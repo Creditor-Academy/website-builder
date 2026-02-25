@@ -8,6 +8,14 @@ export function CanvasPreview() {
   const { state, selectSection, updateSectionContent, updateNavbar, updateFooter } = useBuilder();
   const { page, editor } = state;
 
+  if (!page) {
+    return (
+      <div className="h-full flex items-center justify-center bg-white rounded-xl border-2 border-dashed border-slate-100">
+        <p className="text-slate-400">Select a page to start editing</p>
+      </div>
+    );
+  }
+
   const handleSectionClick = (sectionId, e) => {
     if (!editor.previewMode) {
       e.stopPropagation();
@@ -31,17 +39,14 @@ export function CanvasPreview() {
 
   return (
     <div
-      className="h-full overflow-y-auto scrollbar-thin bg-[hsl(var(--builder-panel))]"
+      className="h-full overflow-y-auto scrollbar-thin bg-[hsl(var(--builder-panel))] w-full max-w-full overflow-x-hidden"
       onClick={handleCanvasClick}
     >
       {/* FIXED FULL-WIDTH CANVAS */}
       <div
-        className="mx-auto shadow-elevated rounded-xl overflow-hidden bg-[hsl(var(--canvas))] transition-colors duration-200"
-        style={{
-          maxWidth: '100%'
-        }}
+        className="mx-auto shadow-elevated rounded-xl bg-[hsl(var(--canvas))] transition-colors duration-200 w-full max-w-full overflow-x-hidden"
       >
-        <div className="light-canvas">
+        <div className="light-canvas w-full max-w-full overflow-x-hidden">
           <NavbarPreview
             config={page.navbar}
             isEditing={!editor.previewMode}

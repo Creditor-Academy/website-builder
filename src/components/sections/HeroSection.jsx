@@ -11,11 +11,11 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
   };
 
   const background = styles.useGradient ? (styles.backgroundGradient || styles.backgroundColor) : styles.backgroundColor;
-  
+
   // Get text colors with fallbacks (default to white/light for hero sections)
   const headingColor = styles.headingColor || '#ffffff';
   const paragraphColor = styles.paragraphColor || '#e2e8f0';
-  
+
   // Get button colors with fallbacks
   const buttonPrimaryBg = styles.buttonPrimaryBg || 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)';
   const buttonPrimaryText = styles.buttonPrimaryText || '#ffffff';
@@ -31,10 +31,9 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
   // Centered Hero Variant
   if (variant === 'centered') {
     return (
-      <section 
-        className={`relative overflow-hidden transition-all duration-300 ${
-          isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''
-        }`}
+      <section
+        className={`relative overflow-hidden transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''
+          }`}
         style={sectionStyle}
       >
         <div className="absolute inset-0 opacity-10">
@@ -46,7 +45,7 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
 
         <div className="container mx-auto px-6 relative z-10 flex flex-col items-center justify-center min-h-[70vh] text-center">
           <div className="max-w-4xl space-y-8 animate-fade-in">
-            <h1 
+            <h1
               className="text-4xl md:text-5xl lg:text-7xl font-bold leading-tight"
               style={{ color: headingColor }}
               contentEditable={isEditing}
@@ -55,8 +54,8 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             >
               {content.headline}
             </h1>
-            
-            <p 
+
+            <p
               className="text-lg md:text-xl lg:text-2xl opacity-80 max-w-2xl mx-auto"
               style={{ color: paragraphColor }}
               contentEditable={isEditing}
@@ -67,9 +66,9 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             </p>
 
             <div className="flex flex-wrap justify-center gap-4">
-              <button 
+              <button
                 className="group px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-glow flex items-center gap-2"
-                style={{ 
+                style={{
                   background: buttonPrimaryBg,
                   color: buttonPrimaryText
                 }}
@@ -83,10 +82,10 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
                 </span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
-              
-              <button 
+
+              <button
                 className="group px-8 py-4 rounded-xl font-semibold text-lg border-2 transition-all duration-300 hover:bg-white/10 flex items-center gap-2"
-                style={{ 
+                style={{
                   background: buttonSecondaryBg,
                   borderColor: 'rgba(255,255,255,0.3)',
                   color: buttonSecondaryText
@@ -108,7 +107,7 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
               <div className="relative max-w-3xl mx-auto">
                 <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl blur-xl" />
                 <div className="relative rounded-2xl overflow-hidden shadow-elevated">
-                  <img 
+                  <img
                     src={content.imageUrl}
                     alt="Hero"
                     className="w-full h-auto object-cover"
@@ -125,10 +124,9 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
   // Video Background Variant
   if (variant === 'video') {
     return (
-      <section 
-        className={`relative overflow-hidden transition-all duration-300 ${
-          isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''
-        }`}
+      <section
+        className={`relative overflow-hidden transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''
+          }`}
         style={{ ...sectionStyle, background: 'transparent' }}
       >
         {/* Video Background */}
@@ -140,7 +138,7 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             style={{ transform: 'scale(1.5)' }}
             allow="autoplay; encrypted-media"
           />
-          <div 
+          <div
             className="absolute inset-0"
             style={{ background: styles.backgroundGradient, opacity: 0.7 }}
           />
@@ -148,7 +146,7 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
 
         <div className="container mx-auto px-6 relative z-10 flex flex-col items-center justify-center min-h-[70vh] text-center">
           <div className="max-w-4xl space-y-8 animate-fade-in">
-            <h1 
+            <h1
               className="text-4xl md:text-5xl lg:text-7xl font-bold leading-tight drop-shadow-2xl"
               style={{ color: headingColor }}
               contentEditable={isEditing}
@@ -157,8 +155,8 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             >
               {content.headline}
             </h1>
-            
-            <p 
+
+            <p
               className="text-lg md:text-xl lg:text-2xl opacity-90 max-w-2xl mx-auto drop-shadow-lg"
               style={{ color: paragraphColor }}
               contentEditable={isEditing}
@@ -169,9 +167,9 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             </p>
 
             <div className="flex flex-wrap justify-center gap-4">
-              <button 
+              <button
                 className="group px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2 backdrop-blur-sm border border-white/30"
-                style={{ 
+                style={{
                   background: buttonPrimaryBg,
                   color: buttonPrimaryText
                 }}
@@ -185,10 +183,10 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
                 </span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
-              
-              <button 
+
+              <button
                 className="group px-8 py-4 rounded-full font-semibold text-lg border-2 transition-all duration-300 hover:bg-white hover:text-black flex items-center gap-2"
-                style={{ 
+                style={{
                   background: buttonSecondaryBg,
                   borderColor: '#ffffff',
                   color: buttonSecondaryText
@@ -213,15 +211,14 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
   // Minimal Variant
   if (variant === 'minimal') {
     return (
-      <section 
-        className={`relative overflow-hidden transition-all duration-300 ${
-          isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''
-        }`}
+      <section
+        className={`relative overflow-hidden transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''
+          }`}
         style={sectionStyle}
       >
         <div className="container mx-auto px-6 py-20">
           <div className="max-w-3xl space-y-6">
-            <h1 
+            <h1
               className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight"
               style={{ color: headingColor }}
               contentEditable={isEditing}
@@ -230,8 +227,8 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             >
               {content.headline}
             </h1>
-            
-            <p 
+
+            <p
               className="text-base md:text-lg opacity-70 max-w-xl"
               style={{ color: paragraphColor }}
               contentEditable={isEditing}
@@ -242,9 +239,9 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             </p>
 
             <div className="flex flex-wrap gap-3 pt-4">
-              <button 
+              <button
                 className="px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
-                style={{ 
+                style={{
                   background: buttonPrimaryBg,
                   color: buttonPrimaryText
                 }}
@@ -258,10 +255,10 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
                 </span>
                 <ArrowRight className="w-4 h-4" />
               </button>
-              
-              <button 
+
+              <button
                 className="px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:bg-white/10 flex items-center gap-2"
-                style={{ 
+                style={{
                   background: buttonSecondaryBg,
                   color: buttonSecondaryText
                 }}
@@ -284,10 +281,9 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
   // Gradient Variant (Bold with animated gradients)
   if (variant === 'gradient') {
     return (
-      <section 
-        className={`relative overflow-hidden transition-all duration-300 ${
-          isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''
-        }`}
+      <section
+        className={`relative overflow-hidden transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''
+          }`}
         style={sectionStyle}
       >
         {/* Animated Gradient Orbs */}
@@ -299,7 +295,7 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
 
         <div className="container mx-auto px-6 relative z-10 flex flex-col items-center justify-center min-h-[80vh] text-center">
           <div className="max-w-5xl space-y-8 animate-fade-in">
-            <h1 
+            <h1
               className="text-5xl md:text-6xl lg:text-8xl font-black leading-none bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-200 to-pink-200"
               contentEditable={isEditing}
               suppressContentEditableWarning
@@ -307,8 +303,8 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             >
               {content.headline}
             </h1>
-            
-            <p 
+
+            <p
               className="text-xl md:text-2xl opacity-80 max-w-2xl mx-auto"
               style={{ color: paragraphColor }}
               contentEditable={isEditing}
@@ -319,9 +315,9 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             </p>
 
             <div className="flex flex-wrap justify-center gap-4 pt-4">
-              <button 
+              <button
                 className="group px-10 py-5 rounded-2xl font-bold text-xl transition-all duration-300 transform hover:scale-105 flex items-center gap-3 shadow-2xl hover:shadow-white/25"
-                style={{ 
+                style={{
                   background: buttonPrimaryBg,
                   color: buttonPrimaryText
                 }}
@@ -335,10 +331,10 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
                 </span>
                 <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
               </button>
-              
-              <button 
+
+              <button
                 className="group px-10 py-5 rounded-2xl font-bold text-xl border-2 border-white/20 transition-all duration-300 hover:bg-white/10 flex items-center gap-3 backdrop-blur-sm"
-                style={{ 
+                style={{
                   background: buttonSecondaryBg,
                   color: buttonSecondaryText
                 }}
@@ -361,10 +357,9 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
 
   // Default Split Variant
   return (
-    <section 
-      className={`relative overflow-hidden transition-all duration-300 ${
-        isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''
-      }`}
+    <section
+      className={`relative overflow-hidden transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''
+        }`}
       style={sectionStyle}
     >
       {/* Background Pattern */}
@@ -379,7 +374,7 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
         <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[70vh]">
           {/* Content */}
           <div className="space-y-8 animate-fade-in">
-            <h1 
+            <h1
               className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight"
               style={{ color: headingColor }}
               contentEditable={isEditing}
@@ -388,8 +383,8 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             >
               {content.headline}
             </h1>
-            
-            <p 
+
+            <p
               className="text-lg md:text-xl opacity-80 max-w-lg"
               style={{ color: paragraphColor }}
               contentEditable={isEditing}
@@ -400,9 +395,9 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <button 
+              <button
                 className="group px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-glow flex items-center gap-2"
-                style={{ 
+                style={{
                   background: buttonPrimaryBg,
                   color: buttonPrimaryText
                 }}
@@ -416,10 +411,10 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
                 </span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
-              
-              <button 
+
+              <button
                 className="group px-8 py-4 rounded-xl font-semibold text-lg border-2 transition-all duration-300 hover:bg-white/10 flex items-center gap-2"
-                style={{ 
+                style={{
                   background: buttonSecondaryBg,
                   borderColor: 'rgba(255,255,255,0.3)',
                   color: buttonSecondaryText
@@ -444,8 +439,8 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
                 { value: '99%', label: 'Uptime' },
               ]).map((stat, i) => (
                 <div key={i} className="text-center">
-                  <div 
-                    className="text-2xl font-bold" 
+                  <div
+                    className="text-2xl font-bold"
                     style={{ color: headingColor }}
                     contentEditable={isEditing}
                     suppressContentEditableWarning
@@ -462,8 +457,8 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
                   >
                     {stat.value}
                   </div>
-                  <div 
-                    className="text-sm opacity-60" 
+                  <div
+                    className="text-sm opacity-60"
                     style={{ color: paragraphColor }}
                     contentEditable={isEditing}
                     suppressContentEditableWarning
@@ -489,7 +484,7 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
           <div className="relative animate-slide-in-right" style={{ animationDelay: '0.2s' }}>
             <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl blur-xl" />
             <div className="relative rounded-2xl overflow-hidden shadow-elevated">
-              <img 
+              <img
                 src={content.imageUrl}
                 alt="Hero"
                 className="w-full h-auto object-cover"

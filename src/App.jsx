@@ -2,9 +2,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
+import Dashboard from "./pages/Dashboard";
+import { WebsiteEditor } from "./components/editor/WebsiteEditor";
 import Features from "./pages/Features";
 import Services from "./pages/Services";
 import Pricing from "./pages/Pricing";
@@ -29,6 +31,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/builder/:id" element={<WebsiteEditor />} />
             <Route path="/features" element={<Features />} />
             <Route path="/services" element={<Services />} />
             <Route path="/pricing" element={<Pricing />} />
@@ -40,7 +44,7 @@ const App = () => (
             <Route path="/careers" element={<Careers />} />
             <Route path="/help" element={<Help />} />
             <Route path="/status" element={<Status />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

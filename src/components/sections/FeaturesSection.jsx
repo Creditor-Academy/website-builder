@@ -11,7 +11,7 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
   };
 
   const background = styles.useGradient ? (styles.backgroundGradient || styles.backgroundColor) : (styles.backgroundColor || '#ffffff');
-  
+
   // Get text colors with fallbacks
   const headingColor = styles.headingColor || '#0f172a';
   const paragraphColor = styles.paragraphColor || '#475569';
@@ -30,18 +30,18 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
   const renderGrid = () => (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
       {content.features?.map((feature, index) => (
-        <div 
+        <div
           key={feature.id}
           className="group relative p-8 rounded-2xl transition-all duration-300 hover:shadow-soft hover:-translate-y-1"
-          style={{ 
+          style={{
             background: '#f8fafc',
             animationDelay: `${index * 0.1}s`
           }}
         >
           {/* Icon */}
-          <div 
+          <div
             className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110"
-            style={{ 
+            style={{
               background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
               color: '#ffffff'
             }}
@@ -50,7 +50,7 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
           </div>
 
           {/* Content */}
-          <h3 
+          <h3
             className="text-xl font-bold mb-3"
             style={{ color: headingColor }}
             contentEditable={isEditing}
@@ -63,7 +63,7 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
           >
             {feature.title}
           </h3>
-          <p 
+          <p
             className="opacity-70 leading-relaxed"
             style={{ color: paragraphColor }}
             contentEditable={isEditing}
@@ -90,28 +90,28 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
         <div key={feature.id} className="flex items-start gap-4">
           <div className="w-12 h-12 flex items-center justify-center rounded-md bg-primary text-white">{getIcon(feature.icon)}</div>
           <div>
-            <h3 
+            <h3
               className="font-semibold"
               style={{ color: headingColor }}
-              contentEditable={isEditing} 
-              suppressContentEditableWarning 
-              onBlur={(e) => { 
-                if (!isEditing || !onContentChange) return; 
-                const updated = content.features.map((f) => f.id === feature.id ? { ...f, title: e.currentTarget.textContent } : f); 
-                onContentChange('features', updated); 
+              contentEditable={isEditing}
+              suppressContentEditableWarning
+              onBlur={(e) => {
+                if (!isEditing || !onContentChange) return;
+                const updated = content.features.map((f) => f.id === feature.id ? { ...f, title: e.currentTarget.textContent } : f);
+                onContentChange('features', updated);
               }}
             >
               {feature.title}
             </h3>
-            <p 
+            <p
               className="text-sm"
               style={{ color: paragraphColor }}
-              contentEditable={isEditing} 
-              suppressContentEditableWarning 
-              onBlur={(e) => { 
-                if (!isEditing || !onContentChange) return; 
-                const updated = content.features.map((f) => f.id === feature.id ? { ...f, description: e.currentTarget.textContent } : f); 
-                onContentChange('features', updated); 
+              contentEditable={isEditing}
+              suppressContentEditableWarning
+              onBlur={(e) => {
+                if (!isEditing || !onContentChange) return;
+                const updated = content.features.map((f) => f.id === feature.id ? { ...f, description: e.currentTarget.textContent } : f);
+                onContentChange('features', updated);
               }}
             >
               {feature.description}
@@ -127,15 +127,15 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
       {content.features?.map((feature) => (
         <div key={feature.id} className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-sm">
           <div className="w-20 h-20 rounded-lg flex items-center justify-center bg-primary text-white mb-4">{getIcon(feature.icon)}</div>
-          <h4 
+          <h4
             className="font-semibold"
             style={{ color: headingColor }}
-            contentEditable={isEditing} 
-            suppressContentEditableWarning 
-            onBlur={(e) => { 
-              if (!isEditing || !onContentChange) return; 
-              const updated = content.features.map((f) => f.id === feature.id ? { ...f, title: e.currentTarget.textContent } : f); 
-              onContentChange('features', updated); 
+            contentEditable={isEditing}
+            suppressContentEditableWarning
+            onBlur={(e) => {
+              if (!isEditing || !onContentChange) return;
+              const updated = content.features.map((f) => f.id === feature.id ? { ...f, title: e.currentTarget.textContent } : f);
+              onContentChange('features', updated);
             }}
           >
             {feature.title}
@@ -148,18 +148,18 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
   const renderCards = () => (
     <div className="space-y-6 max-w-4xl mx-auto">
       {content.features?.map((feature, index) => (
-        <div 
+        <div
           key={feature.id}
           className="group relative p-6 rounded-xl transition-all duration-300 hover:shadow-lg"
-          style={{ 
+          style={{
             background: index % 2 === 0 ? '#ffffff' : '#f8fafc',
             border: '1px solid #e2e8f0'
           }}
         >
           <div className="flex items-start gap-6">
-            <div 
+            <div
               className="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110"
-              style={{ 
+              style={{
                 background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
                 color: '#ffffff'
               }}
@@ -167,7 +167,7 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
               {getIcon(feature.icon)}
             </div>
             <div className="flex-1">
-              <h3 
+              <h3
                 className="text-xl font-bold mb-2"
                 style={{ color: headingColor }}
                 contentEditable={isEditing}
@@ -180,7 +180,7 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
               >
                 {feature.title}
               </h3>
-              <p 
+              <p
                 className="opacity-70 leading-relaxed"
                 style={{ color: paragraphColor }}
                 contentEditable={isEditing}
@@ -201,14 +201,14 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
   );
 
   return (
-    <section 
+    <section
       className={`relative transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}
       style={sectionStyle}
     >
       <div className="container mx-auto px-6">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 
+          <h2
             className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
             style={{ color: headingColor }}
             contentEditable={isEditing}
@@ -217,7 +217,7 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
           >
             {content.headline}
           </h2>
-          <p 
+          <p
             className="text-lg opacity-70"
             style={{ color: paragraphColor }}
             contentEditable={isEditing}

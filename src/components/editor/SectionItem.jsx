@@ -16,32 +16,56 @@ export function SectionItem({ id, name, type, visible, isSelected, onClick }) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative flex items-center gap-3 p-3 rounded-lg transition-all duration-200 cursor-pointer ${isSelected ? 'bg-primary/10 border border-primary/50 shadow-sm' : 'bg-secondary/50 border border-transparent hover:bg-white/2 hover:shadow-sm'} ${isDragging ? 'opacity-60 scale-102 shadow-lg' : ''} ${!visible ? 'opacity-50' : ''}`}
+      className={`group relative flex items-center gap-3 p-2.5 rounded-xl transition-all duration-200 cursor-pointer border ${isSelected
+        ? 'bg-primary/5 border-primary/30 shadow-sm shadow-primary/5 translate-x-1'
+        : 'bg-white border-slate-100 hover:border-slate-300 hover:shadow-md hover:shadow-slate-200/50'
+        } ${isDragging ? 'opacity-40 scale-95 shadow-2xl z-50' : ''} ${!visible ? 'opacity-60 bg-slate-50' : ''}`}
       onClick={onClick}
       role="button"
       tabIndex={0}
     >
-      <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-muted/50">
-        <GripVertical className="w-4 h-4 text-muted-foreground" />
+      <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-1 rounded-md hover:bg-slate-100 transition-colors">
+        <GripVertical className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500" />
       </div>
 
-      <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${sectionColors[type]} flex items-center justify-center flex-shrink-0`}>
+      <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${sectionColors[type]} flex items-center justify-center flex-shrink-0 shadow-sm shadow-black/5 group-hover:scale-110 transition-transform`}>
         <Icon className="w-4 h-4 text-white" />
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{name}</p>
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-xs text-muted-foreground capitalize truncate">{type}</span>
-          <span className="ml-1 text-xs text-muted-foreground">•</span>
-          <span className="text-xs text-muted-foreground">{visible ? 'visible' : 'hidden'}</span>
+        <p className={`text-[12px] font-bold truncate ${isSelected ? 'text-primary' : 'text-slate-700'}`}>{name}</p>
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <span className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">{type}</span>
+          {!visible && (
+            <span className="text-[10px] text-amber-500 font-semibold px-1.5 py-0 rounded bg-amber-50 border border-amber-100/50 flex items-center gap-1">
+              Hidden
+            </span>
+          )}
         </div>
       </div>
 
-      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button onClick={(e) => { e.stopPropagation(); toggleSectionVisibility(id); }} className="p-1.5 rounded-md hover:bg-muted/50 transition-colors" title={visible ? 'Hide section' : 'Show section'}>{visible ? <Eye className="w-4 h-4 text-muted-foreground" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}</button>
-        <button onClick={(e) => { e.stopPropagation(); duplicateSection(id); }} className="p-1.5 rounded-md hover:bg-muted/50 transition-colors" title="Duplicate section"><Copy className="w-4 h-4 text-muted-foreground" /></button>
-        <button onClick={(e) => { e.stopPropagation(); deleteSection(id); }} className="p-1.5 rounded-md hover:bg-destructive/20 transition-colors" title="Delete section"><Trash2 className="w-4 h-4 text-destructive" /></button>
+      <div className={`flex items-center gap-1 transition-all transform ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} translate-x-1 group-hover:translate-x-0`}>
+        <button
+          onClick={(e) => { e.stopPropagation(); toggleSectionVisibility(id); }}
+          className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+          title={visible ? 'Hide section' : 'Show section'}
+        >
+          {visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+        </button>
+        <button
+          onClick={(e) => { e.stopPropagation(); duplicateSection(id); }}
+          className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+          title="Duplicate section"
+        >
+          <Copy className="w-3.5 h-3.5" />
+        </button>
+        <button
+          onClick={(e) => { e.stopPropagation(); deleteSection(id); }}
+          className="p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-colors"
+          title="Delete section"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
       </div>
     </div>
   );

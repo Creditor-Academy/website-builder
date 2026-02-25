@@ -2,7 +2,25 @@ import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { useBuilder } from '@/contexts/BuilderContext';
 import { useNavigate } from 'react-router-dom';
-import { createDefaultHeroSection, createDefaultCTASection, createDefaultFooter, createDefaultNavbar, createFeaturesPage, createServicesPage, createPricingPage, createContactPage, createStartPage, createTemplatesPage, createAboutPage, createBlogPage, createCareersPage, createHelpPage, createStatusPage } from '@/lib/defaultPageData';
+import {
+  createDefaultHeroSection,
+  createDefaultCTASection,
+  createDefaultFooter,
+  createDefaultNavbar,
+  createFeaturesPage,
+  createServicesPage,
+  createPricingPage,
+  createContactPage,
+  createStartPage,
+  createTemplatesPage,
+  createAboutPage,
+  createBlogPage,
+  createCareersPage,
+  createHelpPage,
+  createStatusPage,
+  createPrivacyPolicyPage,
+  createTermsOfServicePage
+} from '@/lib/defaultPageData';
 import { v4 as uuidv4 } from 'uuid';
 
 export function NavbarPreview({ config, isEditing, onUpdate }) {
