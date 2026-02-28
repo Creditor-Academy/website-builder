@@ -27,14 +27,14 @@ const Dashboard = () => {
     return (
         <div className="min-h-screen bg-slate-50 flex">
             <Helmet>
-                <title>Dashboard - SiteBuilder</title>
+                <title>Dashboard - Buildora</title>
             </Helmet>
 
             {/* Sidebar */}
             <aside className="w-64 bg-white border-r hidden md:flex flex-col">
                 <div className="p-6 border-b">
                     <h1 className="text-xl font-bold text-primary flex items-center gap-2">
-                        <Layout className="w-6 h-6" /> SiteBuilder
+                        <Layout className="w-6 h-6" /> Buildora
                     </h1>
                 </div>
                 <nav className="flex-1 p-4 space-y-2">

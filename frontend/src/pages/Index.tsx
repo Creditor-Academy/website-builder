@@ -10,7 +10,6 @@ import {
   Layers,
   Palette,
   Sparkles,
-  ChevronRight,
   Globe,
   Dribbble,
   Github,
@@ -151,19 +150,19 @@ const Index = () => {
           <div>
             <h4 className="text-white font-bold mb-6 italic">Product</h4>
             <ul className="space-y-4">
-              <li><a href="#" className="hover:text-white">Features</a></li>
-              <li><a href="#" className="hover:text-white">Templates</a></li>
-              <li><a href="#" className="hover:text-white">Pricing</a></li>
-              <li><a href="#" className="hover:text-white">Showcase</a></li>
+              <li><a href="/features" className="hover:text-white">Features</a></li>
+              <li><a href="/templates" className="hover:text-white">Templates</a></li>
+              <li><a href="/pricing" className="hover:text-white">Pricing</a></li>
+              <li><a href="/services" className="hover:text-white">Showcase</a></li>
             </ul>
           </div>
           <div>
             <h4 className="text-white font-bold mb-6 italic">Company</h4>
             <ul className="space-y-4">
-              <li><a href="#" className="hover:text-white">About Us</a></li>
-              <li><a href="#" className="hover:text-white">Careers</a></li>
-              <li><a href="#" className="hover:text-white">Blog</a></li>
-              <li><a href="#" className="hover:text-white">Privacy</a></li>
+              <li><a href="/about" className="hover:text-white">About Us</a></li>
+              <li><a href="/careers" className="hover:text-white">Careers</a></li>
+              <li><a href="/blog" className="hover:text-white">Blog</a></li>
+              <li><a href="/help" className="hover:text-white">Privacy</a></li>
             </ul>
           </div>
         </div>
