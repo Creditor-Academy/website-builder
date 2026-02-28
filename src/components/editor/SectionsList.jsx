@@ -125,7 +125,7 @@ const ELEMENT_CATEGORIES = [
           type: 'image',
           content: { imageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80' },
           position: { x: 150, y: 150 },
-          style: { width: '200px', borderRadius: '12px' }
+          style: { width: '200px', height: '200px', borderRadius: '12px' }
         })
       },
     ]
