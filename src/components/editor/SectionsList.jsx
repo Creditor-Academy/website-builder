@@ -128,6 +128,18 @@ const ELEMENT_CATEGORIES = [
           style: { width: '200px', height: '200px', borderRadius: '12px' }
         })
       },
+      {
+        type: "floating-button",
+        name: "Button",
+        icon: MousePointer2,
+        isComponent: true,
+        create: () => ({
+          type: 'button',
+          content: { text: 'Learn More', variant: 'default', size: 'default' },
+          position: { x: 100, y: 200 },
+          style: { width: '150px', height: '40px', backgroundColor: '#3b82f6', color: '#ffffff', borderRadius: '8px', padding: '8px 16px' }
+        })
+      },
     ]
   },
   {

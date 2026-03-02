@@ -192,6 +192,21 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
             }}
           />
         )}
+        {component.type === 'button' && (
+          <button
+            className="w-full h-full flex items-center justify-center pointer-events-none select-none"
+            style={{
+              backgroundColor: component.style?.backgroundColor || '#3b82f6',
+              color: component.style?.color || '#ffffff',
+              borderRadius: component.style?.borderRadius || '8px',
+              padding: component.style?.padding || '8px 16px',
+              fontSize: component.style?.fontSize || '16px',
+              fontWeight: component.style?.fontWeight || 'bold',
+            }}
+          >
+            {component.content?.text || 'Button'}
+          </button>
+        )}
 
         {isEditing && isSelected && !editor.previewMode && (
           <div
@@ -400,8 +415,8 @@ export function SectionRenderer({ section, isSelected, isEditing, onContentChang
               top: `${(comp.position.y / 600) * 100}%`,
               zIndex: comp.style?.zIndex || 10,
               transform: `rotate(${comp.style?.rotation || 0}deg)`,
-              width: comp.type === 'image' ? (comp.style?.width || 'auto') : 'auto',
-              height: comp.type === 'image' ? (comp.style?.height || 'auto') : 'auto',
+              width: (comp.type === 'image' || comp.type === 'button') ? (comp.style?.width || 'auto') : 'auto',
+              height: (comp.type === 'image' || comp.type === 'button') ? (comp.style?.height || 'auto') : 'auto',
             }}>
               {comp.type === 'text' && (
                 <div
@@ -426,6 +441,25 @@ export function SectionRenderer({ section, isSelected, isEditing, onContentChang
                     borderRadius: comp.style?.borderRadius || '0px'
                   }}
                 />
+              )}
+              {comp.type === 'button' && (
+                <button
+                  style={{
+                    backgroundColor: comp.style?.backgroundColor || '#3b82f6',
+                    color: comp.style?.color || '#ffffff',
+                    borderRadius: comp.style?.borderRadius || '8px',
+                    padding: comp.style?.padding || '8px 16px',
+                    fontSize: comp.style?.fontSize || '16px',
+                    fontWeight: comp.style?.fontWeight || 'bold',
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {comp.content.text}
+                </button>
               )}
             </div>
           ))}
