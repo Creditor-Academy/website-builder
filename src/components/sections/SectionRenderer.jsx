@@ -364,6 +364,7 @@ export function SectionRenderer({ section, isSelected, isEditing, onContentChang
       case 'text': return <TextBlock {...commonProps} />;
       case 'button': return <ButtonBlock {...commonProps} />;
       case 'html': return <HTMLBlock {...commonProps} />;
+      case 'section': return <div style={{ minHeight: section.minHeight, ...section.styles }} />;
       default: return <div className="p-10 text-center">Section: {section.name}</div>;
     }
   };

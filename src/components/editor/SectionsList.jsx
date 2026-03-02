@@ -140,6 +140,32 @@ const ELEMENT_CATEGORIES = [
           style: { width: '150px', height: '40px', backgroundColor: '#3b82f6', color: '#ffffff', borderRadius: '8px', padding: '8px 16px' }
         })
       },
+      {
+        type: "section",
+        name: "Section",
+        icon: Layout, // Using Layout icon, as Square is already used for Basic Elements Text Block
+        isComponent: false,
+        create: () => ({
+          id: uuidv4(),
+          type: "section",
+          name: "New Section",
+          visible: true,
+          x: 0,
+          y: 0,
+          width: "100%",
+          minHeight: "200px",
+          rotation: 0,
+          zIndex: 1,
+          styles: {
+            paddingTop: "40px",
+            paddingBottom: "40px",
+            paddingLeft: "20px",
+            paddingRight: "20px",
+            backgroundColor: "#ffffff",
+          },
+          children: [],
+        }),
+      },
     ]
   },
   {
