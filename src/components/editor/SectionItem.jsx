@@ -60,7 +60,7 @@ export function SectionItem({ id, name, type, visible, isSelected, onClick }) {
           <Copy className="w-3.5 h-3.5" />
         </button>
         <button
-          onClick={(e) => { e.stopPropagation(); deleteSection(id); }}
+          onClick={(e) => { e.stopPropagation(); console.log("Deleting Section, ID:", id); deleteSection(id); }}
           className="p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-colors"
           title="Delete section"
         >

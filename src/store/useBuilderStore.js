@@ -186,6 +186,15 @@ const useBuilderStore = create(
 
                 const newSections = page.sections.filter(s => s.id !== sectionId);
                 get().updateCurrentPage({ sections: newSections });
+
+                // Deselect the section and component if they were deleted
+                set((state) => ({
+                    editor: {
+                        ...state.editor,
+                        selectedSectionId: state.editor.selectedSectionId === sectionId ? null : state.editor.selectedSectionId,
+                        selectedComponentId: null,
+                    }
+                }));
             },
 
             reorderSections: (ids) => {
@@ -244,11 +253,29 @@ const useBuilderStore = create(
                 const page = get().getActivePage();
                 if (!page) return;
 
+                const deleteNestedComponent = (components, idToDelete) => {
+                    return (components || []).reduce((acc, comp) => {
+                        if (comp.id === idToDelete) {
+                            return acc; // Skip this component (delete it)
+                        }
+                        if (comp.type === 'container' && comp.children) {
+                            const updatedChildren = deleteNestedComponent(comp.children, idToDelete);
+                            if (updatedChildren.length !== comp.children.length) {
+                                // Only add the container if its children were modified
+                                acc.push({ ...comp, children: updatedChildren });
+                                return acc;
+                            }
+                        }
+                        acc.push(comp); // Keep the component
+                        return acc;
+                    }, []);
+                };
+
                 const newSections = page.sections.map(s => {
                     if (s.id === sectionId) {
                         return {
                             ...s,
-                            components: (s.components || []).filter(c => c.id !== componentId)
+                            components: deleteNestedComponent(s.components, componentId)
                         };
                     }
                     return s;
@@ -299,7 +326,7 @@ const useBuilderStore = create(
             })),
 
             selectSection: (id) => set((state) => ({
-                editor: { ...state.editor, selectedSectionId: id, selectedComponentId: null }
+                editor: { ...state.editor, selectedSectionId: id }
             })),
 
             selectComponent: (id) => set((state) => ({

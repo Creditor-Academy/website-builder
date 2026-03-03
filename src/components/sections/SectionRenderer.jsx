@@ -79,7 +79,8 @@ const FloatingImage = ({ component, section, isSelected, isEditing, editor, upda
               <ChevronDown className="w-4 h-4" />
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); deleteComponent(section.id, component.id); }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => { e.stopPropagation(); console.log("Deleting FloatingComponent, Section ID:", section.id, "Component ID:", component.id); deleteComponent(section.id, component.id); }}
               className="p-2 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-colors"
               title="Delete"
             >
@@ -358,7 +359,8 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
                 <ChevronDown className="w-4 h-4" />
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); deleteComponent(section.id, component.id); }}
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => { e.stopPropagation(); console.log("Deleting FloatingImage, Section ID:", section.id, "Component ID:", component.id); deleteComponent(section.id, component.id); }}
                 className="p-2 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-colors"
                 title="Delete"
               >
@@ -411,8 +413,7 @@ export function SectionRenderer({ section, isSelected, isEditing, onContentChang
       case 'text': return <TextBlock {...commonProps} />;
       case 'button': return <ButtonBlock {...commonProps} />;
       case 'html': return <HTMLBlock {...commonProps} />;
-      case 'section': return <div style={{ minHeight: section.minHeight, ...section.styles }} />;
-      default: return <div className="p-10 text-center">Section: {section.name}</div>;
+      case 'section': return <div style={{ minHeight: section.minHeight || '100px', ...section.styles }} />;      default: return <div className="p-10 text-center">Section: {section.name}</div>;
     }
   };
 

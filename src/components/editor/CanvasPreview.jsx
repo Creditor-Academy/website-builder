@@ -34,7 +34,10 @@ export function CanvasPreview() {
   };
 
   const handleCanvasClick = () => {
-    if (!editor.previewMode) selectSection(null);
+    if (!editor.previewMode) {
+      selectSection(null);
+      selectComponent(null);
+    }
   };
 
   return (
