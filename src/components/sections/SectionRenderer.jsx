@@ -207,6 +207,53 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
             {component.content?.text || 'Button'}
           </button>
         )}
+        {component.type === 'container' && (
+          <div
+            className="w-full h-full pointer-events-none select-none"
+            style={{
+              ...component.styles,
+              position: 'relative', // Ensure children are positioned relative to the container
+            }}
+          >
+            {(component.children || []).map(childComp => (
+              <div key={childComp.id} className="pointer-events-auto" style={{
+                position: 'absolute', // Absolute positioning for children within container
+                left: `${childComp.x}px`,
+                top: `${childComp.y}px`,
+                width: childComp.width,
+                height: childComp.height,
+                zIndex: childComp.zIndex,
+                transform: `rotate(${childComp.rotation || 0}deg)`,
+              }}>
+                {childComp.type === 'image' ? (
+                  <FloatingImage
+                    component={childComp}
+                    section={section}
+                    isSelected={editor.selectedComponentId === childComp.id}
+                    isEditing={isEditing}
+                    editor={editor}
+                    updateComponent={updateComponent}
+                    deleteComponent={deleteComponent}
+                    selectComponent={selectComponent}
+                    selectSection={selectSection}
+                  />
+                ) : (
+                  <FloatingComponent
+                    component={childComp}
+                    section={section}
+                    isSelected={editor.selectedComponentId === childComp.id}
+                    isEditing={isEditing}
+                    editor={editor}
+                    updateComponent={updateComponent}
+                    deleteComponent={deleteComponent}
+                    selectComponent={selectComponent}
+                    selectSection={selectSection}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
         {isEditing && isSelected && !editor.previewMode && (
           <div
