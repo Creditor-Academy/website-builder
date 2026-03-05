@@ -8,7 +8,7 @@ export const createDefaultHeroSection = (variant = 'split') => ({
   visible: true,
   locked: false,
   styles: {
-    backgroundColor: '#0f172a',
+    backgroundColor: '#0f172ai',
     backgroundGradient: variant === 'gradient' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)' : null,
     useGradient: variant === 'gradient',
     padding: variant === 'minimal' ? '60px 0' : '120px 0',
@@ -208,25 +208,27 @@ export const createDefaultMasonryGallerySection = () => ({
 });
 
 
-export const createDefaultContactSection = () => ({
+ export const createDefaultContactSection = () => ({
   id: uuidv4(),
-  type: 'contact',
-  name: 'Contact',
-  visible: true,
-  locked: false,
-  styles: {
-    backgroundColor: '#f8fafc',
-    padding: '100px 0',
-  },
-  content: {
-    headline: 'Get In Touch',
-    subheadline: "We'd love to hear from you. Send us a message!",
-    email: 'hello@example.com',
-    phone: '+1 (555) 123-4567',
-    address: '123 Business Street, City, Country',
-  },
-  components: [],
-});
+   type: 'contact',
+   name: 'Contact',
+   visible: true,
+   locked: false,
+   styles: {
+     backgroundColor: '#f8fafc',
+     padding: '100px 0',
+   },
+   content: {
+     headline: 'Get In Touch',
+     subheadline: "We'd love to hear from you. Send us a message!",
+     email: 'hello@example.com',
+     phone: '+1 (555) 123-4567',
+     address: '123 Business Street, City, Country',
+   },
+   components: [],
+ });
+
+
 
 export const createDefaultStatsSection = () => ({
   id: uuidv4(),
@@ -248,6 +250,7 @@ export const createDefaultStatsSection = () => ({
   },
   components: [],
 });
+
 
 export const createDefaultTeamSection = () => ({
   id: uuidv4(),
@@ -693,6 +696,58 @@ export const createTermsOfServicePage = () => ({
     ]),
   ],
   footer: createDefaultFooter(),
+});
+
+export const getBusinessPage = () => ({ 
+  id: uuidv4(),
+  name: 'Home',
+  slug: '/',
+  meta: {
+    title: 'Business Website - Built with SiteBuilder',
+    description: 'A professional business website.',
+  },
+  navbar: createDefaultNavbar(),
+  sections: [
+    createDefaultHeroSection('split'),
+    createDefaultLogoCloudSection(),
+    createDefaultServicesSection(),
+    createDefaultStatsSection(),
+    createDefaultTeamSection(),
+    createDefaultFAQSection(),
+    createDefaultContactSection(),
+  ],
+  footer: createDefaultFooter(),
+  globalStyles: {
+    fontFamily: 'Inter, system-ui, sans-serif',
+    primaryColor: '#3b82f6',
+    secondaryColor: '#8b5cf6',
+    backgroundColor: '#ffffff',
+  },
+});
+
+export const getPortfolioPage = () => ({ 
+  id: uuidv4(),
+  name: 'Home',
+  slug: '/',
+  meta: {
+    title: 'Portfolio Website - Built with SiteBuilder',
+    description: 'A creative portfolio website.',
+  },
+  navbar: createDefaultNavbar(),
+  sections: [
+    createDefaultHeroSection('minimal'),
+    createDefaultAboutSection('split'),
+    createDefaultGallerySection(),
+    createDefaultTestimonialsSection(),
+    createDefaultContactSection(),
+  ],
+  footer: createDefaultFooter(),
+  globalStyles: {
+    fontFamily: 'Inter, system-ui, sans-serif',
+    primaryColor: '#3b82f6',
+    secondaryColor: '#8b5cf6',
+    backgroundColor: '#ffffff',
+  },
 });
 
 export const getDefaultPage = () => ({ 

@@ -19,6 +19,10 @@ import Careers from "./pages/Careers";
 import Help from "./pages/Help";
 import Status from "./pages/Status";
 import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/Privacypolicy";
+import TermsOfService from "./pages/terms";
+import Login from "./pages/login";
+import Footer from "./pages/footer"; 
 
 const queryClient = new QueryClient();
 
@@ -44,6 +48,9 @@ const App = () => (
             <Route path="/careers" element={<Careers />} />
             <Route path="/help" element={<Help />} />
             <Route path="/status" element={<Status />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/login" element={<Login />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </BrowserRouter>

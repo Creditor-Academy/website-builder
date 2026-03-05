@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { persist } from 'zustand/middleware';
 import {
     getDefaultPage,
+    getBusinessPage,
+    getPortfolioPage,
     createFeaturesPage,
     createServicesPage,
     createPricingPage,
@@ -38,7 +40,16 @@ const useBuilderStore = create(
 
             createWebsite: (name, template = 'blank') => {
                 const id = uuidv4();
-                const homePage = getDefaultPage();
+                
+                let homePage;
+                if (template === 'Business') {
+                    homePage = getBusinessPage();
+                } else if (template === 'Portfolio') {
+                    homePage = getPortfolioPage();
+                } else {
+                    homePage = getDefaultPage();
+                }
+
                 const newWebsite = {
                     id,
                     name,
@@ -56,6 +67,39 @@ const useBuilderStore = create(
                     historyIndex: 0,
                 }));
                 return id;
+            },
+
+            applyTemplateToWebsite: (websiteId, template) => {
+                let homePage;
+                if (template === 'Business') {
+                    homePage = getBusinessPage();
+                } else if (template === 'Portfolio') {
+                    homePage = getPortfolioPage();
+                } else {
+                    homePage = getDefaultPage();
+                }
+
+                set((state) => {
+                    const websites = state.websites.map(w => {
+                        if (w.id === websiteId) {
+                            return {
+                                ...w,
+                                pages: [homePage],
+                                activePageId: homePage.id,
+                                lastEdited: new Date().toISOString()
+                            };
+                        }
+                        return w;
+                    });
+                    
+                    return {
+                        websites,
+                        activeWebsiteId: websiteId,
+                        activePageId: homePage.id,
+                        history: [[homePage]],
+                        historyIndex: 0
+                    };
+                });
             },
 
             selectWebsite: (id) => {
