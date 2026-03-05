@@ -1,0 +1,159 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// Auth Tables
+// ============================================
+
+// User Role Enum
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// User Model
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  password_hash String
+  role          UserRole @default(USER)
+
+  isActive   Boolean @default(true)
+  isVerified Boolean @default(false)
+
+  lastLoginAt          DateTime?
+  lastPasswordChangeAt DateTime?
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  // Relations
+  ownedWebsites           Website[]                @relation("WebsiteOwner")
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+  refreshTokens           RefreshToken[]
+
+  @@index([email])
+  @@index([deleted_at])
+  @@map("users")
+}
+
+// Password Reset Token Model
+model PasswordResetToken {
+  id         String   @id @default(cuid())
+  userId     String
+  token_hash String   @unique
+  expiresAt  DateTime
+  isUsed     Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token_hash])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
+}
+
+// Email Verification Token Model
+model EmailVerificationToken {
+  id         String   @id @default(cuid())
+  userId     String
+  token_hash String   @unique
+  expiresAt  DateTime
+  created_at DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token_hash])
+  @@index([expiresAt])
+  @@map("email_verification_tokens")
+}
+
+// Refresh Token Model
+model RefreshToken {
+  id         String   @id @default(cuid())
+  userId     String
+  token_hash String   @unique
+  sessionId  String
+  expiresAt  DateTime
+  isRevoked  Boolean  @default(false)
+  replacedBy String? // token_hash of the new token that replaces this one
+  created_at DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token_hash])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+// ============================================
+// Website Tables
+// ============================================
+
+// Website Status Enum
+enum WebsiteStatus {
+  DRAFT
+  PUBLISHED
+  DELETED
+}
+
+// Website Model
+model Website {
+  id            String        @id @default(cuid())
+  name          String
+  owner_id      String
+  status        WebsiteStatus @default(DRAFT)
+  settings_id   String?       @unique
+  thumbnail_url String?
+
+  currentDraftVersionId     String? // references the current draft version of the website
+  currentPublishedVersionId String? // references the current published version of the website
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  // Relations
+  owner    User      @relation("WebsiteOwner", fields: [owner_id], references: [id], onDelete: Cascade)
+  settings Settings?
+
+  @@index([owner_id])
+  @@index([status])
+  @@index([deleted_at])
+  @@map("websites")
+}
+
+// Settings Model (for website configuration)
+model Settings {
+  id           String   @id @default(cuid())
+  seo          Json? // {title, description, favicon}
+  contact      Json? // {email, phone, address}
+  social_links Json? // {facebook, twitter, linkedin}
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  // Relations
+  website Website @relation(fields: [id], references: [settings_id], onDelete: Cascade)
+
+  @@map("settings")
+}
