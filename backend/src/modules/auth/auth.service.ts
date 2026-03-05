@@ -12,8 +12,11 @@ import {
 import cacheService from '../../services/cache.service.js';
 import { generateJWTPayload, generateSessionPayload } from '../../builders/payload.builder.js';
 import { generateAuthSessionKey } from '../../builders/redis-key.builder.js';
+import type { EmailVerificationInput, ForgotPasswordInput, LoginInput, RegisterInput, ResetPasswordInput } from './auth.validation.js';
 
 class AuthService {
+  private authDao: AuthDao;
+
   constructor() {
     this.authDao = new AuthDao();
   }
@@ -24,11 +27,11 @@ class AuthService {
   }
 
   // Helper to hash token
-  _hashToken(token) {
+  _hashToken(token: string) {
     return crypto.createHash('sha256').update(token).digest('hex');
   }
 
-  async register(data) {
+  async register(data: RegisterInput) {
     const { name, email, password } = data;
 
     // Check if user already exists
@@ -64,7 +67,7 @@ class AuthService {
     };
   }
 
-  async login(data) {
+  async login(data: LoginInput) {
     const { email, password } = data;
 
     // Find user by email
@@ -101,10 +104,9 @@ class AuthService {
 
     // Generate tokens
     const payload = generateJWTPayload(user, sessionId);
-    const accessToken = generateAccessToken(payload, sessionId);
+    const accessToken = generateAccessToken(payload);
 
-    const userWithoutPassword = { ...user };
-    delete userWithoutPassword.password_hash;
+    const { password_hash, ...userWithoutPassword } = user;
 
     return {
       message: 'Login successful',
@@ -113,7 +115,7 @@ class AuthService {
     };
   }
 
-  async logout(userId, refreshToken, sessionId) {
+  async logout(userId: string, refreshToken: string, sessionId: string) {
     // Revoke current refresh token for the user
     const refreshTokenHash = this._hashToken(refreshToken);
     const refreshTokenRecord = await this.authDao.findRefreshToken(refreshTokenHash);
@@ -131,7 +133,7 @@ class AuthService {
     };
   }
 
-  async forgotPassword(data) {
+  async forgotPassword(data: ForgotPasswordInput) {
     const { email } = data;
 
     // Find user by email
@@ -163,7 +165,7 @@ class AuthService {
     };
   }
 
-  async resetPassword(data) {
+  async resetPassword(data: ResetPasswordInput) {
     const { token, password } = data;
 
     // Hash the token to find it in database
@@ -196,7 +198,7 @@ class AuthService {
     };
   }
 
-  async verifyEmail(token) {
+  async verifyEmail({ token }: EmailVerificationInput) {
     // Hash the token to find it in database
     const tokenHash = this._hashToken(token);
 
@@ -221,13 +223,13 @@ class AuthService {
     };
   }
 
-  async refreshToken(refreshToken, userId) {
+  async refreshToken(refreshToken: string) {
     const refreshTokenHash = this._hashToken(refreshToken);
 
     const refreshTokenRecord = await this.authDao.findRefreshToken(refreshTokenHash);
     const user = refreshTokenRecord?.user;
 
-    if (!refreshTokenRecord || !user.isActive) {
+    if (!refreshTokenRecord || !user?.isActive) {
       throw new Error('Invalid or revoked refresh token');
     }
 

@@ -1,4 +1,4 @@
-export const generatePasswordResetEmailTemplate = (userName, resetUrl) => {
+export const generatePasswordResetEmailTemplate = (userName: string, resetUrl: string) => {
     return `Hello ${userName},
     You requested to reset your password. Click the link below to reset it:
     ${resetUrl}
@@ -7,7 +7,7 @@ export const generatePasswordResetEmailTemplate = (userName, resetUrl) => {
     © ${new Date().getFullYear()} Website Builder. All rights reserved.`
 }
 
-export const generateVerificationEmailTemplate = (userName, verificationUrl) => {
+export const generateVerificationEmailTemplate = (userName: string, verificationUrl: string) => {
     return `Hello ${userName},
     Thank you for registering. Please verify your email by clicking the link below:
     ${verificationUrl}

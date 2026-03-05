@@ -7,13 +7,13 @@ class EmailService {
   constructor() {
   }
 
-  async sendEmail(to, subject, text) {
+  async sendEmail(to: string, subject: string, text: string) {
     // Simulate email sending
     console.log(`Email sent to ${to} with subject "${subject}" and text: ${text}`);
     return true;
   }
 
-  async sendPasswordResetEmail(to, userName, resetToken) {
+  async sendPasswordResetEmail(to: string, userName: string, resetToken: string) {
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
     const subject = 'Password Reset Request';
 
@@ -22,7 +22,7 @@ class EmailService {
     return await this.sendEmail(to, subject, text);
   }
 
-  async sendVerificationEmail(to, userName, verificationToken) {
+  async sendVerificationEmail(to: string, userName: string, verificationToken: string) {
     const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
     const subject = 'Email Verification';
 

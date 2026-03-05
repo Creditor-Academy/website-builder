@@ -1,18 +1,22 @@
-import UserDao from './user.dao.js';
-import AuthDao from '../auth/auth.dao.js';
 import { hashPassword, comparePassword } from '../../utils/password.util.js';
 import cacheService from '../../services/cache.service.js';
 import { generateAuthSessionKey } from '../../builders/redis-key.builder.js';
 import { USER_ROLES } from '../../constants/user.constants.js';
-import { is } from 'zod/v4/locales';
+import UserDao from './user.dao.js';
+import AuthDao from '../auth/auth.dao.js';
+import type { AuthUser } from '../../types/auth.types.js';
+import type { UpdateOwnProfileInput } from './user.validation.js';
 
 class UserService {
+  private userDao: UserDao;
+  private authDao: AuthDao;
+
   constructor() {
     this.userDao = new UserDao();
     this.authDao = new AuthDao();
   }
 
-  async getProfile(userId) {
+  async getProfile(userId: string) {
     const user = await this.userDao.findUserById(userId);
     if (!user) {
       throw new Error('User not found');
@@ -20,7 +24,7 @@ class UserService {
     return user;
   }
 
-  async updateOwnProfile(userId, data) {
+  async updateOwnProfile(userId: string, data: UpdateOwnProfileInput) {
     const user = await this.userDao.findUserById(userId);
     if (!user) {
       throw new Error('User not found');
@@ -29,16 +33,14 @@ class UserService {
     return await this.userDao.updateUser(userId, data);
   }
 
-  async changePassword(userId, oldPassword, newPassword) {
+  async changePassword(userId: string, oldPassword: string, newPassword: string) {
     // Get user with password_hash
-    const user = await this.userDao.findUserById(userId);
-    if (!user) {
+    const userWithPassword = await this.userDao.findUserById(userId, { include_password_hash: true });
+    if (!userWithPassword) {
       throw new Error('User not found');
     }
 
     // Verify old password by fetching with password
-    const userWithPassword = await this.userDao.findUserById(userId, { include_password_hash: true });
-
     const isPasswordValid = await comparePassword(oldPassword, userWithPassword.password_hash);
     if (!isPasswordValid) {
       throw new Error('Current password is incorrect');
@@ -53,7 +55,7 @@ class UserService {
     return { message: 'Password changed successfully' };
   }
 
-  async deactivateAccount(userId) {
+  async deactivateAccount(userId: string) {
     const user = await this.userDao.findUserById(userId);
     if (!user || !user.isActive) {
       throw new Error('User not found');
@@ -70,11 +72,11 @@ class UserService {
     await cacheService.clear(sessionKeyPattern);
   }
 
-  async listUsers(filters) {
+  async listUsers(filters: any) {
     return await this.userDao.listUsers(filters);
   }
 
-  async getUserById(userId) {
+  async getUserById(userId: string) {
     const user = await this.userDao.findUserById(userId);
     if (!user) {
       throw new Error('User not found');
@@ -83,7 +85,7 @@ class UserService {
     return user;
   }
 
-  async updateUserRole(currentUser, userId, newRole) {
+  async updateUserRole(currentUser: AuthUser, userId: string, newRole: string) {
     const targetUser = await this.userDao.findUserById(userId);
     if (!targetUser) {
       throw new Error('User not found');
@@ -101,7 +103,7 @@ class UserService {
     return await this.userDao.updateUser(userId, { role: newRole });
   }
 
-  async updateUserStatus(currentUser, userId, active) {
+  async updateUserStatus(currentUser: AuthUser, userId: string, active: boolean) {
     const user = await this.userDao.findUserById(userId);
     if (!user) {
       throw new Error('User not found');
@@ -135,7 +137,7 @@ class UserService {
     return updatedUser;
   }
 
-  async restoreUser(currentUser, userId) {
+  async restoreUser(currentUser: AuthUser, userId: string) {
     const user = await this.userDao.findUserById(userId);
     if (!user) {
       throw new Error('User not found');
@@ -150,6 +152,11 @@ class UserService {
     }
 
     return await this.userDao.updateUser(userId, { isActive: true, deleted_at: null });
+  }
+
+  async cleanupDeletedUsers() {
+    // Hard delete users that were soft deleted more than 30 days ago
+    await this.userDao.cleanupDeletedUsers();
   }
 }
 

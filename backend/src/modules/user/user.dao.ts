@@ -1,7 +1,9 @@
 import prismaClient from '../../config/prisma.js';
+import { DELETED_USER_RETENTION_TIME } from '../../constants/user.constants.js';
+import type { ListUsersQueryInput } from './user.validation.js';
 
 class UserDao {
-  async findUserById(id, { include_password_hash } = {}) {
+  async findUserById(id: string, { include_password_hash } = { include_password_hash: false }) {
     return await prismaClient.user.findUnique({
       where: { id },
       omit: {
@@ -10,13 +12,14 @@ class UserDao {
     });
   }
 
-  async findUserByEmail(email) {
+  async findUserByEmail(email: string) {
     return await prismaClient.user.findUnique({
       where: { email },
+      omit: { password_hash: true }
     });
   }
 
-  async listUsers(filters = {}) {
+  async listUsers(filters: ListUsersQueryInput) {
     const {
       page = 1, limit = 10,
       role, isActive, isVerified,
@@ -25,7 +28,7 @@ class UserDao {
 
     const skip = (page - 1) * limit;
 
-    const where = {};
+    const where = {} as any;
 
     if (role) where.role = role;
     if (typeof isActive === 'boolean') where.isActive = isActive;
@@ -45,9 +48,9 @@ class UserDao {
     const [users, total] = await Promise.all([
       prismaClient.user.findMany({
         where,
-        skip,
-        take: limit,
+        skip, take: limit,
         orderBy: { created_at: 'desc' },
+        omit: { password_hash: true }
       }),
       prismaClient.user.count({ where }),
     ]);
@@ -63,16 +66,28 @@ class UserDao {
     };
   }
 
-  async updateUser(userId, data) {
+  async updateUser(userId: string, data: any) {
     return await prismaClient.user.update({
-      where: { id: userId },
       data,
+      where: { id: userId },
+      omit: { password_hash: true }
     });
   }
 
-  async deleteUser(userId) {
+  async deleteUser(userId: string) {
     return await prismaClient.user.delete({
       where: { id: userId },
+    });
+  }
+
+  async cleanupDeletedUsers() {
+    await prismaClient.user.deleteMany({
+      where: {
+        isActive: false,
+        deleted_at: {
+          lte: new Date(Date.now() - DELETED_USER_RETENTION_TIME)
+        }
+      }
     });
   }
 }

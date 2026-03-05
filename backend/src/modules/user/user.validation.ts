@@ -31,12 +31,12 @@ export const listUsersQuerySchema = z.object({
   role: z.enum(USER_ROLES_VALUES).optional(),
 
   isActive: z.enum(['true', 'false'], {
-    invalid_type_error: 'isActive filter must be a boolean value',
+    message: 'isActive filter must be a boolean value',
   })
     .transform(val => val === 'true').optional(),
 
   isVerified: z.enum(['true', 'false'], {
-    invalid_type_error: 'isVerified filter must be a boolean value',
+    message: 'isVerified filter must be a boolean value',
   })
     .transform(val => val === 'true').optional(),
 
@@ -56,8 +56,21 @@ export const updateUserRoleSchema = z.object({
 // Update user status schema
 export const updateUserStatusSchema = z.object({
   active: z.enum(['true', 'false'], {
-    required_error: 'Active status is required',
-    invalid_type_error: 'Active status must be a boolean value',
+    message: 'Active status must be a boolean value',
   })
     .transform(val => val === 'true')
 });
+
+// User Id params schema
+export const userIdParamsSchema = z.object({
+  id: z.string().pipe(
+    z.cuid2('Invalid user ID format')
+  ),
+});
+
+export type UpdateOwnProfileInput = z.infer<typeof updateOwnProfileSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type ListUsersQueryInput = z.infer<typeof listUsersQuerySchema>;
+export type UpdateUserRoleInput = z.infer<typeof updateUserRoleSchema>;
+export type UpdateUserStatusInput = z.infer<typeof updateUserStatusSchema>;
+export type UserIdParams = z.infer<typeof userIdParamsSchema>;

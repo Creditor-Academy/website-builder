@@ -49,3 +49,9 @@ export const resetPasswordSchema = z.object({
 export const emailVerificationSchema = z.object({
   token: z.string().min(1, 'Token is required'),
 });
+
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export type EmailVerificationInput = z.infer<typeof emailVerificationSchema>;

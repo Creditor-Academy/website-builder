@@ -2,7 +2,7 @@ import prismaClient from '../../config/prisma.js';
 
 class AuthDao {
   // User operations
-  async findUserByEmail(email, { include_password_hash } = {}) {
+  async findUserByEmail(email: string, { include_password_hash } = { include_password_hash: false }) {
     return await prismaClient.user.findUnique({
       where: { email },
       omit: {
@@ -11,58 +11,52 @@ class AuthDao {
     });
   }
 
-  async findUserById(id) {
+  async findUserById(id: string) {
     return await prismaClient.user.findUnique({
       where: { id },
-      omit: {
-        password_hash: true
-      }
+      omit: { password_hash: true }
     });
   }
 
-  async createUser(userData) {
+  async createUser(userData: { name: string; email: string; password_hash: string }) {
     return await prismaClient.user.create({
       data: userData,
-      omit: {
-        password_hash: true
-      }
+      omit: { password_hash: true }
     });
   }
 
-  async updateUser(userId, userData) {
+  async updateUser(userId: string, userData: any) {
     return await prismaClient.user.update({
       where: { id: userId },
       data: userData,
-      omit: {
-        password_hash: true
-      }
+      omit: { password_hash: true }
     });
   }
 
-  async updateUserPassword(userId, password_hash) {
+  async updateUserPassword(userId: string, password_hash: string) {
     return await prismaClient.user.update({
       where: { id: userId },
       data: {
         password_hash,
         lastPasswordChangeAt: new Date()
       },
-      omit: {
-        password_hash: true
-      }
+      omit: { password_hash: true }
     })
   }
 
   // Email verification token operations
-  async createEmailVerificationToken(tokenData) {
+  async createEmailVerificationToken(tokenData: { userId: string; token_hash: string; expiresAt: Date }) {
     return await prismaClient.emailVerificationToken.create({
       data: tokenData,
     });
   }
 
-  async findEmailVerificationToken(tokenHash) {
+  async findEmailVerificationToken(tokenHash: string) {
     // find a valid (non-expired) verification token by its hash
     return await prismaClient.emailVerificationToken.findFirst({
-      include: { user: true },
+      include: {
+        user: { omit: { password_hash: true } }
+      },
       where: {
         token_hash: tokenHash,
         expiresAt: { gt: new Date() }, // Only find valid (non-expired) tokens
@@ -80,16 +74,18 @@ class AuthDao {
   }
 
   // Password reset token operations
-  async createPasswordResetToken(tokenData) {
+  async createPasswordResetToken(tokenData: { userId: string; token_hash: string; expiresAt: Date }) {
     return await prismaClient.passwordResetToken.create({
       data: tokenData,
     });
   }
 
-  async findPasswordResetToken(tokenHash) {
+  async findPasswordResetToken(tokenHash: string) {
     // find a valid (non-expired, non-used) reset token by its hash
     return await prismaClient.passwordResetToken.findFirst({
-      include: { user: true },
+      include: {
+        user: { omit: { password_hash: true } }
+      },
       where: {
         token_hash: tokenHash,
         expiresAt: { gt: new Date() }, // Only find valid (non-expired) tokens
@@ -98,7 +94,7 @@ class AuthDao {
     });
   }
 
-  async usePasswordResetToken(tokenId) {
+  async usePasswordResetToken(tokenId: string) {
     return await prismaClient.passwordResetToken.update({
       where: { id: tokenId },
       data: { isUsed: true },
@@ -114,17 +110,18 @@ class AuthDao {
     });
   }
 
-
   // Refresh token operations
-  async createRefreshToken(tokenData) {
+  async createRefreshToken(tokenData: { userId: string; token_hash: string; sessionId: string; expiresAt: Date }) {
     return await prismaClient.refreshToken.create({
       data: tokenData,
     });
   }
 
-  async findRefreshToken(tokenHash) {
+  async findRefreshToken(tokenHash: string) {
     return await prismaClient.refreshToken.findFirst({
-      include: { user: true },
+      include: {
+        user: { omit: { password_hash: true } }
+      },
       where: {
         token_hash: tokenHash,
         expiresAt: { gt: new Date() }, // Only find valid (non-expired) tokens
@@ -132,14 +129,14 @@ class AuthDao {
     });
   }
 
-  async revokeRefreshToken(tokenId) {
+  async revokeRefreshToken(tokenId: string) {
     return await prismaClient.refreshToken.update({
       where: { id: tokenId },
       data: { isRevoked: true },
     });
   }
 
-  async revokeAllRefreshTokens(userId) {
+  async revokeAllRefreshTokens(userId: string) {
     return await prismaClient.refreshToken.updateMany({
       where: { userId },
       data: { isRevoked: true },

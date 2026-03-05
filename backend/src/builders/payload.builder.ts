@@ -1,4 +1,4 @@
-export const generateJWTPayload = (user, sessionId) => {
+export const generateJWTPayload = (user: any, sessionId: string) => {
     return {
         userId: user.id,
         email: user.email,
@@ -7,7 +7,7 @@ export const generateJWTPayload = (user, sessionId) => {
     };
 }
 
-export const generateSessionPayload = (user, refreshTokenHash) => {
+export const generateSessionPayload = (user: any, refreshTokenHash: string) => {
     return {
         userId: user.id,
         role: user.role,

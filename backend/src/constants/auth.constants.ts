@@ -18,7 +18,7 @@ export const TOKEN_EXPIRY = {
 export const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict',
+  sameSite: 'strict' as const,
 };
 
 export const selectUserFields = {

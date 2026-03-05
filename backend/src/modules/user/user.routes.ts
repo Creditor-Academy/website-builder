@@ -8,6 +8,7 @@ import {
   listUsersQuerySchema,
   updateUserRoleSchema,
   updateUserStatusSchema,
+  userIdParamsSchema,
 } from './user.validation.js';
 import { USER_ROLES } from '../../constants/user.constants.js';
 
@@ -52,6 +53,7 @@ router.get(
 router.get(
   '/:id',
   authorize([USER_ROLES.ADMIN]),
+  validateRequest(userIdParamsSchema, 'params'),
   userController.getUserById
 );
 
@@ -59,6 +61,7 @@ router.get(
 router.patch(
   '/:id/role',
   authorize([USER_ROLES.ADMIN]),
+  validateRequest(userIdParamsSchema, 'params'),
   validateRequest(updateUserRoleSchema),
   userController.updateUserRole
 );
@@ -67,6 +70,7 @@ router.patch(
 router.patch(
   '/:id/status',
   authorize([USER_ROLES.ADMIN]),
+  validateRequest(userIdParamsSchema, 'params'),
   validateRequest(updateUserStatusSchema),
   userController.updateUserStatus
 );
@@ -75,6 +79,7 @@ router.patch(
 router.post(
   '/:id/restore',
   authorize([USER_ROLES.ADMIN]),
+  validateRequest(userIdParamsSchema, 'params'),
   userController.restoreUser
 );
 

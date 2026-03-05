@@ -145,12 +145,13 @@ model Website {
 
 // Settings Model (for website configuration)
 model Settings {
-  id           String   @id @default(cuid())
+  id           String @id @default(cuid())
   seo          Json? // {title, description, favicon}
   contact      Json? // {email, phone, address}
   social_links Json? // {facebook, twitter, linkedin}
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   // Relations
   website Website @relation(fields: [id], references: [settings_id], onDelete: Cascade)

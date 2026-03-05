@@ -1,13 +1,14 @@
+import type { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwt.util.js';
 import cacheService from '../services/cache.service.js';
 import { generateAuthSessionKey } from '../builders/redis-key.builder.js';
-import { USER_ROLES } from '../constants/user.constants.js';
+import type { AuthUser, JWTPayload } from '../types/auth.types.js';
 
 /**
  * Authentication middleware
  * Verifies access token from cookies and attaches user to request
  */
-export const authenticate = async (req, res, next) => {
+export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Get access token from cookies
     const token = req.cookies?.accessToken;
@@ -17,7 +18,7 @@ export const authenticate = async (req, res, next) => {
     }
 
     // Verify token
-    let decoded;
+    let decoded: JWTPayload;
     try {
       decoded = verifyToken(token);
     } catch (error) {
@@ -47,13 +48,13 @@ export const authenticate = async (req, res, next) => {
     // }
 
     // Attach user to request context
-    req.user = user;
-    req.sessionId = sessionId;
+    req.user = user as AuthUser;
+    req.sessionId = sessionId as string;
 
     next();
 
-  } catch (error) {
-    console.error('Authentication error:', error);
+  } catch (error: any) {
+    console.error('Authentication error:', error.message);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -62,8 +63,8 @@ export const authenticate = async (req, res, next) => {
  * Role-based authorization middleware
  * Checks if the authenticated user has the required role(s)
  */
-export const authorize = (roles = []) => {
-  return (req, res, next) => {
+export const authorize = (roles: string[] = []) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({ error: 'Unauthorized. Please login to continue' });
     }

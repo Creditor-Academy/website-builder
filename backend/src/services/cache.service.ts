@@ -12,7 +12,7 @@ class CacheService {
      * @param {string} key - The cache key to retrieve
      * @return - The cached value, or null if not found or on error
      */
-    async get(key) {
+    async get(key : string) {
         try {
             const value = await this.client.get(key);
             return value;
@@ -28,12 +28,12 @@ class CacheService {
      * @param {*} value - The value to cache
      * @param {number} ttl - Time to live in seconds (default: 3600)
      */
-    async set(key, value, ttl = 3600) {
+    async set(key : string, value : any, ttl: number = 3600) {
         try {
             await this.client.set(
                 key,
                 JSON.stringify(value),
-                { EX: ttl }
+                { ex: ttl }
             );
         }
         catch (error) {
@@ -45,7 +45,7 @@ class CacheService {
      * Deletes a cache entry by key from Redis.
      * @param {string} key - The cache key to delete
      */
-    async del(key) {
+    async del(key : string) {
         try {
             await this.client.del(key);
         }
@@ -58,11 +58,12 @@ class CacheService {
      * Clears cache entries matching a pattern
      * @param {string} pattern - The pattern to match cache keys (e.g., 'user:*')
      */
-    async clear(pattern) {
+    async clear(pattern : string) {
         try {
             const keys = await this.client.keys(pattern);
             if (keys.length > 0) {
-                await this.client.del(keys);
+                // Delete all matching keys in parallel
+                await Promise.all(keys.map((key) => this.client.del(key)));
             }
         }
         catch (error) {
