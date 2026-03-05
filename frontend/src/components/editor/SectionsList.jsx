@@ -112,7 +112,7 @@ const ELEMENT_CATEGORIES = [
         create: () => ({
           type: 'text',
           content: { text: 'New Text Element' },
-          position: { x: 100, y: 100 },
+          position: { x: 200, y: 150 },
           style: { fontSize: '24px', fontWeight: 'bold', color: '#000000', fontFamily: 'Inter' }
         })
       },
