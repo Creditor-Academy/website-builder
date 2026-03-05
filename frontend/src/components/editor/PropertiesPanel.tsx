@@ -614,7 +614,7 @@ export function PropertiesPanel() {
               </div>
             </div>
 
-            <div className="space-y-4 pt-2 border-t border-slate-100 mt-4 pt-4">
+            <div className="space-y-4 pt-2 border-t border-slate-100 mt-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label className="text-[11px] font-bold text-slate-700">Use Gradient</Label>
@@ -625,6 +625,50 @@ export function PropertiesPanel() {
               {selectedSection.styles.useGradient && (
                 <Input value={selectedSection.styles.backgroundGradient || ''} onChange={(e) => handleStyleChange('backgroundGradient', e.target.value)} className="bg-slate-50 border-slate-200 text-[10px] h-8 font-mono" placeholder="linear-gradient(...)" />
               )}
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Border Radius</Label>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { value: '0px', label: '0°', desc: 'Sharp' },
+                  { value: '4px', label: '1°', desc: 'Slight' },
+                  { value: '8px', label: '2°', desc: 'Medium' },
+                  { value: '12px', label: '3°', desc: 'Curved' }
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => selectedComponent 
+                      ? handleCompStyleUpdate({ borderRadius: option.value })
+                      : handleStyleChange('borderRadius', option.value)
+                    }
+                    className={`p-2 rounded-lg border text-[10px] font-medium transition-all ${
+                      (selectedComponent 
+                        ? selectedComponent.style?.borderRadius 
+                        : selectedSection.styles?.borderRadius) === option.value
+                        ? 'bg-primary text-white border-primary shadow-sm'
+                        : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className="font-bold">{option.label}</div>
+                    <div className="text-[8px] opacity-70">{option.desc}</div>
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-2 mt-2">
+                <Input
+                  value={selectedComponent 
+                    ? selectedComponent.style?.borderRadius || ''
+                    : selectedSection.styles?.borderRadius || ''
+                  }
+                  onChange={(e) => selectedComponent 
+                    ? handleCompStyleUpdate({ borderRadius: e.target.value })
+                    : handleStyleChange('borderRadius', e.target.value)
+                  }
+                  className="bg-slate-50 border-slate-200 text-[10px] h-8 font-mono"
+                  placeholder="Custom value (e.g., 16px)"
+                />
+              </div>
             </div>
 
             <div className="space-y-3">

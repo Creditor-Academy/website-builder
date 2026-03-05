@@ -32,18 +32,20 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
       {content.features?.map((feature, index) => (
         <div
           key={feature.id}
-          className="group relative p-8 rounded-2xl transition-all duration-300 hover:shadow-soft hover:-translate-y-1"
+          className="group relative p-8 transition-all duration-300 hover:shadow-soft hover:-translate-y-1"
           style={{
             background: '#f8fafc',
+            borderRadius: styles.borderRadius || '16px',
             animationDelay: `${index * 0.1}s`
           }}
         >
           {/* Icon */}
           <div
-            className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110"
+            className="w-16 h-16 flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110"
             style={{
               background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-              color: '#ffffff'
+              color: '#ffffff',
+              borderRadius: styles.borderRadius ? `calc(${styles.borderRadius} * 0.5)` : '8px'
             }}
           >
             {getIcon(feature.icon)}
@@ -78,7 +80,10 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
           </p>
 
           {/* Hover Accent */}
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-accent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-b-2xl" />
+          <div 
+            className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-accent scale-x-0 group-hover:scale-x-100 transition-transform duration-300" 
+            style={{ borderRadius: styles.borderRadius ? `calc(${styles.borderRadius} * 0.5)` : '8px' }}
+          />
         </div>
       ))}
     </div>
@@ -88,7 +93,7 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
     <div className="space-y-4 max-w-2xl mx-auto">
       {content.features?.map((feature) => (
         <div key={feature.id} className="flex items-start gap-4">
-          <div className="w-12 h-12 flex items-center justify-center rounded-md bg-primary text-white">{getIcon(feature.icon)}</div>
+          <div className="w-12 h-12 flex items-center justify-center bg-primary text-white" style={{ borderRadius: styles.borderRadius ? `calc(${styles.borderRadius} * 0.5)` : '6px' }}>{getIcon(feature.icon)}</div>
           <div>
             <h3
               className="font-semibold"
@@ -125,8 +130,8 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
   const renderIcons = () => (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {content.features?.map((feature) => (
-        <div key={feature.id} className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-sm">
-          <div className="w-20 h-20 rounded-lg flex items-center justify-center bg-primary text-white mb-4">{getIcon(feature.icon)}</div>
+        <div key={feature.id} className="flex flex-col items-center text-center p-6 bg-white shadow-sm" style={{ borderRadius: styles.borderRadius || '8px' }}>
+          <div className="w-20 h-20 flex items-center justify-center bg-primary text-white mb-4" style={{ borderRadius: styles.borderRadius ? `calc(${styles.borderRadius} * 0.5)` : '8px' }}>{getIcon(feature.icon)}</div>
           <h4
             className="font-semibold"
             style={{ color: headingColor }}
@@ -150,18 +155,20 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
       {content.features?.map((feature, index) => (
         <div
           key={feature.id}
-          className="group relative p-6 rounded-xl transition-all duration-300 hover:shadow-lg"
+          className="group relative p-6 transition-all duration-300 hover:shadow-lg"
           style={{
             background: index % 2 === 0 ? '#ffffff' : '#f8fafc',
-            border: '1px solid #e2e8f0'
+            border: '1px solid #e2e8f0',
+            borderRadius: styles.borderRadius || '12px'
           }}
         >
           <div className="flex items-start gap-6">
             <div
-              className="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110"
+              className="w-14 h-14 flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110"
               style={{
                 background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-                color: '#ffffff'
+                color: '#ffffff',
+                borderRadius: styles.borderRadius ? `calc(${styles.borderRadius} * 0.5)` : '8px'
               }}
             >
               {getIcon(feature.icon)}

@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
 export function EditorToolbar({ theme = 'light', onToggleTheme }) {
-  const { state, undo, redo, canUndo, canRedo, setPreviewMode, setLeftPanelVisible, setRightPanelVisible } = useBuilder();
+  const { state, undo, redo, canUndo, canRedo, setPreviewMode, setLeftPanelVisible } = useBuilder();
   const { editor, page } = state;
 
   const handleExport = () => {
@@ -59,7 +59,7 @@ export function EditorToolbar({ theme = 'light', onToggleTheme }) {
         {/* RIGHT */}
         <div className="flex items-center gap-2">
           {/* PANEL TOGGLES */}
-          <div className="flex items-center gap-1 mr-2 px-1 py-1 bg-slate-50 rounded-xl border border-slate-100/50">
+          {/* <div className="flex items-center gap-1 mr-2 px-1 py-1 bg-slate-50 rounded-xl border border-slate-100/50">
             <TooltipProvider delayDuration={0}>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -74,21 +74,8 @@ export function EditorToolbar({ theme = 'light', onToggleTheme }) {
                 </TooltipTrigger>
                 <TooltipContent side="bottom">Toggle Left Panel</TooltipContent>
               </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setRightPanelVisible(!editor.showRightPanel)}
-                    className={`w-8 h-8 rounded-lg ${editor.showRightPanel ? 'bg-white shadow-sm text-primary' : 'text-slate-400'}`}
-                  >
-                    <Sidebar className="w-3.5 h-3.5 rotate-180" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">Toggle Right Panel</TooltipContent>
-              </Tooltip>
             </TooltipProvider>
-          </div>
+          </div> */}
           {/* UNDO / REDO */}
           <div className="flex items-center gap-1">
             <Button

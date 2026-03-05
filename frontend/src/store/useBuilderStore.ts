@@ -27,7 +27,7 @@ const useBuilderStore = create(
                 showGrid: false,
                 previewMode: false,
                 showLeftPanel: true,
-                showRightPanel: true,
+                showRightPanel: false,
             },
 
             history: [],
@@ -299,11 +299,11 @@ const useBuilderStore = create(
             })),
 
             selectSection: (id) => set((state) => ({
-                editor: { ...state.editor, selectedSectionId: id, selectedComponentId: null }
+                editor: { ...state.editor, selectedSectionId: id, selectedComponentId: null, showRightPanel: !!id }
             })),
 
             selectComponent: (id) => set((state) => ({
-                editor: { ...state.editor, selectedComponentId: id }
+                editor: { ...state.editor, selectedComponentId: id, showRightPanel: !!id }
             })),
 
             // Undo/Redo

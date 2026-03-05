@@ -84,6 +84,7 @@ const ELEMENT_CATEGORIES = [
       { type: "features", name: "Features", icon: Grid3X3, description: "Showcase key features", create: createDefaultFeaturesSection },
       { type: "services", name: "Services", icon: Layout, description: "List your services", create: createDefaultServicesSection },
       { type: "about", name: "About Us", icon: Info, description: "Tell your story", create: createDefaultAboutSection },
+      { type: "cta", name: "Call to Action", icon: MousePointer2, description: "Action-oriented CTA section", create: createDefaultCTASection },
       { type: "pricing", name: "Pricing", icon: DollarSign, description: "Pricing tiers & plans", create: createDefaultPricingSection },
       { type: "testimonials", name: "Testimonials", icon: Quote, description: "Customer reviews", create: createDefaultTestimonialsSection },
     ]
@@ -213,52 +214,68 @@ export function SectionsList({ view = "add" }) {
   });
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-white via-slate-50/30 to-slate-50/50 overflow-hidden animate-in fade-in duration-300">
-      {/* Header with Dynamic Title */}
-      <div className="p-4 border-b border-slate-100/50 flex items-center justify-between bg-white/80 backdrop-blur-sm">
-        <div>
-          <h2 className="text-sm font-bold text-slate-900 tracking-tight capitalize flex items-center gap-2">
-            {view === 'add' ? (
-              <>
-                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                Add Elements
-              </>
-            ) : (
-              <>
-                <Layers className="w-4 h-4 text-slate-400" />
-                Layers / Outline
-              </>
-            )}
-          </h2>
-          {view === 'add' && <p className="text-[10px] text-slate-400 mt-1 font-medium">Drag or click to add</p>}
+    <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-slate-50/80 overflow-hidden">
+      {/* Modern Header */}
+      <div className="relative bg-white border-b border-slate-200/60 shadow-sm">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-50"></div>
+        <div className="relative p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${view === 'add' ? 'from-primary to-primary/80' : 'from-slate-600 to-slate-700'} flex items-center justify-center shadow-lg`}>
+              {view === 'add' ? (
+                <Plus className="w-4 h-4 text-white" />
+              ) : (
+                <Layers className="w-4 h-4 text-white" />
+              )}
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-slate-900 tracking-tight">
+                {view === 'add' ? 'Add Elements' : 'Layers & Outline'}
+              </h2>
+              <p className="text-[10px] text-slate-500 mt-0.5 font-medium">
+                {view === 'add' ? 'Build your page with components' : 'Manage page structure'}
+              </p>
+            </div>
+          </div>
+          {view === 'layers' && (
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+              <Badge className="text-[10px] font-bold px-2.5 py-1 h-6 bg-emerald-50 text-emerald-700 border-emerald-200 rounded-lg">
+                {page.sections.length} sections
+              </Badge>
+            </div>
+          )}
         </div>
-        {view === 'layers' && (
-          <Badge variant="secondary" className="text-[10px] font-bold px-2.5 py-1 h-6 bg-primary/10 text-primary border-primary/20 rounded-lg">
-            {page.sections.length}
-          </Badge>
-        )}
       </div>
 
-      {/* Global Search for either View */}
-      <div className="px-4 py-3 bg-white/50 border-b border-slate-100/50 backdrop-blur-sm">
+      {/* Enhanced Search Bar */}
+      <div className="relative bg-white/80 backdrop-blur-sm border-b border-slate-200/60 px-4 py-3">
         <div className="relative group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-primary transition-colors" />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-200"></div>
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary transition-all duration-200" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={view === 'add' ? "Search elements..." : "Find layer..."}
-            className="pl-9 h-9 text-xs bg-white border-slate-200 hover:border-slate-300 focus:ring-primary/30 rounded-xl transition-all"
+            placeholder={view === 'add' ? "Search for elements..." : "Find sections..."}
+            className="pl-10 pr-4 h-10 text-xs bg-slate-50/70 border-slate-200 hover:border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary rounded-xl transition-all duration-200 shadow-sm"
           />
+          {query && (
+            <button
+              onClick={() => setQuery('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors"
+            >
+              <X className="w-3 h-3 text-slate-500" />
+            </button>
+          )}
         </div>
       </div>
 
       <ScrollArea className="flex-1">
         <div className="p-4">
           {view === 'layers' ? (
-            <div className="space-y-1">
+            <div className="space-y-2">
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={filteredLayers.map((s) => s.id)} strategy={verticalListSortingStrategy}>
-                  {filteredLayers.length > 0 ? filteredLayers.map((section) => (
+                  {filteredLayers.length > 0 ? filteredLayers.map((section, index) => (
                     <SectionItem
                       key={section.id}
                       id={section.id}
@@ -267,35 +284,74 @@ export function SectionsList({ view = "add" }) {
                       visible={section.visible}
                       isSelected={editor.selectedSectionId === section.id}
                       onClick={() => selectSection(section.id)}
+                      index={index}
                     />
                   )) : (
-                    <div className="text-center py-12 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/30">
-                      <Layers className="w-10 h-10 mx-auto mb-3 text-slate-200" />
-                      <p className="text-xs text-slate-400 font-medium">No layers found</p>
+                    <div className="text-center py-16 border-2 border-dashed border-slate-200 rounded-2xl bg-gradient-to-br from-slate-50/50 to-white">
+                      <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <Layers className="w-8 h-8 text-slate-300" />
+                      </div>
+                      <p className="text-sm text-slate-500 font-medium mb-2">No sections yet</p>
+                      <p className="text-xs text-slate-400">Switch to Add Elements to start building</p>
                     </div>
                   )}
                 </SortableContext>
               </DndContext>
             </div>
           ) : (
-            <div className="space-y-6">
-              {ELEMENT_CATEGORIES.map((cat) => {
+            <div className="space-y-8">
+              {/* Featured Elements */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-6 rounded-full bg-gradient-to-b from-primary to-primary/50"></div>
+                  <h3 className="text-sm font-bold text-slate-900">Popular Elements</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {ELEMENT_CATEGORIES[0].items.slice(0, 4).map((item, idx) => (
+                    <button
+                      key={item.type}
+                      onClick={() => handleAddElement(item)}
+                      className="group relative bg-white border-2 border-slate-200 hover:border-primary hover:shadow-lg rounded-2xl p-4 transition-all duration-300 hover:scale-105 active:scale-95"
+                      style={{ animationDelay: `${idx * 50}ms` }}
+                    >
+                      <div className="aspect-square bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+                        <item.icon className="w-6 h-6 text-primary" />
+                      </div>
+                      <h4 className="text-xs font-bold text-slate-900 text-center">{item.name}</h4>
+                      <p className="text-[9px] text-slate-500 text-center mt-1 line-clamp-2">{item.description}</p>
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <Plus className="w-3 h-3 text-white" />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* All Categories */}
+              {ELEMENT_CATEGORIES.map((cat, catIndex) => {
                 const filteredItems = cat.items.filter(item =>
                   item.name.toLowerCase().includes(query.toLowerCase()) ||
-                  cat.name.toLowerCase().includes(query.toLowerCase())
+                  item.description?.toLowerCase().includes(query.toLowerCase())
                 );
 
                 if (filteredItems.length === 0) return null;
 
                 return (
-                  <div key={cat.name} className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div key={cat.name} className="space-y-4" style={{ animationDelay: `${catIndex * 100}ms` }}>
                     {/* Category Header */}
-                    <div className="flex items-center gap-3 px-1">
-                      <div className={`w-2 h-5 rounded-full bg-gradient-to-b ${cat.color} border ${cat.borderColor}`} />
-                      <div>
-                        <h3 className="text-xs font-bold text-slate-900 uppercase tracking-widest">{cat.name}</h3>
-                        <div className="text-[9px] text-slate-400 font-medium mt-0.5">{filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''}</div>
+                    <div className="flex items-center justify-between p-3 bg-gradient-to-r from-slate-50 to-transparent rounded-xl border border-slate-100">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${cat.color} ${cat.borderColor} border flex items-center justify-center`}>
+                          <div className="w-5 h-5 rounded bg-white/80"></div>
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold text-slate-900">{cat.name}</h3>
+                          <p className="text-[10px] text-slate-500">{filteredItems.length} element{filteredItems.length !== 1 ? 's' : ''}</p>
+                        </div>
                       </div>
+                      <Badge className={`text-[9px] font-bold px-2 py-1 h-5 ${cat.badgeColor} border-0 rounded-lg`}>
+                        {filteredItems.length}
+                      </Badge>
                     </div>
 
                     {/* Elements Grid */}
@@ -304,39 +360,20 @@ export function SectionsList({ view = "add" }) {
                         <button
                           key={item.type}
                           onClick={() => handleAddElement(item)}
-                          className={`relative flex flex-col items-start justify-between p-3 rounded-xl border transition-all duration-200 group overflow-hidden text-left h-full
-                            bg-gradient-to-br ${cat.color} border-slate-200 
-                            hover:border-primary/60 hover:shadow-lg hover:shadow-primary/10 hover:scale-105
-                            active:scale-95
-                            focus:outline-none focus:ring-2 focus:ring-primary/30
-                            before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/20 before:to-transparent before:opacity-0 before:group-hover:opacity-100 before:transition-opacity before:duration-200 before:pointer-events-none
-                          `}
-                          style={{ animationDelay: `${idx * 30}ms` }}
+                          className="group relative bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md rounded-xl p-3 transition-all duration-200 hover:scale-102 active:scale-98"
+                          style={{ animationDelay: `${(catIndex * 100) + (idx * 30)}ms` }}
                         >
-                          {/* Decorative corner accent */}
-                          {/* <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-bl from-primary/10 to-transparent rounded-bl-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" /> */}
-
-                          {/* Icon Container */}
-                          <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${cat.color} border ${cat.borderColor} flex items-center justify-center group-hover:scale-110 transition-transform duration-200 relative z-10 mb-2 shadow-sm`}>
-                            <item.icon className="w-4 h-4 text-slate-700 group-hover:text-primary transition-colors duration-200" />
-                          </div>
-
-                          {/* Text Content */}
-                          <div className="relative z-10 flex-1">
-                            <span className="text-[11px] font-bold text-slate-900 group-hover:text-primary transition-colors duration-200 block">
-                              {item.name}
-                            </span>
-                            <span className="text-[9px] text-slate-500 group-hover:text-primary/70 mt-0.5 line-clamp-2 leading-tight block opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                              {item.description || 'Click to add'}
-                            </span>
-                          </div>
-
-                          {/* Add Button */}
-                          <div className="mt-2 flex items-center gap-2 relative z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <div className="w-4 h-4 rounded-full bg-primary/15 group-hover:bg-primary/25 flex items-center justify-center transition-colors">
-                              <Plus className="w-2.5 h-2.5 text-primary group-hover:text-primary transition-colors" />
+                          <div className="flex items-start gap-3">
+                            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${cat.color} ${cat.borderColor} border flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200`}>
+                              <item.icon className="w-4 h-4 text-slate-600" />
                             </div>
-                            <span className="text-[8px] font-semibold text-primary/70 group-hover:text-primary">Add</span>
+                            <div className="flex-1 text-left min-w-0">
+                              <h4 className="text-[10px] font-bold text-slate-900 truncate">{item.name}</h4>
+                              <p className="text-[8px] text-slate-500 mt-0.5 line-clamp-2 leading-tight">{item.description}</p>
+                            </div>
+                          </div>
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <Plus className="w-3 h-3 text-primary" />
                           </div>
                         </button>
                       ))}
@@ -349,15 +386,23 @@ export function SectionsList({ view = "add" }) {
         </div>
       </ScrollArea>
 
-      {/* Footer Helper */}
-      <div className="p-3 border-t border-slate-100/50 bg-gradient-to-r from-white via-primary/5 to-white shadow-[0_-2px_8px_-2px_rgba(0,0,0,0.03)]">
-        <div className="flex items-center justify-start gap-2">
-          <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center">
-            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+      {/* Professional Footer */}
+      <div className="relative bg-gradient-to-r from-slate-50 via-white to-slate-50 border-t border-slate-200/60 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+            </div>
+            <p className="text-[10px] text-slate-600 font-medium">
+              {view === 'add' ? 'Click any element to add it to your page' : 'Drag to reorder sections'}
+            </p>
           </div>
-          <p className="text-[10px] text-slate-500 font-medium italic">
-            {view === 'add' ? 'Tip: Search or browse categories to find elements' : 'Drag to reorder, click to edit'}
-          </p>
+          {view === 'add' && (
+            <div className="flex items-center gap-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+              <span className="text-[9px] text-slate-500">Ready to build</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
