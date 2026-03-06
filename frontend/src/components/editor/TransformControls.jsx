@@ -29,8 +29,7 @@ export function TransformControls({
     if (!isEditing || e.button !== 0) return;
     e.stopPropagation();
 
-    // Allow clicking inside but don't drag if clicking a button (if type is drag)
-    if (type === 'drag' && e.target.closest('button')) return;
+
 
     if (type === 'drag') {
       onSelect(e);
@@ -80,6 +79,7 @@ export function TransformControls({
 
         newTransform.x = newX;
         newTransform.y = newY;
+        console.log(`Dragging (ID: ${interactionRef.current.target.closest('[data-component-id]')?.dataset.componentId || 'unknown'}): x=${newX}, y=${newY}`);
       }
       else if (state.type === 'rotate') {
         const cxLocal = state.initialRect.width / 2;

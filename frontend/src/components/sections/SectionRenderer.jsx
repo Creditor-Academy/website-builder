@@ -97,6 +97,18 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
   const [isEditingText, setIsEditingText] = React.useState(false);
   const contentRef = React.useRef(null);
 
+
+  React.useEffect(() => {
+      if (!isSelected && isEditingText) {
+          setIsEditingText(false);
+          if (contentRef.current && contentRef.current.innerText !== (component.content?.text || '')) {
+              updateComponent(section.id, component.id, {
+                  content: { ...component.content, text: contentRef.current.innerText }
+              });
+          }
+      }
+  }, [isSelected, isEditingText, component.id, component.content, section.id, updateComponent]);
+
   const handleUpdate = (updates) => {
     if (updates.style) {
       updateComponent(section.id, component.id, { ...updates, style: { ...component.style, ...updates.style } });
@@ -109,6 +121,7 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
     e.stopPropagation();
     selectSection(section.id);
     selectComponent(component.id);
+
   };
 
   const handleStyleChange = (updates) => {
@@ -120,7 +133,7 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
   return (
     <TransformControls
       isSelected={isSelected}
-      isEditing={isEditing && !editor.previewMode && !isEditingText}
+      isEditing={isEditing && !editor.previewMode}
       position={component.position || { x: 0, y: 0 }}
       size={{ width: component.style?.width || 'auto', height: component.style?.height || 'auto' }}
       rotation={component.style?.rotation || 0}
@@ -129,18 +142,25 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
       keepAspectRatio={false}
       onDoubleClick={(e) => {
         e.stopPropagation();
-        if (component.type === 'text') {
+
+        if (component.type === 'text' || component.type === 'button') {
           setIsEditingText(true);
           setTimeout(() => {
-            contentRef.current?.focus();
-            // Put cursor at end
-            const range = document.createRange();
-            const sel = window.getSelection();
-            if (contentRef.current?.childNodes.length > 0) {
-              range.setStartAfter(contentRef.current.lastChild);
-              range.collapse(true);
-              sel.removeAllRanges();
-              sel.addRange(range);
+            if (contentRef.current) {
+              contentRef.current.focus();
+              const range = document.createRange();
+              const sel = window.getSelection();
+              if (contentRef.current.childNodes.length > 0) {
+                range.setStartAfter(contentRef.current.lastChild);
+                range.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(range);
+              } else { // For empty content, set cursor at start
+                range.setStart(contentRef.current, 0);
+                range.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(range);
+              }
             }
           }, 10);
         }
@@ -154,7 +174,6 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
             contentEditable={isEditing && isSelected && isEditingText}
             suppressContentEditableWarning
             onBlur={(e) => {
-              // Check if we blurred to something in the toolbar
               const relatedTarget = e.relatedTarget;
               if (relatedTarget?.closest('.comp-toolbar')) return;
 
@@ -195,7 +214,8 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
         )}
         {component.type === 'button' && (
           <button
-            className="w-full h-full flex items-center justify-center pointer-events-none select-none"
+            className="w-full h-full flex items-center justify-center pointer-events-auto select-none"
+            onClick={handleSelect} // Explicitly call handleSelect for selection
             style={{
               backgroundColor: component.style?.backgroundColor || '#3b82f6',
               color: component.style?.color || '#ffffff',
@@ -205,7 +225,35 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
               fontWeight: component.style?.fontWeight || 'bold',
             }}
           >
-            {component.content?.text || 'Button'}
+            {isEditingText ? (
+              <div
+                ref={contentRef}
+                contentEditable={isEditing && isSelected && isEditingText}
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  const relatedTarget = e.relatedTarget;
+                  if (relatedTarget?.closest('.comp-toolbar')) return;
+
+                  setIsEditingText(false);
+                  updateComponent(section.id, component.id, {
+                    content: { ...component.content, text: e.target.innerText }
+                  });
+                }}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        contentRef.current?.blur();
+                    }
+                }}
+                onMouseDown={(e) => e.stopPropagation()} // Prevent TransformControls from interfering
+                className={`focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-1 -mx-1 ${isEditingText ? 'pointer-events-auto cursor-text' : ''}`}
+                style={{ minWidth: '50px' }} // Ensure it's wide enough to edit
+              >
+                {component.content?.text || 'Button'}
+              </div>
+            ) : (
+              component.content?.text || 'Button'
+            )}
           </button>
         )}
         {component.type === 'container' && (
@@ -473,9 +521,9 @@ export function SectionRenderer({ section, isSelected, isEditing, onContentChang
                     color: comp.style?.color || 'inherit',
                     fontSize: comp.style?.fontSize || '24px',
                     fontWeight: comp.style?.fontWeight || 'normal',
-                    fontFamily: comp.style?.fontFamily || 'Inter',
-                    fontStyle: comp.style?.fontStyle || 'normal',
-                    letterSpacing: comp.style?.letterSpacing || 'normal',
+                    fontFamily: component.style?.fontFamily || 'Inter',
+                    fontStyle: component.style?.fontStyle || 'normal',
+                    letterSpacing: component.style?.letterSpacing || 'normal',
                   }}
                   dangerouslySetInnerHTML={{ __html: comp.content.text }}
                 />
@@ -499,7 +547,7 @@ export function SectionRenderer({ section, isSelected, isEditing, onContentChang
                     borderRadius: comp.style?.borderRadius || '8px',
                     padding: comp.style?.padding || '8px 16px',
                     fontSize: comp.style?.fontSize || '16px',
-                    fontWeight: comp.style?.fontWeight || 'bold',
+                    fontWeight: component.style?.fontWeight || 'bold',
                     width: '100%',
                     height: '100%',
                     display: 'flex',
