@@ -153,7 +153,7 @@ const ELEMENT_CATEGORIES = [
           x: 0,
           y: 0,
           width: "100%",
-          minHeight: "200px",
+          minHeight: "50vh",
           rotation: 0,
           zIndex: 1,
           styles: {
@@ -161,7 +161,7 @@ const ELEMENT_CATEGORIES = [
             paddingBottom: "40px",
             paddingLeft: "20px",
             paddingRight: "20px",
-            backgroundColor: "#ffffff",
+            backgroundColor: "#2211a2",
           },
           children: [],
         }),

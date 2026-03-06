@@ -164,6 +164,7 @@ const ELEMENT_CATEGORIES = [
             backgroundColor: "#ffffff",
           },
           children: [],
+          components: [], // Added missing components array
         }),
       },
       {
