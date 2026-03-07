@@ -9,11 +9,11 @@ export function BuilderProvider({ children }) {
   const activePage = store.getActivePage();
   const activeWebsite = store.getActiveWebsite();
 
-  const selectedSection = store.editor.selectedSectionId && activePage
+  const selectedSection = store.editor.selectedSectionId && activePage?.sections
     ? activePage.sections.find((s) => s.id === store.editor.selectedSectionId) ?? null
     : null;
 
-  const selectedComponent = store.editor.selectedComponentId && selectedSection
+  const selectedComponent = store.editor.selectedComponentId && selectedSection?.components
     ? selectedSection.components.find((c) => c.id === store.editor.selectedComponentId) ?? null
     : null;
 
