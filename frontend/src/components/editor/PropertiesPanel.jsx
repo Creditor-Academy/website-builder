@@ -115,7 +115,7 @@ export function PropertiesPanel() {
                       <Label className="text-[11px] font-bold text-slate-700">Index on Google</Label>
                       <p className="text-[9px] text-slate-400">Allow search engines to find this page</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch checked={page.meta?.indexOnGoogle ?? true} onCheckedChange={(checked) => updatePageSEO(page.id, { indexOnGoogle: checked })} />
                   </div>
                 </div>
               </div>
@@ -168,7 +168,7 @@ export function PropertiesPanel() {
                 </div>
                 <div className="flex items-center justify-between pt-2">
                   <Label className="text-xs font-medium">Sticky Header</Label>
-                  <Switch defaultChecked />
+                  <Switch checked={page.navbar?.isSticky ?? false} onCheckedChange={(checked) => updateNavbar({ isSticky: checked })} />
                 </div>
               </div>
             </CollapsibleContent>

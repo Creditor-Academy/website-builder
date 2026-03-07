@@ -111,11 +111,53 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
     selectComponent(component.id);
   };
 
+  const debouncedUpdateRef = React.useRef();
+
+  React.useEffect(() => {
+    debouncedUpdateRef.current = setTimeout(() => {
+      // Only run if there are pending updates and the component is still mounted
+      if (latestUpdates.current) {
+        updateComponent(section.id, component.id, {
+          style: { ...(component.style || {}), ...latestUpdates.current }
+        });
+        latestUpdates.current = null; // Clear pending updates
+      }
+    }, 100); // Debounce for 100ms
+
+    return () => {
+      clearTimeout(debouncedUpdateRef.current);
+    };
+  }, [component.style, section.id, component.id, updateComponent]);
+
   const handleStyleChange = (updates) => {
-    updateComponent(section.id, component.id, {
-      style: { ...(component.style || {}), ...updates }
-    });
+    latestUpdates.current = { ...(latestUpdates.current || {}), ...updates };
+    // The actual update will be triggered by the debounced effect
   };
+  const latestUpdates = React.useRef(null);
+
+  const debouncedTransformUpdateRef = React.useRef(null);
+  const latestTransformUpdates = React.useRef(null);
+
+  const handleTransformUpdate = (updates) => {
+    latestTransformUpdates.current = updates;
+    if (debouncedTransformUpdateRef.current) {
+      clearTimeout(debouncedTransformUpdateRef.current);
+    }
+    debouncedTransformUpdateRef.current = setTimeout(() => {
+      if (latestTransformUpdates.current) {
+        handleUpdate(latestTransformUpdates.current);
+        latestTransformUpdates.current = null;
+      }
+    }, 100); // Debounce for 100ms
+  };
+
+  React.useEffect(() => {
+    return () => {
+      if (debouncedTransformUpdateRef.current) {
+        clearTimeout(debouncedTransformUpdateRef.current);
+      }
+    };
+  }, []);
 
   return (
     <TransformControls
@@ -124,7 +166,7 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
       position={component.position || { x: 0, y: 0 }}
       size={{ width: component.style?.width || 'auto', height: component.style?.height || 'auto' }}
       rotation={component.style?.rotation || 0}
-      onUpdate={handleUpdate}
+      onUpdate={handleTransformUpdate}
       onSelect={handleSelect}
       keepAspectRatio={false}
       onDoubleClick={(e) => {
@@ -146,6 +188,7 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
         }
       }}
     >
+      {console.log("FloatingComponent rendering, component.style:", component.style)}
       <div className={`w-full h-full ${!editor.previewMode && !isEditingText ? 'cursor-move' : ''}`}>
         {component.type === 'text' && (
           <div
@@ -268,6 +311,7 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
                 <div className="flex flex-col gap-0.5 px-2 text-left border-r border-slate-100 pr-3">
                   <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Typography</span>
                   <select
+                    onMouseDown={(e) => e.preventDefault()}
                     className="text-[11px] font-bold bg-slate-50 hover:bg-slate-100 rounded-lg px-2 h-8 border-none focus:ring-2 focus:ring-primary/20 cursor-pointer transition-colors"
                     value={component.style?.fontFamily || 'Inter'}
                     onChange={(e) => handleStyleChange({ fontFamily: e.target.value })}
@@ -279,6 +323,7 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
                 <div className="flex flex-col gap-0.5 px-1 border-r border-slate-100 pr-3">
                   <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Size</span>
                   <select
+                    onMouseDown={(e) => e.preventDefault()}
                     className="text-[11px] font-bold bg-slate-50 hover:bg-slate-100 rounded-lg px-2 h-8 border-none focus:ring-2 focus:ring-primary/20 cursor-pointer transition-colors"
                     value={component.style?.fontSize || '24px'}
                     onChange={(e) => handleStyleChange({ fontSize: e.target.value })}
@@ -318,12 +363,11 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
                     {['#000000', '#ffffff', '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#64748b', '#ec4899', '#f43f5e', '#14b8a6', '#475569', '#06b6d4', '#84cc16', '#fb7185'].map(c => (
                       <div
                         key={c}
+                        onMouseDown={(e) => e.preventDefault()}
                         onClick={() => handleStyleChange({ color: c })}
                         className="w-6 h-6 rounded-lg hover:scale-125 transition-transform cursor-pointer border border-slate-200 shadow-sm"
                         style={{ backgroundColor: c }}
                       />
-                    ))}
-                  </div>
                 </div>
               </>
             )}
@@ -334,7 +378,10 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
                 <select
                   className="text-[11px] font-bold bg-slate-50 hover:bg-slate-100 rounded-lg px-2 h-8 border-none focus:ring-2 focus:ring-primary/20 cursor-pointer transition-colors"
                   value={component.style?.width || '200px'}
-                  onChange={(e) => handleStyleChange({ width: e.target.value })}
+                  onChange={(e) => {
+                    console.log("Font Size changed to:", e.target.value);
+                    handleStyleChange({ fontSize: e.target.value });
+                  }}
                 >
                   {['100px', '200px', '300px', '400px', '500px', '600px', '800px', '100%'].map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
@@ -359,7 +406,7 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
                 <ChevronDown className="w-4 h-4" />
               </button>
               <button
-                onMouseDown={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={(e) => { e.stopPropagation(); console.log("Deleting FloatingImage, Section ID:", section.id, "Component ID:", component.id); deleteComponent(section.id, component.id); }}
                 className="p-2 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-colors"
                 title="Delete"

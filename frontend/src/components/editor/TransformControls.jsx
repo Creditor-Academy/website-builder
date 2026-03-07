@@ -16,14 +16,29 @@ export function TransformControls({
   onDoubleClick
 }) {
   const containerRef = useRef(null);
-  const [localTransform, setLocalTransform] = useState(null);
+  const [localTransform, setLocalTransform] = useState({
+    x: position?.x || 0,
+    y: position?.y || 0,
+    width: parseInt(size?.width) || 200,
+    height: parseInt(size?.height) || 200,
+    rotation: rotation || 0,
+  });
   const interactionRef = useRef(null);
 
-  const x = localTransform ? localTransform.x : (position?.x || 0);
-  const y = localTransform ? localTransform.y : (position?.y || 0);
-  const w = localTransform ? localTransform.width : (parseInt(size?.width) || 200);
-  const h = localTransform ? localTransform.height : (parseInt(size?.height) || 200);
-  const r = localTransform ? localTransform.rotation : (rotation || 0);
+  useEffect(() => {
+    setLocalTransform({
+      x: position?.x || 0,
+      y: position?.y || 0,
+      width: parseInt(size?.width) || 200,
+      height: parseInt(size?.height) || 200,
+      rotation: rotation || 0,
+    });
+  }, [position, size, rotation]);
+  const x = localTransform.x;
+  const y = localTransform.y;
+  const w = localTransform.width;
+  const h = localTransform.height;
+  const r = localTransform.rotation;
 
   const handlePointerDown = useCallback((e, type, handle = null) => {
     if (!isEditing || e.button !== 0) return;
@@ -32,7 +47,7 @@ export function TransformControls({
 
 
     if (type === 'drag') {
-      onSelect(e);
+      setTimeout(() => onSelect(e), 0);
     }
 
     const target = e.target;
@@ -206,17 +221,19 @@ export function TransformControls({
       }
 
       setLocalTransform(prev => {
-        if (prev && onUpdate) {
-          onUpdate({
-            position: { x: prev.x, y: prev.y },
-            style: {
-              width: `${prev.width}px`,
-              height: `${prev.height}px`,
-              rotation: prev.rotation
-            }
-          });
+        if (prev) {
+          if (onUpdate) {
+            setTimeout(() => onUpdate({
+              position: { x: prev.x, y: prev.y },
+              style: {
+                width: `${prev.width}px`,
+                height: `${prev.height}px`,
+                rotation: prev.rotation
+              }
+            }), 0);
+          }
         }
-        return null;
+        return prev;
       });
 
       interactionRef.current = null;
@@ -248,7 +265,7 @@ export function TransformControls({
         transformOrigin: 'top left'
       }}
     >
-      <div style={{ width: '100%', height: '100%', pointerEvents: isEditing ? 'none' : 'auto' }}>
+      <div style={{ width: '100%', height: '100%', pointerEvents: 'auto' }}>
         {children}
       </div>
 
