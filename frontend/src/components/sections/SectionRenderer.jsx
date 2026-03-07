@@ -473,33 +473,33 @@ export function SectionRenderer({ section, isSelected, isEditing, onContentChang
       {!editor.previewMode && (
         <div className="absolute inset-0 pointer-events-none overflow-visible">
           {(section.components || []).map(comp => (
-            <div key={comp.id} className="pointer-events-auto">
-              {comp.type === 'image' ? (
-                <FloatingImage
-                  component={comp}
-                  section={section}
-                  isSelected={editor.selectedComponentId === comp.id}
-                  isEditing={isEditing}
-                  editor={editor}
-                  updateComponent={updateComponent}
-                  deleteComponent={deleteComponent}
-                  selectComponent={selectComponent}
-                  selectSection={selectSection}
-                />
-              ) : (
-                <FloatingComponent
-                  component={comp}
-                  section={section}
-                  isSelected={editor.selectedComponentId === comp.id}
-                  isEditing={isEditing}
-                  editor={editor}
-                  updateComponent={updateComponent}
-                  deleteComponent={deleteComponent}
-                  selectComponent={selectComponent}
-                  selectSection={selectSection}
-                />
-              )}
-            </div>
+            comp.type === 'image' ? (
+              <FloatingImage
+                key={comp.id}
+                component={comp}
+                section={section}
+                isSelected={editor.selectedComponentId === comp.id}
+                isEditing={isEditing}
+                editor={editor}
+                updateComponent={updateComponent}
+                deleteComponent={deleteComponent}
+                selectComponent={selectComponent}
+                selectSection={selectSection}
+              />
+            ) : (
+              <FloatingComponent
+                key={comp.id}
+                component={comp}
+                section={section}
+                isSelected={editor.selectedComponentId === comp.id}
+                isEditing={isEditing}
+                editor={editor}
+                updateComponent={updateComponent}
+                deleteComponent={deleteComponent}
+                selectComponent={selectComponent}
+                selectSection={selectSection}
+              />
+            )
           ))}
         </div>
       )}
