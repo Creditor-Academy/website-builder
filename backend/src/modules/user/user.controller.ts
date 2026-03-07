@@ -1,4 +1,4 @@
-import type { Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import UserService from './user.service.js';
 import type { UserIdParams } from './user.validation.js';
 
@@ -10,111 +10,106 @@ class UserController {
   }
 
   // GET /users/me - Get current user profile
-  getProfile = async (req: Request, res: Response) => {
+  getProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const user = await this.userService.getProfile(req.user.id);
+      const userId = req.context.user.id;
+      const user = await this.userService.getProfile(userId);
       res.status(200).json({ user });
     } catch (error: any) {
-      console.error('Get profile error:', error);
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   };
 
   // PUT /users/me - Update own profile
-  updateOwnProfile = async (req: Request, res: Response) => {
+  updateOwnProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const user = await this.userService.updateOwnProfile(req.user.id, req.validated.body);
+      const userId = req.context.user.id;
+      const user = await this.userService.updateOwnProfile(userId, req.validated.body);
       res.status(200).json({ message: 'Profile updated successfully', user });
     } catch (error: any) {
-      console.error('Update profile error:', error);
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   };
 
   // PATCH /users/me/change-password - Change own password
-  changePassword = async (req: Request, res: Response) => {
+  changePassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const userId = req.context.user.id;
       const { oldPassword, newPassword } = req.validated.body;
-      const result = await this.userService.changePassword(req.user.id, oldPassword, newPassword);
+      const result = await this.userService.changePassword(userId, oldPassword, newPassword);
       res.status(200).json(result);
     } catch (error: any) {
-      console.error('Change password error:', error);
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   };
 
   // DELETE /users/me - Deactivate own account
-  deactivateAccount = async (req: Request, res: Response) => {
+  deactivateAccount = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await this.userService.deactivateAccount(req.user.id);
+      const userId = req.context.user.id;
+      await this.userService.deactivateAccount(userId);
       res.status(200).json({ message: 'Account deactivated successfully' });
     } catch (error: any) {
-      console.error('Deactivate account error:', error);
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   };
 
   // GET /users - List users
-  listUsers = async (req: Request, res: Response) => {
+  listUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
       console.log('List users filters:', req.validated.query);
       const result = await this.userService.listUsers(req.validated.query);
       res.status(200).json(result);
     } catch (error: any) {
-      console.error('List users error:', error);
-      res.status(403).json({ error: error.message });
+      next(error);
     }
   };
 
   // GET /users/:id - Get user by ID
-  getUserById = async (req: Request, res: Response) => {
+  getUserById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const params = req.validated.params as UserIdParams;
       const user = await this.userService.getUserById(params.id);
       res.status(200).json({ user });
     } catch (error: any) {
-      console.error('Get user error:', error);
-      res.status(error.message === 'User not found' ? 404 : 403).json({ error: error.message });
+      next(error);
     }
   };
 
   // PATCH /users/:id/role - Update user role
-  updateUserRole = async (req: Request, res: Response) => {
+  updateUserRole = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const params = req.validated.params as UserIdParams;
-      const user = await this.userService.updateUserRole(req.user, params.id, req.validated.body.role);
+      const user = await this.userService.updateUserRole(req.context.user, params.id, req.validated.body.role);
       res.status(200).json({ message: 'User role updated successfully', user });
     } catch (error: any) {
-      console.error('Update user role error:', error);
-      res.status(error.message === 'User not found' ? 404 : 403).json({ error: error.message });
+      next(error);
     }
   };
 
   // PATCH /users/:id/status - Suspend/Reactivate user
-  updateUserStatus = async (req: Request, res: Response) => {
+  updateUserStatus = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const params = req.validated.params as UserIdParams;
       const active = req.validated.body.active;
-      const user = await this.userService.updateUserStatus(req.user, params.id, active);
+      const user = await this.userService.updateUserStatus(req.context.user, params.id, active);
       res.status(200).json({
         message: active ? 'User reactivated successfully' : 'User suspended successfully',
         user
       });
     } catch (error: any) {
-      console.error('Update user status error:', error);
-      res.status(error.message === 'User not found' ? 404 : 403).json({ error: error.message });
+      next(error);
     }
   };
 
   // DELETE /users/:id - Restore user
-  restoreUser = async (req: Request, res: Response) => {
+  restoreUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const params = req.validated.params as UserIdParams;
-      await this.userService.restoreUser(req.user, params.id);
+      await this.userService.restoreUser(req.context.user, params.id);
       res.status(200).json({ message: 'User restored successfully' });
     } catch (error: any) {
-      console.error('Restore user error:', error);
-      res.status(error.message === 'User not found' ? 404 : 403).json({ error: error.message });
+      next(error);
     }
   };
 }

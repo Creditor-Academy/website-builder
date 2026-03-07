@@ -123,7 +123,7 @@ model Website {
   name          String
   owner_id      String
   status        WebsiteStatus @default(DRAFT)
-  settings_id   String?       @unique
+  settings_id   String        @unique
   thumbnail_url String?
 
   currentDraftVersionId     String? // references the current draft version of the website
@@ -134,8 +134,8 @@ model Website {
   deleted_at DateTime?
 
   // Relations
-  owner    User      @relation("WebsiteOwner", fields: [owner_id], references: [id], onDelete: Cascade)
-  settings Settings?
+  owner    User     @relation("WebsiteOwner", fields: [owner_id], references: [id], onDelete: Cascade)
+  settings Settings @relation(fields: [settings_id], references: [id], onDelete: Cascade)
 
   @@index([owner_id])
   @@index([status])
@@ -154,7 +154,7 @@ model Settings {
   updated_at DateTime @updatedAt
 
   // Relations
-  website Website @relation(fields: [id], references: [settings_id], onDelete: Cascade)
+  website Website?
 
   @@map("settings")
 }

@@ -1,7 +1,7 @@
 import express from 'express';
 import AuthController from './auth.controller.js';
 import { validateRequest } from '../../middlewares/validation.middleware.js';
-
+import { rateLimiting } from '../../middlewares/rate-limiting.middleware.js';
 import {
   registerSchema,
   loginSchema,
@@ -10,6 +10,7 @@ import {
   emailVerificationSchema,
 } from './auth.validation.js';
 import { authenticate } from '../../middlewares/auth.middleware.js';
+import { FORGOT_PW_LIMIT, LOGIN_LIMIT, REFRESH_LIMIT } from '../../constants/auth.constants.js';
 
 const router = express.Router();
 const authController = new AuthController();
@@ -25,6 +26,7 @@ router.post(
 router.post(
   '/login',
   validateRequest(loginSchema),
+  rateLimiting('LOGIN', LOGIN_LIMIT),
   authController.login
 );
 
@@ -39,6 +41,7 @@ router.get(
 router.post(
   '/forgot-password',
   validateRequest(forgotPasswordSchema),
+  rateLimiting('FORGOT-PW', FORGOT_PW_LIMIT),
   authController.forgotPassword
 );
 
@@ -59,6 +62,7 @@ router.get(
 // POST /auth/refresh-token - Refresh access token
 router.post(
   '/refresh-token',
+  rateLimiting('REFRESH', REFRESH_LIMIT),
   authController.refreshToken
 );
 

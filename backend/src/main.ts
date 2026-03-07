@@ -3,6 +3,7 @@ import apiRoutes from './modules/api.routes.js';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { initRedis } from './config/redis-client.js';
+import { errorHandler } from './middlewares/error.middleware.js';
 
 const app = express();
 
@@ -14,6 +15,8 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser());
 
 app.use('/api/v1', apiRoutes);
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

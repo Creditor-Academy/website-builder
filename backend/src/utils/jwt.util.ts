@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
 import type { SignOptions, Secret } from "jsonwebtoken";
-import { TOKEN_EXPIRY } from "../constants/auth.constants.js";
 import type { JWTPayload } from "../types/auth.types.js";
+import { TOKEN_EXPIRY } from "../constants/auth.constants.js";
+import { UnauthorizedError } from "./error.utils.js";
 import dotenv from "dotenv";
 
 dotenv.config({ quiet: true });
@@ -21,6 +22,6 @@ export const verifyToken = (token: string) => {
     const decoded = jwt.verify(token, secretKey as Secret);
     return decoded as JWTPayload;
   } catch (error: any) {
-    throw new Error("Invalid token");
+    throw new UnauthorizedError("Invalid token");
   }
 };

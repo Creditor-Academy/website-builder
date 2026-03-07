@@ -1,5 +1,6 @@
+import type { Prisma } from '@prisma/client';
 import prismaClient from '../../config/prisma.js';
-import { DELETED_USER_RETENTION_TIME } from '../../constants/user.constants.js';
+import { SELECT_USER_FIELDS, DELETED_USER_RETENTION_TIME } from '../../constants/user.constants.js';
 import type { ListUsersQueryInput } from './user.validation.js';
 
 class UserDao {
@@ -28,7 +29,7 @@ class UserDao {
 
     const skip = (page - 1) * limit;
 
-    const where = {} as any;
+    const where: Prisma.UserWhereInput = {};
 
     if (role) where.role = role;
     if (typeof isActive === 'boolean') where.isActive = isActive;
@@ -50,7 +51,7 @@ class UserDao {
         where,
         skip, take: limit,
         orderBy: { created_at: 'desc' },
-        omit: { password_hash: true }
+        select: SELECT_USER_FIELDS
       }),
       prismaClient.user.count({ where }),
     ]);

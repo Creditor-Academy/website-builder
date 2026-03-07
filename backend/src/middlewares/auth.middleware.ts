@@ -48,8 +48,10 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     // }
 
     // Attach user to request context
-    req.user = user as AuthUser;
-    req.sessionId = sessionId as string;
+    req.context = {
+      user: user as AuthUser,
+      sessionId: sessionId as string
+    }
 
     next();
 
@@ -65,11 +67,11 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
  */
 export const authorize = (roles: string[] = []) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user) {
+    if (!req.context.user) {
       return res.status(401).json({ error: 'Unauthorized. Please login to continue' });
     }
 
-    if (!roles.includes(req.user.role)) {
+    if (!roles.includes(req.context.user.role)) {
       return res.status(403).json({ error: 'You do not have permission to access this resource' });
     }
 

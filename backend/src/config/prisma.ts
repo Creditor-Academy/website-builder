@@ -7,4 +7,6 @@ dotenv.config({ quiet: true });
 const adapter = new PrismaPg({ connectionString: process.env.POSTGRESQL_URL })
 const prismaClient = new PrismaClient({ adapter });
 
+console.log("Prisma PostgreSQL connected succcessfully");
+
 export default prismaClient;

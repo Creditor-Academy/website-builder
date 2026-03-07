@@ -1,4 +1,4 @@
-import type { Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import AuthService from './auth.service.js';
 import {
   ACCESS_TOKEN_EXPIRY_MS,
@@ -13,17 +13,16 @@ class AuthController {
     this.authService = new AuthService();
   }
 
-  register = async (req: Request, res: Response) => {
+  register = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.authService.register(req.validated.body);
       res.status(201).json(result);
     } catch (error: any) {
-      console.error('Register error:', error);
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   };
 
-  login = async (req: Request, res: Response) => {
+  login = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.authService.login(req.validated.body);
 
@@ -44,14 +43,14 @@ class AuthController {
         user: result.user,
       });
     } catch (error: any) {
-      console.error('Login error:', error);
-      res.status(401).json({ error: error.message });
+      next(error);
     }
   };
 
-  logout = async (req: Request, res: Response) => {
+  logout = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await this.authService.logout(req.user.id, req.cookies.refreshToken, req.sessionId);
+      const userId = req.context.user.id;
+      await this.authService.logout(userId, req.cookies.refreshToken, req.context.sessionId);
 
       // Clear cookies
       res.clearCookie('accessToken');
@@ -59,42 +58,38 @@ class AuthController {
 
       res.status(200).json({ message: 'Logout successful' });
     } catch (error: any) {
-      console.error('Logout error:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   };
 
-  forgotPassword = async (req: Request, res: Response) => {
+  forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.authService.forgotPassword(req.validated.body);
       res.status(200).json(result);
     } catch (error: any) {
-      console.error('Forgot password error:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   };
 
-  resetPassword = async (req: Request, res: Response) => {
+  resetPassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.authService.resetPassword(req.validated.body);
       res.status(200).json(result);
     } catch (error: any) {
-      console.error('Reset password error:', error);
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   };
 
-  verifyEmail = async (req: Request, res: Response) => {
+  verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.authService.verifyEmail(req.validated.query);
       res.status(200).json(result);
     } catch (error: any) {
-      console.error('Email verification error:', error);
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   };
 
-  refreshToken = async (req: Request, res: Response) => {
+  refreshToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.authService.refreshToken(req.cookies.refreshToken);
 
@@ -115,8 +110,7 @@ class AuthController {
         user: result.user,
       });
     } catch (error: any) {
-      console.error('Refresh token error:', error);
-      res.status(401).json({ error: error.message });
+      next(error);
     }
   };
 }

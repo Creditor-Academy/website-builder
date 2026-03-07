@@ -10,7 +10,7 @@ import {
   updateUserStatusSchema,
   userIdParamsSchema,
 } from './user.validation.js';
-import { USER_ROLES } from '../../constants/user.constants.js';
+import { UserRole } from '@prisma/client';
 
 const router = express.Router();
 const userController = new UserController();
@@ -44,7 +44,7 @@ router.delete(
 // GET /users - List users (Admin only)
 router.get(
   '/',
-  authorize([USER_ROLES.ADMIN]),
+  authorize([UserRole.ADMIN]),
   validateRequest(listUsersQuerySchema, 'query'),
   userController.listUsers
 );
@@ -52,7 +52,7 @@ router.get(
 // GET /users/:id - Get user by ID
 router.get(
   '/:id',
-  authorize([USER_ROLES.ADMIN]),
+  authorize([UserRole.ADMIN]),
   validateRequest(userIdParamsSchema, 'params'),
   userController.getUserById
 );
@@ -60,7 +60,7 @@ router.get(
 // PUT /users/:id/role - Update user role (Admin only)
 router.patch(
   '/:id/role',
-  authorize([USER_ROLES.ADMIN]),
+  authorize([UserRole.ADMIN]),
   validateRequest(userIdParamsSchema, 'params'),
   validateRequest(updateUserRoleSchema),
   userController.updateUserRole
@@ -69,7 +69,7 @@ router.patch(
 // PATCH /users/:id/status - Suspend/Reactivate user (Admin only)
 router.patch(
   '/:id/status',
-  authorize([USER_ROLES.ADMIN]),
+  authorize([UserRole.ADMIN]),
   validateRequest(userIdParamsSchema, 'params'),
   validateRequest(updateUserStatusSchema),
   userController.updateUserStatus
@@ -78,7 +78,7 @@ router.patch(
 // DELETE /users/:id - Restore User (Admin only)
 router.post(
   '/:id/restore',
-  authorize([USER_ROLES.ADMIN]),
+  authorize([UserRole.ADMIN]),
   validateRequest(userIdParamsSchema, 'params'),
   userController.restoreUser
 );

@@ -21,18 +21,24 @@ export const COOKIE_OPTIONS = {
   sameSite: 'strict' as const,
 };
 
-export const selectUserFields = {
-  id: true,
-  email: true,
-  name: true,
-  role: true,
-  isVerified: true,
-  institutionId: true,
-}
-
 export const ACCESS_TOKEN_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 export const REFRESH_TOKEN_EXPIRY_MS = 15 * 24 * 60 * 60 * 1000; // 15 days in milliseconds
 export const AUTH_REDIS_EXPIRY_SECONDS = 7 * 24 * 60 * 60; // 7 days in seconds
 
 export const PASSWORD_RESET_TOKEN_EXPIRY_HOURS = 1;
 export const EMAIL_VERIFICATION_TOKEN_EXPIRY_HOURS = 24;
+
+export const LOGIN_LIMIT = {
+  LIMIT: 5,
+  WINDOW_SEC: 10 * 60 // 10min
+}
+
+export const FORGOT_PW_LIMIT = {
+  LIMIT: 5,
+  WINDOW_SEC: 10 * 60 // 10min
+}
+
+export const REFRESH_LIMIT = {
+  LIMIT: 10,
+  WINDOW_SEC: 60 // 1min
+}

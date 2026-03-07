@@ -1,10 +1,11 @@
-import { Redis} from '@upstash/redis';
+import { Redis } from '@upstash/redis';
 // import { createClient } from 'redis';
+import { InternalServerError } from '../utils/error.utils.js';
 
 import dotenv from 'dotenv';
 dotenv.config({ quiet: true });
 
-let redisClient : Redis;
+let redisClient: Redis;
 
 export const initRedis = async () => {
     try {
@@ -28,7 +29,7 @@ export const initRedis = async () => {
         // await redisClient.connect();
 
         console.log('Redis client initialized successfully');
-    } catch (error : any) {
+    } catch (error: any) {
         console.error('Redis connection failed:', error.message);
         process.exit(1);
     }
@@ -36,7 +37,7 @@ export const initRedis = async () => {
 
 export const getRedisClient = () => {
     if (!redisClient) {
-        throw new Error('Redis client not initialized.');
+        throw new InternalServerError('Redis client not initialized.');
     }
 
     return redisClient;

@@ -13,6 +13,7 @@ import cacheService from '../../services/cache.service.js';
 import { generateJWTPayload, generateSessionPayload } from '../../builders/payload.builder.js';
 import { generateAuthSessionKey } from '../../builders/redis-key.builder.js';
 import type { EmailVerificationInput, ForgotPasswordInput, LoginInput, RegisterInput, ResetPasswordInput } from './auth.validation.js';
+import { BadRequestError, ConflictError, UnauthorizedError } from '../../utils/error.utils.js';
 
 class AuthService {
   private authDao: AuthDao;
@@ -37,7 +38,7 @@ class AuthService {
     // Check if user already exists
     const existingUser = await this.authDao.findUserByEmail(email);
     if (existingUser) {
-      throw new Error('Email already exists');
+      throw new ConflictError('Email already exists');
     }
 
     // Hash password
@@ -73,13 +74,13 @@ class AuthService {
     // Find user by email
     const user = await this.authDao.findUserByEmail(email, { include_password_hash: true });
     if (!user || !user.isActive) {
-      throw new Error('Invalid email or password');
+      throw new UnauthorizedError('Invalid email or password');
     }
 
     // Compare passwords
     const isPasswordValid = await comparePassword(password, user.password_hash);
     if (!isPasswordValid) {
-      throw new Error('Invalid email or password');
+      throw new UnauthorizedError('Invalid email or password');
     }
 
     await this.authDao.updateUser(user.id, { lastLoginAt: new Date() });
@@ -176,7 +177,7 @@ class AuthService {
     const user = resetToken?.user;
 
     if (!resetToken || !user?.isActive) {
-      throw new Error('Invalid or expired reset token');
+      throw new BadRequestError('Invalid or expired reset token');
     }
 
     // Hash new password
@@ -206,13 +207,13 @@ class AuthService {
     const verificationToken = await this.authDao.findEmailVerificationToken(tokenHash);
 
     if (!verificationToken) {
-      throw new Error('Invalid or expired verification token');
+      throw new BadRequestError('Invalid or expired verification token');
     }
 
     // Find user by ID
     const user = await this.authDao.findUserById(verificationToken.userId);
     if (!user || !user.isActive) {
-      throw new Error('Invalid verification token');
+      throw new BadRequestError('Invalid verification token');
     }
 
     // Mark user as verified
@@ -224,20 +225,23 @@ class AuthService {
   }
 
   async refreshToken(refreshToken: string) {
+    if (!refreshToken) {
+      throw new UnauthorizedError('Unauthorized. Please login to continue');
+    }
     const refreshTokenHash = this._hashToken(refreshToken);
 
     const refreshTokenRecord = await this.authDao.findRefreshToken(refreshTokenHash);
     const user = refreshTokenRecord?.user;
 
     if (!refreshTokenRecord || !user?.isActive) {
-      throw new Error('Invalid or revoked refresh token');
+      throw new UnauthorizedError('Invalid or revoked refresh token');
     }
 
     if (refreshTokenRecord?.isRevoked) {
       // Handle Replay Attack
       const oldSessionKey = generateAuthSessionKey(refreshTokenRecord.userId, refreshTokenRecord.sessionId);
       await cacheService.del(oldSessionKey);
-      throw new Error('Refresh token has been revoked. Please login again');
+      throw new UnauthorizedError('Refresh token has been revoked. Please login again');
     }
 
     await this.authDao.revokeRefreshToken(refreshTokenRecord.id);

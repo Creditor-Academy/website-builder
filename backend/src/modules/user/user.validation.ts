@@ -1,5 +1,7 @@
 import { z } from 'zod';
-import { USER_ROLES_VALUES } from '../../constants/user.constants.js';
+import { UserRole } from '@prisma/client';
+
+const UserRoleValues = Object.values(UserRole);
 
 // Update own profile schema
 export const updateOwnProfileSchema = z.object({
@@ -28,7 +30,7 @@ export const listUsersQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).optional(),
 
   search: z.string().optional(),
-  role: z.enum(USER_ROLES_VALUES).optional(),
+  role: z.enum(UserRoleValues).optional(),
 
   isActive: z.enum(['true', 'false'], {
     message: 'isActive filter must be a boolean value',
@@ -48,7 +50,7 @@ export const listUsersQuerySchema = z.object({
 
 // Update user role schema
 export const updateUserRoleSchema = z.object({
-  role: z.enum(USER_ROLES_VALUES, {
+  role: z.enum(UserRoleValues, {
     error: () => ({ message: `Invalid user role` }),
   }),
 });

@@ -12,7 +12,7 @@ class CacheService {
      * @param {string} key - The cache key to retrieve
      * @return - The cached value, or null if not found or on error
      */
-    async get(key : string) {
+    async get(key: string) {
         try {
             const value = await this.client.get(key);
             return value;
@@ -28,7 +28,7 @@ class CacheService {
      * @param {*} value - The value to cache
      * @param {number} ttl - Time to live in seconds (default: 3600)
      */
-    async set(key : string, value : any, ttl: number = 3600) {
+    async set(key: string, value: any, ttl: number = 3600) {
         try {
             await this.client.set(
                 key,
@@ -45,7 +45,7 @@ class CacheService {
      * Deletes a cache entry by key from Redis.
      * @param {string} key - The cache key to delete
      */
-    async del(key : string) {
+    async del(key: string) {
         try {
             await this.client.del(key);
         }
@@ -58,7 +58,7 @@ class CacheService {
      * Clears cache entries matching a pattern
      * @param {string} pattern - The pattern to match cache keys (e.g., 'user:*')
      */
-    async clear(pattern : string) {
+    async clear(pattern: string) {
         try {
             const keys = await this.client.keys(pattern);
             if (keys.length > 0) {
@@ -68,6 +68,23 @@ class CacheService {
         }
         catch (error) {
             console.error(`Error clearing cache with pattern ${pattern}:`, error);
+        }
+    }
+
+    async increment(key: string, window: number) {
+        // Atomic INCR + EXPIRE via Lua (race condition safe)
+        const SCRIPT = `
+            local count = redis.call('INCR', KEYS[1])
+            if count == 1 then redis.call('EXPIRE', KEYS[1], ARGV[1]) end
+            return count
+        `;
+        try {
+            const count: number = await this.client.eval(SCRIPT, [key], [window]);
+            return count;
+        }
+        catch (error) {
+            console.error(`Error incrementing cache for key ${key}:`, error);
+            return 0;
         }
     }
 }
