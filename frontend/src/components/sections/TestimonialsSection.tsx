@@ -38,7 +38,7 @@ export function TestimonialsSection({ section, isSelected, isEditing, onContentC
           </div>
           <div className="overflow-x-auto whitespace-nowrap py-4 hide-scrollbar">
             {testimonials.map((t, i) => (
-              <div key={t.id || i} className="inline-block w-80 mr-4 bg-white p-6 shadow-lg border border-slate-100" style={{ borderRadius: styles.borderRadius || '16px' }}>
+              <div key={t.id || i} className="inline-block w-80 mr-4 p-6 shadow-lg border border-slate-100" style={{ borderRadius: styles.borderRadius || '16px', background: styles.cardBackgroundColor || '#ffffff' }}>
                 <Quote className="w-8 h-8 text-blue-500/30 mb-4" />
                 <p 
                   className="text-slate-600 mb-4"
@@ -235,7 +235,7 @@ export function TestimonialsSection({ section, isSelected, isEditing, onContentC
         {/* Testimonials Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
-            <div key={testimonial.id || index} className="bg-white p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100" style={{ borderRadius: styles.borderRadius || '16px' }}>
+            <div key={testimonial.id || index} className="p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100" style={{ borderRadius: styles.borderRadius || '16px', background: styles.cardBackgroundColor || '#ffffff' }}>
               <Quote className="w-10 h-10 text-blue-500/30 mb-4" />
               <p 
                 className="text-slate-600 mb-6 leading-relaxed"

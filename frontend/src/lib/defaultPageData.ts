@@ -8,7 +8,7 @@ export const createDefaultHeroSection = (variant = 'split') => ({
   visible: true,
   locked: false,
   styles: {
-    backgroundColor: '#0f172a',
+    backgroundColor: '#ffffff',
     backgroundGradient: variant === 'gradient' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)' : null,
     useGradient: variant === 'gradient',
     padding: variant === 'minimal' ? '60px 0' : '120px 0',
@@ -366,7 +366,7 @@ export const createDefaultNavbar = () => ({
   ],
   styles: {
     backgroundColor: 'transparent',
-    textColor: '#ffffff',
+    textColor: '#000000',
     sticky: true,
   },
 });
@@ -407,10 +407,10 @@ export const createDefaultFooter = () => ({
     },
   ],
   socialLinks: [
-    { id: uuidv4(), platform: 'twitter', href: '#' },
-    { id: uuidv4(), platform: 'facebook', href: '#' },
-    { id: uuidv4(), platform: 'instagram', href: '#' },
-    { id: uuidv4(), platform: 'linkedin', href: '#' },
+    { id: uuidv4(), platform: 'twitter', href: 'https://twitter.com/yourusername' },
+    { id: uuidv4(), platform: 'facebook', href: 'https://facebook.com/yourpage' },
+    { id: uuidv4(), platform: 'instagram', href: 'https://instagram.com/yourusername' },
+    { id: uuidv4(), platform: 'linkedin', href: 'https://linkedin.com/in/yourprofile' },
   ],
   copyright: '© 2024 SiteBuilder. All rights reserved.',
   styles: {

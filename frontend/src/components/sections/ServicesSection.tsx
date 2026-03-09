@@ -95,7 +95,7 @@ export function ServicesSection({ section, isSelected, isEditing, onContentChang
                 key={service.id}
                 className="flex flex-col items-center text-center p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
                 style={{ 
-                  background: '#f8fafc',
+                  background: styles.cardBackgroundColor || '#f8fafc',
                   borderRadius: styles.borderRadius || '12px'
                 }}
               >

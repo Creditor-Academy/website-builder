@@ -6,14 +6,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X, Type, Palette, Settings2, ChevronDown, Layout, Image as ImageIcon, Search, Users } from 'lucide-react';
+import { X, Type, Palette, Settings2, ChevronDown, Layout, Image as ImageIcon, Search, Users, Trash2 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { getVariantsForSection } from '@/lib/sectionVariants';
 import { MediaLibrary } from './MediaLibrary';
 import { Button } from '@/components/ui/button';
 
 export function PropertiesPanel() {
-  const { state, selectedSection, selectedComponent, updateSection, updateSectionStyles, selectSection, updateNavbar, updateFooter, updatePageSEO, updateComponent, deleteComponent } = useBuilder();
+  const { state, selectedSection, selectedComponent, updateSection, updateSectionStyles, selectSection, updateNavbar, updateFooter, updatePageSEO, updateComponent, deleteComponent, deleteSection } = useBuilder();
   const [contentOpen, setContentOpen] = useState(true);
   const [stylesOpen, setStylesOpen] = useState(true);
   const [layoutOpen, setLayoutOpen] = useState(true);
@@ -72,27 +72,40 @@ export function PropertiesPanel() {
   if (!selectedSection) {
     const { page } = state;
     return (
-      <div className="h-full flex flex-col bg-white">
-        <div className="p-4 border-b border-slate-200 bg-slate-50/50">
-          <h2 className="font-bold text-slate-900 flex items-center gap-2">
-            <Settings2 className="w-4 h-4 text-primary" /> Page Settings
-          </h2>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-1">Configure your active page</p>
+      <div className="h-full flex flex-col bg-gradient-to-b from-white to-slate-50/50">
+        <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20">
+              <Settings2 className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="font-bold text-slate-900 text-lg">Page Settings</h2>
+              <p className="text-xs text-slate-500 font-medium">Configure your active page</p>
+            </div>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto scrollbar-thin">
-          <Collapsible open={seoOpen} onOpenChange={setSeoOpen} className="border-b border-slate-100">
-            <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
-              <div className="flex items-center gap-2">
-                <Search className="w-4 h-4 text-emerald-500" />
-                <span className="text-sm font-semibold text-slate-700">SEO & Metadata</span>
+          <Collapsible open={seoOpen} onOpenChange={setSeoOpen} className="border-b border-slate-100 group">
+            <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-gradient-to-r hover:from-slate-50 hover:to-white transition-all duration-200 group">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
+                  <Search className="w-4 h-4 text-emerald-600" />
+                </div>
+                <div className="text-left">
+                  <span className="text-sm font-semibold text-slate-700 block">SEO & Metadata</span>
+                  <span className="text-xs text-slate-500">Optimize for search engines</span>
+                </div>
               </div>
-              <ChevronDown className={`w-4 h-4 transition-transform text-slate-400 ${seoOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-4 h-4 transition-all duration-200 text-slate-400 ${seoOpen ? 'rotate-180 text-primary' : ''} group-hover:text-primary`} />
             </CollapsibleTrigger>
             <CollapsibleContent className="p-4 pt-0 space-y-4 px-6 pb-6">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-slate-500">Page Title</Label>
+                  <Label className="text-xs font-semibold text-slate-600 flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    Page Title
+                  </Label>
                   <Input
                     value={page.meta?.title || ''}
                     onChange={(e) => updatePageSEO(page.id, { title: e.target.value })}
@@ -101,7 +114,10 @@ export function PropertiesPanel() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-slate-500">Meta Description</Label>
+                  <Label className="text-xs font-semibold text-slate-600 flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    Meta Description
+                  </Label>
                   <Textarea
                     value={page.meta?.description || ''}
                     onChange={(e) => updatePageSEO(page.id, { description: e.target.value })}
@@ -110,12 +126,15 @@ export function PropertiesPanel() {
                   />
                 </div>
                 <div className="space-y-2 pt-2">
-                  <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
-                    <div className="space-y-0.5">
-                      <Label className="text-[11px] font-bold text-slate-700">Index on Google</Label>
-                      <p className="text-[9px] text-slate-400">Allow search engines to find this page</p>
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50 to-white rounded-xl border border-slate-200 hover:border-primary/50 transition-all duration-200">
+                    <div className="space-y-1">
+                      <Label className="text-xs font-bold text-slate-700 flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        Index on Google
+                      </Label>
+                      <p className="text-[10px] text-slate-500">Allow search engines to find this page</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch defaultChecked className="scale-110" />
                   </div>
                 </div>
               </div>
@@ -174,16 +193,22 @@ export function PropertiesPanel() {
             </CollapsibleContent>
           </Collapsible>
 
-          <Collapsible open={footerOpen} onOpenChange={setFooterOpen} className="border-b border-slate-100">
-            <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
-              <div className="flex items-center gap-2">
-                <Palette className="w-4 h-4 text-blue-500" />
-                <span className="text-sm font-semibold text-slate-700">Global Footer</span>
+          <Collapsible open={footerOpen} onOpenChange={setFooterOpen} className="border-b border-slate-100 group">
+            <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-gradient-to-r hover:from-slate-50 hover:to-white transition-all duration-200 group">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                  <Palette className="w-4 h-4 text-blue-600" />
+                </div>
+                <div className="text-left">
+                  <span className="text-sm font-semibold text-slate-700 block">Global Footer</span>
+                  <span className="text-xs text-slate-500">Customize footer styling & social links</span>
+                </div>
               </div>
-              <ChevronDown className={`w-4 h-4 transition-transform text-slate-400 ${footerOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-4 h-4 transition-all duration-200 text-slate-400 ${footerOpen ? 'rotate-180 text-primary' : ''} group-hover:text-primary`} />
             </CollapsibleTrigger>
             <CollapsibleContent className="p-4 pt-0 space-y-4 px-6 pb-6">
               <div className="space-y-4 pt-2">
+                {/* Colors */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Background</Label>
@@ -218,6 +243,206 @@ export function PropertiesPanel() {
                     </div>
                   </div>
                 </div>
+
+                {/* Button Routes & Links Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                      Button Routes & Links
+                    </Label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-[9px] h-7 border-dashed border-purple-300 hover:border-purple-400"
+                      onClick={() => {
+                        const newRoute = {
+                          id: uuidv4(),
+                          name: 'New Button',
+                          type: 'external',
+                          url: 'https://example.com',
+                          target: '_blank'
+                        };
+                        updateFooter({
+                          buttonRoutes: [...(page.footer?.buttonRoutes || []), newRoute]
+                        });
+                      }}
+                    >
+                      + Add Button Route
+                    </Button>
+                  </div>
+
+                  <div className="space-y-2">
+                    {(page.footer?.buttonRoutes || []).map((route) => (
+                      <div key={route.id} className="p-3 bg-purple-50/50 rounded-lg border border-purple-200 space-y-2">
+                        <div className="flex gap-2 items-center">
+                          <Input
+                            value={route.name}
+                            onChange={(e) => {
+                              const updated = page.footer.buttonRoutes.map(r =>
+                                r.id === route.id ? { ...r, name: e.target.value } : r
+                              );
+                              updateFooter({ buttonRoutes: updated });
+                            }}
+                            className="bg-white border-purple-200 text-xs h-8 flex-1"
+                            placeholder="Button Name"
+                          />
+                          <Select
+                            value={route.type}
+                            onValueChange={(value) => {
+                              const updated = page.footer.buttonRoutes.map(r =>
+                                r.id === route.id ? { ...r, type: value } : r
+                              );
+                              updateFooter({ buttonRoutes: updated });
+                            }}
+                          >
+                            <SelectTrigger className="bg-white border-purple-200 h-8 text-xs w-24">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="external" className="text-xs">External</SelectItem>
+                              <SelectItem value="internal" className="text-xs">Internal</SelectItem>
+                              <SelectItem value="email" className="text-xs">Email</SelectItem>
+                              <SelectItem value="phone" className="text-xs">Phone</SelectItem>
+                              <SelectItem value="anchor" className="text-xs">Anchor</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                            onClick={() => {
+                              const updated = page.footer.buttonRoutes.filter(r => r.id !== route.id);
+                              updateFooter({ buttonRoutes: updated });
+                            }}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <div className="flex gap-2 items-center">
+                          <Input
+                            value={route.url}
+                            onChange={(e) => {
+                              const updated = page.footer.buttonRoutes.map(r =>
+                                r.id === route.id ? { ...r, url: e.target.value } : r
+                              );
+                              updateFooter({ buttonRoutes: updated });
+                            }}
+                            className="bg-white border-purple-200 text-xs h-8 flex-1"
+                            placeholder={
+                              route.type === 'email' ? 'mailto:example@email.com' :
+                              route.type === 'phone' ? 'tel:+1234567890' :
+                              route.type === 'anchor' ? '#section-id' :
+                              route.type === 'internal' ? '/page-path' :
+                              'https://example.com'
+                            }
+                          />
+                          {route.type === 'external' && (
+                            <Select
+                              value={route.target || '_blank'}
+                              onValueChange={(value) => {
+                                const updated = page.footer.buttonRoutes.map(r =>
+                                  r.id === route.id ? { ...r, target: value } : r
+                                );
+                                updateFooter({ buttonRoutes: updated });
+                              }}
+                            >
+                              <SelectTrigger className="bg-white border-purple-200 h-8 text-xs w-20">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="_blank" className="text-xs">New Tab</SelectItem>
+                                <SelectItem value="_self" className="text-xs">Same Tab</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      Social Links
+                    </Label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-[9px] h-7 border-dashed"
+                      onClick={() => {
+                        const newSocialLink = {
+                          id: uuidv4(),
+                          platform: 'twitter',
+                          href: 'https://twitter.com/yourusername'
+                        };
+                        updateFooter({
+                          socialLinks: [...(page.footer?.socialLinks || []), newSocialLink]
+                        });
+                      }}
+                    >
+                      + Add Link
+                    </Button>
+                  </div>
+
+                  <div className="space-y-2">
+                    {(page.footer?.socialLinks || []).map((social) => (
+                      <div key={social.id} className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+                        <div className="flex gap-2 items-center">
+                          <Select
+                            value={social.platform}
+                            onValueChange={(value) => {
+                              const updated = page.footer.socialLinks.map(s =>
+                                s.id === social.id ? { ...s, platform: value } : s
+                              );
+                              updateFooter({ socialLinks: updated });
+                            }}
+                          >
+                            <SelectTrigger className="bg-white border-slate-200 h-8 text-xs flex-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="facebook" className="text-xs">Facebook</SelectItem>
+                              <SelectItem value="twitter" className="text-xs">Twitter</SelectItem>
+                              <SelectItem value="instagram" className="text-xs">Instagram</SelectItem>
+                              <SelectItem value="linkedin" className="text-xs">LinkedIn</SelectItem>
+                              <SelectItem value="youtube" className="text-xs">YouTube</SelectItem>
+                              <SelectItem value="github" className="text-xs">GitHub</SelectItem>
+                              <SelectItem value="email" className="text-xs">Email</SelectItem>
+                              <SelectItem value="phone" className="text-xs">Phone</SelectItem>
+                              <SelectItem value="location" className="text-xs">Address</SelectItem>
+                              <SelectItem value="website" className="text-xs">Website</SelectItem>
+                              <SelectItem value="discord" className="text-xs">Discord</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                            onClick={() => {
+                              const updated = page.footer.socialLinks.filter(s => s.id !== social.id);
+                              updateFooter({ socialLinks: updated });
+                            }}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <Input
+                          value={social.href}
+                          onChange={(e) => {
+                            const updated = page.footer.socialLinks.map(s =>
+                              s.id === social.id ? { ...s, href: e.target.value } : s
+                            );
+                            updateFooter({ socialLinks: updated });
+                          }}
+                          className="bg-white border-slate-200 text-xs h-8"
+                          placeholder="https://..."
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </CollapsibleContent>
           </Collapsible>
@@ -244,7 +469,80 @@ export function PropertiesPanel() {
         <div className="space-y-4">
           <div className="space-y-2"><Label className="text-xs font-medium">Headline</Label><Input value={content.headline || ''} onChange={(e) => handleContentChange('headline', e.target.value)} className="bg-white border-slate-200 text-xs" /></div>
           <div className="space-y-2"><Label className="text-xs font-medium">Subheadline</Label><Textarea value={content.subheadline || ''} onChange={(e) => handleContentChange('subheadline', e.target.value)} className="bg-white border-slate-200 resize-none text-xs" rows={3} /></div>
-          <div className="space-y-2"><Label className="text-xs font-medium">Primary Button</Label><Input value={content.ctaText || ''} onChange={(e) => handleContentChange('ctaText', e.target.value)} className="bg-white border-slate-200 text-xs" /></div>
+          <div className="space-y-2"><Label className="text-xs font-medium">Primary Button Text</Label><Input value={content.ctaText || ''} onChange={(e) => handleContentChange('ctaText', e.target.value)} className="bg-white border-slate-200 text-xs" /></div>
+          
+          {/* Primary Button Routing */}
+          <div className="space-y-2">
+            <Label className="text-xs font-medium">Primary Button Route</Label>
+            <div className="flex gap-2">
+              <Select 
+                value={content.primaryRouteType || 'none'} 
+                onValueChange={(value) => handleContentChange('primaryRouteType', value)}
+              >
+                <SelectTrigger className="bg-white border-slate-200 h-8 text-xs w-24">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none" className="text-xs">None</SelectItem>
+                  <SelectItem value="external" className="text-xs">External</SelectItem>
+                  <SelectItem value="internal" className="text-xs">Internal</SelectItem>
+                  <SelectItem value="email" className="text-xs">Email</SelectItem>
+                  <SelectItem value="phone" className="text-xs">Phone</SelectItem>
+                  <SelectItem value="anchor" className="text-xs">Anchor</SelectItem>
+                </SelectContent>
+              </Select>
+              <Input 
+                value={content.primaryRouteUrl || ''} 
+                onChange={(e) => handleContentChange('primaryRouteUrl', e.target.value)} 
+                className="bg-white border-slate-200 text-xs flex-1 h-8" 
+                placeholder={
+                  content.primaryRouteType === 'email' ? 'mailto:example@email.com' :
+                  content.primaryRouteType === 'phone' ? 'tel:+1234567890' :
+                  content.primaryRouteType === 'anchor' ? '#section-id' :
+                  content.primaryRouteType === 'internal' ? '/page-path' :
+                  'https://example.com'
+                }
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2"><Label className="text-xs font-medium">Secondary Button Text</Label><Input value={content.ctaSecondaryText || ''} onChange={(e) => handleContentChange('ctaSecondaryText', e.target.value)} className="bg-white border-slate-200 text-xs" /></div>
+          
+          {/* Secondary Button Routing */}
+          <div className="space-y-2">
+            <Label className="text-xs font-medium">Secondary Button Route</Label>
+            <div className="flex gap-2">
+              <Select 
+                value={content.secondaryRouteType || 'none'} 
+                onValueChange={(value) => handleContentChange('secondaryRouteType', value)}
+              >
+                <SelectTrigger className="bg-white border-slate-200 h-8 text-xs w-24">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none" className="text-xs">None</SelectItem>
+                  <SelectItem value="external" className="text-xs">External</SelectItem>
+                  <SelectItem value="internal" className="text-xs">Internal</SelectItem>
+                  <SelectItem value="email" className="text-xs">Email</SelectItem>
+                  <SelectItem value="phone" className="text-xs">Phone</SelectItem>
+                  <SelectItem value="anchor" className="text-xs">Anchor</SelectItem>
+                </SelectContent>
+              </Select>
+              <Input 
+                value={content.secondaryRouteUrl || ''} 
+                onChange={(e) => handleContentChange('secondaryRouteUrl', e.target.value)} 
+                className="bg-white border-slate-200 text-xs flex-1 h-8" 
+                placeholder={
+                  content.secondaryRouteType === 'email' ? 'mailto:example@email.com' :
+                  content.secondaryRouteType === 'phone' ? 'tel:+1234567890' :
+                  content.secondaryRouteType === 'anchor' ? '#section-id' :
+                  content.secondaryRouteType === 'internal' ? '/page-path' :
+                  'https://example.com'
+                }
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label className="text-xs font-medium">Image URL</Label>
             <div className="flex gap-2">
@@ -455,9 +753,27 @@ export function PropertiesPanel() {
             {selectedComponent ? `${selectedComponent.type} component` : `${selectedSection.type} section`}
           </p>
         </div>
-        <Button variant="ghost" size="icon" onClick={() => selectSection(null)} className="h-8 w-8 rounded-full hover:bg-slate-200 transition-colors shrink-0">
-          <X className="w-4 h-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          {selectedSection && !selectedComponent && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                if (confirm(`Are you sure you want to delete the "${selectedSection.name}" section? This action cannot be undone.`)) {
+                  deleteSection(selectedSection.id);
+                  selectSection(null);
+                }
+              }}
+              className="h-8 w-8 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors shrink-0"
+              title="Delete Section"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          )}
+          <Button variant="ghost" size="icon" onClick={() => selectSection(null)} className="h-8 w-8 rounded-full hover:bg-slate-200 transition-colors shrink-0">
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-thin">
@@ -542,6 +858,13 @@ export function PropertiesPanel() {
                     <Input value={selectedComponent.style?.color || ''} onChange={(e) => handleCompStyleUpdate({ color: e.target.value })} className="bg-white border-slate-200 text-[10px] h-8 font-mono flex-1 px-1.5" />
                   </div>
                 </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">Background</Label>
+                  <div className="flex gap-2">
+                    <input type="color" value={selectedComponent.style?.backgroundColor || 'transparent'} onChange={(e) => handleCompStyleUpdate({ backgroundColor: e.target.value })} className="w-8 h-8 rounded border p-0.5 cursor-pointer" />
+                    <Input value={selectedComponent.style?.backgroundColor || ''} onChange={(e) => handleCompStyleUpdate({ backgroundColor: e.target.value })} className="bg-white border-slate-200 text-[10px] h-8 font-mono flex-1 px-1.5" />
+                  </div>
+                </div>
               </div>
             )}
 
@@ -612,7 +935,67 @@ export function PropertiesPanel() {
                   <Input value={selectedSection.styles.headingColor || ''} onChange={(e) => handleStyleChange('headingColor', e.target.value)} className="bg-slate-50 border-slate-200 text-[10px] h-8 font-mono flex-1 px-1.5" />
                 </div>
               </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Body Text</Label>
+                <div className="flex gap-2">
+                  <input type="color" value={selectedSection.styles.paragraphColor || '#475569'} onChange={(e) => handleStyleChange('paragraphColor', e.target.value)} className="w-8 h-8 rounded border p-0.5 cursor-pointer" />
+                  <Input value={selectedSection.styles.paragraphColor || ''} onChange={(e) => handleStyleChange('paragraphColor', e.target.value)} className="bg-slate-50 border-slate-200 text-[10px] h-8 font-mono flex-1 px-1.5" />
+                </div>
+              </div>
             </div>
+
+            {/* Card Background for features, testimonials, and services sections */}
+            {(selectedSection.type === 'features' || selectedSection.type === 'testimonials' || selectedSection.type === 'services') && (
+              <div className="space-y-4 pt-2 border-t border-slate-100">
+                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Card Styling</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[9px] text-slate-500 font-bold">Card Background</Label>
+                    <div className="flex gap-2">
+                      <input type="color" value={selectedSection.styles.cardBackgroundColor || (selectedSection.type === 'services' ? '#f8fafc' : '#ffffff')} onChange={(e) => handleStyleChange('cardBackgroundColor', e.target.value)} className="w-8 h-8 rounded border p-0.5 cursor-pointer" />
+                      <Input value={selectedSection.styles.cardBackgroundColor || ''} onChange={(e) => handleStyleChange('cardBackgroundColor', e.target.value)} className="bg-slate-50 border-slate-200 text-[10px] h-8 font-mono flex-1 px-1.5" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Button Colors for sections with buttons */}
+            {(selectedSection.type === 'hero' || selectedSection.type === 'cta') && (
+              <div className="space-y-4 pt-2 border-t border-slate-100">
+                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Button Colors</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[9px] text-slate-500 font-bold">Primary Background</Label>
+                    <div className="flex gap-2">
+                      <input type="color" value={selectedSection.styles.buttonPrimaryBg || '#0f172a'} onChange={(e) => handleStyleChange('buttonPrimaryBg', e.target.value)} className="w-8 h-8 rounded border p-0.5 cursor-pointer" />
+                      <Input value={selectedSection.styles.buttonPrimaryBg || ''} onChange={(e) => handleStyleChange('buttonPrimaryBg', e.target.value)} className="bg-slate-50 border-slate-200 text-[10px] h-8 font-mono flex-1 px-1.5" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[9px] text-slate-500 font-bold">Primary Text</Label>
+                    <div className="flex gap-2">
+                      <input type="color" value={selectedSection.styles.buttonPrimaryText || '#ffffff'} onChange={(e) => handleStyleChange('buttonPrimaryText', e.target.value)} className="w-8 h-8 rounded border p-0.5 cursor-pointer" />
+                      <Input value={selectedSection.styles.buttonPrimaryText || ''} onChange={(e) => handleStyleChange('buttonPrimaryText', e.target.value)} className="bg-slate-50 border-slate-200 text-[10px] h-8 font-mono flex-1 px-1.5" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[9px] text-slate-500 font-bold">Secondary Background</Label>
+                    <div className="flex gap-2">
+                      <input type="color" value={selectedSection.styles.buttonSecondaryBg || 'transparent'} onChange={(e) => handleStyleChange('buttonSecondaryBg', e.target.value)} className="w-8 h-8 rounded border p-0.5 cursor-pointer" />
+                      <Input value={selectedSection.styles.buttonSecondaryBg || ''} onChange={(e) => handleStyleChange('buttonSecondaryBg', e.target.value)} className="bg-slate-50 border-slate-200 text-[10px] h-8 font-mono flex-1 px-1.5" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[9px] text-slate-500 font-bold">Secondary Text</Label>
+                    <div className="flex gap-2">
+                      <input type="color" value={selectedSection.styles.buttonSecondaryText || '#0f172a'} onChange={(e) => handleStyleChange('buttonSecondaryText', e.target.value)} className="w-8 h-8 rounded border p-0.5 cursor-pointer" />
+                      <Input value={selectedSection.styles.buttonSecondaryText || ''} onChange={(e) => handleStyleChange('buttonSecondaryText', e.target.value)} className="bg-slate-50 border-slate-200 text-[10px] h-8 font-mono flex-1 px-1.5" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-4 pt-2 border-t border-slate-100 mt-4">
               <div className="flex items-center justify-between">

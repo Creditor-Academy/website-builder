@@ -7,6 +7,7 @@ import { PageManager } from "./PageManager";
 import { SiteSettings } from "./SiteSettings";
 import { CanvasPreview } from "./CanvasPreview";
 import { PropertiesPanel } from "./PropertiesPanel";
+import { TextColorPicker } from "./TextColorPicker";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -63,8 +64,9 @@ function EditorContent() {
   ];
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden font-sans">
+    <div className="h-screen flex flex-col bg-white overflow-hidden font-sans">
       <EditorToolbar theme={theme} onToggleTheme={toggleTheme} />
+      <TextColorPicker />
       <div className="flex-1 min-h-0">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           {!editor.previewMode && editor.showLeftPanel && (
