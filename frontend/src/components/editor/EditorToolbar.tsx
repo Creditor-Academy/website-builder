@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useBuilder } from '@/contexts/BuilderContext';
 import { Undo2, Redo2, Eye, Download, Play, Layout, Sidebar, Sun, Moon, Monitor, Tablet, Smartphone, Share2, CheckCircle2, ChevronRight, Globe, Home, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import { PublishDialog } from './PublishDialog';
 
-export function EditorToolbar({ theme = 'light', onToggleTheme }) {
+export function EditorToolbar({ theme = 'light', onToggleTheme, websiteId }) {
+  const [showPublishDialog, setShowPublishDialog] = useState(false);
   const { state, undo, redo, canUndo, canRedo, setPreviewMode, setLeftPanelVisible } = useBuilder();
   const { editor, page } = state;
 
@@ -22,7 +24,8 @@ export function EditorToolbar({ theme = 'light', onToggleTheme }) {
   };
 
   return (
-    <div className="h-16 px-6 border-b border-slate-200 bg-white sticky top-0 z-50 flex items-center justify-between shadow-sm">
+    <>
+      <div className="h-16 px-6 border-b border-slate-200 bg-white sticky top-0 z-50 flex items-center justify-between shadow-sm">
       <TooltipProvider delayDuration={0}>
         {/* LEFT */}
         <div className="flex items-center gap-6">
@@ -158,12 +161,23 @@ export function EditorToolbar({ theme = 'light', onToggleTheme }) {
           </Tooltip>
 
           {/* PUBLISH */}
-          <Button className="h-10 gap-2 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white rounded-xl px-6 text-xs font-bold shadow-lg shadow-primary/25 transition-all duration-200 hover:shadow-xl hover:shadow-primary/30 active:scale-95">
+          <Button 
+            onClick={() => setShowPublishDialog(true)}
+            className="h-10 gap-2 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white rounded-xl px-6 text-xs font-bold shadow-lg shadow-primary/25 transition-all duration-200 hover:shadow-xl hover:shadow-primary/30 active:scale-95"
+          >
             <Play className="w-4 h-4 fill-current" />
             <span className="hidden sm:inline font-medium">Publish Site</span>
           </Button>
         </div>
       </TooltipProvider>
     </div>
+      
+      {/* Publish Dialog */}
+      <PublishDialog 
+        open={showPublishDialog} 
+        onOpenChange={setShowPublishDialog} 
+        websiteId={websiteId}
+      />
+    </>
   );
 }

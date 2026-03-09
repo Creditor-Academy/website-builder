@@ -23,7 +23,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
-        <title>SiteBuilder - Build Beautiful Websites Without Code</title>
+        <title>Buildora | Website Builder</title>
         <meta name="description" content="The ultimate no-code website builder for professionals and beginners alike." />
       </Helmet>
 

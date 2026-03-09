@@ -16,7 +16,7 @@ import { format } from 'date-fns';
 
 const Dashboard = () => {
     const navigate = useNavigate();
-    const { websites, createWebsite, deleteWebsite } = useBuilderStore();
+    const { websites, createWebsite, deleteWebsite, initializeSampleWebsites } = useBuilderStore();
     const [newSiteName, setNewSiteName] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -269,7 +269,10 @@ const WebsiteCard = ({ site, index, onDelete, onEdit }) => (
     </Card>
 );
 
-const EmptyState = ({ onAction }) => (
+const EmptyState = ({ onAction }) => {
+    const { initializeSampleWebsites } = useBuilderStore();
+    
+    return (
     <div className="h-[400px] flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-[2rem] bg-white p-12 text-center transition-all hover:border-primary/20 hover:bg-slate-50/50">
         <div className="w-20 h-20 bg-primary/5 rounded-3xl flex items-center justify-center mb-6">
             <Globe className="w-10 h-10 text-primary" />
@@ -278,10 +281,20 @@ const EmptyState = ({ onAction }) => (
         <p className="text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">
             Every great brand starts with a single page. Build yours with our visual canvas.
         </p>
-        <Button size="lg" className="mt-8 rounded-full px-8 gap-2 shadow-lg shadow-primary/20" onClick={onAction}>
-            <Plus className="w-5 h-5" /> Create Your First Site
-        </Button>
+        <div className="flex gap-3 mt-8">
+            <Button 
+                variant="outline" 
+                className="rounded-full px-6 gap-2"
+                onClick={() => initializeSampleWebsites()}
+            >
+                <Sparkles className="w-5 h-5" /> Load Sample Sites
+            </Button>
+            <Button size="lg" className="rounded-full px-8 gap-2 shadow-lg shadow-primary/20" onClick={onAction}>
+                <Plus className="w-5 h-5" /> Create Your First Site
+            </Button>
+        </div>
     </div>
-);
+    );
+};
 
 export default Dashboard;

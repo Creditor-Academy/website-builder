@@ -10,7 +10,59 @@ import {
     createAboutPage
 } from '@/lib/defaultPageData';
 
-const useBuilderStore = create(
+interface BuilderStore {
+    // State
+    websites: any[];
+    activeWebsiteId: string | null;
+    activePageId: string | null;
+    editor: {
+        selectedSectionId: string | null;
+        selectedComponentId: string | null;
+        editMode: string;
+        isDragging: boolean;
+        zoom: number;
+        showGrid: boolean;
+        previewMode: boolean;
+        showLeftPanel: boolean;
+        showRightPanel: boolean;
+    };
+    history: any[];
+    historyIndex: number;
+
+    // Actions
+    setWebsites: (websites: any[]) => void;
+    initializeSampleWebsites: () => void;
+    createWebsite: (name: string, template?: string) => string;
+    selectWebsite: (id: string) => void;
+    deleteWebsite: (id: string) => void;
+    setActivePage: (pageId: string) => void;
+    addPage: (pageData: any) => void;
+    updateWebsite: (id: string, updates: any) => void;
+    updateWebsitePages: (pages: any[]) => void;
+    getActiveWebsite: () => any;
+    getActivePage: () => any;
+    updateCurrentPage: (updates: any) => void;
+    setSelectedSection: (id: string | null) => void;
+    setSelectedComponent: (id: string | null) => void;
+    setEditMode: (mode: string) => void;
+    setDragging: (isDragging: boolean) => void;
+    setZoom: (zoom: number) => void;
+    toggleGrid: () => void;
+    setPreviewMode: (previewMode: boolean) => void;
+    toggleLeftPanel: () => void;
+    toggleRightPanel: () => void;
+    addToHistory: (state: any) => void;
+    undo: () => void;
+    redo: () => void;
+}
+
+type BuilderStorePersist = (
+    set: any,
+    get: any,
+    api: any
+) => BuilderStore;
+
+const useBuilderStore = create<BuilderStore>()(
     persist(
         (set, get) => ({
             // State
@@ -35,6 +87,26 @@ const useBuilderStore = create(
 
             // Actions
             setWebsites: (websites) => set({ websites }),
+
+            initializeSampleWebsites: () => {
+                const sampleWebsites = [
+                    {
+                        id: 'sample-1',
+                        name: 'Business Website',
+                        lastEdited: new Date().toISOString(),
+                        status: 'Draft',
+                        pages: [getDefaultPage()]
+                    },
+                    {
+                        id: 'sample-2', 
+                        name: 'Portfolio Site',
+                        lastEdited: new Date().toISOString(),
+                        status: 'Draft',
+                        pages: [getDefaultPage()]
+                    }
+                ];
+                set({ websites: sampleWebsites });
+            },
 
             createWebsite: (name, template = 'blank') => {
                 const id = uuidv4();
@@ -73,6 +145,12 @@ const useBuilderStore = create(
             deleteWebsite: (id) => set((state) => ({
                 websites: state.websites.filter(w => w.id !== id),
                 activeWebsiteId: state.activeWebsiteId === id ? null : state.activeWebsiteId
+            })),
+
+            updateWebsite: (id, updates) => set((state) => ({
+                websites: state.websites.map(w => 
+                    w.id === id ? { ...w, ...updates, lastEdited: new Date().toISOString() } : w
+                )
             })),
 
             // Page Actions
@@ -305,6 +383,52 @@ const useBuilderStore = create(
             selectComponent: (id) => set((state) => ({
                 editor: { ...state.editor, selectedComponentId: id, showRightPanel: !!id }
             })),
+
+            // Additional editor methods for interface compatibility
+            setSelectedSection: (id) => set((state) => ({
+                editor: { ...state.editor, selectedSectionId: id, selectedComponentId: null, showRightPanel: !!id }
+            })),
+
+            setSelectedComponent: (id) => set((state) => ({
+                editor: { ...state.editor, selectedComponentId: id, showRightPanel: !!id }
+            })),
+
+            setEditMode: (mode) => set((state) => ({
+                editor: { ...state.editor, editMode: mode }
+            })),
+
+            setDragging: (isDragging) => set((state) => ({
+                editor: { ...state.editor, isDragging }
+            })),
+
+            setZoom: (zoom) => set((state) => ({
+                editor: { ...state.editor, zoom }
+            })),
+
+            toggleGrid: () => set((state) => ({
+                editor: { ...state.editor, showGrid: !state.editor.showGrid }
+            })),
+
+            setPreviewMode: (previewMode) => set((state) => ({
+                editor: { ...state.editor, previewMode }
+            })),
+
+            toggleLeftPanel: () => set((state) => ({
+                editor: { ...state.editor, showLeftPanel: !state.editor.showLeftPanel }
+            })),
+
+            toggleRightPanel: () => set((state) => ({
+                editor: { ...state.editor, showRightPanel: !state.editor.showRightPanel }
+            })),
+
+            addToHistory: (pages) => set((state) => {
+                const newHistory = state.history.slice(0, state.historyIndex + 1);
+                newHistory.push(pages);
+                return {
+                    history: newHistory,
+                    historyIndex: newHistory.length - 1
+                };
+            }),
 
             // Undo/Redo
             undo: () => {
