@@ -20,7 +20,11 @@ export function TextBlock({ section, isSelected }) {
                     className="prose prose-lg max-w-none"
                     style={{
                         color: styles.paragraphColor || '#334155',
-                        textAlign: content.align || 'left'
+                        textAlign: content.align || 'left',
+                        fontFamily: styles.fontFamily || 'inherit',
+                        fontSize: styles.fontSize || '16px',
+                        fontWeight: styles.fontWeight || 'normal',
+                        lineHeight: styles.lineHeight || '1.5',
                     }}
                     dangerouslySetInnerHTML={{ __html: content.text || 'Enter your text here...' }}
                 />

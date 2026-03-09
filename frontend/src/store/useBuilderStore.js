@@ -239,7 +239,9 @@ const useBuilderStore = create(
                         return {
                             ...s,
                             components: (s.components || []).map(c =>
-                                c.id === componentId ? { ...c, ...updates } : c
+                                c.id === componentId
+                                    ? { ...c, ...updates, style: { ...(c.style || {}), ...(updates.style || {}) } }
+                                    : c
                             )
                         };
                     }

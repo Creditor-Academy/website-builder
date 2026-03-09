@@ -521,7 +521,7 @@ export function SectionRenderer({ section, isSelected, isEditing, onContentChang
                     color: comp.style?.color || 'inherit',
                     fontSize: comp.style?.fontSize || '24px',
                     fontWeight: comp.style?.fontWeight || 'normal',
-                    fontFamily: component.style?.fontFamily || 'Inter',
+                    fontFamily: comp.style?.fontFamily || 'Inter',
                     fontStyle: component.style?.fontStyle || 'normal',
                     letterSpacing: component.style?.letterSpacing || 'normal',
                   }}
