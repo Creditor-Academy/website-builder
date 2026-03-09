@@ -23,6 +23,7 @@ export function EditorToolbar({ theme = 'light', onToggleTheme, websiteId }) {
     URL.revokeObjectURL(url);
   };
 
+  
   return (
     <>
       <div className="h-16 px-6 border-b border-slate-200 bg-white sticky top-0 z-50 flex items-center justify-between shadow-sm">

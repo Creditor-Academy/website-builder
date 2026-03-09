@@ -29,6 +29,17 @@ const Dashboard = () => {
         navigate(`/builder/${id}`);
     };
 
+    const handleLogout = () => {
+        // Clear any stored authentication data
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
+        
+        // Redirect to home screen
+        navigate('/');
+    };
+
     // Filter logic (keeps functionality but adds UX value)
     const filteredWebsites = websites.filter(site => 
         site.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -82,7 +93,10 @@ const Dashboard = () => {
                             <p className="text-sm font-semibold text-slate-900 truncate">John Doe</p>
                             <p className="text-xs text-slate-500 truncate">Pro Plan</p>
                         </div>
-                        <LogOut className="w-4 h-4 text-slate-400 group-hover:text-destructive transition-colors" />
+                        <LogOut 
+                            className="w-4 h-4 text-slate-400 group-hover:text-destructive transition-colors cursor-pointer" 
+                            onClick={handleLogout}
+                        />
                     </div>
                 </div>
             </aside>
