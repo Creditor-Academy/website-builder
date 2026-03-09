@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import useBuilderStore from '@/store/useBuilderStore';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 import business from "../assets/Bussiness.jpg";
 import Ecommerce from "../assets/Ecomm.jpg";
 import Portfolio from "../assets/Portfolio.jpg";
@@ -17,6 +18,7 @@ const templates = [
     { title: "eCommerce", image: Ecommerce },
     { title: "Portfolio", image: Portfolio },
     { title: "Business", image: business },
+    { title: "Consultant", image: "https://ordainit.com/wp-content/uploads/2025/05/it-consulting-website-template.jpg" },
 ];
 
 const Dashboard = () => {
@@ -27,13 +29,23 @@ const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('websites');
     const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [selectedWebsiteId, setSelectedWebsiteId] = useState(null);
+    const [isCreating, setIsCreating] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const handleCreateSite = () => {
-        if (!newSiteName.trim()) return;
-        const id = createWebsite(newSiteName, selectedTemplate || 'blank');
+        if (!newSiteName.trim()) {
+            toast.error("Please enter a website name");
+            return;
+        }
+        if (!selectedTemplate) {
+            toast.error("Please select a template");
+            return;
+        }
+        const id = createWebsite(newSiteName, selectedTemplate);
         setNewSiteName('');
         setIsDialogOpen(false);
         setSelectedTemplate(null);
+        toast.success("Website created successfully!");
         navigate(`/builder/${id}`);
     };
 
@@ -52,25 +64,34 @@ const Dashboard = () => {
                 <title>Dashboard - SiteBuilder</title>
             </Helmet>
 
-            {/* Sidebar */}
-            <aside className="w-64 bg-white border-r hidden md:flex flex-col">
-                <div className="p-6 border-b">
+            {/* Sidebar Desktop & Mobile */}
+            <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <div className="p-6 border-b flex items-center justify-between">
                     <h1 className="text-xl font-bold text-primary flex items-center gap-2">
                         <Layout className="w-6 h-6" /> SiteBuilder
                     </h1>
+                    <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsSidebarOpen(false)}>
+                        <Plus className="w-5 h-5 rotate-45" /> {/* Using Plus as close icon */}
+                    </Button>
                 </div>
                 <nav className="flex-1 p-4 space-y-2">
                     <Button 
                         variant="ghost" 
                         className={`w-full justify-start gap-3 ${activeTab === 'websites' ? 'bg-slate-100 text-primary' : 'text-slate-600 hover:text-primary'}`}
-                        onClick={() => setActiveTab('websites')}
+                        onClick={() => {
+                            setActiveTab('websites');
+                            setIsSidebarOpen(false);
+                        }}
                     >
                         <Globe className="w-4 h-4" /> My Websites
                     </Button>
                     <Button 
                         variant="ghost" 
                         className={`w-full justify-start gap-3 ${activeTab === 'templates' ? 'bg-slate-100 text-primary' : 'text-slate-600 hover:text-primary'}`}
-                        onClick={() => setActiveTab('templates')}
+                        onClick={() => {
+                            setActiveTab('templates');
+                            setIsSidebarOpen(false);
+                        }}
                     >
                         <Layout className="w-4 h-4" /> Templates
                     </Button>
@@ -93,10 +114,31 @@ const Dashboard = () => {
                 </div>
             </aside>
 
+            {/* Mobile Sidebar Overlay */}
+            {isSidebarOpen && (
+                <div 
+                    className="fixed inset-0 bg-black/50 z-40 md:hidden" 
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
             {/* Main Content */}
-            <main className="flex-1 p-8">
-                <header className="flex justify-between items-center mb-8">
-                    <div>
+            <main className="flex-1 p-4 md:p-8">
+                <header className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
+                    <div className="flex items-center gap-3 md:block">
+                        <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="md:hidden" 
+                            onClick={() => setIsSidebarOpen(true)}
+                        >
+                            <div className="space-y-1.2 flex flex-col items-center">
+                                <div className="w-4 h-0.5 bg-slate-600 rounded-full"></div>
+                                <div className="w-4 h-0.5 bg-slate-600 rounded-full my-0.5"></div>
+                                <div className="w-4 h-0.5 bg-slate-600 rounded-full"></div>
+                            </div>
+                        </Button>
+                        <div>
                         <h2 className="text-3xl font-bold text-slate-900 leading-tight">
                             {activeTab === 'websites' ? 'My Websites' : 'Template Gallery'}
                         </h2>
@@ -106,27 +148,30 @@ const Dashboard = () => {
                                 : 'Choose a professional template as your starting point'
                             }
                         </p>
+                        </div>
                     </div>
                     <Dialog open={isDialogOpen} onOpenChange={(open) => {
                         setIsDialogOpen(open);
                         if (!open) {
                             setSelectedTemplate(null);
                             setSelectedWebsiteId(null);
+                            setIsCreating(false);
                         }
                     }}>
                         <DialogTrigger asChild>
                             <Button 
-                                className="gap-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                                className="w-full md:w-auto gap-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
                                 onClick={() => {
                                     setSelectedTemplate(null);
                                     setSelectedWebsiteId(null);
+                                    setIsCreating(true);
                                 }}
                             >
                                 <Plus className="w-5 h-5" /> Create New Website
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="sm:max-w-md">
-                            {selectedTemplate ? (
+                        <DialogContent className="sm:max-w-md w-[95vw] rounded-2xl">
+                            {!isCreating && selectedTemplate ? (
                                 <>
                                     <DialogHeader>
                                         <DialogTitle>Apply Template</DialogTitle>
@@ -162,23 +207,79 @@ const Dashboard = () => {
                             ) : (
                                 <>
                                     <DialogHeader>
-                                        <DialogTitle>New Website</DialogTitle>
+                                        <DialogTitle className="text-2xl font-bold">Create New Website</DialogTitle>
                                         <DialogDescription>
-                                            Give your new website a name to get started.
+                                            Enter a name and choose a template to get started.
                                         </DialogDescription>
                                     </DialogHeader>
-                                    <div className="py-4">
-                                        <Input
-                                            placeholder="My Awesome Website"
-                                            value={newSiteName}
-                                            onChange={(e) => setNewSiteName(e.target.value)}
-                                            onKeyDown={(e) => e.key === 'Enter' && handleCreateSite()}
-                                            autoFocus
-                                        />
+                                    <div className="py-6 space-y-6">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-semibold text-slate-700">Website Name</label>
+                                            <Input
+                                                placeholder="My Awesome Website"
+                                                value={newSiteName}
+                                                onChange={(e) => setNewSiteName(e.target.value)}
+                                                onKeyDown={(e) => e.key === 'Enter' && handleCreateSite()}
+                                                autoFocus
+                                                className="h-12 text-lg shadow-sm focus:ring-2 focus:ring-primary/20"
+                                            />
+                                        </div>
+                                        
+                                        <div className="space-y-4">
+                                            <label className="text-sm font-semibold text-slate-700">Select Template</label>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto pr-2 pb-2">
+                                                {templates.map((t) => (
+                                                    <div 
+                                                        key={t.title}
+                                                        onClick={() => setSelectedTemplate(t.title)}
+                                                        className={`relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-300 ${
+                                                            selectedTemplate === t.title 
+                                                            ? 'border-primary ring-2 ring-primary/20 shadow-md' 
+                                                            : 'border-slate-200 hover:border-primary/50 grayscale hover:grayscale-0'
+                                                        }`}
+                                                    >
+                                                        <img src={t.image} alt={t.title} className="w-full h-full object-cover" />
+                                                        <div className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity duration-300 ${selectedTemplate === t.title ? 'opacity-100' : 'opacity-0'}`}>
+                                                            <CheckCircle className="w-8 h-8 text-white drop-shadow-lg" />
+                                                        </div>
+                                                        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
+                                                            <p className="text-xs font-bold text-white truncate">{t.title}</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                <div 
+                                                    onClick={() => setSelectedTemplate('blank')}
+                                                    className={`relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-300 flex flex-col items-center justify-center bg-slate-50 ${
+                                                        selectedTemplate === 'blank' 
+                                                        ? 'border-primary ring-2 ring-primary/20 bg-primary/5 shadow-md' 
+                                                        : 'border-slate-200 hover:border-primary/50'
+                                                    }`}
+                                                >
+                                                    <Plus className={`w-8 h-8 mb-2 transition-colors ${selectedTemplate === 'blank' ? 'text-primary' : 'text-slate-400'}`} />
+                                                    <p className={`text-xs font-bold transition-colors ${selectedTemplate === 'blank' ? 'text-primary' : 'text-slate-500'}`}>Blank Canvas</p>
+                                                    {selectedTemplate === 'blank' && (
+                                                        <div className="absolute top-2 right-2">
+                                                            <CheckCircle className="w-4 h-4 text-primary" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <DialogFooter>
-                                        <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                                        <Button onClick={handleCreateSite} disabled={!newSiteName.trim()}>Create Website</Button>
+                                        <Button 
+                                            variant="secondary" 
+                                            onClick={() => setIsDialogOpen(false)}
+                                            className="h-11 px-6 font-medium"
+                                        >
+                                            Cancel
+                                        </Button>
+                                        <Button 
+                                            onClick={handleCreateSite} 
+                                            className="h-11 px-8 font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all"
+                                        >
+                                            Create Website
+                                        </Button>
                                     </DialogFooter>
                                 </>
                             )}
@@ -196,8 +297,9 @@ const Dashboard = () => {
                             <p className="text-slate-500 mt-2 max-w-sm mx-auto">
                                 Ready to start your next big project? Create your first website with our intuitive builder.
                             </p>
-                            <Button variant="outline" className="mt-6" onClick={() => {
+                             <Button variant="outline" className="mt-6" onClick={() => {
                                 setSelectedTemplate(null);
+                                setIsCreating(true);
                                 setIsDialogOpen(true);
                             }}>
                                 Start Your First Project
@@ -279,7 +381,9 @@ const Dashboard = () => {
                                     ? 'ring-4 ring-primary ring-offset-4 scale-[1.02]' 
                                     : 'hover:scale-[1.01]'
                                 }`}
-                                onClick={() => setSelectedTemplate(selectedTemplate === template.title ? null : template.title)}
+                                 onClick={() => {
+                                    setSelectedTemplate(selectedTemplate === template.title ? null : template.title);
+                                }}
                             >
                                 <div className="aspect-[4/5] rounded-2xl overflow-hidden shadow-lg bg-white border border-slate-200 relative">
                                     <img 
@@ -310,14 +414,12 @@ const Dashboard = () => {
                                             className="w-full bg-white text-slate-900 hover:bg-slate-100 border-none"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                const existingSite = websites.find(w => w.name.toLowerCase() === template.title.toLowerCase());
-                                                if (existingSite) {
-                                                    applyTemplateToWebsite(existingSite.id, template.title);
-                                                    navigate(`/builder/${existingSite.id}`);
-                                                } else {
-                                                    const newId = createWebsite(template.title, template.title);
+                                                setSelectedTemplate(template.title);
+                                                const newId = createWebsite(`My ${template.title} Site`, template.title);
+                                                toast.success(`${template.title} site created!`);
+                                                setTimeout(() => {
                                                     navigate(`/builder/${newId}`);
-                                                }
+                                                }, 300);
                                             }}
                                         >
                                             Use Template

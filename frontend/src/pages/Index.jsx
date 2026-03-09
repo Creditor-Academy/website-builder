@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ArrowRight, MousePointer2, Sparkles, Menu, X, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
+import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
+
+// Assets
 import brand from "../assets/brand.mp4";
 import business from "../assets/Bussiness.jpg";
 import create from "../assets/create.mp4";
@@ -8,540 +11,334 @@ import library from "../assets/Libaray.mp4";
 import Drag from "../assets/Drag.gif";
 import Ecommerce from "../assets/Ecomm.jpg";
 import Portfolio from "../assets/Portfolio.jpg";
+import Learning from "../assets/Learning.jpg";
+import Hospital from "../assets/Hospital.jpg";
+import school from "../assets/school.jpg";
 import CTA from "../assets/CTA.png"; 
-import bgg2 from "../assets/bgg2.png";
+import bgg from "../assets/bgg.jpg";
+
 const features = [
-  {
-    id: 1,
-    title: "* Drag and drop freedom",
-    desc: "Drag and drop elements anywhere with complete freedom. Resize, reposition, and layer components effortlessly—no coding required.",
-    image: Drag,
-  },
-  {
-    id: 2,
-    title: "* Create with us",
-    desc: "Create with us using powerful tools designed to turn your ideas into stunning, high-performing websites—fast and effortlessly.",
-    image: create,
-  },
-  {
-    id: 3,
-    title: "* A library of possibilities",
-    desc: "A growing library of possibilities at your fingertips. Mix, match, and customize layouts, sections, and elements to build websites that truly reflect your ideas.",
-    image: library,
-  },
-  {
-    id: 4,
-    title: "* Define our brand",
-    desc: "At Buildora, we’re redefining how websites are built. Our platform blends flexibility with simplicity, empowering creators to turn ideas into beautiful, high-performing websites—faster than ever.",
-    image: brand,
-  },
+  { id: 1, title: "* Drag and drop freedom", desc: "Drag and drop elements anywhere with complete freedom. Resize, reposition, and layer components effortlessly—no coding required.", image: Drag },
+  { id: 2, title: "* Create with us", desc: "Create with us using powerful tools designed to turn your ideas into stunning, high-performing websites—fast and effortlessly.", image: create },
+  { id: 3, title: "* A library of possibilities", desc: "A growing library of possibilities at your fingertips. Mix, match, and customize layouts, sections, and elements to build websites that truly reflect your ideas.", image: library },
+  { id: 4, title: "* Define our brand", desc: "At Buildora, we’re redefining how websites are built. Our platform blends flexibility with simplicity, empowering creators to turn ideas into beautiful, high-performing websites—faster than ever.", image: brand },
 ];
 
 const templates = [
   { title: "eCommerce", image: Ecommerce },
   { title: "Portfolio", image: Portfolio },
   { title: "Business", image: business },
+  { title: "School", image: school },
+  { title: "Hospital", image: Hospital },
+  { title: "Learning", image: Learning },
 ];
 
 export default function LandingPage() {
-const carouselRef = useRef(null);
-const [pauseCarousel, setPauseCarousel] = useState(false);
-const [activeBtn, setActiveBtn] = useState(false);
-const [active, setActive] = useState(features[0]);
-useEffect(() => {
-  let scrollAmount = 0;
-  let rafId;
+  const carouselRef = useRef(null);
+  const [pauseCarousel, setPauseCarousel] = useState(false);
+  const [activeBtn, setActiveBtn] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [hoveredId, setHoveredId] = useState(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  const { scrollY } = useScroll();
+  const yContent = useTransform(scrollY, [0, 500], [0, -80]);
+  const opacityHero = useTransform(scrollY, [0, 400], [1, 0]);
+  const scaleHero = useTransform(scrollY, [0, 400], [1, 0.9]);
 
-  const speed = 2.0;
-
-  const autoScroll = () => {
-    if (!pauseCarousel && carouselRef.current) {
-      scrollAmount += speed;
-      carouselRef.current.scrollLeft = scrollAmount;
-
-      if (
-        scrollAmount >=
-        carouselRef.current.scrollWidth / 2
-      ) {
-        scrollAmount = 0;
-        carouselRef.current.scrollLeft = 0;
+  useEffect(() => {
+    let scrollAmount = 0;
+    let rafId;
+    const speed = 1.5;
+    const autoScroll = () => {
+      if (!pauseCarousel && carouselRef.current) {
+        scrollAmount += speed;
+        carouselRef.current.scrollLeft = scrollAmount;
+        if (scrollAmount >= carouselRef.current.scrollWidth / 2) {
+          scrollAmount = 0;
+          carouselRef.current.scrollLeft = 0;
+        }
       }
-    }
-    rafId = requestAnimationFrame(autoScroll);
+      rafId = requestAnimationFrame(autoScroll);
+    };
+    autoScroll();
+    return () => cancelAnimationFrame(rafId);
+  }, [pauseCarousel]);
+
+  useEffect(() => {
+    if (hoveredId !== null) return;
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % features.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [hoveredId]);
+
+  const handleViewTemplates = () => {
+    document.getElementById("templates")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  autoScroll();
-  return () => cancelAnimationFrame(rafId);
-}, [pauseCarousel]);
-
-
-const aboutImgRef = useRef(null);
-
-const handleAboutMouseMove = (e) => {
-  const el = aboutImgRef.current;
-  if (!el) return;
-
-  const rect = el.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-
-  const moveX = (x - rect.width / 2) / 20;
-  const moveY = (y - rect.height / 2) / 20;
-
-  el.style.transform = `
-  translate(${moveX}px, ${moveY}px)
-  rotateX(${-moveY}deg)
-  rotateY(${moveX}deg)
-`;
-};
-
-const handleAboutMouseLeave = () => {
-  if (aboutImgRef.current) {
-    aboutImgRef.current.style.transform = "translate(0px, 0px)";
-  }
-};
-
-const handleViewTemplates = () => {
-  const section = document.getElementById("templates");
-  section?.scrollIntoView({
-    behavior: "smooth",
-    block: "start",
-  });
-};
-
-
-   return ( 
-   <main className="w-full overflow-x-hidden">
-{/* ================= HERO WITH NAVBAR ================= */}
- <section id="hero"
-  className="relative min-h-screen overflow-hidden bg-cover bg-center bg-no-repeat"
-  style={{ backgroundImage: `url(${bgg2})` }}
->
-  {/* Optional dark overlay */}
-  {/* <div className="absolute inset-0 bg-black/60 z-0" /> */}
-
-  {/* NAVBAR */}
-  <nav className="absolute top-0 left-0 w-full z-20">
-    <div className="max-w-[1400px] mx-auto px-6 py-6 flex items-center justify-between text-black">
-      <div className="flex items-center gap-1">
-        <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center font-bold text-lg">
-          B
-        </div>
-        <div className="text-xl font-bold tracking-wide">
-          UILDORA
-        </div>
-      </div>
-
-      <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-        <a href="#web" className="hover:opacity-80">Features</a>
-        <a href="#extrem" className="hover:opacity-80">Resources</a>
-        <Link
-  to="/login"
-  className="hover:opacity-80 cursor-pointer"
->
-  Log in
-</Link>
-        <Link to="/contact" className="border border-black px-5 py-2 rounded-md hover:bg-black hover:text-white transition">
-          Get started
-        </Link>
-      </div>
-    </div>
-  </nav>
-
-  {/* HERO CONTENT */}
-  <div className="max-w-[1400px] mx-auto px-6 pt-40 grid grid-cols-1 lg:grid-cols-2 items-center gap-20">
-  
-  {/* LEFT TEXT */}
-  <div className="text-left">
-    <h1 className="font-sans font-bold text-[32px] md:text-[62px] lg:text-[72px] leading-tight text-slate-900 mb-8">
-      Everything you need to build a website
-      <br />
-      <span className="text-slate-900">is here</span>
-    </h1>
-
-    <p className="font-sans text-[18px] leading-relaxed text-slate-600 max-w-xl mb-10">
-      Create modern, responsive websites using powerful tools and flexible
-      layouts. Everything is designed to help you move faster from idea to
-      launch.
-    
-
-</p>
-     
-    </div>
-  </div>
-
-
-
-</section>
-
-  
-
-
-{/* _________________________ About_____________________  */}
-
-<section id="about" className="relative h-[520px] md:h-[620px] overflow-hidden rounded-3xl mb-10">
-
-  <div className="pointer-events-none absolute w-[520px] h-[520px] rounded-full bg-gradient-to-br from-blue-50 via-blue-100 to-blue-100 blur-3xl opacity-50" />
-
-  {/* Background Image */}
-  <img
-    src="https://img.freepik.com/free-vector/ui-ux-designers-isometric-composition-with-small-people-creating-custom-design-web-site-3d-vector-illustration_1284-68939.jpg?semt=ais_user_personalization&w=740&q=80"
-    alt="Website preview"
-    className="absolute
-    right-[-0px]  
-    top-1/2
-    -translate-y-1/2
-    h-full
-    object-contain"
-  />
-
-
-  <div className="relative max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-
-    {/* LEFT */}
-    <div>
-      <h2 className="text-5xl mt-20 md:text-6xl font-extrabold text-neutral-900 tracking-tight">
-        Get a{" "}
-        <span className="text-blue-600 relative">
-          Professional
-        </span>{" "}
-        website
-      </h2>
-
-      <p className="mt-4 text-lg text-neutral-600 max-w-xl">
-        Build a stunning online presence and grow your business with fast,
-        reliable, and modern website solutions.
-      </p>
-
-      {/* feature card */}
-      <div className="mt-10 bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl p-6 max-w-sm shadow-xl">
-        <p className="text-sm font-semibold text-blue-600 mb-4">
-          Why choose us
-        </p>
-
-        <ul className="space-y-3 text-sm text-neutral-700">
-          <li className="flex items-center gap-3">
-            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-            Fast delivery & clean code
-          </li>
-          <li className="flex items-center gap-3">
-            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-            Professional UI/UX design
-          </li>
-          <li className="flex items-center gap-3">
-            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-            Trusted & scalable solutions
-          </li>
-        </ul>
-      </div>
-
-      {/* CTA */}
-      <div className="mt-12 flex gap-4">
-       <button
-  onMouseEnter={() => setActiveBtn(true)}
-  onMouseLeave={() => setActiveBtn(false)}
-  onClick={() => {
-    setActiveBtn(true);
-    handleViewTemplates();
-  }}
-  className={`px-8 py-4 rounded-full font-semibold transition-all duration-300
-    ${activeBtn
-      ? "bg-blue-600 text-white shadow-lg scale-105"
-      : "bg-white text-neutral-900 shadow"
-    }`}
->
-  View Templates
-</button>
+  return (
+    <main className="w-full overflow-x-hidden bg-[#020617] text-slate-200 selection:bg-blue-500/30">
       
-      </div>
+      {/* ================= NAV ================= */}
+      <nav className="fixed top-0 w-full z-[100] px-6 py-8 flex justify-center">
+        <motion.div 
+          initial={{ y: -100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="w-full max-w-6xl backdrop-blur-xl bg-slate-900/95 border border-white/10 rounded-[2rem] px-6 py-4 flex items-center justify-between shadow-2xl"
+        >
+          <div className="flex items-center gap-2 group cursor-pointer">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center font-black shadow-lg group-hover:rotate-6 transition-transform">B</div>
+            <span className="text-xl font-black tracking-tighter text-white uppercase">Buildora</span>
+          </div>
 
-      {/* trust */}
-      <div className="mt-10 flex flex-wrap gap-4 text-sm">
-        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md">
-          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-          100+ satisfied clients
-        </div>
-        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md">
-          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-          Trusted by 1000+ users
-        </div>
-      </div>
-    </div>
+          <div className="hidden md:flex items-center gap-8 text-sm font-bold">
+            {["Home", "About", "Resources"].map((item) => (
+              <a key={item} href={`#${item.toLowerCase() === 'resources' ? 'web' : item.toLowerCase()}`} className="text-slate-400 hover:text-white transition-colors">{item}</a>
+            ))}
+            <div className="h-4 w-px bg-white/10" />
+            <Link to="/login" className="text-slate-400 hover:text-white">Log in</Link>
+            <Link to="/contact" className="bg-white text-black px-6 py-2.5 rounded-xl hover:bg-blue-600 hover:text-white transition-all active:scale-95 shadow-xl">
+              Get started
+            </Link>
+          </div>
 
-      </div>
-</section>
+          <button className="md:hidden text-white p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </motion.div>
 
-{/* ================= WEBSITE TEMPLATES ================= */}
-
-<section id="web" className="relative pt-36 pb-16 px-6 bg-white overflow-hidden">
-  {/* ===== SUBTLE BACKGROUND DEPTH ===== */}
-  <div className="pointer-events-none absolute -top-40 -left-40 w-[520px] h-[520px] rounded-full bg-gradient-to-br from-blue-200 via-blue-200 to-blue-200 blur-3xl opacity-50" />
-  <div className="pointer-events-none absolute -bottom-48 -right-48 w-[520px] h-[520px] rounded-full bg-gradient-to-br from-slate-200 via-slate-200 to-gray-200 blur-3xl opacity-50" /> 
-
-  <div className="relative max-w-[1400px] mx-auto">
-    <div className="flex flex-col lg:flex-row justify-between gap-24">
-
-      {/* ===== LEFT: EDITORIAL HEADING ===== */}
-      <div className="max-w-2xl">
-        <span className="block mb-6 text-sm uppercase tracking-[0.2em] text-stone-500">
-          Website templates
-        </span>
-
-        <h2 className="
-          text-[56px] md:text-[72px]
-          leading-[1.05]
-          font-extrabold
-          tracking-tight
-          text-stone-900
-        ">
-          Website templates
-          <br />
-          <span className="text-stone-400 font-semibold">
-            are another way in
-          </span>
-        </h2>
-
-        {/* Editorial divider */}
-        <div className="mt-10 h-[2px] w-24 bg-gradient-to-r from-stone-900 to-transparent" />
-      </div>
-
-      {/* ===== RIGHT CONTENT ===== */}
-      <div className="max-w-md">
-        <p className="text-lg leading-relaxed text-stone-600 mb-10">
-          Our free website builder offers 2000+{" "}
-          <span className="underline underline-offset-4 decoration-2 decoration-stone-400">
-            website templates
-          </span>
-          , all fully customizable and ready for business.
-        </p>
-
-        {/* <button className="
-          rounded-full px-12 py-4
-          text-lg font-semibold text-white
-          bg-black
-          shadow-lg shadow-black/20
-          hover:shadow-xl hover:-translate-y-0.5
-          transition-all
-        ">
-          Get Started
-        </button> */}
-      </div>
-
-    </div>
-  </div>
-</section>
-
-{/* ================= TEMPLATES CAROUSEL ================= */}
- <section id="templates" className="relative bg-white pt-4 pb-20 -mt-24 z-10"> 
-  <div
-    ref={carouselRef}
-    onMouseEnter={() => setPauseCarousel(true)}
-    onMouseLeave={() => setPauseCarousel(false)}
-    className="
-      flex gap-12
-      overflow-x-scroll
-      scroll-smooth
-      -mx-6 px-6
-      py-6 bg-white
-    "
-    style={{ scrollbarWidth: "none" }}
-  >
-    <style>{`
-      div::-webkit-scrollbar {
-        display: none;
-      }
-    `}</style>
-
-    {templates.concat(templates).map((item, index) => (
-      <div key={index} className="shrink-0 w-[380px] group cursor-pointer">
-        <div className="relative rounded-2xl overflow-hidden shadow-lg">
-          <img
-            src={item.image}
-            alt={item.title}
-            className="h-[420px] w-full object-cover"
-          />
-          {/* subtle hover overlay */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
-        </div>
-
-        <p className="mt-6 text-lg font-medium underline underline-offset-4">
-          {item.title} →
-        </p>
-      </div>
-    ))}
-  </div>
-</section>
-
-
-
-
-
-{/* __________EXTREM SECTION___________________ */}
-     
-<section id="extrem" className="w-full bg-gray-50 py-16">
-  <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-
-    {/* LEFT: TEXT ACCORDION */}
-    <div className="text-black space-y-10">
-      <p className="text-5xl font-extrabold tracking-tight">
-        Extreme customization.<br/>Absolute control.
-      </p>
-
-      <div className="space-y-4">
-        {features.map((item) => {
-          const isActive = active?.id === item.id;
-          return (
-            <div
-              key={item.id}
-              onClick={() => setActive(isActive ? null : item)}
-              onMouseEnter={() => setActive(item)}
-              className={`group
-                cursor-pointer rounded-xl border transition-all duration-300 overflow-hidden
-                ${isActive 
-                  ? 'bg-[#1e293b] border-[#334155] shadow-lg' 
-                  : 'bg-[#0f172a] border-transparent hover:bg-[#1e293b]/50'
-                }
-              `}
+        {/* Mobile Nav */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="absolute top-24 left-6 right-6 p-8 bg-slate-900/95 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 flex flex-col gap-6 text-center pointer-events-auto shadow-2xl"
             >
-              <div className="p-6 flex items-center justify-between">
-                <p className="font-semibold text-lg text-white">
-                  {item.title.replace('* ', '')}
-                </p>
-                <ChevronDown 
-                  className={`w-5 h-5 transition-transform duration-300 ${isActive ? 'rotate-180 text-blue-500' : 'text-slate-500 group-hover:text-blue-400'}`} 
-                />
-              </div>
+              <a href="#hero" onClick={() => setIsMenuOpen(false)} className="text-xl font-bold">Home</a>
+              <a href="#about" onClick={() => setIsMenuOpen(false)} className="text-xl font-bold">About</a>
+              <a href="#web" onClick={() => setIsMenuOpen(false)} className="text-xl font-bold">Resources</a>
+              <Link to="/login" className="text-xl font-bold">Log in</Link>
+              <Link to="/contact" className="bg-blue-600 text-white py-4 rounded-2xl font-bold">Get started</Link>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </nav>
 
-              <div
-                className={`transition-all duration-500 ease-in-out px-6 ${
-                  isActive
-                    ? "max-h-60 opacity-100 pb-6"
-                    : "max-h-0 opacity-0 pb-0"
-                }`}
-              >
-                <p className="text-gray-300 text-sm leading-relaxed max-w-md">
-                  {item.desc}
-                </p>
-                {/* {isActive && ( */}
-                
-                {/* )} */}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-
-    {/* RIGHT: IMAGE (sticky container) */}
-    <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-gradient-to-br from-blue-900/20 to-purple-900/20 aspect-square lg:aspect-auto lg:h-[600px] sticky top-24">
-      {typeof active.image === "string" && active.image.endsWith(".mp4") ? (
-        <video
-          src={active.image}
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="w-full h-full object-cover"
-        />
-      ) : (
-        <img
-          src={active.image}
-          alt={active.title}
-          className="w-full h-full object-cover"
-        />
-      )}
-    </div> 
-
-  </div>
-</section>
- {/* ================= FIXED BG (ONLY THIS SECTION) ================= */}
-
- <section className="relative h-screen bg-white overflow-hidden"> 
-
-  {/* Sticky background */}
-   <div
-    className="sticky h-full bg-cover bg-center"
-    style={{ backgroundImage: `url(${CTA})` }}
-  /> *
-
-  {/* Content over background */}
-  <div className="absolute inset-5 flex items-center justify-end "> 
-    <div className="bg-white/75 backdrop-blur-xl rounded-3xl px-16 py-20 text-center max-w-3xl"> 
-
-      {/* HEADING */}
-      <h2 className="font-sans font-bold text-[48px] md:text-[64px] leading-tight text-black mb-6">
-        Your vision. Your goals.
-        
-        <span className="text-black">Your website.</span>
-      </h2>
-
-      {/* SUBTEXT */}
-      <p className="text-lg text-neutral-600 max-w-xl mx-auto mb-10">
-        Build powerful, modern websites that bring your ideas to life.
-        Start today and turn your vision into a digital reality.
-      </p>
-
-      {/* CTA BUTTONS */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
-        
-        
-
-        <Link to="/contact" className="border border-black px-10 py-4 cursor-pointer rounded-full font-medium hover:bg-black hover:text-white transition">
-          Contact Us
-        </Link>
-      </div>
-
-    </div>
-  </div>
-
-</section> 
-
-   {/* ================= FOOTER ================= */}
-<footer id="footer" className="bg-[#1f2a33] text-white py-16 px-6">
-  <div className="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
-    {/* BRAND & DESC */}
-    <div className="md:col-span-2">
-      <div className="flex items-center gap-1 mb-6">
-        <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center font-bold text-lg">
-          B
+      {/* ================= HERO ================= */}
+      <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img src={bgg} className="w-full h-full object-cover scale-110" alt="Background" />
+           {/* <div className="absolute inset-0 bg-gradient-to-b from-blue-600/80 via-indigo-600/60 to-[#020617]" />  */}
         </div>
-        <span className="text-xl font-semibold ">uildora</span>
-      </div>
-      <p className="text-sm text-gray-400 max-w-sm leading-relaxed">
-        Build modern, responsive websites with powerful tools, flexible layouts,
-        and complete creative control — no coding required.
-      </p>
-    </div>
 
-   
+        <motion.div style={{ y: yContent, opacity: opacityHero, scale: scaleHero }} className="relative z-10 max-w-7xl mx-auto px-6 text-center">
+          <motion.div 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold mb-8 uppercase tracking-widest"
+          >
+            <Sparkles className="w-3 h-3" /> The Future of Web Creation
+          </motion.div>
+          <h1 className="text-5xl md:text-8xl font-black text-white leading-[1] tracking-tight mb-10">
+            Everything you need to <br /> build a website <span className="text-blue-500">is here</span>
+          </h1>
+          <p className="text-lg md:text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed mb-12">
+            Create modern, responsive websites using powerful tools and flexible layouts. Everything is designed to help you move faster from idea to launch.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <button onClick={handleViewTemplates} className="px-12 py-5 bg-blue-600 text-white rounded-2xl font-black shadow-2xl shadow-blue-500/20 hover:bg-blue-500 transition-all flex items-center gap-3 hover:-translate-y-1 active:translate-y-0">
+              Start Building <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
+        </motion.div>
+      </section>
 
-    {/* COMPANY */}
-    <div>
-      <h3 className="font-semibold justify-start text-lg mb-4">Company</h3>
-      <ul className="space-y-3 text-sm text-gray-400">
-        <li><a href="/#about" className="hover:text-white transition cursor-pointer">About Us</a></li>
-        <li><Link to="/privacy-policy" className="hover:text-white transition cursor-pointer">Privacy Policy</Link></li>
-        <li><Link to="/terms-of-service" className="hover:text-white transition cursor-pointer">Terms of Service</Link></li>
-      </ul>
-    </div>
-  </div>
+      {/* ================= ABOUT ================= */}
+      <section id="about" className="py-12 md:py-20 relative bg-white rounded-t-[2rem] text-slate-900">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 lg:gap-12 items-center">
+          <motion.div initial={{ x: -40, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} viewport={{ once: true }}>
+            <h2 className="text-5xl md:text-7xl font-black leading-tight mb-8">
+              Get a <span className="text-blue-600">Professional</span> website
+            </h2>
+            <p className="text-xl text-slate-600 mb-8 max-w-lg">Build a stunning online presence and grow your business with fast, reliable, and modern website solutions.</p>
+            
+            <div className="space-y-4 mb-8">
+              {['Fast delivery & clean code', 'Professional UI/UX design', 'Trusted & scalable solutions'].map((text, i) => (
+                <div key={i} className="flex items-center gap-4 p-5 bg-slate-50 rounded-[1.5rem] border border-slate-100 group transition-all hover:bg-white hover:shadow-xl hover:border-blue-200">
+                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                    <Zap className="w-5 h-5 fill-current" />
+                  </div>
+                  <span className="font-bold text-slate-800 text-lg">{text}</span>
+                </div>
+              ))}
+            </div>
 
-  {/* BOTTOM BAR */}
-  <div className="max-w-[1400px] mx-auto mt-16 pt-8 border-t border-gray-700 flex flex-col md:flex-row items-center justify-between text-sm text-gray-400">
-    <p>© {new Date().getFullYear()} Buildora Inc. All rights reserved.</p>
-    <p className="mt-4 md:mt-0">
-      Powered by{" "}
-      <a
-        href="https://lmsathena.com/"
-        target="_blank"
-        rel="noreferrer"
-        className="text-blue-400 hover:text-blue-300 hover:underline transition"
-      >
-        Athena LMS
-      </a>
-    </p>
-  </div>
-</footer>
-</main >
+            <button 
+              onMouseEnter={() => setActiveBtn(true)}
+              onMouseLeave={() => setActiveBtn(false)}
+              onClick={handleViewTemplates}
+              className={`px-12 py-6 rounded-2xl font-black text-lg transition-all shadow-2xl ${activeBtn ? "bg-blue-600 text-white -translate-y-1" : "bg-slate-900 text-white"}`}
+            >
+              View Templates
+            </button>
+          </motion.div>
+
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }} 
+            whileInView={{ scale: 1, opacity: 1 }} 
+            viewport={{ once: true }}
+            className="relative group cursor-crosshair"
+          >
+            <div className="absolute -inset-10 bg-blue-400/20 rounded-full blur-[100px] opacity-0 group-hover:opacity-100 transition-opacity" />
+            <motion.div whileHover={{ rotateY: 8, rotateX: -5 }} className="relative rounded-[3rem] overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.15)] border-[12px] border-white">
+              <img src="https://img.freepik.com/free-vector/ui-ux-designers-isometric-composition-with-small-people-creating-custom-design-web-site-3d-vector-illustration_1284-68939.jpg?semt=ais_user_personalization&w=740&q=80" alt="Professional Design" />
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ================= TEMPLATES ================= */}
+      <section id="web" className="py-16 bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 mb-10 flex flex-col md:flex-row justify-between items-end ">
+          <div className="flex-1">
+            <span className="text-blue-600 font-black uppercase tracking-widest text-3xl mb-4 block">Website Templates</span>
+            <h2 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter">
+              Another way <span className="italic text-slate-900 font-black">in.</span>
+            </h2>
+          </div>
+          <p className="max-w-md text-slate-500 text-lg font-lg leading-relaxed">
+            Our free website builder offers 2000+ <span className="text-slate-900 underline decoration-blue-500 decoration-4 underline-offset-4">website templates</span>, all fully customizable.
+          </p>
+        </div>
+
+        <div id="templates" ref={carouselRef} onMouseEnter={() => setPauseCarousel(true)} onMouseLeave={() => setPauseCarousel(false)} className="flex gap-8 overflow-x-hidden py-10 px-6 cursor-grab active:cursor-grabbing">
+          {templates.concat(templates).map((item, index) => (
+            <div key={index} className="shrink-0 w-[85vw] sm:w-[450px] group">
+              <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden bg-slate-100 shadow-2xl transition-all duration-700 group-hover:-translate-y-4">
+                <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent flex flex-col justify-end p-12 opacity-0 group-hover:opacity-100 transition-all duration-500">
+                  <p className="text-white text-3xl font-black mb-6 translate-y-4 group-hover:translate-y-0 transition-transform">{item.title}</p>
+                  <button className="bg-white text-black px-8 py-4 rounded-2xl font-black flex items-center gap-2 w-full justify-center hover:bg-blue-600 hover:text-white transition-colors">
+                    Select Template <MousePointer2 className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+              <p className="mt-8 text-3xl font-black px-4 text-slate-900">{item.title} <span className="text-blue-500">→</span></p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ================= EXTREME CONTROL ================= */}
+      <section id="extrem" className="py-12 md:py-20 bg-slate-50 relative">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-10">
+          <div className="space-y-12">
+            <div>
+              <h2 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tighter mb-4">Extreme</h2>
+              <h3 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tighter">customization.</h3>
+            </div>
+            
+            <div className="space-y-6" onMouseLeave={() => setHoveredId(null)}>
+              {features.map((item) => {
+                const isHovered = (hoveredId === item.id);
+                return (
+                  <div 
+                    key={item.id} 
+                    onMouseEnter={() => setHoveredId(item.id)}
+                    className={`p-10 rounded-[2.5rem] cursor-pointer border-2 transition-all duration-500 ${isHovered ? "bg-white border-blue-500 shadow-[0_20px_50px_rgba(59,130,246,0.1)] scale-[1.02]" : "bg-white/50 border-slate-200 opacity-60 hover:opacity-100 hover:bg-white"}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className={`text-2xl font-black ${isHovered ? "text-white" : "text-slate-800"}`}>{item.title.replace('* ', '')}</span>
+                      <ChevronDown className={`w-6 h-6 transition-transform duration-500 ${isHovered ? "rotate-180 text-blue-500" : "text-slate-600"}`} />
+                    </div>
+                    <AnimatePresence>
+                      {isHovered && (
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                          <p className="text-slate-600 mt-6 leading-relaxed text-lg font-medium">{item.desc}</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          
+          <div className="relative h-[500px] lg:h-[750px] rounded-[3.5rem] overflow-hidden lg:sticky lg:top-32 border border-white/10 shadow-3xl">
+            <AnimatePresence mode="wait">
+              {(() => {
+                const activeFeature = hoveredId !== null 
+                  ? features.find(f => f.id === hoveredId) 
+                  : features[activeIndex];
+                
+                return (
+                  <motion.div key={activeFeature.id} initial={{ opacity: 0, scale: 1.1 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.5 }} className="w-full h-full relative">
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-200/40 to-transparent z-10" />
+                    {activeFeature.image.endsWith(".mp4") ? (
+                      <video src={activeFeature.image} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                    ) : (
+                      <img src={activeFeature.image} alt="feature" className="w-full h-full object-cover" />
+                    )}
+                  </motion.div>
+                );
+              })()}
+            </AnimatePresence>
+          </div>
+        </div>
+      </section>
+
+      {/* ================= FINAL CTA ================= */}
+      <section className="relative py-16 flex items-center justify-center min-h-[70vh]">
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <img src={CTA} className="w-full h-full object-cover brightness-[0.8] scale-105" alt="CTA" />
+        </div>
+        <motion.div 
+          initial={{ y: 60, opacity: 0 }} 
+          whileInView={{ y: 0, opacity: 1 }} 
+          className="relative z-10 bg-white/10 backdrop-blur-3xl border border-white/20 p-12 md:p-32 rounded-[4rem] shadow-2xl text-center max-w-5xl mx-4"
+        >
+          <h2 className="text-5xl md:text-8xl font-black text-white mb-8 leading-tight">Your vision. <br /> <span className="text-blue-500">Your website.</span></h2>
+          <p className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto font-medium">Build powerful, modern websites that bring your ideas to life. Start today and turn your vision into a digital reality.</p>
+          <Link to="/contact" className="inline-flex items-center gap-4 px-12 py-6 bg-white text-black rounded-2xl font-black text-xl hover:bg-blue-600 hover:text-white transition-all hover:scale-105 active:scale-95 shadow-3xl">
+            Contact Us <ArrowRight className="w-6 h-6" />
+          </Link>
+        </motion.div>
+      </section>
+
+      {/* ================= FOOTER ================= */}
+      <footer className="bg-[#020617] text-white pt-16 pb-12 px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 border-b border-white/5 pb-12">
+          <div className="md:col-span-2 space-y-10">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-white text-black flex items-center justify-center font-black text-2xl shadow-xl">B</div>
+              <span className="text-4xl font-black tracking-tighter">BUILDORA</span>
+            </div>
+            <p className="text-slate-400 text-xl max-w-md leading-relaxed font-medium">Build modern, responsive websites with powerful tools, flexible layouts, and complete creative control — no coding required.</p>
+          </div>
+          <div>
+            <h4 className="font-black text-xl mb-10 text-white">Explore</h4>
+            <ul className="space-y-5 text-slate-500 text-lg font-bold">
+              {["Templates", "Features", "About Us"].map(item => (
+                <li key={item} className="hover:text-blue-500 cursor-pointer transition-colors w-fit">{item}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-black text-xl mb-10 text-white">Legal</h4>
+            <ul className="space-y-5 text-slate-500 text-lg font-bold">
+              <li><Link to="/privacy-policy" className="hover:text-blue-500 transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/terms-of-service" className="hover:text-blue-500 transition-colors">Terms of Service</Link></li>
+            </ul>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto mt-16 flex flex-col md:flex-row justify-between items-center text-slate-600 text-base font-bold gap-8">
+          <p>© {new Date().getFullYear()} Buildora Inc. All rights reserved.</p>
+          <p className="flex items-center gap-2">Powered by <a href="https://lmsathena.com/" className="text-blue-500 hover:text-white transition-colors">Athena LMS</a></p>
+        </div>
+      </footer>
+    </main>
   );
-}   
+}

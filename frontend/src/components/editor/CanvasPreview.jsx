@@ -54,7 +54,7 @@ export function CanvasPreview() {
           />
 
           {page.sections
-            .filter(section => section.visible)
+            .filter(section => section.visible !== false)
             .map(section => (
               <div
                 key={section.id}

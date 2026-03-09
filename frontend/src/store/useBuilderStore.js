@@ -5,6 +5,8 @@ import {
     getDefaultPage,
     getBusinessPage,
     getPortfolioPage,
+    getEcommercePage,
+    getConsultantPage,
     createFeaturesPage,
     createServicesPage,
     createPricingPage,
@@ -46,8 +48,13 @@ const useBuilderStore = create(
                     homePage = getBusinessPage();
                 } else if (template === 'Portfolio') {
                     homePage = getPortfolioPage();
+                } else if (template === 'Ecommerce') {
+                    homePage = getEcommercePage();
+                } else if (template === 'Consultant') {
+                    homePage = getConsultantPage();
                 } else {
-                    homePage = getDefaultPage();
+                    // Default to Business template as requested
+                    homePage = getBusinessPage();
                 }
 
                 const newWebsite = {
@@ -75,8 +82,13 @@ const useBuilderStore = create(
                     homePage = getBusinessPage();
                 } else if (template === 'Portfolio') {
                     homePage = getPortfolioPage();
+                } else if (template === 'Ecommerce') {
+                    homePage = getEcommercePage();
+                } else if (template === 'Consultant') {
+                    homePage = getConsultantPage();
                 } else {
-                    homePage = getDefaultPage();
+                    // Default to Business template as requested
+                    homePage = getBusinessPage();
                 }
 
                 set((state) => {
