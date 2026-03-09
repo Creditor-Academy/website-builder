@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { BuilderProvider } from "@/contexts/BuilderContext";
 import { EditorToolbar } from "./EditorToolbar";
 import { SectionsList } from "./SectionsList";
@@ -7,21 +7,16 @@ import { PageManager } from "./PageManager";
 import { SiteSettings } from "./SiteSettings";
 import { CanvasPreview } from "./CanvasPreview";
 import { PropertiesPanel } from "./PropertiesPanel";
-import { TextColorPicker } from "./TextColorPicker";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Layers,
   FileText,
-  Globe,
   Plus,
   Settings,
-  Palette,
-  Search,
   Sliders,
 } from "lucide-react";
 import useBuilderStore from "@/store/useBuilderStore";
@@ -33,18 +28,8 @@ import {
 } from "@/components/ui/tooltip";
 
 function EditorContent() {
-  const [theme, setTheme] = useState("light");
   const [leftNavTab, setLeftNavTab] = useState("add"); // 'add', 'layers', 'pages', 'settings', 'edit'
   const { editor } = useBuilderStore();
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-  }, [theme]);
 
   // Auto-switch to edit tab when a section or component is selected
   useEffect(() => {
@@ -52,8 +37,6 @@ function EditorContent() {
       setLeftNavTab("edit");
     }
   }, [editor.selectedSectionId, editor.selectedComponentId]);
-
-  const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
 
   const navItems = [
     { id: "add", icon: Plus, label: "Add Elements" },
@@ -65,8 +48,7 @@ function EditorContent() {
 
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden font-sans">
-      <EditorToolbar theme={theme} onToggleTheme={toggleTheme} />
-      <TextColorPicker />
+      <EditorToolbar />
       <div className="flex-1 min-h-0">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           {!editor.previewMode && editor.showLeftPanel && (

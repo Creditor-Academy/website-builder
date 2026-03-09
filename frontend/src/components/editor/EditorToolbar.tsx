@@ -1,11 +1,11 @@
 import React from 'react';
 import { useBuilder } from '@/contexts/BuilderContext';
-import { Undo2, Redo2, Eye, Download, Play, Layout, Sidebar, Sun, Moon, Monitor, Tablet, Smartphone, Share2, CheckCircle2, ChevronRight, Globe, Home, ArrowLeft } from 'lucide-react';
+import { Undo2, Redo2, Eye, Download, Play, Share2, ChevronRight, Globe, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
-export function EditorToolbar({ theme = 'light', onToggleTheme }) {
+export function EditorToolbar() {
   const { state, undo, redo, canUndo, canRedo, setPreviewMode, setLeftPanelVisible } = useBuilder();
   const { editor, page } = state;
 
