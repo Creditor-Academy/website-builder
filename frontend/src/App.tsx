@@ -7,6 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import { WebsiteEditor } from "./components/editor/WebsiteEditor";
+import Login from "./pages/Login";
 import Features from "./pages/Features";
 import Services from "./pages/Services";
 import Pricing from "./pages/Pricing";
@@ -18,6 +19,8 @@ import Blog from "./pages/Blog";
 import Careers from "./pages/Careers";
 import Help from "./pages/Help";
 import Status from "./pages/Status";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +34,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/builder/:id" element={<WebsiteEditor />} />
             <Route path="/features" element={<Features />} />
@@ -44,6 +48,8 @@ const App = () => (
             <Route path="/careers" element={<Careers />} />
             <Route path="/help" element={<Help />} />
             <Route path="/status" element={<Status />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -178,10 +178,10 @@ function EditorContent() {
   );
 }
 
-export function WebsiteEditor() {
+export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { selectWebsite, activeWebsiteId, websites } = useBuilderStore();
+  const { selectWebsite, activeWebsiteId, createWebsite, websites } = useBuilderStore();
 
   useEffect(() => {
     if (id) {
@@ -193,8 +193,12 @@ export function WebsiteEditor() {
         return;
       }
       selectWebsite(id);
+    } else if (initialPage) {
+      // If we're on a static demo page, create/select the initial data
+      const newId = createWebsite(initialPage.name || "Preview", initialPage.id);
+      selectWebsite(newId);
     }
-  }, [id, selectWebsite, websites, navigate]);
+  }, [id, initialPage, selectWebsite, createWebsite, websites, navigate]);
 
   // Show loading state only if we're actively loading a valid website
   if (!activeWebsiteId && id && websites.some(w => w.id === id)) {
