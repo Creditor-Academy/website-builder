@@ -44,7 +44,8 @@ import {
   Settings2,
   X,
   Palette,
-  Globe
+  Globe,
+  ShoppingBag
 } from "lucide-react";
 import {
   Collapsible,
@@ -70,6 +71,10 @@ import {
   createDefaultBlogListSection,
   createDefaultMasonryGallerySection,
   createDefaultAboutSection,
+  getBusinessPage,
+  getPortfolioPage,
+  getEcommercePage,
+  getConsultantPage,
 } from "@/lib/defaultPageData";
 import { Badge } from "@/components/ui/badge";
 
@@ -87,6 +92,15 @@ const ELEMENT_CATEGORIES = [
       { type: "cta", name: "Call to Action", icon: MousePointer2, description: "Action-oriented CTA section", create: createDefaultCTASection },
       { type: "pricing", name: "Pricing", icon: DollarSign, description: "Pricing tiers & plans", create: createDefaultPricingSection },
       { type: "testimonials", name: "Testimonials", icon: Quote, description: "Customer reviews", create: createDefaultTestimonialsSection },
+    ]
+  },
+  {
+    name: "Full Templates",
+    items: [
+      { type: "business", name: "Business", icon: Building2, create: getBusinessPage, isFullPage: true },
+      { type: "portfolio", name: "Portfolio", icon: Layout, create: getPortfolioPage, isFullPage: true },
+      { type: "ecommerce", name: "Ecommerce", icon: ShoppingBag, create: getEcommercePage, isFullPage: true },
+      { type: "consultant", name: "Consultant", icon: Users, create: getConsultantPage, isFullPage: true },
     ]
   },
   {
@@ -160,7 +174,7 @@ const ELEMENT_CATEGORIES = [
 ];
 
 export function SectionsList({ view = "add" }) {
-  const { state, selectSection, reorderSections, addSection, deleteSection, addComponent } = useBuilder();
+  const { state, selectSection, reorderSections, addSection, deleteSection, addComponent, updateCurrentPage } = useBuilder();
   const { page, editor } = state;
 
   if (!page) {
@@ -196,6 +210,18 @@ export function SectionsList({ view = "add" }) {
   };
 
   const handleAddElement = (item) => {
+    if (item.isFullPage) {
+      if (window.confirm("This will replace all sections, navbar, and footer on the current page with the template. Continue?")) {
+        const templatePage = item.create();
+        updateCurrentPage({
+          sections: templatePage.sections,
+          navbar: templatePage.navbar,
+          footer: templatePage.footer,
+          globalStyles: templatePage.globalStyles
+        });
+      }
+      return;
+    }
     if (item.isComponent) {
       const sectionId = editor.selectedSectionId || (page.sections[0]?.id);
       if (!sectionId) return;

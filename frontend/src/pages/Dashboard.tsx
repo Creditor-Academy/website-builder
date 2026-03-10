@@ -18,21 +18,26 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const { websites, createWebsite, deleteWebsite } = useBuilderStore();
     const [newSiteName, setNewSiteName] = useState('');
+    const [selectedTemplate, setSelectedTemplate] = useState('blank');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
+    const [activeTab, setActiveTab] = useState('websites'); // 'websites' or 'templates'
 
     const handleCreateSite = () => {
         if (!newSiteName.trim()) return;
-        const id = createWebsite(newSiteName);
+        const id = createWebsite(newSiteName, selectedTemplate);
         setNewSiteName('');
+        setSelectedTemplate('blank');
         setIsDialogOpen(false);
         navigate(`/builder/${id}`);
     };
 
-    // Filter logic (keeps functionality but adds UX value)
-    const filteredWebsites = websites.filter(site => 
-        site.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const templatesList = [
+        { id: 'blank', name: 'Blank Canvas', desc: 'Start from scratch', icon: FileText, color: 'bg-slate-100 text-slate-600' },
+        { id: 'business', name: 'Business', desc: 'Professional corporate layout', icon: Building2, color: 'bg-blue-100 text-blue-600' },
+        { id: 'portfolio', name: 'Portfolio', desc: 'Showcase your creative work', icon: Layout, color: 'bg-purple-100 text-purple-600' },
+        { id: 'ecommerce', name: 'E-commerce', desc: 'Modern online store', icon: ShoppingBag, color: 'bg-green-100 text-green-600' },
+        { id: 'consultant', name: 'Consultant', desc: 'Expert advisory layout', icon: Users, color: 'bg-amber-100 text-amber-600' },
+    ];
 
     return (
         <div className="min-h-screen bg-[#f8fafc] flex font-sans selection:bg-primary/10">
@@ -52,16 +57,27 @@ const Dashboard = () => {
                         </h1>
                     </div>
                 </div>
-
-                <nav className="flex-1 px-4 py-2 space-y-1">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 mb-2">Main Menu</p>
-                    <NavItem icon={<Globe className="w-4 h-4" />} label="My Websites" active />
-                    <NavItem icon={<Layout className="w-4 h-4" />} label="Templates" />
-                    <NavItem icon={<FileText className="w-4 h-4" />} label="Assets" />
-                    <div className="pt-4">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 mb-2">System</p>
-                        <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" />
-                    </div>
+                <nav className="flex-1 p-4 space-y-2">
+                    <Button 
+                        variant="ghost" 
+                        onClick={() => setActiveTab('websites')}
+                        className={`w-full justify-start gap-3 ${activeTab === 'websites' ? 'bg-slate-100 text-primary' : 'text-slate-600 hover:text-primary'}`}
+                    >
+                        <Globe className="w-4 h-4" /> My Websites
+                    </Button>
+                    <Button 
+                        variant="ghost" 
+                        onClick={() => setActiveTab('templates')}
+                        className={`w-full justify-start gap-3 ${activeTab === 'templates' ? 'bg-slate-100 text-primary' : 'text-slate-600 hover:text-primary'}`}
+                    >
+                        <Layout className="w-4 h-4" /> Templates
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start gap-3 text-slate-600 hover:text-primary">
+                        <FileText className="w-4 h-4" /> Assets
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start gap-3 text-slate-600 hover:text-primary">
+                        <Settings className="w-4 h-4" /> Settings
+                    </Button>
                 </nav>
 
                 <div className="p-4 mt-auto">
@@ -143,9 +159,50 @@ const Dashboard = () => {
                     </div>
                 </header>
 
-                {/* --- Content Area --- */}
-                {websites.length === 0 ? (
-                    <EmptyState onAction={() => setIsDialogOpen(true)} />
+                {activeTab === 'templates' ? (
+                    <div className="space-y-8">
+                        <div>
+                            <h2 className="text-3xl font-bold text-slate-900 leading-tight">Templates Library</h2>
+                            <p className="text-slate-500 mt-1">Start with a professionally designed layout</p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            {templatesList.map((tpl) => (
+                                <Card key={tpl.id} className="group overflow-hidden border-slate-200 hover:border-primary transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 bg-white cursor-pointer" onClick={() => {
+                                    setSelectedTemplate(tpl.id);
+                                    setIsDialogOpen(true);
+                                }}>
+                                    <div className="aspect-[4/3] bg-slate-100 relative overflow-hidden">
+                                        <div className={`absolute inset-0 opacity-10 ${tpl.color.split(' ')[0]}`} />
+                                        <div className="absolute inset-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                                            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center shadow-xl ${tpl.color}`}>
+                                                <tpl.icon className="w-10 h-10" />
+                                            </div>
+                                        </div>
+                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+                                            <Button variant="secondary" className="w-full font-bold">Use This Template</Button>
+                                        </div>
+                                    </div>
+                                    <CardHeader className="p-6">
+                                        <CardTitle className="text-xl font-bold">{tpl.name}</CardTitle>
+                                        <CardDescription className="text-sm mt-2">{tpl.desc}</CardDescription>
+                                    </CardHeader>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                ) : websites.length === 0 ? (
+                    <div className="h-96 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-2xl bg-white p-12 text-center">
+                        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                            <Globe className="w-8 h-8 text-slate-400" />
+                        </div>
+                        <h3 className="text-xl font-semibold text-slate-900">No websites yet</h3>
+                        <p className="text-slate-500 mt-2 max-w-sm mx-auto">
+                            Ready to start your next big project? Create your first website with our intuitive builder.
+                        </p>
+                        <Button variant="outline" className="mt-6" onClick={() => setIsDialogOpen(true)}>
+                            Start Your First Project
+                        </Button>
+                    </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                         {filteredWebsites.map((site, index) => (

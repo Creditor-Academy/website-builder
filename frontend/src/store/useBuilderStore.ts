@@ -3,14 +3,77 @@ import { v4 as uuidv4 } from 'uuid';
 import { persist } from 'zustand/middleware';
 import {
     getDefaultPage,
-    createFeaturesPage,
-    createServicesPage,
-    createPricingPage,
-    createContactPage,
-    createAboutPage
+    getBusinessPage,
+    getPortfolioPage,
+    getEcommercePage,
+    getConsultantPage
 } from '@/lib/defaultPageData';
 
-const useBuilderStore = create(
+const TEMPLATE_MAP: Record<string, () => any> = {
+    blank: getDefaultPage,
+    business: getBusinessPage,
+    portfolio: getPortfolioPage,
+    ecommerce: getEcommercePage,
+    consultant: getConsultantPage,
+};
+
+export interface Website {
+    id: string;
+    name: string;
+    lastEdited: string;
+    status: string;
+    pages: any[];
+    activePageId: string;
+}
+
+export interface BuilderState {
+    websites: Website[];
+    activeWebsiteId: string | null;
+    activePageId: string | null;
+    editor: {
+        selectedSectionId: string | null;
+        selectedComponentId: string | null;
+        editMode: string;
+        isDragging: boolean;
+        zoom: number;
+        showGrid: boolean;
+        previewMode: boolean;
+        showLeftPanel: boolean;
+        showRightPanel: boolean;
+    };
+    history: any[][];
+    historyIndex: number;
+
+    setWebsites: (websites: Website[]) => void;
+    createWebsite: (name: string, template?: string) => string;
+    selectWebsite: (id: string) => void;
+    deleteWebsite: (id: string) => void;
+    setActivePage: (pageId: string) => void;
+    addPage: (pageData: any) => void;
+    duplicatePage: (pageId: string) => void;
+    deletePage: (pageId: string) => void;
+    updatePageSEO: (pageId: string, seoUpdates: any) => void;
+    updateWebsitePages: (newPages: any[]) => void;
+    addSection: (section: any, index?: number) => void;
+    updateSection: (sectionId: string, updates: any) => void;
+    deleteSection: (sectionId: string) => void;
+    reorderSections: (ids: string[]) => void;
+    addComponent: (sectionId: string, component: any) => void;
+    updateComponent: (sectionId: string, componentId: string, updates: any) => void;
+    deleteComponent: (sectionId: string, componentId: string) => void;
+    getActiveWebsite: () => Website | undefined;
+    getActivePage: () => any | null;
+    updateCurrentPage: (updates: any) => void;
+    updateNavbar: (updates: any) => void;
+    updateFooter: (updates: any) => void;
+    setEditorState: (updates: any) => void;
+    selectSection: (id: string | null) => void;
+    selectComponent: (id: string | null) => void;
+    undo: () => void;
+    redo: () => void;
+}
+
+const useBuilderStore = create<BuilderState>()(
     persist(
         (set, get) => ({
             // State
@@ -38,7 +101,8 @@ const useBuilderStore = create(
 
             createWebsite: (name, template = 'blank') => {
                 const id = uuidv4();
-                const homePage = getDefaultPage();
+                const templateFn = TEMPLATE_MAP[template] || TEMPLATE_MAP.blank;
+                const homePage = templateFn();
                 const newWebsite = {
                     id,
                     name,

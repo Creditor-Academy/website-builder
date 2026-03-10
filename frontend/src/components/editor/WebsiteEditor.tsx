@@ -174,15 +174,19 @@ function EditorContent() {
   );
 }
 
-export function WebsiteEditor() {
+export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
   const { id } = useParams();
-  const { selectWebsite, activeWebsiteId } = useBuilderStore();
+  const { selectWebsite, activeWebsiteId, createWebsite } = useBuilderStore();
 
   useEffect(() => {
     if (id) {
       selectWebsite(id);
+    } else if (initialPage) {
+      // If we're on a static demo page, create/select the initial data
+      const newId = createWebsite(initialPage.name || "Preview", initialPage.id);
+      selectWebsite(newId);
     }
-  }, [id, selectWebsite]);
+  }, [id, initialPage, selectWebsite, createWebsite]);
 
   if (!activeWebsiteId && id) {
     return (
