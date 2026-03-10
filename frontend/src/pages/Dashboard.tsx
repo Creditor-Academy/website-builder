@@ -23,6 +23,8 @@ import business from "../assets/Bussiness.jpg";
 import ecommerce from "../assets/Ecomm.jpg";
 import portfolio from "../assets/Portfolio.jpg";
 import school from "../assets/School.jpg";
+import learning from "../assets/Learning.jpg";
+import cta from "../assets/CTA.png";
 
 export const templatesList = [
     { id: 'blank', name: 'Blank Canvas', desc: 'Start from scratch with a clean slate', icon: FileText, color: 'bg-slate-100 text-slate-600', image: school, category: 'starter', features: ['Complete creative freedom', 'No predefined structure', 'Perfect for custom designs'] },
@@ -30,7 +32,8 @@ export const templatesList = [
     { id: 'portfolio', name: 'Portfolio', desc: 'Showcase your creative work beautifully', icon: Layout, color: 'bg-purple-100 text-purple-600', image: portfolio, category: 'creative', features: ['Gallery layouts', 'Project showcases', 'About section', 'Contact portfolio'] },
     { id: 'ecommerce', name: 'E-commerce', desc: 'Modern online store with shopping features', icon: ShoppingBag, color: 'bg-green-100 text-green-600', image: ecommerce, category: 'business', features: ['Product catalog', 'Shopping cart', 'Payment integration', 'Product pages'] },
     { id: 'consultant', name: 'Consultant', desc: 'Expert advisory layout for professionals', icon: Users, color: 'bg-amber-100 text-amber-600', image: school, category: 'professional', features: ['Services section', 'Testimonials', 'Booking forms', 'Expert profile'] },
-    { id: 'marketing', name: 'Marketing Agency', desc: 'Bold, high-conversion design for agencies', icon: Sparkles, color: 'bg-rose-100 text-rose-600', image: business, category: 'business', features: ['Growth metrics', 'Lead generation', 'Service tiers', 'Client logos'] },
+    { id: 'agencies', name: 'Agencies', desc: 'Creative & marketing agency layout', icon: Globe, color: 'bg-indigo-100 text-indigo-600', image: learning, category: 'business', features: ['Growth metrics', 'Lead generation', 'Service tiers', 'Client logos'] },
+    { id: 'coaching', name: 'Coaching', desc: 'Course & mentorship layout', icon: Sparkles, color: 'bg-rose-100 text-rose-600', image: cta, category: 'professional', features: ['Curriculum overview', 'Student success', 'Enrollment flow', 'Mentor profile'] },
 ];
 
 const Dashboard = () => {
@@ -55,6 +58,14 @@ const Dashboard = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('websites'); // 'websites' or 'templates'
 
+    const handleDialogClose = (open: boolean) => {
+        setIsDialogOpen(open);
+        if (!open) {
+            setDialogStep('templates');
+            setNewSiteName('');
+        }
+    };
+
     // Filter logic
     const filteredWebsites = websites.filter(site =>
         site.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -71,15 +82,7 @@ const Dashboard = () => {
         }
     };
 
-    const templatesList = [
-        { id: 'blank', name: 'Blank Canvas', desc: 'Start from scratch', icon: FileText, color: 'bg-slate-100 text-slate-600' },
-        { id: 'business', name: 'Business', desc: 'Professional corporate layout', icon: Building2, color: 'bg-blue-100 text-blue-600' },
-        { id: 'portfolio', name: 'Portfolio', desc: 'Showcase your creative work', icon: Layout, color: 'bg-purple-100 text-purple-600' },
-        { id: 'ecommerce', name: 'E-commerce', desc: 'Modern online store', icon: ShoppingBag, color: 'bg-green-100 text-green-600' },
-        { id: 'consultant', name: 'Consultant', desc: 'Expert advisory layout', icon: Users, color: 'bg-amber-100 text-amber-600' },
-        { id: 'agencies', name: 'Agencies', desc: 'Creative & marketing agency layout', icon: Globe, color: 'bg-indigo-100 text-indigo-600' },
-        { id: 'coaching', name: 'Coaching', desc: 'Course & mentorship layout', icon: Sparkles, color: 'bg-rose-100 text-rose-600' },
-    ];
+
 
     return (
         <div className="min-h-screen bg-[#f8fafc] flex font-sans selection:bg-primary/10">
