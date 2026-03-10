@@ -100,16 +100,12 @@ const SectionHeader = ({ content, isEditing, onContentChange, headingColor, para
       Pricing
     </div>
     <h2 style={{ margin: '0 0 1rem', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, color: headingColor, lineHeight: 1.2, letterSpacing: '-0.025em' }}
-      contentEditable={isEditing} suppressContentEditableWarning
-      onBlur={(e) => onContentChange?.('headline', e.currentTarget.textContent)}>
-      {content.headline || 'Simple, Transparent Pricing'}
-    </h2>
+      contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.headline || 'Simple, Transparent Pricing' }}
+      onInput={(e) => onContentChange?.('headline', e.currentTarget.innerHTML)}></h2>
     <div style={{ width: '56px', height: '3px', background: accentGrad, borderRadius: '999px', margin: '0 auto 1.25rem' }} />
     <p style={{ margin: 0, fontSize: '1rem', lineHeight: 1.75, color: paragraphColor, opacity: 0.85 }}
-      contentEditable={isEditing} suppressContentEditableWarning
-      onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.textContent)}>
-      {content.subheadline || 'Choose the plan that works best for you'}
-    </p>
+      contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.subheadline || 'Choose the plan that works best for you' }}
+      onInput={(e) => onContentChange?.('subheadline', e.currentTarget.innerHTML)}></p>
     {showToggle && (
       <div className="toggle-pill">
         <button className={annual ? 'inactive' : 'active'} onClick={() => setAnnual(false)}>Monthly</button>
@@ -141,14 +137,12 @@ const PlanCard = ({ plan, isEditing, onContentChange, content, buttonPrimaryBg, 
           boxShadow: '0 4px 12px rgba(239,68,68,0.35)',
         }}>
           <Zap width={10} height={10} />
-          <span contentEditable={isEditing} suppressContentEditableWarning
-            onBlur={(e) => {
+          <span contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: plan.popularLabel || 'Most Popular' }}
+            onInput={(e) => {
               if (!isEditing || !onContentChange) return;
-              const updated = content.plans.map(p => p.id === plan.id ? { ...p, popularLabel: e.currentTarget.textContent } : p);
+              const updated = content.plans.map(p => p.id === plan.id ? { ...p, popularLabel: e.currentTarget.innerHTML } : p);
               onContentChange('plans', updated);
-            }}>
-            {plan.popularLabel || 'Most Popular'}
-          </span>
+            }}></span>
         </div>
       )}
 
@@ -165,24 +159,20 @@ const PlanCard = ({ plan, isEditing, onContentChange, content, buttonPrimaryBg, 
 
       {/* Plan name */}
       <h3 style={{ margin: '1.5rem 0 0.35rem', fontSize: '1.15rem', fontWeight: 700, color: isPopular ? '#fff' : '#0f172a', letterSpacing: '-0.01em' }}
-        contentEditable={isEditing} suppressContentEditableWarning
-        onBlur={(e) => {
+        contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: plan.name || '' }}
+        onInput={(e) => {
           if (!isEditing || !onContentChange) return;
-          const updated = content.plans.map(p => p.id === plan.id ? { ...p, name: e.currentTarget.textContent } : p);
+          const updated = content.plans.map(p => p.id === plan.id ? { ...p, name: e.currentTarget.innerHTML } : p);
           onContentChange('plans', updated);
-        }}>
-        {plan.name}
-      </h3>
+        }}></h3>
 
       <p style={{ margin: '0 0 1.5rem', fontSize: '0.85rem', lineHeight: 1.6, color: isPopular ? 'rgba(255,255,255,0.65)' : '#64748b' }}
-        contentEditable={isEditing} suppressContentEditableWarning
-        onBlur={(e) => {
+        contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: plan.description || '' }}
+        onInput={(e) => {
           if (!isEditing || !onContentChange) return;
-          const updated = content.plans.map(p => p.id === plan.id ? { ...p, description: e.currentTarget.textContent } : p);
+          const updated = content.plans.map(p => p.id === plan.id ? { ...p, description: e.currentTarget.innerHTML } : p);
           onContentChange('plans', updated);
-        }}>
-        {plan.description}
-      </p>
+        }}></p>
 
       {/* Price */}
       <div style={{ marginBottom: '1.75rem', paddingBottom: '1.75rem', borderBottom: `1px solid ${isPopular ? 'rgba(255,255,255,0.15)' : 'rgba(99,102,241,0.1)'}` }}>
@@ -221,30 +211,26 @@ const PlanCard = ({ plan, isEditing, onContentChange, content, buttonPrimaryBg, 
               <Check width={11} height={11} color={isPopular ? '#fff' : '#6366f1'} strokeWidth={3} />
             </div>
             <span style={{ fontSize: '0.875rem', color: isPopular ? 'rgba(255,255,255,0.85)' : '#475569' }}
-              contentEditable={isEditing} suppressContentEditableWarning
-              onBlur={(e) => {
+              contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: feature || '' }}
+              onInput={(e) => {
                 if (!isEditing || !onContentChange) return;
                 const updatedFeatures = [...(plan.features || [])];
-                updatedFeatures[i] = e.currentTarget.textContent;
+                updatedFeatures[i] = e.currentTarget.innerHTML;
                 const updated = content.plans.map(p => p.id === plan.id ? { ...p, features: updatedFeatures } : p);
                 onContentChange('plans', updated);
-              }}>
-              {feature}
-            </span>
+              }}></span>
           </li>
         ))}
       </ul>
 
       {/* CTA */}
       <button className={isPopular ? 'pricing-cta-popular' : 'pricing-cta-default'}>
-        <span contentEditable={isEditing} suppressContentEditableWarning
-          onBlur={(e) => {
+        <span contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: plan.ctaText || 'Get Started' }}
+          onInput={(e) => {
             if (!isEditing || !onContentChange) return;
-            const updated = content.plans.map(p => p.id === plan.id ? { ...p, ctaText: e.currentTarget.textContent } : p);
+            const updated = content.plans.map(p => p.id === plan.id ? { ...p, ctaText: e.currentTarget.innerHTML } : p);
             onContentChange('plans', updated);
-          }}>
-          {plan.ctaText || 'Get Started'}
-        </span>
+          }}></span>
         <ArrowRight width={14} height={14} />
       </button>
     </div>

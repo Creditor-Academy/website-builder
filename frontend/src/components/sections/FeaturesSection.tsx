@@ -93,14 +93,18 @@ const renderGrid = ({ content, styles, isEditing, onContentChange, headingColor,
             }}
             contentEditable={isEditing}
             suppressContentEditableWarning
-            onBlur={(e) => {
+            dangerouslySetInnerHTML={{ __html: feature.title }}
+            onInput={(e) => {
               if (!isEditing || !onContentChange) return;
-              const updated = content.features.map(f => f.id === feature.id ? { ...f, title: e.currentTarget.textContent } : f);
+              const updated = content.features.map(f => f.id === feature.id ? { ...f, title: e.currentTarget.innerHTML } : f);
               onContentChange('features', updated);
             }}
-          >
-            {feature.title}
-          </h3>
+            onBlur={(e) => {
+              if (!isEditing || !onContentChange) return;
+              const updated = content.features.map(f => f.id === feature.id ? { ...f, title: e.currentTarget.innerHTML } : f);
+              onContentChange('features', updated);
+            }}
+          />
 
           <p
             style={{
@@ -111,14 +115,18 @@ const renderGrid = ({ content, styles, isEditing, onContentChange, headingColor,
             }}
             contentEditable={isEditing}
             suppressContentEditableWarning
-            onBlur={(e) => {
+            dangerouslySetInnerHTML={{ __html: feature.description }}
+            onInput={(e) => {
               if (!isEditing || !onContentChange) return;
-              const updated = content.features.map(f => f.id === feature.id ? { ...f, description: e.currentTarget.textContent } : f);
+              const updated = content.features.map(f => f.id === feature.id ? { ...f, description: e.currentTarget.innerHTML } : f);
               onContentChange('features', updated);
             }}
-          >
-            {feature.description}
-          </p>
+            onBlur={(e) => {
+              if (!isEditing || !onContentChange) return;
+              const updated = content.features.map(f => f.id === feature.id ? { ...f, description: e.currentTarget.innerHTML } : f);
+              onContentChange('features', updated);
+            }}
+          />
 
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: '5px',
@@ -203,14 +211,18 @@ const renderList = ({ content, styles, isEditing, onContentChange, headingColor,
               }}
               contentEditable={isEditing}
               suppressContentEditableWarning
-              onBlur={(e) => {
+              dangerouslySetInnerHTML={{ __html: feature.title }}
+              onInput={(e) => {
                 if (!isEditing || !onContentChange) return;
-                const updated = content.features.map(f => f.id === feature.id ? { ...f, title: e.currentTarget.textContent } : f);
+                const updated = content.features.map(f => f.id === feature.id ? { ...f, title: e.currentTarget.innerHTML } : f);
                 onContentChange('features', updated);
               }}
-            >
-              {feature.title}
-            </h3>
+              onBlur={(e) => {
+                if (!isEditing || !onContentChange) return;
+                const updated = content.features.map(f => f.id === feature.id ? { ...f, title: e.currentTarget.innerHTML } : f);
+                onContentChange('features', updated);
+              }}
+            />
 
             <p
               style={{
@@ -221,14 +233,18 @@ const renderList = ({ content, styles, isEditing, onContentChange, headingColor,
               }}
               contentEditable={isEditing}
               suppressContentEditableWarning
-              onBlur={(e) => {
+              dangerouslySetInnerHTML={{ __html: feature.description }}
+              onInput={(e) => {
                 if (!isEditing || !onContentChange) return;
-                const updated = content.features.map(f => f.id === feature.id ? { ...f, description: e.currentTarget.textContent } : f);
+                const updated = content.features.map(f => f.id === feature.id ? { ...f, description: e.currentTarget.innerHTML } : f);
                 onContentChange('features', updated);
               }}
-            >
-              {feature.description}
-            </p>
+              onBlur={(e) => {
+                if (!isEditing || !onContentChange) return;
+                const updated = content.features.map(f => f.id === feature.id ? { ...f, description: e.currentTarget.innerHTML } : f);
+                onContentChange('features', updated);
+              }}
+            />
           </div>
 
           <div style={{

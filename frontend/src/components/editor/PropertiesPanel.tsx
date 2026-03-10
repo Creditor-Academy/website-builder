@@ -733,6 +733,90 @@ export function PropertiesPanel() {
         </div>
       );
 
+      case 'team': return (
+        <div className="space-y-4">
+          <div className="space-y-2"><Label className="text-xs font-medium">Headline</Label><Input value={content.headline || ''} onChange={(e) => handleContentChange('headline', e.target.value)} className="bg-white border-slate-200 text-xs" /></div>
+          <div className="space-y-2"><Label className="text-xs font-medium">Subheadline</Label><Textarea value={content.subheadline || ''} onChange={(e) => handleContentChange('subheadline', e.target.value)} className="bg-white border-slate-200 resize-none text-xs" rows={2} /></div>
+          <div className="space-y-3">
+            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Team Members</Label>
+            <div className="space-y-3">
+              {(content.members || []).map((m) => (
+                <div key={m.id} className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+                  <div className="flex gap-2 items-center">
+                    <div className="w-12 h-12 rounded-full border border-slate-200 overflow-hidden bg-white shrink-0 cursor-pointer group relative" onClick={() => openMediaPicker(selectedSection.id, 'avatar', false, m.id, 'members')}>
+                      {m.avatar ? <img src={m.avatar} className="w-full h-full object-cover" /> : <Users className="w-5 h-5 m-3.5 text-slate-300" />}
+                      <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                        <Search className="w-3 h-3 text-white" />
+                      </div>
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <Input value={m.name || ''} className="text-[10px] font-bold h-6" onChange={(e) => {
+                        const updated = content.members.map(x => x.id === m.id ? { ...x, name: e.target.value } : x);
+                        handleContentChange('members', updated);
+                      }} placeholder="Name" />
+                      <Input value={m.role || ''} className="text-[9px] h-5" onChange={(e) => {
+                        const updated = content.members.map(x => x.id === m.id ? { ...x, role: e.target.value } : x);
+                        handleContentChange('members', updated);
+                      }} placeholder="Role" />
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => {
+                      const updated = content.members.filter(x => x.id !== m.id);
+                      handleContentChange('members', updated);
+                    }}><X className="w-4 h-4" /></Button>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[9px] font-medium text-slate-500">Social Links</Label>
+                    {(m.social || []).map((s, idx) => (
+                      <div key={idx} className="flex gap-1 items-center">
+                        <Select value={s.platform || 'linkedin'} onValueChange={(value) => {
+                          const updatedMembers = content.members.map(x => x.id === m.id ? {
+                            ...x,
+                            social: x.social.map((soc, i) => i === idx ? { ...soc, platform: value } : soc)
+                          } : x);
+                          handleContentChange('members', updatedMembers);
+                        }} className="h-6 text-[8px]">
+                          <SelectTrigger className="w-16 h-6"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="linkedin" className="text-[8px]">LinkedIn</SelectItem>
+                            <SelectItem value="twitter" className="text-[8px]">Twitter</SelectItem>
+                            <SelectItem value="github" className="text-[8px]">GitHub</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Input value={s.url || ''} className="text-[9px] h-6 flex-1" onChange={(e) => {
+                          const updatedMembers = content.members.map(x => x.id === m.id ? {
+                            ...x,
+                            social: x.social.map((soc, i) => i === idx ? { ...soc, url: e.target.value } : soc)
+                          } : x);
+                          handleContentChange('members', updatedMembers);
+                        }} placeholder="URL" />
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => {
+                          const updatedMembers = content.members.map(x => x.id === m.id ? {
+                            ...x,
+                            social: x.social.filter((_, i) => i !== idx)
+                          } : x);
+                          handleContentChange('members', updatedMembers);
+                        }}><X className="w-3 h-3" /></Button>
+                      </div>
+                    ))}
+                    <Button variant="outline" size="sm" className="w-full text-[9px] h-6 border-dashed" onClick={() => {
+                      const updatedMembers = content.members.map(x => x.id === m.id ? {
+                        ...x,
+                        social: [...(x.social || []), { platform: 'linkedin', url: '' }]
+                      } : x);
+                      handleContentChange('members', updatedMembers);
+                    }}>+ Add Link</Button>
+                  </div>
+                </div>
+              ))}
+              <Button variant="outline" size="sm" className="w-full text-[10px] font-bold h-8 border-dashed" onClick={() => {
+                const newMember = { id: uuidv4(), name: 'New Member', role: 'Role', avatar: '', social: [] };
+                handleContentChange('members', [...(content.members || []), newMember]);
+              }}>+ Add Member</Button>
+            </div>
+          </div>
+        </div>
+      );
+
       default: return <div className="text-center py-12 px-4 space-y-3">
         <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-300">
           <Layout className="w-6 h-6" />

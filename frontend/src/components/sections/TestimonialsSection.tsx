@@ -1,282 +1,258 @@
 import React from 'react';
 import { Quote, Star } from 'lucide-react';
 
-export function TestimonialsSection({ section, isSelected, isEditing, onContentChange }) {
-  const { content, styles } = section;
-  const testimonials = content.testimonials || [];
-  const variant = section.variant || 'cards';
-  const background = styles.useGradient ? (styles.backgroundGradient || styles.backgroundColor) : (styles.backgroundColor || '#ffffff');
-  const padding = styles.padding || '100px 0';
-  
-  // Get text colors with fallbacks
-  const headingColor = styles.headingColor || '#0f172a';
-  const paragraphColor = styles.paragraphColor || '#64748b';
+// ─── Global styles injected once ──────────────────────────────────────────
+const STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Syne:wght@400;500;700&display=swap');
 
-  if (variant === 'carousel') {
-    return (
-      <section className="relative" style={{ background, padding }}>
-        <div className="container mx-auto px-6 max-w-7xl">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 
-              className="text-4xl md:text-5xl font-bold mb-6" 
-              style={{ color: headingColor }}
-              contentEditable={isEditing} 
-              suppressContentEditableWarning 
-              onBlur={(e) => onContentChange?.('headline', e.currentTarget.textContent)}
-            >
-              {content.headline || 'What Our Clients Say'}
-            </h2>
-            <p 
-              className="text-lg opacity-80" 
-              style={{ color: paragraphColor }}
-              contentEditable={isEditing} 
-              suppressContentEditableWarning 
-              onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.textContent)}
-            >
-              {content.subheadline || 'Trusted by thousands of happy customers worldwide'}
-            </p>
-          </div>
-          <div className="overflow-x-auto whitespace-nowrap py-4 hide-scrollbar">
-            {testimonials.map((t, i) => (
-              <div key={t.id || i} className="inline-block w-80 mr-4 p-6 shadow-lg border border-slate-100" style={{ borderRadius: styles.borderRadius || '16px', background: styles.cardBackgroundColor || '#ffffff' }}>
-                <Quote className="w-8 h-8 text-blue-500/30 mb-4" />
-                <p 
-                  className="text-slate-600 mb-4"
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => {
-                    if (!isEditing || !onContentChange) return;
-                    const updated = content.testimonials.map((test) => test.id === t.id ? { ...test, quote: e.currentTarget.textContent.replace(/^"|"$/g, '') } : test);
-                    onContentChange('testimonials', updated);
-                  }}
-                >
-                  "{t.quote}"
-                </p>
-                <div className="flex items-center gap-2">
-                  <img src={t.avatar} alt={t.name} className="w-10 h-10 object-cover" style={{ borderRadius: styles.borderRadius ? `calc(${styles.borderRadius} * 0.5)` : '50%' }} />
-                  <div>
-                    <h4 
-                      className="font-semibold"
-                      contentEditable={isEditing}
-                      suppressContentEditableWarning
-                      onBlur={(e) => {
-                        if (!isEditing || !onContentChange) return;
-                        const updated = content.testimonials.map((test) => test.id === t.id ? { ...test, name: e.currentTarget.textContent } : test);
-                        onContentChange('testimonials', updated);
-                      }}
-                    >
-                      {t.name}
-                    </h4>
-                    <p 
-                      className="text-sm text-slate-500"
-                      contentEditable={isEditing}
-                      suppressContentEditableWarning
-                      onBlur={(e) => {
-                        if (!isEditing || !onContentChange) return;
-                        const updated = content.testimonials.map((test) => test.id === t.id ? { ...test, role: e.currentTarget.textContent } : test);
-                        onContentChange('testimonials', updated);
-                      }}
-                    >
-                      {t.role}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
+  @keyframes t-fade-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes t-scale-in {
+    from { opacity: 0; transform: scale(0.94); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes t-line-grow {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+  @keyframes t-float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+  }
+  @keyframes t-marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
   }
 
-  if (variant === 'quote') {
-    const t = testimonials[0] || {};
-    return (
-      <section className="relative" style={{ background, padding }}>
-        <div className="container mx-auto px-6 max-w-5xl text-center">
-          <Quote className="w-12 h-12 text-blue-500/20 mb-6" />
-          <blockquote 
-            className="text-2xl md:text-3xl font-semibold"
-            style={{ color: headingColor }}
+  .t-ce:focus { outline: none; }
+  .t-ce[contenteditable="true"] {
+    border-bottom: 1.5px dashed rgba(0,0,0,0.18);
+    cursor: text;
+  }
+  .t-ce-light[contenteditable="true"] {
+    border-bottom: 1.5px dashed rgba(255,255,255,0.3);
+  }
+
+  .t-card-hover {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .t-card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 24px 48px -12px rgba(0,0,0,0.14);
+  }
+
+  .t-carousel-track {
+    display: flex;
+    animation: t-marquee 32s linear infinite;
+  }
+  .t-carousel-track:hover {
+    animation-play-state: paused;
+  }
+
+  .t-hide-scroll::-webkit-scrollbar { display: none; }
+  .t-hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+`;
+
+function InjectStyles() {
+  if (typeof document !== 'undefined' && !document.getElementById('testimonials-styles')) {
+    const el = document.createElement('style');
+    el.id = 'testimonials-styles';
+    el.textContent = STYLES;
+    document.head.appendChild(el);
+  }
+  return null;
+}
+
+// ─── Shared editable wrappers ──────────────────────────────────────────────
+function EditEl({ as: Tag = 'span', value, onBlur, isEditing, style, className, lightMode }) {
+  return (
+    <Tag
+      className={`t-ce ${lightMode ? 't-ce-light' : ''} ${className || ''}`}
+      style={style}
+      contentEditable={isEditing}
+      suppressContentEditableWarning
+      onBlur={isEditing ? (e) => onBlur(e.currentTarget.innerHTML || '') : undefined}
+      dangerouslySetInnerHTML={{ __html: value || '' }}
+    />
+  );
+}
+
+function starRow(rating = 5) {
+  return (
+    <div style={{ display: 'flex', gap: 3, marginBottom: 20 }}>
+      {[...Array(5)].map((_, i) => (
+        <Star
+          key={i}
+          size={13}
+          style={{
+            color: i < rating ? '#F59E0B' : 'rgba(0,0,0,0.12)',
+            fill: i < rating ? '#F59E0B' : 'transparent',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function avatarStyle(borderRadius, size = 44) {
+  return {
+    width: size,
+    height: size,
+    objectFit: 'cover',
+    borderRadius: borderRadius ? `calc(${borderRadius} * 0.5)` : '50%',
+    flexShrink: 0,
+  };
+}
+
+// ─── Section label component ──────────────────────────────────────────────
+function SectionLabel({ text }) {
+  return (
+    <div style={{
+      display: 'inline-flex', alignItems: 'center', gap: 10,
+      fontFamily: "'Syne', sans-serif",
+      fontSize: 10, letterSpacing: '0.22em',
+      textTransform: 'uppercase', color: '#94a3b8',
+      marginBottom: 20,
+    }}>
+      <div style={{ width: 20, height: 1, background: '#94a3b8' }} />
+      {text}
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// VARIANT: cards  →  Luxury Editorial Grid
+// ──────────────────────────────────────────────────────────────────────────
+function CardsVariant({ testimonials, content, styles, isEditing, onContentChange, background, padding, headingColor, paragraphColor }) {
+  const updateT = (t, field, val) => {
+    if (!isEditing || !onContentChange) return;
+    const updated = content.testimonials.map((test) =>
+      test.id === t.id ? { ...test, [field]: val } : test
+    );
+    onContentChange('testimonials', updated);
+  };
+
+  return (
+    <section style={{ background: background || '#fafaf8', padding, fontFamily: "'Syne', sans-serif", position: 'relative', overflow: 'hidden' }}>
+      <InjectStyles />
+
+      {/* background texture */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        backgroundImage: 'radial-gradient(circle at 80% 20%, rgba(245,158,11,0.05) 0%, transparent 60%), radial-gradient(circle at 10% 80%, rgba(99,102,241,0.04) 0%, transparent 50%)',
+      }} />
+
+      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px', position: 'relative' }}>
+
+        {/* Header */}
+        <div style={{ maxWidth: 600, marginBottom: 64 }}>
+          <SectionLabel text="testimonials" />
+          <h2
+            className="t-ce"
+            style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 'clamp(36px, 4.5vw, 58px)',
+              fontWeight: 600, lineHeight: 1.1,
+              color: headingColor, marginBottom: 16,
+              animation: 't-fade-up 0.6s ease both',
+            }}
             contentEditable={isEditing}
             suppressContentEditableWarning
-            onBlur={(e) => {
-              if (!isEditing || !onContentChange) return;
-              const updated = content.testimonials.map((test) => test.id === t.id ? { ...test, quote: e.currentTarget.textContent.replace(/^"|"$/g, '') } : test);
-              onContentChange('testimonials', updated);
+            dangerouslySetInnerHTML={{ __html: content.headline || 'What Our Clients Say' }}
+            onInput={(e) => onContentChange?.('headline', e.currentTarget.innerHTML)}
+          ></h2>
+          <p
+            className="t-ce"
+            style={{
+              fontFamily: "'Syne', sans-serif",
+              fontSize: 15, lineHeight: 1.7,
+              color: paragraphColor, opacity: 0.75,
+              animation: 't-fade-up 0.6s ease 0.1s both',
             }}
-          >
-            "{t.quote || 'Great product!' }"
-          </blockquote>
-          <div className="mt-6">
-            <h4 
-              className="font-semibold"
-              style={{ color: headingColor }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => {
-                if (!isEditing || !onContentChange) return;
-                const updated = content.testimonials.map((test) => test.id === t.id ? { ...test, name: e.currentTarget.textContent } : test);
-                onContentChange('testimonials', updated);
-              }}
-            >
-              {t.name}
-            </h4>
-            <p 
-              className="text-sm"
-              style={{ color: paragraphColor }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => {
-                if (!isEditing || !onContentChange) return;
-                const updated = content.testimonials.map((test) => test.id === t.id ? { ...test, role: e.currentTarget.textContent } : test);
-                onContentChange('testimonials', updated);
-              }}
-            >
-              {t.role}
-            </p>
-          </div>
+            contentEditable={isEditing}
+            suppressContentEditableWarning
+            dangerouslySetInnerHTML={{ __html: content.subheadline || 'Trusted by thousands of happy customers worldwide' }}
+            onInput={(e) => onContentChange?.('subheadline', e.currentTarget.innerHTML)}
+          ></p>
         </div>
-      </section>
-    );
-  }
 
-  if (variant === 'minimal') {
-    return (
-      <section className="relative" style={{ background, padding }}>
-        <div className="container mx-auto px-6 max-w-4xl">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 
-              className="text-4xl md:text-5xl font-bold mb-6" 
-              style={{ color: headingColor }}
-              contentEditable={isEditing} 
-              suppressContentEditableWarning 
-              onBlur={(e) => onContentChange?.('headline', e.currentTarget.textContent)}
+        {/* Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: 24,
+        }}>
+          {testimonials.map((t, index) => (
+            <div
+              key={t.id || index}
+              className="t-card-hover"
+              style={{
+                background: styles.cardBackgroundColor || '#ffffff',
+                borderRadius: styles.borderRadius || '4px',
+                padding: '40px 36px',
+                border: '1px solid rgba(0,0,0,0.07)',
+                position: 'relative',
+                animation: `t-scale-in 0.5s ease ${index * 0.07}s both`,
+              }}
             >
-              {content.headline || 'What Our Clients Say'}
-            </h2>
-            <p 
-              className="text-lg opacity-80" 
-              style={{ color: paragraphColor }}
-              contentEditable={isEditing} 
-              suppressContentEditableWarning 
-              onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.textContent)}
-            >
-              {content.subheadline || 'Trusted by thousands of happy customers worldwide'}
-            </p>
-          </div>
-          <div className="space-y-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={testimonial.id || index} className="border-l-4 pl-6 py-4" style={{ borderColor: 'rgba(59, 130, 246, 0.3)' }}>
-                <p 
-                  className="text-lg mb-4 leading-relaxed"
-                  style={{ color: paragraphColor }}
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => {
-                    if (!isEditing || !onContentChange) return;
-                    const updated = content.testimonials.map((test) => test.id === testimonial.id ? { ...test, quote: e.currentTarget.textContent.replace(/^"|"$/g, '') } : test);
-                    onContentChange('testimonials', updated);
-                  }}
-                >
-                  "{testimonial.quote}"
-                </p>
-                <div className="flex items-center gap-3">
-                  {testimonial.avatar && (
-                    <img src={testimonial.avatar} alt={testimonial.name} className="w-10 h-10 object-cover" style={{ borderRadius: styles.borderRadius ? `calc(${styles.borderRadius} * 0.5)` : '50%' }} />
-                  )}
-                  <div>
-                    <h4 
-                      className="font-semibold"
-                      style={{ color: headingColor }}
-                      contentEditable={isEditing}
-                      suppressContentEditableWarning
-                      onBlur={(e) => {
-                        if (!isEditing || !onContentChange) return;
-                        const updated = content.testimonials.map((test) => test.id === testimonial.id ? { ...test, name: e.currentTarget.textContent } : test);
-                        onContentChange('testimonials', updated);
-                      }}
-                    >
-                      {testimonial.name}
-                    </h4>
-                    <p 
-                      className="text-sm"
-                      style={{ color: paragraphColor }}
-                      contentEditable={isEditing}
-                      suppressContentEditableWarning
-                      onBlur={(e) => {
-                        if (!isEditing || !onContentChange) return;
-                        const updated = content.testimonials.map((test) => test.id === testimonial.id ? { ...test, role: e.currentTarget.textContent } : test);
-                        onContentChange('testimonials', updated);
-                      }}
-                    >
-                      {testimonial.role}
-                    </p>
-                  </div>
-                </div>
+              {/* accent top line */}
+              <div style={{
+                position: 'absolute', top: 0, left: 36, right: 36,
+                height: 2,
+                background: index % 3 === 0 ? '#F59E0B' : index % 3 === 1 ? '#6366f1' : '#10b981',
+                borderRadius: '0 0 2px 2px',
+                transformOrigin: 'left',
+                animation: `t-line-grow 0.6s ease ${index * 0.1}s both`,
+              }} />
+
+              {/* quote icon */}
+              <div style={{ marginBottom: 20 }}>
+                <Quote size={28} style={{ color: 'rgba(0,0,0,0.08)' }} />
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
 
-  // default cards
-  return (
-    <section className="relative" style={{ background, padding }}>
-      <div className="container mx-auto px-6 max-w-7xl">
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: headingColor }} contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('headline', e.currentTarget.textContent)}>{content.headline || 'What Our Clients Say'}</h2>
-          <p className="text-lg opacity-80" style={{ color: paragraphColor }} contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.textContent)}>{content.subheadline || 'Trusted by thousands of happy customers worldwide'}</p>
-        </div>
+              {starRow(t.rating || 5)}
 
-        {/* Testimonials Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {testimonials.map((testimonial, index) => (
-            <div key={testimonial.id || index} className="p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100" style={{ borderRadius: styles.borderRadius || '16px', background: styles.cardBackgroundColor || '#ffffff' }}>
-              <Quote className="w-10 h-10 text-blue-500/30 mb-4" />
-              <p 
-                className="text-slate-600 mb-6 leading-relaxed"
+              {/* quote text */}
+              <p
+                className="t-ce"
+                style={{
+                  fontFamily: "'Cormorant Garamond', serif",
+                  fontSize: 20, lineHeight: 1.65,
+                  color: paragraphColor || '#374151',
+                  marginBottom: 32, fontStyle: 'italic',
+                }}
                 contentEditable={isEditing}
                 suppressContentEditableWarning
-                onBlur={(e) => {
-                  if (!isEditing || !onContentChange) return;
-                  const updated = content.testimonials.map((test) => test.id === testimonial.id ? { ...test, quote: e.currentTarget.textContent.replace(/^"|"$/g, '') } : test);
-                  onContentChange('testimonials', updated);
-                }}
-              >
-                "{testimonial.quote}"
-              </p>
-              <div className="flex items-center gap-1 mb-4">{[...Array(5)].map((_, i) => (<Star key={i} className={`w-4 h-4 ${i < (testimonial.rating || 5) ? 'text-yellow-400 fill-yellow-400' : 'text-slate-300'}`} />))}</div>
-              <div className="flex items-center gap-4">
-                <img src={testimonial.avatar} alt={testimonial.name} className="w-12 h-12 object-cover" style={{ borderRadius: styles.borderRadius ? `calc(${styles.borderRadius} * 0.5)` : '50%' }} />
+                dangerouslySetInnerHTML={{ __html: t.quote ? `"${t.quote}"` : '""' }}
+                onInput={(e) => updateT(t, 'quote', e.currentTarget.innerHTML.replace(/^"|"$/g, ''))}
+              ></p>
+
+              {/* author */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <img src={t.avatar} alt={t.name} style={avatarStyle(styles.borderRadius)} />
                 <div>
-                  <h4 
-                    className="font-semibold text-slate-900"
+                  <p
+                    className="t-ce"
+                    style={{
+                      fontFamily: "'Syne', sans-serif",
+                      fontWeight: 700, fontSize: 13,
+                      color: headingColor || '#0f172a', letterSpacing: '0.05em',
+                    }}
                     contentEditable={isEditing}
                     suppressContentEditableWarning
-                    onBlur={(e) => {
-                      if (!isEditing || !onContentChange) return;
-                      const updated = content.testimonials.map((test) => test.id === testimonial.id ? { ...test, name: e.currentTarget.textContent } : test);
-                      onContentChange('testimonials', updated);
-                    }}
-                  >
-                    {testimonial.name}
-                  </h4>
-                  <p 
-                    className="text-sm text-slate-500"
+                    dangerouslySetInnerHTML={{ __html: t.name || '' }}
+                    onInput={(e) => updateT(t, 'name', e.currentTarget.innerHTML)}
+                  ></p>
+                  <p
+                    className="t-ce"
+                    style={{ fontSize: 12, color: paragraphColor || '#64748b', marginTop: 2, letterSpacing: '0.04em' }}
                     contentEditable={isEditing}
                     suppressContentEditableWarning
-                    onBlur={(e) => {
-                      if (!isEditing || !onContentChange) return;
-                      const updated = content.testimonials.map((test) => test.id === testimonial.id ? { ...test, role: e.currentTarget.textContent } : test);
-                      onContentChange('testimonials', updated);
-                    }}
-                  >
-                    {testimonial.role}
-                  </p>
+                    dangerouslySetInnerHTML={{ __html: t.role || '' }}
+                    onInput={(e) => updateT(t, 'role', e.currentTarget.innerHTML)}
+                  ></p>
                 </div>
               </div>
             </div>
@@ -285,4 +261,372 @@ export function TestimonialsSection({ section, isSelected, isEditing, onContentC
       </div>
     </section>
   );
-} 
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// VARIANT: carousel  →  Infinite Dark Marquee
+// ──────────────────────────────────────────────────────────────────────────
+function CarouselVariant({ testimonials, content, styles, isEditing, onContentChange, background, padding, headingColor, paragraphColor }) {
+  const updateT = (t, field, val) => {
+    if (!isEditing || !onContentChange) return;
+    const updated = content.testimonials.map((test) =>
+      test.id === t.id ? { ...test, [field]: val } : test
+    );
+    onContentChange('testimonials', updated);
+  };
+
+  const doubled = [...testimonials, ...testimonials]; // for seamless marquee
+
+  return (
+    <section style={{ background: background || '#09090b', padding, fontFamily: "'Syne', sans-serif", position: 'relative', overflow: 'hidden' }}>
+      <InjectStyles />
+
+      {/* edge fades */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, bottom: 0, width: 160, zIndex: 2,
+        background: `linear-gradient(to right, ${background || '#09090b'}, transparent)`,
+        pointerEvents: 'none',
+      }} />
+      <div style={{
+        position: 'absolute', top: 0, right: 0, bottom: 0, width: 160, zIndex: 2,
+        background: `linear-gradient(to left, ${background || '#09090b'}, transparent)`,
+        pointerEvents: 'none',
+      }} />
+
+      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px', position: 'relative' }}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 64 }}>
+          <SectionLabel text="testimonials" />
+          <h2
+            className="t-ce t-ce-light"
+            style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 'clamp(36px, 4.5vw, 60px)',
+              fontWeight: 600, lineHeight: 1.1,
+              color: headingColor || '#f8fafc', marginBottom: 16,
+            }}
+            contentEditable={isEditing}
+            suppressContentEditableWarning
+            onBlur={(e) => onContentChange?.('headline', e.currentTarget.textContent)}
+          >
+            {content.headline || 'What Our Clients Say'}
+          </h2>
+          <p
+            className="t-ce t-ce-light"
+            style={{ fontSize: 15, color: paragraphColor || '#94a3b8', lineHeight: 1.7 }}
+            contentEditable={isEditing}
+            suppressContentEditableWarning
+            onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.textContent)}
+          >
+            {content.subheadline || 'Trusted by thousands of happy customers worldwide'}
+          </p>
+        </div>
+      </div>
+
+      {/* Scrolling track — full bleed */}
+      <div style={{ overflow: 'hidden', width: '100%' }}>
+        {isEditing ? (
+          // In editing mode, show static row
+          <div style={{ display: 'flex', gap: 20, padding: '0 40px', overflowX: 'auto' }} className="t-hide-scroll">
+            {testimonials.map((t, i) => (
+              <CarouselCard key={t.id || i} t={t} i={i} styles={styles} isEditing={isEditing} updateT={updateT} paragraphColor={paragraphColor} headingColor={headingColor} />
+            ))}
+          </div>
+        ) : (
+          <div className="t-carousel-track" style={{ gap: 20 }}>
+            {doubled.map((t, i) => (
+              <CarouselCard key={`${t.id || i}-${i}`} t={t} i={i} styles={styles} isEditing={isEditing} updateT={updateT} paragraphColor={paragraphColor} headingColor={headingColor} />
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function CarouselCard({ t, i, styles, isEditing, updateT, paragraphColor, headingColor }) {
+  return (
+    <div style={{
+      minWidth: 320, maxWidth: 320,
+      background: 'rgba(255,255,255,0.04)',
+      border: '1px solid rgba(255,255,255,0.08)',
+      borderRadius: styles.borderRadius || '4px',
+      padding: '32px 28px',
+      flexShrink: 0,
+    }}>
+      <Quote size={22} style={{ color: 'rgba(255,255,255,0.15)', marginBottom: 16 }} />
+      <p
+        className="t-ce t-ce-light"
+        style={{
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: 18, lineHeight: 1.65, fontStyle: 'italic',
+          color: 'rgba(255,255,255,0.75)', marginBottom: 24,
+        }}
+        contentEditable={isEditing}
+        suppressContentEditableWarning
+        onBlur={(e) => updateT(t, 'quote', e.currentTarget.textContent.replace(/^"|"$/g, ''))}
+      >
+        "{t.quote}"
+      </p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <img src={t.avatar} alt={t.name} style={avatarStyle(styles.borderRadius, 38)} />
+        <div>
+          <p
+            className="t-ce t-ce-light"
+            style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 12, color: '#f1f5f9', letterSpacing: '0.06em' }}
+            contentEditable={isEditing}
+            suppressContentEditableWarning
+            onBlur={(e) => updateT(t, 'name', e.currentTarget.textContent)}
+          >
+            {t.name}
+          </p>
+          <p
+            className="t-ce t-ce-light"
+            style={{ fontSize: 11, color: 'rgba(255,255,255,0.38)', marginTop: 2, letterSpacing: '0.04em' }}
+            contentEditable={isEditing}
+            suppressContentEditableWarning
+            onBlur={(e) => updateT(t, 'role', e.currentTarget.textContent)}
+          >
+            {t.role}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// VARIANT: quote  →  Cinematic Full-Bleed Pull Quote
+// ──────────────────────────────────────────────────────────────────────────
+function QuoteVariant({ testimonials, content, styles, isEditing, onContentChange, background, padding, headingColor, paragraphColor }) {
+  const t = testimonials[0] || {};
+  const updateT = (field, val) => {
+    if (!isEditing || !onContentChange) return;
+    const updated = content.testimonials.map((test) =>
+      test.id === t.id ? { ...test, [field]: val } : test
+    );
+    onContentChange('testimonials', updated);
+  };
+
+  return (
+    <section style={{ background: background || '#0f0f0f', padding, fontFamily: "'Syne', sans-serif", position: 'relative', overflow: 'hidden' }}>
+      <InjectStyles />
+
+      {/* decorative giant quotemark */}
+      <div style={{
+        position: 'absolute', top: '-5%', left: '3%',
+        fontFamily: "'Cormorant Garamond', serif",
+        fontSize: '35vw', fontWeight: 600, lineHeight: 1,
+        color: 'rgba(255,255,255,0.025)',
+        userSelect: 'none', pointerEvents: 'none',
+      }}>
+        "
+      </div>
+
+      <div style={{
+        maxWidth: 860, margin: '0 auto', padding: '0 48px',
+        position: 'relative', textAlign: 'center',
+      }}>
+
+        {/* Stars */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 4, marginBottom: 40 }}>
+          {[...Array(5)].map((_, i) => (
+            <Star key={i} size={16} style={{ color: '#F59E0B', fill: '#F59E0B' }} />
+          ))}
+        </div>
+
+        {/* Quote */}
+        <blockquote
+          className="t-ce t-ce-light"
+          style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: 'clamp(28px, 4vw, 52px)',
+            fontWeight: 400, fontStyle: 'italic',
+            lineHeight: 1.35,
+            color: headingColor || '#f8fafc',
+            marginBottom: 48,
+            animation: 't-fade-up 0.7s ease both',
+          }}
+          contentEditable={isEditing}
+          suppressContentEditableWarning
+          onBlur={(e) => updateT('quote', e.currentTarget.textContent.replace(/^"|"$/g, ''))}
+        >
+          "{t.quote || 'Great product!'}"
+        </blockquote>
+
+        {/* Divider */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, marginBottom: 28 }}>
+          <div style={{ width: 60, height: 1, background: 'rgba(255,255,255,0.15)' }} />
+          <img src={t.avatar} alt={t.name} style={{ ...avatarStyle(styles.borderRadius, 48), animation: 't-float 3s ease-in-out infinite' }} />
+          <div style={{ width: 60, height: 1, background: 'rgba(255,255,255,0.15)' }} />
+        </div>
+
+        {/* Name & role */}
+        <p
+          className="t-ce t-ce-light"
+          style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: '0.12em', textTransform: 'uppercase', color: headingColor || '#f8fafc', marginBottom: 6 }}
+          contentEditable={isEditing}
+          suppressContentEditableWarning
+          onBlur={(e) => updateT('name', e.currentTarget.textContent)}
+        >
+          {t.name}
+        </p>
+        <p
+          className="t-ce t-ce-light"
+          style={{ fontSize: 12, letterSpacing: '0.08em', color: paragraphColor || '#94a3b8' }}
+          contentEditable={isEditing}
+          suppressContentEditableWarning
+          onBlur={(e) => updateT('role', e.currentTarget.textContent)}
+        >
+          {t.role}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// VARIANT: minimal  →  Refined Left-Spine Layout
+// ──────────────────────────────────────────────────────────────────────────
+function MinimalVariant({ testimonials, content, styles, isEditing, onContentChange, background, padding, headingColor, paragraphColor }) {
+  const updateT = (t, field, val) => {
+    if (!isEditing || !onContentChange) return;
+    const updated = content.testimonials.map((test) =>
+      test.id === t.id ? { ...test, [field]: val } : test
+    );
+    onContentChange('testimonials', updated);
+  };
+
+  const accents = ['#F59E0B', '#6366f1', '#10b981', '#ef4444'];
+
+  return (
+    <section style={{ background: background || '#fafaf9', padding, fontFamily: "'Syne', sans-serif", position: 'relative' }}>
+      <InjectStyles />
+
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 48px' }}>
+
+        {/* Header — left aligned */}
+        <div style={{ marginBottom: 72, maxWidth: 540 }}>
+          <SectionLabel text="testimonials" />
+          <h2
+            className="t-ce"
+            style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 'clamp(32px, 4vw, 52px)',
+              fontWeight: 600, lineHeight: 1.1,
+              color: headingColor, marginBottom: 14,
+              animation: 't-fade-up 0.5s ease both',
+            }}
+            contentEditable={isEditing}
+            suppressContentEditableWarning
+            onBlur={(e) => onContentChange?.('headline', e.currentTarget.textContent)}
+          >
+            {content.headline || 'What Our Clients Say'}
+          </h2>
+          <p
+            className="t-ce"
+            style={{ fontSize: 15, color: paragraphColor, lineHeight: 1.7, opacity: 0.75 }}
+            contentEditable={isEditing}
+            suppressContentEditableWarning
+            onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.textContent)}
+          >
+            {content.subheadline || 'Trusted by thousands of happy customers worldwide'}
+          </p>
+        </div>
+
+        {/* Testimonials — indexed list */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+          {testimonials.map((t, index) => {
+            const accent = accents[index % accents.length];
+            return (
+              <div
+                key={t.id || index}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '40px 1fr',
+                  gap: '0 32px',
+                  paddingBottom: 48,
+                  marginBottom: 48,
+                  borderBottom: index < testimonials.length - 1 ? '1px solid rgba(0,0,0,0.07)' : 'none',
+                  animation: `t-fade-up 0.5s ease ${index * 0.08}s both`,
+                }}
+              >
+                {/* Left gutter: accent bar + index */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                  <div style={{ width: 2, height: '100%', minHeight: 80, background: accent, borderRadius: 2 }} />
+                </div>
+
+                {/* Content */}
+                <div>
+                  {starRow(t.rating || 5)}
+                  <p
+                    className="t-ce"
+                    style={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: 22, lineHeight: 1.7,
+                      fontStyle: 'italic',
+                      color: paragraphColor || '#374151',
+                      marginBottom: 24,
+                    }}
+                    contentEditable={isEditing}
+                    suppressContentEditableWarning
+                    onBlur={(e) => updateT(t, 'quote', e.currentTarget.textContent.replace(/^"|"$/g, ''))}
+                  >
+                    "{t.quote}"
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    {t.avatar && (
+                      <img src={t.avatar} alt={t.name} style={avatarStyle(styles.borderRadius, 40)} />
+                    )}
+                    <div>
+                      <p
+                        className="t-ce"
+                        style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: headingColor || '#0f172a' }}
+                        contentEditable={isEditing}
+                        suppressContentEditableWarning
+                        onBlur={(e) => updateT(t, 'name', e.currentTarget.textContent)}
+                      >
+                        {t.name}
+                      </p>
+                      <p
+                        className="t-ce"
+                        style={{ fontSize: 12, color: paragraphColor || '#64748b', marginTop: 3, letterSpacing: '0.04em' }}
+                        contentEditable={isEditing}
+                        suppressContentEditableWarning
+                        onBlur={(e) => updateT(t, 'role', e.currentTarget.textContent)}
+                      >
+                        {t.role}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Main export — identical prop API & logic
+// ──────────────────────────────────────────────────────────────────────────
+export function TestimonialsSection({ section, isSelected, isEditing, onContentChange }) {
+  const { content, styles } = section;
+  const testimonials = content.testimonials || [];
+  const variant = section.variant || 'cards';
+  const background = styles.useGradient
+    ? (styles.backgroundGradient || styles.backgroundColor)
+    : (styles.backgroundColor || '#ffffff');
+  const padding = styles.padding || '100px 0';
+  const headingColor = styles.headingColor || '#0f172a';
+  const paragraphColor = styles.paragraphColor || '#64748b';
+
+  const shared = { testimonials, content, styles, isEditing, onContentChange, background, padding, headingColor, paragraphColor };
+
+  if (variant === 'carousel') return <CarouselVariant {...shared} />;
+  if (variant === 'quote')    return <QuoteVariant {...shared} />;
+  if (variant === 'minimal')  return <MinimalVariant {...shared} />;
+  return <CardsVariant {...shared} />;
+}
