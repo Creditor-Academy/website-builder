@@ -20,7 +20,7 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
 
   if (variant === 'table') {
     // simple comparison table
-    const allFeatures = Array.from(new Set(plans.flatMap(p => p.features || [])));
+    const allFeatures = Array.from(new Set<string>(plans.flatMap((p: any) => p.features || [])));
     return (
       <section className="relative" style={{ background, padding }}>
         <div className="container mx-auto px-6 max-w-7xl">
@@ -35,15 +35,15 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
                 <tr>
                   <th className="p-4 text-left">Plan</th>
                   <th className="p-4">Price</th>
-                  {allFeatures.map((f) => <th key={f} className="p-4">{f}</th>)}
+                  {allFeatures.map((f) => <th key={f as string} className="p-4">{f as string}</th>)}
                 </tr>
               </thead>
               <tbody>
-                {plans.map((p) => (
+                {plans.map((p: any) => (
                   <tr key={p.id} className="border-t">
                     <td className="p-4">{p.name}</td>
                     <td className="p-4">${p.price}{p.popular ? ' • Popular' : ''}</td>
-                    {allFeatures.map((f) => <td key={f} className="p-4">{(p.features || []).includes(f) ? '✓' : ''}</td>)}
+                    {allFeatures.map((f) => <td key={f as string} className="p-4">{(p.features || []).includes(f) ? '✓' : ''}</td>)}
                   </tr>
                 ))}
               </tbody>
@@ -69,14 +69,14 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {plans.map((plan, index) => (
-              <div key={plan.id || index} className={`relative rounded-3xl p-8 transition-all duration-300 ${plan.popular ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-2xl scale-105 z-10' : 'bg-white border border-slate-200 hover:border-blue-200 hover:shadow-xl'}`}>
+              <div key={plan.id || index} className={`group/card relative rounded-3xl p-8 transition-all duration-300 ${plan.popular ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-2xl scale-105 z-10 hover:shadow-blue-500/30 hover:shadow-3xl' : 'bg-white border border-slate-200 hover:bg-gradient-to-br hover:from-blue-500 hover:to-blue-600 hover:text-white hover:border-transparent hover:shadow-2xl hover:shadow-blue-500/25 hover:scale-[1.03]'}`}>
                 {plan.popular && <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-sm font-medium rounded-full flex items-center gap-1"><Sparkles className="w-4 h-4" />Most Popular</div>}
                 <div className="text-center mb-8">
-                  <h3 className={`text-xl font-bold mb-2 ${plan.popular ? 'text-white' : 'text-slate-900'}`}>{plan.name}</h3>
-                  <p className={`text-sm mb-4 ${plan.popular ? 'text-white/80' : 'text-slate-500'}`}>{plan.description}</p>
+                  <h3 className={`text-xl font-bold mb-2 transition-colors duration-300 ${plan.popular ? 'text-white' : 'text-slate-900 group-hover/card:text-white'}`}>{plan.name}</h3>
+                  <p className={`text-sm mb-4 transition-colors duration-300 ${plan.popular ? 'text-white/80' : 'text-slate-500 group-hover/card:text-white/80'}`}>{plan.description}</p>
                   <div className="flex items-baseline justify-center gap-1">
-                    <span className={`text-5xl font-bold ${plan.popular ? 'text-white' : 'text-slate-900'}`}>${annual ? (plan.price * 10) : plan.price}</span>
-                    <span className={plan.popular ? 'text-white/70' : 'text-slate-400'}>{annual ? '/year' : '/month'}</span>
+                    <span className={`text-5xl font-bold transition-colors duration-300 ${plan.popular ? 'text-white' : 'text-slate-900 group-hover/card:text-white'}`}>${annual ? (plan.price * 10) : plan.price}</span>
+                    <span className={`transition-colors duration-300 ${plan.popular ? 'text-white/70' : 'text-slate-400 group-hover/card:text-white/70'}`}>{annual ? '/year' : '/month'}</span>
                   </div>
                 </div>
                 <ul className="space-y-4 mb-8">{(plan.features || []).map((feature, i) => (<li key={i} className="flex items-center gap-3"><div className={`w-5 h-5 rounded-full flex items-center justify-center ${plan.popular ? 'bg-white/20' : 'bg-green-100'}`}><Check className={`w-3 h-3 ${plan.popular ? 'text-white' : 'text-green-600'}`} /></div><span className={plan.popular ? 'text-white/90' : 'text-slate-600'}>{feature}</span></li>))}</ul>
@@ -138,14 +138,10 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
           {plans.map((plan, index) => (
             <div
               key={plan.id || index}
-              className={`relative rounded-3xl p-8 transition-all duration-300 ${
-                plan.popular
-                  ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-2xl scale-105 z-10'
-                  : 'bg-white border border-slate-200 hover:border-blue-200 hover:shadow-xl'
-              }`}
+              className="group/card relative rounded-3xl p-8 transition-all duration-300 bg-white border border-slate-200 hover:bg-gradient-to-br hover:from-blue-500 hover:to-blue-600 hover:text-white hover:border-transparent hover:shadow-2xl hover:shadow-blue-500/25 hover:scale-[1.03]"
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-sm font-medium rounded-full flex items-center gap-1">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-gray-400 to-gray-500 text-white text-sm font-medium rounded-full flex items-center gap-1">
                   <Sparkles className="w-4 h-4" />
                   <span
                     contentEditable={isEditing}
@@ -162,7 +158,7 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
               )}
               <div className="text-center mb-8">
                 <h3 
-                  className={`text-xl font-bold mb-2 ${plan.popular ? 'text-white' : 'text-slate-900'}`}
+                  className="text-xl font-bold mb-2 transition-colors duration-300 text-slate-900 group-hover/card:text-white"
                   contentEditable={isEditing}
                   suppressContentEditableWarning
                   onBlur={(e) => {
@@ -174,7 +170,7 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
                   {plan.name}
                 </h3>
                 <p 
-                  className={`text-sm mb-4 ${plan.popular ? 'text-white/80' : 'text-slate-500'}`}
+                  className="text-sm mb-4 transition-colors duration-300 text-slate-500 group-hover/card:text-white/80"
                   contentEditable={isEditing}
                   suppressContentEditableWarning
                   onBlur={(e) => {
@@ -187,7 +183,7 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
                 </p>
                 <div className="flex items-baseline justify-center gap-1">
                   <span 
-                    className={`text-5xl font-bold ${plan.popular ? 'text-white' : 'text-slate-900'}`}
+                    className="text-5xl font-bold transition-colors duration-300 text-slate-900 group-hover/card:text-white"
                     contentEditable={isEditing}
                     suppressContentEditableWarning
                     onBlur={(e) => {
@@ -200,7 +196,7 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
                     ${plan.price}
                   </span>
                   <span 
-                    className={plan.popular ? 'text-white/70' : 'text-slate-400'}
+                    className="transition-colors duration-300 text-slate-400 group-hover/card:text-white/70"
                     contentEditable={isEditing}
                     suppressContentEditableWarning
                     onBlur={(e) => {
@@ -216,13 +212,11 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
               <ul className="space-y-4 mb-8">
                 {(plan.features || []).map((feature, i) => (
                   <li key={i} className="flex items-center gap-3">
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-                      plan.popular ? 'bg-white/20' : 'bg-green-100'
-                    }`}>
-                      <Check className={`w-3 h-3 ${plan.popular ? 'text-white' : 'text-green-600'}`} />
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center transition-colors duration-300 bg-green-100 group-hover/card:bg-white/20">
+                      <Check className="w-3 h-3 transition-colors duration-300 text-green-600 group-hover/card:text-white" />
                     </div>
                     <span 
-                      className={plan.popular ? 'text-white/90' : 'text-slate-600'}
+                      className="transition-colors duration-300 text-slate-600 group-hover/card:text-white/90"
                       contentEditable={isEditing}
                       suppressContentEditableWarning
                       onBlur={(e) => {
@@ -239,15 +233,7 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
                 ))}
               </ul>
               <button
-                className={`w-full py-4 rounded-xl font-semibold transition-all duration-200 ${
-                  plan.popular
-                    ? 'hover:bg-slate-100'
-                    : 'hover:bg-slate-800'
-                }`}
-                style={{ 
-                  background: plan.popular ? '#ffffff' : buttonPrimaryBg, 
-                  color: plan.popular ? '#3b82f6' : buttonPrimaryText 
-                }}
+                className="w-full py-4 rounded-xl font-semibold transition-all duration-300 bg-slate-900 text-white group-hover/card:bg-white group-hover/card:text-blue-600"
               >
                 <span
                   contentEditable={isEditing}

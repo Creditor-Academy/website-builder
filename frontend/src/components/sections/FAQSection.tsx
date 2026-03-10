@@ -22,30 +22,35 @@ export function FAQSection({ section, isEditing, onContentChange }) {
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             {faqs.map((faq, idx) => (
-              <div key={faq.id || idx} className="bg-white rounded-2xl p-6 border border-slate-200">
-                <h4 
-                  className="font-semibold mb-2"
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => {
-                    if (!isEditing || !onContentChange) return;
-                    const updated = content.faqs.map((f) => f.id === faq.id ? { ...f, question: e.currentTarget.textContent } : f);
-                    onContentChange('faqs', updated);
-                  }}
-                >
-                  {faq.question}
-                </h4>
-                <div 
-                  className="text-slate-600 text-sm leading-relaxed"
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => {
-                    if (!isEditing || !onContentChange) return;
-                    const updated = content.faqs.map((f) => f.id === faq.id ? { ...f, answer: e.currentTarget.textContent } : f);
-                    onContentChange('faqs', updated);
-                  }}
-                >
-                  {faq.answer}
+              <div key={faq.id || idx} className="bg-white rounded-2xl overflow-hidden border border-slate-200 hover:shadow-lg transition-shadow">
+                {faq.imageUrl && (
+                  <img src={faq.imageUrl} alt={faq.question} className="w-full h-48 object-cover" />
+                )}
+                <div className="p-6">
+                  <h4 
+                    className="font-semibold mb-2"
+                    contentEditable={isEditing}
+                    suppressContentEditableWarning
+                    onBlur={(e) => {
+                      if (!isEditing || !onContentChange) return;
+                      const updated = content.faqs.map((f) => f.id === faq.id ? { ...f, question: e.currentTarget.textContent } : f);
+                      onContentChange('faqs', updated);
+                    }}
+                  >
+                    {faq.question}
+                  </h4>
+                  <div 
+                    className="text-slate-600 text-sm leading-relaxed"
+                    contentEditable={isEditing}
+                    suppressContentEditableWarning
+                    onBlur={(e) => {
+                      if (!isEditing || !onContentChange) return;
+                      const updated = content.faqs.map((f) => f.id === faq.id ? { ...f, answer: e.currentTarget.textContent } : f);
+                      onContentChange('faqs', updated);
+                    }}
+                  >
+                    {faq.answer}
+                  </div>
                 </div>
               </div>
             ))}
@@ -57,7 +62,7 @@ export function FAQSection({ section, isEditing, onContentChange }) {
 
   if (variant === 'tabs') {
     // group by category (if provided)
-    const categories = Array.from(new Set(faqs.map(f => f.category || 'General')));
+    const categories = Array.from(new Set<string>(faqs.map((f: any) => f.category || 'General')));
     const [active, setActive] = useState(categories[0] || 'General');
     return (
       <section className="relative" style={{ background, padding }}>
@@ -67,10 +72,10 @@ export function FAQSection({ section, isEditing, onContentChange }) {
             <p className="text-lg opacity-80" style={{ color: paragraphColor }} contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.textContent)}>{content.subheadline}</p>
           </div>
           <div className="mb-6 flex gap-3 justify-center">
-            {categories.map(cat => <button key={cat} className={`px-4 py-2 rounded-md ${active === cat ? 'bg-primary text-white' : 'bg-secondary'}`} onClick={() => setActive(cat)}>{cat}</button>)}
+            {categories.map((cat) => <button key={cat as string} className={`px-4 py-2 rounded-md ${active === cat ? 'bg-primary text-white' : 'bg-secondary'}`} onClick={() => setActive(cat as string)}>{cat as string}</button>)}
           </div>
           <div>
-            {(faqs.filter(f => (f.category || 'General') === active)).map((faq, idx) => (
+            {(faqs.filter((f: any) => (f.category || 'General') === active)).map((faq: any, idx) => (
               <div key={faq.id || idx} className="bg-white rounded-2xl p-6 border border-slate-200 mb-4">
                 <h4 
                   className="font-semibold mb-2"

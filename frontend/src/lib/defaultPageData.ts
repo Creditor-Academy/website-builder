@@ -1,10 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
 
 // Import template-specific creators
-export * from './templates/Business';
-export * from './templates/Portfolio';
-export * from './templates/Ecommerce';
-export * from './templates/Consultant';
+export * from './templates/Bussiness/Business';
+export * from './templates/Portfolio/Portfolio';
+export * from './templates/Ecommerce/Ecommerce';
+export * from './templates/consultant/Consultant';
+export * from './templates/agencies/Agencies';
+export * from './templates/Coach/Coach';
 
 // --- Default Sections (Shared/Fallback) ---
 
@@ -281,11 +283,85 @@ export const createAboutPage = () => ({ id: uuidv4(), sections: [createDefaultAb
 
 // --- Utility Page Creators ---
 
-export const createStartPage = () => ({ id: uuidv4(), name: 'Get Started', sections: [createDefaultHeroSection()] });
-export const createTemplatesPage = () => ({ id: uuidv4(), name: 'Templates', sections: [createDefaultHeroSection()] });
-export const createBlogPage = () => ({ id: uuidv4(), name: 'Blog', sections: [createDefaultBlogListSection()] });
-export const createCareersPage = () => ({ id: uuidv4(), name: 'Careers', sections: [createDefaultHeroSection()] });
-export const createHelpPage = () => ({ id: uuidv4(), name: 'Help Center', sections: [createDefaultFAQSection()] });
-export const createStatusPage = () => ({ id: uuidv4(), name: 'System Status', sections: [createDefaultStatsSection()] });
-export const createPrivacyPolicyPage = () => ({ id: uuidv4(), name: 'Privacy Policy', sections: [createDefaultHeroSection()] });
-export const createTermsOfServicePage = () => ({ id: uuidv4(), name: 'Terms of Service', sections: [createDefaultHeroSection()] });
+export const createStartPage = () => ({ id: uuidv4(), name: 'Get Started', slug: '/start', sections: [createDefaultHeroSection()] });
+export const createTemplatesPage = () => ({ id: uuidv4(), name: 'Templates', slug: '/templates', sections: [createDefaultHeroSection()] });
+export const createBlogPage = () => ({ id: uuidv4(), name: 'Blog', slug: '/blog', sections: [createDefaultBlogListSection()] });
+export const createCareersPage = () => ({ id: uuidv4(), name: 'Careers', slug: '/careers', sections: [createDefaultHeroSection()] });
+export const createHelpPage = () => ({ id: uuidv4(), name: 'Help Center', slug: '/help', sections: [createDefaultFAQSection()] });
+export const createStatusPage = () => ({ id: uuidv4(), name: 'System Status', slug: '/status', sections: [createDefaultStatsSection()] });
+
+export const createPrivacyPolicyPage = () => ({
+  id: uuidv4(),
+  name: 'Privacy Policy',
+  slug: '/privacy',
+  navbar: createDefaultNavbar(),
+  sections: [
+    {
+      id: uuidv4(),
+      type: 'content',
+      name: 'Privacy Policy Content',
+      visible: true,
+      styles: { backgroundColor: '#ffffff', padding: '80px 0' },
+      content: {
+        title: 'Privacy Policy',
+        lastUpdated: `Last Updated: ${new Date().toLocaleDateString()}`,
+        sections: [
+          {
+            id: uuidv4(),
+            heading: '1. Information We Collect',
+            content: 'We collect information that you provide directly to us, such as when you create an account, subscribe to our newsletter, or contact us for support. This may include your name, email address, and any other information you choose to provide.',
+          },
+          {
+            id: uuidv4(),
+            heading: '2. How We Use Your Information',
+            content: 'We use the information we collect to provide, maintain, and improve our services, to communicate with you, and to protect our users and ourselves.',
+          },
+          {
+            id: uuidv4(),
+            heading: '3. Data Security',
+            content: 'We take reasonable measures to protect your personal information from loss, theft, misuse, and unauthorized access.',
+          }
+        ]
+      }
+    }
+  ],
+  footer: createDefaultFooter(),
+});
+
+export const createTermsOfServicePage = () => ({
+  id: uuidv4(),
+  name: 'Terms of Service',
+  slug: '/terms',
+  navbar: createDefaultNavbar(),
+  sections: [
+    {
+      id: uuidv4(),
+      type: 'content',
+      name: 'Terms of Service Content',
+      visible: true,
+      styles: { backgroundColor: '#ffffff', padding: '80px 0' },
+      content: {
+        title: 'Terms of Service',
+        lastUpdated: `Last Updated: ${new Date().toLocaleDateString()}`,
+        sections: [
+          {
+            id: uuidv4(),
+            heading: '1. Acceptance of Terms',
+            content: 'By accessing or using our services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.',
+          },
+          {
+            id: uuidv4(),
+            heading: '2. User Responsibilities',
+            content: 'You are responsible for your use of our services and for any content you provide. You agree to comply with all applicable laws and regulations.',
+          },
+          {
+            id: uuidv4(),
+            heading: '3. Limitation of Liability',
+            content: 'To the maximum extent permitted by law, we shall not be liable for any indirect, incidental, special, or consequential damages arising out of or in connection with your use of our services.',
+          }
+        ]
+      }
+    }
+  ],
+  footer: createDefaultFooter(),
+});

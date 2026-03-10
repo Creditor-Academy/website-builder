@@ -5,11 +5,10 @@ export const createConsultantNavbar = () => ({
   type: 'navbar',
   name: 'Consultant Navbar',
   visible: true,
-  logo: { text: 'Thompson Consulting', imageUrl: '', font: 'Playfair Display' },
+  logo: { text: 'Thomse Consulting', imageUrl: '', font: 'Playfair Display' },
   links: [
+    { id: uuidv4(), label: 'About', href: '#about' },
     { id: uuidv4(), label: 'Services', href: '#services' },
-    { id: uuidv4(), label: 'Case Studies', href: '#casestudies' },
-    { id: uuidv4(), label: 'Testimonials', href: '#testimonials' },
     { id: uuidv4(), label: 'Book a Call', href: '#contact' },
   ],
   styles: {
@@ -37,15 +36,40 @@ export const createConsultantHeroSection = () => ({
     headline: 'Strategic Intelligence for High-Performance Leaders',
     subheadline: 'I partner with C-suite executives to navigate complex business transitions, sharpen competitive positioning, and unlock exponential growth.',
     ctaText: 'Schedule a Strategy Call',
-    ctaSecondaryText: 'View My Results',
-    imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1200&q=80',
+    imageUrl: '/images/consultant/strategy.png',
     badge: 'Trusted by Fortune 500 Leaders',
   },
   components: [],
 });
 
+export const createConsultantAboutSection = () => ({
+  id: 'about',
+  type: 'about',
+  name: 'Consultant About',
+  visible: true,
+  locked: false,
+  styles: {
+    backgroundColor: '#ffffff',
+    padding: '110px 0',
+    color: '#0f172a',
+  },
+  content: {
+    badge: 'Our Philosophy',
+    headline: 'Strategy Beyond the Spreadsheet',
+    description: 'We believe that sustainable growth isn\'t just about numbers—it\'s about clarity of vision, alignment of leadership, and the courage to make hard decisions. Our approach combines deep analytical rigor with a human-centric focus on organizational performance.',
+    imageUrl: '/images/consultant/about.png',
+    imagePosition: 'right',
+    values: [
+      { id: uuidv4(), icon: 'Target', title: 'Precision Strategy', description: 'Zeroing in on the 20% of actions that drive 80% of your results.' },
+      { id: uuidv4(), icon: 'Users', title: 'Leadership Alignment', description: 'Ensuring your executive team is moving in the same direction with total conviction.' },
+      { id: uuidv4(), icon: 'Award', title: 'Calculated Risk', description: 'Making bold moves backed by data-driven intelligence.' },
+    ],
+  },
+  components: [],
+});
+
 export const createConsultantServicesSection = () => ({
-  id: uuidv4(),
+  id: 'services',
   type: 'services',
   name: 'Consultant Services',
   visible: true,
@@ -53,8 +77,9 @@ export const createConsultantServicesSection = () => ({
   styles: {
     backgroundColor: '#ffffff',
     padding: '110px 0',
-    color: '#e2e8f0',
+    color: '#0f172a',
   },
+  variant: 'cards',
   content: {
     headline: 'Areas of Expertise',
     subheadline: 'Precision advisory services built for leaders who demand measurable outcomes.',
@@ -65,24 +90,36 @@ export const createConsultantServicesSection = () => ({
         icon: 'Target',
         title: 'Executive Strategy',
         description: 'Bespoke strategic frameworks to align your leadership team, sharpen your roadmap, and accelerate decision-making at the highest level.',
+        imageUrl: '/images/consultant/service_strategy.png',
+        link: '#contact',
+        linkText: 'Learn More'
       },
       {
         id: uuidv4(),
         icon: 'Activity',
         title: 'Organizational Transformation',
         description: 'Redesign culture, structure, and processes to create resilient, agile organizations ready for the demands of tomorrow.',
+        imageUrl: '/images/consultant/service_transformation.png',
+        link: '#contact',
+        linkText: 'Learn More'
       },
       {
         id: uuidv4(),
         icon: 'DollarSign',
         title: 'Revenue & Growth Advisory',
         description: 'Identify hidden revenue streams, optimize pricing strategies, and build scalable go-to-market engines that compound growth.',
+        imageUrl: '/images/consultant/service_revenue.png',
+        link: '#contact',
+        linkText: 'Learn More'
       },
       {
         id: uuidv4(),
         icon: 'Compass',
         title: 'Market Entry & Expansion',
         description: 'Navigate new geographies and verticals with confidence through deep competitive intelligence and localization strategy.',
+        imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80',
+        link: '#contact',
+        linkText: 'Learn More'
       },
     ],
   },
@@ -90,7 +127,7 @@ export const createConsultantServicesSection = () => ({
 });
 
 export const createConsultantCaseStudiesSection = () => ({
-  id: uuidv4(),
+  id: 'casestudies',
   type: 'casestudies',
   name: 'Consultant Case Studies',
   visible: true,
@@ -135,7 +172,7 @@ export const createConsultantCaseStudiesSection = () => ({
 });
 
 export const createConsultantTestimonialsSection = () => ({
-  id: uuidv4(),
+  id: 'testimonials',
   type: 'testimonials',
   name: 'Consultant Testimonials',
   visible: true,
@@ -201,7 +238,7 @@ export const createConsultantCTASection = () => ({
 });
 
 export const createConsultantContactSection = () => ({
-  id: uuidv4(),
+  id: 'contact',
   type: 'contact',
   name: 'Consultant Contact',
   visible: true,
@@ -246,19 +283,9 @@ export const createConsultantFooter = () => ({
       id: uuidv4(),
       title: 'Practice Areas',
       links: [
-        { id: uuidv4(), label: 'Executive Strategy', href: '#services' },
-        { id: uuidv4(), label: 'Org Transformation', href: '#services' },
-        { id: uuidv4(), label: 'Revenue Growth', href: '#services' },
-        { id: uuidv4(), label: 'Market Expansion', href: '#services' },
-      ],
-    },
-    {
-      id: uuidv4(),
-      title: 'Explore',
-      links: [
-        { id: uuidv4(), label: 'Case Studies', href: '#casestudies' },
-        { id: uuidv4(), label: 'Testimonials', href: '#testimonials' },
-        { id: uuidv4(), label: 'Book a Call', href: '#contact' },
+        { id: uuidv4(), label: 'Executive Strategy', href: '/executive-strategy' },
+        { id: uuidv4(), label: 'Revenue Growth', href: '/revenue-growth' },
+        { id: uuidv4(), label: 'Market Expansion', href: '/market-expansion' },
       ],
     },
     {
@@ -279,12 +306,153 @@ export const createConsultantFooter = () => ({
   },
 });
 
+// --- Consultant Sub-Pages ---
+
+export const createExecutiveStrategyPage = () => ({
+  id: uuidv4(),
+  name: 'Executive Strategy',
+  slug: '/executive-strategy',
+  navbar: createConsultantNavbar(),
+  sections: [
+    {
+      id: uuidv4(),
+      type: 'hero',
+      name: 'Strategy Hero',
+      visible: true,
+      locked: false,
+      styles: {
+        backgroundColor: '#0f172a',
+        padding: '120px 0',
+        color: '#ffffff',
+      },
+      content: {
+        headline: 'Executive Strategy & Leadership Alignment',
+        subheadline: 'Crafting the high-level roadmap that turns organizational vision into actionable, competitive advantage.',
+        ctaText: 'Discuss Your Strategy',
+        imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&q=80',
+      },
+      components: [],
+    },
+    {
+      id: uuidv4(),
+      type: 'features',
+      name: 'Strategy Pillars',
+      visible: true,
+      locked: false,
+      styles: { backgroundColor: '#ffffff', padding: '100px 0' },
+      content: {
+        headline: 'Our Strategic Approach',
+        features: [
+          { id: uuidv4(), icon: 'Compass', title: 'Vision Articulation', description: 'Defining a clear, compelling future state for the organization.' },
+          { id: uuidv4(), icon: 'Users', title: 'Leadership Sync', description: 'Aligning the executive team around a single, unified roadmap.' },
+          { id: uuidv4(), icon: 'Target', title: 'Execution Frameworks', description: 'Building the systems required to track and achieve strategic goals.' },
+        ],
+      },
+      components: [],
+    },
+  ],
+  footer: createConsultantFooter(),
+});
+
+export const createRevenueGrowthPage = () => ({
+  id: uuidv4(),
+  name: 'Revenue Growth',
+  slug: '/revenue-growth',
+  navbar: createConsultantNavbar(),
+  sections: [
+    {
+      id: uuidv4(),
+      type: 'hero',
+      name: 'Growth Hero',
+      visible: true,
+      locked: false,
+      styles: {
+        backgroundColor: '#0f172a',
+        padding: '120px 0',
+        color: '#ffffff',
+      },
+      content: {
+        headline: 'Accelerate Your Revenue Engine',
+        subheadline: 'Optimizing the entire revenue lifecycle to drive predictable, scalable, and sustainable growth.',
+        ctaText: 'Analyze Growth Potential',
+        imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80',
+      },
+      components: [],
+    },
+    {
+      id: uuidv4(),
+      type: 'features',
+      name: 'Growth Catalysts',
+      visible: true,
+      locked: false,
+      styles: { backgroundColor: '#ffffff', padding: '100px 0' },
+      content: {
+        headline: 'Growth Methodology',
+        features: [
+          { id: uuidv4(), icon: 'TrendingUp', title: 'Sales Optimization', description: 'Refining the sales motion to increase win rates and deal velocity.' },
+          { id: uuidv4(), icon: 'BarChart', title: 'Pricing Strategy', description: 'Leveraging value-based pricing to capture maximum market value.' },
+          { id: uuidv4(), icon: 'Activity', title: 'Funnel Enhancement', description: 'Removing friction from the customer journey to boost conversion.' },
+        ],
+      },
+      components: [],
+    },
+  ],
+  footer: createConsultantFooter(),
+});
+
+export const createMarketExpansionPage = () => ({
+  id: uuidv4(),
+  name: 'Market Expansion',
+  slug: '/market-expansion',
+  navbar: createConsultantNavbar(),
+  sections: [
+    {
+      id: uuidv4(),
+      type: 'hero',
+      name: 'Expansion Hero',
+      visible: true,
+      locked: false,
+      styles: {
+        backgroundColor: '#0f172a',
+        padding: '120px 0',
+        color: '#ffffff',
+      },
+      content: {
+        headline: 'Expand Into New Horizons',
+        subheadline: 'Data-driven market entry strategies to minimize risk and maximize penetration in new verticals and geographies.',
+        ctaText: 'Explore New Markets',
+        imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&q=80',
+      },
+      components: [],
+    },
+    {
+      id: uuidv4(),
+      type: 'features',
+      name: 'Expansion Tactics',
+      visible: true,
+      locked: false,
+      styles: { backgroundColor: '#ffffff', padding: '100px 0' },
+      content: {
+        headline: 'Entry Strategy',
+        features: [
+          { id: uuidv4(), icon: 'Globe', title: 'Geographic Expansion', description: 'Navigating local regulations and cultural nuances in new regions.' },
+          { id: uuidv4(), icon: 'Layers', title: 'Vertical Penetration', description: 'Adapting your core offering for success in adjacent industries.' },
+          { id: uuidv4(), icon: 'PieChart', title: 'Competitive Intelligence', description: 'Deep analysis of market leaders and white-space opportunities.' },
+        ],
+      },
+      components: [],
+    },
+  ],
+  footer: createConsultantFooter(),
+});
+
 export const getConsultantPage = () => ({
   id: uuidv4(),
   name: 'Home',
   navbar: createConsultantNavbar(),
   sections: [
     createConsultantHeroSection(),
+    createConsultantAboutSection(),
     createConsultantServicesSection(),
     createConsultantCaseStudiesSection(),
     createConsultantTestimonialsSection(),

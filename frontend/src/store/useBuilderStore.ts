@@ -6,7 +6,9 @@ import {
     getBusinessPage,
     getPortfolioPage,
     getEcommercePage,
-    getConsultantPage
+    getConsultantPage,
+    getAgenciesPage,
+    getCoachPage
 } from '@/lib/defaultPageData';
 
 const TEMPLATE_MAP: Record<string, () => any> = {
@@ -15,6 +17,8 @@ const TEMPLATE_MAP: Record<string, () => any> = {
     portfolio: getPortfolioPage,
     ecommerce: getEcommercePage,
     consultant: getConsultantPage,
+    agencies: getAgenciesPage,
+    coaching: getCoachPage,
 };
 
 export interface Website {

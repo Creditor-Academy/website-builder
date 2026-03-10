@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from 'react-router-dom';
 import { useBuilder } from '@/contexts/BuilderContext';
-import { createDefaultHeroSection, createDefaultCTASection, createDefaultFooter, createDefaultNavbar, createFeaturesPage, createServicesPage, createPricingPage, createContactPage, createStartPage, createTemplatesPage, createAboutPage, createBlogPage, createCareersPage, createHelpPage, createStatusPage, createPrivacyPolicyPage, createTermsOfServicePage } from '@/lib/defaultPageData';
+import { createDefaultHeroSection, createDefaultCTASection, createDefaultFooter, createDefaultNavbar, createFeaturesPage, createServicesPage, createPricingPage, createContactPage, createStartPage, createTemplatesPage, createAboutPage, createBlogPage, createCareersPage, createHelpPage, createStatusPage, createPrivacyPolicyPage, createTermsOfServicePage, createMarketingPage, createDesignPage, createDevPage, createExecutiveStrategyPage, createRevenueGrowthPage, createMarketExpansionPage } from '@/lib/defaultPageData';
 import {
   Facebook,
   Twitter,
@@ -133,46 +133,76 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
                     <a
                       href={link.href}
                       onClick={(e) => {
-                        if (isEditing) {
-                          const target = pages.find(p => p.slug === link.href);
-                          if (target) {
-                            e.preventDefault();
-                            setActivePage(target.id);
-                          } else if (link.href && link.href.startsWith('/')) {
-                            e.preventDefault();
-                            // create new page for slug (reuse factories if available)
-                            const slug = link.href;
-                            let newPage = null;
-                            switch (slug) {
-                              case '/features': newPage = createFeaturesPage(); break;
-                              case '/services': newPage = createServicesPage(); break;
-                              case '/pricing': newPage = createPricingPage(); break;
-                              case '/contact': newPage = createContactPage(); break;
-                              case '/start': newPage = createStartPage(); break;
-                              case '/templates': newPage = createTemplatesPage(); break;
-                              case '/about': newPage = createAboutPage(); break;
-                              case '/blog': newPage = createBlogPage(); break;
-                              case '/careers': newPage = createCareersPage(); break;
-                              case '/help': newPage = createHelpPage(); break;
-                              case '/status': newPage = createStatusPage(); break;
-                              case '/privacy': newPage = createPrivacyPolicyPage(); break;
-                              case '/terms': newPage = createTermsOfServicePage(); break;
-                              default:
+                        // 1. Handle anchor links (e.g., #about, #services)
+                        if (link.href && link.href.startsWith('#')) {
+                          e.preventDefault();
+                          const targetId = link.href.substring(1);
+                          const element = document.getElementById(targetId);
+                          
+                          if (element) {
+                            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          } else {
+                            // Switch to home page if section not found on current page
+                            const homePage = pages.find(p => p.slug === '/' || p.name?.toLowerCase().includes('home')) || pages[0];
+                            if (homePage) {
+                              setActivePage(homePage.id);
+                            }
+                          }
+                          return;
+                        }
+
+                        // 2. Handle internal pages (e.g., /about, /privacy)
+                        const isInternalPage = link.href && link.href.startsWith('/');
+                        const targetPage = isInternalPage ? pages.find(p => p.slug === link.href) : null;
+
+                        if (targetPage) {
+                          e.preventDefault();
+                          setActivePage(targetPage.id);
+                          return;
+                        }
+
+                        // If page doesn't exist, try to create it (Even in Preview mode for these standard routes)
+                        if (isInternalPage) {
+                          e.preventDefault();
+                          const slug = link.href;
+                          let newPage = null;
+                          switch (slug) {
+                            case '/features': newPage = createFeaturesPage(); break;
+                            case '/services': newPage = createServicesPage(); break;
+                            case '/pricing': newPage = createPricingPage(); break;
+                            case '/contact': newPage = createContactPage(); break;
+                            case '/start': newPage = createStartPage(); break;
+                            case '/templates': newPage = createTemplatesPage(); break;
+                            case '/about': newPage = createAboutPage(); break;
+                            case '/blog': newPage = createBlogPage(); break;
+                            case '/careers': newPage = createCareersPage(); break;
+                            case '/help': newPage = createHelpPage(); break;
+                            case '/status': newPage = createStatusPage(); break;
+                            case '/privacy': newPage = createPrivacyPolicyPage(); break;
+                            case '/terms': newPage = createTermsOfServicePage(); break;
+                            case '/marketing': newPage = createMarketingPage(); break;
+                            case '/design': newPage = createDesignPage(); break;
+                            case '/dev': newPage = createDevPage(); break;
+                            case '/executive-strategy': newPage = createExecutiveStrategyPage(); break;
+                            case '/revenue-growth': newPage = createRevenueGrowthPage(); break;
+                            case '/market-expansion': newPage = createMarketExpansionPage(); break;
+                            default:
+                              if (isEditing) {
                                 newPage = {
-                                  id: (Math.random()+1).toString(36).substring(7),
+                                  id: (Math.random() + 1).toString(36).substring(7),
                                   name: link.label || slug.replace('/', '') || 'New Page',
                                   slug,
                                   navbar: createDefaultNavbar(),
                                   sections: [createDefaultHeroSection(), createDefaultCTASection()],
                                   footer: createDefaultFooter(),
                                 };
-                            }
-                            createPage(newPage);
+                              }
                           }
-                        } else {
-                          if (!isEditing && link.href && link.href.startsWith('/')) {
-                            e.preventDefault();
-                            navigate(link.href);
+
+                          if (newPage) {
+                            createPage(newPage);
+                          } else if (!isEditing) {
+                            console.warn('Page not found in this project:', link.href);
                           }
                         }
                       }}
@@ -228,49 +258,6 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
           >
             {config.copyright}
           </p>
-
-          <div className="flex gap-6 text-sm opacity-60">
-            <a 
-              href="/privacy" 
-              className="hover:opacity-100 transition-opacity"
-              style={{ color: config.styles.textColor }}
-              onClick={(e) => {
-                e.preventDefault();
-                const target = pages.find(p => p.slug === '/privacy');
-                if (target) {
-                  setActivePage(target.id);
-                } else {
-                  const newPage = createPrivacyPolicyPage();
-                  createPage(newPage);
-                }
-                if (!isEditing) {
-                  navigate('/privacy', { replace: true });
-                }
-              }}
-            >
-              {config.privacyPolicy || 'Privacy Policy'}
-            </a>
-            <a 
-              href="/terms" 
-              className="hover:opacity-100 transition-opacity"
-              style={{ color: config.styles.textColor }}
-              onClick={(e) => {
-                e.preventDefault();
-                const target = pages.find(p => p.slug === '/terms');
-                if (target) {
-                  setActivePage(target.id);
-                } else {
-                  const newPage = createTermsOfServicePage();
-                  createPage(newPage);
-                }
-                if (!isEditing) {
-                  navigate('/terms', { replace: true });
-                }
-              }}
-            >
-              {config.termsOfService || 'Terms of Service'}
-            </a>
-          </div>
         </div>
       </div>
     </footer>

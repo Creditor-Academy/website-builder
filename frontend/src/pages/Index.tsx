@@ -43,6 +43,8 @@ const templates: Template[] = [
   { id: "portfolio", title: "Portfolio", image: Portfolio },
   { id: "business", title: "Business", image: business },
   { id: "consultant", title: "Consultant", image: business }, 
+  { id: "agencies", title: "Agencies", image: Learning },
+  { id: "coaching", title: "Coaching", image: CTA },
   { id: "blank", title: "Blank Canvas", image: school },
 ];
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Plus, Globe, MoreVertical, Edit2, Play, Trash2, Layout, Settings, LogOut, Clock, CheckCircle, FileText, ShoppingBag, Building2, Users } from 'lucide-react';
+import { Plus, Globe, MoreVertical, Edit2, Play, Trash2, Layout, Settings, LogOut, Clock, CheckCircle, FileText, ShoppingBag, Building2, Users, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -33,6 +33,8 @@ const Dashboard = () => {
         { id: 'portfolio', name: 'Portfolio', desc: 'Showcase your creative work', icon: Layout, color: 'bg-purple-100 text-purple-600' },
         { id: 'ecommerce', name: 'E-commerce', desc: 'Modern online store', icon: ShoppingBag, color: 'bg-green-100 text-green-600' },
         { id: 'consultant', name: 'Consultant', desc: 'Expert advisory layout', icon: Users, color: 'bg-amber-100 text-amber-600' },
+        { id: 'agencies', name: 'Agencies', desc: 'Creative & marketing agency layout', icon: Globe, color: 'bg-indigo-100 text-indigo-600' },
+        { id: 'coaching', name: 'Coaching', desc: 'Course & mentorship layout', icon: Sparkles, color: 'bg-rose-100 text-rose-600' },
     ];
 
     return (

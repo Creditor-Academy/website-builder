@@ -66,40 +66,44 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             </p>
 
             <div className="flex flex-wrap justify-center gap-4">
-              <button
-                className="group px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-glow flex items-center gap-2"
-                style={{
-                  background: buttonPrimaryBg,
-                  color: buttonPrimaryText
-                }}
-              >
-                <span
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => handleTextEdit('ctaText', e)}
+              {content.ctaText && (
+                <button
+                  className="group px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-glow flex items-center gap-2"
+                  style={{
+                    background: buttonPrimaryBg,
+                    color: buttonPrimaryText
+                  }}
                 >
-                  {content.ctaText}
-                </span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
+                  <span
+                    contentEditable={isEditing}
+                    suppressContentEditableWarning
+                    onBlur={(e) => handleTextEdit('ctaText', e)}
+                  >
+                    {content.ctaText}
+                  </span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </button>
+              )}
 
-              <button
-                className="group px-8 py-4 rounded-xl font-semibold text-lg border-2 transition-all duration-300 hover:bg-white/10 flex items-center gap-2"
-                style={{
-                  background: buttonSecondaryBg,
-                  borderColor: 'rgba(255,255,255,0.3)',
-                  color: buttonSecondaryText
-                }}
-              >
-                <Play className="w-5 h-5" />
-                <span
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}
+              {content.ctaSecondaryText && (
+                <button
+                  className="group px-8 py-4 rounded-xl font-semibold text-lg border-2 transition-all duration-300 hover:bg-white/10 flex items-center gap-2"
+                  style={{
+                    background: buttonSecondaryBg,
+                    borderColor: 'rgba(255,255,255,0.3)',
+                    color: buttonSecondaryText
+                  }}
                 >
-                  {content.ctaSecondaryText}
-                </span>
-              </button>
+                  <Play className="w-5 h-5" />
+                  <span
+                    contentEditable={isEditing}
+                    suppressContentEditableWarning
+                    onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}
+                  >
+                    {content.ctaSecondaryText}
+                  </span>
+                </button>
+              )}
             </div>
 
             {/* Centered Image Below */}
@@ -167,40 +171,44 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             </p>
 
             <div className="flex flex-wrap justify-center gap-4">
-              <button
-                className="group px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2 backdrop-blur-sm border border-white/30"
-                style={{
-                  background: buttonPrimaryBg,
-                  color: buttonPrimaryText
-                }}
-              >
-                <span
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => handleTextEdit('ctaText', e)}
+              {content.ctaText && (
+                <button
+                  className="group px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2 backdrop-blur-sm border border-white/30"
+                  style={{
+                    background: buttonPrimaryBg,
+                    color: buttonPrimaryText
+                  }}
                 >
-                  {content.ctaText}
-                </span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
+                  <span
+                    contentEditable={isEditing}
+                    suppressContentEditableWarning
+                    onBlur={(e) => handleTextEdit('ctaText', e)}
+                  >
+                    {content.ctaText}
+                  </span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </button>
+              )}
 
-              <button
-                className="group px-8 py-4 rounded-full font-semibold text-lg border-2 transition-all duration-300 hover:bg-white hover:text-black flex items-center gap-2"
-                style={{
-                  background: buttonSecondaryBg,
-                  borderColor: '#ffffff',
-                  color: buttonSecondaryText
-                }}
-              >
-                <Play className="w-5 h-5" />
-                <span
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}
+              {content.ctaSecondaryText && (
+                <button
+                  className="group px-8 py-4 rounded-full font-semibold text-lg border-2 transition-all duration-300 hover:bg-white hover:text-black flex items-center gap-2"
+                  style={{
+                    background: buttonSecondaryBg,
+                    borderColor: '#ffffff',
+                    color: buttonSecondaryText
+                  }}
                 >
-                  {content.ctaSecondaryText}
-                </span>
-              </button>
+                  <Play className="w-5 h-5" />
+                  <span
+                    contentEditable={isEditing}
+                    suppressContentEditableWarning
+                    onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}
+                  >
+                    {content.ctaSecondaryText}
+                  </span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -239,38 +247,42 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             </p>
 
             <div className="flex flex-wrap gap-3 pt-4">
-              <button
-                className="px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
-                style={{
-                  background: buttonPrimaryBg,
-                  color: buttonPrimaryText
-                }}
-              >
-                <span
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => handleTextEdit('ctaText', e)}
+              {content.ctaText && (
+                <button
+                  className="px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+                  style={{
+                    background: buttonPrimaryBg,
+                    color: buttonPrimaryText
+                  }}
                 >
-                  {content.ctaText}
-                </span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+                  <span
+                    contentEditable={isEditing}
+                    suppressContentEditableWarning
+                    onBlur={(e) => handleTextEdit('ctaText', e)}
+                  >
+                    {content.ctaText}
+                  </span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
 
-              <button
-                className="px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:bg-white/10 flex items-center gap-2"
-                style={{
-                  background: buttonSecondaryBg,
-                  color: buttonSecondaryText
-                }}
-              >
-                <span
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}
+              {content.ctaSecondaryText && (
+                <button
+                  className="px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:bg-white/10 flex items-center gap-2"
+                  style={{
+                    background: buttonSecondaryBg,
+                    color: buttonSecondaryText
+                  }}
                 >
-                  {content.ctaSecondaryText}
-                </span>
-              </button>
+                  <span
+                    contentEditable={isEditing}
+                    suppressContentEditableWarning
+                    onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}
+                  >
+                    {content.ctaSecondaryText}
+                  </span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -315,39 +327,43 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             </p>
 
             <div className="flex flex-wrap justify-center gap-4 pt-4">
-              <button
-                className="group px-10 py-5 rounded-2xl font-bold text-xl transition-all duration-300 transform hover:scale-105 flex items-center gap-3 shadow-2xl hover:shadow-white/25"
-                style={{
-                  background: buttonPrimaryBg,
-                  color: buttonPrimaryText
-                }}
-              >
-                <span
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => handleTextEdit('ctaText', e)}
+              {content.ctaText && (
+                <button
+                  className="group px-10 py-5 rounded-2xl font-bold text-xl transition-all duration-300 transform hover:scale-105 flex items-center gap-3 shadow-2xl hover:shadow-white/25"
+                  style={{
+                    background: buttonPrimaryBg,
+                    color: buttonPrimaryText
+                  }}
                 >
-                  {content.ctaText}
-                </span>
-                <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-              </button>
+                  <span
+                    contentEditable={isEditing}
+                    suppressContentEditableWarning
+                    onBlur={(e) => handleTextEdit('ctaText', e)}
+                  >
+                    {content.ctaText}
+                  </span>
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                </button>
+              )}
 
-              <button
-                className="group px-10 py-5 rounded-2xl font-bold text-xl border-2 border-white/20 transition-all duration-300 hover:bg-white/10 flex items-center gap-3 backdrop-blur-sm"
-                style={{
-                  background: buttonSecondaryBg,
-                  color: buttonSecondaryText
-                }}
-              >
-                <Play className="w-6 h-6" />
-                <span
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}
+              {content.ctaSecondaryText && (
+                <button
+                  className="group px-10 py-5 rounded-2xl font-bold text-xl border-2 border-white/20 transition-all duration-300 hover:bg-white/10 flex items-center gap-3 backdrop-blur-sm"
+                  style={{
+                    background: buttonSecondaryBg,
+                    color: buttonSecondaryText
+                  }}
                 >
-                  {content.ctaSecondaryText}
-                </span>
-              </button>
+                  <Play className="w-6 h-6" />
+                  <span
+                    contentEditable={isEditing}
+                    suppressContentEditableWarning
+                    onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}
+                  >
+                    {content.ctaSecondaryText}
+                  </span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -395,40 +411,44 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <button
-                className="group px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-glow flex items-center gap-2"
-                style={{
-                  background: buttonPrimaryBg,
-                  color: buttonPrimaryText
-                }}
-              >
-                <span
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => handleTextEdit('ctaText', e)}
+              {content.ctaText && (
+                <button
+                  className="group px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-glow flex items-center gap-2"
+                  style={{
+                    background: buttonPrimaryBg,
+                    color: buttonPrimaryText
+                  }}
                 >
-                  {content.ctaText}
-                </span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
+                  <span
+                    contentEditable={isEditing}
+                    suppressContentEditableWarning
+                    onBlur={(e) => handleTextEdit('ctaText', e)}
+                  >
+                    {content.ctaText}
+                  </span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </button>
+              )}
 
-              <button
-                className="group px-8 py-4 rounded-xl font-semibold text-lg border-2 transition-all duration-300 hover:bg-white/10 flex items-center gap-2"
-                style={{
-                  background: buttonSecondaryBg,
-                  borderColor: 'rgba(255,255,255,0.3)',
-                  color: buttonSecondaryText
-                }}
-              >
-                <Play className="w-5 h-5" />
-                <span
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}
+              {content.ctaSecondaryText && (
+                <button
+                  className="group px-8 py-4 rounded-xl font-semibold text-lg border-2 transition-all duration-300 hover:bg-white/10 flex items-center gap-2"
+                  style={{
+                    background: buttonSecondaryBg,
+                    borderColor: 'rgba(255,255,255,0.3)',
+                    color: buttonSecondaryText
+                  }}
                 >
-                  {content.ctaSecondaryText}
-                </span>
-              </button>
+                  <Play className="w-5 h-5" />
+                  <span
+                    contentEditable={isEditing}
+                    suppressContentEditableWarning
+                    onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}
+                  >
+                    {content.ctaSecondaryText}
+                  </span>
+                </button>
+              )}
             </div>
 
             {/* Stats */}
