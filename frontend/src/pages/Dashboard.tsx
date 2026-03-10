@@ -348,7 +348,6 @@ const WebsiteCard = ({ site, index, onDelete, onEdit }) => (
 );
 
 const EmptyState = ({ onAction }) => {
-    const { initializeSampleWebsites } = useBuilderStore();
     
     return (
     <div className="h-[400px] flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-[2rem] bg-white p-12 text-center transition-all hover:border-primary/20 hover:bg-slate-50/50">
@@ -359,18 +358,9 @@ const EmptyState = ({ onAction }) => {
         <p className="text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">
             Every great brand starts with a single page. Build yours with our visual canvas.
         </p>
-        <div className="flex gap-3 mt-8">
-            <Button 
-                variant="outline" 
-                className="rounded-full px-6 gap-2"
-                onClick={() => initializeSampleWebsites()}
-            >
-                <Sparkles className="w-5 h-5" /> Load Sample Sites
-            </Button>
-            <Button size="lg" className="rounded-full px-8 gap-2 shadow-lg shadow-primary/20" onClick={onAction}>
-                <Plus className="w-5 h-5" /> Create Your First Site
-            </Button>
-        </div>
+        <Button size="lg" className="rounded-full px-8 gap-2 shadow-lg shadow-primary/20" onClick={onAction}>
+            <Plus className="w-5 h-5" /> Create Your First Site
+        </Button>
     </div>
     );
 };
