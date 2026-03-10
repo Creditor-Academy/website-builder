@@ -23,6 +23,7 @@ export interface Website {
     status: string;
     pages: any[];
     activePageId: string;
+    templateId?: string;
 }
 
 export interface BuilderState {
@@ -108,6 +109,7 @@ export const useBuilderStore = create<BuilderState>()(
                 status: 'Draft',
                 pages: [homePage],
                 activePageId: homePage.id,
+                templateId: template,
             };
 
             set((state) => ({
