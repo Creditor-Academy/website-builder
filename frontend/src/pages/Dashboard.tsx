@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom'; // Added Link and useLocation
 import { Helmet } from 'react-helmet-async';
-import { 
-    Plus, Globe, MoreVertical, Edit2, Play, Trash2, 
-    Layout, Settings, LogOut, Clock, CheckCircle, 
-    FileText, Search, Sparkles, Zap,Files 
+import {
+    Plus, Globe, MoreVertical, Edit2, Play, Trash2,
+    Layout, Settings, LogOut, Clock, CheckCircle,
+    FileText, Search, Sparkles, Zap, Files, Users, Activity, Menu, X // Added Users and Activity
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,13 +13,63 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import useBuilderStore from '@/store/useBuilderStore';
 import { format } from 'date-fns';
+import { useIsMobile } from '@/hooks/use-mobile'; // Import useIsMobile hook
+
+// New OverviewCard component for dashboard statistics
+const OverviewCard = ({ title, value, icon, description }) => (
+    <Card className="rounded-xl border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-slate-700">
+                {title}
+            </CardTitle>
+            {icon}
+        </CardHeader>
+        <CardContent>
+            <div className="text-2xl font-bold text-slate-900">{value}</div>
+            {description && <p className="text-xs text-slate-500 mt-1">{description}</p>}
+        </CardContent>
+    </Card>
+);
+
+// Modified NavItem to support `to` prop and active state via `useLocation`
+const NavItem = ({ icon, label, to }) => {
+    const location = useLocation();
+    const isActive = location.pathname === to;
+    return (
+        <Button
+            variant="ghost"
+            className={`w-full justify-start gap-3 h-11 transition-all duration-200 group ${
+                isActive
+                    ? 'bg-primary/5 text-primary font-semibold'
+                    : 'text-slate-600 hover:text-slate-600 hover:bg-blue-50'
+            }`}
+            asChild
+        >
+            <Link to={to}>
+                <span className={`transition-colors duration-200 ${
+                    isActive
+                        ? 'text-primary'
+                        : 'text-slate-400 group-hover:text-slate-600'
+                }`}>{icon}</span>
+                {label}
+                {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />} 
+            </Link>
+        </Button>
+    );
+};
+
 
 const Dashboard = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { websites, createWebsite, deleteWebsite } = useBuilderStore();
     const [newSiteName, setNewSiteName] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for mobile sidebar
+    const isMobile = useIsMobile(); // Use the hook
+
+    console.log({ isMobile, isSidebarOpen }); // Debugging line
 
     const handleCreateSite = () => {
         if (!newSiteName.trim()) return;
@@ -40,27 +90,51 @@ const Dashboard = () => {
                 <title>Dashboard | Buildora</title>
             </Helmet>
 
+            {/* Mobile Sidebar Overlay */}
+            {isMobile && isSidebarOpen && (
+                <div 
+                    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                ></div>
+            )}
+
             {/* --- Sidebar Redesign --- */}
-            <aside className="w-64 bg-white border-r hidden lg:flex flex-col sticky top-0 h-screen">
+            <aside 
+                className={`fixed inset-y-0 left-0 w-64 bg-white border-r flex-col z-50 
+                    lg:static lg:flex 
+                    ${isMobile ? 'transition-transform duration-300 ease-in-out transform' : ''} 
+                    ${isMobile && isSidebarOpen ? 'translate-x-0 flex' : isMobile ? '-translate-x-full flex' : 'flex'}
+                `}
+            >
                 <div className="p-6">
                     <div className="flex items-center gap-2.5 px-2">
-                        {/* <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-                            <Zap className="w-5 h-5 text-white fill-white" />
-                        </div> */}
                         <h1 className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600">
                             Buildora
                         </h1>
+                        {isMobile && (
+                            <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="ml-auto lg:hidden" 
+                                onClick={() => setIsSidebarOpen(false)}
+                            >
+                                <X className="w-5 h-5" />
+                            </Button>
+                        )}
                     </div>
                 </div>
 
                 <nav className="flex-1 px-4 py-2 space-y-1">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 mb-2">Main Menu</p>
-                    <NavItem icon={<Globe className="w-4 h-4" />} label="My Websites" active />
-                    <NavItem icon={<Layout className="w-4 h-4" />} label="Templates" />
-                    <NavItem icon={<FileText className="w-4 h-4" />} label="Assets" />
+                    <NavItem icon={<Globe className="w-4 h-4" />} label="Dashboard" to="/dashboard" />
+                    <NavItem icon={<Layout className="w-4 h-4" />} label="Templates" to="/dashboard/templates" />
+                    <NavItem icon={<FileText className="w-4 h-4" />} label="Assets" to="/dashboard/assets" />
                     <div className="pt-4">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 mb-2">System</p>
-                        <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" />
+                        <NavItem icon={<Users className="w-4 h-4" />} label="Users" to="/dashboard/users" />
+                        <NavItem icon={<Layout className="w-4 h-4" />} label="Websites" to="/dashboard/websites" />
+                        <NavItem icon={<Activity className="w-4 h-4" />} label="Deployment Monitoring" to="/dashboard/deployment" />
+                        <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" to="/dashboard/settings" />
                     </div>
                 </nav>
 
@@ -87,14 +161,26 @@ const Dashboard = () => {
                 </div>
             </aside>
 
-            {/* --- Main Content Redesign --- */}
+            {/* --- Main Content Area --- */}
             <main className="flex-1 p-6 md:p-10 overflow-y-auto">
                 <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-                    <div>
-                        <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Project Hub</h2>
-                        <p className="text-slate-500 flex items-center gap-2 mt-1">
-                            Welcome back! You have <span className="text-primary font-medium">{websites.length} active projects</span>
-                        </p>
+                    <div className="flex items-center gap-4">
+                        {isMobile && (
+                            <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="lg:hidden" 
+                                onClick={() => setIsSidebarOpen(true)}
+                            >
+                                <Menu className="w-6 h-6" />
+                            </Button>
+                        )}
+                        <div>
+                            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Project Hub</h2>
+                            <p className="text-slate-500 flex items-center gap-2 mt-1">
+                                Welcome back! You have <span className="text-primary font-medium">{websites.length} active projects</span>
+                            </p>
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -143,7 +229,35 @@ const Dashboard = () => {
                     </div>
                 </header>
 
-                {/* --- Content Area --- */}
+                {/* --- Overview Cards Section --- */}
+                <section className="grid gap-6 mb-10 md:grid-cols-2 lg:grid-cols-4">
+                    <OverviewCard 
+                        title="Total Websites"
+                        value="1,234"
+                        description="+20.1% from last month"
+                        icon={<Globe className="w-4 h-4 text-slate-400" />}
+                    />
+                    <OverviewCard 
+                        title="Active Users"
+                        value="250"
+                        description="+15% from last month"
+                        icon={<Users className="w-4 h-4 text-slate-400" />}
+                    />
+                    <OverviewCard 
+                        title="Templates Available"
+                        value="42"
+                        description="New templates added frequently"
+                        icon={<Layout className="w-4 h-4 text-slate-400" />}
+                    />
+                    <OverviewCard 
+                        title="Deployments Today"
+                        value="78"
+                        description="Successfully deployed websites"
+                        icon={<Activity className="w-4 h-4 text-slate-400" />}
+                    />
+                </section>
+
+                {/* --- Content Area (Website Cards) --- */}
                 {websites.length === 0 ? (
                     <EmptyState onAction={() => setIsDialogOpen(true)} />
                 ) : (
@@ -163,27 +277,6 @@ const Dashboard = () => {
         </div>
     );
 };
-
-// --- Sub-components for better organization & interactivity ---
-
-const NavItem = ({ icon, label, active = false }) => (
-    <Button 
-        variant="ghost" 
-        className={`w-full justify-start gap-3 h-11 transition-all duration-200 group ${
-            active 
-                ? 'bg-primary/5 text-primary font-semibold' 
-                : 'text-slate-600 hover:text-slate-600 hover:bg-blue-50'
-        }`}
-    >
-        <span className={`transition-colors duration-200 ${
-            active 
-                ? 'text-primary' 
-                : 'text-slate-400 group-hover:text-slate-600'
-        }`}>{icon}</span>
-        {label}
-        {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
-    </Button>
-);
 
 const WebsiteCard = ({ site, index, onDelete, onEdit }) => (
     <Card className="group border-slate-200 hover:border-primary/20 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] hover:scale-[1.01] bg-white rounded-3xl overflow-hidden flex flex-col">
@@ -212,9 +305,6 @@ const WebsiteCard = ({ site, index, onDelete, onEdit }) => (
                 <Button size="sm" onClick={onEdit} className="bg-white text-slate-900 hover:bg-white/90 ">
                     <Edit2 className="w-4 h-4" /> Edit
                 </Button>
-                {/* <Button size="icon" variant="secondary" className="bg-white/20 border-white/30 text-white hover:bg-white/40">
-                    <Play className="w-4 h-4" />
-                </Button> */}
             </div>
         </div>
 

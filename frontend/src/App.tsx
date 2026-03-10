@@ -6,6 +6,12 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
+import DashboardUsers from "./pages/DashboardUsers";
+import DashboardWebsites from "./pages/DashboardWebsites";
+import DashboardTemplates from "./pages/DashboardTemplates";
+import DashboardDeployment from "./pages/DashboardDeployment";
+import DashboardAssets from "./pages/DashboardAssets";
+import DashboardSettings from "./pages/DashboardSettings";
 import { WebsiteEditor } from "./components/editor/WebsiteEditor";
 import Features from "./pages/Features";
 import Services from "./pages/Services";
@@ -31,7 +37,15 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />}>
+              <Route index element={null} /> {/* This will be handled by Dashboard component's internal routing or default view */}
+              <Route path="users" element={<DashboardUsers />} />
+              <Route path="websites" element={<DashboardWebsites />} />
+              <Route path="templates" element={<DashboardTemplates />} />
+              <Route path="deployment" element={<DashboardDeployment />} />
+              <Route path="assets" element={<DashboardAssets />} />
+              <Route path="settings" element={<DashboardSettings />} />
+            </Route>
             <Route path="/builder/:id" element={<WebsiteEditor />} />
             <Route path="/features" element={<Features />} />
             <Route path="/services" element={<Services />} />
