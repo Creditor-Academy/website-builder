@@ -9,7 +9,7 @@ export const createBusinessNavbar = () => ({
   links: [
     { id: uuidv4(), label: 'About', href: '#about' },
     { id: uuidv4(), label: 'Services', href: '#services' },
-    { id: uuidv4(), label: 'Why Us', href: '#whychooseus' },
+    { id: uuidv4(), label: 'Curriculum', href: '#curriculum' },
     { id: uuidv4(), label: 'Testimonials', href: '#testimonials' },
     { id: uuidv4(), label: 'Contact', href: '#contact' },
   ],
@@ -22,13 +22,15 @@ export const createBusinessNavbar = () => ({
 });
 
 export const createBusinessHeroSection = () => ({
-  id: uuidv4(),
+  id: 'hero',
   type: 'hero',
   name: 'Business Hero',
   visible: true,
   locked: false,
   styles: {
-    backgroundColor: '#1e3a8a',
+    useGradient: true,
+    backgroundGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    backgroundColor: '#667eea',
     padding: '120px 0',
     minHeight: '90vh',
     color: '#ffffff',
@@ -36,14 +38,38 @@ export const createBusinessHeroSection = () => ({
   content: {
     headline: 'Strategic Business Solutions for Global Growth',
     subheadline: 'We empower enterprises with cutting-edge technology and strategic consulting to drive measurable results.',
-    ctaText: 'Get Started Today',
+    ctaText: '', 
     imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80',
   },
   components: [],
 });
 
+export const createBusinessCurriculumSection = () => ({
+  id: 'curriculum',
+  type: 'faq',
+  variant: 'grid',
+  name: 'Business Curriculum',
+  visible: true,
+  locked: false,
+  styles: {
+    backgroundColor: '#f8fafc',
+    padding: '100px 0',
+    color: '#1e293b',
+  },
+  content: {
+    headline: 'Our Growth Curriculum',
+    subheadline: 'A structured approach to institutional excellence.',
+    faqs: [
+      { id: uuidv4(), question: 'Phase 1: Institutional Diagnosis', answer: 'Comprehensive audit of organizational systems, culture metrics, and performance bottlenecks to identify growth levers.', imageUrl: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&q=80' },
+      { id: uuidv4(), question: 'Phase 2: Strategic Architecture', answer: 'Designing scalable roadmaps that leverage proprietary technology and competitive market advantages for sustainable scale.', imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80' },
+      { id: uuidv4(), question: 'Phase 3: Precision Execution', answer: 'Full-spectrum implementation with automated workflows, real-time analytics dashboards, and professional advisory support.', imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&q=80' },
+    ],
+  },
+  components: [],
+});
+
 export const createBusinessAboutSection = () => ({
-  id: uuidv4(),
+  id: 'about',
   type: 'about',
   name: 'Business About',
   visible: true,
@@ -62,7 +88,7 @@ export const createBusinessAboutSection = () => ({
 });
 
 export const createBusinessServicesSection = () => ({
-  id: uuidv4(),
+  id: 'services',
   type: 'services',
   name: 'Business Services',
   visible: true,
@@ -81,68 +107,28 @@ export const createBusinessServicesSection = () => ({
         icon: 'BarChart2',
         title: 'Business Strategy',
         description: 'Data-driven strategic planning to align your vision with market opportunities and long-term profitability.',
+        imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80',
       },
       {
         id: uuidv4(),
         icon: 'Cpu',
         title: 'Digital Transformation',
         description: 'Modernize your operations with cloud solutions, automation, and AI-powered workflows.',
+        imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80',
       },
       {
         id: uuidv4(),
         icon: 'Users',
         title: 'Talent & HR Solutions',
         description: 'Build high-performing teams with our recruitment, training, and organizational development services.',
+        imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&q=80',
       },
       {
         id: uuidv4(),
         icon: 'Globe',
         title: 'Global Expansion',
         description: 'Enter new markets confidently with our localization, compliance, and go-to-market strategies.',
-      },
-    ],
-  },
-  components: [],
-});
-
-export const createBusinessWhyChooseUsSection = () => ({
-  id: uuidv4(),
-  type: 'whychooseus',
-  name: 'Business Why Choose Us',
-  visible: true,
-  locked: false,
-  styles: {
-    backgroundColor: '#1e3a8a',
-    padding: '100px 0',
-    color: '#ffffff',
-  },
-  content: {
-    headline: 'Why Industry Leaders Choose BizCorp',
-    subheadline: 'Over 500 global companies trust us to deliver results that matter.',
-    reasons: [
-      {
-        id: uuidv4(),
-        icon: 'Award',
-        title: '15+ Years of Expertise',
-        description: 'Proven track record across finance, healthcare, retail, and technology sectors.',
-      },
-      {
-        id: uuidv4(),
-        icon: 'TrendingUp',
-        title: 'Measurable ROI',
-        description: 'Our clients see an average 3x ROI within the first 12 months of engagement.',
-      },
-      {
-        id: uuidv4(),
-        icon: 'Shield',
-        title: 'Enterprise-Grade Security',
-        description: 'ISO 27001 certified. Your data and operations are always protected.',
-      },
-      {
-        id: uuidv4(),
-        icon: 'Headphones',
-        title: 'Dedicated Support',
-        description: '24/7 dedicated account managers and support teams at your disposal.',
+        imageUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&q=80',
       },
     ],
   },
@@ -150,7 +136,7 @@ export const createBusinessWhyChooseUsSection = () => ({
 });
 
 export const createBusinessTestimonialsSection = () => ({
-  id: uuidv4(),
+  id: 'testimonials',
   type: 'testimonials',
   name: 'Business Testimonials',
   visible: true,
@@ -180,12 +166,12 @@ export const createBusinessTestimonialsSection = () => ({
         avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80',
         rating: 5,
       },
-      {
+       {
         id: uuidv4(),
-        quote: 'Professional, responsive, and incredibly knowledgeable. BizCorp is the partner every enterprise needs for sustainable growth.',
-        name: 'Priya Sharma',
-        role: 'VP Operations, GlobalTech Solutions',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80',
+        quote: 'The digital transformation project was executed flawlessly. Our team productivity doubled and customer satisfaction scores are at an all-time high.',
+        name: 'Chen',
+        role: 'ATO, Apox Retail Inc.',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80',
         rating: 5,
       },
     ],
@@ -194,27 +180,30 @@ export const createBusinessTestimonialsSection = () => ({
 });
 
 export const createBusinessCTASection = () => ({
-  id: uuidv4(),
+  id: 'cta',
   type: 'cta',
+  variant: 'split',
   name: 'Business CTA',
   visible: true,
   locked: false,
   styles: {
-    backgroundGradient: 'linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%)',
+    backgroundGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    backgroundColor: '#667eea',
     padding: '100px 0',
     color: '#ffffff',
   },
   content: {
     headline: 'Ready to Transform Your Business?',
-    subheadline: 'Join over 500 leading companies who trust BizCorp to deliver exceptional results. Let\'s build your future together.',
+    subheadline: 'Join over 500 leading companies who trust BizCorp to deliver exceptional results.',
     ctaText: 'Schedule a Free Consultation',
-    ctaSecondaryText: 'View Our Case Studies',
+    ctaSecondaryText: 'View Case Studies',
+    imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80',
   },
   components: [],
 });
 
 export const createBusinessContactSection = () => ({
-  id: uuidv4(),
+  id: 'contact',
   type: 'contact',
   name: 'Business Contact',
   visible: true,
@@ -233,7 +222,6 @@ export const createBusinessContactSection = () => ({
     fields: [
       { id: uuidv4(), label: 'Full Name', type: 'text', placeholder: 'John Smith', required: true },
       { id: uuidv4(), label: 'Business Email', type: 'email', placeholder: 'john@company.com', required: true },
-      { id: uuidv4(), label: 'Company Name', type: 'text', placeholder: 'Your Company', required: false },
       { id: uuidv4(), label: 'Message', type: 'textarea', placeholder: 'Tell us how we can help...', required: true },
     ],
     submitText: 'Send Message',
@@ -247,7 +235,7 @@ export const createBusinessFooter = () => ({
   name: 'Business Footer',
   visible: true,
   logo: { text: 'BizCorp', imageUrl: '' },
-  description: 'Leading the way in enterprise consulting and digital transformation since 2010.',
+  description: 'Leading the way in enterprise consulting since 2010.',
   socialLinks: [
     { id: uuidv4(), platform: 'facebook', href: '#' },
     { id: uuidv4(), platform: 'twitter', href: '#' },
@@ -256,21 +244,11 @@ export const createBusinessFooter = () => ({
   columns: [
     {
       id: uuidv4(),
-      title: 'Our Company',
+      title: 'Company',
       links: [
-        { id: uuidv4(), label: 'About Us', href: '#about' },
+        { id: uuidv4(), label: 'About', href: '#about' },
         { id: uuidv4(), label: 'Services', href: '#services' },
-        { id: uuidv4(), label: 'Why Choose Us', href: '#whychooseus' },
-        { id: uuidv4(), label: 'Careers', href: '/careers' },
-      ],
-    },
-    {
-      id: uuidv4(),
-      title: 'Resources',
-      links: [
-        { id: uuidv4(), label: 'Blog', href: '/blog' },
-        { id: uuidv4(), label: 'Case Studies', href: '/case-studies' },
-        { id: uuidv4(), label: 'Whitepapers', href: '/resources' },
+        { id: uuidv4(), label: 'Contact', href: '#contact' },
       ],
     },
     {
@@ -298,7 +276,7 @@ export const getBusinessPage = () => ({
     createBusinessHeroSection(),
     createBusinessAboutSection(),
     createBusinessServicesSection(),
-    createBusinessWhyChooseUsSection(),
+    createBusinessCurriculumSection(),
     createBusinessTestimonialsSection(),
     createBusinessCTASection(),
     createBusinessContactSection(),

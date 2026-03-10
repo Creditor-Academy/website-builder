@@ -71,23 +71,16 @@ const Dashboard = () => {
         }
     };
 
-    const handleTemplateSelect = (templateId: string) => {
-        setSelectedTemplate(templateId);
-        setDialogStep('details');
-    };
+    const templatesList = [
+        { id: 'blank', name: 'Blank Canvas', desc: 'Start from scratch', icon: FileText, color: 'bg-slate-100 text-slate-600' },
+        { id: 'business', name: 'Business', desc: 'Professional corporate layout', icon: Building2, color: 'bg-blue-100 text-blue-600' },
+        { id: 'portfolio', name: 'Portfolio', desc: 'Showcase your creative work', icon: Layout, color: 'bg-purple-100 text-purple-600' },
+        { id: 'ecommerce', name: 'E-commerce', desc: 'Modern online store', icon: ShoppingBag, color: 'bg-green-100 text-green-600' },
+        { id: 'consultant', name: 'Consultant', desc: 'Expert advisory layout', icon: Users, color: 'bg-amber-100 text-amber-600' },
+        { id: 'agencies', name: 'Agencies', desc: 'Creative & marketing agency layout', icon: Globe, color: 'bg-indigo-100 text-indigo-600' },
+        { id: 'coaching', name: 'Coaching', desc: 'Course & mentorship layout', icon: Sparkles, color: 'bg-rose-100 text-rose-600' },
+    ];
 
-    const handleBackToTemplates = () => {
-        setDialogStep('templates');
-    };
-
-    const handleDialogClose = (open: boolean) => {
-        if (!open) {
-            setDialogStep('templates');
-            setNewSiteName('');
-            setSelectedTemplate('blank');
-        }
-        setIsDialogOpen(open);
-    };
     return (
         <div className="min-h-screen bg-[#f8fafc] flex font-sans selection:bg-primary/10">
             <Helmet>
