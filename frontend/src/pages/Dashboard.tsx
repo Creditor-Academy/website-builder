@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { 
     Plus, Globe, MoreVertical, Edit2, Play, Trash2, 
     Layout, Settings, LogOut, Clock, CheckCircle, 
-    FileText, Search, Sparkles, Zap,Files 
+    FileText, Search, Sparkles, Zap, Files, Building2, ShoppingBag, Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,10 +17,28 @@ import { format } from 'date-fns';
 const Dashboard = () => {
     const navigate = useNavigate();
     const { websites, createWebsite, deleteWebsite } = useBuilderStore();
+
+    const handleLogout = () => {
+        // Clear any stored authentication data
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
+        
+        // Redirect to home screen
+        navigate('/');
+    };
+
     const [newSiteName, setNewSiteName] = useState('');
     const [selectedTemplate, setSelectedTemplate] = useState('blank');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('websites'); // 'websites' or 'templates'
+    const [searchQuery, setSearchQuery] = useState('');
+
+    // Filter logic
+    const filteredWebsites = websites.filter(site => 
+        site.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     const handleCreateSite = () => {
         if (!newSiteName.trim()) return;
@@ -98,7 +116,10 @@ const Dashboard = () => {
                             <p className="text-sm font-semibold text-slate-900 truncate">John Doe</p>
                             <p className="text-xs text-slate-500 truncate">Pro Plan</p>
                         </div>
-                        <LogOut className="w-4 h-4 text-slate-400 group-hover:text-destructive transition-colors" />
+                        <LogOut 
+                            className="w-4 h-4 text-slate-400 group-hover:text-destructive transition-colors cursor-pointer" 
+                            onClick={handleLogout}
+                        />
                     </div>
                 </div>
             </aside>

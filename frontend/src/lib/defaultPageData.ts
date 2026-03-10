@@ -273,12 +273,6 @@ export const createDefaultFooter = () => ({
       ],
     },
   ],
-  socialLinks: [
-    { id: uuidv4(), platform: 'twitter', href: 'https://twitter.com/yourusername' },
-    { id: uuidv4(), platform: 'facebook', href: 'https://facebook.com/yourpage' },
-    { id: uuidv4(), platform: 'instagram', href: 'https://instagram.com/yourusername' },
-    { id: uuidv4(), platform: 'linkedin', href: 'https://linkedin.com/in/yourprofile' },
-  ],
   copyright: '© 2024 SiteBuilder. All rights reserved.',
   styles: {
     backgroundColor: '#0f172a',
@@ -572,19 +566,3 @@ export const getDefaultPage = () => ({
 });
 
 // Deprecated or legacy creators needed for SectionsList.jsx
-export const createFeaturesPage = () => ({ id: uuidv4(), sections: [createDefaultFeaturesSection()] });
-export const createServicesPage = () => ({ id: uuidv4(), sections: [createDefaultServicesSection()] });
-export const createPricingPage = () => ({ id: uuidv4(), sections: [createDefaultPricingSection()] });
-export const createContactPage = () => ({ id: uuidv4(), sections: [createDefaultContactSection()] });
-export const createAboutPage = () => ({ id: uuidv4(), sections: [createDefaultAboutSection()] });
-
-// --- Utility Page Creators ---
-
-export const createStartPage = () => ({ id: uuidv4(), name: 'Get Started', sections: [createDefaultHeroSection()] });
-export const createTemplatesPage = () => ({ id: uuidv4(), name: 'Templates', sections: [createDefaultHeroSection()] });
-export const createBlogPage = () => ({ id: uuidv4(), name: 'Blog', sections: [createDefaultBlogListSection()] });
-export const createCareersPage = () => ({ id: uuidv4(), name: 'Careers', sections: [createDefaultHeroSection()] });
-export const createHelpPage = () => ({ id: uuidv4(), name: 'Help Center', sections: [createDefaultFAQSection()] });
-export const createStatusPage = () => ({ id: uuidv4(), name: 'System Status', sections: [createDefaultStatsSection()] });
-export const createPrivacyPolicyPage = () => ({ id: uuidv4(), name: 'Privacy Policy', sections: [createDefaultHeroSection()] });
-export const createTermsOfServicePage = () => ({ id: uuidv4(), name: 'Terms of Service', sections: [createDefaultHeroSection()] });
