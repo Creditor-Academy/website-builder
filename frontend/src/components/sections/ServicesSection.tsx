@@ -56,7 +56,7 @@ export function ServicesSection({ section, isSelected, isEditing, onContentChang
           <div className="space-y-4 max-w-3xl mx-auto">
             {content.services?.map((service) => (
               <div key={service.id} className="flex items-start gap-4">
-                <img src={service.imageUrl} alt={service.title} className="w-24 h-24 object-cover rounded-md" />
+                <img src={service.imageUrl} alt={service.title} className="w-24 h-24 object-cover" style={{ borderRadius: styles.borderRadius ? `calc(${styles.borderRadius} * 0.5)` : '6px' }} />
                 <div>
                   <h3 
                     className="font-semibold"
@@ -93,14 +93,15 @@ export function ServicesSection({ section, isSelected, isEditing, onContentChang
             {content.services?.map((service, index) => (
               <div 
                 key={service.id}
-                className="flex flex-col items-center text-center p-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                className="flex flex-col items-center text-center p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
                 style={{ 
-                  background: '#f8fafc',
+                  background: styles.cardBackgroundColor || '#f8fafc',
+                  borderRadius: styles.borderRadius || '12px'
                 }}
               >
-                <div className="w-20 h-20 rounded-xl flex items-center justify-center mb-4" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)' }}>
+                <div className="w-20 h-20 flex items-center justify-center mb-4" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)', borderRadius: styles.borderRadius ? `calc(${styles.borderRadius} * 0.5)` : '8px' }}>
                   {service.imageUrl ? (
-                    <img src={service.imageUrl} alt={service.title} className="w-full h-full object-cover rounded-xl" />
+                    <img src={service.imageUrl} alt={service.title} className="w-full h-full object-cover" style={{ borderRadius: styles.borderRadius ? `calc(${styles.borderRadius} * 0.5)` : '8px' }} />
                   ) : (
                     <span className="text-2xl font-bold text-white">{service.title?.[0] || 'S'}</span>
                   )}
@@ -139,8 +140,11 @@ export function ServicesSection({ section, isSelected, isEditing, onContentChang
             {content.services?.map((service, index) => (
               <div 
                 key={service.id}
-                className="group relative overflow-hidden rounded-2xl transition-all duration-500 hover:-translate-y-2"
-                style={{ animationDelay: `${index * 0.1}s` }}
+                className="group relative overflow-hidden transition-all duration-500 hover:-translate-y-2"
+                style={{ 
+                  animationDelay: `${index * 0.1}s`,
+                  borderRadius: styles.borderRadius || '16px'
+                }}
               >
                 {/* Image */}
                 <div className="relative h-64 overflow-hidden">
@@ -200,8 +204,11 @@ export function ServicesSection({ section, isSelected, isEditing, onContentChang
 
                 {/* Corner Accent */}
                 <div 
-                  className="absolute top-4 right-4 w-12 h-12 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)' }}
+                  className="absolute top-4 right-4 w-12 h-12 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                    borderRadius: styles.borderRadius ? `calc(${styles.borderRadius} * 0.5)` : '24px'
+                  }}
                 >
                   <ArrowUpRight className="w-5 h-5 text-white" />
                 </div>

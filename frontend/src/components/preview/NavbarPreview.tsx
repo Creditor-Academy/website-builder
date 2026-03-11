@@ -31,17 +31,21 @@ import { v4 as uuidv4 } from 'uuid';
 
 export function NavbarPreview({ config, isEditing, onUpdate }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showBgPicker, setShowBgPicker] = useState(false);
 
   const { pages, setActivePage, updatePageName, createPage, selectSection } = useBuilder();
 
   /* ------------------------------
      NAVBAR STYLES (dynamic)
   ------------------------------ */
+  // Use config bg if set and not 'transparent', else default to white
+  const navBg =
+    config.styles.backgroundColor && config.styles.backgroundColor !== 'transparent'
+      ? config.styles.backgroundColor
+      : '#ffffff';
+
   const navStyle = {
-    backgroundColor:
-      config.styles.backgroundColor === 'transparent'
-        ? 'rgba(15, 23, 42, 0.8)'
-        : config.styles.backgroundColor,
+    backgroundColor: navBg,
     color: config.styles.textColor,
   };
 
@@ -151,7 +155,7 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
   return (
     <nav
       className={`${config.styles.sticky ? 'sticky top-0' : 'relative'
-        } z-50 backdrop-blur-md ${isEditing ? 'cursor-pointer' : ''}`}
+        } z-50 backdrop-blur-lg ${isEditing ? 'cursor-pointer' : ''} transition-all duration-300`}
       style={navStyle}
       onClick={handleNavbarClick}
     >
@@ -161,16 +165,19 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
           {/* =====================================================
               LOGO SECTION
           ===================================================== */}
-          <div className="flex items-center shrink-0">
+          <div className="flex items-center shrink-0 group">
             {config.logo.imageUrl ? (
-              <img
-                src={config.logo.imageUrl}
-                alt="Logo"
-                className="h-9 md:h-10"
-              />
+              <div className="relative">
+                <img
+                  src={config.logo.imageUrl}
+                  alt="Logo"
+                  className="h-9 md:h-10 transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+              </div>
             ) : (
               <span
-                className="text-xl md:text-2xl font-bold"
+                className="text-xl md:text-2xl font-bold transition-all duration-300 hover:scale-105"
                 style={{ color: config.styles.textColor }}
                 contentEditable={isEditing}
                 suppressContentEditableWarning
@@ -198,21 +205,22 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
                   key={link.id}
                   href={link.href}
                   onClick={(e) => handleNavClick(e, link)}
-                  className="px-6 py-2.5 rounded-lg font-medium transition-all duration-300 hover:shadow-glow"
+                  className="px-6 py-2.5 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-primary/25 transform hover:scale-105 active:scale-95 relative overflow-hidden group"
                   style={{
                     background:
                       'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
                     color: '#ffffff',
                   }}
                 >
-                  {link.label}
+                  <span className="relative z-10">{link.label}</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </a>
               ) : (
                 <a
                   key={link.id}
                   href={link.href}
                   onClick={(e) => handleNavClick(e, link)}
-                  className="font-medium transition-colors hover:text-primary"
+                  className="font-medium transition-all duration-300 hover:text-primary hover:scale-105 relative group"
                   style={{ color: config.styles.textColor }}
                   contentEditable={isEditing}
                   suppressContentEditableWarning
@@ -231,26 +239,14 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
                   }}
                 >
                   {link.label}
+                  <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
                 </a>
               )
             )}
           </div>
 
-          {/* =====================================================
-              MOBILE MENU BUTTON
-          ===================================================== */}
-          <button
-            className="md:hidden p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            style={{ color: config.styles.textColor }}
-            onClick={() => setMobileMenuOpen((prev) => !prev)}
-            aria-label="Toggle Menu"
-          >
-            {mobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
-          </button>
+          
+         
         </div>
       </div>
 

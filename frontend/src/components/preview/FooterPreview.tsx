@@ -9,6 +9,11 @@ import {
   Linkedin,
   Youtube,
   Github,
+  Mail,
+  Phone,
+  MapPin,
+  Globe,
+  MessageCircle,
 } from "lucide-react";
 
 const socialIcons = {
@@ -18,6 +23,11 @@ const socialIcons = {
   linkedin: Linkedin,
   youtube: Youtube,
   github: Github,
+  email: Mail,
+  phone: Phone,
+  location: MapPin,
+  website: Globe,
+  discord: MessageCircle,
 };
 
 export function FooterPreview({ config, isEditing, onUpdate }) {
@@ -85,20 +95,39 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
             </p>
 
             {/* SOCIAL ICONS (links editable via config) */}
-            <div className="flex gap-4">
+            <div className="flex gap-3 flex-wrap">
               {config.socialLinks.map((social) => {
                 const Icon = socialIcons[social.platform];
+                const isContact = ['email', 'phone', 'location'].includes(social.platform);
                 return (
                   <a
                     key={social.id}
                     href={social.href}
-                    className="w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300 hover:bg-white/10 hover:scale-110"
+                    target={isContact ? '_self' : '_blank'}
+                    rel={isContact ? '' : 'noopener noreferrer'}
+                    onClick={(e) => {
+                      if (social.platform === 'email') {
+                        e.preventDefault();
+                        window.location.href = `mailto:${social.href.replace('mailto:', '')}`;
+                      } else if (social.platform === 'phone') {
+                        e.preventDefault();
+                        window.location.href = `tel:${social.href.replace('tel:', '')}`;
+                      } else if (social.platform === 'location') {
+                        e.preventDefault();
+                        window.open(`https://maps.google.com/?q=${encodeURIComponent(social.href)}`, '_blank');
+                      }
+                    }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 hover:bg-white/10 hover:scale-110 hover:shadow-lg hover:shadow-white/20 relative overflow-hidden group"
                     style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
                   >
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-5 h-5 relative z-10 transition-colors duration-300 group-hover:text-white" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </a>
                 );
               })}
+              {config.socialLinks.length === 0 && (
+                <div className="text-xs opacity-40 italic w-full">No social links added yet</div>
+              )}
             </div>
           </div>
 

@@ -18,9 +18,11 @@ export const createDefaultHeroSection = (variant = 'split') => ({
   visible: true,
   locked: false,
   styles: {
-    backgroundColor: '#202340',
-    padding: '120px 0',
-    minHeight: '90vh',
+    backgroundColor: '#ffffff',
+    backgroundGradient: variant === 'gradient' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)' : null,
+    useGradient: variant === 'gradient',
+    padding: variant === 'minimal' ? '60px 0' : '120px 0',
+    minHeight: variant === 'minimal' ? '60vh' : '90vh',
   },
   content: {
     headline: 'Build Beautiful Websites Without Code',
@@ -225,11 +227,23 @@ export const createDefaultMasonryGallerySection = () => ({
 
 export const createDefaultNavbar = () => ({
   id: uuidv4(),
-  type: 'navbar',
-  name: 'Default Navbar',
-  logo: { text: 'SiteBuilder' },
-  links: [{ id: uuidv4(), label: 'Home', href: '/' }],
-  styles: { backgroundColor: '#ffffff', textColor: '#000000' },
+  style: 'minimal',
+  logo: {
+    text: 'SiteBuilder',
+  },
+  links: [
+    { id: uuidv4(), label: 'Home', href: '/' },
+    { id: uuidv4(), label: 'About', href: '/about' },
+    { id: uuidv4(), label: 'Services', href: '/services' },
+    { id: uuidv4(), label: 'Pricing', href: '/pricing' },
+    { id: uuidv4(), label: 'Contact', href: '/contact' },
+    { id: uuidv4(), label: 'Get Started', href: '/start', isButton: true },
+  ],
+  styles: {
+    backgroundColor: 'transparent',
+    textColor: '#000000',
+    sticky: true,
+  },
 });
 
 export const createDefaultFooter = () => ({
@@ -261,8 +275,287 @@ export const createDefaultFooter = () => ({
       ],
     },
   ],
-  copyright: `© ${new Date().getFullYear()} SiteBuilder. All rights reserved.`,
-  styles: { backgroundColor: '#ffffff', textColor: '#000000', padding: '40px 0' },
+  copyright: '© 2024 SiteBuilder. All rights reserved.',
+  styles: {
+    backgroundColor: '#0f172a',
+    textColor: '#94a3b8',
+  },
+});
+
+export const createFeaturesPage = () => ({
+  id: uuidv4(),
+  name: 'Features',
+  slug: '/features',
+  meta: {
+    title: 'Features - My Website',
+    description: 'Features page',
+  },
+  navbar: createDefaultNavbar(),
+  sections: [
+    createDefaultFeaturesSection(),
+    createDefaultCTASection(),
+  ],
+  footer: createDefaultFooter(),
+  globalStyles: {
+    fontFamily: 'Inter, system-ui, sans-serif',
+    primaryColor: '#3b82f6',
+    secondaryColor: '#8b5cf6',
+    backgroundColor: '#ffffff',
+  },
+});
+
+export const createServicesPage = () => ({
+  id: uuidv4(),
+  name: 'Services',
+  slug: '/services',
+  navbar: createDefaultNavbar(),
+  sections: [createDefaultServicesSection(), createDefaultCTASection()],
+  footer: createDefaultFooter(),
+});
+
+export const createPricingPage = () => ({
+  id: uuidv4(),
+  name: 'Pricing',
+  slug: '/pricing',
+  navbar: createDefaultNavbar(),
+  sections: [createDefaultPricingSection(), createDefaultCTASection()],
+  footer: createDefaultFooter(),
+});
+
+export const createContactPage = () => ({
+  id: uuidv4(),
+  name: 'Contact',
+  slug: '/contact',
+  navbar: createDefaultNavbar(),
+  sections: [createDefaultContactSection(), createDefaultCTASection()],
+  footer: createDefaultFooter(),
+});
+
+export const createStartPage = () => ({
+  id: uuidv4(),
+  name: 'Get Started',
+  slug: '/start',
+  navbar: createDefaultNavbar(),
+  sections: [createDefaultCTASection()],
+  footer: createDefaultFooter(),
+});
+
+export const createTemplatesPage = () => ({
+  id: uuidv4(),
+  name: 'Templates',
+  slug: '/templates',
+  navbar: createDefaultNavbar(),
+  sections: [createDefaultGallerySection(), createDefaultCTASection()],
+  footer: createDefaultFooter(),
+});
+
+export const createAboutPage = () => ({
+  id: uuidv4(),
+  name: 'About',
+  slug: '/about',
+  meta: {
+    title: 'About Us - My Website',
+    description: 'Learn more about our company, mission, and values',
+  },
+  navbar: createDefaultNavbar(),
+  sections: [
+    createDefaultAboutSection('split'),
+    createDefaultTeamSection(),
+    createDefaultCTASection(),
+  ],
+  footer: createDefaultFooter(),
+  globalStyles: {
+    fontFamily: 'Inter, system-ui, sans-serif',
+    primaryColor: '#3b82f6',
+    secondaryColor: '#8b5cf6',
+    backgroundColor: '#ffffff',
+  },
+});
+
+export const createBlogPage = () => ({
+  id: uuidv4(),
+  name: 'Blog',
+  slug: '/blog',
+  navbar: createDefaultNavbar(),
+  sections: [],
+  footer: createDefaultFooter(),
+});
+
+export const createCareersPage = () => ({
+  id: uuidv4(),
+  name: 'Careers',
+  slug: '/careers',
+  navbar: createDefaultNavbar(),
+  sections: [],
+  footer: createDefaultFooter(),
+});
+
+export const createHelpPage = () => ({
+  id: uuidv4(),
+  name: 'Help',
+  slug: '/help',
+  navbar: createDefaultNavbar(),
+  sections: [createDefaultFAQSection(), createDefaultContactSection()],
+  footer: createDefaultFooter(),
+});
+
+export const createStatusPage = () => ({
+  id: uuidv4(),
+  name: 'Status',
+  slug: '/status',
+  navbar: createDefaultNavbar(),
+  sections: [createDefaultStatsSection()],
+  footer: createDefaultFooter(),
+});
+
+export const createDefaultContentSection = (title, content) => ({
+  id: uuidv4(),
+  type: 'content',
+  name: 'Content',
+  visible: true,
+  locked: false,
+  styles: {
+    backgroundColor: '#ffffff',
+    padding: '80px 0',
+    headingColor: '#0f172a',
+    paragraphColor: '#475569',
+  },
+  content: {
+    title,
+    lastUpdated: 'Last updated: January 1, 2024',
+    sections: content || [],
+  },
+  components: [],
+});
+
+export const createPrivacyPolicyPage = () => ({
+  id: uuidv4(),
+  name: 'Privacy Policy',
+  slug: '/privacy',
+  navbar: createDefaultNavbar(),
+  sections: [
+    createDefaultContentSection('Privacy Policy', [
+      {
+        id: uuidv4(),
+        heading: 'Information We Collect',
+        content: 'We collect information that you provide directly to us, such as when you create an account, make a purchase, or contact us for support. This may include your name, email address, phone number, and payment information.',
+        listItems: [
+          'Personal information you provide when creating an account',
+          'Payment and billing information',
+          'Communications with our support team',
+          'Usage data and analytics',
+        ],
+      },
+      {
+        id: uuidv4(),
+        heading: 'How We Use Your Information',
+        content: 'We use the information we collect to provide, maintain, and improve our services, process transactions, send you technical notices and support messages, and respond to your comments and questions.',
+        listItems: [
+          'To provide and maintain our services',
+          'To process your transactions',
+          'To send you updates and support messages',
+          'To improve our services and user experience',
+        ],
+      },
+      {
+        id: uuidv4(),
+        heading: 'Information Sharing',
+        content: 'We do not sell, trade, or rent your personal information to third parties. We may share your information only in the following circumstances:',
+        listItems: [
+          'With your consent',
+          'To comply with legal obligations',
+          'To protect our rights and safety',
+          'With service providers who assist us in operating our services',
+        ],
+      },
+      {
+        id: uuidv4(),
+        heading: 'Data Security',
+        content: 'We implement appropriate technical and organizational security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.',
+      },
+      {
+        id: uuidv4(),
+        heading: 'Your Rights',
+        content: 'You have the right to access, update, or delete your personal information at any time. You can also opt-out of certain communications from us.',
+      },
+      {
+        id: uuidv4(),
+        heading: 'Contact Us',
+        content: 'If you have any questions about this Privacy Policy, please contact us at privacy@example.com.',
+      },
+    ]),
+  ],
+  footer: createDefaultFooter(),
+});
+
+export const createTermsOfServicePage = () => ({
+  id: uuidv4(),
+  name: 'Terms of Service',
+  slug: '/terms',
+  navbar: createDefaultNavbar(),
+  sections: [
+    createDefaultContentSection('Terms of Service', [
+      {
+        id: uuidv4(),
+        heading: 'Acceptance of Terms',
+        content: 'By accessing and using this website, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these terms, please do not use our services.',
+      },
+      {
+        id: uuidv4(),
+        heading: 'Use License',
+        content: 'Permission is granted to temporarily access the materials on our website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:',
+        listItems: [
+          'Modify or copy the materials',
+          'Use the materials for any commercial purpose',
+          'Attempt to reverse engineer any software',
+          'Remove any copyright or proprietary notations',
+        ],
+      },
+      {
+        id: uuidv4(),
+        heading: 'User Accounts',
+        content: 'You are responsible for maintaining the confidentiality of your account and password. You agree to accept responsibility for all activities that occur under your account.',
+        listItems: [
+          'You must provide accurate and complete information',
+          'You are responsible for maintaining account security',
+          'You must notify us immediately of any unauthorized use',
+          'We reserve the right to suspend or terminate accounts',
+        ],
+      },
+      {
+        id: uuidv4(),
+        heading: 'Prohibited Uses',
+        content: 'You may not use our services:',
+        listItems: [
+          'In any way that violates any applicable law',
+          'To transmit any malicious code or viruses',
+          'To collect or harvest information about other users',
+          'To impersonate any person or entity',
+        ],
+      },
+      {
+        id: uuidv4(),
+        heading: 'Intellectual Property',
+        content: 'All content, features, and functionality of our services are owned by us and are protected by international copyright, trademark, and other intellectual property laws.',
+      },
+      {
+        id: uuidv4(),
+        heading: 'Limitation of Liability',
+        content: 'In no event shall we be liable for any damages arising out of the use or inability to use our services, even if we have been advised of the possibility of such damages.',
+      },
+      {
+        id: uuidv4(),
+        heading: 'Changes to Terms',
+        content: 'We reserve the right to modify these terms at any time. Your continued use of our services after any changes constitutes acceptance of the new terms.',
+      },
+      {
+        id: uuidv4(),
+        heading: 'Contact Information',
+        content: 'If you have any questions about these Terms of Service, please contact us at legal@example.com.',
+      },
+    ]),
+  ],
+  footer: createDefaultFooter(),
 });
 
 export const getDefaultPage = () => ({
@@ -275,6 +568,7 @@ export const getDefaultPage = () => ({
 });
 
 // Deprecated or legacy creators needed for SectionsList.jsx
+<<<<<<< HEAD
 export const createFeaturesPage = () => ({ id: uuidv4(), sections: [createDefaultFeaturesSection()] });
 export const createServicesPage = () => ({ id: uuidv4(), sections: [createDefaultServicesSection()] });
 export const createPricingPage = () => ({ id: uuidv4(), sections: [createDefaultPricingSection()] });
@@ -365,3 +659,5 @@ export const createTermsOfServicePage = () => ({
   ],
   footer: createDefaultFooter(),
 });
+=======
+>>>>>>> 9da32379f14bf3cd3f6e870ee537648498a3ab46

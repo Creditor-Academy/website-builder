@@ -38,7 +38,7 @@ export function TestimonialsSection({ section, isSelected, isEditing, onContentC
           </div>
           <div className="overflow-x-auto whitespace-nowrap py-4 hide-scrollbar">
             {testimonials.map((t, i) => (
-              <div key={t.id || i} className="inline-block w-80 mr-4 bg-white rounded-2xl p-6 shadow-lg border border-slate-100">
+              <div key={t.id || i} className="inline-block w-80 mr-4 p-6 shadow-lg border border-slate-100" style={{ borderRadius: styles.borderRadius || '16px', background: styles.cardBackgroundColor || '#ffffff' }}>
                 <Quote className="w-8 h-8 text-blue-500/30 mb-4" />
                 <p 
                   className="text-slate-600 mb-4"
@@ -53,7 +53,7 @@ export function TestimonialsSection({ section, isSelected, isEditing, onContentC
                   "{t.quote}"
                 </p>
                 <div className="flex items-center gap-2">
-                  <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full" />
+                  <img src={t.avatar} alt={t.name} className="w-10 h-10 object-cover" style={{ borderRadius: styles.borderRadius ? `calc(${styles.borderRadius} * 0.5)` : '50%' }} />
                   <div>
                     <h4 
                       className="font-semibold"
@@ -183,7 +183,7 @@ export function TestimonialsSection({ section, isSelected, isEditing, onContentC
                 </p>
                 <div className="flex items-center gap-3">
                   {testimonial.avatar && (
-                    <img src={testimonial.avatar} alt={testimonial.name} className="w-10 h-10 rounded-full object-cover" />
+                    <img src={testimonial.avatar} alt={testimonial.name} className="w-10 h-10 object-cover" style={{ borderRadius: styles.borderRadius ? `calc(${styles.borderRadius} * 0.5)` : '50%' }} />
                   )}
                   <div>
                     <h4 
@@ -235,7 +235,7 @@ export function TestimonialsSection({ section, isSelected, isEditing, onContentC
         {/* Testimonials Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
-            <div key={testimonial.id || index} className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
+            <div key={testimonial.id || index} className="p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100" style={{ borderRadius: styles.borderRadius || '16px', background: styles.cardBackgroundColor || '#ffffff' }}>
               <Quote className="w-10 h-10 text-blue-500/30 mb-4" />
               <p 
                 className="text-slate-600 mb-6 leading-relaxed"
@@ -251,7 +251,7 @@ export function TestimonialsSection({ section, isSelected, isEditing, onContentC
               </p>
               <div className="flex items-center gap-1 mb-4">{[...Array(5)].map((_, i) => (<Star key={i} className={`w-4 h-4 ${i < (testimonial.rating || 5) ? 'text-yellow-400 fill-yellow-400' : 'text-slate-300'}`} />))}</div>
               <div className="flex items-center gap-4">
-                <img src={testimonial.avatar} alt={testimonial.name} className="w-12 h-12 rounded-full object-cover" />
+                <img src={testimonial.avatar} alt={testimonial.name} className="w-12 h-12 object-cover" style={{ borderRadius: styles.borderRadius ? `calc(${styles.borderRadius} * 0.5)` : '50%' }} />
                 <div>
                   <h4 
                     className="font-semibold text-slate-900"
