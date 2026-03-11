@@ -153,7 +153,16 @@ export const createEcommerceFooter = () => ({
     { id: uuidv4(), platform: 'instagram', href: '#' },
     { id: uuidv4(), platform: 'twitter', href: '#' },
   ],
-  columns: [],
+  columns: [
+    {
+      id: uuidv4(),
+      title: 'Legal',
+      links: [
+        { id: uuidv4(), label: 'Privacy Policy', href: '/privacy' },
+        { id: uuidv4(), label: 'Terms of Service', href: '/terms' },
+      ],
+    },
+  ],
   copyright: `© ${new Date().getFullYear()} EcoShop. All rights reserved.`,
   styles: {
     backgroundColor: '#0f172a',

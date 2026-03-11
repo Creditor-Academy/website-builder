@@ -1,12 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
 
 // Import template-specific creators
-export * from './templates/Bussiness/Business';
-export * from './templates/Portfolio/Portfolio';
-export * from './templates/Ecommerce/Ecommerce';
-export * from './templates/consultant/Consultant';
-export * from './templates/agencies/Agencies';
-export * from './templates/Coach/Coach';
+export * from './templates/Business';
+export * from './templates/Portfolio';
+export * from './templates/Ecommerce';
+export * from './templates/Consultant';
+export * from './templates/Agencies';
+export * from './templates/Coach';
 
 // --- Default Sections (Shared/Fallback) ---
 

@@ -167,7 +167,15 @@ export const createPortfolioFooter = () => ({
          
         { id: uuidv4(), label: 'About', href: '#about' },
          { id: uuidv4(), label: 'Work', href: '#work' },
-     ],
+       ],
+     },
+     {
+       id: uuidv4(),
+       title: 'Legal',
+       links: [
+         { id: uuidv4(), label: 'Privacy Policy', href: '/privacy' },
+         { id: uuidv4(), label: 'Terms of Service', href: '/terms' },
+       ],
      },
   ],
   copyright: `© ${new Date().getFullYear()} CreativeStudio. All rights reserved.`,

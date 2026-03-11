@@ -48,16 +48,32 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
   const navigate = useNavigate();
 
   const handleNavClick = (e, link) => {
-    // 1. Handle anchor links (e.g., #about, #services)
-    if (link.href && link.href.startsWith('#')) {
+    // 1. Handle anchor links and root routes (e.g., #about, /#hero, /)
+    if (link.href && (link.href.startsWith('#') || link.href.startsWith('/#') || link.href === '/')) {
       e.preventDefault();
-      const targetId = link.href.substring(1);
-      const element = document.getElementById(targetId);
       
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const targetId = link.href.startsWith('/#') ? link.href.substring(2)
+                     : link.href.startsWith('#') ? link.href.substring(1)
+                     : '';
+                     
+      if (targetId) {
+        const element = document.getElementById(targetId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          // Switch to home page if section not found on current page
+          const homePage = pages.find(p => p.slug === '/' || p.name?.toLowerCase().includes('home')) || pages[0];
+          if (homePage) {
+            setActivePage(homePage.id);
+            // Delay to allow page switch rendering before scrolling
+            setTimeout(() => {
+              const el = document.getElementById(targetId);
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+          }
+        }
       } else {
-        // Switch to home page if section not found on current page
+        // Just switch to root '/'
         const homePage = pages.find(p => p.slug === '/' || p.name?.toLowerCase().includes('home')) || pages[0];
         if (homePage) {
           setActivePage(homePage.id);
