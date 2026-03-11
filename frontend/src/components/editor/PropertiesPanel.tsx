@@ -6,11 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X, Type, Palette, Settings2, ChevronDown, Layout, Image as ImageIcon, Search, Users, Trash2 } from 'lucide-react';
+import { X, Type, Palette, Settings2, ChevronDown, Layout, Image as ImageIcon, Search, Users, Trash2, Plus, Mail, Phone, MapPin, MessageSquare, Clock } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { getVariantsForSection } from '@/lib/sectionVariants';
 import { MediaLibrary } from './MediaLibrary';
 import { Button } from '@/components/ui/button';
+import { NavbarSettings } from './NavbarSettings';
+import { FooterSettings } from './FooterSettings';
 
 export function PropertiesPanel() {
   const { state, selectedSection, selectedComponent, updateSection, updateSectionStyles, selectSection, updateNavbar, updateFooter, updatePageSEO, updateComponent, deleteComponent, deleteSection } = useBuilder();
@@ -141,318 +143,65 @@ export function PropertiesPanel() {
             </CollapsibleContent>
           </Collapsible>
 
-          <Collapsible open={navbarOpen} onOpenChange={setNavbarOpen} className="border-b border-slate-100">
-            <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
-              <div className="flex items-center gap-2">
-                <Palette className="w-4 h-4 text-primary" />
-                <span className="text-sm font-semibold text-slate-700">Global Navbar</span>
-              </div>
-              <ChevronDown className={`w-4 h-4 transition-transform text-slate-400 ${navbarOpen ? 'rotate-180' : ''}`} />
-            </CollapsibleTrigger>
-            <CollapsibleContent className="p-4 pt-0 space-y-4 px-6 pb-6">
-              <div className="space-y-4 pt-2">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Background</Label>
-                    <div className="flex gap-2">
-                      <input
-                        type="color"
-                        value={page.navbar?.styles?.backgroundColor || '#0f172a'}
-                        onChange={(e) => updateNavbar({ styles: { ...page.navbar.styles, backgroundColor: e.target.value } })}
-                        className="w-8 h-8 rounded border p-0.5 cursor-pointer"
-                      />
-                      <Input
-                        value={page.navbar?.styles?.backgroundColor || ''}
-                        onChange={(e) => updateNavbar({ styles: { ...page.navbar.styles, backgroundColor: e.target.value } })}
-                        className="bg-slate-50 border-slate-200 flex-1 font-mono text-[10px] h-8"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Text Color</Label>
-                    <div className="flex gap-2">
-                      <input
-                        type="color"
-                        value={page.navbar?.styles?.textColor || '#ffffff'}
-                        onChange={(e) => updateNavbar({ styles: { ...page.navbar.styles, textColor: e.target.value } })}
-                        className="w-8 h-8 rounded border p-0.5 cursor-pointer"
-                      />
-                      <Input
-                        value={page.navbar?.styles?.textColor || ''}
-                        onChange={(e) => updateNavbar({ styles: { ...page.navbar.styles, textColor: e.target.value } })}
-                        className="bg-slate-50 border-slate-200 flex-1 font-mono text-[10px] h-8"
-                      />
-                    </div>
-                  </div>
+          {page?.slug === '/' ? (
+            <Collapsible open={navbarOpen} onOpenChange={setNavbarOpen} className="border-b border-slate-100">
+              <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                <div className="flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-semibold text-slate-700">Global Navbar</span>
                 </div>
-                <div className="flex items-center justify-between pt-2">
-                  <Label className="text-xs font-medium">Sticky Header</Label>
-                  <Switch defaultChecked />
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-
-          <Collapsible open={footerOpen} onOpenChange={setFooterOpen} className="border-b border-slate-100 group">
-            <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-gradient-to-r hover:from-slate-50 hover:to-white transition-all duration-200 group">
+                <ChevronDown className={`w-4 h-4 transition-transform text-slate-400 ${navbarOpen ? 'rotate-180' : ''}`} />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="p-0">
+                <NavbarSettings
+                  navbar={page.navbar}
+                  pages={page ? [page] : []}
+                  onUpdate={(updates) => updateNavbar(updates)}
+                  isExpanded={true}
+                />
+              </CollapsibleContent>
+            </Collapsible>
+          ) : (
+            <div className="border-b border-slate-100 p-4 bg-blue-50 rounded-lg mx-4 my-2">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
                   <Palette className="w-4 h-4 text-blue-600" />
                 </div>
-                <div className="text-left">
-                  <span className="text-sm font-semibold text-slate-700 block">Global Footer</span>
-                  <span className="text-xs text-slate-500">Customize footer styling & social links</span>
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-700">Navbar is Global</h3>
+                  <p className="text-xs text-slate-500 mt-1">This page uses the navbar from the Home page. Edit navbar settings on the Home page.</p>
                 </div>
               </div>
-              <ChevronDown className={`w-4 h-4 transition-all duration-200 text-slate-400 ${footerOpen ? 'rotate-180 text-primary' : ''} group-hover:text-primary`} />
-            </CollapsibleTrigger>
-            <CollapsibleContent className="p-4 pt-0 space-y-4 px-6 pb-6">
-              <div className="space-y-4 pt-2">
-                {/* Colors */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Background</Label>
-                    <div className="flex gap-2">
-                      <input
-                        type="color"
-                        value={page.footer?.styles?.backgroundColor || '#0f172a'}
-                        onChange={(e) => updateFooter({ styles: { ...page.footer.styles, backgroundColor: e.target.value } })}
-                        className="w-8 h-8 rounded border p-0.5 cursor-pointer"
-                      />
-                      <Input
-                        value={page.footer?.styles?.backgroundColor || ''}
-                        onChange={(e) => updateFooter({ styles: { ...page.footer.styles, backgroundColor: e.target.value } })}
-                        className="bg-slate-50 border-slate-200 flex-1 font-mono text-[10px] h-8"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Text Color</Label>
-                    <div className="flex gap-2">
-                      <input
-                        type="color"
-                        value={page.footer?.styles?.textColor || '#ffffff'}
-                        onChange={(e) => updateFooter({ styles: { ...page.footer.styles, textColor: e.target.value } })}
-                        className="w-8 h-8 rounded border p-0.5 cursor-pointer"
-                      />
-                      <Input
-                        value={page.footer?.styles?.textColor || ''}
-                        onChange={(e) => updateFooter({ styles: { ...page.footer.styles, textColor: e.target.value } })}
-                        className="bg-slate-50 border-slate-200 flex-1 font-mono text-[10px] h-8"
-                      />
-                    </div>
-                  </div>
-                </div>
+            </div>
+          )}
 
-                {/* Button Routes & Links Section */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
-                      Button Routes & Links
-                    </Label>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-[9px] h-7 border-dashed border-purple-300 hover:border-purple-400"
-                      onClick={() => {
-                        const newRoute = {
-                          id: uuidv4(),
-                          name: 'New Button',
-                          type: 'external',
-                          url: 'https://example.com',
-                          target: '_blank'
-                        };
-                        updateFooter({
-                          buttonRoutes: [...(page.footer?.buttonRoutes || []), newRoute]
-                        });
-                      }}
-                    >
-                      + Add Button Route
-                    </Button>
+          {page?.slug === '/' ? (
+            <FooterSettings 
+              footer={page.footer} 
+              pages={page ? [page] : []}
+              onUpdate={updateFooter}
+              isExpanded={footerOpen}
+            />
+            ) : (
+              <div className="border-b border-slate-100 p-4 bg-blue-50 rounded-lg mx-4 my-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <Palette className="w-4 h-4 text-blue-600" />
                   </div>
-
-                  <div className="space-y-2">
-                    {(page.footer?.buttonRoutes || []).map((route) => (
-                      <div key={route.id} className="p-3 bg-purple-50/50 rounded-lg border border-purple-200 space-y-2">
-                        <div className="flex gap-2 items-center">
-                          <Input
-                            value={route.name}
-                            onChange={(e) => {
-                              const updated = page.footer.buttonRoutes.map(r =>
-                                r.id === route.id ? { ...r, name: e.target.value } : r
-                              );
-                              updateFooter({ buttonRoutes: updated });
-                            }}
-                            className="bg-white border-purple-200 text-xs h-8 flex-1"
-                            placeholder="Button Name"
-                          />
-                          <Select
-                            value={route.type}
-                            onValueChange={(value) => {
-                              const updated = page.footer.buttonRoutes.map(r =>
-                                r.id === route.id ? { ...r, type: value } : r
-                              );
-                              updateFooter({ buttonRoutes: updated });
-                            }}
-                          >
-                            <SelectTrigger className="bg-white border-purple-200 h-8 text-xs w-24">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="external" className="text-xs">External</SelectItem>
-                              <SelectItem value="internal" className="text-xs">Internal</SelectItem>
-                              <SelectItem value="email" className="text-xs">Email</SelectItem>
-                              <SelectItem value="phone" className="text-xs">Phone</SelectItem>
-                              <SelectItem value="anchor" className="text-xs">Anchor</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                            onClick={() => {
-                              const updated = page.footer.buttonRoutes.filter(r => r.id !== route.id);
-                              updateFooter({ buttonRoutes: updated });
-                            }}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                        <div className="flex gap-2 items-center">
-                          <Input
-                            value={route.url}
-                            onChange={(e) => {
-                              const updated = page.footer.buttonRoutes.map(r =>
-                                r.id === route.id ? { ...r, url: e.target.value } : r
-                              );
-                              updateFooter({ buttonRoutes: updated });
-                            }}
-                            className="bg-white border-purple-200 text-xs h-8 flex-1"
-                            placeholder={
-                              route.type === 'email' ? 'mailto:example@email.com' :
-                              route.type === 'phone' ? 'tel:+1234567890' :
-                              route.type === 'anchor' ? '#section-id' :
-                              route.type === 'internal' ? '/page-path' :
-                              'https://example.com'
-                            }
-                          />
-                          {route.type === 'external' && (
-                            <Select
-                              value={route.target || '_blank'}
-                              onValueChange={(value) => {
-                                const updated = page.footer.buttonRoutes.map(r =>
-                                  r.id === route.id ? { ...r, target: value } : r
-                                );
-                                updateFooter({ buttonRoutes: updated });
-                              }}
-                            >
-                              <SelectTrigger className="bg-white border-purple-200 h-8 text-xs w-20">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="_blank" className="text-xs">New Tab</SelectItem>
-                                <SelectItem value="_self" className="text-xs">Same Tab</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                      Social Links
-                    </Label>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-[9px] h-7 border-dashed"
-                      onClick={() => {
-                        const newSocialLink = {
-                          id: uuidv4(),
-                          platform: 'twitter',
-                          href: 'https://twitter.com/yourusername'
-                        };
-                        updateFooter({
-                          socialLinks: [...(page.footer?.socialLinks || []), newSocialLink]
-                        });
-                      }}
-                    >
-                      + Add Link
-                    </Button>
-                  </div>
-
-                  <div className="space-y-2">
-                    {(page.footer?.socialLinks || []).map((social) => (
-                      <div key={social.id} className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
-                        <div className="flex gap-2 items-center">
-                          <Select
-                            value={social.platform}
-                            onValueChange={(value) => {
-                              const updated = page.footer.socialLinks.map(s =>
-                                s.id === social.id ? { ...s, platform: value } : s
-                              );
-                              updateFooter({ socialLinks: updated });
-                            }}
-                          >
-                            <SelectTrigger className="bg-white border-slate-200 h-8 text-xs flex-1">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="facebook" className="text-xs">Facebook</SelectItem>
-                              <SelectItem value="twitter" className="text-xs">Twitter</SelectItem>
-                              <SelectItem value="instagram" className="text-xs">Instagram</SelectItem>
-                              <SelectItem value="linkedin" className="text-xs">LinkedIn</SelectItem>
-                              <SelectItem value="youtube" className="text-xs">YouTube</SelectItem>
-                              <SelectItem value="github" className="text-xs">GitHub</SelectItem>
-                              <SelectItem value="email" className="text-xs">Email</SelectItem>
-                              <SelectItem value="phone" className="text-xs">Phone</SelectItem>
-                              <SelectItem value="location" className="text-xs">Address</SelectItem>
-                              <SelectItem value="website" className="text-xs">Website</SelectItem>
-                              <SelectItem value="discord" className="text-xs">Discord</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                            onClick={() => {
-                              const updated = page.footer.socialLinks.filter(s => s.id !== social.id);
-                              updateFooter({ socialLinks: updated });
-                            }}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                        <Input
-                          value={social.href}
-                          onChange={(e) => {
-                            const updated = page.footer.socialLinks.map(s =>
-                              s.id === social.id ? { ...s, href: e.target.value } : s
-                            );
-                            updateFooter({ socialLinks: updated });
-                          }}
-                          className="bg-white border-slate-200 text-xs h-8"
-                          placeholder="https://..."
-                        />
-                      </div>
-                    ))}
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-700">Footer is Global</h3>
+                    <p className="text-xs text-slate-500 mt-1">This page uses footer from the Home page. Edit footer settings on the Home page.</p>
                   </div>
                 </div>
               </div>
-            </CollapsibleContent>
-          </Collapsible>
+            )}
         </div>
 
-        <div className="p-4 bg-primary/5 m-4 rounded-xl border border-primary/10">
+        {/* <div className="p-4 bg-primary/5 m-4 rounded-xl border border-primary/10">
           <h4 className="text-[11px] font-bold text-primary uppercase tracking-widest mb-2">Publishing</h4>
           <p className="text-[10px] text-slate-500 mb-3 leading-relaxed">Changes are saved automatically to your local project. Ready to go live?</p>
           <Button className="w-full text-xs h-9 shadow-sm" onClick={() => alert('Publishing feature coming soon!')}>Publish Project</Button>
-        </div>
+        </div> */}
 
         <MediaLibrary open={mediaOpen} onOpenChange={setMediaOpen} onSelect={handleMediaSelect} />
       </div>
@@ -812,6 +561,512 @@ export function PropertiesPanel() {
                 const newMember = { id: uuidv4(), name: 'New Member', role: 'Role', avatar: '', social: [] };
                 handleContentChange('members', [...(content.members || []), newMember]);
               }}>+ Add Member</Button>
+            </div>
+          </div>
+        </div>
+      );
+
+      case 'gallery': return (
+        <div className="space-y-4">
+          <div className="space-y-2"><Label className="text-xs font-medium">Headline</Label><Input value={content.headline || ''} onChange={(e) => handleContentChange('headline', e.target.value)} className="bg-white border-slate-200 text-xs" /></div>
+          <div className="space-y-2"><Label className="text-xs font-medium">Subheadline</Label><Textarea value={content.subheadline || ''} onChange={(e) => handleContentChange('subheadline', e.target.value)} className="bg-white border-slate-200 resize-none text-xs" rows={2} /></div>
+          
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Gallery Images</Label>
+              <Button variant="outline" size="sm" className="text-[9px] h-8 border-dashed" onClick={() => {
+                const newImage = { 
+                  id: uuidv4(), 
+                  url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80',
+                  title: 'New Image', 
+                  category: 'Gallery' 
+                };
+                handleContentChange('images', [...(content.images || []), newImage]);
+              }}>
+                <Plus className="w-3 h-3 mr-1" /> Add Image
+              </Button>
+            </div>
+            
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {(content.images || []).map((image, index) => (
+                <div key={image.id} className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+                  <div className="flex gap-2 items-start">
+                    <div className="w-16 h-16 rounded-lg border border-slate-200 overflow-hidden bg-white shrink-0 cursor-pointer group relative" onClick={() => openMediaPicker(selectedSection.id, 'url', false, image.id, 'images')}>
+                      {image.url ? <img src={image.url} className="w-full h-full object-cover" /> : <ImageIcon className="w-6 h-6 m-5 text-slate-300" />}
+                      <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                        <Search className="w-4 h-4 text-white" />
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center">
+                          {index + 1}
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:bg-destructive/10" onClick={() => {
+                          const updated = content.images.filter(x => x.id !== image.id);
+                          handleContentChange('images', updated);
+                        }}>
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                      
+                      <Input 
+                        value={image.title || ''} 
+                        onChange={(e) => {
+                          const updated = content.images.map(x => x.id === image.id ? { ...x, title: e.target.value } : x);
+                          handleContentChange('images', updated);
+                        }} 
+                        placeholder="Image Title" 
+                        className="text-xs font-bold h-7" 
+                      />
+                      
+                      <Input 
+                        value={image.category || ''} 
+                        onChange={(e) => {
+                          const updated = content.images.map(x => x.id === image.id ? { ...x, category: e.target.value } : x);
+                          handleContentChange('images', updated);
+                        }} 
+                        placeholder="Category" 
+                        className="text-[9px] h-6" 
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {(content.images || []).length === 0 && (
+                <div className="text-center py-8 px-4 border-2 border-dashed border-slate-200 rounded-lg">
+                  <ImageIcon className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                  <p className="text-xs text-slate-400">No images yet. Click "Add Image" to get started.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+
+      case 'blog': return (
+        <div className="space-y-4">
+          <div className="space-y-2"><Label className="text-xs font-medium">Headline</Label><Input value={content.headline || ''} onChange={(e) => handleContentChange('headline', e.target.value)} className="bg-white border-slate-200 text-xs" /></div>
+          <div className="space-y-2"><Label className="text-xs font-medium">Subheadline</Label><Textarea value={content.subheadline || ''} onChange={(e) => handleContentChange('subheadline', e.target.value)} className="bg-white border-slate-200 resize-none text-xs" rows={2} /></div>
+          
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Blog Posts</Label>
+              <Button variant="outline" size="sm" className="text-[9px] h-8 border-dashed" onClick={() => {
+                const newPost = { 
+                  id: uuidv4(), 
+                  imageUrl: '',
+                  title: 'New Blog Post',
+                  excerpt: 'Blog post excerpt here...',
+                  author: 'Author Name',
+                  date: 'Today',
+                  category: 'Article'
+                };
+                handleContentChange('posts', [...(content.posts || []), newPost]);
+              }}>
+                <Plus className="w-3 h-3 mr-1" /> Add Post
+              </Button>
+            </div>
+            
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {(content.posts || []).map((post, index) => (
+                <div key={post.id} className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+                  <div className="flex gap-2 items-start">
+                    <div className="w-16 h-16 rounded-lg border border-slate-200 overflow-hidden bg-white shrink-0 cursor-pointer group relative" onClick={() => openMediaPicker(selectedSection.id, 'imageUrl', false, post.id, 'posts')}>
+                      {post.imageUrl ? <img src={post.imageUrl} className="w-full h-full object-cover" /> : <ImageIcon className="w-6 h-6 m-5 text-slate-300" />}
+                      <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                        <Search className="w-4 h-4 text-white" />
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center">
+                          {index + 1}
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:bg-destructive/10" onClick={() => {
+                          const updated = content.posts.filter(x => x.id !== post.id);
+                          handleContentChange('posts', updated);
+                        }}>
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                      
+                      <Input 
+                        value={post.title || ''} 
+                        onChange={(e) => {
+                          const updated = content.posts.map(x => x.id === post.id ? { ...x, title: e.target.value } : x);
+                          handleContentChange('posts', updated);
+                        }} 
+                        placeholder="Post Title" 
+                        className="text-xs font-bold h-7" 
+                      />
+                      
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input 
+                          value={post.author || ''} 
+                          onChange={(e) => {
+                            const updated = content.posts.map(x => x.id === post.id ? { ...x, author: e.target.value } : x);
+                            handleContentChange('posts', updated);
+                          }} 
+                          placeholder="Author" 
+                          className="text-[9px] h-6" 
+                        />
+                        <Input 
+                          value={post.date || ''} 
+                          onChange={(e) => {
+                            const updated = content.posts.map(x => x.id === post.id ? { ...x, date: e.target.value } : x);
+                            handleContentChange('posts', updated);
+                          }} 
+                          placeholder="Date" 
+                          className="text-[9px] h-6" 
+                        />
+                      </div>
+                      
+                      <Input 
+                        value={post.category || ''} 
+                        onChange={(e) => {
+                          const updated = content.posts.map(x => x.id === post.id ? { ...x, category: e.target.value } : x);
+                          handleContentChange('posts', updated);
+                        }} 
+                        placeholder="Category" 
+                        className="text-[9px] h-6" 
+                      />
+                      
+                      <Textarea 
+                        value={post.excerpt || ''} 
+                        onChange={(e) => {
+                          const updated = content.posts.map(x => x.id === post.id ? { ...x, excerpt: e.target.value } : x);
+                          handleContentChange('posts', updated);
+                        }} 
+                        placeholder="Post excerpt..." 
+                        className="text-[9px] resize-none h-12" 
+                        rows={2}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {(content.posts || []).length === 0 && (
+                <div className="text-center py-8 px-4 border-2 border-dashed border-slate-200 rounded-lg">
+                  <ImageIcon className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                  <p className="text-xs text-slate-400">No blog posts yet. Click "Add Post" to get started.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+
+      case 'contact': return (
+        <div className="space-y-4">
+          <div className="space-y-2"><Label className="text-xs font-medium">Headline</Label><Input value={content.headline || ''} onChange={(e) => handleContentChange('headline', e.target.value)} className="bg-white border-slate-200 text-xs" /></div>
+          <div className="space-y-2"><Label className="text-xs font-medium">Subheadline</Label><Textarea value={content.subheadline || ''} onChange={(e) => handleContentChange('subheadline', e.target.value)} className="bg-white border-slate-200 resize-none text-xs" rows={2} /></div>
+          
+          {/* Form Labels */}
+          <div className="space-y-3">
+            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Form Labels</Label>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <Label className="text-[9px] text-slate-500">First Name Label</Label>
+                <Input 
+                  value={content.labelFirstName || ''} 
+                  onChange={(e) => handleContentChange('labelFirstName', e.target.value)} 
+                  className="bg-white border-slate-200 text-[10px] h-7" 
+                  placeholder="First Name"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[9px] text-slate-500">Last Name Label</Label>
+                <Input 
+                  value={content.labelLastName || ''} 
+                  onChange={(e) => handleContentChange('labelLastName', e.target.value)} 
+                  className="bg-white border-slate-200 text-[10px] h-7" 
+                  placeholder="Last Name"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[9px] text-slate-500">Email Label</Label>
+                <Input 
+                  value={content.labelEmail || ''} 
+                  onChange={(e) => handleContentChange('labelEmail', e.target.value)} 
+                  className="bg-white border-slate-200 text-[10px] h-7" 
+                  placeholder="Email"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[9px] text-slate-500">Message Label</Label>
+                <Input 
+                  value={content.labelMessage || ''} 
+                  onChange={(e) => handleContentChange('labelMessage', e.target.value)} 
+                  className="bg-white border-slate-200 text-[10px] h-7" 
+                  placeholder="Message"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Button Text */}
+          <div className="space-y-2">
+            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Button</Label>
+            <Input 
+              value={content.buttonText || ''} 
+              onChange={(e) => handleContentChange('buttonText', e.target.value)} 
+              className="bg-white border-slate-200 text-xs" 
+              placeholder="Send Message"
+            />
+          </div>
+
+          {/* Contact Info Fields */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contact Info Fields</Label>
+              <Button variant="outline" size="sm" className="text-[9px] h-8 border-dashed" onClick={() => {
+                const newField = { 
+                  id: uuidv4(), 
+                  label: 'New Field',
+                  value: 'Field value here',
+                  icon: 'Mail',
+                  accent: '#E11D48'
+                };
+                handleContentChange('contactFields', [...(content.contactFields || [
+                  { id: '1', label: content.labelEmailUs || 'Email Us', value: content.email || 'hello@example.com', icon: 'Mail', accent: '#E11D48' },
+                  { id: '2', label: content.labelCallUs || 'Call Us', value: content.phone || '+1 (555) 123-4567', icon: 'Phone', accent: '#0891B2' },
+                  { id: '3', label: content.labelVisitUs || 'Visit Us', value: content.address || '123 Business St', icon: 'MapPin', accent: '#059669' }
+                ]), newField]);
+              }}>
+                <Plus className="w-3 h-3 mr-1" /> Add Field
+              </Button>
+            </div>
+            
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {(content.contactFields || [
+                { id: '1', label: content.labelEmailUs || 'Email Us', value: content.email || 'hello@example.com', icon: 'Mail', accent: '#E11D48' },
+                { id: '2', label: content.labelCallUs || 'Call Us', value: content.phone || '+1 (555) 123-4567', icon: 'Phone', accent: '#0891B2' },
+                { id: '3', label: content.labelVisitUs || 'Visit Us', value: content.address || '123 Business St', icon: 'MapPin', accent: '#059669' }
+              ]).map((field, index) => (
+                <div key={field.id} className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-8 h-8 rounded flex items-center justify-center text-white text-xs"
+                      style={{ background: field.accent }}
+                    >
+                      {field.icon === 'Mail' && <Mail className="w-4 h-4" />}
+                      {field.icon === 'Phone' && <Phone className="w-4 h-4" />}
+                      {field.icon === 'MapPin' && <MapPin className="w-4 h-4" />}
+                      {field.icon === 'Globe' && <Users className="w-4 h-4" />}
+                      {field.icon === 'MessageSquare' && <MessageSquare className="w-4 h-4" />}
+                      {field.icon === 'Clock' && <Clock className="w-4 h-4" />}
+                    </div>
+                    <div className="w-6 h-6 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center">
+                      {index + 1}
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:bg-destructive/10" onClick={() => {
+                      const updated = (content.contactFields || [
+                        { id: '1', label: content.labelEmailUs || 'Email Us', value: content.email || 'hello@example.com', icon: 'Mail', accent: '#E11D48' },
+                        { id: '2', label: content.labelCallUs || 'Call Us', value: content.phone || '+1 (555) 123-4567', icon: 'Phone', accent: '#0891B2' },
+                        { id: '3', label: content.labelVisitUs || 'Visit Us', value: content.address || '123 Business St', icon: 'MapPin', accent: '#059669' }
+                      ]).filter(x => x.id !== field.id);
+                      handleContentChange('contactFields', updated);
+                    }}>
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <Label className="text-[9px] text-slate-500">Label</Label>
+                      <Input 
+                        value={field.label || ''} 
+                        onChange={(e) => {
+                          const updated = (content.contactFields || [
+                            { id: '1', label: content.labelEmailUs || 'Email Us', value: content.email || 'hello@example.com', icon: 'Mail', accent: '#E11D48' },
+                            { id: '2', label: content.labelCallUs || 'Call Us', value: content.phone || '+1 (555) 123-4567', icon: 'Phone', accent: '#0891B2' },
+                            { id: '3', label: content.labelVisitUs || 'Visit Us', value: content.address || '123 Business St', icon: 'MapPin', accent: '#059669' }
+                          ]).map(x => x.id === field.id ? { ...x, label: e.target.value } : x);
+                          handleContentChange('contactFields', updated);
+                        }} 
+                        placeholder="Field Label" 
+                        className="text-[9px] h-6" 
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[9px] text-slate-500">Icon</Label>
+                      <Select 
+                        value={field.icon || 'Mail'} 
+                        onValueChange={(value) => {
+                          const accentMap = { Mail: '#E11D48', Phone: '#0891B2', MapPin: '#059669', Globe: '#7C3AED', MessageSquare: '#D97706', Clock: '#0F766E' };
+                          const updated = (content.contactFields || [
+                            { id: '1', label: content.labelEmailUs || 'Email Us', value: content.email || 'hello@example.com', icon: 'Mail', accent: '#E11D48' },
+                            { id: '2', label: content.labelCallUs || 'Call Us', value: content.phone || '+1 (555) 123-4567', icon: 'Phone', accent: '#0891B2' },
+                            { id: '3', label: content.labelVisitUs || 'Visit Us', value: content.address || '123 Business St', icon: 'MapPin', accent: '#059669' }
+                          ]).map(x => x.id === field.id ? { ...x, icon: value, accent: accentMap[value] } : x);
+                          handleContentChange('contactFields', updated);
+                        }}
+                      >
+                        <SelectTrigger className="bg-white border-slate-200 h-6 text-[9px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Mail" className="text-[9px]">Mail</SelectItem>
+                          <SelectItem value="Phone" className="text-[9px]">Phone</SelectItem>
+                          <SelectItem value="MapPin" className="text-[9px]">MapPin</SelectItem>
+                          <SelectItem value="Globe" className="text-[9px]">Globe</SelectItem>
+                          <SelectItem value="MessageSquare" className="text-[9px]">Message</SelectItem>
+                          <SelectItem value="Clock" className="text-[9px]">Clock</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Label className="text-[9px] text-slate-500">Value</Label>
+                    <Input 
+                      value={field.value || ''} 
+                      onChange={(e) => {
+                        const updated = (content.contactFields || [
+                          { id: '1', label: content.labelEmailUs || 'Email Us', value: content.email || 'hello@example.com', icon: 'Mail', accent: '#E11D48' },
+                          { id: '2', label: content.labelCallUs || 'Call Us', value: content.phone || '+1 (555) 123-4567', icon: 'Phone', accent: '#0891B2' },
+                          { id: '3', label: content.labelVisitUs || 'Visit Us', value: content.address || '123 Business St', icon: 'MapPin', accent: '#059669' }
+                        ]).map(x => x.id === field.id ? { ...x, value: e.target.value } : x);
+                        handleContentChange('contactFields', updated);
+                      }} 
+                      placeholder="Field Value" 
+                      className="text-[9px] h-6" 
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Map Embed for Map Variant */}
+          <div className="space-y-2">
+            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Map Embed (Map Variant)</Label>
+            <Input 
+              value={content.mapEmbed || ''} 
+              onChange={(e) => handleContentChange('mapEmbed', e.target.value)} 
+              className="bg-white border-slate-200 text-xs" 
+              placeholder="Google Maps iframe URL..."
+            />
+            <p className="text-[9px] text-slate-400">Add Google Maps iframe embed URL for the map variant</p>
+          </div>
+        </div>
+      );
+
+      case 'logocloud': return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label className="text-xs font-medium">Headline</Label>
+            <Input 
+              value={content.headline || ''} 
+              onChange={(e) => handleContentChange('headline', e.target.value)} 
+              className="bg-white border-slate-200 text-xs" 
+              placeholder="e.g., Trusted by leading companies"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label className="text-xs font-medium">Subheadline</Label>
+            <Textarea 
+              value={content.subheadline || ''} 
+              onChange={(e) => handleContentChange('subheadline', e.target.value)} 
+              className="bg-white border-slate-200 resize-none text-xs" 
+              rows={2}
+              placeholder="Description text (optional)"
+            />
+          </div>
+          
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Logo Assets</Label>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-[9px] h-8 border-dashed border-blue-300 hover:border-blue-400 hover:bg-blue-50" 
+                onClick={() => {
+                  const newLogo = { 
+                    id: uuidv4(), 
+                    name: 'Company Logo',
+                    url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=200&h=100&fit=crop'
+                  };
+                  handleContentChange('logos', [...(content.logos || []), newLogo]);
+                }}
+              >
+                <Plus className="w-3 h-3 mr-1" /> Add Logo
+              </Button>
+            </div>
+            
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {(content.logos || []).map((logo, index) => (
+                <div key={logo.id} className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+                  <div className="flex gap-2 items-start">
+                    <div 
+                      className="w-12 h-12 rounded-lg border border-slate-200 overflow-hidden bg-white shrink-0 cursor-pointer group relative flex items-center justify-center" 
+                      onClick={() => openMediaPicker(selectedSection.id, 'url', false, logo.id, 'logos')}
+                      title="Click to change logo"
+                    >
+                      {logo.url ? (
+                        <img src={logo.url} className="w-full h-full object-contain p-1" alt={logo.name} />
+                      ) : (
+                        <ImageIcon className="w-5 h-5 text-slate-300" />
+                      )}
+                      <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-lg">
+                        <Search className="w-4 h-4 text-white" />
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-[9px] font-bold flex items-center justify-center">
+                          {index + 1}
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-6 w-6 text-destructive hover:bg-destructive/10 ml-auto" 
+                          onClick={() => {
+                            const updated = content.logos.filter(x => x.id !== logo.id);
+                            handleContentChange('logos', updated);
+                          }}
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                      
+                      <Input 
+                        value={logo.name || ''} 
+                        onChange={(e) => {
+                          const updated = content.logos.map(x => x.id === logo.id ? { ...x, name: e.target.value } : x);
+                          handleContentChange('logos', updated);
+                        }} 
+                        placeholder="Company name" 
+                        className="text-xs font-bold h-7" 
+                      />
+                      
+                      <Input 
+                        value={logo.url || ''} 
+                        onChange={(e) => {
+                          const updated = content.logos.map(x => x.id === logo.id ? { ...x, url: e.target.value } : x);
+                          handleContentChange('logos', updated);
+                        }} 
+                        placeholder="Logo image URL" 
+                        className="text-[9px] h-6 font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {(content.logos || []).length === 0 && (
+                <div className="text-center py-8 px-4 border-2 border-dashed border-slate-200 rounded-lg">
+                  <ImageIcon className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                  <p className="text-xs text-slate-400">No logos yet. Click "Add Logo" to get started.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

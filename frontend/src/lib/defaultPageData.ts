@@ -11,7 +11,7 @@ export const createDefaultHeroSection = (variant = 'split') => ({
     backgroundColor: '#ffffff',
     backgroundGradient: variant === 'gradient' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)' : null,
     useGradient: variant === 'gradient',
-    padding: variant === 'minimal' ? '60px 0' : '120px 0',
+    padding: variant === 'minimal' ? '15px 0' : '15px 0',
     minHeight: variant === 'minimal' ? '60vh' : '90vh',
   },
   content: {
@@ -298,15 +298,20 @@ export const createDefaultFAQSection = () => ({
 export const createDefaultLogoCloudSection = () => ({
   id: uuidv4(),
   type: 'logocloud',
+  variant: 'simple',
   name: 'Logo Cloud',
   visible: true,
   locked: false,
   styles: {
     backgroundColor: '#ffffff',
-    padding: '60px 0',
+    padding: '80px 0',
+    headingColor: '#0f172a',
+    paragraphColor: '#64748b',
+    logoHeight: '40px',
   },
   content: {
     headline: 'Trusted by leading companies',
+    subheadline: 'Join thousands of organizations using our platform',
     logos: [
       { id: uuidv4(), name: 'Google', url: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg' },
       { id: uuidv4(), name: 'Microsoft', url: 'https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg' },
@@ -368,6 +373,9 @@ export const createDefaultNavbar = () => ({
     backgroundColor: 'transparent',
     textColor: '#000000',
     sticky: true,
+    buttonBg: '#0f172a',
+    buttonText: '#ffffff',
+    buttonRadius: '2px',
   },
 });
 

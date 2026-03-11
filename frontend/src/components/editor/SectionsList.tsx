@@ -87,6 +87,8 @@ const ELEMENT_CATEGORIES = [
       { type: "cta", name: "Call to Action", icon: MousePointer2, description: "Action-oriented CTA section", create: createDefaultCTASection },
       { type: "pricing", name: "Pricing", icon: DollarSign, description: "Pricing tiers & plans", create: createDefaultPricingSection },
       { type: "testimonials", name: "Testimonials", icon: Quote, description: "Customer reviews", create: createDefaultTestimonialsSection },
+      { type: "contact", name: "Contact", icon: Mail, description: "Contact form & information", create: createDefaultContactSection },
+      { type: "faq", name: "FAQ", icon: HelpCircle, description: "Frequently asked questions", create: createDefaultFAQSection },
     ]
   },
   {
@@ -97,6 +99,7 @@ const ELEMENT_CATEGORIES = [
     items: [
       { type: "gallery", name: "Gallery", icon: ImageIcon, description: "Photo gallery layout", create: createDefaultGallerySection },
       { type: "blog", name: "Blog", icon: FileText, description: "Blog post listings", create: createDefaultBlogListSection },
+      { type: "logocloud", name: "Logo Cloud", icon: Building2, description: "Display partner/client logos", create: createDefaultLogoCloudSection },
       { type: "stats", name: "Stats", icon: BarChart2, description: "Display statistics", create: createDefaultStatsSection },
       { type: "team", name: "Team", icon: Users, description: "Team members grid", create: createDefaultTeamSection },
     ]
