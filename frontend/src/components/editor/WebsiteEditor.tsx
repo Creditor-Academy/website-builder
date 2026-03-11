@@ -40,7 +40,8 @@ import {
 function EditorContent() {
   const [theme, setTheme] = useState("light");
   const [leftNavTab, setLeftNavTab] = useState("add"); // 'add', 'layers', 'pages', 'settings', 'edit'
-  const { editor } = useBuilderStore();
+  const { editor, activeWebsiteId } = useBuilderStore();
+  const { id } = useParams();
 
   useEffect(() => {
     const root = document.documentElement;
@@ -70,11 +71,11 @@ function EditorContent() {
 
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden font-sans">
-      <EditorToolbar theme={theme} onToggleTheme={toggleTheme} />
+      <EditorToolbar theme={theme} onToggleTheme={toggleTheme} websiteId={activeWebsiteId || id} />
       <TextColorPicker />
       <div className="flex-1 min-h-0">
         <ResizablePanelGroup direction="horizontal" className="h-full">
-          {!editor.previewMode && editor.showLeftPanel && (
+          {editor.showLeftPanel && (
             <>
               <ResizablePanel
                 defaultSize={22}
@@ -90,11 +91,10 @@ function EditorContent() {
                         <TooltipTrigger asChild>
                           <button
                             onClick={() => setLeftNavTab(item.id)}
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${
-                              leftNavTab === item.id
-                                ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105"
-                                : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/50"
-                            }`}
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${leftNavTab === item.id
+                              ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105"
+                              : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/50"
+                              }`}
                           >
                             <item.icon className="w-5 h-5" />
                           </button>
@@ -116,13 +116,12 @@ function EditorContent() {
                           <button
                             onClick={() => setLeftNavTab("settings")}
                             className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all
-                                          ${
-                                            leftNavTab === "settings"
-                                              ? "bg-blue-500 text-white shadow-md"
-                                              : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/50"
-                                          }
+                                          ${leftNavTab === "settings"
+                                ? "bg-blue-500 text-white shadow-md"
+                                : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/50"
+                              }
                                         `}
-                                                          >
+                          >
                             <Settings className="w-5 h-5" />
                           </button>
                         </TooltipTrigger>
@@ -158,20 +157,19 @@ function EditorContent() {
             <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px] opacity-40 pointer-events-none"></div>
             <CanvasPreview />
           </ResizablePanel>
-          {false && !editor.previewMode &&
-            editor.showRightPanel && (
-              <>
-                <ResizableHandle className="w-1 bg-slate-100 hover:bg-primary/30 transition-all border-l border-slate-200" />
-                <ResizablePanel
-                  defaultSize={25}
-                  minSize={20}
-                  maxSize={35}
-                  className="bg-white border-l border-slate-200 shadow-sm"
-                >
-                  <PropertiesPanel />
-                </ResizablePanel>
-              </>
-            )}
+          {!editor.previewMode && editor.showRightPanel && (
+            <>
+              <ResizableHandle className="w-1 bg-slate-100 hover:bg-primary/30 transition-all border-l border-slate-200" />
+              <ResizablePanel
+                defaultSize={25}
+                minSize={20}
+                maxSize={35}
+                className="bg-white border-l border-slate-200 shadow-sm"
+              >
+                <PropertiesPanel />
+              </ResizablePanel>
+            </>
+          )}
         </ResizablePanelGroup>
       </div>
     </div>

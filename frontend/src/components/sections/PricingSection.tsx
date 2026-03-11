@@ -93,7 +93,7 @@ const sharedStyles = `
 `;
 
 // ─── Section Header ────────────────────────────────────────────────────────────
-const SectionHeader = ({ content, isEditing, onContentChange, headingColor, paragraphColor, showToggle, annual, setAnnual }) => (
+const SectionHeader = ({ content, isEditing, onContentChange, headingColor, paragraphColor, showToggle = false, annual = false, setAnnual = () => { } }: any) => (
   <div style={{ textAlign: 'center', maxWidth: '620px', margin: '0 auto 4rem' }}>
     <div className="pricing-chip">
       <Sparkles width={10} height={10} />
@@ -252,8 +252,8 @@ const PlanCard = ({ plan, isEditing, onContentChange, content, buttonPrimaryBg, 
 };
 
 // ─── VARIANT: TABLE ────────────────────────────────────────────────────────────
-const renderTable = ({ content, isEditing, onContentChange, headingColor, paragraphColor, plans }) => {
-  const allFeatures = Array.from(new Set(plans.flatMap(p => p.features || [])));
+const renderTable = ({ content, isEditing, onContentChange, headingColor, paragraphColor, plans }: any) => {
+  const allFeatures = Array.from(new Set<string>(plans.flatMap((p: any) => p.features || [])));
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 2rem' }}>
       <SectionHeader content={content} isEditing={isEditing} onContentChange={onContentChange} headingColor={headingColor} paragraphColor={paragraphColor} />
@@ -268,7 +268,7 @@ const renderTable = ({ content, isEditing, onContentChange, headingColor, paragr
               <th style={{ padding: '1.25rem 1.5rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.08em', textTransform: 'uppercase', borderBottom: '1px solid rgba(99,102,241,0.1)' }}>
                 Price
               </th>
-              {allFeatures.map(f => (
+              {allFeatures.map((f: string) => (
                 <th key={f} style={{ padding: '1.25rem 1rem', textAlign: 'center', fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', letterSpacing: '0.06em', textTransform: 'uppercase', borderBottom: '1px solid rgba(99,102,241,0.1)', whiteSpace: 'nowrap' }}>
                   {f}
                 </th>
@@ -293,12 +293,12 @@ const renderTable = ({ content, isEditing, onContentChange, headingColor, paragr
                   <span style={{ fontWeight: 800, fontSize: '1.25rem', color: '#0f172a', fontFamily: '"DM Serif Display", serif' }}>${p.price}</span>
                   <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>/mo</span>
                 </td>
-                {allFeatures.map(f => (
+                {allFeatures.map((f: string) => (
                   <td key={f} style={{ padding: '1.25rem 1rem', textAlign: 'center' }}>
                     {(p.features || []).includes(f)
                       ? <div style={{ width: '22px', height: '22px', borderRadius: '6px', background: p.popular ? accentGrad : 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-                          <Check width={12} height={12} color={p.popular ? '#fff' : '#6366f1'} strokeWidth={3} />
-                        </div>
+                        <Check width={12} height={12} color={p.popular ? '#fff' : '#6366f1'} strokeWidth={3} />
+                      </div>
                       : <div style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(148,163,184,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', color: '#cbd5e1', fontSize: '1rem' }}>–</div>
                     }
                   </td>
@@ -329,6 +329,7 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
   const buttonPrimaryText = styles.buttonPrimaryText || '#ffffff';
 
   const shared = { content, isEditing, onContentChange, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText, plans, styles };
+
 
   return (
     <>

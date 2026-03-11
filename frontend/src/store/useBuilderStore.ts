@@ -5,7 +5,9 @@ import {
     createFeaturesPage,
     createServicesPage,
     createPricingPage,
-    createContactPage
+    createContactPage,
+    getAgenciesPage,
+    getCoachPage
 } from '@/lib/defaultPageData';
 
 const TEMPLATE_MAP: Record<string, () => any> = {
@@ -14,6 +16,8 @@ const TEMPLATE_MAP: Record<string, () => any> = {
     portfolio: createServicesPage,
     ecommerce: createPricingPage,
     consultant: createContactPage,
+    agencies: getAgenciesPage,
+    coaching: getCoachPage,
 };
 
 export interface Website {
