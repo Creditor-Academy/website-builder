@@ -5,12 +5,13 @@ export const createPortfolioNavbar = () => ({
   type: 'navbar',
   name: 'Portfolio Navbar',
   visible: true,
-  logo: { text: 'CreativeStudio', imageUrl: '', font: 'Outfit' },
+  logo: { text: 'CreativeStudio', imageUrl: '', font: 'Outfit', href: '/#hero' },
   links: [
-    { id: uuidv4(), label: 'About', href: '#about' },
-    { id: uuidv4(), label: 'Skills', href: '#skills' },
-    { id: uuidv4(), label: 'Work', href: '#work' },
-    { id: uuidv4(), label: 'Contact', href: '#contact' },
+    { id: uuidv4(), label: 'Home', href: '/#hero' },
+    { id: uuidv4(), label: 'About', href: '/#about' },
+    { id: uuidv4(), label: 'Skills', href: '/#skills' },
+    { id: uuidv4(), label: 'Work', href: '/#work' },
+    { id: uuidv4(), label: 'Contact', href: '/#contact' },
   ],
   styles: {
     backgroundColor: '#ffffff',
@@ -21,7 +22,7 @@ export const createPortfolioNavbar = () => ({
 });
 
 export const createPortfolioHeroSection = () => ({
-  id: uuidv4(),
+  id: 'hero',
   type: 'hero',
   name: 'Portfolio Hero',
   visible: true,

@@ -26,7 +26,8 @@ import {
   Edit,
   Copy,
   Shield,
-  Zap
+  Zap,
+  Loader2
 } from 'lucide-react';
 
 export function DomainManager({ open, onOpenChange, websiteId }) {

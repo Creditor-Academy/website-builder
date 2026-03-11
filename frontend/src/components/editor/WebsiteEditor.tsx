@@ -40,7 +40,7 @@ import {
 function EditorContent() {
   const [theme, setTheme] = useState("light");
   const [leftNavTab, setLeftNavTab] = useState("add"); // 'add', 'layers', 'pages', 'settings', 'edit'
-  const { editor } = useBuilderStore();
+  const { editor, activeWebsiteId } = useBuilderStore();
 
   useEffect(() => {
     const root = document.documentElement;
@@ -70,7 +70,7 @@ function EditorContent() {
 
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden font-sans">
-      <EditorToolbar theme={theme} onToggleTheme={toggleTheme} />
+      <EditorToolbar theme={theme} onToggleTheme={toggleTheme} websiteId={activeWebsiteId} />
       <TextColorPicker />
       <div className="flex-1 min-h-0">
         <ResizablePanelGroup direction="horizontal" className="h-full">

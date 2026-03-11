@@ -1,16 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-<<<<<<< HEAD
-import { Plus, Globe, MoreVertical, Edit2, Play, Trash2, Layout, Settings, LogOut, Clock, CheckCircle, FileText, ShoppingBag, Building2, Users, Sparkles } from 'lucide-react';
-=======
 import {
     Plus, Globe, MoreVertical, Edit2, Play, Trash2,
     Layout, Settings, LogOut, Clock, CheckCircle,
     FileText, Search, Sparkles, Zap, Files, Building2, ShoppingBag, Users,
     ArrowRight, ChevronLeft, Palette, Layers, MonitorPlay, Move, LayoutTemplate
 } from 'lucide-react';
->>>>>>> 9da32379f14bf3cd3f6e870ee537648498a3ab46
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
@@ -52,24 +48,12 @@ const Dashboard = () => {
         navigate('/');
     };
 
-<<<<<<< HEAD
-    const templatesList = [
-        { id: 'blank', name: 'Blank Canvas', desc: 'Start from scratch', icon: FileText, color: 'bg-slate-100 text-slate-600' },
-        { id: 'business', name: 'Business', desc: 'Professional corporate layout', icon: Building2, color: 'bg-blue-100 text-blue-600' },
-        { id: 'portfolio', name: 'Portfolio', desc: 'Showcase your creative work', icon: Layout, color: 'bg-purple-100 text-purple-600' },
-        { id: 'ecommerce', name: 'E-commerce', desc: 'Modern online store', icon: ShoppingBag, color: 'bg-green-100 text-green-600' },
-        { id: 'consultant', name: 'Consultant', desc: 'Expert advisory layout', icon: Users, color: 'bg-amber-100 text-amber-600' },
-        { id: 'agencies', name: 'Agencies', desc: 'Creative & marketing agency layout', icon: Globe, color: 'bg-indigo-100 text-indigo-600' },
-        { id: 'coaching', name: 'Coaching', desc: 'Course & mentorship layout', icon: Sparkles, color: 'bg-rose-100 text-rose-600' },
-    ];
-=======
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [newSiteName, setNewSiteName] = useState('');
     const [selectedTemplate, setSelectedTemplate] = useState('blank');
     const [dialogStep, setDialogStep] = useState<'templates' | 'details'>('templates');
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('websites'); // 'websites' or 'templates'
->>>>>>> 9da32379f14bf3cd3f6e870ee537648498a3ab46
 
     // Filter logic
     const filteredWebsites = websites.filter(site =>

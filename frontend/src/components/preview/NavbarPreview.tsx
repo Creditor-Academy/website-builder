@@ -89,16 +89,29 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
 
     // 2. Handle internal pages (e.g., /about, /privacy)
     if (link.href && link.href.startsWith('/')) {
-      e.preventDefault();
+      // Check if this slug exists in the builder's internal pages
       const targetPage = pages.find((p) => p.slug === link.href);
       
       if (targetPage) {
+        e.preventDefault();
         setActivePage(targetPage.id);
         setMobileMenuOpen(false);
         return;
       }
 
-      // If page doesn't exist, try to create it (Even in Preview mode for standard routes)
+      // If we are on a "marketing" page (non-editor route) and it's a known global route, 
+      // let the browser handle it (don't prevent default) unless we want to create it in the builder.
+      const isGlobalRoute = ['/', '/features', '/pricing', '/templates', '/services', '/contact', '/about', '/privacy-policy', '/terms-of-service'].includes(link.href);
+      
+      // If NOT in the main builder (/builder/:id) and it's a global route, allow navigation
+      const isMainBuilder = window.location.pathname.startsWith('/builder/');
+      if (!isMainBuilder && isGlobalRoute) {
+        // Allow regular navigation
+        return;
+      }
+
+      // Otherwise, try to create the page in the current session
+      e.preventDefault();
       const slug = link.href;
       let newPage = null;
       switch (slug) {
@@ -113,8 +126,8 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
         case '/careers': newPage = createCareersPage(); break;
         case '/help': newPage = createHelpPage(); break;
         case '/status': newPage = createStatusPage(); break;
-        case '/privacy': newPage = createPrivacyPolicyPage(); break;
-        case '/terms': newPage = createTermsOfServicePage(); break;
+        case '/privacy-policy': newPage = createPrivacyPolicyPage(); break;
+        case '/terms-of-service': newPage = createTermsOfServicePage(); break;
         case '/marketing': newPage = createMarketingPage(); break;
         case '/design': newPage = createDesignPage(); break;
         case '/dev': newPage = createDevPage(); break;
@@ -138,7 +151,6 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
         createPage(newPage);
         setMobileMenuOpen(false);
       } else if (!isEditing) {
-        // Preview mode but page doesn't exist and isn't a standard route
         console.warn('Page not found in this project:', link.href);
       }
       return;

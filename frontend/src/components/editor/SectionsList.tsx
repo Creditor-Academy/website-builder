@@ -310,7 +310,6 @@ export function SectionsList({ view = "add" }) {
                       visible={section.visible}
                       isSelected={editor.selectedSectionId === section.id}
                       onClick={() => selectSection(section.id)}
-                      index={index}
                     />
                   )) : (
                     <div className="text-center py-16 border-2 border-dashed border-slate-200 rounded-2xl bg-gradient-to-br from-slate-50/50 to-white">
@@ -357,7 +356,7 @@ export function SectionsList({ view = "add" }) {
               {ELEMENT_CATEGORIES.map((cat, catIndex) => {
                 const filteredItems = cat.items.filter(item =>
                   item.name.toLowerCase().includes(query.toLowerCase()) ||
-                  item.description?.toLowerCase().includes(query.toLowerCase())
+                  (item as any).description?.toLowerCase().includes(query.toLowerCase())
                 );
 
                 if (filteredItems.length === 0) return null;
@@ -395,7 +394,7 @@ export function SectionsList({ view = "add" }) {
                             </div>
                             <div className="flex-1 text-left min-w-0">
                               <h4 className="text-[10px] font-bold text-slate-900 truncate">{item.name}</h4>
-                              <p className="text-[8px] text-slate-500 mt-0.5 line-clamp-2 leading-tight">{item.description}</p>
+                              <p className="text-[8px] text-slate-500 mt-0.5 line-clamp-2 leading-tight">{(item as any).description}</p>
                             </div>
                           </div>
                           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">

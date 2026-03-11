@@ -23,6 +23,7 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
     const allFeatures = Array.from(new Set(plans.flatMap(p => p.features || [])));
     return (
       <section className="relative" style={{ background, padding }}>
+        
         <div className="container mx-auto px-6 max-w-7xl">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h2 className="text-4xl md:text-5xl font-bold mb-6" contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('headline', e.currentTarget.textContent)}>{content.headline || 'Simple, Transparent Pricing'}</h2>
@@ -35,7 +36,7 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
                 <tr>
                   <th className="p-4 text-left">Plan</th>
                   <th className="p-4">Price</th>
-                  {allFeatures.map((f) => <th key={f} className="p-4">{f}</th>)}
+                  {allFeatures.map((f: any) => <th key={f as string} className="p-4">{f as string}</th>)}
                 </tr>
               </thead>
               <tbody>
@@ -43,7 +44,7 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
                   <tr key={p.id} className="border-t">
                     <td className="p-4">{p.name}</td>
                     <td className="p-4">${p.price}{p.popular ? ' • Popular' : ''}</td>
-                    {allFeatures.map((f) => <td key={f} className="p-4">{(p.features || []).includes(f) ? '✓' : ''}</td>)}
+                    {allFeatures.map((f: any) => <td key={f as string} className="p-4">{(p.features || []).includes(f) ? '✓' : ''}</td>)}
                   </tr>
                 ))}
               </tbody>
@@ -101,9 +102,7 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
     );
   }
 
-// ─── Plan Card (shared between cards + toggle) ─────────────────────────────────
-const PlanCard = ({ plan, isEditing, onContentChange, content, buttonPrimaryBg, buttonPrimaryText, price, period, styles }) => {
-  const isPopular = plan.popular;
+  // default cards
   return (
     <section
       className="relative"
@@ -264,9 +263,9 @@ const PlanCard = ({ plan, isEditing, onContentChange, content, buttonPrimaryBg, 
                 </span>
               </button>
             </div>
-          )}
+          ))}
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }

@@ -2,36 +2,23 @@ import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
 import {
     getDefaultPage,
-<<<<<<< HEAD
     getBusinessPage,
     getPortfolioPage,
     getEcommercePage,
     getConsultantPage,
     getAgenciesPage,
     getCoachPage
-=======
-    createFeaturesPage,
-    createServicesPage,
-    createPricingPage,
-    createContactPage
->>>>>>> 9da32379f14bf3cd3f6e870ee537648498a3ab46
 } from '@/lib/defaultPageData';
 
 const TEMPLATE_MAP: Record<string, () => any> = {
     blank: getDefaultPage,
-<<<<<<< HEAD
     business: getBusinessPage,
     portfolio: getPortfolioPage,
     ecommerce: getEcommercePage,
     consultant: getConsultantPage,
     agencies: getAgenciesPage,
     coaching: getCoachPage,
-=======
-    business: createFeaturesPage,
-    portfolio: createServicesPage,
-    ecommerce: createPricingPage,
-    consultant: createContactPage,
->>>>>>> 9da32379f14bf3cd3f6e870ee537648498a3ab46
+    marketing: getAgenciesPage,
 };
 
 export interface Website {
@@ -64,6 +51,7 @@ export interface BuilderState {
 
     setWebsites: (websites: Website[]) => void;
     createWebsite: (name: string, template?: string) => string;
+    updateWebsite: (id: string, updates: any) => void;
     selectWebsite: (id: string) => void;
     deleteWebsite: (id: string) => void;
     setActivePage: (pageId: string) => void;
@@ -139,6 +127,10 @@ export const useBuilderStore = create<BuilderState>()(
             }));
             return id;
         },
+
+        updateWebsite: (id, updates) => set((state) => ({
+            websites: state.websites.map(w => w.id === id ? { ...w, ...updates } : w)
+        })),
 
         selectWebsite: (id) => {
             const website = get().websites.find(w => w.id === id);

@@ -14,6 +14,7 @@ import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
 import Start from "./pages/Start";
 import Templates from "./pages/Templates";
+import Resources from "./pages/Resources";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
 import Careers from "./pages/Careers";
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/builder/:id" element={<WebsiteEditor />} />
             <Route path="/features" element={<Features />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/resources" element={<Resources />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/start" element={<Start />} />
