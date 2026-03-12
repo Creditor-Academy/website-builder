@@ -32,10 +32,10 @@ const templates: Template[] = [
   { id: "ecommerce", title: "eCommerce", image: Ecommerce },
   { id: "portfolio", title: "Portfolio", image: Portfolio },
   { id: "business", title: "Business", image: business },
-  { id: "consultant", title: "Consultant", image: business }, 
-  { id: "agencies", title: "Agencies", image: school },
-  { id: "coaching", title: "Coaching", image: CTA },
-  { id: "blank", title: "Blank Canvas", image: school },
+  { id: "consultant", title: "Consultant", image: CTA }, 
+  { id: "agencies", title: "Agencies", image: Learning },
+  { id: "coaching", title: "Coaching", image: school },
+  { id: "blank", title: "Blank Canvas", image: Ecommerce },
 ];
 
 const FloatingElement = ({ children, x, y, delay = 0, className, isDark }: any) => {
@@ -235,7 +235,7 @@ export default function LandingPage() {
 
       {/* ================= HERO ================= */}
       <section className="relative min-h-[100svh] flex flex-col items-center justify-center overflow-hidden pt-20">
-        <div className={cn("absolute inset-0 z-0 flex items-center justify-center pointer-events-none transition-opacity duration-1000", isDark ? "opacity-30 mix-blend-screen" : "opacity-40 mix-blend-multiply")}>
+        <div className={cn("absolute inset-0 z-0 flex items-center justify-center pointer-events-none transition-opacity duration-1000", isDark ? "opacity-100 mix-blend-screen" : "opacity-100 mix-blend-multiply")}>
           {/* Animated Background Orbs */}
           <motion.div
             animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
@@ -408,8 +408,8 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 auto-rows-[400px] gap-6">
             {/* Feature 1 (Large) */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }}
-              className="md:col-span-2 relative rounded-[2.5rem] border border-slate-700/50 bg-slate-900/60 backdrop-blur-xl overflow-hidden group flex flex-col hover:border-blue-500/50 transition-colors duration-500 shadow-2xl"
+              initial={{ opacity: 1, y: 0 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }}
+              className="md:col-span-2 relative rounded-[2.5rem] border border-slate-700/50 bg-slate-900 backdrop-blur-xl overflow-hidden group flex flex-col hover:border-blue-500/50 transition-colors duration-500 shadow-2xl"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="p-10 pb-0 z-10 relative">
@@ -417,7 +417,7 @@ export default function LandingPage() {
                   <Move className="w-7 h-7 text-blue-400" />
                 </div>
                 <h3 className="text-3xl font-bold mb-3 text-white">Absolute Freedom</h3>
-                <p className="text-slate-300 text-lg max-w-sm font-medium">Drag and drop elements anywhere on the canvas with pixel-perfect control.</p>
+                <p className="text-white text-lg max-w-sm font-medium">Drag and drop elements anywhere on the canvas with pixel-perfect control.</p>
               </div>
               <div className="flex-1 mt-6 relative w-full translate-y-8 group-hover:translate-y-2 group-hover:scale-[1.02] transition-all duration-700 ease-out">
                 <img src={Drag} alt="Drag Interface" className="absolute right-0 bottom-0 w-[90%] md:w-[75%] rounded-tl-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)] border-t border-l border-slate-600 opacity-90 group-hover:opacity-100" />
@@ -427,7 +427,7 @@ export default function LandingPage() {
             {/* Feature 2 (Small) */}
             <motion.div
               initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ delay: 0.1 }}
-              className="relative rounded-[2.5rem] border border-slate-700/50 bg-slate-900/60 backdrop-blur-xl overflow-hidden group flex flex-col hover:border-purple-500/50 transition-colors duration-500 shadow-2xl"
+              className="relative rounded-[2.5rem] border border-slate-700/50 bg-slate-900 backdrop-blur-xl overflow-hidden group flex flex-col hover:border-purple-500/50 transition-colors duration-500 shadow-2xl"
             >
               <div className="absolute inset-0 bg-gradient-to-bl from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="p-8 z-10 relative flex flex-col h-full">
@@ -446,7 +446,7 @@ export default function LandingPage() {
             {/* Feature 3 (Small) */}
             <motion.div
               initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }}
-              className="relative rounded-[2.5rem] border border-slate-700/50 bg-slate-900/60 backdrop-blur-xl overflow-hidden group flex flex-col hover:border-emerald-500/50 transition-colors duration-500 shadow-2xl"
+              className="relative rounded-[2.5rem] border border-slate-700/50 bg-slate-900 backdrop-blur-xl overflow-hidden group flex flex-col hover:border-emerald-500/50 transition-colors duration-500 shadow-2xl"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="p-8 z-10 relative flex flex-col h-full">
@@ -467,8 +467,8 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ delay: 0.1 }}
               className="md:col-span-2 relative rounded-[2.5rem] border border-slate-700/50 bg-slate-900/60 backdrop-blur-xl overflow-hidden group flex flex-col md:flex-row hover:border-orange-500/50 transition-colors duration-500 shadow-2xl"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/80 to-transparent z-10" />
-              <video src={brand} autoPlay muted loop className={cn("absolute right-0 top-0 h-full w-[70%] object-cover transition-opacity duration-700", isDark ? "opacity-50 group-hover:opacity-80 mix-blend-screen" : "opacity-30 group-hover:opacity-50 mix-blend-multiply")} />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/80 to-transparent z-10" /> 
+              <video src={brand} autoPlay muted loop className={cn("absolute right-0 top-0 h-full w-[70%] object-cover transition-opacity duration-700", isDark ? "opacity-20 group-hover:opacity-80 mix-blend-screen" : "opacity-30 group-hover:opacity-50 mix-blend-multiply")} />
 
               <div className="p-10 z-20 relative flex flex-col justify-center max-w-md h-full">
                 <div className="w-14 h-14 rounded-2xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_15px_rgba(249,115,22,0.5)]">
@@ -524,7 +524,7 @@ export default function LandingPage() {
 
 
       {/* ================= FINAL CTA ================= */}
-      <section className={cn("relative py-40 flex items-center justify-center text-center px-6 overflow-hidden transition-colors duration-1000", isDark ? "bg-slate-950" : "bg-slate-50")}>
+      <section className={cn("relative py-40 flex items-center justify-center text-center px-6 overflow-hidden transition-colors duration-1000", isDark ? "bg-slate-900" : "bg-slate-50")}>
         <div className="absolute inset-0 z-0">
           <img src={CTA} alt="CTA" className="w-full h-full object-cover opacity-60 scale-105 filter blur-[1px]" />
           <div className={cn("absolute inset-0 bg-gradient-to-t transition-colors duration-1000", isDark ? "from-slate-950 via-slate-950/40 to-transparent" : "from-slate-50 via-slate-50/40 to-transparent")} />
@@ -534,7 +534,7 @@ export default function LandingPage() {
         <div className={cn("relative z-10 max-w-5xl mx-auto backdrop-blur-3xl border p-12 md:p-24 rounded-[4rem] shadow-[0_0_120px_rgba(59,130,246,0.3)] transition-colors duration-1000", isDark ? "bg-slate-950/80 border-white/10" : "bg-white/90 border-slate-200")}>
           {/* Internal Glow for CTA Box */}
           <div className="absolute -top-[20%] -right-[10%] w-[300px] h-[300px] bg-blue-500/30 blur-[100px] rounded-full pointer-events-none" />
-          <div className="absolute -bottom-[20%] -left-[10%] w-[300px] h-[300px] bg-indigo-500/30 blur-[100px] rounded-full pointer-events-none" />
+          <div className="absolute -bottom-[20%] -left-[10%] w-[300px] h-[300px] bg-indigo-500/20 blur-[100px] rounded-full pointer-events-none" />
           <h2 className={cn("text-5xl md:text-7xl font-black tracking-tight mb-8 drop-shadow-lg transition-colors duration-1000", isDark ? "text-white" : "text-slate-900")}>
             Ready to build <br /> your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">masterpiece?</span>
           </h2>

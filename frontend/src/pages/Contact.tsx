@@ -190,24 +190,7 @@ export default function Contact() {
                 </motion.div>
               ))}
 
-              <div className={cn(
-                "p-8 rounded-[2.5rem] border overflow-hidden relative group",
-                isDark ? "bg-indigo-600 border-indigo-500" : "bg-slate-900 border-slate-800"
-              )}>
-                <div className="absolute top-0 right-0 p-8 opacity-20 transition-transform group-hover:scale-110">
-                  <Globe className="w-32 h-32 text-white" />
-                </div>
-                <h3 className="text-2xl font-black text-white mb-4 relative z-10">Global Support</h3>
-                <p className="text-indigo-100 font-medium mb-6 relative z-10">We support creators from 150+ countries. Our team is fully remote and distributed.</p>
-                <div className="flex items-center gap-4 relative z-10">
-                  <div className="flex -space-x-2">
-                    {[1,2,3,4].map(i => (
-                      <div key={i} className="w-10 h-10 rounded-full border-2 border-indigo-600 bg-indigo-500" />
-                    ))}
-                  </div>
-                  <span className="text-white text-sm font-bold">24/7 Available</span>
-                </div>
-              </div>
+
             </div>
 
             {/* RIGHT: CONTACT FORM */}

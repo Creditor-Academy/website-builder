@@ -44,6 +44,11 @@ export interface BuilderState {
         previewMode: boolean;
         showLeftPanel: boolean;
         showRightPanel: boolean;
+        tour: {
+            isActive: boolean;
+            step: number;
+            isFinished: boolean;
+        };
     };
     history: any[][];
     historyIndex: number;
@@ -72,6 +77,7 @@ export interface BuilderState {
     updateNavbar: (updates: any) => void;
     updateFooter: (updates: any) => void;
     setEditorState: (updates: any) => void;
+    setTourState: (updates: any) => void;
     selectSection: (id: string | null) => void;
     selectComponent: (id: string | null) => void;
     undo: () => void;
@@ -95,6 +101,11 @@ export const useBuilderStore = create<BuilderState>()(
             previewMode: false,
             showLeftPanel: true,
             showRightPanel: false,
+            tour: {
+                isActive: false,
+                step: 0,
+                isFinished: false,
+            },
         },
 
         history: [],
@@ -369,6 +380,13 @@ export const useBuilderStore = create<BuilderState>()(
         // Editor Actions
         setEditorState: (updates) => set((state) => ({
             editor: { ...state.editor, ...updates }
+        })),
+        
+        setTourState: (updates) => set((state) => ({
+            editor: { 
+                ...state.editor, 
+                tour: { ...state.editor.tour, ...updates } 
+            }
         })),
 
         selectSection: (id) => set((state) => ({

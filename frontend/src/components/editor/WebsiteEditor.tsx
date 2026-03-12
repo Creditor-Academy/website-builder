@@ -8,6 +8,7 @@ import { SiteSettings } from "./SiteSettings";
 import { CanvasPreview } from "./CanvasPreview";
 import { PropertiesPanel } from "./PropertiesPanel";
 import { TextColorPicker } from "./TextColorPicker";
+import { GuidedTour } from "./GuidedTour";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -40,7 +41,7 @@ import {
 function EditorContent() {
   const [theme, setTheme] = useState("light");
   const [leftNavTab, setLeftNavTab] = useState("add"); // 'add', 'layers', 'pages', 'settings', 'edit'
-  const { editor, activeWebsiteId } = useBuilderStore();
+  const { editor, activeWebsiteId, setTourState } = useBuilderStore();
   const { id } = useParams();
 
   useEffect(() => {
@@ -59,6 +60,15 @@ function EditorContent() {
     }
   }, [editor.selectedSectionId, editor.selectedComponentId]);
 
+  // Start tour if not finished
+  useEffect(() => {
+    if (!editor.tour.isFinished && !editor.tour.isActive) {
+      setTimeout(() => {
+        setTourState({ isActive: true });
+      }, 1000);
+    }
+  }, []);
+
   const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
 
   const navItems = [
@@ -70,10 +80,12 @@ function EditorContent() {
   ];
 
   return (
-    <div className="h-screen flex flex-col bg-white overflow-hidden font-sans">
-      <EditorToolbar theme={theme} onToggleTheme={toggleTheme} websiteId={activeWebsiteId || id} />
-      <TextColorPicker />
-      <div className="flex-1 min-h-0">
+    <div className="h-screen flex flex-col bg-white overflow-hidden font-sans relative">
+      <GuidedTour />
+      <div className={`flex flex-col h-full transition-all duration-500 ${editor.tour.isActive ? 'pointer-events-none' : ''}`}>
+        <EditorToolbar theme={theme} onToggleTheme={toggleTheme} websiteId={activeWebsiteId || id} />
+        <TextColorPicker />
+        <div className="flex-1 min-h-0">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           {editor.showLeftPanel && (
             <>
@@ -90,6 +102,7 @@ function EditorContent() {
                       <Tooltip key={item.id}>
                         <TooltipTrigger asChild>
                           <button
+                            id={`tour-nav-${item.id}`}
                             onClick={() => setLeftNavTab(item.id)}
                             className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${leftNavTab === item.id
                               ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105"
@@ -137,7 +150,7 @@ function EditorContent() {
                 </div>
 
                 {/* Content Panel */}
-                <div className="flex-1 flex flex-col min-w-0 bg-white">
+                <div id="tour-side-panel" className="flex-1 flex flex-col min-w-0 bg-white">
                   <div className="h-full overflow-hidden">
                     {leftNavTab === "add" && <SectionsList view="add" />}
                     {leftNavTab === "layers" && <SectionsList view="layers" />}
@@ -153,6 +166,7 @@ function EditorContent() {
           <ResizablePanel
             defaultSize={editor.previewMode ? 100 : 53}
             className="bg-slate-100/30 p-4 lg:p-6 overflow-hidden flex flex-col relative"
+            id="tour-canvas"
           >
             <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px] opacity-40 pointer-events-none"></div>
             <CanvasPreview />
@@ -171,6 +185,7 @@ function EditorContent() {
             </>
           )}
         </ResizablePanelGroup>
+      </div>
       </div>
     </div>
   );

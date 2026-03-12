@@ -80,9 +80,14 @@ export function CanvasPreview() {
 
                 {!editor.previewMode &&
                   editor.selectedSectionId === section.id && (
-                    <div className="absolute top-2 left-2 z-10 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium shadow-lg">
-                      {section.name}
-                    </div>
+                    <>
+                      <div className="absolute top-2 left-2 z-10 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium shadow-lg flex items-center gap-2">
+                        {section.name}
+                        <div id="tour-radial-menu" className="w-4 h-4 rounded-full bg-white/20 hover:bg-white/40 cursor-help flex items-center justify-center">
+                           <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                        </div>
+                      </div>
+                    </>
                   )}
               </div>
             ))}
