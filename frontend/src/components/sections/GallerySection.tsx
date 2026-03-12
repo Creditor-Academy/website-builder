@@ -376,14 +376,14 @@ export function GallerySection({ section, isSelected, isEditing, onContentChange
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 56, flexWrap: 'wrap', gap: 20 }}>
           <div style={{ maxWidth: 500 }}>
             {/* micro label */}
-            <div style={{
+            {/* <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 10,
               fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase',
               color: 'rgba(0,0,0,0.3)', marginBottom: 16, pointerEvents: 'none',
             }}>
               <div style={{ width: 20, height: 1, background: 'rgba(0,0,0,0.2)' }} />
               portfolio
-            </div>
+            </div> */}
 
             <CE
               as="h2" value={content.headline || 'Our Portfolio'} isEditing={isEditing} dark

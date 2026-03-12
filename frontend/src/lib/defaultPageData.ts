@@ -726,3 +726,117 @@ export const getDefaultPage = () => ({
     backgroundColor: '#ffffff',
   },
 });
+
+// Layout Sections
+export const createDefaultTextOnlySection = () => ({
+  id: uuidv4(),
+  type: 'layout',
+  name: 'Text Only Layout',
+  variant: 'text-only',
+  visible: true,
+  content: {
+    text: 'This is a sample text paragraph that can be edited to include your own content. You can add multiple paragraphs, lists, or any other text content you need for your website.',
+  },
+  styles: {
+    padding: '60px 0',
+    textAlign: 'left',
+    fontSize: '16px',
+    lineHeight: '1.6',
+  },
+});
+
+export const createDefaultImageTextLeftSection = () => ({
+  id: uuidv4(),
+  type: 'layout',
+  name: 'Image + Text (Left)',
+  variant: 'image-text-left',
+  visible: true,
+  content: {
+    imageUrl: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800',
+    imageAlt: 'Sample image',
+    heading: 'Beautiful Design',
+    text: 'This layout features an image on the left side with text content on the right. Perfect for showcasing products, services, or any content that benefits from visual support.',
+  },
+  styles: {
+    padding: '80px 0',
+    backgroundColor: '#ffffff',
+  },
+});
+
+export const createDefaultImageTextRightSection = () => ({
+  id: uuidv4(),
+  type: 'layout',
+  name: 'Image + Text (Right)',
+  variant: 'image-text-right',
+  visible: true,
+  content: {
+    imageUrl: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800',
+    imageAlt: 'Sample image',
+    heading: 'Flexible Layout',
+    text: 'This layout places text on the left side with an image on the right. Great for creating visual interest while maintaining readability and professional appearance.',
+  },
+  styles: {
+    padding: '80px 0',
+    backgroundColor: '#f8fafc',
+  },
+});
+
+export const createDefaultTextButtonSection = () => ({
+  id: uuidv4(),
+  type: 'layout',
+  name: 'Text + Button',
+  variant: 'text-button',
+  visible: true,
+  content: {
+    text: 'This is a text-only layout with a call-to-action button. Perfect for simple announcements, newsletter signups, or directing users to important content.',
+    buttonText: 'Learn More',
+    buttonHref: '/learn-more',
+  },
+  styles: {
+    padding: '60px 0',
+    textAlign: 'center',
+    backgroundColor: '#ffffff',
+  },
+});
+
+export const createDefaultHeadingTextButtonSection = () => ({
+  id: uuidv4(),
+  type: 'layout',
+  name: 'Heading + Text + Button',
+  variant: 'heading-text-button',
+  visible: true,
+  content: {
+    heading: 'Complete Layout Solution',
+    text: 'This comprehensive layout includes a compelling heading, descriptive text, and a clear call-to-action button. It\'s perfect for landing pages, feature sections, or any content that needs to drive user action.',
+    buttonText: 'Get Started',
+    buttonHref: '/get-started',
+  },
+  styles: {
+    padding: '80px 0',
+    textAlign: 'center',
+    backgroundColor: '#ffffff',
+  },
+});
+
+export const createDefaultTwoColumnSection = () => ({
+  id: uuidv4(),
+  type: 'layout',
+  name: 'Two Column Layout',
+  variant: 'two-column',
+  visible: true,
+  content: {
+    leftColumn: {
+      heading: 'Left Column',
+      text: 'This is the left column content. You can add text, images, or any other content here. Perfect for comparing features or showing related information.',
+    },
+    rightColumn: {
+      heading: 'Right Column',
+      text: 'This is the right column content. It mirrors the left column structure and can be used for complementary information or additional details.',
+    },
+  },
+  styles: {
+    padding: '80px 0',
+    backgroundColor: '#ffffff',
+    gap: '40px',
+  },
+});

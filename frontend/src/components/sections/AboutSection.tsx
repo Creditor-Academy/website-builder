@@ -177,7 +177,7 @@ function SplitVariant({ content, styles, isEditing, onContentChange, headingColo
           background: 'rgba(0,0,0,0.08)', pointerEvents: 'none',
         }} />
 
-        <MicroLabel text="our story" />
+        {/* <MicroLabel text="our story" /> */}
         <Badge text={content.badge} isEditing={isEditing} onSave={(val) => onContentChange?.('badge', val)} />
 
         <CE

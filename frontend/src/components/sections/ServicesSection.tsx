@@ -93,7 +93,7 @@ const ACCENTS = ['#E11D48', '#0891B2', '#059669', '#7C3AED', '#D97706', '#0F766E
 function Header({ content, isEditing, onContentChange, headingColor, paragraphColor }) {
   return (
     <div style={{ marginBottom: 80 }}>
-      {/* micro tag */}
+      {/* micro tag
       <div style={{
         display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 20,
         fontFamily: "'Cabinet Grotesk', sans-serif",
@@ -102,7 +102,7 @@ function Header({ content, isEditing, onContentChange, headingColor, paragraphCo
       }}>
         <div style={{ width: 20, height: 1, background: 'rgba(0,0,0,0.2)' }} />
         what we do
-      </div>
+      </div> */}
 
       <CE
         as="h2" value={content.headline} isEditing={isEditing}

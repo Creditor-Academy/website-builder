@@ -77,6 +77,14 @@ export const sectionVariants = {
     { id: 'cards', name: 'Blog Cards', description: 'Card-style blog posts' },
     { id: 'magazine', name: 'Magazine Style', description: 'Editorial magazine layout' },
   ],
+  layout: [
+    { id: 'text-only', name: 'Text Only', description: 'Simple text paragraph layout' },
+    { id: 'image-text-left', name: 'Image + Text (Left)', description: 'Image on left, text on right' },
+    { id: 'image-text-right', name: 'Image + Text (Right)', description: 'Text on left, image on right' },
+    { id: 'text-button', name: 'Text + Button', description: 'Text content with call-to-action button' },
+    { id: 'heading-text-button', name: 'Heading + Text + Button', description: 'Full layout with heading, description, and button' },
+    { id: 'two-column', name: 'Two Column', description: 'Split content into two columns' },
+  ],
 };
 
 export function getVariantsForSection(sectionType) {

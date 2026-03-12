@@ -143,58 +143,30 @@ export function PropertiesPanel() {
             </CollapsibleContent>
           </Collapsible>
 
-          {page?.slug === '/' ? (
-            <Collapsible open={navbarOpen} onOpenChange={setNavbarOpen} className="border-b border-slate-100">
-              <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
-                <div className="flex items-center gap-2">
-                  <Palette className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-semibold text-slate-700">Global Navbar</span>
-                </div>
-                <ChevronDown className={`w-4 h-4 transition-transform text-slate-400 ${navbarOpen ? 'rotate-180' : ''}`} />
-              </CollapsibleTrigger>
-              <CollapsibleContent className="p-0">
-                <NavbarSettings
-                  navbar={page.navbar}
-                  pages={page ? [page] : []}
-                  onUpdate={(updates) => updateNavbar(updates)}
-                  isExpanded={true}
-                />
-              </CollapsibleContent>
-            </Collapsible>
-          ) : (
-            <div className="border-b border-slate-100 p-4 bg-blue-50 rounded-lg mx-4 my-2">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <Palette className="w-4 h-4 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-700">Navbar is Global</h3>
-                  <p className="text-xs text-slate-500 mt-1">This page uses the navbar from the Home page. Edit navbar settings on the Home page.</p>
-                </div>
+          <Collapsible open={navbarOpen} onOpenChange={setNavbarOpen} className="border-b border-slate-100">
+            <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+              <div className="flex items-center gap-2">
+                <Palette className="w-4 h-4 text-primary" />
+                <span className="text-sm font-semibold text-slate-700">Global Navbar</span>
               </div>
-            </div>
-          )}
+              <ChevronDown className={`w-4 h-4 transition-transform text-slate-400 ${navbarOpen ? 'rotate-180' : ''}`} />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="p-0">
+              <NavbarSettings
+                navbar={page.navbar}
+                pages={page ? [page] : []}
+                onUpdate={(updates) => updateNavbar(updates)}
+                isExpanded={true}
+              />
+            </CollapsibleContent>
+          </Collapsible>
 
-          {page?.slug === '/' ? (
-            <FooterSettings 
-              footer={page.footer} 
-              pages={page ? [page] : []}
-              onUpdate={updateFooter}
-              isExpanded={footerOpen}
-            />
-            ) : (
-              <div className="border-b border-slate-100 p-4 bg-blue-50 rounded-lg mx-4 my-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <Palette className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-slate-700">Footer is Global</h3>
-                    <p className="text-xs text-slate-500 mt-1">This page uses footer from the Home page. Edit footer settings on the Home page.</p>
-                  </div>
-                </div>
-              </div>
-            )}
+          <FooterSettings 
+            footer={page.footer} 
+            pages={page ? [page] : []}
+            onUpdate={updateFooter}
+            isExpanded={footerOpen}
+          />
         </div>
 
         {/* <div className="p-4 bg-primary/5 m-4 rounded-xl border border-primary/10">
@@ -1069,6 +1041,288 @@ export function PropertiesPanel() {
               )}
             </div>
           </div>
+        </div>
+      );
+
+      case 'layout': return (
+        <div className="space-y-4">
+          {/* Layout variant specific content */}
+          {selectedSection.variant === 'text-only' && (
+            <div className="space-y-2">
+              <Label className="text-xs font-medium">Text Content</Label>
+              <Textarea 
+                value={content.text || ''} 
+                onChange={(e) => handleContentChange('text', e.target.value)} 
+                className="bg-white border-slate-200 resize-none text-xs" 
+                rows={6}
+                placeholder="Enter your text content here..."
+              />
+            </div>
+          )}
+
+          {(selectedSection.variant === 'image-text-left' || selectedSection.variant === 'image-text-right') && (
+            <>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Heading</Label>
+                <Input 
+                  value={content.heading || ''} 
+                  onChange={(e) => handleContentChange('heading', e.target.value)} 
+                  className="bg-white border-slate-200 text-xs" 
+                  placeholder="Enter heading..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Text Content</Label>
+                <Textarea 
+                  value={content.text || ''} 
+                  onChange={(e) => handleContentChange('text', e.target.value)} 
+                  className="bg-white border-slate-200 resize-none text-xs" 
+                  rows={4}
+                  placeholder="Enter your text content here..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Image</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    value={content.imageUrl || ''} 
+                    onChange={(e) => handleContentChange('imageUrl', e.target.value)} 
+                    className="bg-white border-slate-200 text-xs flex-1" 
+                    placeholder="Image URL..."
+                  />
+                  <Button 
+                    onClick={() => openMediaPicker(selectedSection.id, 'imageUrl')}
+                    variant="outline" 
+                    size="sm"
+                    className="text-xs h-8"
+                  >
+                    <ImageIcon className="w-3 h-3 mr-1" />
+                    Choose
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Image Alt Text</Label>
+                <Input 
+                  value={content.imageAlt || ''} 
+                  onChange={(e) => handleContentChange('imageAlt', e.target.value)} 
+                  className="bg-white border-slate-200 text-xs" 
+                  placeholder="Image description for accessibility..."
+                />
+              </div>
+            </>
+          )}
+
+          {selectedSection.variant === 'text-button' && (
+            <>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Text Content</Label>
+                <Textarea 
+                  value={content.text || ''} 
+                  onChange={(e) => handleContentChange('text', e.target.value)} 
+                  className="bg-white border-slate-200 resize-none text-xs" 
+                  rows={4}
+                  placeholder="Enter your text content here..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Button Text</Label>
+                <Input 
+                  value={content.buttonText || ''} 
+                  onChange={(e) => handleContentChange('buttonText', e.target.value)} 
+                  className="bg-white border-slate-200 text-xs" 
+                  placeholder="Button text..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Button Link</Label>
+                <Input 
+                  value={content.buttonHref || ''} 
+                  onChange={(e) => handleContentChange('buttonHref', e.target.value)} 
+                  className="bg-white border-slate-200 text-xs" 
+                  placeholder="/page-path or https://..."
+                />
+              </div>
+            </>
+          )}
+
+          {selectedSection.variant === 'heading-text-button' && (
+            <>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Heading</Label>
+                <Input 
+                  value={content.heading || ''} 
+                  onChange={(e) => handleContentChange('heading', e.target.value)} 
+                  className="bg-white border-slate-200 text-xs" 
+                  placeholder="Enter heading..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Text Content</Label>
+                <Textarea 
+                  value={content.text || ''} 
+                  onChange={(e) => handleContentChange('text', e.target.value)} 
+                  className="bg-white border-slate-200 resize-none text-xs" 
+                  rows={4}
+                  placeholder="Enter your text content here..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Button Text</Label>
+                <Input 
+                  value={content.buttonText || ''} 
+                  onChange={(e) => handleContentChange('buttonText', e.target.value)} 
+                  className="bg-white border-slate-200 text-xs" 
+                  placeholder="Button text..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Button Link</Label>
+                <Input 
+                  value={content.buttonHref || ''} 
+                  onChange={(e) => handleContentChange('buttonHref', e.target.value)} 
+                  className="bg-white border-slate-200 text-xs" 
+                  placeholder="/page-path or https://..."
+                />
+              </div>
+            </>
+          )}
+
+          {selectedSection.variant === 'two-column' && (
+            <>
+              <div className="space-y-4">
+                <Label className="text-xs font-medium">Left Column</Label>
+                <div className="space-y-2">
+                  <Label className="text-[9px] font-medium">Heading</Label>
+                  <Input 
+                    value={content.leftColumn?.heading || ''} 
+                    onChange={(e) => handleContentChange('leftColumn', { ...content.leftColumn, heading: e.target.value })} 
+                    className="bg-white border-slate-200 text-xs" 
+                    placeholder="Left column heading..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[9px] font-medium">Text Content</Label>
+                  <Textarea 
+                    value={content.leftColumn?.text || ''} 
+                    onChange={(e) => handleContentChange('leftColumn', { ...content.leftColumn, text: e.target.value })} 
+                    className="bg-white border-slate-200 resize-none text-xs" 
+                    rows={3}
+                    placeholder="Left column text..."
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <Label className="text-xs font-medium">Right Column</Label>
+                <div className="space-y-2">
+                  <Label className="text-[9px] font-medium">Heading</Label>
+                  <Input 
+                    value={content.rightColumn?.heading || ''} 
+                    onChange={(e) => handleContentChange('rightColumn', { ...content.rightColumn, heading: e.target.value })} 
+                    className="bg-white border-slate-200 text-xs" 
+                    placeholder="Right column heading..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[9px] font-medium">Text Content</Label>
+                  <Textarea 
+                    value={content.rightColumn?.text || ''} 
+                    onChange={(e) => handleContentChange('rightColumn', { ...content.rightColumn, text: e.target.value })} 
+                    className="bg-white border-slate-200 resize-none text-xs" 
+                    rows={3}
+                    placeholder="Right column text..."
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Button styles for layouts with buttons */}
+          {(selectedSection.variant === 'text-button' || selectedSection.variant === 'heading-text-button') && (
+            <div className="space-y-4 pt-4 border-t border-slate-100">
+              <Label className="text-xs font-medium">Button Styles</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-[9px] font-medium">Border Radius</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      value={selectedSection.styles?.buttonBorderRadius || '6'}
+                      onChange={(e) => handleStyleChange('buttonBorderRadius', `${e.target.value}px`)}
+                      className="bg-white border-slate-200 text-xs h-8 w-16"
+                      min="0"
+                      max="50"
+                    />
+                    <span className="text-xs text-slate-500 self-center">px</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[9px] font-medium">Background Color</Label>
+                  <div className="flex gap-2">
+                    <input
+                      type="color"
+                      value={selectedSection.styles?.buttonBackgroundColor || '#0f172a'}
+                      onChange={(e) => handleStyleChange('buttonBackgroundColor', e.target.value)}
+                      className="w-8 h-8 rounded border p-0.5 cursor-pointer"
+                    />
+                    <Input
+                      value={selectedSection.styles?.buttonBackgroundColor || '#0f172a'}
+                      onChange={(e) => handleStyleChange('buttonBackgroundColor', e.target.value)}
+                      className="flex-1 text-xs h-8 font-mono bg-white border-slate-200"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[9px] font-medium">Text Color</Label>
+                  <div className="flex gap-2">
+                    <input
+                      type="color"
+                      value={selectedSection.styles?.buttonTextColor || '#ffffff'}
+                      onChange={(e) => handleStyleChange('buttonTextColor', e.target.value)}
+                      className="w-8 h-8 rounded border p-0.5 cursor-pointer"
+                    />
+                    <Input
+                      value={selectedSection.styles?.buttonTextColor || '#ffffff'}
+                      onChange={(e) => handleStyleChange('buttonTextColor', e.target.value)}
+                      className="flex-1 text-xs h-8 font-mono bg-white border-slate-200"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[9px] font-medium">Quick Options</Label>
+                  <div className="flex gap-1">
+                    {['0', '4', '6', '8', '12', '16'].map((radius) => (
+                      <Button
+                        key={radius}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleStyleChange('buttonBorderRadius', `${radius}px`)}
+                        className={`text-xs h-6 px-2 ${selectedSection.styles?.buttonBorderRadius === `${radius}px` ? 'bg-primary text-primary-foreground' : ''}`}
+                      >
+                        {radius}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[9px] font-medium">Preview</Label>
+                <div className="p-3 bg-slate-50 rounded-lg flex justify-center">
+                  <Button 
+                    style={{ 
+                      borderRadius: `${selectedSection.styles?.buttonBorderRadius || 6}px`,
+                      backgroundColor: selectedSection.styles?.buttonBackgroundColor || '#0f172a',
+                      color: selectedSection.styles?.buttonTextColor || '#ffffff'
+                    }}
+                    className="text-xs"
+                  >
+                    {content.buttonText || 'Button'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       );
 
