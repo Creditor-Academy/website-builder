@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+
 export function FAQSection({ section, isEditing, onContentChange }) {
   const { content, styles } = section;
   const faqs = content.faqs || [];
   const [openIndex, setOpenIndex] = useState(0);
+
+  const categories = Array.from(new Set<string>(faqs.map((f: any) => f.category || 'General')));
+  const [active, setActive] = useState(categories[0] || 'General');
+
   const variant = section.variant || 'accordion';
   const background = styles.useGradient ? (styles.backgroundGradient || styles.backgroundColor) : (styles.backgroundColor || '#f8fafc');
   const padding = styles.padding || '100px 0';
-  
+
   // Get text colors with fallbacks
   const headingColor = styles.headingColor || '#0f172a';
   const paragraphColor = styles.paragraphColor || '#64748b';
@@ -27,7 +32,7 @@ export function FAQSection({ section, isEditing, onContentChange }) {
                   <img src={faq.imageUrl} alt={faq.question} className="w-full h-48 object-cover" />
                 )}
                 <div className="p-6">
-                  <h4 
+                  <h4
                     className="font-semibold mb-2"
                     contentEditable={isEditing}
                     suppressContentEditableWarning
@@ -39,7 +44,7 @@ export function FAQSection({ section, isEditing, onContentChange }) {
                   >
                     {faq.question}
                   </h4>
-                  <div 
+                  <div
                     className="text-slate-600 text-sm leading-relaxed"
                     contentEditable={isEditing}
                     suppressContentEditableWarning
@@ -61,9 +66,6 @@ export function FAQSection({ section, isEditing, onContentChange }) {
   }
 
   if (variant === 'tabs') {
-    // group by category (if provided)
-    const categories = Array.from(new Set<string>(faqs.map((f: any) => f.category || 'General')));
-    const [active, setActive] = useState(categories[0] || 'General');
     return (
       <section className="relative" style={{ background, padding }}>
         <div className="container mx-auto px-6 max-w-7xl">
@@ -77,7 +79,7 @@ export function FAQSection({ section, isEditing, onContentChange }) {
           <div>
             {(faqs.filter((f: any) => (f.category || 'General') === active)).map((faq: any, idx) => (
               <div key={faq.id || idx} className="bg-white rounded-2xl p-6 border border-slate-200 mb-4">
-                <h4 
+                <h4
                   className="font-semibold mb-2"
                   contentEditable={isEditing}
                   suppressContentEditableWarning
@@ -89,7 +91,7 @@ export function FAQSection({ section, isEditing, onContentChange }) {
                 >
                   {faq.question}
                 </h4>
-                <div 
+                <div
                   className="text-slate-600 text-sm leading-relaxed"
                   contentEditable={isEditing}
                   suppressContentEditableWarning
@@ -121,7 +123,7 @@ export function FAQSection({ section, isEditing, onContentChange }) {
           {faqs.map((faq, index) => (
             <div key={faq.id || index} className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
               <button onClick={() => setOpenIndex(openIndex === index ? null : index)} className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-slate-50 transition-colors">
-                <span 
+                <span
                   className="font-semibold text-slate-900 pr-4"
                   contentEditable={isEditing}
                   suppressContentEditableWarning
@@ -136,7 +138,7 @@ export function FAQSection({ section, isEditing, onContentChange }) {
                 <ChevronDown className={`w-5 h-5 text-slate-400 flex-shrink-0 transition-transform duration-200 ${openIndex === index ? 'rotate-180' : ''}`} />
               </button>
               <div className={`overflow-hidden transition-all duration-200 ${openIndex === index ? 'max-h-96' : 'max-h-0'}`}>
-                <div 
+                <div
                   className="px-6 pb-5 text-slate-600 leading-relaxed"
                   contentEditable={isEditing}
                   suppressContentEditableWarning

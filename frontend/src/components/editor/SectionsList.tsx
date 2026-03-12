@@ -176,6 +176,12 @@ const ELEMENT_CATEGORIES = [
 export function SectionsList({ view = "add" }) {
   const { state, selectSection, reorderSections, addSection, deleteSection, addComponent, updateCurrentPage } = useBuilder();
   const { page, editor } = state;
+  const [query, setQuery] = useState('');
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   if (!page) {
     return (
@@ -187,13 +193,6 @@ export function SectionsList({ view = "add" }) {
       </div>
     );
   }
-
-  const [query, setQuery] = useState('');
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
@@ -354,7 +353,7 @@ export function SectionsList({ view = "add" }) {
 
               {/* All Categories */}
               {ELEMENT_CATEGORIES.map((cat, catIndex) => {
-                const filteredItems = cat.items.filter(item =>
+                const filteredItems = cat.items.filter((item: any) =>
                   item.name.toLowerCase().includes(query.toLowerCase()) ||
                   (item as any).description?.toLowerCase().includes(query.toLowerCase())
                 );

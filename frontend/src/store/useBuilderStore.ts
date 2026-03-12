@@ -18,7 +18,6 @@ const TEMPLATE_MAP: Record<string, () => any> = {
     consultant: getConsultantPage,
     agencies: getAgenciesPage,
     coaching: getCoachPage,
-    marketing: getAgenciesPage,
 };
 
 export interface Website {

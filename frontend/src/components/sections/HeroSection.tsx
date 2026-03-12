@@ -20,10 +20,11 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
       case 'phone':
         window.location.href = routeUrl.startsWith('tel:') ? routeUrl : `tel:${routeUrl}`;
         break;
-      case 'anchor':
+      case 'anchor': {
         const element = document.querySelector(routeUrl);
         if (element) element.scrollIntoView({ behavior: 'smooth' });
         break;
+      }
       default:
         if (routeUrl) window.open(routeUrl, '_blank', 'noopener,noreferrer');
     }

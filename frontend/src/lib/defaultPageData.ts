@@ -568,5 +568,4 @@ export const getDefaultPage = () => ({
   globalStyles: { fontFamily: 'Inter', primaryColor: '#3b82f6' },
 });
 
-// Deprecated or legacy creators needed for SectionsList.jsx
 

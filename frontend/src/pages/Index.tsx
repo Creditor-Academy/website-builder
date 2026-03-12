@@ -16,6 +16,7 @@ import Ecommerce from "../assets/Ecomm.jpg";
 import Portfolio from "../assets/Portfolio.jpg";
 import school from "../assets/School.jpg";
 import CTA from "../assets/CTA.png";
+import Learning from "../assets/Learning.jpg";
 
 
 
