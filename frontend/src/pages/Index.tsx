@@ -467,7 +467,7 @@ export default function LandingPage() {
               className="md:col-span-2 relative rounded-[2.5rem] border border-slate-700/50 bg-slate-900/60 backdrop-blur-xl overflow-hidden group flex flex-col md:flex-row hover:border-orange-500/50 transition-colors duration-500 shadow-2xl"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/80 to-transparent z-10" />
-              <video src={brand} autoPlay muted loop className="absolute right-0 top-0 h-full w-[70%] object-cover opacity-50 group-hover:opacity-80 transition-opacity duration-700 mix-blend-screen" />
+              <video src={brand} autoPlay muted loop className={cn("absolute right-0 top-0 h-full w-[70%] object-cover transition-opacity duration-700", isDark ? "opacity-50 group-hover:opacity-80 mix-blend-screen" : "opacity-30 group-hover:opacity-50 mix-blend-multiply")} />
 
               <div className="p-10 z-20 relative flex flex-col justify-center max-w-md h-full">
                 <div className="w-14 h-14 rounded-2xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_15px_rgba(249,115,22,0.5)]">
@@ -506,7 +506,7 @@ export default function LandingPage() {
         >
           {templates.concat(templates).map((tpl, i) => (
             <div key={i} className="relative shrink-0 w-[85vw] md:w-[450px] aspect-[4/5] group rounded-[3rem] overflow-hidden border border-slate-700 bg-slate-900 shadow-2xl hover:shadow-[0_20px_50px_rgba(59,130,246,0.2)] hover:border-blue-500/50 transition-all duration-500 cursor-pointer">
-              <img src={tpl.image} alt={tpl.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 opacity-70 group-hover:opacity-100 mix-blend-lighten" />
+              <img src={tpl.image} alt={tpl.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 opacity-100" />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent flex flex-col justify-end p-10">
                 <h3 className="text-4xl font-bold mb-6 text-white transform translate-y-6 group-hover:translate-y-0 transition-transform duration-500">{tpl.title}</h3>
                 <button
