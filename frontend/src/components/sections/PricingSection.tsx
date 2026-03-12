@@ -373,9 +373,9 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
                 })}
               </div>
             </div>
-          ))}
+          )}
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }
