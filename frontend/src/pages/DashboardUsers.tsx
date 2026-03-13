@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -122,15 +123,39 @@ export default function DashboardUsers() {
     }, 300); // Simulate network delay
   };
 
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleAddUser = () => {
+    console.log("Add new user");
+    // In a real application, this would open a form to add a new user
+  };
+
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (isLoading) {
     return <div className="p-6">Loading users...</div>;
   }
 
-
-
   return (
     <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200">
-      <h2 className="text-xl font-bold text-slate-900 mb-4">Users Management</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold text-slate-900">Users Management</h2>
+        <Button onClick={handleAddUser}>Add User</Button>
+      </div>
+
+      <div className="mb-4">
+        <Input
+          placeholder="Search users..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-sm"
+        />
+      </div>
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -143,13 +168,17 @@ export default function DashboardUsers() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((user) => (
+          {filteredUsers.map((user) => (
             <TableRow key={user.id}>
               <TableCell className="font-medium">{user.id}</TableCell>
               <TableCell>{user.name}</TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.role}</TableCell>
-              <TableCell>{user.status}</TableCell>
+              <TableCell>
+                <Badge variant={user.status === "Active" ? "default" : "secondary"}>
+                  {user.status}
+                </Badge>
+              </TableCell>
               <TableCell className="text-right">
                 <Button variant="outline" size="sm" className="mr-2" onClick={() => handleEditClick(user)}>Edit</Button>
                 <Button
