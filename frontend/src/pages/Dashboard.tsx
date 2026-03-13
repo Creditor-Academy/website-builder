@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom'; // Added Link and useLocation
+import { useNavigate, Link, useLocation, Outlet } from 'react-router-dom'; // Added Link, useLocation, and Outlet
 import { Helmet } from 'react-helmet-async';
 import {
     Plus, Globe, MoreVertical, Edit2, Play, Trash2,
@@ -163,115 +163,121 @@ const Dashboard = () => {
 
             {/* --- Main Content Area --- */}
             <main className="flex-1 p-6 md:p-10 overflow-y-auto">
-                <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-                    <div className="flex items-center gap-4">
-                        {isMobile && (
-                            <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="lg:hidden" 
-                                onClick={() => setIsSidebarOpen(true)}
-                            >
-                                <Menu className="w-6 h-6" />
-                            </Button>
-                        )}
-                        <div>
-                            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Project Hub</h2>
-                            <p className="text-slate-500 flex items-center gap-2 mt-1">
-                                Welcome back! You have <span className="text-primary font-medium">{websites.length} active projects</span>
-                            </p>
-                        </div>
-                    </div>
+                {location.pathname === '/dashboard' ? (
+                    <>
+                        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+                            <div className="flex items-center gap-4">
+                                {isMobile && (
+                                    <Button 
+                                        variant="ghost" 
+                                        size="icon" 
+                                        className="lg:hidden" 
+                                        onClick={() => setIsSidebarOpen(true)}
+                                    >
+                                        <Menu className="w-6 h-6" />
+                                    </Button>
+                                )}
+                                <div>
+                                    <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Project Hub</h2>
+                                    <p className="text-slate-500 flex items-center gap-2 mt-1">
+                                        Welcome back! You have <span className="text-primary font-medium">{websites.length} active projects</span>
+                                    </p>
+                                </div>
+                            </div>
 
-                    <div className="flex items-center gap-3">
-                        <div className="relative hidden sm:block">
-                            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <Input 
-                                placeholder="Search projects..." 
-                                className="pl-9 w-[240px] bg-white border-slate-200 focus:ring-primary/20"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
-
-                        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                            <DialogTrigger asChild>
-                                <Button className="gap-2 px-5 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all">
-                                    <Plus className="w-5 h-5" /> New Project
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-md rounded-3xl">
-                                <DialogHeader>
-                                    <DialogTitle>Create New Website</DialogTitle>
-                                    <DialogDescription>
-                                        Enter a name for your next masterpiece.
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <div className="py-4">
-                                    <Input
-                                        placeholder="e.g., Portfolio 2024"
-                                        value={newSiteName}
-                                        onChange={(e) => setNewSiteName(e.target.value)}
-                                        className="h-11"
-                                        onKeyDown={(e) => e.key === 'Enter' && handleCreateSite()}
+                            <div className="flex items-center gap-3">
+                                <div className="relative hidden sm:block">
+                                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                                    <Input 
+                                        placeholder="Search projects..." 
+                                        className="pl-9 w-[240px] bg-white border-slate-200 focus:ring-primary/20"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
                                     />
                                 </div>
-                                <DialogFooter>
-                                    <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>
-                                        Cancel
-                                    </Button>
-                                    <Button onClick={handleCreateSite} disabled={!newSiteName.trim()}>
-                                        Start Building
-                                    </Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-                    </div>
-                </header>
 
-                {/* --- Overview Cards Section --- */}
-                <section className="grid gap-6 mb-10 md:grid-cols-2 lg:grid-cols-4">
-                    <OverviewCard 
-                        title="Total Websites"
-                        value="1,234"
-                        description="+20.1% from last month"
-                        icon={<Globe className="w-4 h-4 text-slate-400" />}
-                    />
-                    <OverviewCard 
-                        title="Active Users"
-                        value="250"
-                        description="+15% from last month"
-                        icon={<Users className="w-4 h-4 text-slate-400" />}
-                    />
-                    <OverviewCard 
-                        title="Templates Available"
-                        value="42"
-                        description="New templates added frequently"
-                        icon={<Layout className="w-4 h-4 text-slate-400" />}
-                    />
-                    <OverviewCard 
-                        title="Deployments Today"
-                        value="78"
-                        description="Successfully deployed websites"
-                        icon={<Activity className="w-4 h-4 text-slate-400" />}
-                    />
-                </section>
+                                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                                    <DialogTrigger asChild>
+                                        <Button className="gap-2 px-5 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all">
+                                            <Plus className="w-5 h-5" /> New Project
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="sm:max-w-md rounded-3xl">
+                                        <DialogHeader>
+                                            <DialogTitle>Create New Website</DialogTitle>
+                                            <DialogDescription>
+                                                Enter a name for your next masterpiece.
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <div className="py-4">
+                                            <Input
+                                                placeholder="e.g., Portfolio 2024"
+                                                value={newSiteName}
+                                                onChange={(e) => setNewSiteName(e.target.value)}
+                                                className="h-11"
+                                                onKeyDown={(e) => e.key === 'Enter' && handleCreateSite()}
+                                            />
+                                        </div>
+                                        <DialogFooter>
+                                            <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>
+                                                Cancel
+                                            </Button>
+                                            <Button onClick={handleCreateSite} disabled={!newSiteName.trim()}>
+                                                Start Building
+                                            </Button>
+                                        </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
+                            </div>
+                        </header>
 
-                {/* --- Content Area (Website Cards) --- */}
-                {websites.length === 0 ? (
-                    <EmptyState onAction={() => setIsDialogOpen(true)} />
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                        {filteredWebsites.map((site, index) => (
-                            <WebsiteCard 
-                                key={site.id} 
-                                site={site} 
-                                index={index}
-                                onDelete={() => deleteWebsite(site.id)}
-                                onEdit={() => navigate(`/builder/${site.id}`)}
+                        {/* --- Overview Cards Section --- */}
+                        <section className="grid gap-6 mb-10 md:grid-cols-2 lg:grid-cols-4">
+                            <OverviewCard 
+                                title="Total Websites"
+                                value="1,234"
+                                description="+20.1% from last month"
+                                icon={<Globe className="w-4 h-4 text-slate-400" />}
                             />
-                        ))}
-                    </div>
+                            <OverviewCard 
+                                title="Active Users"
+                                value="250"
+                                description="+15% from last month"
+                                icon={<Users className="w-4 h-4 text-slate-400" />}
+                            />
+                            <OverviewCard 
+                                title="Templates Available"
+                                value="42"
+                                description="New templates added frequently"
+                                icon={<Layout className="w-4 h-4 text-slate-400" />}
+                            />
+                            <OverviewCard 
+                                title="Deployments Today"
+                                value="78"
+                                description="Successfully deployed websites"
+                                icon={<Activity className="w-4 h-4 text-slate-400" />}
+                            />
+                        </section>
+
+                        {/* --- Content Area (Website Cards) --- */}
+                        {websites.length === 0 ? (
+                            <EmptyState onAction={() => setIsDialogOpen(true)} />
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                {filteredWebsites.map((site, index) => (
+                                    <WebsiteCard 
+                                        key={site.id} 
+                                        site={site} 
+                                        index={index}
+                                        onDelete={() => deleteWebsite(site.id)}
+                                        onEdit={() => navigate(`/builder/${site.id}`)}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <Outlet />
                 )}
             </main>
         </div>
