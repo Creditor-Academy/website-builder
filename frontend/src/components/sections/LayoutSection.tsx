@@ -172,7 +172,7 @@ function ImageBlock({ content, section, isEditing, openMediaPicker, aspectRatio 
 // VARIANTS
 // ──────────────────────────────────────────────────────────────────────────
 
-function TextOnly({ content, isEditing, updateContent, styles }) {
+function TextOnly({ content, isEditing, updateContent, styles }) { // Text-only layout variant
   return (
     <div style={{ maxWidth: 760, margin: '0 auto' }}>
       <CE
@@ -190,7 +190,7 @@ function TextOnly({ content, isEditing, updateContent, styles }) {
   );
 }
 
-function ImageTextLayout({ content, section, isEditing, updateContent, openMediaPicker, styles, imageRight = false }) {
+function ImageTextLayout({ content, section, isEditing, updateContent, openMediaPicker, styles, imageRight = false }) { // Image-text layout variant (left/right)
   const textBlock = (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
       <CE
@@ -237,7 +237,7 @@ function ImageTextLayout({ content, section, isEditing, updateContent, openMedia
   );
 }
 
-function TextButton({ content, isEditing, updateContent, styles }) {
+function TextButton({ content, isEditing, updateContent, styles }) { // Text-button layout variant
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
       <CE
@@ -270,7 +270,7 @@ function TextButton({ content, isEditing, updateContent, styles }) {
   );
 }
 
-function HeadingTextButton({ content, isEditing, updateContent, styles }) {
+function HeadingTextButton({ content, isEditing, updateContent, styles }) { // Heading-text-button layout variant
   return (
     <div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
       <CE
@@ -315,7 +315,7 @@ function HeadingTextButton({ content, isEditing, updateContent, styles }) {
   );
 }
 
-function TwoColumn({ content, isEditing, updateContent, styles }) {
+function TwoColumn({ content, isEditing, updateContent, styles }) { // Two-column layout variant
   const cols = [
     { key: 'leftColumn',  label: '01' },
     { key: 'rightColumn', label: '02' },
@@ -412,14 +412,14 @@ export function LayoutSection({ section, isSelected, isEditing, onContentChange 
       {isEditing && <div className="ly-badge">Layout</div>}
 
       <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px', position: 'relative' }}>
-        {variant === 'text-only'           && <TextOnly         {...shared} />}
-        {variant === 'image-text-left'     && <ImageTextLayout  {...shared} imageRight={false} />}
-        {variant === 'image-text-right'    && <ImageTextLayout  {...shared} imageRight={true}  />}
-        {variant === 'text-button'         && <TextButton        {...shared} />}
-        {variant === 'heading-text-button' && <HeadingTextButton {...shared} />}
-        {variant === 'two-column'          && <TwoColumn         {...shared} />}
+        {variant === 'text-only'           && <TextOnly         {...shared} />} // Text-only variant
+        {variant === 'image-text-left'     && <ImageTextLayout  {...shared} imageRight={false} />} // Left image variant
+        {variant === 'image-text-right'    && <ImageTextLayout  {...shared} imageRight={true}  />} // Right image variant
+        {variant === 'text-button'         && <TextButton        {...shared} />} // Text-button variant
+        {variant === 'heading-text-button' && <HeadingTextButton {...shared} />} // Complete layout variant
+        {variant === 'two-column'          && <TwoColumn         {...shared} />} // Two-column variant
         {!['text-only','image-text-left','image-text-right','text-button','heading-text-button','two-column'].includes(variant)
-          && <TextOnly {...shared} />}
+          && <TextOnly {...shared} />} // Fallback variant
       </div>
     </section>
   );

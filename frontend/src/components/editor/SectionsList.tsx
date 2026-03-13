@@ -116,12 +116,12 @@ const ELEMENT_CATEGORIES = [
     borderColor: "border-amber-200/50",
     badgeColor: "bg-amber-50 text-amber-700",
     items: [
-      { type: "layout", name: "Text Only", icon: Type, description: "Simple text paragraph layout", create: createDefaultTextOnlySection },
-      { type: "layout", name: "Image + Text (Left)", icon: Layout, description: "Image on left, text on right", create: createDefaultImageTextLeftSection },
-      { type: "layout", name: "Image + Text (Right)", icon: Layout, description: "Text on left, image on right", create: createDefaultImageTextRightSection },
-      { type: "layout", name: "Text + Button", icon: MousePointer2, description: "Text content with call-to-action button", create: createDefaultTextButtonSection },
-      { type: "layout", name: "Heading + Text + Button", icon: Sparkles, description: "Full layout with heading, description, and button", create: createDefaultHeadingTextButtonSection },
-      { type: "layout", name: "Two Column", icon: ColumnsIcon, description: "Split content into two columns", create: createDefaultTwoColumnSection },
+      { type: "layout", name: "Text Only", icon: Type, description: "Simple text paragraph layout", create: createDefaultTextOnlySection }, // Text layout section
+      { type: "layout", name: "Image + Text (Left)", icon: Layout, description: "Image on left, text on right", create: createDefaultImageTextLeftSection }, // Left image layout
+      { type: "layout", name: "Image + Text (Right)", icon: Layout, description: "Text on left, image on right", create: createDefaultImageTextRightSection }, // Right image layout
+      { type: "layout", name: "Text + Button", icon: MousePointer2, description: "Text content with call-to-action button", create: createDefaultTextButtonSection }, // Text button layout
+      { type: "layout", name: "Heading + Text + Button", icon: Sparkles, description: "Full layout with heading, description, and button", create: createDefaultHeadingTextButtonSection }, // Complete layout
+      { type: "layout", name: "Two Column", icon: ColumnsIcon, description: "Split content into two columns", create: createDefaultTwoColumnSection }, // Column layout
     ]
   },
   {

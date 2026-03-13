@@ -728,7 +728,7 @@ export const getDefaultPage = () => ({
 });
 
 // Layout Sections
-export const createDefaultTextOnlySection = () => ({
+export const createDefaultTextOnlySection = () => ({ // Text-only layout section
   id: uuidv4(),
   type: 'layout',
   name: 'Text Only Layout',
@@ -745,7 +745,7 @@ export const createDefaultTextOnlySection = () => ({
   },
 });
 
-export const createDefaultImageTextLeftSection = () => ({
+export const createDefaultImageTextLeftSection = () => ({ // Left image layout section
   id: uuidv4(),
   type: 'layout',
   name: 'Image + Text (Left)',
@@ -763,7 +763,7 @@ export const createDefaultImageTextLeftSection = () => ({
   },
 });
 
-export const createDefaultImageTextRightSection = () => ({
+export const createDefaultImageTextRightSection = () => ({ // Right image layout section
   id: uuidv4(),
   type: 'layout',
   name: 'Image + Text (Right)',
@@ -781,7 +781,7 @@ export const createDefaultImageTextRightSection = () => ({
   },
 });
 
-export const createDefaultTextButtonSection = () => ({
+export const createDefaultTextButtonSection = () => ({ // Text button layout section
   id: uuidv4(),
   type: 'layout',
   name: 'Text + Button',
@@ -799,7 +799,7 @@ export const createDefaultTextButtonSection = () => ({
   },
 });
 
-export const createDefaultHeadingTextButtonSection = () => ({
+export const createDefaultHeadingTextButtonSection = () => ({ // Complete layout section
   id: uuidv4(),
   type: 'layout',
   name: 'Heading + Text + Button',
@@ -818,7 +818,7 @@ export const createDefaultHeadingTextButtonSection = () => ({
   },
 });
 
-export const createDefaultTwoColumnSection = () => ({
+export const createDefaultTwoColumnSection = () => ({ // Two column layout section
   id: uuidv4(),
   type: 'layout',
   name: 'Two Column Layout',
