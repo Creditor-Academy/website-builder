@@ -1,22 +1,46 @@
 import WebsiteDao from './website.dao.js';
+import PageDao from './page.dao.js';
 import UserDao from '../user/user.dao.js';
-import type { CreateWebsiteInput, ListWebsitesQuerySchema, UpdateWebsiteInput, UpdateWebsiteSettingsInput } from './website.validation.js';
+import type { CreateWebsiteInput, ListWebsitesQuerySchema, UpdateWebsiteInput, UpdateWebsiteSettingsInput, UpdatePageContentInput } from './website.validation.js';
 import { WebsiteStatus, type Website } from '@prisma/client';
 
 class WebsiteService {
     private websiteDao: WebsiteDao;
+    private pageDao: PageDao;
     private userDao: UserDao;
 
     constructor() {
         this.websiteDao = new WebsiteDao();
+        this.pageDao = new PageDao();
         this.userDao = new UserDao();
     }
 
     async createWebsite(userId: string, data: CreateWebsiteInput) {
-        return await this.websiteDao.createWebsite(userId, data);
+        const { name, templateId } = data;
+        const website = await this.websiteDao.createWebsite(userId, { name });
 
-        // Create new Draft version
-        // Generate new subdomain
+        if (templateId && templateId !== 'blank') {
+            const template = await this.websiteDao.findTemplateById(templateId);
+            if (template && Array.isArray(template.content)) {
+                // Instantiate pages from template
+                for (const pageData of (template.content as any[])) {
+                    await this.pageDao.createPage({
+                        website_id: website.id,
+                        ...pageData
+                    });
+                }
+            }
+        } else {
+            // Create default Home page
+            await this.pageDao.createPage({
+                website_id: website.id,
+                name: 'Home',
+                slug: '/home',
+                content: []
+            });
+        }
+
+        return await this.websiteDao.findWebsiteById(website.id);
     }
 
     async listWebsites(userId: string, filters: ListWebsitesQuerySchema) {
@@ -30,10 +54,11 @@ class WebsiteService {
     async getSingleWebsite(website: Website) {
         const settingsPromise = this.websiteDao.getWebsiteSettings(website.settings_id!);
         const ownerPromise = this.userDao.findUserById(website.owner_id);
+        const pagesPromise = this.pageDao.findPagesByWebsiteId(website.id);
 
-        const [settings, owner] = await Promise.all([settingsPromise, ownerPromise]);
+        const [settings, owner, pages] = await Promise.all([settingsPromise, ownerPromise, pagesPromise]);
 
-        return { website, settings, owner };
+        return { website, settings, owner, pages };
     }
 
     async updateWebsite(website: Website, data: UpdateWebsiteInput) {
@@ -80,6 +105,21 @@ class WebsiteService {
         }
         const settingId = website.settings_id!;
         await this.websiteDao.updateWebsiteSettings(settingId, data);
+    }
+
+    async updatePageContent(pageId: string, data: UpdatePageContentInput) {
+        return await this.pageDao.updatePage(pageId, data as any);
+    }
+
+    async publishWebsite(website: Website) {
+        if (website.status === WebsiteStatus.DELETED) {
+            throw Error("Website Deleted");
+        }
+        return await this.websiteDao.updateWebsite(website.id, { status: WebsiteStatus.PUBLISHED });
+    }
+
+    async listTemplates() {
+        return await this.websiteDao.listTemplates();
     }
 
     async cleanupDeletedWebsites() {

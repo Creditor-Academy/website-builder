@@ -7,8 +7,21 @@ import {
     createPricingPage,
     createContactPage,
     getAgenciesPage,
-    getCoachPage
+    getCoachPage,
+    createDefaultNavbar,
+    createDefaultFooter,
 } from '@/lib/defaultPageData';
+import { websiteService } from '@/services/websiteService';
+
+// Helper: normalize a raw page from backend to the shape the frontend expects
+const normalizePage = (p: any) => ({
+    ...p,
+    // Backend stores sections as `content`, frontend expects `sections`
+    sections: p.sections || p.content || [],
+    // Inject default navbar/footer if not saved yet (newly created pages from backend)
+    navbar: p.navbar || createDefaultNavbar(),
+    footer: p.footer || createDefaultFooter(),
+});
 
 const TEMPLATE_MAP: Record<string, () => any> = {
     blank: getDefaultPage,
@@ -23,10 +36,12 @@ const TEMPLATE_MAP: Record<string, () => any> = {
 export interface Website {
     id: string;
     name: string;
-    lastEdited: string;
+    lastEdited?: string; // Frontend shadow/compatibility
+    updatedAt?: string;  // Backend field
+    createdAt?: string;  // Backend field
     status: string;
     pages: any[];
-    activePageId: string;
+    activePageId?: string;
     templateId?: string;
 }
 
@@ -49,16 +64,19 @@ export interface BuilderState {
     historyIndex: number;
 
     setWebsites: (websites: Website[]) => void;
-    createWebsite: (name: string, template?: string) => string;
-    selectWebsite: (id: string) => void;
+    updatePageSEO: (pageId: string, seoUpdates: any) => void;
+    updateWebsite: (id: string, updates: any) => void;
     deleteWebsite: (id: string) => void;
+    fetchWebsites: () => Promise<void>;
+    clearStore: () => void;
+    loadWebsite: (id: string) => Promise<Website | null>;
+    saveCurrentPage: () => Promise<void>;
+    createWebsite: (name: string, template?: string) => Promise<string>;
+    updateWebsitePages: (newPages: any[]) => void;
     setActivePage: (pageId: string) => void;
     addPage: (pageData: any) => void;
     duplicatePage: (pageId: string) => void;
     deletePage: (pageId: string) => void;
-    updatePageSEO: (pageId: string, seoUpdates: any) => void;
-    updateWebsite: (id: string, updates: any) => void;
-    updateWebsitePages: (newPages: any[]) => void;
     addSection: (section: any, index?: number) => void;
     updateSection: (sectionId: string, updates: any) => void;
     deleteSection: (sectionId: string) => void;
@@ -103,28 +121,98 @@ export const useBuilderStore = create<BuilderState>()(
         // Actions
         setWebsites: (websites) => set({ websites }),
 
-        createWebsite: (name, template = 'blank') => {
-            const id = uuidv4();
-            const templateFn = TEMPLATE_MAP[template] || TEMPLATE_MAP.blank;
-            const homePage = templateFn();
-            const newWebsite = {
-                id,
-                name,
-                lastEdited: new Date().toISOString(),
-                status: 'Draft',
-                pages: [homePage],
-                activePageId: homePage.id,
-                templateId: template,
-            };
+        fetchWebsites: async () => {
+            try {
+                const response = await websiteService.listWebsites();
+                // Normalize each website's pages the same way loadWebsite does
+                const normalized = (response.websites || []).map((w: any) => ({
+                    ...w,
+                    pages: (w.pages || []).map(normalizePage)
+                }));
+                set({ websites: normalized });
+            } catch (error) {
+                console.error("Failed to fetch websites:", error);
+            }
+        },
 
-            set((state) => ({
-                websites: [...state.websites, newWebsite],
-                activeWebsiteId: id,
-                activePageId: homePage.id,
-                history: [newWebsite.pages],
-                historyIndex: 0,
-            }));
-            return id;
+        clearStore: () => {
+            set({
+                websites: [],
+                activeWebsiteId: null,
+                activePageId: null,
+                history: [],
+                historyIndex: -1
+            });
+        },
+
+        loadWebsite: async (id: string) => {
+            try {
+                const response = await websiteService.getWebsite(id);
+                const website = {
+                    ...response.data.website,
+                    pages: response.data.pages.map(normalizePage)
+                };
+
+                // Add to websites list if not present, to fix WebsiteEditor "Not Found" race condition
+                set((state) => {
+                    const exists = state.websites.some(w => w.id === id);
+                    const updatedWebsites = exists
+                        ? state.websites.map(w => w.id === id ? { ...w, ...website } : w)
+                        : [...state.websites, website];
+
+                    return {
+                        websites: updatedWebsites,
+                        activeWebsiteId: id,
+                        activePageId: website.pages[0]?.id,
+                        history: [website.pages],
+                        historyIndex: 0
+                    };
+                });
+                return website;
+            } catch (error) {
+                console.error("Failed to load website:", error);
+                return null;
+            }
+        },
+
+        createWebsite: async (name, template = 'blank') => {
+            try {
+                const response = await websiteService.createWebsite(name, template);
+                const newWebsite = {
+                    ...response.website,
+                    pages: (response.website.pages || []).map(normalizePage)
+                };
+
+                set((state) => ({
+                    websites: [...state.websites, newWebsite],
+                    activeWebsiteId: newWebsite.id,
+                    activePageId: newWebsite.pages[0]?.id,
+                    history: [newWebsite.pages],
+                    historyIndex: 0,
+                }));
+                return newWebsite.id;
+            } catch (error) {
+                console.error("Failed to create website:", error);
+                throw error;
+            }
+        },
+
+        saveCurrentPage: async () => {
+            const { activeWebsiteId, activePageId } = get();
+            const page = get().getActivePage();
+            if (!activeWebsiteId || !activePageId || !page) return;
+
+            try {
+                await websiteService.updatePageContent(activeWebsiteId, activePageId, {
+                    content: page.sections,
+                    navbar: page.navbar,
+                    footer: page.footer,
+                    globalStyles: page.globalStyles,
+                    meta: page.meta
+                });
+            } catch (error) {
+                console.error("Failed to save page:", error);
+            }
         },
 
         selectWebsite: (id) => {
@@ -133,8 +221,6 @@ export const useBuilderStore = create<BuilderState>()(
                 set({
                     activeWebsiteId: id,
                     activePageId: website.activePageId || website.pages[0].id,
-                    history: [website.pages],
-                    historyIndex: 0
                 });
             }
         },

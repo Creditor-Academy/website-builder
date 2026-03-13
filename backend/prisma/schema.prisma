@@ -137,11 +137,49 @@ model Website {
   // Relations
   owner    User     @relation("WebsiteOwner", fields: [owner_id], references: [id], onDelete: Cascade)
   settings Settings @relation(fields: [settings_id], references: [id], onDelete: Cascade)
+  pages    Page[]
 
   @@index([owner_id])
   @@index([status])
   @@index([deleted_at])
   @@map("websites")
+}
+
+// Page Model
+model Page {
+  id           String   @id @default(cuid())
+  website_id   String
+  name         String
+  slug         String
+  content      Json     @default("[]")
+  navbar       Json?
+  footer       Json?
+  globalStyles Json?
+  meta         Json?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Relations
+  website Website @relation(fields: [website_id], references: [id], onDelete: Cascade)
+
+  @@index([website_id])
+  @@map("pages")
+}
+
+// Template Model
+model Template {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    String?
+  thumbnail   String?
+  content     Json // The initial JSON structure for this template
+  
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("templates")
 }
 
 // Settings Model (for website configuration)

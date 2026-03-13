@@ -24,8 +24,8 @@ class WebsiteController {
     listWebsites = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const userId = req.context.user.id;
-            const websites = await this.websiteService.listWebsites(userId, req.validated.query);
-            res.status(200).json({ websites });
+            const result = await this.websiteService.listWebsites(userId, req.validated.query);
+            res.status(200).json(result);
         } catch (error: any) {
             next(error);
         }
@@ -34,8 +34,8 @@ class WebsiteController {
     // GET /websites/all - List all websites
     listAllWebsites = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const websites = await this.websiteService.listAllWebsites(req.validated.query);
-            res.status(200).json({ websites });
+            const result = await this.websiteService.listAllWebsites(req.validated.query);
+            res.status(200).json(result);
         } catch (error: any) {
             next(error);
         }
@@ -102,6 +102,41 @@ class WebsiteController {
             const website = req.context.website!;
             await this.websiteService.updateWebsiteSettings(website, req.validated.body);
             return res.status(200).json({ message: 'Website settings updated successfully' });
+        } catch (error: any) {
+            next(error);
+        }
+    }
+
+    // GET /websites/templates - List all templates
+    listTemplates = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const templates = await this.websiteService.listTemplates();
+            res.status(200).json({ templates });
+        } catch (error: any) {
+            next(error);
+        }
+    }
+
+    // PATCH /websites/:id/pages/:pageId - Update Page Content
+    updatePageContent = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { pageId } = req.params;
+            if (!pageId || typeof pageId !== 'string') {
+                return res.status(400).json({ message: 'Valid Page ID is required' });
+            }
+            const updatedPage = await this.websiteService.updatePageContent(pageId, req.validated.body);
+            return res.status(200).json({ message: 'Page updated successfully', page: updatedPage });
+        } catch (error: any) {
+            next(error);
+        }
+    }
+
+    // POST /websites/:id/publish - Publish Website
+    publishWebsite = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const website = req.context.website!;
+            await this.websiteService.publishWebsite(website);
+            return res.status(200).json({ message: 'Website published successfully' });
         } catch (error: any) {
             next(error);
         }

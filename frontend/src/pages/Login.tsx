@@ -207,6 +207,8 @@ export default function LoginSignup() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Google login failed");
 
+      // Cache user data so dashboard can hydrate instantly
+      if (data.user) localStorage.setItem('buildora_user', JSON.stringify(data.user));
       navigate("/dashboard");
     } catch (err: any) {
       setError(err.message);
@@ -232,6 +234,8 @@ export default function LoginSignup() {
         throw new Error(errorMsg);
       }
 
+      // Cache user data so dashboard can hydrate instantly
+      if (data.user) localStorage.setItem('buildora_user', JSON.stringify(data.user));
       navigate("/dashboard");
     } catch (err: any) {
       setError(err.message);

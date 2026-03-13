@@ -29,11 +29,24 @@ import {
 } from '@/lib/defaultPageData';
 import { v4 as uuidv4 } from 'uuid';
 
-export function NavbarPreview({ config, isEditing, onUpdate }) {
+export function NavbarPreview({ config: rawConfig, isEditing, onUpdate }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showBgPicker, setShowBgPicker] = useState(false);
 
   const { pages, setActivePage, updatePageName, createPage, selectSection } = useBuilder();
+
+  // Merge with safe defaults so null/undefined navbar from DB never crashes the component
+  const safeRaw = rawConfig || {};
+  const config = {
+    logo: { text: 'My Site', imageUrl: '', ...((safeRaw as any).logo || {}) },
+    links: (safeRaw as any).links || [],
+    styles: {
+      backgroundColor: 'transparent',
+      textColor: '#000000',
+      sticky: true,
+      ...((safeRaw as any).styles || {}),
+    },
+  };
 
   /* ------------------------------
      NAVBAR STYLES (dynamic)
@@ -57,7 +70,7 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
       e.preventDefault();
       const targetId = link.href.substring(1);
       const element = document.getElementById(targetId);
-      
+
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } else {
@@ -75,7 +88,7 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
     if (link.href && link.href.startsWith('/')) {
       e.preventDefault();
       const targetPage = pages.find((p) => p.slug === link.href);
-      
+
       if (targetPage) {
         setActivePage(targetPage.id);
         setMobileMenuOpen(false);
@@ -229,8 +242,8 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
             )}
           </div>
 
-          
-         
+
+
         </div>
       </div>
 

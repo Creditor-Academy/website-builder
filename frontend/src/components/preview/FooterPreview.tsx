@@ -30,9 +30,24 @@ const socialIcons = {
   discord: MessageCircle,
 };
 
-export function FooterPreview({ config, isEditing, onUpdate }) {
+export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
   const navigate = useNavigate();
   const { updatePageName, pages, setActivePage, createPage, selectSection } = useBuilder();
+
+  // Merge with safe defaults so null/undefined footer from DB never crashes the component
+  const safeRaw = rawConfig || {};
+  const config = {
+    logo: { text: 'My Site', imageUrl: '', ...((safeRaw as any).logo || {}) },
+    description: (safeRaw as any).description || '',
+    socialLinks: (safeRaw as any).socialLinks || [],
+    columns: (safeRaw as any).columns || [],
+    copyright: (safeRaw as any).copyright || `© ${new Date().getFullYear()} My Site. All rights reserved.`,
+    styles: {
+      backgroundColor: '#0f172a',
+      textColor: '#94a3b8',
+      ...((safeRaw as any).styles || {}),
+    },
+  };
 
   const footerStyle = {
     backgroundColor: config.styles.backgroundColor,
@@ -47,8 +62,8 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
   };
 
   return (
-    <footer 
-      className={`relative ${isEditing ? 'cursor-pointer' : ''}`} 
+    <footer
+      className={`relative ${isEditing ? 'cursor-pointer' : ''}`}
       style={footerStyle}
       onClick={handleFooterClick}
     >
@@ -167,7 +182,7 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
                           e.preventDefault();
                           const targetId = link.href.substring(1);
                           const element = document.getElementById(targetId);
-                          
+
                           if (element) {
                             element.scrollIntoView({ behavior: 'smooth', block: 'start' });
                           } else {
@@ -240,11 +255,11 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
                       contentEditable={isEditing}
                       suppressContentEditableWarning
                       onBlur={(e) => {
-                      const newLabel = e.target.innerText;
-                      onUpdate({
-                        columns: config.columns.map((c) =>
-                          c.id === column.id
-                            ? {
+                        const newLabel = e.target.innerText;
+                        onUpdate({
+                          columns: config.columns.map((c) =>
+                            c.id === column.id
+                              ? {
                                 ...c,
                                 links: c.links.map((l) =>
                                   l.id === link.id
@@ -252,14 +267,14 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
                                     : l
                                 ),
                               }
-                            : c
-                        ),
-                      });
+                              : c
+                          ),
+                        });
 
-                      if (link.href && link.href.startsWith('/')) {
-                        updatePageName(link.href, newLabel);
-                      }
-                    }}
+                        if (link.href && link.href.startsWith('/')) {
+                          updatePageName(link.href, newLabel);
+                        }
+                      }}
                     >
                       {link.label}
                     </a>

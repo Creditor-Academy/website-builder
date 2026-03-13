@@ -115,7 +115,7 @@ class AuthService {
     const payload = generateJWTPayload(user, sessionId);
     const accessToken = generateAccessToken(payload);
 
-    const { password_hash, ...userWithoutPassword } = user;
+    const { password_hash, ...userWithoutPassword } = user as Record<string, any>;
 
     return {
       message: 'Login successful',
@@ -190,7 +190,7 @@ class AuthService {
     const jwtPayload = generateJWTPayload(userForAuth as any, sessionId);
     const accessToken = generateAccessToken(jwtPayload);
 
-    const { password_hash, ...userWithoutPassword } = userForAuth;
+    const { password_hash, ...userWithoutPassword } = userForAuth as Record<string, any>;
 
     return {
       message: 'Login successful',
