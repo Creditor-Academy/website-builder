@@ -57,6 +57,7 @@ export interface BuilderState {
     duplicatePage: (pageId: string) => void;
     deletePage: (pageId: string) => void;
     updatePageSEO: (pageId: string, seoUpdates: any) => void;
+    updateWebsite: (id: string, updates: any) => void;
     updateWebsitePages: (newPages: any[]) => void;
     addSection: (section: any, index?: number) => void;
     updateSection: (sectionId: string, updates: any) => void;
@@ -206,6 +207,14 @@ export const useBuilderStore = create<BuilderState>()(
                 p.id === pageId ? { ...p, meta: { ...p.meta, ...seoUpdates } } : p
             );
             get().updateWebsitePages(newPages);
+        },
+
+        updateWebsite: (id, updates) => {
+            set((state) => ({
+                websites: state.websites.map((w) =>
+                    w.id === id ? { ...w, ...updates, lastEdited: new Date().toISOString() } : w
+                ),
+            }));
         },
 
         updateWebsitePages: (newPages) => {

@@ -1,5 +1,4 @@
 import { Redis } from '@upstash/redis';
-// import { createClient } from 'redis';
 import { InternalServerError } from '../utils/error.utils.js';
 
 import dotenv from 'dotenv';
@@ -12,26 +11,12 @@ export const initRedis = async () => {
         redisClient = new Redis({
             url: process.env.REDIS_URL,
             token: process.env.REDIS_TOKEN,
-        })
-
-        // redisClient = createClient({
-        //     url: process.env.REDIS_URL,
-        // });
-
-        // redisClient.on('error', (err) => {
-        //     console.error('Redis Client Error', err);
-        // });
-
-        // redisClient.on('connect', () => {
-        //     console.log('Redis connected successfully');
-        // });
-
-        // await redisClient.connect();
+        });
 
         console.log('Redis client initialized successfully');
     } catch (error: any) {
-        console.error('Redis connection failed:', error.message);
-        process.exit(1);
+        console.error('Redis connection failed. Features requiring Redis (like login sessions) will not work:', error.message);
+        // Do not exit, allow the app to start for other features (like signup)
     }
 };
 
