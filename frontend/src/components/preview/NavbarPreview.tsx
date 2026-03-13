@@ -19,7 +19,13 @@ import {
   createHelpPage,
   createStatusPage,
   createPrivacyPolicyPage,
-  createTermsOfServicePage
+  createTermsOfServicePage,
+  createMarketingPage,
+  createDesignPage,
+  createDevPage,
+  createExecutiveStrategyPage,
+  createRevenueGrowthPage,
+  createMarketExpansionPage
 } from '@/lib/defaultPageData';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -46,65 +52,37 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
   const navigate = useNavigate();
 
   const handleNavClick = (e, link) => {
-    if (isEditing) {
-      const targetPage = pages.find((p) => p.slug === link.href);
-      if (targetPage) {
-        e.preventDefault();
-        setActivePage(targetPage.id);
-        setMobileMenuOpen(false);
-        return;
-      }
-
-      // If no page exists for this href, create a new page on-the-fly
-      if (link.href && link.href.startsWith('/')) {
-        e.preventDefault();
-        // Map slug to page factory if we have one
-        const slug = link.href;
-        let newPage = null;
-        switch (slug) {
-          case '/about': newPage = createAboutPage(); break;
-          case '/services': newPage = createServicesPage(); break;
-          case '/pricing': newPage = createPricingPage(); break;
-          case '/contact': newPage = createContactPage(); break;
-          case '/start': newPage = createStartPage(); break;
-          case '/templates': newPage = createTemplatesPage(); break;
-          case '/features': newPage = createFeaturesPage(); break;
-          case '/blog': newPage = createBlogPage(); break;
-          case '/careers': newPage = createCareersPage(); break;
-          case '/help': newPage = createHelpPage(); break;
-          case '/status': newPage = createStatusPage(); break;
-          case '/privacy': newPage = createPrivacyPolicyPage(); break;
-          case '/terms': newPage = createTermsOfServicePage(); break;
-          default:
-            newPage = {
-              id: uuidv4(),
-              name: link.label || slug.replace('/', '') || 'New Page',
-              slug: slug,
-              navbar: createDefaultNavbar(),
-              sections: [createDefaultHeroSection(), createDefaultCTASection()],
-              footer: createDefaultFooter(),
-            };
+    // 1. Handle anchor links (e.g., #about, #services)
+    if (link.href && link.href.startsWith('#')) {
+      e.preventDefault();
+      const targetId = link.href.substring(1);
+      const element = document.getElementById(targetId);
+      
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        // Switch to home page if section not found on current page
+        const homePage = pages.find(p => p.slug === '/' || p.name?.toLowerCase().includes('home')) || pages[0];
+        if (homePage) {
+          setActivePage(homePage.id);
         }
-
-        createPage(newPage);
-        setMobileMenuOpen(false);
-        return;
       }
-
+      setMobileMenuOpen(false);
       return;
     }
 
-    // Preview mode: switch the builder's active page so preview stays active
+    // 2. Handle internal pages (e.g., /about, /privacy)
     if (link.href && link.href.startsWith('/')) {
       e.preventDefault();
       const targetPage = pages.find((p) => p.slug === link.href);
+      
       if (targetPage) {
         setActivePage(targetPage.id);
         setMobileMenuOpen(false);
         return;
       }
 
-      // If no page exists for this href, create a new page on-the-fly in preview
+      // If page doesn't exist, try to create it (Even in Preview mode for standard routes)
       const slug = link.href;
       let newPage = null;
       switch (slug) {
@@ -121,22 +99,33 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
         case '/status': newPage = createStatusPage(); break;
         case '/privacy': newPage = createPrivacyPolicyPage(); break;
         case '/terms': newPage = createTermsOfServicePage(); break;
+        case '/marketing': newPage = createMarketingPage(); break;
+        case '/design': newPage = createDesignPage(); break;
+        case '/dev': newPage = createDevPage(); break;
+        case '/executive-strategy': newPage = createExecutiveStrategyPage(); break;
+        case '/revenue-growth': newPage = createRevenueGrowthPage(); break;
+        case '/market-expansion': newPage = createMarketExpansionPage(); break;
         default:
-          newPage = {
-            id: uuidv4(),
-            name: link.label || slug.replace('/', '') || 'New Page',
-            slug: slug,
-            navbar: createDefaultNavbar(),
-            sections: [createDefaultHeroSection(), createDefaultCTASection()],
-            footer: createDefaultFooter(),
-          };
+          if (isEditing) {
+            newPage = {
+              id: uuidv4(),
+              name: link.label || slug.replace('/', '') || 'New Page',
+              slug: slug,
+              navbar: createDefaultNavbar(),
+              sections: [createDefaultHeroSection(), createDefaultCTASection()],
+              footer: createDefaultFooter(),
+            };
+          }
       }
 
       if (newPage) {
         createPage(newPage);
         setMobileMenuOpen(false);
-        return;
+      } else if (!isEditing) {
+        // Preview mode but page doesn't exist and isn't a standard route
+        console.warn('Page not found in this project:', link.href);
       }
+      return;
     }
   };
 

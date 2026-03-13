@@ -47,6 +47,31 @@ class AuthController {
     }
   };
 
+  googleLogin = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await this.authService.googleLogin(req.validated.body.idToken);
+
+      // Set access token in http-only cookie
+      res.cookie('accessToken', result.accessToken, {
+        ...COOKIE_OPTIONS,
+        maxAge: ACCESS_TOKEN_EXPIRY_MS
+      });
+
+      // Set refresh token in http-only cookie
+      res.cookie('refreshToken', result.refreshToken, {
+        ...COOKIE_OPTIONS,
+        maxAge: REFRESH_TOKEN_EXPIRY_MS
+      });
+
+      res.status(200).json({
+        message: result.message,
+        user: result.user,
+      });
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
   logout = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.context.user.id;

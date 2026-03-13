@@ -58,6 +58,7 @@ export function CanvasPreview() {
             .map(section => (
               <div
                 key={section.id}
+                id={section.id || section.type}
                 onClick={(e) => handleSectionClick(section.id, e)}
                 className={`relative transition-all duration-200 ${!editor.previewMode ? 'cursor-pointer' : ''
                   } ${editor.selectedSectionId === section.id && !editor.previewMode

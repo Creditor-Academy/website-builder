@@ -1,8 +1,10 @@
+import { Prisma } from '@prisma/client';
 import prismaClient from '../../config/prisma.js';
 
 class AuthDao {
   // User operations
-  async findUserByEmail(email: string, { include_password_hash } = { include_password_hash: false }) {
+  async findUserByEmail(email: string, options: { include_password_hash?: boolean } = { include_password_hash: false }) {
+    const { include_password_hash } = options;
     return await prismaClient.user.findUnique({
       where: { email },
       omit: {
@@ -11,21 +13,24 @@ class AuthDao {
     });
   }
 
-  async findUserById(id: string) {
+  async findUserById(id: string, options: { include_password_hash?: boolean } = { include_password_hash: false }) {
+    const { include_password_hash } = options;
     return await prismaClient.user.findUnique({
       where: { id },
-      omit: { password_hash: true }
+      omit: {
+        password_hash: !include_password_hash
+      }
     });
   }
 
-  async createUser(userData: { name: string; email: string; password_hash: string }) {
+  async createUser(userData: Prisma.UserCreateInput) {
     return await prismaClient.user.create({
       data: userData,
       omit: { password_hash: true }
     });
   }
 
-  async updateUser(userId: string, userData: any) {
+  async updateUser(userId: string, userData: Prisma.UserUpdateInput) {
     return await prismaClient.user.update({
       where: { id: userId },
       data: userData,
@@ -51,11 +56,16 @@ class AuthDao {
     });
   }
 
-  async findEmailVerificationToken(tokenHash: string) {
+  async findEmailVerificationToken(tokenHash: string, options: { include_password_hash?: boolean } = { include_password_hash: false }) {
+    const { include_password_hash } = options;
     // find a valid (non-expired) verification token by its hash
     return await prismaClient.emailVerificationToken.findFirst({
       include: {
-        user: { omit: { password_hash: true } }
+        user: {
+          omit: {
+            password_hash: !include_password_hash
+          }
+        }
       },
       where: {
         token_hash: tokenHash,
@@ -80,11 +90,16 @@ class AuthDao {
     });
   }
 
-  async findPasswordResetToken(tokenHash: string) {
+  async findPasswordResetToken(tokenHash: string, options: { include_password_hash?: boolean } = { include_password_hash: false }) {
+    const { include_password_hash } = options;
     // find a valid (non-expired, non-used) reset token by its hash
     return await prismaClient.passwordResetToken.findFirst({
       include: {
-        user: { omit: { password_hash: true } }
+        user: {
+          omit: {
+            password_hash: !include_password_hash
+          }
+        }
       },
       where: {
         token_hash: tokenHash,
@@ -117,10 +132,15 @@ class AuthDao {
     });
   }
 
-  async findRefreshToken(tokenHash: string) {
+  async findRefreshToken(tokenHash: string, options: { include_password_hash?: boolean } = { include_password_hash: false }) {
+    const { include_password_hash } = options;
     return await prismaClient.refreshToken.findFirst({
       include: {
-        user: { omit: { password_hash: true } }
+        user: {
+          omit: {
+            password_hash: !include_password_hash
+          }
+        }
       },
       where: {
         token_hash: tokenHash,

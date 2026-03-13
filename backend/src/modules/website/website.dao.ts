@@ -80,7 +80,7 @@ class WebsiteDao {
     async updateWebsiteSettings(id: string, data: UpdateWebsiteSettingsInput) {
         return await prismaClient.settings.update({
             where: { id },
-            data: data
+            data: data as any
         })
     }
 
