@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
     Plus, Globe, MoreVertical, Edit2, Play, Trash2,
     Layout, Settings, LogOut, Clock, CheckCircle,
     FileText, Search, Sparkles, Zap, Files, Building2, ShoppingBag, Users,
-    ArrowRight, ChevronLeft, Palette, Layers, MonitorPlay, Move, LayoutTemplate
+    ArrowRight, ChevronLeft, Palette, Layers, MonitorPlay, Move, LayoutTemplate, Pencil, Check, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +17,7 @@ import useBuilderStore from '@/store/useBuilderStore';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 // Import template assets
 import business from "../assets/Bussiness.jpg";
@@ -38,14 +39,43 @@ export const templatesList = [
 
 const Dashboard = () => {
     const navigate = useNavigate();
-    const { websites, createWebsite, deleteWebsite } = useBuilderStore();
+    const { websites, createWebsite, deleteWebsite, fetchWebsites, clearStore } = useBuilderStore();
+    const { user, initials, updateName } = useCurrentUser();
+    const [loadingWebsites, setLoadingWebsites] = useState(true);
+    const [isCreating, setIsCreating] = useState(false);
+
+    // Fetch websites from backend on every dashboard load (survive refresh)
+    React.useEffect(() => {
+        setLoadingWebsites(true);
+        fetchWebsites().finally(() => setLoadingWebsites(false));
+    }, [fetchWebsites]);
+
+    // Inline name editing state
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [editedName, setEditedName] = useState('');
+    const nameInputRef = useRef<HTMLInputElement>(null);
+
+    const handleStartEditName = () => {
+        setEditedName(user?.name || '');
+        setIsEditingName(true);
+        setTimeout(() => nameInputRef.current?.focus(), 50);
+    };
+
+    const handleSaveName = async () => {
+        if (editedName.trim() && editedName !== user?.name) {
+            await updateName(editedName.trim());
+        }
+        setIsEditingName(false);
+    };
 
     const handleLogout = () => {
         // Clear any stored authentication data
         localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        localStorage.removeItem('buildora_user');
         sessionStorage.removeItem('token');
-        sessionStorage.removeItem('user');
+
+        // Reset the builder store to prevent data leaking between users
+        clearStore();
 
         // Redirect to home screen
         navigate('/');
@@ -71,14 +101,21 @@ const Dashboard = () => {
         site.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const handleCreateSite = () => {
-        if (newSiteName.trim()) {
-            const id = createWebsite(newSiteName, selectedTemplate);
-            setIsDialogOpen(false);
-            setDialogStep('templates');
-            setNewSiteName('');
-            setSelectedTemplate('blank');
-            navigate(`/builder/${id}`);
+    const handleCreateSite = async () => {
+        if (newSiteName.trim() && !isCreating) {
+            setIsCreating(true);
+            try {
+                const id = await createWebsite(newSiteName, selectedTemplate);
+                setIsDialogOpen(false);
+                setDialogStep('templates');
+                setNewSiteName('');
+                setSelectedTemplate('blank');
+                navigate(`/builder/${id}`);
+            } catch (err) {
+                console.error('Failed to create website:', err);
+            } finally {
+                setIsCreating(false);
+            }
         }
     };
 
@@ -144,12 +181,31 @@ const Dashboard = () => {
 
                     <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer border border-transparent hover:border-slate-100">
                         <div className="relative">
-                            <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm">JD</div>
+                            <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm select-none">
+                                {initials}
+                            </div>
                             <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-slate-900 truncate">John Doe</p>
-                            <p className="text-xs text-slate-500 truncate">Pro Plan</p>
+                            {isEditingName ? (
+                                <div className="flex items-center gap-1">
+                                    <input
+                                        ref={nameInputRef}
+                                        value={editedName}
+                                        onChange={(e) => setEditedName(e.target.value)}
+                                        onBlur={handleSaveName}
+                                        onKeyDown={(e) => { if (e.key === 'Enter') handleSaveName(); if (e.key === 'Escape') setIsEditingName(false); }}
+                                        className="text-sm font-semibold text-slate-900 w-full bg-transparent border-b border-indigo-400 outline-none pb-0.5"
+                                    />
+                                    <Check className="w-3.5 h-3.5 text-indigo-500 cursor-pointer shrink-0" onClick={handleSaveName} />
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-1 group/name" onClick={handleStartEditName}>
+                                    <p className="text-sm font-semibold text-slate-900 truncate">{user?.name || 'Loading...'}</p>
+                                    <Pencil className="w-3 h-3 text-slate-400 opacity-0 group-hover/name:opacity-100 transition-opacity shrink-0" />
+                                </div>
+                            )}
+                            <p className="text-xs text-slate-500 truncate">{user?.email || ''}</p>
                         </div>
                         <LogOut
                             className="w-4 h-4 text-slate-400 group-hover:text-destructive transition-colors cursor-pointer"
@@ -219,10 +275,19 @@ const Dashboard = () => {
                                             <div className="mt-auto pt-8 border-t border-slate-100">
                                                 <Button
                                                     onClick={handleCreateSite}
-                                                    disabled={!newSiteName.trim()}
+                                                    disabled={!newSiteName.trim() || isCreating}
                                                     className="w-full h-14 rounded-xl font-bold bg-slate-900 hover:bg-slate-800 text-white shadow-xl disabled:opacity-50 transition-all text-lg flex items-center justify-center gap-2 group active:scale-[0.98]"
                                                 >
-                                                    Start Building <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                                    {isCreating ? (
+                                                        <>
+                                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                                            Creating Project...
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            Start Building <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                                        </>
+                                                    )}
                                                 </Button>
                                             </div>
                                         </div>
@@ -334,6 +399,18 @@ const Dashboard = () => {
                     <AssetsView />
                 ) : activeTab === 'settings' ? (
                     <SettingsView />
+                ) : loadingWebsites ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="bg-white rounded-3xl border border-slate-100 overflow-hidden animate-pulse">
+                                <div className="aspect-[16/10] bg-slate-100" />
+                                <div className="p-5 space-y-3">
+                                    <div className="h-4 bg-slate-100 rounded-full w-3/4" />
+                                    <div className="h-3 bg-slate-100 rounded-full w-1/2" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 ) : websites.length === 0 ? (
                     <div className="h-96 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-2xl bg-white p-12 text-center">
                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
@@ -354,7 +431,14 @@ const Dashboard = () => {
                                 key={site.id}
                                 site={site}
                                 index={index}
-                                onDelete={() => deleteWebsite(site.id)}
+                                onDelete={async () => {
+                                    try {
+                                        await fetch(`http://localhost:5000/api/v1/websites/${site.id}`, {
+                                            method: 'DELETE', credentials: 'include',
+                                        });
+                                    } catch (e) { /* still remove from UI */ }
+                                    deleteWebsite(site.id);
+                                }}
                                 onEdit={() => navigate(`/builder/${site.id}`)}
                             />
                         ))}
@@ -403,9 +487,79 @@ const AssetsView = () => {
 };
 
 const SettingsView = () => {
-    const [name, setName] = useState('John Doe');
-    const [email] = useState('john@example.com');
+    const { user, updateName, refetch, initials } = useCurrentUser();
     const { toast } = useToast();
+    const navigate = useNavigate();
+
+    // Profile form
+    const [nameValue, setNameValue] = useState('');
+    const [savingProfile, setSavingProfile] = useState(false);
+
+    // Password form
+    const [oldPassword, setOldPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [savingPassword, setSavingPassword] = useState(false);
+
+    // Sync name input when user loads
+    React.useEffect(() => {
+        if (user?.name) setNameValue(user.name);
+    }, [user?.name]);
+
+    const handleSaveProfile = async () => {
+        if (!nameValue.trim() || nameValue === user?.name) return;
+        setSavingProfile(true);
+        const ok = await updateName(nameValue.trim());
+        setSavingProfile(false);
+        if (ok) {
+            toast({ title: '✅ Profile updated', description: 'Your name has been saved.' });
+        } else {
+            toast({ title: '❌ Failed to update', description: 'Could not update your name. Try again.', variant: 'destructive' });
+        }
+    };
+
+    const handleChangePassword = async () => {
+        if (!oldPassword || !newPassword) {
+            toast({ title: 'Fill in both fields', variant: 'destructive' });
+            return;
+        }
+        setSavingPassword(true);
+        try {
+            const res = await fetch('http://localhost:5000/api/v1/users/me/change-password', {
+                method: 'PATCH',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldPassword, newPassword }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                const msg = data.errors?.join(', ') || data.message || 'Password change failed';
+                throw new Error(msg);
+            }
+            setOldPassword('');
+            setNewPassword('');
+            toast({ title: '✅ Password changed', description: 'Your password has been updated successfully.' });
+        } catch (err: any) {
+            toast({ title: '❌ Error', description: err.message, variant: 'destructive' });
+        } finally {
+            setSavingPassword(false);
+        }
+    };
+
+    const handleDeactivate = async () => {
+        if (!confirm('Are you sure? This will deactivate your account and all your websites.')) return;
+        try {
+            const res = await fetch('http://localhost:5000/api/v1/users/me', {
+                method: 'DELETE',
+                credentials: 'include',
+            });
+            if (!res.ok) throw new Error('Deactivation failed');
+            localStorage.removeItem('buildora_user');
+            toast({ title: 'Account deactivated', description: 'You have been logged out.' });
+            setTimeout(() => navigate('/'), 1500);
+        } catch (err: any) {
+            toast({ title: '❌ Error', description: err.message, variant: 'destructive' });
+        }
+    };
 
     return (
         <div className="max-w-4xl space-y-12 animate-in fade-in duration-500 pb-32">
@@ -417,27 +571,44 @@ const SettingsView = () => {
             {/* Profile Section */}
             <section className="bg-white border rounded-[2.5rem] p-8 md:p-12 shadow-sm space-y-8">
                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center">
-                        <Users className="w-6 h-6" />
+                    {/* Avatar */}
+                    <div className="w-16 h-16 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xl select-none shrink-0">
+                        {initials}
                     </div>
                     <div>
                         <h3 className="text-xl font-bold text-slate-900">Profile Information</h3>
-                        <p className="text-sm text-slate-500">Update your personal details. (Route: GET /users/me)</p>
+                        <p className="text-sm text-slate-500">{user?.email || 'Loading your account...'}</p>
                     </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-8">
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Full Name</label>
-                        <Input value={name} onChange={(e) => setName(e.target.value)} className="h-14 rounded-2xl bg-slate-50 border-transparent focus:bg-white transition-all shadow-inner" />
+                        <Input
+                            value={nameValue}
+                            onChange={(e) => setNameValue(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') handleSaveProfile(); }}
+                            placeholder="Your full name"
+                            className="h-14 rounded-2xl bg-slate-50 border-transparent focus:bg-white transition-all shadow-inner"
+                        />
                     </div>
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Email Address</label>
-                        <Input value={email} disabled className="h-14 rounded-2xl bg-slate-100 text-slate-400 border-transparent cursor-not-allowed opacity-60" />
+                        <Input
+                            value={user?.email || ''}
+                            disabled
+                            className="h-14 rounded-2xl bg-slate-100 text-slate-400 border-transparent cursor-not-allowed opacity-60"
+                        />
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Email cannot be changed directly.</p>
                     </div>
                 </div>
-                <Button className="rounded-2xl px-10 h-14 font-bold text-white shadow-xl shadow-primary/20" onClick={() => toast({ title: "Profile updated", description: "PATCH /users/me successful. Name updated in database." })}>Save Changes</Button>
+                <Button
+                    className="rounded-2xl px-10 h-14 font-bold text-white shadow-xl shadow-primary/20"
+                    onClick={handleSaveProfile}
+                    disabled={savingProfile || !nameValue.trim() || nameValue === user?.name}
+                >
+                    {savingProfile ? 'Saving...' : 'Save Changes'}
+                </Button>
             </section>
 
             {/* Security Section */}
@@ -448,7 +619,7 @@ const SettingsView = () => {
                     </div>
                     <div>
                         <h3 className="text-xl font-bold text-slate-900">Security</h3>
-                        <p className="text-sm text-slate-500">Manage your password. (Route: POST /users/change-password)</p>
+                        <p className="text-sm text-slate-500">Change your account password.</p>
                     </div>
                 </div>
 
@@ -456,14 +627,34 @@ const SettingsView = () => {
                     <div className="grid md:grid-cols-2 gap-8">
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Current Password</label>
-                            <Input type="password" placeholder="••••••••" className="h-14 rounded-2xl bg-slate-50 border-transparent focus:bg-white transition-all shadow-inner" />
+                            <Input
+                                type="password"
+                                placeholder="••••••••"
+                                value={oldPassword}
+                                onChange={(e) => setOldPassword(e.target.value)}
+                                className="h-14 rounded-2xl bg-slate-50 border-transparent focus:bg-white transition-all shadow-inner"
+                            />
                         </div>
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">New Password</label>
-                            <Input type="password" placeholder="••••••••" className="h-14 rounded-2xl bg-slate-50 border-transparent focus:bg-white transition-all shadow-inner" />
+                            <Input
+                                type="password"
+                                placeholder="••••••••"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                className="h-14 rounded-2xl bg-slate-50 border-transparent focus:bg-white transition-all shadow-inner"
+                            />
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Min 8 chars, must include upper, lower & number.</p>
                         </div>
                     </div>
-                    <Button className="rounded-2xl px-10 h-14 font-bold" variant="secondary" onClick={() => toast({ title: "Password changed", description: "POST /users/change-password successful. password_hash updated, session cleared." })}>Update Password</Button>
+                    <Button
+                        className="rounded-2xl px-10 h-14 font-bold"
+                        variant="secondary"
+                        onClick={handleChangePassword}
+                        disabled={savingPassword}
+                    >
+                        {savingPassword ? 'Updating...' : 'Update Password'}
+                    </Button>
                 </div>
             </section>
 
@@ -475,21 +666,22 @@ const SettingsView = () => {
                     </div>
                     <div>
                         <h3 className="text-xl font-bold text-slate-900">Danger Zone</h3>
-                        <p className="text-sm text-rose-600">Soft Deletes. (Route: DELETE /users/me)</p>
+                        <p className="text-sm text-rose-600">These actions are irreversible. Proceed with care.</p>
                     </div>
                 </div>
 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 p-8 bg-white/60 backdrop-blur-sm rounded-[2rem] border border-rose-100/50">
                     <div className="space-y-1">
                         <p className="font-black text-slate-900 text-lg">Deactivate Account</p>
-                        <p className="text-sm text-slate-500 max-w-md font-medium">Temporarily disable your profile and all websites. (isActive = false, deletedAt = now())</p>
+                        <p className="text-sm text-slate-500 max-w-md font-medium">Temporarily disable your profile and all websites. You can reactivate by contacting support.</p>
                     </div>
-                    <Button variant="destructive" className="rounded-2xl font-black h-14 px-8 shadow-lg shadow-rose-200" onClick={() => {
-                        if (confirm("Are you sure you want to deactivate your account? This will log you out and deactivate all sites.")) {
-                            alert("DELETE /users/me successful. Profile deactivated. Tokens revoked.");
-                            window.location.href = "/";
-                        }
-                    }}>Deactivate Profile</Button>
+                    <Button
+                        variant="destructive"
+                        className="rounded-2xl font-black h-14 px-8 shadow-lg shadow-rose-200"
+                        onClick={handleDeactivate}
+                    >
+                        Deactivate Profile
+                    </Button>
                 </div>
             </section>
         </div>
@@ -498,7 +690,7 @@ const SettingsView = () => {
 
 // --- Sub-components for better organization & interactivity ---
 
-const NavItem = ({ icon, label, active = false }) => (
+const NavItem = ({ icon, label, active = false }: { icon: React.ReactNode, label: string, active?: boolean }) => (
     <Button
         variant="ghost"
         className={`w-full justify-start gap-3 h-11 transition-all duration-200 group ${active
@@ -515,7 +707,7 @@ const NavItem = ({ icon, label, active = false }) => (
     </Button>
 );
 
-const WebsiteCard = ({ site, index, onDelete, onEdit }) => {
+const WebsiteCard = ({ site, index, onDelete, onEdit }: { site: any, index: number, onDelete: () => void, onEdit: () => void }) => {
     const template = templatesList.find(t => t.id === site.templateId);
 
     return (
@@ -548,8 +740,9 @@ const WebsiteCard = ({ site, index, onDelete, onEdit }) => {
 
                 {/* Hover Actions Overlay */}
                 <div className="absolute inset-0 bg-slate-900/40  opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
-                    <Button size="sm" onClick={onEdit} className="bg-white text-slate-900 hover:bg-white/90 ">
-                        <Edit2 className="w-4 h-4" /> Edit
+                    <Button size="sm" onClick={onEdit} className="bg-white text-slate-900 hover:bg-white/90 font-bold rounded-xl px-4 h-9">
+                        <Edit2 className="w-3.5 h-3.5 mr-2" />
+                        {site.status === 'PUBLISHED' ? 'Edit Live' : 'Continue Editing'}
                     </Button>
                     {/* <Button size="icon" variant="secondary" className="bg-white/20 border-white/30 text-white hover:bg-white/40">
                     <Play className="w-4 h-4" />
@@ -560,12 +753,20 @@ const WebsiteCard = ({ site, index, onDelete, onEdit }) => {
             <CardHeader className="p-5 pb-2">
                 <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                        <CardTitle className="text-lg font-bold text-slate-800 group-hover:text-primary transition-colors">
-                            {site.name}
-                        </CardTitle>
+                        <div className="flex items-center gap-3">
+                            <CardTitle className="text-lg font-bold text-slate-800 group-hover:text-primary transition-colors">
+                                {site.name}
+                            </CardTitle>
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${site.status === 'PUBLISHED'
+                                ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                : 'bg-slate-100 text-slate-500 border-slate-200'
+                                }`}>
+                                {site.status || 'DRAFT'}
+                            </span>
+                        </div>
                         <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
                             <Clock className="w-3 h-3" />
-                            {format(new Date(site.lastEdited), 'MMM d, p')}
+                            {format(new Date(site.lastEdited || site.updated_at || site.updatedAt || new Date()), 'MMM d, p')}
                         </div>
                     </div>
 
@@ -576,8 +777,8 @@ const WebsiteCard = ({ site, index, onDelete, onEdit }) => {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 rounded-xl p-2">
-                            <DropdownMenuItem onClick={onEdit} className="rounded-lg gap-2 cursor-pointer">
-                                <Edit2 className="w-4 h-4" /> edit
+                            <DropdownMenuItem onClick={onEdit} className="rounded-lg gap-2 cursor-pointer font-medium">
+                                <Edit2 className="w-4 h-4" /> {site.status === 'PUBLISHED' ? 'Edit Live' : 'Continue Editing'}
                             </DropdownMenuItem>
                             <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer">
                                 <Files className="w-4 h-4" /> Duplicate
@@ -608,7 +809,7 @@ const WebsiteCard = ({ site, index, onDelete, onEdit }) => {
     );
 };
 
-const EmptyState = ({ onAction }) => {
+const EmptyState = ({ onAction }: { onAction: () => void }) => {
 
     return (
         <div className="h-[400px] flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-[2rem] bg-white p-12 text-center transition-all hover:border-primary/20 hover:bg-slate-50/50">

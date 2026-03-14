@@ -9,6 +9,7 @@ import {
     updateWebsiteSchema,
     websiteIdParamsSchema,
     updateWebsiteSettingsSchema,
+    updatePageContentSchema
 } from './website.validation.js';
 import { UserRole } from '@prisma/client';
 import { rateLimiting } from '../../middlewares/rate-limiting.middleware.js';
@@ -33,6 +34,12 @@ router.get(
     '/',
     validateRequest(listWebsitesQuerySchema, 'query'),
     websiteController.listWebsites
+);
+
+// GET /websites/templates - List all templates
+router.get(
+    '/templates',
+    websiteController.listTemplates
 );
 
 // GET /websites/all - List all websites (Admin only)
@@ -85,6 +92,14 @@ router.post(
     websiteController.duplicateWebsite
 );
 
+// POST /websites/:id/publish - Publish website
+router.post(
+    '/:id/publish',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    requireWebsiteOwnership,
+    websiteController.publishWebsite
+);
+
 // PATCH /websites/:id/settings - Update website settings
 router.patch(
     '/:id/settings',
@@ -92,6 +107,15 @@ router.patch(
     validateRequest(updateWebsiteSettingsSchema),
     requireWebsiteOwnership,
     websiteController.updateWebsiteSettings
+);
+
+// PATCH /websites/:id/pages/:pageId - Update Page Content
+router.patch(
+    '/:id/pages/:pageId',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    validateRequest(updatePageContentSchema),
+    requireWebsiteOwnership,
+    websiteController.updatePageContent
 );
 
 export default router;

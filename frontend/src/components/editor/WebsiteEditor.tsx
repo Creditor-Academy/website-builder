@@ -30,6 +30,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import useBuilderStore from "@/store/useBuilderStore";
+import { useToast } from "@/hooks/use-toast";
 import {
   Tooltip,
   TooltipContent,
@@ -179,27 +180,62 @@ function EditorContent() {
 export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { selectWebsite, activeWebsiteId, createWebsite, websites } = useBuilderStore();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const { loadWebsite, saveCurrentPage, activeWebsiteId, createWebsite, websites } = useBuilderStore();
 
   useEffect(() => {
     if (id) {
-      // Check if website exists before trying to select it
-      const websiteExists = websites.some(w => w.id === id);
-      if (!websiteExists) {
-        // Redirect to dashboard if website doesn't exist
-        navigate('/dashboard');
-        return;
-      }
-      selectWebsite(id);
+      setLoading(true);
+      loadWebsite(id).finally(() => setLoading(false));
     } else if (initialPage) {
-      // If we're on a static demo page, create/select the initial data
-      const newId = createWebsite(initialPage.name || "Preview", initialPage.id);
-      selectWebsite(newId);
+      setLoading(true);
+      createWebsite(initialPage.name || "Preview", initialPage.id).finally(() => setLoading(false));
     }
-  }, [id, initialPage, selectWebsite, createWebsite, websites, navigate]);
+  }, [id, initialPage, loadWebsite, createWebsite]);
 
-  // Show loading state only if we're actively loading a valid website
-  if (!activeWebsiteId && id && websites.some(w => w.id === id)) {
+  // Auto-save logic
+  const activePage = useBuilderStore(state => state.getActivePage());
+
+  const handleManualSave = async () => {
+    if (!activeWebsiteId || !activePage || isSaving) return;
+    setIsSaving(true);
+    try {
+      await saveCurrentPage();
+      toast({
+        title: "Draft saved!",
+        description: "Your changes are safely stored in your dashboard.",
+        duration: 3000,
+      });
+    } catch (error) {
+      toast({
+        title: "Save failed",
+        description: "Could not save your changes. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('manual-save', handleManualSave);
+    return () => window.removeEventListener('manual-save', handleManualSave);
+  }, [activePage, activeWebsiteId]);
+
+  useEffect(() => {
+    if (!activeWebsiteId || !activePage) return;
+
+    const timer = setTimeout(() => {
+      saveCurrentPage();
+    }, 5000); // 5 seconds of inactivity
+
+    return () => clearTimeout(timer);
+  }, [activePage, activeWebsiteId, saveCurrentPage]);
+
+  // Show loading state
+  if (loading || (!activeWebsiteId && id && !websites.some(w => w.id === id))) {
     return (
       <div className="h-screen flex items-center justify-center bg-slate-50">
         <div className="flex flex-col items-center gap-4">

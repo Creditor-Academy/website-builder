@@ -5,8 +5,13 @@ import type { ListWebsitesQuerySchema, UpdateWebsiteSettingsInput } from "./webs
 
 class WebsiteDao {
     async findWebsiteById(id: string) {
-        return await prismaClient.website.findUnique({
-            where: { id }
+        // @ts-ignore
+        return await (prismaClient.website as any).findUnique({
+            where: { id },
+            include: {
+                pages: true,
+                settings: true
+            }
         });
     }
 
@@ -34,11 +39,18 @@ class WebsiteDao {
         }
 
         const [websites, total] = await Promise.all([
-            prismaClient.website.findMany({
+            // @ts-ignore
+            (prismaClient.website as any).findMany({
                 where,
                 skip, take: limit,
                 orderBy: { created_at: 'desc' },
-                select: SELECT_WEBSITE_FIELDS
+                include: {
+                    pages: {
+                        take: 1, // Usually just need one for preview/thumbnail
+                        orderBy: { created_at: 'asc' }
+                    },
+                    settings: true
+                }
             }),
             prismaClient.website.count({ where }),
         ]);
@@ -80,7 +92,7 @@ class WebsiteDao {
     async updateWebsiteSettings(id: string, data: UpdateWebsiteSettingsInput) {
         return await prismaClient.settings.update({
             where: { id },
-            data: data
+            data: data as any
         })
     }
 
@@ -92,6 +104,21 @@ class WebsiteDao {
                     lte: new Date(Date.now() - DELETED_WEBSITE_RETENTION_TIME)
                 }
             }
+        });
+    }
+
+    // Template Methods
+    async listTemplates(category?: string) {
+        // @ts-ignore
+        return await (prismaClient as any).template.findMany({
+            where: category ? { category } : {}
+        });
+    }
+
+    async findTemplateById(id: string) {
+        // @ts-ignore
+        return await (prismaClient as any).template.findUnique({
+            where: { id }
         });
     }
 }
