@@ -32,7 +32,7 @@ const App = () => (
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
+        <Toaster position="top-right" />
         <Sonner />
         <BrowserRouter>
           <Routes>
