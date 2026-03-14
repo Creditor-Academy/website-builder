@@ -294,7 +294,7 @@ export function SectionsList({ view = "add" }) {
         </div>
       </div>
 
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1" id="tour-elements-list">
         <div className="p-4">
           {view === 'layers' ? (
             <div className="space-y-2">

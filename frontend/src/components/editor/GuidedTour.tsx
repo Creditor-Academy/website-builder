@@ -13,9 +13,9 @@ const TOUR_STEPS = [
     position: 'center'
   },
   {
-    id: 'add-elements-tab',
-    title: "Start Building",
-    message: "Click here to browse our library of pre-designed sections and drag them onto your canvas.",
+    id: 'sections',
+    title: "Start Building jn",
+    message: "Browse our 500+ pre-designed sections and drag them onto your canvas to get started.",
     target: '#tour-nav-add',
     mascotState: 'pointing',
     position: 'right'
@@ -29,27 +29,27 @@ const TOUR_STEPS = [
     position: 'left'
   },
   {
-    id: 'pages',
-    title: "Pages",
-    message: "Manage your site's structure. Create, rename and organize your pages with ease.",
-    target: '#tour-nav-pages',
+    id: 'add-elements-tab',
+    title: "Add Elements",
+    message: "Customize every detail of your sections. Change colors, layout, and content here.",
+    target: '#tour-nav-edit',
     mascotState: 'pointing',
     position: 'right'
   },
   {
-    id: 'add-elements',
-    title: "Add Elements",
-    message: "Discover a wide range of components and sections to build your site effortlessly.",
-    target: '#tour-nav-add',
+    id: 'layers',
+    title: "Layers & Outline",
+    message: "View your site's structure in detail. Manage layers and fine-tune your design's composition.",
+    target: '#tour-nav-layers',
     mascotState: 'idea',
     position: 'right'
   },
   {
-    id: 'layers',
-    title: "Layer and Outlines",
-    message: "View your site's structure in detail. Manage layers and fine-tune your design's composition.",
-    target: '#tour-nav-layers',
-    mascotState: 'idea',
+    id: 'pages',
+    title: "Manage Pages",
+    message: "Organize your site's structure. Create, rename and organize your pages with ease.",
+    target: '#tour-nav-pages',
+    mascotState: 'pointing',
     position: 'right'
   },
   {

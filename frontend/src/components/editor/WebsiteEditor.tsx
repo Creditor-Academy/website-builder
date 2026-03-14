@@ -72,10 +72,10 @@ function EditorContent() {
   const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
 
   const navItems = [
-    { id: "add", icon: Plus, label: "Add Elements" },
+    { id: "add", icon: Plus, label: "Sections" },
     { id: "layers", icon: Layers, label: "Layers" },
+    { id: "edit", icon: Plus, label: "Add Elements" },
     { id: "pages", icon: FileText, label: "Pages" },
-    { id: "edit", icon: Sliders, label: "Edit Properties" },
     // { id: 'settings', icon: Settings, label: 'Site Settings' },
   ];
 

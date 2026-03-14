@@ -523,28 +523,64 @@ export default function LandingPage() {
       </section>
 
 
-      {/* ================= FINAL CTA ================= */}
-      <section className={cn("relative py-40 flex items-center justify-center text-center px-6 overflow-hidden transition-colors duration-1000", isDark ? "bg-slate-900" : "bg-slate-50")}>
+      <section className={cn("relative py-40 flex items-center justify-center text-center px-6 overflow-hidden transition-colors duration-1000", isDark ? "bg-slate-950" : "bg-slate-50")}>
+        {/* Restored Background Image */}
         <div className="absolute inset-0 z-0">
           <img src={CTA} alt="CTA" className="w-full h-full object-cover opacity-60 scale-105 filter blur-[1px]" />
           <div className={cn("absolute inset-0 bg-gradient-to-t transition-colors duration-1000", isDark ? "from-slate-950 via-slate-950/40 to-transparent" : "from-slate-50 via-slate-50/40 to-transparent")} />
           <div className={cn("absolute inset-0 bg-gradient-to-b transition-colors duration-1000", isDark ? "from-slate-950 via-transparent to-slate-950" : "from-slate-50 via-transparent to-slate-50")} />
         </div>
 
-        <div className={cn("relative z-10 max-w-5xl mx-auto backdrop-blur-3xl border p-12 md:p-24 rounded-[4rem] shadow-[0_0_120px_rgba(59,130,246,0.3)] transition-colors duration-1000", isDark ? "bg-slate-950/80 border-white/10" : "bg-white/90 border-slate-200")}>
-          {/* Internal Glow for CTA Box */}
-          <div className="absolute -top-[20%] -right-[10%] w-[300px] h-[300px] bg-blue-500/30 blur-[100px] rounded-full pointer-events-none" />
-          <div className="absolute -bottom-[20%] -left-[10%] w-[300px] h-[300px] bg-indigo-500/20 blur-[100px] rounded-full pointer-events-none" />
-          <h2 className={cn("text-5xl md:text-7xl font-black tracking-tight mb-8 drop-shadow-lg transition-colors duration-1000", isDark ? "text-white" : "text-slate-900")}>
-            Ready to build <br /> your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">masterpiece?</span>
-          </h2>
-          <p className={cn("text-xl md:text-2xl font-medium mb-12 max-w-2xl mx-auto leading-relaxed transition-colors duration-1000", isDark ? "text-slate-300" : "text-slate-600")}>
-            Join thousands of creators producing high-performance, dynamic websites without writing a single line of code.
-          </p>
-          <Link to="/contact" className={cn("inline-flex h-20 px-12 items-center justify-center gap-4 font-black rounded-full text-xl hover:scale-105 transition-all duration-300 group shadow-2xl", isDark ? "bg-white text-slate-950 hover:bg-blue-50 hover:text-blue-600 hover:shadow-[0_0_50px_rgba(59,130,246,0.5)]" : "bg-slate-900 text-white hover:bg-slate-800 hover:shadow-[0_0_50px_rgba(15,23,42,0.3)]")}>
-            Get Started for Free <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-          </Link>
+        {/* Animated Background Orbs */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <motion.div 
+            animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
+            transition={{ duration: 15, repeat: Infinity }}
+            className="absolute -top-[20%] -right-[10%] w-[600px] h-[600px] bg-blue-500/20 blur-[100px] rounded-full" 
+          />
         </div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className={cn(
+            "relative z-10 max-w-4xl mx-auto backdrop-blur-3xl border p-12 md:p-24 rounded-[4rem] shadow-[0_40px_100px_rgba(59,130,246,0.2)] overflow-hidden group",
+            isDark ? "bg-slate-900/40 border-white/5" : "bg-white/90 border-slate-200"
+          )}
+        >
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-blue-500/5 via-transparent to-transparent pointer-events-none" />
+          
+          <div className="relative z-10">
+            <motion.div
+              className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 font-bold text-[10px] tracking-[0.3em] uppercase mb-10"
+            >
+              <Sparkles className="w-3 h-3 fill-current" />
+              Creative Freedom
+            </motion.div>
+
+            <h2 className={cn("text-5xl md:text-6xl font-black tracking-tight mb-8 leading-[1.1] transition-colors duration-1000", isDark ? "text-white" : "text-slate-900")}>
+              Ready to build<br />
+              <span className="font-serif italic font-light text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500">your masterpiece?</span>
+            </h2>
+            
+            <p className={cn("text-lg mb-12 max-w-2xl mx-auto leading-relaxed transition-colors duration-1000", isDark ? "text-slate-300" : "text-slate-600")}>
+              Join a new generation of creators building high-performance websites with absolute creative control and zero code.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+              <Link to="/contact" className={cn(
+                "h-18 px-12 py-6 items-center justify-center gap-4 font-black rounded-full text-xl hover:scale-105 active:scale-95 transition-all duration-300 group shadow-xl flex",
+                isDark ? "bg-white text-slate-950 hover:bg-blue-50" : "bg-slate-900 text-white hover:bg-slate-800"
+              )}>
+                Start Building Now <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
+              </Link>
+            </div>
+            
+           
+          </div>
+        </motion.div>
       </section>
 
       <Footer isDark={isDark} />
