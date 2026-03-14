@@ -1,0 +1,97 @@
+import express from 'express';
+import WebsiteController from './website.controller.js';
+import { authenticate, authorize } from '../../middlewares/auth.middleware.js';
+import { validateRequest } from '../../middlewares/validation.middleware.js';
+import { requireWebsiteAccess } from '../../middlewares/resource-access.middleware.js';
+import {
+    createWebsiteSchema,
+    listWebsitesQuerySchema,
+    updateWebsiteSchema,
+    websiteIdParamsSchema,
+    updateWebsiteSettingsSchema,
+} from './website.validation.js';
+import { UserRole } from '@prisma/client';
+import { rateLimiting } from '../../middlewares/rate-limiting.middleware.js';
+import { CREATE_WEB_LIMIT, DUPLICATE_WEB_LIMIT } from '../../constants/website.constants.js';
+
+const router = express.Router();
+const websiteController = new WebsiteController();
+
+// All routes require authentication
+router.use(authenticate);
+
+// POST /websites - Create a new website
+router.post(
+    '/',
+    validateRequest(createWebsiteSchema),
+    rateLimiting('CREATE-WEB', CREATE_WEB_LIMIT),
+    websiteController.createWebsite
+);
+
+// GET /websites - List my websites
+router.get(
+    '/',
+    validateRequest(listWebsitesQuerySchema, 'query'),
+    websiteController.listWebsites
+);
+
+// GET /websites/all - List all websites (Admin only)
+router.get(
+    '/all',
+    authorize([UserRole.ADMIN]),
+    validateRequest(listWebsitesQuerySchema, 'query'),
+    websiteController.listAllWebsites
+);
+
+// GET /websites/:id - Get single website by ID
+router.get(
+    '/:id',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    requireWebsiteAccess,
+    websiteController.getWebsiteById
+);
+
+// PATCH /websites/:id - Update website
+router.patch(
+    '/:id',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    validateRequest(updateWebsiteSchema),
+    requireWebsiteAccess,
+    websiteController.updateWebsite
+);
+
+// DELETE /websites/:id - Delete website (Soft)
+router.delete(
+    '/:id',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    requireWebsiteAccess,
+    websiteController.deleteWebsite
+);
+
+// POST /websites/:id/restore - Restore website
+router.post(
+    '/:id/restore',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    requireWebsiteAccess,
+    websiteController.restoreWebsite
+);
+
+// POST /websites/:id/duplicate - Duplicate website
+router.post(
+    '/:id/duplicate',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    rateLimiting('DUPLICATE-WEB', DUPLICATE_WEB_LIMIT),
+    requireWebsiteAccess,
+    websiteController.duplicateWebsite
+);
+
+// PATCH /websites/:id/settings - Update website settings
+router.patch(
+    '/:id/settings',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    validateRequest(updateWebsiteSettingsSchema),
+    requireWebsiteAccess,
+    websiteController.updateWebsiteSettings
+);
+
+export default router;
