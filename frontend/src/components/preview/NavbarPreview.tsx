@@ -157,7 +157,7 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
       return;
     }
     if (link.href && link.href.startsWith('/')) {
-      e.preventDefault();
+      // Check if this slug exists in the builder's internal pages
       const targetPage = pages.find((p) => p.slug === link.href);
       if (targetPage) { setActivePage(targetPage.id); setMobileMenuOpen(false); return; }
       createPage(buildPage(link.href, link.label));

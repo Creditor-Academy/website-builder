@@ -413,6 +413,10 @@ export function FAQSection({ section, isEditing, onContentChange }) {
   const { content, styles } = section;
   const faqs = content.faqs || [];
   const [openIndex, setOpenIndex] = useState(0);
+
+  const categories = Array.from(new Set<string>(faqs.map((f: any) => f.category || 'General')));
+  const [active, setActive] = useState(categories[0] || 'General');
+
   const variant = section.variant || 'accordion';
 
   const background = styles.useGradient

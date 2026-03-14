@@ -44,7 +44,8 @@ import {
   Settings2,
   X,
   Palette,
-  Globe
+  Globe,
+  ShoppingBag
 } from "lucide-react";
 import {
   Collapsible,
@@ -76,6 +77,10 @@ import {
   createDefaultTextButtonSection,
   createDefaultHeadingTextButtonSection,
   createDefaultTwoColumnSection,
+  getBusinessPage,
+  getPortfolioPage,
+  getEcommercePage,
+  getConsultantPage,
 } from "@/lib/defaultPageData";
 import { Badge } from "@/components/ui/badge";
 
@@ -95,6 +100,15 @@ const ELEMENT_CATEGORIES = [
       { type: "testimonials", name: "Testimonials", icon: Quote, description: "Customer reviews", create: createDefaultTestimonialsSection },
       { type: "contact", name: "Contact", icon: Mail, description: "Contact form & information", create: createDefaultContactSection },
       { type: "faq", name: "FAQ", icon: HelpCircle, description: "Frequently asked questions", create: createDefaultFAQSection },
+    ]
+  },
+  {
+    name: "Full Templates",
+    items: [
+      { type: "business", name: "Business", icon: Building2, create: getBusinessPage, isFullPage: true },
+      { type: "portfolio", name: "Portfolio", icon: Layout, create: getPortfolioPage, isFullPage: true },
+      { type: "ecommerce", name: "Ecommerce", icon: ShoppingBag, create: getEcommercePage, isFullPage: true },
+      { type: "consultant", name: "Consultant", icon: Users, create: getConsultantPage, isFullPage: true },
     ]
   },
   {
@@ -183,8 +197,14 @@ const ELEMENT_CATEGORIES = [
 ];
 
 export function SectionsList({ view = "add" }) {
-  const { state, selectSection, reorderSections, addSection, deleteSection, addComponent } = useBuilder();
+  const { state, selectSection, reorderSections, addSection, deleteSection, addComponent, updateCurrentPage } = useBuilder();
   const { page, editor } = state;
+  const [query, setQuery] = useState('');
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   if (!page) {
     return (
@@ -196,13 +216,6 @@ export function SectionsList({ view = "add" }) {
       </div>
     );
   }
-
-  const [query, setQuery] = useState('');
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
@@ -219,6 +232,18 @@ export function SectionsList({ view = "add" }) {
   };
 
   const handleAddElement = (item) => {
+    if (item.isFullPage) {
+      if (window.confirm("This will replace all sections, navbar, and footer on the current page with the template. Continue?")) {
+        const templatePage = item.create();
+        updateCurrentPage({
+          sections: templatePage.sections,
+          navbar: templatePage.navbar,
+          footer: templatePage.footer,
+          globalStyles: templatePage.globalStyles
+        });
+      }
+      return;
+    }
     if (item.isComponent) {
       const sectionId = editor.selectedSectionId || (page.sections[0]?.id);
       if (!sectionId) return;
@@ -307,7 +332,6 @@ export function SectionsList({ view = "add" }) {
                       visible={section.visible}
                       isSelected={editor.selectedSectionId === section.id}
                       onClick={() => selectSection(section.id)}
-                      index={index}
                     />
                   )) : (
                     <div className="text-center py-16 border-2 border-dashed border-slate-200 rounded-2xl bg-gradient-to-br from-slate-50/50 to-white">
@@ -352,9 +376,9 @@ export function SectionsList({ view = "add" }) {
 
               {/* All Categories */}
               {ELEMENT_CATEGORIES.map((cat, catIndex) => {
-                const filteredItems = cat.items.filter(item =>
+                const filteredItems = cat.items.filter((item: any) =>
                   item.name.toLowerCase().includes(query.toLowerCase()) ||
-                  item.description?.toLowerCase().includes(query.toLowerCase())
+                  (item as any).description?.toLowerCase().includes(query.toLowerCase())
                 );
 
                 if (filteredItems.length === 0) return null;
@@ -392,7 +416,7 @@ export function SectionsList({ view = "add" }) {
                             </div>
                             <div className="flex-1 text-left min-w-0">
                               <h4 className="text-[10px] font-bold text-slate-900 truncate">{item.name}</h4>
-                              <p className="text-[8px] text-slate-500 mt-0.5 line-clamp-2 leading-tight">{item.description}</p>
+                              <p className="text-[8px] text-slate-500 mt-0.5 line-clamp-2 leading-tight">{(item as any).description}</p>
                             </div>
                           </div>
                           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">

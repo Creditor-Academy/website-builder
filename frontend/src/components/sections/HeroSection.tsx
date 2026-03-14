@@ -20,10 +20,11 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
       case 'phone':
         window.location.href = routeUrl.startsWith('tel:') ? routeUrl : `tel:${routeUrl}`;
         break;
-      case 'anchor':
+      case 'anchor': {
         const element = document.querySelector(routeUrl);
         if (element) element.scrollIntoView({ behavior: 'smooth' });
         break;
+      }
       default:
         if (routeUrl) window.open(routeUrl, '_blank', 'noopener,noreferrer');
     }
@@ -113,27 +114,31 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             />
 
             <div className="flex flex-wrap justify-center gap-3 pt-4">
-              <button
-                className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:shadow-slate-900/20 hover:-translate-y-0.5 active:translate-y-0"
-                style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
-                onClick={() => handleButtonClick(content.primaryRouteType, content.primaryRouteUrl)}
-              >
-                <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaText', e)}>
-                  {content.ctaText}
-                </span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </button>
+              {content.ctaText && (
+                <button
+                  className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:shadow-slate-900/20 hover:-translate-y-0.5 active:translate-y-0"
+                  style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
+                  onClick={() => handleButtonClick(content.primaryRouteType, content.primaryRouteUrl)}
+                >
+                  <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaText', e)}>
+                    {content.ctaText}
+                  </span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              )}
 
-              <button
-                className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 bg-white transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
-                style={{ color: buttonSecondaryText }}
-                onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
-              >
-                <Play className="w-4 h-4 fill-current opacity-70" />
-                <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}>
-                  {content.ctaSecondaryText}
-                </span>
-              </button>
+              {content.ctaSecondaryText && (
+                <button
+                  className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 bg-white transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
+                  style={{ color: buttonSecondaryText }}
+                  onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
+                >
+                  <Play className="w-4 h-4 fill-current opacity-70" />
+                  <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}>
+                    {content.ctaSecondaryText}
+                  </span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -294,27 +299,31 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             />
 
             <div className="flex flex-wrap gap-3 pt-2">
-              <button
-                className="group inline-flex items-center gap-2.5 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:shadow-slate-900/15 hover:-translate-y-0.5"
-                style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
-                onClick={() => handleButtonClick(content.primaryRouteType, content.primaryRouteUrl)}
-              >
-                <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaText', e)}>
-                  {content.ctaText}
-                </span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </button>
+              {content.ctaText && (
+                <button
+                  className="group inline-flex items-center gap-2.5 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:shadow-slate-900/15 hover:-translate-y-0.5"
+                  style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
+                  onClick={() => handleButtonClick(content.primaryRouteType, content.primaryRouteUrl)}
+                >
+                  <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaText', e)}>
+                    {content.ctaText}
+                  </span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              )}
 
-              <button
-                className="group inline-flex items-center gap-2.5 px-6 py-3 rounded-lg font-semibold text-sm border border-slate-200 transition-all duration-200 hover:bg-slate-50 hover:border-slate-300 hover:-translate-y-0.5"
-                style={{ color: buttonSecondaryText, background: buttonSecondaryBg }}
-                onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
-              >
-                <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}>
-                  {content.ctaSecondaryText}
-                </span>
-                <ChevronRight className="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
-              </button>
+              {content.ctaSecondaryText && (
+                <button
+                  className="group inline-flex items-center gap-2.5 px-6 py-3 rounded-lg font-semibold text-sm border border-slate-200 transition-all duration-200 hover:bg-slate-50 hover:border-slate-300 hover:-translate-y-0.5"
+                  style={{ color: buttonSecondaryText, background: buttonSecondaryBg }}
+                  onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
+                >
+                  <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}>
+                    {content.ctaSecondaryText}
+                  </span>
+                  <ChevronRight className="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -385,27 +394,31 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             />
 
             <div className="flex flex-wrap justify-center gap-3 pt-4">
-              <button
-                className="group inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base transition-all duration-200 hover:opacity-90 hover:shadow-xl hover:shadow-slate-900/20 hover:-translate-y-1"
-                style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
-                onClick={() => handleButtonClick(content.primaryRouteType, content.primaryRouteUrl)}
-              >
-                <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaText', e)}>
-                  {content.ctaText}
-                </span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
-              </button>
+              {content.ctaText && (
+                <button
+                  className="group inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base transition-all duration-200 hover:opacity-90 hover:shadow-xl hover:shadow-slate-900/20 hover:-translate-y-1"
+                  style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
+                  onClick={() => handleButtonClick(content.primaryRouteType, content.primaryRouteUrl)}
+                >
+                  <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaText', e)}>
+                    {content.ctaText}
+                  </span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              )}
 
-              <button
-                className="group inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base border border-slate-200 bg-white/70 backdrop-blur-sm transition-all duration-200 hover:border-slate-300 hover:shadow-lg hover:-translate-y-1"
-                style={{ color: buttonSecondaryText }}
-                onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
-              >
-                <Play className="w-5 h-5 fill-current opacity-60" />
-                <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}>
-                  {content.ctaSecondaryText}
-                </span>
-              </button>
+              {content.ctaSecondaryText && (
+                <button
+                  className="group inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base border border-slate-200 bg-white/70 backdrop-blur-sm transition-all duration-200 hover:border-slate-300 hover:shadow-lg hover:-translate-y-1"
+                  style={{ color: buttonSecondaryText }}
+                  onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
+                >
+                  <Play className="w-5 h-5 fill-current opacity-60" />
+                  <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}>
+                    {content.ctaSecondaryText}
+                  </span>
+                </button>
+              )}
             </div>
 
             {/* Social proof row */}
@@ -491,27 +504,31 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
             />
 
             <div className="flex flex-wrap gap-3">
-              <button
-                className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base transition-all duration-200 hover:opacity-90 hover:shadow-xl hover:shadow-slate-900/15 hover:-translate-y-0.5"
-                style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
-                onClick={() => handleButtonClick(content.primaryRouteType, content.primaryRouteUrl)}
-              >
-                <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaText', e)}>
-                  {content.ctaText}
-                </span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </button>
+              {content.ctaText && (
+                <button
+                  className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base transition-all duration-200 hover:opacity-90 hover:shadow-xl hover:shadow-slate-900/15 hover:-translate-y-0.5"
+                  style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
+                  onClick={() => handleButtonClick(content.primaryRouteType, content.primaryRouteUrl)}
+                >
+                  <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaText', e)}>
+                    {content.ctaText}
+                  </span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              )}
 
-              <button
-                className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 bg-white transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
-                style={{ color: buttonSecondaryText }}
-                onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
-              >
-                <Play className="w-4 h-4 fill-current opacity-60" />
-                <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}>
-                  {content.ctaSecondaryText}
-                </span>
-              </button>
+              {content.ctaSecondaryText && (
+                <button
+                  className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 bg-white transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
+                  style={{ color: buttonSecondaryText }}
+                  onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
+                >
+                  <Play className="w-4 h-4 fill-current opacity-60" />
+                  <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}>
+                    {content.ctaSecondaryText}
+                  </span>
+                </button>
+              )}
             </div>
 
             {/* Stats row */}

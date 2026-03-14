@@ -460,6 +460,7 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
 
   const shared = { content, isEditing, onContentChange, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText, plans, styles };
 
+
   return (
     <>
       <style>{STYLES}</style>

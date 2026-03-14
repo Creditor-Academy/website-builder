@@ -20,7 +20,7 @@ import { TextBlock } from './TextBlock';
 import { ButtonBlock } from './ButtonBlock';
 import { HTMLBlock } from './HTMLBlock';
 import { useBuilder } from '@/contexts/BuilderContext';
-import { Trash2, ChevronUp, ChevronDown, Bold, Italic, Palette, Type } from 'lucide-react';
+import { Trash2, ChevronUp, ChevronDown, Bold, Italic, Palette, Type, Play } from 'lucide-react';
 
 const FloatingComponent = ({ component, section, isSelected, isEditing, editor, updateComponent, deleteComponent, selectComponent, selectSection }) => {
   const [isEditingText, setIsEditingText] = React.useState(false);
@@ -153,6 +153,33 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
             borderRadius: component.style?.borderRadius || '0px'
           }}
         />
+      )}
+      {component.type === 'button' && (
+        <button
+          className="px-6 py-3 rounded-lg font-semibold whitespace-nowrap"
+          style={{
+            background: component.style?.background || 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+            color: component.style?.color || '#ffffff',
+            fontSize: component.style?.fontSize || '16px',
+            borderRadius: component.style?.borderRadius || '8px',
+          }}
+          >
+            <div className="flex items-center gap-2">
+              {component.content?.text?.toLowerCase().includes('watch') && <Play className="w-4 h-4 fill-current" />}
+              <span
+                contentEditable={isEditing && isSelected && isEditingText}
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  setIsEditingText(false);
+                  updateComponent(section.id, component.id, {
+                    content: { ...component.content, text: e.currentTarget.textContent }
+                  });
+                }}
+              >
+                {component.content?.text || 'Click me'}
+              </span>
+            </div>
+          </button>
       )}
 
       {isEditing && isSelected && (
@@ -293,6 +320,7 @@ export function SectionRenderer({ section, isSelected, isEditing, onContentChang
       case 'hero': return <HeroSection {...commonProps} />;
       case 'features': return <FeaturesSection {...commonProps} />;
       case 'services': return <ServicesSection {...commonProps} />;
+      case 'casestudies': return <CaseStudiesSection {...commonProps} />;
       case 'cta': return <CTASection {...commonProps} />;
       case 'testimonials': return <TestimonialsSection {...commonProps} />;
       case 'pricing': return <PricingSection {...commonProps} />;
@@ -315,7 +343,7 @@ export function SectionRenderer({ section, isSelected, isEditing, onContentChang
   };
 
   return (
-    <div className="relative group/section">
+    <div id={section.id} className="relative group/section">
       {renderBaseSection()}
 
       {/* Absolute components overlay */}
@@ -368,6 +396,23 @@ export function SectionRenderer({ section, isSelected, isEditing, onContentChang
                     borderRadius: comp.style?.borderRadius || '0px'
                   }}
                 />
+              )}
+              {comp.type === 'button' && (
+                <button
+                  style={{
+                    padding: '12px 24px',
+                    borderRadius: comp.style?.borderRadius || '8px',
+                    backgroundColor: comp.style?.backgroundColor || '#3b82f6',
+                    background: comp.style?.background || 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                    color: comp.style?.color || '#ffffff',
+                    fontSize: comp.style?.fontSize || '16px',
+                    fontWeight: comp.style?.fontWeight || '600',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {comp.content.text}
+                </button>
               )}
             </div>
           ))}
