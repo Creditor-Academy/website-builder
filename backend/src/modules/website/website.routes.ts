@@ -93,5 +93,3 @@ router.patch(
     requireWebsiteAccess,
     websiteController.updateWebsiteSettings
 );
-
-export default router;

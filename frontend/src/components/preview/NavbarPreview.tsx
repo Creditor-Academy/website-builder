@@ -19,88 +19,83 @@ import {
   createHelpPage,
   createStatusPage,
   createPrivacyPolicyPage,
-  createTermsOfServicePage
+  createTermsOfServicePage,
+  createMarketingPage,
+  createDesignPage,
+  createDevPage,
+  createExecutiveStrategyPage,
+  createRevenueGrowthPage,
+  createMarketExpansionPage
 } from '@/lib/defaultPageData';
 import { v4 as uuidv4 } from 'uuid';
 
-export function NavbarPreview({ config, isEditing, onUpdate }) {
+export function NavbarPreview({ config: rawConfig, isEditing, onUpdate }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showBgPicker, setShowBgPicker] = useState(false);
 
   const { pages, setActivePage, updatePageName, createPage, selectSection } = useBuilder();
+
+  // Merge with safe defaults so null/undefined navbar from DB never crashes the component
+  const safeRaw = rawConfig || {};
+  const config = {
+    logo: { text: 'My Site', imageUrl: '', ...((safeRaw as any).logo || {}) },
+    links: (safeRaw as any).links || [],
+    styles: {
+      backgroundColor: 'transparent',
+      textColor: '#000000',
+      sticky: true,
+      ...((safeRaw as any).styles || {}),
+    },
+  };
 
   /* ------------------------------
      NAVBAR STYLES (dynamic)
   ------------------------------ */
+  // Use config bg if set and not 'transparent', else default to white
+  const navBg =
+    config.styles.backgroundColor && config.styles.backgroundColor !== 'transparent'
+      ? config.styles.backgroundColor
+      : '#ffffff';
+
   const navStyle = {
-    backgroundColor:
-      config.styles.backgroundColor === 'transparent'
-        ? 'rgba(15, 23, 42, 0.8)'
-        : config.styles.backgroundColor,
+    backgroundColor: navBg,
     color: config.styles.textColor,
   };
 
   const navigate = useNavigate();
 
   const handleNavClick = (e, link) => {
-    if (isEditing) {
-      const targetPage = pages.find((p) => p.slug === link.href);
-      if (targetPage) {
-        e.preventDefault();
-        setActivePage(targetPage.id);
-        setMobileMenuOpen(false);
-        return;
-      }
+    // 1. Handle anchor links (e.g., #about, #services)
+    if (link.href && link.href.startsWith('#')) {
+      e.preventDefault();
+      const targetId = link.href.substring(1);
+      const element = document.getElementById(targetId);
 
-      // If no page exists for this href, create a new page on-the-fly
-      if (link.href && link.href.startsWith('/')) {
-        e.preventDefault();
-        // Map slug to page factory if we have one
-        const slug = link.href;
-        let newPage = null;
-        switch (slug) {
-          case '/about': newPage = createAboutPage(); break;
-          case '/services': newPage = createServicesPage(); break;
-          case '/pricing': newPage = createPricingPage(); break;
-          case '/contact': newPage = createContactPage(); break;
-          case '/start': newPage = createStartPage(); break;
-          case '/templates': newPage = createTemplatesPage(); break;
-          case '/features': newPage = createFeaturesPage(); break;
-          case '/blog': newPage = createBlogPage(); break;
-          case '/careers': newPage = createCareersPage(); break;
-          case '/help': newPage = createHelpPage(); break;
-          case '/status': newPage = createStatusPage(); break;
-          case '/privacy': newPage = createPrivacyPolicyPage(); break;
-          case '/terms': newPage = createTermsOfServicePage(); break;
-          default:
-            newPage = {
-              id: uuidv4(),
-              name: link.label || slug.replace('/', '') || 'New Page',
-              slug: slug,
-              navbar: createDefaultNavbar(),
-              sections: [createDefaultHeroSection(), createDefaultCTASection()],
-              footer: createDefaultFooter(),
-            };
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        // Switch to home page if section not found on current page
+        const homePage = pages.find(p => p.slug === '/' || p.name?.toLowerCase().includes('home')) || pages[0];
+        if (homePage) {
+          setActivePage(homePage.id);
         }
-
-        createPage(newPage);
-        setMobileMenuOpen(false);
-        return;
       }
-
+      setMobileMenuOpen(false);
       return;
     }
 
-    // Preview mode: switch the builder's active page so preview stays active
+    // 2. Handle internal pages (e.g., /about, /privacy)
     if (link.href && link.href.startsWith('/')) {
       e.preventDefault();
       const targetPage = pages.find((p) => p.slug === link.href);
+
       if (targetPage) {
         setActivePage(targetPage.id);
         setMobileMenuOpen(false);
         return;
       }
 
-      // If no page exists for this href, create a new page on-the-fly in preview
+      // If page doesn't exist, try to create it (Even in Preview mode for standard routes)
       const slug = link.href;
       let newPage = null;
       switch (slug) {
@@ -117,22 +112,33 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
         case '/status': newPage = createStatusPage(); break;
         case '/privacy': newPage = createPrivacyPolicyPage(); break;
         case '/terms': newPage = createTermsOfServicePage(); break;
+        case '/marketing': newPage = createMarketingPage(); break;
+        case '/design': newPage = createDesignPage(); break;
+        case '/dev': newPage = createDevPage(); break;
+        case '/executive-strategy': newPage = createExecutiveStrategyPage(); break;
+        case '/revenue-growth': newPage = createRevenueGrowthPage(); break;
+        case '/market-expansion': newPage = createMarketExpansionPage(); break;
         default:
-          newPage = {
-            id: uuidv4(),
-            name: link.label || slug.replace('/', '') || 'New Page',
-            slug: slug,
-            navbar: createDefaultNavbar(),
-            sections: [createDefaultHeroSection(), createDefaultCTASection()],
-            footer: createDefaultFooter(),
-          };
+          if (isEditing) {
+            newPage = {
+              id: uuidv4(),
+              name: link.label || slug.replace('/', '') || 'New Page',
+              slug: slug,
+              navbar: createDefaultNavbar(),
+              sections: [createDefaultHeroSection(), createDefaultCTASection()],
+              footer: createDefaultFooter(),
+            };
+          }
       }
 
       if (newPage) {
         createPage(newPage);
         setMobileMenuOpen(false);
-        return;
+      } else if (!isEditing) {
+        // Preview mode but page doesn't exist and isn't a standard route
+        console.warn('Page not found in this project:', link.href);
       }
+      return;
     }
   };
 
@@ -146,7 +152,7 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
   return (
     <nav
       className={`${config.styles.sticky ? 'sticky top-0' : 'relative'
-        } z-50 backdrop-blur-md ${isEditing ? 'cursor-pointer' : ''}`}
+        } z-50 backdrop-blur-lg ${isEditing ? 'cursor-pointer' : ''} transition-all duration-300`}
       style={navStyle}
       onClick={handleNavbarClick}
     >
@@ -156,16 +162,19 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
           {/* =====================================================
               LOGO SECTION
           ===================================================== */}
-          <div className="flex items-center shrink-0">
+          <div className="flex items-center shrink-0 group">
             {config.logo.imageUrl ? (
-              <img
-                src={config.logo.imageUrl}
-                alt="Logo"
-                className="h-9 md:h-10"
-              />
+              <div className="relative">
+                <img
+                  src={config.logo.imageUrl}
+                  alt="Logo"
+                  className="h-9 md:h-10 transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+              </div>
             ) : (
               <span
-                className="text-xl md:text-2xl font-bold"
+                className="text-xl md:text-2xl font-bold transition-all duration-300 hover:scale-105"
                 style={{ color: config.styles.textColor }}
                 contentEditable={isEditing}
                 suppressContentEditableWarning
@@ -193,21 +202,22 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
                   key={link.id}
                   href={link.href}
                   onClick={(e) => handleNavClick(e, link)}
-                  className="px-6 py-2.5 rounded-lg font-medium transition-all duration-300 hover:shadow-glow"
+                  className="px-6 py-2.5 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-primary/25 transform hover:scale-105 active:scale-95 relative overflow-hidden group"
                   style={{
                     background:
                       'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
                     color: '#ffffff',
                   }}
                 >
-                  {link.label}
+                  <span className="relative z-10">{link.label}</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </a>
               ) : (
                 <a
                   key={link.id}
                   href={link.href}
                   onClick={(e) => handleNavClick(e, link)}
-                  className="font-medium transition-colors hover:text-primary"
+                  className="font-medium transition-all duration-300 hover:text-primary hover:scale-105 relative group"
                   style={{ color: config.styles.textColor }}
                   contentEditable={isEditing}
                   suppressContentEditableWarning
@@ -226,26 +236,14 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
                   }}
                 >
                   {link.label}
+                  <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
                 </a>
               )
             )}
           </div>
 
-          {/* =====================================================
-              MOBILE MENU BUTTON
-          ===================================================== */}
-          <button
-            className="md:hidden p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            style={{ color: config.styles.textColor }}
-            onClick={() => setMobileMenuOpen((prev) => !prev)}
-            aria-label="Toggle Menu"
-          >
-            {mobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
-          </button>
+
+
         </div>
       </div>
 
