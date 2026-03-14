@@ -1,10 +1,32 @@
 import React, { useState } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { CheckCircle, MoreVertical, RefreshCw, AlertCircle } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Activity, Globe, Tag, CheckCircle, XCircle, Hourglass, User as UserIcon, FileText, RefreshCw, MoreVertical, AlertCircle, RotateCcw, CircleDotDashed, Ban, Clock
+} from 'lucide-react';
 import DeploymentLogViewer from './DeploymentLogViewer';
 
 interface Deployment {
@@ -130,35 +152,52 @@ export default function DeploymentMonitoring() {
   };
 
   return (
-    <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200">
-      <h3 className="text-lg font-semibold text-slate-800 mb-4">Website Deployment Status</h3>
-      <div className="overflow-x-auto">
+    <div className="p-4 md:p-6 bg-white rounded-xl shadow-sm border border-slate-200">
+      <h3 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-3 mb-6">
+        <Activity className="w-6 h-6 text-primary" /> Website Deployment Status
+      </h3>
+      <div className="overflow-x-auto rounded-lg border border-slate-200 shadow-sm">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-slate-50">
             <TableRow>
-              <TableHead>Website Name</TableHead>
-              <TableHead>Version</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Deployed At</TableHead>
-              <TableHead>Deployed By</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="min-w-[150px] px-4 py-3 whitespace-nowrap">
+                <span className="flex items-center gap-1.5"><Globe className="w-4 h-4" /> Website Name</span>
+              </TableHead>
+              <TableHead className="min-w-[100px] px-4 py-3 whitespace-nowrap">
+                <span className="flex items-center gap-1.5"><Tag className="w-4 h-4" /> Version</span>
+              </TableHead>
+              <TableHead className="min-w-[120px] px-4 py-3 whitespace-nowrap">
+                <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4" /> Status</span>
+              </TableHead>
+              <TableHead className="min-w-[150px] px-4 py-3 whitespace-nowrap">
+                <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> Deployed At</span>
+              </TableHead>
+              <TableHead className="min-w-[120px] px-4 py-3 whitespace-nowrap">
+                <span className="flex items-center gap-1.5"><UserIcon className="w-4 h-4" /> Deployed By</span>
+              </TableHead>
+              <TableHead className="text-center min-w-[100px] px-4 py-3 whitespace-nowrap">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {deployments.map((deployment) => (
               <TableRow key={deployment.id}>
-                <TableCell className="font-medium">{deployment.websiteName}</TableCell>
-                <TableCell>{deployment.version}</TableCell>
-                <TableCell>
+                <TableCell className="font-medium px-4 py-3 whitespace-nowrap">{deployment.websiteName}</TableCell>
+                <TableCell className="px-4 py-3 whitespace-nowrap">{deployment.version}</TableCell>
+                <TableCell className="px-4 py-3">
                   <Badge
                     variant={deployment.status === 'Success' ? 'default' : deployment.status === 'Failed' ? 'destructive' : deployment.status === 'Rolled Back' ? 'outline' : 'secondary'}
+                    className="flex items-center gap-1 w-fit"
                   >
+                    {deployment.status === 'Success' && <CheckCircle className="w-3 h-3" />}
+                    {deployment.status === 'Failed' && <XCircle className="w-3 h-3" />}
+                    {deployment.status === 'Pending' && <Hourglass className="w-3 h-3 animate-pulse" />}
+                    {deployment.status === 'Rolled Back' && <RotateCcw className="w-3 h-3" />}
                     {deployment.status}
                   </Badge>
                 </TableCell>
-                <TableCell>{deployment.deployedAt}</TableCell>
-                <TableCell>{deployment.deployedBy}</TableCell>
-                <TableCell className="text-right">
+                <TableCell className="px-4 py-3 whitespace-nowrap text-slate-500 text-sm">{deployment.deployedAt}</TableCell>
+                <TableCell className="px-4 py-3 whitespace-nowrap text-slate-500 text-sm">{deployment.deployedBy}</TableCell>
+                <TableCell className="text-center px-4 py-3 whitespace-nowrap">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="h-8 w-8 p-0">
@@ -166,14 +205,12 @@ export default function DeploymentMonitoring() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleRollback(deployment)} disabled={deployment.status === 'Pending' || deployment.status === 'Rolled Back'}>
-                        <RefreshCw className="mr-2 h-4 w-4" />
-                        <span>Rollback</span>
+                      <DropdownMenuItem onClick={() => handleRollback(deployment)} disabled={deployment.status === 'Pending' || deployment.status === 'Rolled Back'} className="gap-2">
+                        <RefreshCw className="w-4 h-4" /> <span>Rollback</span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleViewLogs(deployment)}>
-                        <CheckCircle className="mr-2 h-4 w-4" />
-                        <span>View Logs</span>
+                      <DropdownMenuItem onClick={() => handleViewLogs(deployment)} className="gap-2">
+                        <FileText className="w-4 h-4" /> <span>View Logs</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -192,7 +229,7 @@ export default function DeploymentMonitoring() {
       />
 
       <Dialog open={showRollbackConfirm} onOpenChange={setShowRollbackConfirm}>
-        <DialogContent>
+        <DialogContent className="w-[90%] rounded-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-amber-500" /> Confirm Rollback
