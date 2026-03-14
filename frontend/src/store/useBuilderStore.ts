@@ -143,8 +143,38 @@ export const useBuilderStore = create<BuilderState>()(
         })),
 
         selectWebsite: (id) => {
-            const website = get().websites.find(w => w.id === id);
-            if (website) {
+            let website = get().websites.find(w => w.id === id);
+            
+            // If website doesn't exist and we have an ID, create a default one
+            if (!website && id) {
+                const defaultPage = getDefaultPage();
+                website = {
+                    id,
+                    name: defaultPage.name,
+                    lastEdited: new Date().toISOString(),
+                    status: 'active',
+                    pages: [defaultPage],
+                    activePageId: defaultPage.id,
+                    templateId: 'blank'
+                };
+                
+                set((state) => ({
+                    websites: [...state.websites, website],
+                    activeWebsiteId: id,
+                    activePageId: defaultPage.id,
+                    history: [website.pages],
+                    historyIndex: 0,
+                    editor: {
+                        ...state.editor,
+                        tour: {
+                            ...state.editor.tour,
+                            isActive: true, // Start tour for new websites
+                            step: 0,
+                            isFinished: false
+                        }
+                    }
+                }));
+            } else if (website) {
                 set({
                     activeWebsiteId: id,
                     activePageId: website.activePageId || website.pages[0].id,

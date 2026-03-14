@@ -26,9 +26,11 @@ export const createDefaultHeroSection = (variant = 'split') => ({
   },
   content: {
     headline: 'Build Beautiful Websites Without Code',
-    subheadline: 'Drag, drop, and design your dream website with our intuitive builder.',
+    subheadline: 'Drag, drop, and design your dream website with our intuitive builder. No coding required.',
     ctaText: 'Get Started Free',
+    ctaSecondaryText: 'Watch Demo',
     imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
   },
   components: [],
 });
@@ -46,9 +48,14 @@ export const createDefaultFeaturesSection = (variant = 'grid') => ({
   },
   content: {
     headline: 'Powerful Features',
+    subheadline: 'Everything you need to build stunning websites',
     features: [
-      { id: uuidv4(), icon: 'Layers', title: 'Drag & Drop', description: 'Intuitive interface.' },
-      { id: uuidv4(), icon: 'Smartphone', title: 'Responsive', description: 'Looks perfect on any device.' },
+      { id: uuidv4(), icon: 'Layers', title: 'Drag & Drop Builder', description: 'Intuitive drag and drop interface that makes building websites a breeze.' },
+      { id: uuidv4(), icon: 'Palette', title: 'Beautiful Templates', description: 'Start with professionally designed templates and customize them to your needs.' },
+      { id: uuidv4(), icon: 'Smartphone', title: 'Fully Responsive', description: 'Your website looks perfect on any device, from desktop to mobile.' },
+      { id: uuidv4(), icon: 'Zap', title: 'Lightning Fast', description: 'Optimized for speed to ensure your visitors have the best experience.' },
+      { id: uuidv4(), icon: 'Shield', title: 'Secure & Reliable', description: 'Enterprise-grade security to keep your website and data safe.' },
+      { id: uuidv4(), icon: 'BarChart', title: 'Analytics Built-in', description: 'Track your website performance with integrated analytics tools.' },
     ],
   },
   components: [],
@@ -60,11 +67,17 @@ export const createDefaultServicesSection = () => ({
   name: 'Services Section',
   visible: true,
   locked: false,
-  styles: { backgroundColor: '#ffffff', padding: '100px 0' },
+  styles: {
+    backgroundColor: '#f8fafc',
+    padding: '100px 0',
+  },
   content: {
     headline: 'Our Services',
+    subheadline: 'Comprehensive solutions for your digital presence',
     services: [
-      { id: uuidv4(), title: 'Web Design', description: 'Custom designs.' },
+      { id: uuidv4(), imageUrl: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&q=80', title: 'Web Design', description: 'Beautiful, custom designs that capture your brand identity and engage your audience.', link: '#' },
+      { id: uuidv4(), imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80', title: 'Development', description: 'Robust, scalable web applications built with modern technologies.', link: '#' },
+      { id: uuidv4(), imageUrl: 'https://images.unsplash.com/photo-1553484771-371a605b060b?w=600&q=80', title: 'SEO Optimization', description: 'Improve your search rankings and drive organic traffic to your website.', link: '#' },
     ],
   },
   components: [],
@@ -77,8 +90,18 @@ export const createDefaultCTASection = (variant = 'simple') => ({
   name: 'Call to Action',
   visible: true,
   locked: false,
-  styles: { padding: '80px 0', backgroundGradient: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)' },
-  content: { headline: 'Ready to Get Started?', ctaText: 'Start Building Now' },
+  styles: {
+    backgroundGradient: variant === 'banner' 
+      ? 'linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%)'
+      : 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+    padding: variant === 'floating' ? '40px 0' : '80px 0',
+  },
+  content: {
+    headline: 'Ready to Get Started?',
+    subheadline: 'Join thousands of creators who are already building amazing websites.',
+    ctaText: 'Start Building Now',
+    ctaSecondaryText: 'Contact Sales',
+  },
   components: [],
 });
 
@@ -88,11 +111,17 @@ export const createDefaultTestimonialsSection = () => ({
   name: 'Testimonials',
   visible: true,
   locked: false,
-  styles: { backgroundColor: '#ffffff', padding: '100px 0' },
+  styles: {
+    backgroundColor: '#ffffff',
+    padding: '100px 0',
+  },
   content: {
     headline: 'What Our Clients Say',
+    subheadline: 'Trusted by thousands of happy customers worldwide',
     testimonials: [
-      { id: uuidv4(), quote: 'Amazing tool!', name: 'Sarah J.' },
+      { id: uuidv4(), quote: 'This builder transformed how we create websites. Incredibly intuitive and powerful!', name: 'Sarah Johnson', role: 'CEO, TechStart', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80', rating: 5 },
+      { id: uuidv4(), quote: 'The best investment we made for our design workflow. Highly recommended!', name: 'Michael Chen', role: 'Design Lead, Creative Co', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&q=80', rating: 5 },
+      { id: uuidv4(), quote: 'Finally a tool that lets me build professional sites without writing code.', name: 'Emily Davis', role: 'Freelancer', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&q=80', rating: 5 },
     ],
   },
   components: [],
@@ -104,12 +133,17 @@ export const createDefaultPricingSection = () => ({
   name: 'Pricing',
   visible: true,
   locked: false,
-  styles: { backgroundColor: '#ffffff', padding: '100px 0' },
+  styles: {
+    backgroundColor: '#f8fafc',
+    padding: '100px 0',
+  },
   content: {
     headline: 'Simple, Transparent Pricing',
+    subheadline: 'Choose the plan that works best for you',
     plans: [
-      { id: uuidv4(), name: 'Starter', price: 9, features: ['5 Projects'], ctaText: 'Get Started' },
-      { id: uuidv4(), name: 'Pro', price: 29, features: ['Unlimited Projects'], ctaText: 'Get Started', popular: true },
+      { id: uuidv4(), name: 'Starter', description: 'Perfect for individuals', price: 9, features: ['5 Projects', 'Basic Templates', 'Email Support', 'Custom Domain'], ctaText: 'Get Started', popular: false },
+      { id: uuidv4(), name: 'Pro', description: 'Best for growing teams', price: 29, features: ['Unlimited Projects', 'Premium Templates', 'Priority Support', 'Custom Domain', 'Analytics', 'Team Collaboration'], ctaText: 'Get Started', popular: true },
+      { id: uuidv4(), name: 'Enterprise', description: 'For large organizations', price: 99, features: ['Everything in Pro', 'Dedicated Support', 'SSO & Security', 'API Access', 'White Label'], ctaText: 'Contact Sales', popular: false },
     ],
   },
   components: [],
@@ -121,10 +155,21 @@ export const createDefaultGallerySection = () => ({
   name: 'Gallery',
   visible: true,
   locked: false,
-  styles: { backgroundColor: '#ffffff', padding: '100px 0' },
+  styles: {
+    backgroundColor: '#ffffff',
+    padding: '100px 0',
+  },
   content: {
     headline: 'Our Portfolio',
-    images: [{ id: uuidv4(), url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80', title: 'Project 1' }],
+    subheadline: 'A showcase of our finest work',
+    images: [
+      { id: uuidv4(), url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80', title: 'Web App Dashboard', category: 'Web Design' },
+      { id: uuidv4(), url: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&q=80', title: 'Team Collaboration', category: 'Branding' },
+      { id: uuidv4(), url: 'https://images.unsplash.com/photo-1553484771-371a605b060b?w=600&q=80', title: 'Marketing Campaign', category: 'Marketing' },
+      { id: uuidv4(), url: 'https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=600&q=80', title: 'E-commerce Store', category: 'Web Design' },
+      { id: uuidv4(), url: 'https://images.unsplash.com/photo-1522542550221-31fd8575f44a?w=600&q=80', title: 'Mobile App', category: 'UI/UX' },
+      { id: uuidv4(), url: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&q=80', title: 'Brand Identity', category: 'Branding' },
+    ],
   },
   components: [],
 });
@@ -135,10 +180,17 @@ export const createDefaultBlogListSection = () => ({
   name: 'Blog List',
   visible: true,
   locked: false,
-  styles: { backgroundColor: '#ffffff', padding: '100px 0' },
+  styles: {
+    backgroundColor: '#f8fafc',
+    padding: '100px 0',
+  },
   content: {
     headline: 'Latest Posts',
-    posts: [{ id: uuidv4(), title: 'Post 1', excerpt: 'Excerpt 1' }],
+    subheadline: 'Read our latest insights',
+    posts: [
+      { id: uuidv4(), imageUrl: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80', title: 'How we built our product', excerpt: 'An inside look at our design decisions and architecture.', author: 'Team', date: 'Jan 1, 2024' },
+      { id: uuidv4(), imageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80', title: 'Design trends 2024', excerpt: 'What\'s shaping design this year and beyond.', author: 'Design', date: 'Feb 15, 2024' },
+    ],
   },
   components: [],
 });
@@ -235,8 +287,6 @@ export const createDefaultLogoCloudSection = () => ({
       { id: uuidv4(), name: 'Apple', url: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg' },
     ],
   },
-  styles: { backgroundGradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', padding: '80px 0' },
-  content: { stats: [{ id: uuidv4(), value: '10K', label: 'Active Users' }] },
   components: [],
 });
 
@@ -247,8 +297,28 @@ export const createDefaultAboutSection = (variant = 'split') => ({
   name: 'About Us',
   visible: true,
   locked: false,
-  styles: { backgroundColor: '#ffffff', padding: '100px 0' },
-  content: { headline: 'We Build Digital Experiences', description: 'Mission description' },
+  styles: {
+    backgroundColor: '#ffffff',
+    padding: '100px 0',
+    headingColor: '#0f172a',
+    paragraphColor: '#475569',
+  },
+  content: {
+    badge: 'About Us',
+    headline: 'We Build Digital Experiences That Matter',
+    description: 'Founded with a vision to revolutionize how people create and manage their digital presence, we have grown from a small startup to a trusted platform serving thousands of creators worldwide. Our mission is to make professional website creation accessible to everyone.',
+    imageUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80',
+    imageAlt: 'Our team working together',
+    imagePosition: 'right',
+    storyTitle: 'Our Story',
+    storyContent: 'We started with a simple idea: everyone deserves the tools to build their digital presence. Today, we help thousands of businesses and individuals create stunning websites without writing a single line of code.',
+    values: [
+      { id: uuidv4(), icon: 'Target', title: 'Our Mission', description: 'Empowering everyone to build beautiful websites without technical barriers.' },
+      { id: uuidv4(), icon: 'Eye', title: 'Our Vision', description: 'A world where anyone can bring their digital ideas to life effortlessly.' },
+      { id: uuidv4(), icon: 'Heart', title: 'Our Values', description: 'Innovation, accessibility, quality, and putting our users first in everything we do.' },
+      { id: uuidv4(), icon: 'Award', title: 'Our Promise', description: 'Reliable, secure, and continuously improving tools for your success.' },
+    ],
+  },
   components: [],
 });
 
@@ -258,8 +328,17 @@ export const createDefaultContactSection = () => ({
   name: 'Contact',
   visible: true,
   locked: false,
-  styles: { backgroundColor: '#ffffff', padding: '100px 0' },
-  content: { headline: 'Get In Touch', email: 'hello@example.com' },
+  styles: {
+    backgroundColor: '#f8fafc',
+    padding: '100px 0',
+  },
+  content: {
+    headline: 'Get In Touch',
+    subheadline: "We'd love to hear from you. Send us a message!",
+    email: 'hello@example.com',
+    phone: '+1 (555) 123-4567',
+    address: '123 Business Street, City, Country',
+  },
   components: [],
 });
 
@@ -304,22 +383,18 @@ export const createDefaultNavbar = () => ({
 
 export const createDefaultFooter = () => ({
   id: uuidv4(),
-  type: 'footer',
-  name: 'Default Footer',
-  logo: { text: 'SiteBuilder', imageUrl: '' },
-  description: 'Built with the world\'s most intuitive website builder.',
-  socialLinks: [
-    { id: uuidv4(), platform: 'facebook', href: '#' },
-    { id: uuidv4(), platform: 'twitter', href: '#' },
-    { id: uuidv4(), platform: 'instagram', href: '#' },
-  ],
+  style: 'columns',
+  logo: {
+    text: 'SiteBuilder',
+  },
   columns: [
     {
       id: uuidv4(),
       title: 'Product',
       links: [
-        { id: uuidv4(), label: 'Features', href: '/features' },
+        { id: uuidv4(), label: 'About', href: '/about' },
         { id: uuidv4(), label: 'Pricing', href: '/pricing' },
+        { id: uuidv4(), label: 'Templates', href: '/templates' },
       ],
     },
     {
@@ -327,9 +402,25 @@ export const createDefaultFooter = () => ({
       title: 'Company',
       links: [
         { id: uuidv4(), label: 'About', href: '/about' },
-        { id: uuidv4(), label: 'Contact', href: '/contact' },
+        { id: uuidv4(), label: 'Blog', href: '/blog' },
+        { id: uuidv4(), label: 'Careers', href: '/careers' },
       ],
     },
+    {
+      id: uuidv4(),
+      title: 'Support',
+      links: [
+        { id: uuidv4(), label: 'Help Center', href: '/help' },
+        { id: uuidv4(), label: 'Contact', href: '/contact' },
+        { id: uuidv4(), label: 'Status', href: '/status' },
+      ],
+    },
+  ],
+  socialLinks: [
+    { id: uuidv4(), platform: 'twitter', href: 'https://twitter.com/yourusername' },
+    { id: uuidv4(), platform: 'facebook', href: 'https://facebook.com/yourpage' },
+    { id: uuidv4(), platform: 'instagram', href: 'https://instagram.com/yourusername' },
+    { id: uuidv4(), platform: 'linkedin', href: 'https://linkedin.com/in/yourprofile' },
   ],
   copyright: '© 2024 SiteBuilder. All rights reserved.',
   styles: {
@@ -614,13 +705,28 @@ export const createTermsOfServicePage = () => ({
   footer: createDefaultFooter(),
 });
 
-export const getDefaultPage = () => ({
+export const getDefaultPage = () => ({ 
   id: uuidv4(),
   name: 'Home',
+  slug: '/',
+  meta: {
+    title: 'My Website - Built with SiteBuilder',
+    description: 'A beautiful website created with the no-code website builder.',
+  },
   navbar: createDefaultNavbar(),
-  sections: [createDefaultHeroSection(), createDefaultFeaturesSection()],
+  sections: [
+    createDefaultHeroSection(),
+    createDefaultFeaturesSection(),
+    createDefaultServicesSection(),
+    createDefaultCTASection(),
+  ],
   footer: createDefaultFooter(),
-  globalStyles: { fontFamily: 'Inter', primaryColor: '#3b82f6' },
+  globalStyles: {
+    fontFamily: 'Inter, system-ui, sans-serif',
+    primaryColor: '#3b82f6',
+    secondaryColor: '#8b5cf6',
+    backgroundColor: '#ffffff',
+  },
 });
 
 // Layout Sections

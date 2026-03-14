@@ -1,33 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { BuilderProvider } from "@/contexts/BuilderContext";
-import { EditorToolbar } from "./EditorToolbar";
-import { SectionsList } from "./SectionsList";
-import { PageManager } from "./PageManager";
-import { SiteSettings } from "./SiteSettings";
-import { CanvasPreview } from "./CanvasPreview";
-import { PropertiesPanel } from "./PropertiesPanel";
-import { TextColorPicker } from "./TextColorPicker";
-import { GuidedTour } from "./GuidedTour";
+import { EditorToolbar } from './EditorToolbar';
+import { SectionsList } from './SectionsList';
+import { PageManager } from './PageManager';
+import { CanvasPreview } from './CanvasPreview';
+import { PropertiesPanel } from './PropertiesPanel';
+import { TextColorPicker } from './TextColorPicker';
+import { GuidedTour } from './GuidedTour';
+import { SiteSettings } from './SiteSettings';
+import { useBuilderStore } from '@/store/useBuilderStore';
+import { useBuilder } from '@/contexts/BuilderContext';
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import {
   Layers,
   FileText,
   Plus,
   Settings,
   Sliders,
-  Rocket,
-  Link,
-  Download,
-  AlertCircle,
 } from "lucide-react";
-import useBuilderStore from "@/store/useBuilderStore";
 import {
   Tooltip,
   TooltipContent,
@@ -37,9 +32,7 @@ import {
 
 function EditorContent() {
   const [leftNavTab, setLeftNavTab] = useState("add"); // 'add', 'layers', 'pages', 'settings', 'edit'
-  const [theme, setTheme] = useState("light"); // Theme state
-  const { editor, activeWebsiteId, setTourState } = useBuilderStore();
-  const { id } = useParams();
+  const { editor, setTourState } = useBuilderStore();
 
   // Auto-switch to edit tab when a section or component is selected
   useEffect(() => {
@@ -48,34 +41,30 @@ function EditorContent() {
     }
   }, [editor.selectedSectionId, editor.selectedComponentId]);
 
-  // Start tour if not finished
-  useEffect(() => {
-    if (!editor.tour.isFinished && !editor.tour.isActive) {
-      setTimeout(() => {
-        setTourState({ isActive: true });
-      }, 1000);
-    }
-  }, []);
-
-  const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
-
   const navItems = [
     { id: "add", icon: Plus, label: "Add Elements" },
     { id: "layers", icon: Layers, label: "Layers" },
     { id: "pages", icon: FileText, label: "Pages" },
     { id: "edit", icon: Sliders, label: "Edit Properties" },
-    // { id: 'settings', icon: Settings, label: 'Site Settings' },
+    { id: 'settings', icon: Settings, label: 'Site Settings' },
   ];
 
   return (
-    <div className="h-screen flex flex-col bg-white overflow-hidden font-sans relative">
+    <div className="h-screen flex flex-col bg-white overflow-hidden font-sans">
+      <EditorToolbar />
+      <TextColorPicker />
       <GuidedTour />
-      <div className={`flex flex-col h-full transition-all duration-500 ${editor.tour.isActive ? 'pointer-events-none' : ''}`}>
-        <EditorToolbar theme={theme} onToggleTheme={toggleTheme} websiteId={activeWebsiteId || id} />
-        <TextColorPicker />
-        <div className="flex-1 min-h-0">
+      {/* Debug: Test Tour Button */}
+      <button
+  onClick={() => setTourState({ isActive: true, step: 0, isFinished: false })}
+  className="fixed bottom-4 right-4 z-50 w-12 h-12 flex items-center justify-center bg-sky-400 text-white rounded-full shadow-lg hover:bg-sky-500 transition-colors"
+>
+  ?
+</button>
+
+      <div className="flex-1 min-h-0">
         <ResizablePanelGroup direction="horizontal" className="h-full">
-          {editor.showLeftPanel && (
+          {!editor.previewMode && editor.showLeftPanel && (
             <>
               <ResizablePanel
                 defaultSize={22}
@@ -92,10 +81,11 @@ function EditorContent() {
                           <button
                             id={`tour-nav-${item.id}`}
                             onClick={() => setLeftNavTab(item.id)}
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${leftNavTab === item.id
-                              ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105"
-                              : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/50"
-                              }`}
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${
+                              leftNavTab === item.id
+                                ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105"
+                                : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/50"
+                            }`}
                           >
                             <item.icon className="w-5 h-5" />
                           </button>
@@ -117,12 +107,13 @@ function EditorContent() {
                           <button
                             onClick={() => setLeftNavTab("settings")}
                             className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all
-                                          ${leftNavTab === "settings"
-                                ? "bg-blue-500 text-white shadow-md"
-                                : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/50"
-                              }
+                                          ${
+                                            leftNavTab === "settings"
+                                              ? "bg-blue-500 text-white shadow-md"
+                                              : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/50"
+                                          }
                                         `}
-                          >
+                                                          >
                             <Settings className="w-5 h-5" />
                           </button>
                         </TooltipTrigger>
@@ -138,7 +129,7 @@ function EditorContent() {
                 </div>
 
                 {/* Content Panel */}
-                <div id="tour-side-panel" className="flex-1 flex flex-col min-w-0 bg-white">
+                <div className="flex-1 flex flex-col min-w-0 bg-white">
                   <div className="h-full overflow-hidden">
                     {leftNavTab === "add" && <SectionsList view="add" />}
                     {leftNavTab === "layers" && <SectionsList view="layers" />}
@@ -154,77 +145,47 @@ function EditorContent() {
           <ResizablePanel
             defaultSize={editor.previewMode ? 100 : 53}
             className="bg-slate-100/30 p-4 lg:p-6 overflow-hidden flex flex-col relative"
-            id="tour-canvas"
           >
             <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px] opacity-40 pointer-events-none"></div>
             <CanvasPreview />
           </ResizablePanel>
-          {!editor.previewMode && editor.showRightPanel && (
-            <>
-              <ResizableHandle className="w-1 bg-slate-100 hover:bg-primary/30 transition-all border-l border-slate-200" />
-              <ResizablePanel
-                defaultSize={25}
-                minSize={20}
-                maxSize={35}
-                className="bg-white border-l border-slate-200 shadow-sm"
-              >
-                <PropertiesPanel />
-              </ResizablePanel>
-            </>
-          )}
+          {!editor.previewMode &&
+            editor.showRightPanel &&
+            false && (
+              <>
+                <ResizableHandle className="w-1 bg-slate-100 hover:bg-primary/30 transition-all border-l border-slate-200" />
+                <ResizablePanel
+                  defaultSize={25}
+                  minSize={20}
+                  maxSize={35}
+                  className="bg-white border-l border-slate-200 shadow-sm"
+                >
+                  <PropertiesPanel />
+                </ResizablePanel>
+              </>
+            )}
         </ResizablePanelGroup>
-      </div>
       </div>
     </div>
   );
 }
 
-export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
+export function WebsiteEditor() {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const { selectWebsite, activeWebsiteId, createWebsite, websites } = useBuilderStore();
+  const { selectWebsite, activeWebsiteId } = useBuilderStore();
 
   useEffect(() => {
     if (id) {
-      // Check if website exists before trying to select it
-      const websiteExists = websites.some(w => w.id === id);
-      if (!websiteExists) {
-        // Redirect to dashboard if website doesn't exist
-        navigate('/dashboard');
-        return;
-      }
       selectWebsite(id);
-    } else if (initialPage) {
-      // If we're on a static demo page, create/select the initial data
-      const newId = createWebsite(initialPage.name || "Preview", initialPage.id);
-      selectWebsite(newId);
     }
-  }, [id, initialPage, selectWebsite, createWebsite, websites, navigate]);
+  }, [id, selectWebsite]);
 
-  // Show loading state only if we're actively loading a valid website
-  if (!activeWebsiteId && id && websites.some(w => w.id === id)) {
+  if (!activeWebsiteId && id) {
     return (
       <div className="h-screen flex items-center justify-center bg-slate-50">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
           <p className="text-slate-600 font-medium">Loading your project...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error state if website doesn't exist
-  if (!activeWebsiteId && id) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-slate-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-            <AlertCircle className="w-6 h-6 text-red-600" />
-          </div>
-          <p className="text-slate-600 font-medium">Website not found</p>
-          <Button onClick={() => navigate('/dashboard')}>
-            Go to Dashboard
-          </Button>
         </div>
       </div>
     );
