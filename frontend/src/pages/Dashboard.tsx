@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Temp comment to force re-compilation
 import { useNavigate, Link, useLocation, Outlet } from 'react-router-dom'; // Added Link, useLocation, and Outlet
 import { Helmet } from 'react-helmet-async';
 import {
     Plus, Globe, MoreVertical, Edit2, Play, Trash2,
     Layout, Settings, LogOut, Clock, CheckCircle,
-    FileText, Search, Sparkles, Zap, Files, Users, Activity, Menu, X // Added Users and Activity
+    FileText, Search, Sparkles, Zap, Files, Users, Activity, Menu, X, ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,25 +32,19 @@ const OverviewCard = ({ title, value, icon, description }) => (
 );
 
 // Modified NavItem to support `to` prop and active state via `useLocation`
-const NavItem = ({ icon, label, to }) => {
+const NavItem = ({ icon, label, to, activeColor = 'text-primary', hoverBg = 'hover:bg-blue-50', hoverText = 'hover:text-slate-600', defaultText = 'text-slate-600' }) => {
     const location = useLocation();
     const isActive = location.pathname === to;
     return (
         <Button
             variant="ghost"
-            className={`w-full justify-start gap-3 h-11 transition-all duration-200 group ${
-                isActive
-                    ? 'bg-primary/5 text-primary font-semibold'
-                    : 'text-slate-600 hover:text-slate-600 hover:bg-blue-50'
+            className={`w-full justify-start gap-3 h-11 transition-all duration-200 group 
+                ${isActive ? `bg-primary/5 ${activeColor} font-semibold` : `${defaultText} ${hoverText} ${hoverBg}`}
             }`}
             asChild
         >
             <Link to={to}>
-                <span className={`transition-colors duration-200 ${
-                    isActive
-                        ? 'text-primary'
-                        : 'text-slate-400 group-hover:text-slate-600'
-                }`}>{icon}</span>
+                <span className={`transition-colors duration-200 ${isActive ? activeColor : `${defaultText} ${hoverText}`}`}>{icon}</span>
                 {label}
                 {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />} 
             </Link>
@@ -67,9 +61,26 @@ const Dashboard = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for mobile sidebar
+    const [isAdmin, setIsAdmin] = useState(false); // New state for admin mode
     const isMobile = useIsMobile(); // Use the hook
 
-    console.log({ isMobile, isSidebarOpen }); // Debugging line
+    const adminRoutes = [
+        '/dashboard/users',
+        '/dashboard/websites',
+        '/dashboard/deployment',
+        '/dashboard/settings',
+    ];
+
+    console.log({ isMobile, isSidebarOpen, isAdmin }); // Debugging line
+
+    useEffect(() => {
+        console.log('useEffect running:', { isAdmin, currentPath: location.pathname });
+
+        if (!isAdmin && adminRoutes.includes(location.pathname)) {
+            console.log('Redirecting from admin route because isAdmin is false.', { from: location.pathname, to: '/dashboard' });
+            navigate('/dashboard');
+        }
+    }, [isAdmin, location.pathname, navigate]);
 
     const handleCreateSite = () => {
         if (!newSiteName.trim()) return;
@@ -100,7 +111,7 @@ const Dashboard = () => {
 
             {/* --- Sidebar Redesign --- */}
             <aside 
-                className={`fixed inset-y-0 left-0 w-64 bg-white border-r flex-col z-50 
+                className={`fixed inset-y-0 left-0 w-64 bg-gradient-to-br from-slate-900 to-slate-800 border-r border-slate-700 flex-col z-50 
                     lg:static lg:flex 
                     ${isMobile ? 'transition-transform duration-300 ease-in-out transform' : ''} 
                     ${isMobile && isSidebarOpen ? 'translate-x-0 flex' : isMobile ? '-translate-x-full flex' : 'flex'}
@@ -108,14 +119,14 @@ const Dashboard = () => {
             >
                 <div className="p-6">
                     <div className="flex items-center gap-2.5 px-2">
-                        <h1 className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600">
+                        <h1 className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500">
                             Buildora
                         </h1>
                         {isMobile && (
                             <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="ml-auto lg:hidden" 
+                                className="ml-auto lg:hidden text-white hover:bg-slate-700 hover:text-white" 
                                 onClick={() => setIsSidebarOpen(false)}
                             >
                                 <X className="w-5 h-5" />
@@ -125,45 +136,59 @@ const Dashboard = () => {
                 </div>
 
                 <nav className="flex-1 px-4 py-2 space-y-1">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 mb-2">Main Menu</p>
-                    <NavItem icon={<Globe className="w-4 h-4" />} label="Dashboard" to="/dashboard" />
-                    <NavItem icon={<Layout className="w-4 h-4" />} label="Templates" to="/dashboard/templates" />
-                    <NavItem icon={<FileText className="w-4 h-4" />} label="Assets" to="/dashboard/assets" />
-                    <div className="pt-4">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 mb-2">System</p>
-                        <NavItem icon={<Users className="w-4 h-4" />} label="Users" to="/dashboard/users" />
-                        <NavItem icon={<Layout className="w-4 h-4" />} label="Websites" to="/dashboard/websites" />
-                        <NavItem icon={<Activity className="w-4 h-4" />} label="Deployment Monitoring" to="/dashboard/deployment" />
-                        <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" to="/dashboard/settings" />
-                    </div>
+                    <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest px-3 mb-2">Main Menu</p>
+                    {isAdmin === false && <NavItem icon={<Globe className="w-4 h-4" />} label="Dashboard" to="/dashboard" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />}
+                    <NavItem icon={<Layout className="w-4 h-4" />} label="Templates" to="/dashboard/templates" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
+                    <NavItem icon={<FileText className="w-4 h-4" />} label="Assets" to="/dashboard/assets" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
+                    {isAdmin && (
+                        <div className="pt-4">
+                            <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest px-3 mb-2">System</p>
+                            <NavItem icon={<Users className="w-4 h-4" />} label="Users" to="/dashboard/users" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
+                            <NavItem icon={<Layout className="w-4 h-4" />} label="Websites" to="/dashboard/websites" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
+                            <NavItem icon={<Activity className="w-4 h-4" />} label="Deployment Monitoring" to="/dashboard/deployment" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
+                            <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" to="/dashboard/settings" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
+                        </div>
+                    )}
                 </nav>
 
                 <div className="p-4 mt-auto">
-                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 mb-4">
-                        <p className="text-xs font-semibold text-slate-900 mb-1">Free Plan</p>
-                        <div className="w-full bg-slate-200 h-1.5 rounded-full mb-2">
-                            <div className="bg-primary h-full w-1/3 rounded-full"></div>
+                    <div className="bg-slate-700 rounded-2xl p-4 border border-slate-600 mb-4">
+                        <p className="text-xs font-semibold text-white mb-1">Free Plan</p>
+                        <div className="w-full bg-slate-600 h-1.5 rounded-full mb-2">
+                            <div className="bg-purple-500 h-full w-1/3 rounded-full"></div>
                         </div>
-                        <p className="text-[10px] text-slate-500">3 of 10 projects used</p>
+                        <p className="text-[10px] text-slate-400">3 of 10 projects used</p>
                     </div>
+
+                    <Button 
+                        className="w-full justify-start gap-3 h-11 transition-all duration-200 group mb-4 bg-slate-700 text-slate-300 border border-slate-500 hover:bg-slate-600 group-hover:text-white"
+                        onClick={() => setIsAdmin(!isAdmin)}
+                    >
+                        {isAdmin ? (
+                            <ShieldCheck className="w-4 h-4 text-purple-400" />
+                        ) : (
+                            <Users className="w-4 h-4 text-slate-300 group-hover:text-white" />
+                        )}
+                        {isAdmin ? "Admin Mode On" : "Switch to Admin Mode"}
+                    </Button>
                     
-                    <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer border border-transparent hover:border-slate-100">
+                    <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-700 transition-colors group cursor-pointer border border-transparent hover:border-slate-600">
                         <div className="relative">
-                            <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm">JD</div>
-                            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
+                            <div className="w-9 h-9 rounded-full bg-indigo-300 text-indigo-800 flex items-center justify-center font-bold text-sm">JD</div>
+                            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-slate-800 rounded-full"></div>
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-slate-900 truncate">John Doe</p>
-                            <p className="text-xs text-slate-500 truncate">Pro Plan</p>
+                            <p className="text-sm font-semibold text-white truncate">John Doe</p>
+                            <p className="text-xs text-slate-400 truncate">Pro Plan</p>
                         </div>
-                        <LogOut className="w-4 h-4 text-slate-400 group-hover:text-destructive transition-colors" />
+                        <LogOut className="w-4 h-4 text-slate-400 group-hover:text-red-400 transition-colors" />
                     </div>
                 </div>
             </aside>
 
             {/* --- Main Content Area --- */}
             <main className="flex-1 p-6 md:p-10 overflow-y-auto">
-                {location.pathname === '/dashboard' ? (
+                {location.pathname === '/dashboard' && !isAdmin ? (
                     <>
                         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
                             <div className="flex items-center gap-4">
@@ -239,24 +264,28 @@ const Dashboard = () => {
                                 description="+20.1% from last month"
                                 icon={<Globe className="w-4 h-4 text-slate-400" />}
                             />
-                            <OverviewCard 
-                                title="Active Users"
-                                value="250"
-                                description="+15% from last month"
-                                icon={<Users className="w-4 h-4 text-slate-400" />}
-                            />
+                            {isAdmin && (
+                                <OverviewCard 
+                                    title="Active Users"
+                                    value="250"
+                                    description="+15% from last month"
+                                    icon={<Users className="w-4 h-4 text-slate-400" />}
+                                />
+                            )}
                             <OverviewCard 
                                 title="Templates Available"
                                 value="42"
                                 description="New templates added frequently"
                                 icon={<Layout className="w-4 h-4 text-slate-400" />}
                             />
-                            <OverviewCard 
-                                title="Deployments Today"
-                                value="78"
-                                description="Successfully deployed websites"
-                                icon={<Activity className="w-4 h-4 text-slate-400" />}
-                            />
+                            {isAdmin && (
+                                <OverviewCard 
+                                    title="Deployments Today"
+                                    value="78"
+                                    description="Successfully deployed websites"
+                                    icon={<Activity className="w-4 h-4 text-slate-400" />}
+                                />
+                            )}
                         </section>
 
                         {/* --- Content Area (Website Cards) --- */}
@@ -277,7 +306,7 @@ const Dashboard = () => {
                         )}
                     </>
                 ) : (
-                    <Outlet />
+                    <Outlet key={location.pathname} /> 
                 )}
             </main>
         </div>

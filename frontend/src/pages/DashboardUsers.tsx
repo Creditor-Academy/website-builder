@@ -222,15 +222,15 @@ export default function DashboardUsers() {
         </Button>
       </div>
 
-        <div className="mb-6 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <Input
-            placeholder="Search users..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-full md:max-w-sm pl-9"
-          />
-        </div>
+      <div className="mb-6 relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <Input
+          placeholder="Search users..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-full md:max-w-sm pl-9"
+        />
+      </div>
 
       <div className="overflow-x-auto rounded-lg border border-slate-200 shadow-sm">
         <Table>
