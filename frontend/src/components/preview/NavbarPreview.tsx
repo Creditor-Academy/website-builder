@@ -144,6 +144,9 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
 
   // ── Original handleNavClick logic, unchanged ──────────────────────────
   const handleNavClick = (e, link) => {
+    // Scroll to top on any navigation click
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     if (isEditing) {
       const targetPage = pages.find((p) => p.slug === link.href);
       if (targetPage) {

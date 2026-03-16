@@ -154,6 +154,38 @@
 }
 
 @layer utilities {
+  /* Fix text direction for contenteditable elements */
+  [contenteditable="true"] {
+    direction: ltr !important;
+    unicode-bidi: bidi-override !important;
+    text-align: left !important;
+    writing-mode: horizontal-tb !important;
+    text-orientation: mixed !important;
+  }
+
+  /* Additional fix for any class-based contenteditable elements */
+  [class*="ce"][contenteditable="true"],
+  [class*="-ce"][contenteditable="true"],
+  [class*="editable"][contenteditable="true"] {
+    direction: ltr !important;
+    unicode-bidi: bidi-override !important;
+    text-align: left !important;
+    writing-mode: horizontal-tb !important;
+    text-orientation: mixed !important;
+  }
+
+  /* Fix cursor position in contenteditable elements */
+  [contenteditable="true"]:focus {
+    outline: none;
+    caret-color: currentColor;
+  }
+
+  /* Force LTR for all text inputs */
+  input, textarea {
+    direction: ltr !important;
+    unicode-bidi: bidi-override !important;
+  }
+
   /* Smooth transitions */
   .transition-smooth {
     @apply transition-all duration-300 ease-out;

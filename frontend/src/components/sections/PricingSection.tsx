@@ -15,10 +15,16 @@ const STYLES = `
   .pr-ce[contenteditable="true"] {
     border-bottom: 1.5px dashed rgba(0,0,0,0.18);
     cursor: text; padding-bottom: 1px;
+    direction: ltr !important;
+    unicode-bidi: normal !important;
+    text-align: left !important;
   }
   .pr-ce-inv[contenteditable="true"] {
     border-bottom: 1.5px dashed rgba(255,255,255,0.28);
     cursor: text; padding-bottom: 1px;
+    direction: ltr !important;
+    unicode-bidi: normal !important;
+    text-align: left !important;
   }
 
   /* Toggle */
@@ -115,8 +121,12 @@ function SectionHeader({ content, isEditing, onContentChange, headingColor, para
         }}
         contentEditable={isEditing}
         suppressContentEditableWarning
-        dangerouslySetInnerHTML={{ __html: content.headline || 'Simple, Transparent Pricing' }}
-        onInput={(e) => onContentChange?.('headline', e.currentTarget.innerHTML)}
+        ref={(el) => {
+          if (el && el.innerHTML !== (content.headline || 'Simple, Transparent Pricing')) {
+            el.innerHTML = content.headline || 'Simple, Transparent Pricing';
+          }
+        }}
+        onBlur={(e) => onContentChange?.('headline', e.currentTarget.innerHTML)}
       />
 
       <div style={{
@@ -134,8 +144,12 @@ function SectionHeader({ content, isEditing, onContentChange, headingColor, para
         }}
         contentEditable={isEditing}
         suppressContentEditableWarning
-        dangerouslySetInnerHTML={{ __html: content.subheadline || 'Choose the plan that works best for you' }}
-        onInput={(e) => onContentChange?.('subheadline', e.currentTarget.innerHTML)}
+        ref={(el) => {
+          if (el && el.innerHTML !== (content.subheadline || 'Choose the plan that works best for you')) {
+            el.innerHTML = content.subheadline || 'Choose the plan that works best for you';
+          }
+        }}
+        onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.innerHTML)}
       />
 
       {showToggle && (
@@ -198,8 +212,12 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
             className="pr-ce-inv"
             contentEditable={isEditing}
             suppressContentEditableWarning
-            dangerouslySetInnerHTML={{ __html: plan.popularLabel || 'Most Popular' }}
-            onInput={(e) => updatePlan('popularLabel', e.currentTarget.innerHTML)}
+            ref={(el) => {
+              if (el && el.innerHTML !== (plan.popularLabel || 'Most Popular')) {
+                el.innerHTML = plan.popularLabel || 'Most Popular';
+              }
+            }}
+            onBlur={(e) => updatePlan('popularLabel', e.currentTarget.innerHTML)}
           />
         </div>
       )}
@@ -227,8 +245,12 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
           }}
           contentEditable={isEditing}
           suppressContentEditableWarning
-          dangerouslySetInnerHTML={{ __html: plan.name || '' }}
-          onInput={(e) => updatePlan('name', e.currentTarget.innerHTML)}
+          ref={(el) => {
+            if (el && el.innerHTML !== (plan.name || '')) {
+              el.innerHTML = plan.name || '';
+            }
+          }}
+          onBlur={(e) => updatePlan('name', e.currentTarget.innerHTML)}
         />
 
         <p
@@ -241,8 +263,12 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
           }}
           contentEditable={isEditing}
           suppressContentEditableWarning
-          dangerouslySetInnerHTML={{ __html: plan.description || '' }}
-          onInput={(e) => updatePlan('description', e.currentTarget.innerHTML)}
+          ref={(el) => {
+            if (el && el.innerHTML !== (plan.description || '')) {
+              el.innerHTML = plan.description || '';
+            }
+          }}
+          onBlur={(e) => updatePlan('description', e.currentTarget.innerHTML)}
         />
 
         {/* Price */}
@@ -265,6 +291,11 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
               }}
               contentEditable={isEditing}
               suppressContentEditableWarning
+              ref={(el) => {
+                if (el && el.innerHTML !== (price ?? plan.price)) {
+                  el.innerHTML = price ?? plan.price;
+                }
+              }}
               onBlur={(e) => updatePlan('price', e.currentTarget.textContent.replace('$', '').trim())}
             >
               {price ?? plan.price}
@@ -278,6 +309,11 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
               }}
               contentEditable={isEditing}
               suppressContentEditableWarning
+              ref={(el) => {
+                if (el && el.innerHTML !== (period || plan.pricePeriod || '/mo')) {
+                  el.innerHTML = period || plan.pricePeriod || '/mo';
+                }
+              }}
               onBlur={(e) => updatePlan('pricePeriod', e.currentTarget.textContent)}
             >
               {period || plan.pricePeriod || '/mo'}
@@ -305,8 +341,12 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
                 }}
                 contentEditable={isEditing}
                 suppressContentEditableWarning
-                dangerouslySetInnerHTML={{ __html: feature || '' }}
-                onInput={(e) => updateFeature(i, e.currentTarget.innerHTML)}
+                ref={(el) => {
+                  if (el && el.innerHTML !== (feature || '')) {
+                    el.innerHTML = feature || '';
+                  }
+                }}
+                onBlur={(e) => updateFeature(i, e.currentTarget.innerHTML)}
               />
             </li>
           ))}
@@ -318,8 +358,12 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
             className={isPopular ? 'pr-ce-inv' : 'pr-ce'}
             contentEditable={isEditing}
             suppressContentEditableWarning
-            dangerouslySetInnerHTML={{ __html: plan.ctaText || 'Get Started' }}
-            onInput={(e) => updatePlan('ctaText', e.currentTarget.innerHTML)}
+            ref={(el) => {
+              if (el && el.innerHTML !== (plan.ctaText || 'Get Started')) {
+                el.innerHTML = plan.ctaText || 'Get Started';
+              }
+            }}
+            onBlur={(e) => updatePlan('ctaText', e.currentTarget.innerHTML)}
           />
           <ArrowRight size={13} />
         </button>

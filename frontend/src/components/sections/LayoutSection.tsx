@@ -55,10 +55,11 @@ const STYLES = `
     font-size: 11px; font-weight: 600;
     letter-spacing: 0.14em; text-transform: uppercase;
     background: var(--btn-bg, #0f172a); color: var(--btn-color, #fff);
-    border: none; border-radius: var(--btn-radius, 3px);
+    border: none;
     padding: 14px 28px; cursor: pointer;
     transition: opacity 0.2s ease, transform 0.2s ease;
     text-decoration: none;
+    border-radius: var(--btn-radius, 6px);
   }
   .ly-btn:hover { opacity: 0.85; transform: translateY(-1px); }
 
@@ -412,14 +413,13 @@ export function LayoutSection({ section, isSelected, isEditing, onContentChange 
       {isEditing && <div className="ly-badge">Layout</div>}
 
       <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px', position: 'relative' }}>
-        {variant === 'text-only'           && <TextOnly         {...shared} />} // Text-only variant
-        {variant === 'image-text-left'     && <ImageTextLayout  {...shared} imageRight={false} />} // Left image variant
-        {variant === 'image-text-right'    && <ImageTextLayout  {...shared} imageRight={true}  />} // Right image variant
-        {variant === 'text-button'         && <TextButton        {...shared} />} // Text-button variant
-        {variant === 'heading-text-button' && <HeadingTextButton {...shared} />} // Complete layout variant
-        {variant === 'two-column'          && <TwoColumn         {...shared} />} // Two-column variant
+        {variant === 'text-only'           && <TextOnly         {...shared} />} 
+        {variant === 'image-text-left'     && <ImageTextLayout  {...shared} imageRight={false} />}          {variant === 'image-text-right'    && <ImageTextLayout  {...shared} imageRight={true}  />}
+        {variant === 'text-button'         && <TextButton        {...shared} />}
+        {variant === 'heading-text-button' && <HeadingTextButton {...shared} />} 
+        {variant === 'two-column'          && <TwoColumn         {...shared} />} 
         {!['text-only','image-text-left','image-text-right','text-button','heading-text-button','two-column'].includes(variant)
-          && <TextOnly {...shared} />} // Fallback variant
+          && <TextOnly {...shared} />} 
       </div>
     </section>
   );

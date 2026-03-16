@@ -76,6 +76,9 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
 
   // ── Link click handler (original logic, unchanged) ──────────────────────
   const handleLinkClick = (e, link, column) => {
+    // Scroll to top on any footer link click
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     if (isEditing) {
       const target = pages.find(p => p.slug === link.href);
       if (target) {
@@ -121,6 +124,9 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
 
   const handlePrivacyClick = (e) => {
     e.preventDefault();
+    // Scroll to top on privacy policy click
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     const target = pages.find(p => p.slug === '/privacy');
     if (target) { setActivePage(target.id); }
     else { createPage(createPrivacyPolicyPage()); }
@@ -129,6 +135,9 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
 
   const handleTermsClick = (e) => {
     e.preventDefault();
+    // Scroll to top on terms of service click
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     const target = pages.find(p => p.slug === '/terms');
     if (target) { setActivePage(target.id); }
     else { createPage(createTermsOfServicePage()); }

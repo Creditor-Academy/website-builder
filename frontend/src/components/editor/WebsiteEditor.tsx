@@ -46,7 +46,7 @@ function EditorContent() {
     { id: "layers", icon: Layers, label: "Layers" },
     { id: "pages", icon: FileText, label: "Pages" },
     { id: "edit", icon: Sliders, label: "Edit Properties" },
-    { id: 'settings', icon: Settings, label: 'Site Settings' },
+    // { id: 'settings', icon: Settings, label: 'Site Settings' },
   ];
 
   return (

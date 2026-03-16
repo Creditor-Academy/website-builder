@@ -420,12 +420,12 @@ export function SectionsList({ view = "add" }) {
               {view === 'add' ? 'Click any element to add it to your page' : 'Drag to reorder sections'}
             </p>
           </div>
-          {view === 'add' && (
+          {/* {view === 'add' && (
             <div className="flex items-center gap-1">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
               <span className="text-[9px] text-slate-500">Ready to build</span>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

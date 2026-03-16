@@ -1,6 +1,16 @@
 import React from 'react';
 import { Quote, Star } from 'lucide-react';
 
+// ─── Cursor Position Utility ───────────────────────────────────────────────────
+function setCursorToEnd(element) {
+  const range = document.createRange();
+  const selection = window.getSelection();
+  range.selectNodeContents(element);
+  range.collapse(false); // collapse to end
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
 // ─── Global styles injected once ──────────────────────────────────────────
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Syne:wght@400;500;700&display=swap');
@@ -30,9 +40,15 @@ const STYLES = `
   .t-ce[contenteditable="true"] {
     border-bottom: 1.5px dashed rgba(0,0,0,0.18);
     cursor: text;
+    direction: ltr !important;
+    unicode-bidi: normal !important;
+    text-align: left !important;
   }
   .t-ce-light[contenteditable="true"] {
     border-bottom: 1.5px dashed rgba(255,255,255,0.3);
+    direction: ltr !important;
+    unicode-bidi: normal !important;
+    text-align: left !important;
   }
 
   .t-card-hover {
@@ -161,7 +177,11 @@ function CardsVariant({ testimonials, content, styles, isEditing, onContentChang
             contentEditable={isEditing}
             suppressContentEditableWarning
             dangerouslySetInnerHTML={{ __html: content.headline || 'What Our Clients Say' }}
-            onInput={(e) => onContentChange?.('headline', e.currentTarget.innerHTML)}
+            onInput={(e) => {
+              onContentChange?.('headline', e.currentTarget.innerHTML);
+              // Preserve cursor position
+              setTimeout(() => setCursorToEnd(e.currentTarget), 0);
+            }}
           ></h2>
           <p
             className="t-ce"
@@ -174,7 +194,11 @@ function CardsVariant({ testimonials, content, styles, isEditing, onContentChang
             contentEditable={isEditing}
             suppressContentEditableWarning
             dangerouslySetInnerHTML={{ __html: content.subheadline || 'Trusted by thousands of happy customers worldwide' }}
-            onInput={(e) => onContentChange?.('subheadline', e.currentTarget.innerHTML)}
+            onInput={(e) => {
+              onContentChange?.('subheadline', e.currentTarget.innerHTML);
+              // Preserve cursor position
+              setTimeout(() => setCursorToEnd(e.currentTarget), 0);
+            }}
           ></p>
         </div>
 
@@ -226,7 +250,11 @@ function CardsVariant({ testimonials, content, styles, isEditing, onContentChang
                 contentEditable={isEditing}
                 suppressContentEditableWarning
                 dangerouslySetInnerHTML={{ __html: t.quote ? `"${t.quote}"` : '""' }}
-                onInput={(e) => updateT(t, 'quote', e.currentTarget.innerHTML.replace(/^"|"$/g, ''))}
+                onInput={(e) => {
+                updateT(t, 'quote', e.currentTarget.innerHTML.replace(/^"|"$/g, ''));
+                // Preserve cursor position
+                setTimeout(() => setCursorToEnd(e.currentTarget), 0);
+              }}
               ></p>
 
               {/* author */}
@@ -243,7 +271,11 @@ function CardsVariant({ testimonials, content, styles, isEditing, onContentChang
                     contentEditable={isEditing}
                     suppressContentEditableWarning
                     dangerouslySetInnerHTML={{ __html: t.name || '' }}
-                    onInput={(e) => updateT(t, 'name', e.currentTarget.innerHTML)}
+                    onInput={(e) => {
+                    updateT(t, 'name', e.currentTarget.innerHTML);
+                    // Preserve cursor position
+                    setTimeout(() => setCursorToEnd(e.currentTarget), 0);
+                  }}
                   ></p>
                   <p
                     className="t-ce"
@@ -251,7 +283,11 @@ function CardsVariant({ testimonials, content, styles, isEditing, onContentChang
                     contentEditable={isEditing}
                     suppressContentEditableWarning
                     dangerouslySetInnerHTML={{ __html: t.role || '' }}
-                    onInput={(e) => updateT(t, 'role', e.currentTarget.innerHTML)}
+                    onInput={(e) => {
+                    updateT(t, 'role', e.currentTarget.innerHTML);
+                    // Preserve cursor position
+                    setTimeout(() => setCursorToEnd(e.currentTarget), 0);
+                  }}
                   ></p>
                 </div>
               </div>
