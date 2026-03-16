@@ -203,7 +203,7 @@ export default function DashboardUsers() {
                 <TableCell className="px-4 py-3">
                   <Badge 
                     variant="outline" 
-                    className="flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full w-fit"
+                    className="flex items-center gap-1 w-fit"
                   >
                     {user.role === "Admin" && <ShieldCheck className="w-3 h-3 text-indigo-500" />}
                     {user.role === "Editor" && <Briefcase className="w-3 h-3 text-blue-500" />}
