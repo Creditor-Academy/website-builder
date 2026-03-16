@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import WebsiteService from './website.service.js';
+import type { WebsiteIdParams } from './website.validation.js';
 
 class WebsiteController {
     private websiteService: WebsiteService;
@@ -23,8 +24,8 @@ class WebsiteController {
     listWebsites = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const userId = req.context.user.id;
-            const websites = await this.websiteService.listWebsites(userId, req.validated.query);
-            res.status(200).json({ websites });
+            const result = await this.websiteService.listWebsites(userId, req.validated.query);
+            res.status(200).json(result);
         } catch (error: any) {
             next(error);
         }
@@ -33,8 +34,8 @@ class WebsiteController {
     // GET /websites/all - List all websites
     listAllWebsites = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const websites = await this.websiteService.listAllWebsites(req.validated.query);
-            res.status(200).json({ websites });
+            const result = await this.websiteService.listAllWebsites(req.validated.query);
+            res.status(200).json(result);
         } catch (error: any) {
             next(error);
         }
@@ -101,6 +102,28 @@ class WebsiteController {
             const website = req.context.website!;
             await this.websiteService.updateWebsiteSettings(website, req.validated.body);
             return res.status(200).json({ message: 'Website settings updated successfully' });
+        } catch (error: any) {
+            next(error);
+        }
+    }
+
+    // POST /websites/:id/publish - Publish Website
+    publishWebsite = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const website = req.context.website!;
+            await this.websiteService.publishWebsite(website);
+            return res.status(200).json({ message: 'Website published successfully' });
+        } catch (error: any) {
+            next(error);
+        }
+    }
+
+    // POST /websites/:id/unpublish - Unpublish Website
+    unpublishWebsite = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const website = req.context.website!;
+            await this.websiteService.unpublishWebsite(website);
+            return res.status(200).json({ message: 'Website unpublished successfully' });
         } catch (error: any) {
             next(error);
         }

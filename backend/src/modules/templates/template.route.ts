@@ -19,6 +19,17 @@ const router = express.Router();
 router.use(authenticate);
 
 // ============================================
+// Website Template Routes
+// ============================================
+
+// GET /websites/templates - List all website templates
+router.get(
+    '/websites',
+    validateRequest(listTemplatesQuerySchema, 'query'),
+    templateController.listWebsiteTemplates
+);
+
+// ============================================
 // Page Template Routes
 // ============================================
 

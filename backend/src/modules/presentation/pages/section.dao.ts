@@ -1,5 +1,6 @@
 import prismaClient from '../../../config/prisma.js';
-import type { Section } from '@prisma/client';
+import type { Prisma, Section } from '@prisma/client';
+import { UpdateSectionInput } from './page.validation.js';
 
 class SectionDao {
     /**
@@ -76,15 +77,15 @@ class SectionDao {
     /**
      * Update section
      */
-    async updateSection(sectionId: string, data: Partial<{
-        category: string;
-        props: any;
-        order: number;
-        sectionTemplateId: string | null;
-    }>): Promise<Section> {
+    async updateSection(sectionId: string, data: Partial<UpdateSectionInput>): Promise<Section> {
+        const updateData: Prisma.SectionUpdateInput = {};
+        if (data.category) updateData.category = data.category;
+        if (data.props) updateData.props = data.props;
+        if (data.order) updateData.order = data.order;
+
         return await prismaClient.section.update({
             where: { id: sectionId },
-            data,
+            data: updateData,
             include: {
                 sectionTemplate: true,
                 page: true

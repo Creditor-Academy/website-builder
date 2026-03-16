@@ -17,6 +17,11 @@ export const registerSchema = z.object({
     .regex(/[0-9]/, 'Password must contain at least one number'),
 });
 
+// Google Login schema
+export const googleLoginSchema = z.object({
+  idToken: z.string().min(1, 'ID Token is required'),
+});
+
 // Login schema
 export const loginSchema = z.object({
   email: z.string()

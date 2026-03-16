@@ -7,7 +7,8 @@ const WebsiteStatusValues = Object.values(WebsiteStatus);
 export const createWebsiteSchema = z.object({
     name: z.string()
         .min(2, 'Name must be at least 2 characters')
-        .max(100, 'Name must not exceed 100 characters')
+        .max(100, 'Name must not exceed 100 characters'),
+    templateId: z.string().optional()
 });
 
 // Get websites schema
@@ -36,16 +37,15 @@ export const updateWebsiteSchema = z.object({
 
 // Update website settings schema
 export const updateWebsiteSettingsSchema = z.object({
-    seo: z.json('seo should be valid JSON'),
-    contact: z.json('contact should be valid JSON'),
-    social_links: z.json('social_links should be valid JSON'),
+    seo: z.any().optional(),
+    contact: z.any().optional(),
+    social_links: z.any().optional(),
 });
 
 // Website ID params schema
 export const websiteIdParamsSchema = z.object({
-    id: z.string().pipe(
-        z.cuid2('Invalid website ID format')
-    )
+    id: z.string().min(1, 'Invalid website ID format')
+        .pipe(z.cuid2('Invalid website ID format'))
 });
 
 export type CreateWebsiteInput = z.infer<typeof createWebsiteSchema>;

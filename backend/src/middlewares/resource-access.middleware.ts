@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
 import WebsiteDao from '../modules/website/website.dao.js';
 import PageDao from '../modules/presentation/pages/page.dao.js';
-import SectionDao from '../modules/presentation/sections/section.dao.js';
-import { UserRole, type PageTemplate, type SectionTemplate } from '@prisma/client';
+import SectionDao from '../modules/presentation/pages/section.dao.js';
+import { UserRole, WebsiteStatus, type PageTemplate, type SectionTemplate } from '@prisma/client';
 import TemplateDao from '../modules/templates/template.dao.js';
 
 const websiteDao = new WebsiteDao();
@@ -51,7 +51,8 @@ export const resolveWebsiteDraft = (options?: { include_global_design?: boolean 
             const websiteId = req.validated.params.websiteId;
 
             const result = await websiteDao.findWebsiteById(websiteId, options);
-            if (!result) return res.status(404).json({ error: 'Website not found' });
+            if (!result || result.status === WebsiteStatus.DELETED)
+                return res.status(404).json({ error: 'Website not found' });
 
             if (!canAccess(user, result)) {
                 return res.status(403).json({ error: 'Access Denied' });
@@ -86,30 +87,6 @@ export const validatePage = async (req: Request, res: Response, next: NextFuncti
         next();
     } catch (error: any) {
         console.error('Page Access Error:', error.message);
-        res.status(500).json({ error: error.message });
-    }
-};
-
-/**
- * validateSection
- * Verifies the section param (:sectionId) belongs to the website already
- * resolved by resolveWebsiteDraft. Must run after resolveWebsiteDraft.
- */
-export const validateSection = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const sectionId = req.validated.params.sectionId;
-
-        const section = await sectionDao.getSectionById(sectionId);
-        if (!section) return res.status(404).json({ error: 'Section not found' });
-
-        if (section.page_id !== req.context.page?.id) {
-            return res.status(403).json({ error: 'Access Denied' });
-        }
-
-        req.context.section = section;
-        next();
-    } catch (error: any) {
-        console.error('Section Access Error:', error.message);
         res.status(500).json({ error: error.message });
     }
 };

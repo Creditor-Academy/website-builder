@@ -65,9 +65,8 @@ export const updateUserStatusSchema = z.object({
 
 // User Id params schema
 export const userIdParamsSchema = z.object({
-  id: z.string().pipe(
-    z.cuid2('Invalid user ID format')
-  ),
+  id: z.string().min(1, 'Invalid user ID format')
+    .pipe(z.cuid2('Invalid user ID format')),
 });
 
 export type UpdateOwnProfileInput = z.infer<typeof updateOwnProfileSchema>;

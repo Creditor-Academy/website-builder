@@ -6,8 +6,7 @@ import {
     createPageSchema,
     updatePageSchema,
     duplicatePageSchema,
-    pageIdParamsSchema,
-    listPagesQuerySchema
+    pageIdParamsSchema
 } from './page.validation.js';
 
 const router = express.Router({ mergeParams: true });
@@ -15,17 +14,16 @@ const pageController = new PageController();
 
 /**
  * GET /presentation/website/:websiteId/pages
- * List all pages for the draft version with optional pagination and search.
+ * List all pages for the draft website
  */
 router.get(
     '/',
-    validateRequest(listPagesQuerySchema, 'query'),
     pageController.listPages
 );
 
 /**
  * POST /presentation/website/:websiteId/pages
- * Create a new page in the draft version.
+ * Create a new page in the draft website.
  */
 router.post(
     '/',

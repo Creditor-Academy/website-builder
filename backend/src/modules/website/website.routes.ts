@@ -8,7 +8,7 @@ import {
     listWebsitesQuerySchema,
     updateWebsiteSchema,
     websiteIdParamsSchema,
-    updateWebsiteSettingsSchema,
+    updateWebsiteSettingsSchema
 } from './website.validation.js';
 import { UserRole } from '@prisma/client';
 import { rateLimiting } from '../../middlewares/rate-limiting.middleware.js';
@@ -85,6 +85,22 @@ router.post(
     websiteController.duplicateWebsite
 );
 
+// POST /websites/:id/publish - Publish website
+router.post(
+    '/:id/publish',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    requireWebsiteAccess,
+    websiteController.publishWebsite
+);
+
+// POST /websites/:id/unpublish - Unpublish Website
+router.post(
+    '/:id/unpublish',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    requireWebsiteAccess,
+    websiteController.unpublishWebsite
+);
+
 // PATCH /websites/:id/settings - Update website settings
 router.patch(
     '/:id/settings',
@@ -93,3 +109,5 @@ router.patch(
     requireWebsiteAccess,
     websiteController.updateWebsiteSettings
 );
+
+export default router;

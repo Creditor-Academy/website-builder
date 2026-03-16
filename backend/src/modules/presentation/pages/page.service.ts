@@ -1,10 +1,9 @@
 import PageDao from './page.dao.js';
-import SectionDao from '../sections/section.dao.js';
+import SectionDao from './section.dao.js';
 import { NotFoundError, BadRequestError, ConflictError } from '../../../utils/error.utils.js';
-import type { CreatePageInput, UpdatePageInput } from './page.validation.js';
-import type { ListPagesQueryInput } from './page.validation.js';
+import type { CreatePageInput, UpdatePageInput, updateSectionSchema } from './page.validation.js';
 import type { DuplicatePageInput } from './page.validation.js';
-import type { Page } from '@prisma/client';
+import type { Page, Section } from '@prisma/client';
 
 class PageService {
     private pageDao: InstanceType<typeof PageDao>;
@@ -16,45 +15,36 @@ class PageService {
     }
 
     /**
-     * Create a new page in the given version.
-     * versionId comes from req.context.version.id (set by resolveWebsiteDraft).
+     * Create a new page in the given website.
+     * websiteId comes from req.context.website.id (set by resolveWebsiteDraft).
      */
-    async createPage(versionId: string, data: CreatePageInput): Promise<Page> {
+    async createPage(websiteId: string, data: CreatePageInput): Promise<Page> {
         const slug = data.slug;
 
-        // Validate slug uniqueness within the version
-        const isUnique = await this.pageDao.isSlugUnique(slug, versionId);
+        // Validate slug uniqueness within the website
+        const isUnique = await this.pageDao.isSlugUnique(slug, websiteId);
         if (!isUnique) {
-            throw new ConflictError(`Slug "${slug}" already exists in this version`);
+            throw new ConflictError(`Slug "${slug}" already exists in this website`);
         }
 
-        return await this.pageDao.createPage({
-            name: data.name,
-            slug,
-            version_id: versionId,
-            meta: data.meta || {},
-            page_styles: data.page_styles
-        });
+        return await this.pageDao.createPage(websiteId, data);
     }
 
     /**
-     * List all pages for a version with pagination and optional search.
+     * List all pages for a website with pagination and optional search.
      */
-    async listPages(versionId: string, query: ListPagesQueryInput): Promise<Page[]> {
-        const { page = 1, limit = 50, search } = query;
-        const skip = (page - 1) * limit;
-
-        return await this.pageDao.listPagesByVersion(versionId, {
-            skip,
-            take: limit,
-            ...(search ? { search } : {})
-        });
+    async listPages(websiteId: string): Promise<Page[]> {
+        return await this.pageDao.listPagesByWebsiteId(websiteId);
     }
 
     /**
      * Get single page with full section content.
      */
     async getSinglePage(page: Page): Promise<any> {
+        if (page.deleted_at) {
+            throw new NotFoundError('Page not found');
+        }
+
         const fullPage = await this.pageDao.getPageFullContent(page.id);
         if (!fullPage) {
             throw new NotFoundError('Page not found');
@@ -69,14 +59,18 @@ class PageService {
      * Update page details (name, slug, meta, page_styles).
      */
     async updatePage(page: Page, data: UpdatePageInput): Promise<Page> {
+        if (page.deleted_at) {
+            throw new BadRequestError('Page is already deleted');
+        }
+
         const updateData: any = {};
 
         if (data.name !== undefined) updateData.name = data.name;
 
         if (data.slug !== undefined) {
-            const isUnique = await this.pageDao.isSlugUnique(data.slug, page.version_id, page.id);
+            const isUnique = await this.pageDao.isSlugUnique(data.slug, page.website_id, page.id);
             if (!isUnique) {
-                throw new ConflictError(`Slug "${data.slug}" already exists in this version`);
+                throw new ConflictError(`Slug "${data.slug}" already exists in this website`);
             }
             updateData.slug = data.slug;
         }
@@ -84,17 +78,43 @@ class PageService {
         if (data.meta !== undefined) updateData.meta = data.meta;
         if (data.page_styles !== undefined) updateData.page_styles = data.page_styles;
 
-        return await this.pageDao.updatePage(page.id, updateData);
+        let updates: Promise<Section>[] = [];
+        let deletes: Promise<Section>[] = [];
+        let restores: Promise<Section>[] = [];
+
+        if (data.updateSections !== undefined) {
+            updates = data.updateSections.map(
+                (section) => this.sectionDao.updateSection(section.id, section)
+            );
+        }
+
+        if (data.deleteSections !== undefined) {
+            deletes = data.deleteSections.map(
+                (sectionId) => this.sectionDao.deleteSection(sectionId)
+            );
+        }
+
+        if (data.restoreSections !== undefined) {
+            restores = data.restoreSections.map(
+                (sectionId) => this.sectionDao.restoreSection(sectionId)
+            );
+        }
+
+        await Promise.all([...updates, ...deletes, ...restores]);
+
+        const updatedPage = await this.pageDao.updatePage(page.id, updateData, data.createSections);
+
+        return updatedPage;
     }
 
     /**
      * Soft delete a page and all its sections.
      */
     async deletePage(page: Page): Promise<void> {
-        const sections = await this.sectionDao.getSectionsByPageId(page.id);
-        if (sections.length > 0) {
-            await this.sectionDao.deleteSections(sections.map((s: any) => s.id));
+        if (page.deleted_at) {
+            throw new BadRequestError('Page is already deleted');
         }
+
         await this.pageDao.deletePage(page.id);
     }
 
@@ -109,29 +129,29 @@ class PageService {
     }
 
     /**
-     * Duplicate a page and all its sections into the same version.
+     * Duplicate a page and all its sections into the same website.
      */
-    async duplicatePage(versionId: string, sourcePage: Page, data: DuplicatePageInput): Promise<Page> {
-        // Validate slug uniqueness within the version
-        const isUnique = await this.pageDao.isSlugUnique(data.slug, versionId);
+    async duplicatePage(websiteId: string, sourcePage: Page, data: DuplicatePageInput): Promise<Page> {
+        // Validate slug uniqueness within the website
+        const isUnique = await this.pageDao.isSlugUnique(data.slug, websiteId);
         if (!isUnique) {
-            throw new ConflictError(`Slug "${data.slug}" already exists in this version`);
+            throw new ConflictError(`Slug "${data.slug}" already exists in this website`);
         }
+
+        const pageSections = await this.sectionDao.getSectionsByPageId(sourcePage.id);
 
         // Create new page
-        const newPage = await this.pageDao.createPage({
+        const newPage = await this.pageDao.createPage(websiteId, {
+            ...sourcePage,
             name: data.newName,
             slug: data.slug,
-            version_id: versionId,
-            meta: sourcePage.meta,
-            page_styles: sourcePage.page_styles
+            sections: pageSections.map((section) => ({
+                category: section.category,
+                sectionTemplateId: section.sectionTemplateId,
+                order: section.order,
+                props: section.props
+            }))
         });
-
-        // Duplicate sections
-        const sections = await this.sectionDao.getSectionsByPageId(sourcePage.id);
-        for (const section of sections) {
-            await this.sectionDao.duplicateSection(section, newPage.id);
-        }
 
         return newPage;
     }

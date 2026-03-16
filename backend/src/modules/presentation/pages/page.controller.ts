@@ -10,12 +10,12 @@ class PageController {
 
     /**
      * POST /presentation/website/:websiteId/pages
-     * Create a new page in the current draft version.
+     * Create a new page in the current draft website.
      */
     createPage = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const versionId = req.context.version!.id;
-            const page = await this.pageService.createPage(versionId, req.validated.body);
+            const websiteId = req.context.website!.id;
+            const page = await this.pageService.createPage(websiteId, req.validated.body);
             res.status(201).json({
                 message: 'Page created successfully',
                 data: page
@@ -27,12 +27,12 @@ class PageController {
 
     /**
      * GET /presentation/website/:websiteId/pages
-     * List all pages for the current draft version.
+     * List all pages for the current draft website.
      */
     listPages = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const versionId = req.context.version!.id;
-            const pages = await this.pageService.listPages(versionId, req.validated.query || {});
+            const websiteId = req.context.website!.id;
+            const pages = await this.pageService.listPages(websiteId);
             res.status(200).json({
                 data: pages,
                 count: pages.length
@@ -107,10 +107,10 @@ class PageController {
     duplicatePage = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const page = req.context.page!;
-            const versionId = req.context.version!.id;
+            const websiteId = req.context.website!.id;
 
             const duplicatedPage = await this.pageService.duplicatePage(
-                versionId, page,
+                websiteId, page,
                 req.validated.body
             );
             res.status(201).json({

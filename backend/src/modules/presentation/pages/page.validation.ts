@@ -4,6 +4,19 @@ import { z } from 'zod';
 // Create Page Schema
 // ============================================
 
+const createSectionSchema = z.object({
+    category: z.string().trim()
+        .min(2, 'Category must be at least 2 characters')
+        .max(100, 'Category must not exceed 100 characters'),
+
+    props: z.any().optional().default({}),
+    sectionTemplateId: z.string()
+        .pipe(z.cuid2('Invalid section template ID format'))
+        .nullable(),
+
+    order: z.number()
+});
+
 export const createPageSchema = z.object({
     name: z.string().trim()
         .min(2, 'Name must be at least 2 characters')
@@ -16,15 +29,29 @@ export const createPageSchema = z.object({
 
     templateId: z.string()
         .pipe(z.cuid2('Invalid template ID format'))
-        .optional(),
+        .nullable(),
 
-    meta: z.json().optional(),
-    page_styles: z.json().optional()
+    meta: z.any().default({}),
+    page_styles: z.any().default({}),
+
+    sections: z.array(createSectionSchema)
+        .default([])
 });
 
 // ============================================
 // Update Page Schema
 // ============================================
+export const updateSectionSchema = z.object({
+    id: z.string()
+        .pipe(z.cuid2('Invalid section ID format')),
+
+    category: z.string().trim()
+        .min(2, 'Category must be at least 2 characters')
+        .max(100, 'Category must not exceed 100 characters'),
+
+    props: z.any().optional(),
+    order: z.number().optional()
+});
 
 export const updatePageSchema = z.object({
     name: z.string().trim()
@@ -38,8 +65,22 @@ export const updatePageSchema = z.object({
         .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase alphanumeric with hyphens only')
         .optional(),
 
-    meta: z.json().optional(),
-    page_styles: z.json().optional()
+    meta: z.any().optional(),
+    page_styles: z.any().optional(),
+
+    createSections: z.array(createSectionSchema)
+        .optional(),
+
+    updateSections: z.array(updateSectionSchema)
+        .optional(),
+
+    deleteSections: z.array(z.string()
+        .pipe(z.cuid2('Invalid section ID format'))
+    ).optional(),
+
+    restoreSections: z.array(z.string()
+        .pipe(z.cuid2('Invalid section ID format'))
+    ).optional()
 }).refine(
     (data) => Object.keys(data).length > 0,
     { message: 'At least one field must be provided for update' }
@@ -64,9 +105,8 @@ export const duplicatePageSchema = z.object({
 // ============================================
 
 export const pageIdParamsSchema = z.object({
-    id: z.string().pipe(
-        z.cuid2('Invalid page ID format')
-    )
+    id: z.string().min(1, 'Invalid page ID format')
+        .pipe(z.cuid2('Invalid page ID format'))
 });
 
 export const pageSlugParamsSchema = z.object({
@@ -76,27 +116,13 @@ export const pageSlugParamsSchema = z.object({
 });
 
 // ============================================
-// List Pages Query Schema
-// ============================================
-
-export const listPagesQuerySchema = z.object({
-    page: z.coerce.number().int().min(1).optional().default(1),
-    limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-    search: z.string().min(1).optional(),
-
-    includeDeleted: z.enum(['true', 'false'])
-        .transform(val => val === 'true')
-        .optional()
-        .default(false)
-});
-
-// ============================================
 // Type Exports
 // ============================================
 
+export type CreateSectionInput = z.infer<typeof createSectionSchema>;
+export type UpdateSectionInput = z.infer<typeof updateSectionSchema>;
 export type CreatePageInput = z.infer<typeof createPageSchema>;
 export type UpdatePageInput = z.infer<typeof updatePageSchema>;
 export type DuplicatePageInput = z.infer<typeof duplicatePageSchema>;
 export type PageIdParams = z.infer<typeof pageIdParamsSchema>;
 export type PageSlugParams = z.infer<typeof pageSlugParamsSchema>;
-export type ListPagesQueryInput = z.infer<typeof listPagesQuerySchema>;

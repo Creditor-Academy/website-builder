@@ -27,7 +27,7 @@ model User {
   id            String   @id @default(cuid())
   name          String
   email         String   @unique
-  password_hash String
+  password_hash String?
   role          UserRole @default(USER)
 
   isActive   Boolean @default(true)
@@ -119,13 +119,13 @@ enum WebsiteStatus {
 
 // Website Model
 model Website {
-  id       String @id @default(cuid())
+  id       String        @id @default(cuid())
   name     String
   owner_id String
+  status   WebsiteStatus @default(DRAFT)
 
-  status        WebsiteStatus @default(DRAFT)
-  homepageId    String?       @unique
-  settings_id   String        @unique
+  homepageId    String? @unique
+  settings_id   String  @unique
   thumbnail_url String?
 
   created_at DateTime  @default(now())
@@ -167,14 +167,16 @@ model Settings {
 
 // Global Design
 model GlobalDesign {
-  id         String @id @default(cuid())
-  website_id String @unique // FK for 1-to-1 with Website
+  id                String  @id @default(cuid())
+  website_id        String  @unique // FK for 1-to-1 with Website
+  websiteTemplateId String?
 
   global_styles Json
 
   // Relations
-  website     Website      @relation(fields: [website_id], references: [id], onDelete: Cascade)
-  globalSlots GlobalSlot[]
+  website         Website          @relation(fields: [website_id], references: [id], onDelete: Cascade)
+  websiteTemplate WebsiteTemplate? @relation(fields: [websiteTemplateId], references: [id], onDelete: SetNull)
+  globalSlots     GlobalSlot[]
 
   @@index([website_id])
   @@map("global_design")
@@ -206,42 +208,27 @@ model GlobalSlot {
 
 // Page Model
 model Page {
-  id          String @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
   slug        String
   website_id  String
   meta        Json
   page_styles Json?
+  templateId  String?
 
   created_at DateTime  @default(now())
   deleted_at DateTime?
 
   // Relation
-  website    Website   @relation("WebsitePages", fields: [website_id], references: [id], onDelete: Cascade)
-  homepageOf Website?  @relation("Homepage")
+  website    Website       @relation("WebsitePages", fields: [website_id], references: [id], onDelete: Cascade)
+  homepageOf Website?      @relation("Homepage")
+  template   PageTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
   sections   Section[]
 
   @@unique([slug, website_id])
   @@index([slug, website_id])
   @@index([deleted_at])
   @@map("pages")
-}
-
-// Page Template Model
-model PageTemplate {
-  id            String  @id @default(cuid())
-  name          String
-  category      String
-  thumbnail_url String?
-  sections      Json
-
-  created_at DateTime  @default(now())
-  deleted_at DateTime?
-
-  @@index([name])
-  @@index([category])
-  @@index([deleted_at])
-  @@map("page_templates")
 }
 
 // Section Model
@@ -263,6 +250,49 @@ model Section {
   @@index([page_id, order])
   @@index([deleted_at])
   @@map("sections")
+}
+
+// ================================
+// Template Tables (website, page, section)
+// ================================
+
+// Website Template
+model WebsiteTemplate {
+  id            String  @id @default(cuid())
+  name          String
+  category      String
+  thumbnail_url String?
+
+  global_style Json?
+  navbar       Json?
+  footer       Json?
+
+  created_at    DateTime       @default(now())
+  deleted_at    DateTime?
+  globalDesigns GlobalDesign[]
+
+  @@index([name])
+  @@index([category])
+  @@index([deleted_at])
+  @@map("website_templates")
+}
+
+// Page Template Model
+model PageTemplate {
+  id            String  @id @default(cuid())
+  name          String
+  category      String
+  thumbnail_url String?
+  sections      Json
+
+  created_at DateTime  @default(now())
+  deleted_at DateTime?
+  pages      Page[]
+
+  @@index([name])
+  @@index([category])
+  @@index([deleted_at])
+  @@map("page_templates")
 }
 
 // Section Template

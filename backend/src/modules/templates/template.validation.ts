@@ -76,7 +76,7 @@ export const createSectionTemplateSchema = z.object({
         .pipe(z.url('Invalid thumbnail URL'))
         .optional(),
 
-    props: z.json()
+    props: z.any()
 });
 
 export const updateSectionTemplateSchema = z.object({
@@ -106,9 +106,8 @@ export const updateSectionTemplateSchema = z.object({
 // ============================================
 
 export const templateIdParamsSchema = z.object({
-    templateId: z.string().pipe(
-        z.cuid2('Invalid template ID format')
-    )
+    templateId: z.string().min(1, 'Invalid template ID format')
+        .pipe(z.cuid2('Invalid template ID format'))
 });
 
 // ============================================

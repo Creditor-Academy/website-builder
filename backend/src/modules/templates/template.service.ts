@@ -17,6 +17,14 @@ class TemplateService {
     }
 
     /**
+     * Get all website templates
+     */
+    async listWebsiteTemplates(query: ListTemplatesQueryInput) {
+        let templates = await this.templateDao.listWebsiteTemplates(query);
+        return templates;
+    }
+
+    /**
      * Create a new page template
      */
     async createPageTemplate(data: CreatePageTemplateInput): Promise<PageTemplate> {

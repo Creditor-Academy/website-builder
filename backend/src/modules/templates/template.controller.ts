@@ -10,6 +10,23 @@ class TemplateController {
     }
 
     // ============================================
+    // Website Template Routes
+    // ============================================
+
+    // GET /websites/templates - List all templates
+    listWebsiteTemplates = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const templates = await this.templateService.listWebsiteTemplates(req.validated.query);
+            res.status(200).json({
+                data: templates,
+                count: templates.length
+            });
+        } catch (error: any) {
+            next(error);
+        }
+    }
+
+    // ============================================
     // Page Template Routes
     // ============================================
 

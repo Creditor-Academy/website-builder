@@ -1,25 +1,25 @@
 import prismaClient from '../../../config/prisma.js';
+import { Prisma } from '@prisma/client';
 import type { Page } from '@prisma/client';
+import { CreatePageInput, CreateSectionInput, UpdatePageInput } from './page.validation.js';
 
 class PageDao {
     /**
      * Create a new page
      */
-    async createPage(data: {
-        name: string;
-        slug: string;
-        version_id: string;
-        meta: any;
-        page_styles?: any;
-    }): Promise<Page> {
+    async createPage(website_id: string, data: CreatePageInput): Promise<Page> {
         return await prismaClient.page.create({
-            data,
-            // include: {
-            //     sections: {
-            //         where: { deleted_at: null },
-            //         orderBy: { order: 'asc' }
-            //     }
-            // }
+            data: {
+                ...data,
+                website_id,
+                sections: { create: data.sections }
+            },
+            include: {
+                sections: {
+                    where: { deleted_at: null },
+                    orderBy: { order: 'asc' }
+                }
+            }
         });
     }
 
@@ -39,13 +39,13 @@ class PageDao {
     }
 
     /**
-     * Get page by slug and version
+     * Get page by slug and website
      */
-    async getPageBySlug(slug: string, versionId: string): Promise<Page | null> {
+    async getPageBySlug(slug: string, websiteId: string): Promise<Page | null> {
         return await prismaClient.page.findFirst({
             where: {
                 slug,
-                version_id: versionId,
+                website_id: websiteId,
                 deleted_at: null
             },
             include: {
@@ -58,28 +58,23 @@ class PageDao {
     }
 
     /**
-     * List all pages for a version with pagination
+     * List all pages for a website (without associations)
      */
-    async listPagesByVersion(
-        versionId: string,
-        options: {
-            skip?: number;
-            take?: number;
-            search?: string;
-        } = {}
-    ): Promise<Page[]> {
-        const { skip = 0, take = 50, search } = options;
+    async findPagesByWebsiteId(websiteId: string) {
+        return await prismaClient.page.findMany({
+            where: { website_id: websiteId },
+            orderBy: { created_at: 'asc' }
+        });
+    }
 
+    /**
+     * List all pages for a website (with sections in order)
+     */
+    async listPagesByWebsiteId(websiteId: string): Promise<Page[]> {
         return await prismaClient.page.findMany({
             where: {
-                version_id: versionId,
+                website_id: websiteId,
                 deleted_at: null,
-                ...(search ? {
-                    OR: [
-                        { name: { contains: search, mode: 'insensitive' } },
-                        { slug: { contains: search, mode: 'insensitive' } }
-                    ]
-                } : {})
             },
             include: {
                 sections: {
@@ -87,8 +82,6 @@ class PageDao {
                     orderBy: { order: 'asc' }
                 }
             },
-            skip,
-            take,
             orderBy: { created_at: 'desc' }
         });
     }
@@ -96,15 +89,22 @@ class PageDao {
     /**
      * Update page
      */
-    async updatePage(pageId: string, data: Partial<{
-        name: string;
-        slug: string;
-        meta: any;
-        page_styles: any;
-    }>): Promise<Page> {
+    async updatePage(
+        pageId: string,
+        data: Partial<{
+            name: string;
+            slug: string;
+            meta: any;
+            page_styles: any;
+        }>,
+        createSections?: CreateSectionInput[]
+    ): Promise<Page> {
         return await prismaClient.page.update({
             where: { id: pageId },
-            data,
+            data: {
+                ...data,
+                sections: createSections ? { create: createSections } : {}
+            },
             include: {
                 sections: {
                     where: { deleted_at: null },
@@ -120,12 +120,7 @@ class PageDao {
     async deletePage(pageId: string): Promise<Page> {
         return await prismaClient.page.update({
             where: { id: pageId },
-            data: { deleted_at: new Date() },
-            include: {
-                sections: {
-                    orderBy: { order: 'asc' }
-                }
-            }
+            data: { deleted_at: new Date() }
         });
     }
 
@@ -135,24 +130,18 @@ class PageDao {
     async restorePage(pageId: string): Promise<Page> {
         return await prismaClient.page.update({
             where: { id: pageId },
-            data: { deleted_at: null },
-            include: {
-                sections: {
-                    where: { deleted_at: null },
-                    orderBy: { order: 'asc' }
-                }
-            }
+            data: { deleted_at: null }
         });
     }
 
     /**
      * Check if page exists
      */
-    async pageExists(pageId: string, versionId: string): Promise<boolean> {
+    async pageExists(pageId: string, websiteId: string): Promise<boolean> {
         const page = await prismaClient.page.findFirst({
             where: {
                 id: pageId,
-                version_id: versionId,
+                website_id: websiteId,
                 deleted_at: null
             },
             select: { id: true }
@@ -162,14 +151,14 @@ class PageDao {
     }
 
     /**
-     * Check if slug is unique in version
+     * Check if slug is unique in website
      * excludePageId is used to exclude the current page from the check
      */
-    async isSlugUnique(slug: string, versionId: string, excludePageId?: string): Promise<boolean> {
+    async isSlugUnique(slug: string, websiteId: string, excludePageId?: string): Promise<boolean> {
         const page = await prismaClient.page.findFirst({
             where: {
                 slug,
-                version_id: versionId,
+                website_id: websiteId,
                 deleted_at: null,
                 ...(excludePageId ? { NOT: { id: excludePageId } } : {})
             },
@@ -180,12 +169,12 @@ class PageDao {
     }
 
     /**
-     * Count pages in version
+     * Count pages in website
      */
-    async countPagesByVersion(versionId: string): Promise<number> {
+    async countPagesByWebsite(websiteId: string): Promise<number> {
         return await prismaClient.page.count({
             where: {
-                version_id: versionId,
+                website_id: websiteId,
                 deleted_at: null
             }
         });
@@ -199,7 +188,6 @@ class PageDao {
             where: { id: pageId, deleted_at: null },
             include: {
                 sections: {
-                    where: { deleted_at: null },
                     orderBy: { order: 'asc' },
                 }
             }

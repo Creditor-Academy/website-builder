@@ -1,11 +1,43 @@
 import prismaClient from '../../config/prisma.js';
 import type { PageTemplate, Prisma, SectionTemplate } from '@prisma/client';
-import type { CreatePageTemplateInput, CreateSectionTemplateInput, ListTemplatesQueryInput, UpdatePageTemplateInput, UpdateSectionTemplateInput } from './template.validation.js';
+import type {
+    CreatePageTemplateInput,
+    CreateSectionTemplateInput,
+    ListTemplatesQueryInput,
+    UpdatePageTemplateInput,
+    UpdateSectionTemplateInput
+} from './template.validation.js';
 
 class TemplateDao {
     // ==============================
     // Page Template Operations
     // ==============================
+
+    /**
+     * Get all page templates
+     */
+    async listWebsiteTemplates(options: ListTemplatesQueryInput) {
+        const { page = 1, limit = 10, category, search } = options;
+        const skip = (page - 1) * limit;
+
+        const where: Prisma.WebsiteTemplateWhereInput = {};
+
+        where.deleted_at = null;
+        if (category) where.category = category;
+
+        if (search) {
+            where.OR = [
+                { name: { contains: search, mode: 'insensitive' } },
+                { category: { contains: category || '', mode: 'insensitive' } },
+            ]
+        }
+
+        return await prismaClient.websiteTemplate.findMany({
+            where, skip,
+            take: limit,
+            orderBy: { created_at: 'desc' }
+        });
+    }
 
     /**
      * Create a new page template
