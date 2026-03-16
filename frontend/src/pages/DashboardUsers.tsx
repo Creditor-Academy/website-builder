@@ -36,7 +36,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Users, UserPlus, Search, Edit, UserX, UserCheck, UserCog, AlertTriangle, Clock, CalendarDays, ShieldCheck, User as UserIcon, Briefcase } from 'lucide-react'; // Import new icons
+import { Users, UserPlus, Search, Edit, UserX, UserCheck, UserCog, AlertTriangle, Clock, CalendarDays, ShieldCheck, User as UserIcon, Briefcase, CheckCircle, AlertCircle, XCircle } from 'lucide-react'; // Import icons
+import { useToast } from '@/components/ui/use-toast';
 
 interface User {
   id: string;
@@ -49,10 +50,13 @@ interface User {
 }
 
 export default function DashboardUsers() {
+  const { toast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const [newUser, setNewUser] = useState<Omit<User, 'id' | 'createdAt' | 'lastLogin'> & { id?: string }>({ name: '', email: '', role: 'User', status: 'Active' });
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
   const [userToDeactivate, setUserToDeactivate] = useState<User | null>(null);
@@ -89,6 +93,11 @@ export default function DashboardUsers() {
       );
       setIsModalOpen(false);
       setEditingUser(null);
+      toast({
+        title: "User Updated ✅",
+        description: `User ${editingUser.name} has been updated.`, 
+        icon: <CheckCircle className="h-5 w-5 text-emerald-500" />,
+      });
     }, 300); // Simulate network delay
   };
 
@@ -122,6 +131,11 @@ export default function DashboardUsers() {
       );
       setIsDeactivateDialogOpen(false);
       setUserToDeactivate(null);
+      toast({
+        title: "User Deactivated 🚫",
+        description: `User ${userToDeactivate.name} has been deactivated.`, 
+        icon: <XCircle className="h-5 w-5 text-destructive" />,
+      });
     }, 300); // Simulate network delay
   };
 
@@ -131,15 +145,15 @@ export default function DashboardUsers() {
       setUsers((prevUsers) =>
         prevUsers.map((u) => (u.id === user.id ? { ...u, status: "Active" } : u))
       );
+      toast({
+        title: "User Restored ✨",
+        description: `User ${user.name} has been restored to active status.`, 
+        icon: <CheckCircle className="h-5 w-5 text-primary" />,
+      });
     }, 300);
   };
 
   const [searchTerm, setSearchTerm] = useState('');
-
-  const handleAddUser = () => {
-    console.log("Add new user");
-    // In a real application, this would open a form to add a new user
-  };
 
   const filteredUsers = users.filter(
     (user) =>
@@ -147,9 +161,55 @@ export default function DashboardUsers() {
       user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (isLoading) {
-    return <div className="p-6">Loading users...</div>;
-  }
+  const handleAddUserClick = () => {
+    setNewUser({ name: '', email: '', role: 'User', status: 'Active' }); // Reset form
+    setIsAddUserModalOpen(true);
+  };
+
+  const handleNewUserChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { id, value } = e.target;
+    setNewUser({ ...newUser, [id]: value });
+  };
+
+  const handleNewUserSelectChange = (id: keyof Omit<User, 'id' | 'createdAt' | 'lastLogin'>, value: string) => {
+    setNewUser({ ...newUser, [id]: value });
+  };
+
+  const handleCreateNewUser = async () => {
+    if (!newUser.name.trim() || !newUser.email.trim()) {
+      toast({
+        title: "Validation Error ⚠️",
+        description: "Please fill in all required fields for the new user.", 
+        icon: <AlertCircle className="h-5 w-5 text-amber-500" />,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newId = (parseInt(users[users.length - 1].id) + 1).toString(); // Simple ID generation
+    const now = new Date().toISOString().split('T')[0];
+    const userToAdd: User = {
+      id: newId,
+      name: newUser.name,
+      email: newUser.email,
+      role: newUser.role,
+      status: newUser.status,
+      createdAt: now,
+      lastLogin: now,
+    };
+
+    setTimeout(() => {
+      setUsers((prevUsers) => [...prevUsers, userToAdd]);
+      setIsAddUserModalOpen(false);
+      setNewUser({ name: '', email: '', role: 'User', status: 'Active' });
+      toast({
+        title: "User Added Successfully 🎉",
+        description: `New user ${userToAdd.name} has been created.`, 
+        icon: <CheckCircle className="h-5 w-5 text-emerald-500" />,
+      });
+    }, 300);
+  };
+
 
   return (
     <div className="p-4 md:p-6 bg-white rounded-xl shadow-sm border border-slate-200">
@@ -157,20 +217,20 @@ export default function DashboardUsers() {
         <h2 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-3">
           <Users className="w-7 h-7 text-primary" /> Users Management
         </h2>
-        <Button onClick={handleAddUser} className="gap-2 w-full md:w-auto">
+        <Button onClick={handleAddUserClick} className="gap-2 w-full md:w-auto">
           <UserPlus className="w-4 h-4" /> Add User
         </Button>
       </div>
 
-      <div className="mb-6 relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-        <Input
-          placeholder="Search users..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-full md:max-w-sm pl-9"
-        />
-      </div>
+        <div className="mb-6 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input
+            placeholder="Search users..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-full md:max-w-sm pl-9"
+          />
+        </div>
 
       <div className="overflow-x-auto rounded-lg border border-slate-200 shadow-sm">
         <Table>
@@ -317,6 +377,80 @@ export default function DashboardUsers() {
           </div>
           <div className="flex justify-end">
             <Button onClick={handleSaveUser}>Save changes</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isAddUserModalOpen} onOpenChange={setIsAddUserModalOpen}>
+        <DialogContent className="sm:max-w-[425px] w-[90%] rounded-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><UserPlus className="w-5 h-5" /> Add New User</DialogTitle>
+            <DialogDescription>
+              Enter the details for the new user. Click save when you're done.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="md:text-right">
+                Name
+              </Label>
+              <Input
+                id="name"
+                value={newUser.name}
+                onChange={handleNewUserChange}
+                className="col-span-1 md:col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+              <Label htmlFor="email" className="md:text-right">
+                Email
+              </Label>
+              <Input
+                id="email"
+                value={newUser.email}
+                onChange={handleNewUserChange}
+                className="col-span-1 md:col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+              <Label htmlFor="role" className="md:text-right">
+                Role
+              </Label>
+              <Select
+                value={newUser.role}
+                onValueChange={(value) => handleNewUserSelectChange("role", value)}
+              >
+                <SelectTrigger className="col-span-1 md:col-span-3">
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Admin">Admin</SelectItem>
+                  <SelectItem value="Editor">Editor</SelectItem>
+                  <SelectItem value="User">User</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+              <Label htmlFor="status" className="md:text-right">
+                Status
+              </Label>
+              <Select
+                value={newUser.status}
+                onValueChange={(value) => handleNewUserSelectChange("status", value)}
+              >
+                <SelectTrigger className="col-span-1 md:col-span-3">
+                  <SelectValue placeholder="Select a status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Inactive">Inactive</SelectItem>
+                  <SelectItem value="Suspended">Suspended</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={handleCreateNewUser} disabled={!newUser.name.trim() || !newUser.email.trim()}>Create User</Button>
           </div>
         </DialogContent>
       </Dialog>
