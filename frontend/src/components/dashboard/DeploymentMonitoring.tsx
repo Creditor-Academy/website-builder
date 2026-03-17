@@ -28,6 +28,7 @@ import {
   Activity, Globe, Tag, CheckCircle, XCircle, Hourglass, User as UserIcon, FileText, RefreshCw, MoreVertical, AlertCircle, RotateCcw, CircleDotDashed, Ban, Clock
 } from 'lucide-react';
 import DeploymentLogViewer from './DeploymentLogViewer';
+import { useToast } from '@/components/ui/use-toast';
 
 interface Deployment {
   id: string;
@@ -114,6 +115,7 @@ export default function DeploymentMonitoring() {
   const [currentDeploymentId, setCurrentDeploymentId] = useState('');
   const [showRollbackConfirm, setShowRollbackConfirm] = useState(false);
   const [rollbackTarget, setRollbackTarget] = useState<Deployment | null>(null);
+  const { toast } = useToast();
 
   const handleViewLogs = (deployment: Deployment) => {
     setCurrentDeploymentId(deployment.id);
@@ -128,6 +130,10 @@ export default function DeploymentMonitoring() {
   const handleRollback = (deployment: Deployment) => {
     setRollbackTarget(deployment);
     setShowRollbackConfirm(true);
+    toast({
+      title: "⏳ Initiating rollback process...",
+      description: `Preparing to roll back ${deployment.websiteName} to version ${deployment.version}.`,
+    });
   };
 
   const confirmRollback = () => {
@@ -146,6 +152,16 @@ export default function DeploymentMonitoring() {
         websiteName: rollbackTarget.websiteName,
       };
       setDeployments([newRolledBackDeployment, ...newDeployments]);
+      toast({
+        title: "🚀 Rollback successful!",
+        description: `Version ${rollbackTarget.version} of ${rollbackTarget.websiteName} has been rolled back. A new deployment has been initiated.`,
+      });
+    } else {
+      toast({
+        title: "⚠️ Rollback failed",
+        description: "No target deployment specified for rollback.",
+        variant: "destructive",
+      });
     }
     setShowRollbackConfirm(false);
     setRollbackTarget(null);
