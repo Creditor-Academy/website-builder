@@ -54,12 +54,12 @@ const STYLES = `
     font-family: 'Geist', sans-serif;
     font-size: 11px; font-weight: 600;
     letter-spacing: 0.14em; text-transform: uppercase;
-    background: var(--btn-bg, #0f172a); color: var(--btn-color, #fff);
+    background: var(--btn-bg, #0f172a) !important; color: var(--btn-color, #fff) !important;
     border: none;
     padding: 14px 28px; cursor: pointer;
     transition: opacity 0.2s ease, transform 0.2s ease;
     text-decoration: none;
-    border-radius: var(--btn-radius, 6px);
+    border-radius: var(--btn-radius, 6px) !important;
   }
   .ly-btn:hover { opacity: 0.85; transform: translateY(-1px); }
 
@@ -239,6 +239,10 @@ function ImageTextLayout({ content, section, isEditing, updateContent, openMedia
 }
 
 function TextButton({ content, isEditing, updateContent, styles }) { // Text-button layout variant
+  const handleTextEdit = (field, e) => {
+    updateContent(field, e.currentTarget.innerHTML);
+  };
+
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
       <CE
@@ -253,25 +257,46 @@ function TextButton({ content, isEditing, updateContent, styles }) { // Text-but
           animation: 'ly-up 0.5s ease both',
         }}
       />
-      <button 
-        className="ly-btn"
-        style={{
-          '--btn-bg': styles.buttonBackgroundColor || '#0f172a',
-          '--btn-color': styles.buttonTextColor || '#ffffff',
-          '--btn-radius': `${styles.buttonBorderRadius || 6}px`,
-        } as React.CSSProperties}
-      >
-        <CE
-          as="span" value={content.buttonText || 'Get Started'} isEditing={isEditing}
-          onSave={(val) => updateContent('buttonText', val)}
-        />
-        <ArrowRight size={13} />
-      </button>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', marginBottom: '3rem' }}>
+        <button 
+          className="cta-btn-primary" 
+          style={{ 
+            background: styles.buttonBackgroundColor || '#0f172a', 
+            color: styles.buttonTextColor || '#ffffff', 
+            borderRadius: styles.buttonBorderRadius || '12px',
+            padding: '14px 28px',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontFamily: "'Geist', sans-serif",
+            fontSize: '11px',
+            fontWeight: '600',
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            transition: 'opacity 0.2s ease, transform 0.2s ease'
+          }}
+        >
+          <span 
+            contentEditable={isEditing} 
+            suppressContentEditableWarning 
+            dangerouslySetInnerHTML={{ __html: content.buttonText || 'Get Started' }} 
+            onInput={(e) => handleTextEdit('buttonText', e)}
+            style={{ outline: 'none' }}
+          />
+          <ArrowRight width={16} height={16} />
+        </button>
+      </div>
     </div>
   );
 }
 
 function HeadingTextButton({ content, isEditing, updateContent, styles }) { // Heading-text-button layout variant
+  const handleTextEdit = (field, e) => {
+    updateContent(field, e.currentTarget.innerHTML);
+  };
+
   return (
     <div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
       <CE
@@ -298,20 +323,37 @@ function HeadingTextButton({ content, isEditing, updateContent, styles }) { // H
           opacity: 0.78, display: 'block', marginBottom: 40,
         }}
       />
-      <button 
-        className="ly-btn"
-        style={{
-          '--btn-bg': styles.buttonBackgroundColor || '#0f172a',
-          '--btn-color': styles.buttonTextColor || '#ffffff',
-          '--btn-radius': `${styles.buttonBorderRadius || 6}px`,
-        } as React.CSSProperties}
-      >
-        <CE
-          as="span" value={content.buttonText || 'Get Started'} isEditing={isEditing}
-          onSave={(val) => updateContent('buttonText', val)}
-        />
-        <ArrowRight size={13} />
-      </button>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', marginBottom: '3rem' }}>
+        <button 
+          className="cta-btn-primary" 
+          style={{ 
+            background: styles.buttonBackgroundColor || '#0f172a', 
+            color: styles.buttonTextColor || '#ffffff', 
+            borderRadius: styles.buttonBorderRadius || '12px',
+            padding: '14px 28px',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontFamily: "'Geist', sans-serif",
+            fontSize: '11px',
+            fontWeight: '600',
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            transition: 'opacity 0.2s ease, transform 0.2s ease'
+          }}
+        >
+          <span 
+            contentEditable={isEditing} 
+            suppressContentEditableWarning 
+            dangerouslySetInnerHTML={{ __html: content.buttonText || 'Get Started' }} 
+            onInput={(e) => handleTextEdit('buttonText', e)}
+            style={{ outline: 'none' }}
+          />
+          <ArrowRight width={16} height={16} />
+        </button>
+      </div>
     </div>
   );
 }

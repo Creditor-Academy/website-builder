@@ -9,7 +9,7 @@ import { PropertiesPanel } from './PropertiesPanel';
 import { TextColorPicker } from './TextColorPicker';
 import { GuidedTour } from './GuidedTour';
 import { SiteSettings } from './SiteSettings';
-import { useBuilderStore } from '@/store/useBuilderStore';
+import useBuilderStore from '@/store/useBuilderStore';
 import { useBuilder } from '@/contexts/BuilderContext';
 import {
   ResizableHandle,
@@ -32,7 +32,8 @@ import {
 
 function EditorContent() {
   const [leftNavTab, setLeftNavTab] = useState("add"); // 'add', 'layers', 'pages', 'settings', 'edit'
-  const { editor, setTourState } = useBuilderStore();
+  const store = useBuilderStore();
+  const { editor, setTourState } = store;
 
   // Auto-switch to edit tab when a section or component is selected
   useEffect(() => {
@@ -172,7 +173,8 @@ function EditorContent() {
 
 export function WebsiteEditor() {
   const { id } = useParams();
-  const { selectWebsite, activeWebsiteId } = useBuilderStore();
+  const store = useBuilderStore();
+  const { selectWebsite, activeWebsiteId } = store;
 
   useEffect(() => {
     if (id) {

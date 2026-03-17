@@ -1,6 +1,6 @@
 import React from 'react';
 import { useBuilder } from '@/contexts/BuilderContext';
-import { useBuilderStore } from '@/store/useBuilderStore';
+import useBuilderStore from '@/store/useBuilderStore';
 import { Undo2, Redo2, Eye, Download, Play, Share2, ChevronRight, Globe, Home, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -9,7 +9,8 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/comp
 export function EditorToolbar() {
   const { state, undo, redo, canUndo, canRedo, setPreviewMode, setLeftPanelVisible } = useBuilder();
   const { editor, page } = state;
-  const { setTourState } = useBuilderStore();
+  const store = useBuilderStore();
+  const { setTourState } = store;
 
   const startTour = () => {
     setTourState({ isActive: true, step: 0, isFinished: false });
