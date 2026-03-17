@@ -10,7 +10,76 @@ import {
     createAboutPage
 } from '@/lib/defaultPageData';
 
-const useBuilderStore = create(
+interface Page {
+    id: string;
+    name: string;
+    slug: string;
+    sections: any[]; // Define a more specific type for sections if available
+    meta: { title: string; description: string };
+    navbar: any; // Define a more specific type for navbar if available
+    footer: any; // Define a more specific type for footer if available
+    globalStyles: any; // Define a more specific type for globalStyles if available
+}
+
+interface Website {
+    id: string;
+    name: string;
+    lastEdited: string;
+    status: 'Draft' | 'Published';
+    pages: Page[];
+    activePageId: string | null;
+}
+
+interface EditorState {
+    selectedSectionId: string | null;
+    selectedComponentId: string | null;
+    editMode: 'content' | 'style';
+    isDragging: boolean;
+    zoom: number;
+    showGrid: boolean;
+    previewMode: boolean;
+    showLeftPanel: boolean;
+    showRightPanel: boolean;
+}
+
+interface BuilderStore {
+    websites: Website[];
+    activeWebsiteId: string | null;
+    activePageId: string | null;
+    editor: EditorState;
+    history: Page[][];
+    historyIndex: number;
+
+    setWebsites: (websites: Website[]) => void;
+    createWebsite: (name: string, template?: string) => string;
+    selectWebsite: (id: string) => void;
+    deleteWebsite: (id: string) => void;
+    setActivePage: (pageId: string) => void;
+    addPage: (pageData: Partial<Page>) => void;
+    duplicatePage: (pageId: string) => void;
+    deletePage: (pageId: string) => void;
+    updatePageSEO: (pageId: string, seoUpdates: Partial<{ title: string; description: string }>) => void;
+    updateWebsitePages: (newPages: Page[]) => void;
+    addSection: (section: any, index?: number) => void;
+    updateSection: (sectionId: string, updates: any) => void;
+    deleteSection: (sectionId: string) => void;
+    reorderSections: (ids: string[]) => void;
+    addComponent: (sectionId: string, component: any) => void;
+    updateComponent: (sectionId: string, componentId: string, updates: any) => void;
+    deleteComponent: (sectionId: string, componentId: string) => void;
+    getActiveWebsite: () => Website | undefined;
+    getActivePage: () => Page | null;
+    updateCurrentPage: (updates: Partial<Page>) => void;
+    updateNavbar: (updates: any) => void;
+    updateFooter: (updates: any) => void;
+    setEditorState: (updates: Partial<EditorState>) => void;
+    selectSection: (id: string | null) => void;
+    selectComponent: (id: string | null) => void;
+    undo: () => void;
+    redo: () => void;
+}
+
+const useBuilderStore = create<BuilderStore>(
     persist(
         (set, get) => ({
             // State
