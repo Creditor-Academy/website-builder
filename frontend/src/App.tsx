@@ -13,17 +13,21 @@ import DashboardDeployment from "./pages/DashboardDeployment";
 import DashboardAssets from "./pages/DashboardAssets";
 import DashboardSettings from "./pages/DashboardSettings";
 import { WebsiteEditor } from "./components/editor/WebsiteEditor";
+import Login from "./pages/Login";
 import Features from "./pages/Features";
 import Services from "./pages/Services";
 import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
 import Start from "./pages/Start";
 import Templates from "./pages/Templates";
+import Resources from "./pages/Resources";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
 import Careers from "./pages/Careers";
 import Help from "./pages/Help";
 import Status from "./pages/Status";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +41,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard" element={<Dashboard />}>
               <Route index element={null} /> {/* This will be handled by Dashboard component's internal routing or default view */}
               <Route path="users" element={<DashboardUsers />} />
@@ -49,6 +55,7 @@ const App = () => (
             <Route path="/builder/:id" element={<WebsiteEditor />} />
             <Route path="/features" element={<Features />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/resources" element={<Resources />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/start" element={<Start />} />
@@ -58,6 +65,8 @@ const App = () => (
             <Route path="/careers" element={<Careers />} />
             <Route path="/help" element={<Help />} />
             <Route path="/status" element={<Status />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

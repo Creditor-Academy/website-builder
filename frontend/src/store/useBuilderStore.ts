@@ -97,6 +97,11 @@ const useBuilderStore = create<BuilderStore>(
                 previewMode: false,
                 showLeftPanel: true,
                 showRightPanel: false,
+                tour: {
+                    isActive: false,
+                    step: 0,
+                    isFinished: false,
+                },
             },
 
             history: [],
@@ -365,6 +370,13 @@ const useBuilderStore = create<BuilderStore>(
             // Editor Actions
             setEditorState: (updates) => set((state) => ({
                 editor: { ...state.editor, ...updates }
+            })),
+            
+            setTourState: (updates) => set((state) => ({
+                editor: { 
+                    ...state.editor, 
+                    tour: { ...state.editor.tour, ...updates } 
+                }
             })),
 
             selectSection: (id) => set((state) => ({

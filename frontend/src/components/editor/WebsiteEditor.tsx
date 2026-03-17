@@ -1,30 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { BuilderProvider } from "@/contexts/BuilderContext";
-import { EditorToolbar } from "./EditorToolbar";
-import { SectionsList } from "./SectionsList";
-import { PageManager } from "./PageManager";
-import { SiteSettings } from "./SiteSettings";
-import { CanvasPreview } from "./CanvasPreview";
-import { PropertiesPanel } from "./PropertiesPanel";
-import { TextColorPicker } from "./TextColorPicker";
+import { EditorToolbar } from './EditorToolbar';
+import { SectionsList } from './SectionsList';
+import { PageManager } from './PageManager';
+import { CanvasPreview } from './CanvasPreview';
+import { PropertiesPanel } from './PropertiesPanel';
+import { TextColorPicker } from './TextColorPicker';
+import { GuidedTour } from './GuidedTour';
+import { SiteSettings } from './SiteSettings';
+import useBuilderStore from '@/store/useBuilderStore';
+import { useBuilder } from '@/contexts/BuilderContext';
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Layers,
   FileText,
-  Globe,
   Plus,
   Settings,
-  Palette,
-  Search,
   Sliders,
 } from "lucide-react";
-import useBuilderStore from "@/store/useBuilderStore";
 import {
   Tooltip,
   TooltipContent,
@@ -33,18 +31,9 @@ import {
 } from "@/components/ui/tooltip";
 
 function EditorContent() {
-  const [theme, setTheme] = useState("light");
   const [leftNavTab, setLeftNavTab] = useState("add"); // 'add', 'layers', 'pages', 'settings', 'edit'
-  const { editor } = useBuilderStore();
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-  }, [theme]);
+  const store = useBuilderStore();
+  const { editor, setTourState } = store;
 
   // Auto-switch to edit tab when a section or component is selected
   useEffect(() => {
@@ -52,8 +41,6 @@ function EditorContent() {
       setLeftNavTab("edit");
     }
   }, [editor.selectedSectionId, editor.selectedComponentId]);
-
-  const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
 
   const navItems = [
     { id: "add", icon: Plus, label: "Add Elements" },
@@ -65,8 +52,17 @@ function EditorContent() {
 
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden font-sans">
-      <EditorToolbar theme={theme} onToggleTheme={toggleTheme} />
+      <EditorToolbar />
       <TextColorPicker />
+      <GuidedTour />
+      {/* Debug: Test Tour Button */}
+      <button
+  onClick={() => setTourState({ isActive: true, step: 0, isFinished: false })}
+  className="fixed bottom-4 right-4 z-50 w-12 h-12 flex items-center justify-center bg-sky-400 text-white rounded-full shadow-lg hover:bg-sky-500 transition-colors"
+>
+  ?
+</button>
+
       <div className="flex-1 min-h-0">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           {!editor.previewMode && editor.showLeftPanel && (
@@ -84,6 +80,7 @@ function EditorContent() {
                       <Tooltip key={item.id}>
                         <TooltipTrigger asChild>
                           <button
+                            id={`tour-nav-${item.id}`}
                             onClick={() => setLeftNavTab(item.id)}
                             className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${
                               leftNavTab === item.id
@@ -176,7 +173,8 @@ function EditorContent() {
 
 export function WebsiteEditor() {
   const { id } = useParams();
-  const { selectWebsite, activeWebsiteId } = useBuilderStore();
+  const store = useBuilderStore();
+  const { selectWebsite, activeWebsiteId } = store;
 
   useEffect(() => {
     if (id) {

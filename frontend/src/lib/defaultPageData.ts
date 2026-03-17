@@ -1,5 +1,15 @@
 import { v4 as uuidv4 } from 'uuid';
 
+// Import template-specific creators
+export * from './templates/Business';
+export * from './templates/Portfolio';
+export * from './templates/Ecommerce';
+export * from './templates/Consultant';
+export * from './templates/Agencies';
+export * from './templates/Coach';
+
+// --- Default Sections (Shared/Fallback) ---
+
 export const createDefaultHeroSection = (variant = 'split') => ({
   id: uuidv4(),
   type: 'hero',
@@ -11,7 +21,7 @@ export const createDefaultHeroSection = (variant = 'split') => ({
     backgroundColor: '#ffffff',
     backgroundGradient: variant === 'gradient' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)' : null,
     useGradient: variant === 'gradient',
-    padding: variant === 'minimal' ? '60px 0' : '120px 0',
+    padding: variant === 'minimal' ? '15px 0' : '15px 0',
     minHeight: variant === 'minimal' ? '60vh' : '90vh',
   },
   content: {
@@ -164,8 +174,6 @@ export const createDefaultGallerySection = () => ({
   components: [],
 });
 
-// Image section removed — it was deprecated and removed from templates. Existing image sections will still render via a fallback in the renderer.
-
 export const createDefaultBlogListSection = () => ({
   id: uuidv4(),
   type: 'blog',
@@ -181,49 +189,8 @@ export const createDefaultBlogListSection = () => ({
     subheadline: 'Read our latest insights',
     posts: [
       { id: uuidv4(), imageUrl: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80', title: 'How we built our product', excerpt: 'An inside look at our design decisions and architecture.', author: 'Team', date: 'Jan 1, 2024' },
-      { id: uuidv4(), imageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80', title: 'Design trends 2024', excerpt: 'What’s shaping design this year and beyond.', author: 'Design', date: 'Feb 15, 2024' },
+      { id: uuidv4(), imageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80', title: 'Design trends 2024', excerpt: 'What\'s shaping design this year and beyond.', author: 'Design', date: 'Feb 15, 2024' },
     ],
-  },
-  components: [],
-});
-
-export const createDefaultMasonryGallerySection = () => ({
-  id: uuidv4(),
-  type: 'gallery-masonry',
-  name: 'Gallery Masonry',
-  visible: true,
-  locked: false,
-  styles: {
-    backgroundColor: '#ffffff',
-    padding: '80px 0',
-  },
-  content: {
-    images: [
-      { id: uuidv4(), url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80', title: 'Dashboard' },
-      { id: uuidv4(), url: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&q=80', title: 'Collaboration' },
-      { id: uuidv4(), url: 'https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&q=80', title: 'E-commerce' },
-    ],
-  },
-  components: [],
-});
-
-
-export const createDefaultContactSection = () => ({
-  id: uuidv4(),
-  type: 'contact',
-  name: 'Contact',
-  visible: true,
-  locked: false,
-  styles: {
-    backgroundColor: '#f8fafc',
-    padding: '100px 0',
-  },
-  content: {
-    headline: 'Get In Touch',
-    subheadline: "We'd love to hear from you. Send us a message!",
-    email: 'hello@example.com',
-    phone: '+1 (555) 123-4567',
-    address: '123 Business Street, City, Country',
   },
   components: [],
 });
@@ -298,15 +265,20 @@ export const createDefaultFAQSection = () => ({
 export const createDefaultLogoCloudSection = () => ({
   id: uuidv4(),
   type: 'logocloud',
+  variant: 'simple',
   name: 'Logo Cloud',
   visible: true,
   locked: false,
   styles: {
     backgroundColor: '#ffffff',
-    padding: '60px 0',
+    padding: '80px 0',
+    headingColor: '#0f172a',
+    paragraphColor: '#64748b',
+    logoHeight: '40px',
   },
   content: {
     headline: 'Trusted by leading companies',
+    subheadline: 'Join thousands of organizations using our platform',
     logos: [
       { id: uuidv4(), name: 'Google', url: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg' },
       { id: uuidv4(), name: 'Microsoft', url: 'https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg' },
@@ -350,6 +322,41 @@ export const createDefaultAboutSection = (variant = 'split') => ({
   components: [],
 });
 
+export const createDefaultContactSection = () => ({
+  id: uuidv4(),
+  type: 'contact',
+  name: 'Contact',
+  visible: true,
+  locked: false,
+  styles: {
+    backgroundColor: '#f8fafc',
+    padding: '100px 0',
+  },
+  content: {
+    headline: 'Get In Touch',
+    subheadline: "We'd love to hear from you. Send us a message!",
+    email: 'hello@example.com',
+    phone: '+1 (555) 123-4567',
+    address: '123 Business Street, City, Country',
+  },
+  components: [],
+});
+
+// --- Re-adding Missing Sections for Build Fix ---
+
+export const createDefaultMasonryGallerySection = () => ({
+  id: uuidv4(),
+  type: 'gallery-masonry',
+  name: 'Gallery Masonry',
+  visible: true,
+  locked: false,
+  styles: { backgroundColor: '#ffffff', padding: '80px 0' },
+  content: { images: [{ id: uuidv4(), url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80', title: 'Masonry 1' }] },
+  components: [],
+});
+
+// --- Fallback Global Creators ---
+
 export const createDefaultNavbar = () => ({
   id: uuidv4(),
   style: 'minimal',
@@ -368,6 +375,9 @@ export const createDefaultNavbar = () => ({
     backgroundColor: 'transparent',
     textColor: '#000000',
     sticky: true,
+    buttonBg: '#0f172a',
+    buttonText: '#ffffff',
+    buttonRadius: '2px',
   },
 });
 
@@ -718,3 +728,118 @@ export const getDefaultPage = () => ({
     backgroundColor: '#ffffff',
   },
 });
+
+// Layout Sections
+export const createDefaultTextOnlySection = () => ({
+  id: uuidv4(),
+  type: 'layout',
+  name: 'Text Only Layout',
+  variant: 'text-only',
+  visible: true,
+  content: {
+    text: 'This is a sample text paragraph that can be edited to include your own content. You can add multiple paragraphs, lists, or any other text content you need for your website.',
+  },
+  styles: {
+    padding: '60px 0',
+    textAlign: 'left',
+    fontSize: '16px',
+    lineHeight: '1.6',
+  },
+});
+
+export const createDefaultImageTextLeftSection = () => ({
+  id: uuidv4(),
+  type: 'layout',
+  name: 'Image + Text (Left)',
+  variant: 'image-text-left',
+  visible: true,
+  content: {
+    imageUrl: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800',
+    imageAlt: 'Sample image',
+    heading: 'Beautiful Design',
+    text: 'This layout features an image on the left side with text content on the right. Perfect for showcasing products, services, or any content that benefits from visual support.',
+  },
+  styles: {
+    padding: '80px 0',
+    backgroundColor: '#ffffff',
+  },
+});
+
+export const createDefaultImageTextRightSection = () => ({
+  id: uuidv4(),
+  type: 'layout',
+  name: 'Image + Text (Right)',
+  variant: 'image-text-right',
+  visible: true,
+  content: {
+    imageUrl: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800',
+    imageAlt: 'Sample image',
+    heading: 'Flexible Layout',
+    text: 'This layout places text on the left side with an image on the right. Great for creating visual interest while maintaining readability and professional appearance.',
+  },
+  styles: {
+    padding: '80px 0',
+    backgroundColor: '#f8fafc',
+  },
+});
+
+export const createDefaultTextButtonSection = () => ({
+  id: uuidv4(),
+  type: 'layout',
+  name: 'Text + Button',
+  variant: 'text-button',
+  visible: true,
+  content: {
+    text: 'This is a text-only layout with a call-to-action button. Perfect for simple announcements, newsletter signups, or directing users to important content.',
+    buttonText: 'Learn More',
+    buttonHref: '/learn-more',
+  },
+  styles: {
+    padding: '60px 0',
+    textAlign: 'center',
+    backgroundColor: '#ffffff',
+  },
+});
+
+export const createDefaultHeadingTextButtonSection = () => ({
+  id: uuidv4(),
+  type: 'layout',
+  name: 'Heading + Text + Button',
+  variant: 'heading-text-button',
+  visible: true,
+  content: {
+    heading: 'Complete Layout Solution',
+    text: 'This comprehensive layout includes a compelling heading, descriptive text, and a clear call-to-action button. It\'s perfect for landing pages, feature sections, or any content that needs to drive user action.',
+    buttonText: 'Get Started',
+    buttonHref: '/get-started',
+  },
+  styles: {
+    padding: '80px 0',
+    textAlign: 'center',
+    backgroundColor: '#ffffff',
+  },
+});
+
+export const createDefaultTwoColumnSection = () => ({
+  id: uuidv4(),
+  type: 'layout',
+  name: 'Two Column Layout',
+  variant: 'two-column',
+  visible: true,
+  content: {
+    leftColumn: {
+      heading: 'Left Column',
+      text: 'This is the left column content. You can add text, images, or any other content here. Perfect for comparing features or showing related information.',
+    },
+    rightColumn: {
+      heading: 'Right Column',
+      text: 'This is the right column content. It mirrors the left column structure and can be used for complementary information or additional details.',
+    },
+  },
+  styles: {
+    padding: '80px 0',
+    backgroundColor: '#ffffff',
+    gap: '40px',
+  },
+});
+
