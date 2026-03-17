@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Users, UserPlus, Search, Edit, UserX, UserCheck, UserCog, AlertTriangle, Clock, CalendarDays, ShieldCheck, User as UserIcon, Briefcase, CheckCircle, AlertCircle, XCircle } from 'lucide-react'; // Import icons
 import { useToast } from '@/components/ui/use-toast';
+import UserShimmer from '@/components/dashboard/UserShimmer';
 
 interface User {
   id: string;
@@ -255,54 +256,67 @@ export default function DashboardUsers() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredUsers.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell className="font-medium px-4 py-3 whitespace-nowrap">{user.id}</TableCell>
-                <TableCell className="px-4 py-3 whitespace-nowrap">{user.name}</TableCell>
-                <TableCell className="px-4 py-3 whitespace-nowrap">{user.email}</TableCell>
-                <TableCell className="px-4 py-3">
-                  <Badge 
-                    variant="outline" 
-                    className="flex items-center gap-1 w-fit"
-                  >
-                    {user.role === "Admin" && <ShieldCheck className="w-3 h-3 text-indigo-500" />}
-                    {user.role === "Editor" && <Briefcase className="w-3 h-3 text-blue-500" />}
-                    {user.role === "User" && <UserIcon className="w-3 h-3 text-green-500" />}
-                    {user.role}
-                  </Badge>
-                </TableCell>
-                <TableCell className="px-4 py-3">
-                  <Badge
-                    variant={user.status === "Active" ? "default" : user.status === "Suspended" ? "destructive" : "secondary"}
-                    className="w-fit"
-                  >
-                    {user.status}
-                  </Badge>
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-slate-500 text-sm px-4 py-3">{user.createdAt}</TableCell>
-                <TableCell className="whitespace-nowrap text-slate-500 text-sm px-4 py-3">{user.lastLogin}</TableCell>
-                <TableCell className="text-center whitespace-nowrap px-4 py-3">
-                  {user.status === "Inactive" || user.status === "Suspended" ? (
-                    <Button variant="outline" size="sm" className="mr-2 gap-1" onClick={() => handleRestoreClick(user)}>
-                      <UserCheck className="w-4 h-4" /> Restore
+            {isLoading ? (
+              // Shimmer loading effect
+              Array.from({ length: 5 }).map((_, i) => <UserShimmer key={i} />)
+            ) : filteredUsers.length > 0 ? (
+              // Display filtered users
+              filteredUsers.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell className="font-medium px-4 py-3 whitespace-nowrap">{user.id}</TableCell>
+                  <TableCell className="px-4 py-3 whitespace-nowrap">{user.name}</TableCell>
+                  <TableCell className="px-4 py-3 whitespace-nowrap">{user.email}</TableCell>
+                  <TableCell className="px-4 py-3">
+                    <Badge 
+                      variant="outline" 
+                      className="flex items-center gap-1 w-fit"
+                    >
+                      {user.role === "Admin" && <ShieldCheck className="w-3 h-3 text-indigo-500" />}
+                      {user.role === "Editor" && <Briefcase className="w-3 h-3 text-blue-500" />}
+                      {user.role === "User" && <UserIcon className="w-3 h-3 text-green-500" />}
+                      {user.role}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="px-4 py-3">
+                    <Badge
+                      variant={user.status === "Active" ? "default" : user.status === "Suspended" ? "destructive" : "secondary"}
+                      className="w-fit"
+                    >
+                      {user.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap text-slate-500 text-sm px-4 py-3">{user.createdAt}</TableCell>
+                  <TableCell className="whitespace-nowrap text-slate-500 text-sm px-4 py-3">{user.lastLogin}</TableCell>
+                  <TableCell className="text-center whitespace-nowrap px-4 py-3">
+                    {user.status === "Inactive" || user.status === "Suspended" ? (
+                      <Button variant="outline" size="sm" className="mr-2 gap-1" onClick={() => handleRestoreClick(user)}>
+                        <UserCheck className="w-4 h-4" /> Restore
+                      </Button>
+                    ) : (
+                      <Button variant="outline" size="sm" className="mr-2 gap-1" onClick={() => handleEditClick(user)}>
+                        <Edit className="w-4 h-4" /> Edit
+                      </Button>
+                    )}
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDeactivateClick(user)}
+                      disabled={user.status === "Inactive" || user.status === "Suspended"}
+                      className="gap-1"
+                    >
+                      <UserX className="w-4 h-4" /> Deactivate
                     </Button>
-                  ) : (
-                    <Button variant="outline" size="sm" className="mr-2 gap-1" onClick={() => handleEditClick(user)}>
-                      <Edit className="w-4 h-4" /> Edit
-                    </Button>
-                  )}
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleDeactivateClick(user)}
-                    disabled={user.status === "Inactive" || user.status === "Suspended"}
-                    className="gap-1"
-                  >
-                    <UserX className="w-4 h-4" /> Deactivate
-                  </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              // No users found message
+              <TableRow>
+                <TableCell colSpan={8} className="h-24 text-center text-slate-500">
+                  No users found.
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </div>
