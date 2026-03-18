@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from "@/components/ui/use-toast";
 import useBuilderStore from '@/store/useBuilderStore';
@@ -42,11 +43,11 @@ export const templatesList = [
 const OverviewCard = ({ title, value, icon, description }) => (
     <Card className="rounded-xl border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-700">{title}</CardTitle>
+            <CardTitle className="text-base font-medium text-slate-700">{title}</CardTitle>
             {icon}
         </CardHeader>
         <CardContent>
-            <div className="text-2xl font-bold text-slate-900">{value}</div>
+            <div className="text-3xl font-bold text-slate-900">{value}</div>
             {description && <p className="text-xs text-slate-500 mt-1">{description}</p>}
         </CardContent>
     </Card>
@@ -86,6 +87,8 @@ const Dashboard = () => {
     const [selectedTemplate, setSelectedTemplate] = useState('blank');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [sortBy, setSortBy] = useState('recent'); // 'recent' or 'name'
+    const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'draft', 'published'
 
     const adminRoutes = [
         '/dashboard/users',
@@ -116,9 +119,23 @@ const Dashboard = () => {
         }
     };
 
-    const filteredWebsites = websites.filter(site =>
-        site.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredWebsites = React.useMemo(() => {
+        let tempWebsites = websites.filter(site =>
+            site.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+        if (filterStatus !== 'all') {
+            tempWebsites = tempWebsites.filter(site => site.status.toLowerCase() === filterStatus);
+        }
+
+        if (sortBy === 'recent') {
+            tempWebsites.sort((a, b) => new Date(b.lastEdited).getTime() - new Date(a.lastEdited).getTime());
+        } else if (sortBy === 'name') {
+            tempWebsites.sort((a, b) => a.name.localeCompare(b.name));
+        }
+
+        return tempWebsites;
+    }, [websites, searchQuery, sortBy, filterStatus]);
 
     const handleCreateSite = () => {
         if (newSiteName.trim()) {
@@ -153,7 +170,7 @@ const Dashboard = () => {
                     isMobile && !isSidebarOpen ? "-translate-x-full" : "translate-x-0"
                 )}
             >
-                <div className="p-6">
+                <div className="p-6 shrink-0">
                     <div className="flex items-center gap-2.5 px-2">
                         <h1 className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500">
                             Buildora
@@ -171,7 +188,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <nav className="flex-1 px-4 py-2 space-y-1">
+                <nav className="flex-1 px-4 py-2 space-y-1 overflow-y-auto">
                     <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest px-3 mb-2">Main Menu</p>
                     {!isAdmin && (
                         <NavItem icon={<Globe className="w-4 h-4" />} label="Dashboard" to="/dashboard" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
@@ -189,8 +206,7 @@ const Dashboard = () => {
                     )}
                 </nav>
 
-                {/* FIX: Removed mismatched extra wrapping div; cleaned up sidebar footer structure */}
-                <div className="p-4 mt-auto space-y-3">
+                <div className="p-4 space-y-3 shrink-0">
                     <div className="bg-slate-700 rounded-2xl p-4 border border-slate-600">
                         <p className="text-xs font-semibold text-white mb-1">Free Plan</p>
                         <div className="w-full bg-slate-600 h-1.5 rounded-full mb-2">
@@ -228,7 +244,8 @@ const Dashboard = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 p-6 md:p-10 overflow-y-auto">
+                        <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
+
                 {location.pathname === '/dashboard' && !isAdmin ? (
                     <>
                         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
@@ -244,27 +261,17 @@ const Dashboard = () => {
                                     </Button>
                                 )}
                                 <div>
-                                    <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Project Hub</h2>
-                                    <p className="text-slate-500 flex items-center gap-2 mt-1">
+                                    <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">Project Hub</h2>
+                                                                        <p className="text-lg text-slate-600 flex items-center gap-2 mt-1">
                                         Welcome back! You have <span className="text-primary font-medium">{websites.length} active projects</span>
                                     </p>
                                 </div>
                             </div>
 
                             <div className="flex items-center gap-3">
-                                <div className="relative hidden sm:block">
-                                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                    <Input
-                                        placeholder="Search projects..."
-                                        className="pl-9 w-[240px] bg-white border-slate-200 focus:ring-primary/20"
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                    />
-                                </div>
-
                                 <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
                                     <DialogTrigger asChild>
-                                        <Button className="gap-2 px-5 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all">
+                                        <Button className="gap-2 h-12 px-6 text-base rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
                                             <Plus className="w-5 h-5" /> New Project
                                         </Button>
                                     </DialogTrigger>
@@ -399,11 +406,45 @@ const Dashboard = () => {
                             )}
                         </section>
 
+                        {/* Search and Filters */}
+                        <div className="flex flex-col sm:flex-row items-center gap-3 mb-6">
+                            <div className="relative flex-1 w-full sm:w-auto">
+                                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                                <Input
+                                    placeholder="Search projects..."
+                                    className="pl-9 w-full bg-white border-slate-200 focus:ring-primary/20"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+
+                            <Select value={sortBy} onValueChange={setSortBy}>
+                                <SelectTrigger className="w-full sm:w-[160px] h-12 rounded-xl bg-white border-slate-200 focus:ring-primary/20">
+                                    <SelectValue placeholder="Sort By" />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">
+                                    <SelectItem value="recent">Recent</SelectItem>
+                                    <SelectItem value="name">Name</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            <Select value={filterStatus} onValueChange={setFilterStatus}>
+                                <SelectTrigger className="w-full sm:w-[160px] h-12 rounded-xl bg-white border-slate-200 focus:ring-primary/20">
+                                    <SelectValue placeholder="Filter Status" />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">
+                                    <SelectItem value="all">All</SelectItem>
+                                    <SelectItem value="draft">Draft</SelectItem>
+                                    <SelectItem value="published">Published</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
                         {/* Website Cards */}
                         {websites.length === 0 ? (
                             <EmptyState onAction={() => setIsDialogOpen(true)} />
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {filteredWebsites.map((site, index) => (
                                     <WebsiteCard
                                         key={site.id}
