@@ -60,7 +60,7 @@ const NavItem = ({ icon, label, to, activeColor = 'text-primary', hoverBg = 'hov
     return (
         <Button
             variant="ghost"
-            className={`w-full justify-start gap-3 h-11 transition-all duration-200 group 
+            className={`w-full justify-start gap-2 h-8 text-sm transition-all duration-200 group 
                 ${isActive ? `bg-primary/5 ${activeColor} font-semibold` : `${defaultText} ${hoverText} ${hoverBg}`}
             `}
             asChild
@@ -170,7 +170,7 @@ const Dashboard = () => {
                     isMobile && !isSidebarOpen ? "-translate-x-full" : "translate-x-0"
                 )}
             >
-                <div className="p-6 shrink-0">
+                <div className="p-4 shrink-0">
                     <div className="flex items-center gap-2.5 px-2">
                         <h1 className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500">
                             Buildora
@@ -188,16 +188,16 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <nav className="flex-1 px-4 py-2 space-y-1 overflow-y-auto">
-                    <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest px-3 mb-2">Main Menu</p>
+                <nav className="flex-1 px-4 py-1 space-y-0.5">
+                    <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest px-3 mb-1">Main Menu</p>
                     {!isAdmin && (
                         <NavItem icon={<Globe className="w-4 h-4" />} label="Dashboard" to="/dashboard" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
                     )}
                     <NavItem icon={<Layout className="w-4 h-4" />} label="Templates" to="/dashboard/templates" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
                     <NavItem icon={<FileText className="w-4 h-4" />} label="Assets" to="/dashboard/assets" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
                     {isAdmin && (
-                        <div className="pt-4">
-                            <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest px-3 mb-2">System</p>
+                        <div className="pt-1">
+                            <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest px-3 mb-1">System</p>
                             <NavItem icon={<Users className="w-4 h-4" />} label="Users" to="/dashboard/users" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
                             <NavItem icon={<Layout className="w-4 h-4" />} label="Websites" to="/dashboard/websites" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
                             <NavItem icon={<Activity className="w-4 h-4" />} label="Deployment Monitoring" to="/dashboard/deployment" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
@@ -206,17 +206,17 @@ const Dashboard = () => {
                     )}
                 </nav>
 
-                <div className="p-4 space-y-3 shrink-0">
-                    <div className="bg-slate-700 rounded-2xl p-4 border border-slate-600">
+                <div className="p-1 space-y-2 shrink-0">
+                    <div className="bg-slate-700 rounded-2xl p-1 border border-slate-600">
                         <p className="text-xs font-semibold text-white mb-1">Free Plan</p>
-                        <div className="w-full bg-slate-600 h-1.5 rounded-full mb-2">
+                        <div className="w-full bg-slate-600 h-1.5 rounded-full mb-1">
                             <div className="bg-purple-500 h-full w-1/3 rounded-full" />
                         </div>
                         <p className="text-[10px] text-slate-400">3 of 10 projects used</p>
                     </div>
 
                     <Button
-                        className="w-full justify-start gap-3 h-11 bg-slate-700 text-slate-300 border border-slate-500 hover:bg-slate-600 hover:text-white"
+                        className="w-full justify-start gap-3 h-8 bg-slate-700 text-slate-300 border border-slate-500 hover:bg-slate-600 hover:text-white"
                         onClick={() => setIsAdmin(!isAdmin)}
                     >
                         {isAdmin
@@ -227,7 +227,7 @@ const Dashboard = () => {
                     </Button>
 
                     <div
-                        className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-700 transition-colors cursor-pointer border border-transparent hover:border-slate-600"
+                        className="flex items-center gap-3 p-1 rounded-xl hover:bg-slate-700 transition-colors cursor-pointer border border-transparent hover:border-slate-600"
                         onClick={handleLogout}
                     >
                         <div className="relative">
