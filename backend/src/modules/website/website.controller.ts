@@ -89,8 +89,8 @@ class WebsiteController {
     duplicateWebsite = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const website = req.context.website!;
-            await this.websiteService.duplicateWebsite(website);
-            return res.status(200).json({ message: 'Website duplicated successfully' });
+            const newWebsite = await this.websiteService.duplicateWebsite(website);
+            return res.status(200).json({ message: 'Website duplicated successfully', website: newWebsite });
         } catch (error: any) {
             next(error);
         }

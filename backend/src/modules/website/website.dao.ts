@@ -1,4 +1,4 @@
-import { GlobalSlotType, Prisma, WebsiteStatus } from "@prisma/client";
+import { GlobalDesign, GlobalSlot, GlobalSlotType, Page, Prisma, Section, Settings, Website, WebsiteStatus } from "@prisma/client";
 import prismaClient from "../../config/prisma.js";
 import { DELETED_WEBSITE_RETENTION_TIME, SELECT_WEBSITE_FIELDS } from "../../constants/website.constants.js";
 import type { ListWebsitesQuerySchema, UpdateWebsiteSettingsInput } from "./website.validation.js";
@@ -77,30 +77,45 @@ class WebsiteDao {
         global_styles: any,
         global_slots: { type: GlobalSlotType, props: any }[]
     ) {
-        return await prismaClient.website.create({
-            data: {
-                ...websiteData,
-                owner: { connect: { id: userId } },
-                settings: { create: {} },
-                globalDesign: {
-                    create: {
-                        global_styles,
-                        ...(global_slots.length > 0 && {
-                            globalSlots: {
-                                create: global_slots
+        return await prismaClient.$transaction(async (tx) => {
+            const website = await tx.website.create({
+                data: {
+                    ...websiteData,
+                    owner: { connect: { id: userId } },
+                    settings: { create: {} },
+                    globalDesign: {
+                        create: {
+                            global_styles,
+                            ...(global_slots.length > 0 && {
+                                globalSlots: {
+                                    create: global_slots
+                                }
+                            })
+                        }
+                    },
+                    pages: {
+                        create: {
+                            ...pageData,
+                            sections: {
+                                create: pageData.sections
                             }
-                        })
-                    }
-                },
-                pages: {
-                    create: {
-                        ...pageData,
-                        sections: {
-                            create: pageData.sections
                         }
                     }
+                },
+                include: {
+                    pages: true
                 }
+            });
+
+            if (website.pages?.length > 0) {
+                return await tx.website.update({
+                    where: { id: website.id },
+                    data: { homepageId: website.pages[0]!.id }
+                });
             }
+
+            const { pages, ...rest } = website;
+            return rest;
         });
     }
 
@@ -122,6 +137,55 @@ class WebsiteDao {
             where: { id },
             data: data as any
         })
+    }
+
+    async cloneWebsite(
+        website: Website,
+        settings: Settings,
+        globalDesign: GlobalDesign & { globalSlots: GlobalSlot[] },
+        pages: (Page & { sections: Section[] })[]
+    ) {
+        return await prismaClient.$transaction(async (tx) => {
+            const clonePages = pages.map(({ id, website_id, created_at, ...page }) => ({
+                ...page,
+                sections: {
+                    create: page.sections.map(({ id, page_id, created_at, ...section }) => section)
+                }
+            }));
+
+            const cloneGlobalSlots = globalDesign.globalSlots.map(
+                ({ id, global_design_id, created_at, updated_at, ...slot }) => slot
+            );
+
+            const { id, created_at, updated_at, ...cleanSettings } = settings;
+            const { id: gdId, website_id: gdWebsiteId, globalSlots, ...cleanGlobalDesign } = globalDesign;
+
+            const newWebsite = await tx.website.create({
+                data: {
+                    name: `${website.name}-copy`,
+                    owner: { connect: { id: website.owner_id } },
+                    status: WebsiteStatus.DRAFT,
+                    settings: { create: cleanSettings as Prisma.SettingsCreateInput },
+                    globalDesign: {
+                        create: {
+                            ...cleanGlobalDesign,
+                            global_styles: cleanGlobalDesign.global_styles || {},
+                            globalSlots: {
+                                create: cloneGlobalSlots as Prisma.GlobalSlotCreateWithoutGlobal_designInput[]
+                            }
+                        }
+                    },
+                    pages: { create: clonePages as Prisma.PageCreateInput[] }
+                },
+                include: {
+                    pages: true,
+                    settings: true,
+                    globalDesign: true
+                }
+            });
+
+            return newWebsite;
+        });
     }
 
     async cleanupDeletedWebsites() {

@@ -79,8 +79,9 @@ class PageController {
      */
     deletePage = async (req: Request, res: Response, next: NextFunction) => {
         try {
+            const website = req.context.website!;
             const page = req.context.page!;
-            await this.pageService.deletePage(page);
+            await this.pageService.deletePage(website, page);
             res.status(200).json({ message: 'Page deleted successfully' });
         } catch (error: any) {
             next(error);

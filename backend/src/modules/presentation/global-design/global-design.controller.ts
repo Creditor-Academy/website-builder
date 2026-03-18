@@ -52,8 +52,8 @@ class GlobalDesignController {
      */
     createGlobalSlot = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const websiteId = req.context.website!.id;
-            const globalDesign = await this.service.createGlobalSlot(websiteId, req.validated.body);
+            const globalDesignId = req.context.website!.globalDesign!.id;
+            const globalDesign = await this.service.createGlobalSlot(globalDesignId, req.validated.body);
 
             res.status(200).json({
                 message: 'Global slot created successfully',
@@ -70,13 +70,13 @@ class GlobalDesignController {
      */
     updateGlobalSlot = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const website = req.context.website!;
+            const global_design_id = req.context.website!.globalDesign!.id;
             const slotId = req.validated.params.slotId!;
-            const globalDesign = await this.service.updateGlobalSlot(website, slotId, req.validated.body);
+            const globalSlot = await this.service.updateGlobalSlot(global_design_id, slotId, req.validated.body);
 
             res.status(200).json({
                 message: 'Global slot updated successfully',
-                data: globalDesign
+                data: globalSlot
             });
         } catch (error: any) {
             next(error);
@@ -89,13 +89,13 @@ class GlobalDesignController {
      */
     deleteGlobalSlot = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const website = req.context.website!;
+            const global_design_id = req.context.website!.globalDesign!.id;
             const slotId = req.validated.params.slotId!;
-            const globalDesign = await this.service.deleteGlobalSlot(website, slotId);
+            const globalSlot = await this.service.deleteGlobalSlot(global_design_id, slotId);
 
             res.status(200).json({
                 message: 'Global slot deleted successfully',
-                data: globalDesign
+                data: globalSlot
             });
         } catch (error: any) {
             next(error);

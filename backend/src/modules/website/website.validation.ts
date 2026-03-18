@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { WebsiteStatus } from '@prisma/client';
+import { jsonObject } from '../../utils/validator.utils.js';
 
 const WebsiteStatusValues = Object.values(WebsiteStatus);
 
@@ -40,9 +41,9 @@ export const updateWebsiteSchema = z.object({
 
 // Update website settings schema
 export const updateWebsiteSettingsSchema = z.object({
-    seo: z.any().optional(),
-    contact: z.any().optional(),
-    social_links: z.any().optional(),
+    seo: jsonObject.optional(),
+    contact: jsonObject.optional(),
+    social_links: jsonObject.optional(),
 });
 
 // Website ID params schema

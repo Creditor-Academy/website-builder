@@ -6,7 +6,8 @@ class GlobalDesignDao {
     /**
      * Get global design by website ID (includes navbar + footer sections)
      */
-    async getByWebsiteId(websiteId: string): Promise<GlobalDesign | null> {
+    async getByWebsiteId(websiteId: string):
+        Promise<GlobalDesign & { globalSlots: GlobalSlot[] } | null> {
         return await prismaClient.globalDesign.findFirst({
             where: { website_id: websiteId },
             include: {
@@ -55,22 +56,21 @@ class GlobalDesignDao {
     /**
      * Update global slot
      */
-    async updateGlobalSlot(globalSlotId: string, data: UpdateGlobalSlotInput): Promise<GlobalSlot> {
+    async updateGlobalSlot(globalDesignId: string, slotId: string, data: UpdateGlobalSlotInput): Promise<GlobalSlot> {
         return await prismaClient.globalSlot.update({
-            where: { id: globalSlotId },
-            data,
+            where: { id: slotId, global_design_id: globalDesignId },
+            data: {
+                props: data.props!
+            }
         });
     }
 
     /**
      * Delete global slot
      */
-    async deleteGlobalSlot(globalSlotId: string): Promise<GlobalSlot> {
-        return await prismaClient.globalSlot.update({
-            where: { id: globalSlotId },
-            data: {
-                deleted_at: new Date(),
-            }
+    async deleteGlobalSlot(globalDesignId: string, slotId: string): Promise<void> {
+        await prismaClient.globalSlot.delete({
+            where: { id: slotId, global_design_id: globalDesignId }
         });
     }
 }

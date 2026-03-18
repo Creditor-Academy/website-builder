@@ -13,7 +13,7 @@ const router = express.Router({ mergeParams: true });
 const pageController = new PageController();
 
 /**
- * GET /presentation/website/:websiteId/pages
+ * GET /presentation/:websiteId/pages
  * List all pages for the draft website
  */
 router.get(
@@ -22,7 +22,7 @@ router.get(
 );
 
 /**
- * POST /presentation/website/:websiteId/pages
+ * POST /presentation/:websiteId/pages
  * Create a new page in the draft website.
  */
 router.post(
@@ -32,7 +32,7 @@ router.post(
 );
 
 /**
- * GET /presentation/website/:websiteId/pages/:id
+ * GET /presentation/:websiteId/pages/:id
  * Get single page by ID with all sections.
  */
 router.get(
@@ -43,7 +43,7 @@ router.get(
 );
 
 /**
- * PATCH /presentation/website/:websiteId/pages/:id
+ * PATCH /presentation/:websiteId/pages/:id
  * Update page metadata, name, slug, and styles.
  */
 router.patch(
@@ -55,7 +55,7 @@ router.patch(
 );
 
 /**
- * DELETE /presentation/website/:websiteId/pages/:id
+ * DELETE /presentation/:websiteId/pages/:id
  * Soft delete page (also soft deletes all child sections).
  */
 router.delete(
@@ -66,7 +66,7 @@ router.delete(
 );
 
 /**
- * POST /presentation/website/:websiteId/pages/:id/restore
+ * POST /presentation/:websiteId/pages/:id/restore
  * Restore a soft-deleted page.
  */
 router.post(
@@ -77,7 +77,7 @@ router.post(
 );
 
 /**
- * POST /presentation/website/:websiteId/pages/:id/duplicate
+ * POST /presentation/:websiteId/pages/:id/duplicate
  * Duplicate page with all its sections.
  */
 router.post(

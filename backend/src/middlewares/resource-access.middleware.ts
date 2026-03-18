@@ -1,13 +1,11 @@
 import type { Request, Response, NextFunction } from 'express';
 import WebsiteDao from '../modules/website/website.dao.js';
 import PageDao from '../modules/presentation/pages/page.dao.js';
-import SectionDao from '../modules/presentation/pages/section.dao.js';
-import { UserRole, WebsiteStatus, type PageTemplate, type SectionTemplate } from '@prisma/client';
+import { UserRole, WebsiteStatus } from '@prisma/client';
 import TemplateDao from '../modules/templates/template.dao.js';
 
 const websiteDao = new WebsiteDao();
 const pageDao = new PageDao();
-const sectionDao = new SectionDao();
 const templateDao = new TemplateDao();
 
 const canAccess = (user: { id: string; role: string }, website: { owner_id: string }): boolean => {

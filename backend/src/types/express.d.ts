@@ -15,7 +15,7 @@ declare global {
         sessionId: string;
 
         website?: WebsiteWithIncludes;
-        page?: Page;
+        page?: Page & { sections: Section[] };
         section?: Section;
 
         websiteTemplate?: WebsiteTemplate;

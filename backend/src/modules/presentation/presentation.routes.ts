@@ -13,19 +13,19 @@ router.use(authenticate);
 
 // ============================================
 // Nested Routes - Global Design, Pages and Sections
-// /presentation/website/:websiteId/global-design
-// /presentation/website/:websiteId/pages
+// /presentation/:websiteId/global-design
+// /presentation/:websiteId/pages
 // ============================================
 
 router.use(
-    "/website/:websiteId/global-design",
+    "/:websiteId/global-design",
     validateRequest(websiteIdParamsSchema, 'params'),
     resolveWebsiteDraft({ include_global_design: true }),
     globalDesignRoutes
 );
 
 router.use(
-    "/website/:websiteId/pages",
+    "/:websiteId/pages",
     validateRequest(websiteIdParamsSchema, 'params'),
     resolveWebsiteDraft(),
     pageRoutes

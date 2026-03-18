@@ -9,19 +9,23 @@ import type {
 import { GlobalSlotType, WebsiteStatus, type Website } from '@prisma/client';
 import PageDao from '../presentation/pages/page.dao.js';
 import TemplateDao from '../templates/template.dao.js';
+import GlobalDesignDao from '../presentation/global-design/global-design.dao.js';
 import type { CreatePageInput } from '../presentation/pages/page.validation.js';
+import { JsonObjectType } from '../../utils/validator.utils.js';
 
 class WebsiteService {
     private websiteDao: WebsiteDao;
     private pageDao: PageDao;
     private userDao: UserDao;
     private templateDao: TemplateDao;
+    private globalDesignDao: GlobalDesignDao;
 
     constructor() {
         this.websiteDao = new WebsiteDao();
         this.pageDao = new PageDao();
         this.userDao = new UserDao();
         this.templateDao = new TemplateDao();
+        this.globalDesignDao = new GlobalDesignDao();
     }
 
     async createWebsite(userId: string, data: CreateWebsiteInput) {
@@ -57,7 +61,7 @@ class WebsiteService {
                 name: 'Home',
                 slug: '/home',
                 templateId: template.id,
-                page_styles: home_layout,
+                page_styles: home_layout as JsonObjectType || {},
                 meta: {},
                 sections: []
             };
@@ -89,10 +93,11 @@ class WebsiteService {
         const settingsPromise = this.websiteDao.getWebsiteSettings(website.settings_id!);
         const ownerPromise = this.userDao.findUserById(website.owner_id);
         const pagesPromise = this.pageDao.findPagesByWebsiteId(website.id);
+        const globalDesignPromise = this.globalDesignDao.getByWebsiteId(website.id);
 
-        const [settings, owner, pages] = await Promise.all([settingsPromise, ownerPromise, pagesPromise]);
+        const [settings, owner, pages, globalDesign] = await Promise.all([settingsPromise, ownerPromise, pagesPromise, globalDesignPromise]);
 
-        return { website, settings, owner, pages };
+        return { website, settings, owner, pages, globalDesign };
     }
 
     async updateWebsite(website: Website, data: UpdateWebsiteInput) {
@@ -129,8 +134,17 @@ class WebsiteService {
         if (website.status === WebsiteStatus.DELETED) {
             throw Error("Website Deleted");
         }
-        // clone website settings, current draft and published version
+
+        const settingsPromise = this.websiteDao.getWebsiteSettings(website.settings_id!);
+        const globalDesignPromise = this.globalDesignDao.getByWebsiteId(website.id);
+        const pagesPromise = this.pageDao.listPagesByWebsiteId(website.id);
+
+        const [settings, globalDesign, pages] = await Promise.all([settingsPromise, globalDesignPromise, pagesPromise]);
+
+        const newWebsite = await this.websiteDao.cloneWebsite(website, settings!, globalDesign!, pages);
+
         // generate new subdomain
+        return newWebsite;
     }
 
     async updateWebsiteSettings(website: Website, data: UpdateWebsiteSettingsInput) {

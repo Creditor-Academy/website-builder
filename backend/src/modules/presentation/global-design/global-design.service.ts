@@ -39,30 +39,22 @@ class GlobalDesignService {
     /**
      * Create global slot
      */
-    async createGlobalSlot(websiteId: string, data: CreateGlobalSlotInput) {
-        const globalDesign = await this.dao.getByWebsiteId(websiteId);
-
-        return await this.dao.createGlobalSlot(globalDesign!.id, data);
+    async createGlobalSlot(globalDesignId: string, data: CreateGlobalSlotInput) {
+        return await this.dao.createGlobalSlot(globalDesignId, data);
     }
 
     /**
      * Update global slot
      */
-    async updateGlobalSlot(website: WebsiteWithIncludes, slotId: string, data: UpdateGlobalSlotInput) {
-        if (!website.globalDesign || website.globalDesign.id !== slotId) {
-            throw new BadRequestError('WebsiteId not matched with slotId');
-        }
-        return await this.dao.updateGlobalSlot(slotId, data);
+    async updateGlobalSlot(globalDesignId: string, slotId: string, data: UpdateGlobalSlotInput) {
+        return await this.dao.updateGlobalSlot(globalDesignId, slotId, data);
     }
 
     /**
      * Delete global slot
      */
-    async deleteGlobalSlot(website: WebsiteWithIncludes, slotId: string) {
-        if (!website.globalDesign || website.globalDesign.id !== slotId) {
-            throw new BadRequestError('WebsiteId not matched with slotId');
-        }
-        return await this.dao.deleteGlobalSlot(slotId);
+    async deleteGlobalSlot(globalDesignId: string, slotId: string) {
+        return await this.dao.deleteGlobalSlot(globalDesignId, slotId);
     }
 }
 

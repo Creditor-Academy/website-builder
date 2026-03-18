@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { jsonObject } from '../../utils/validator.utils.js';
 
 // ============================================
 // List Query Schemas
@@ -33,10 +34,10 @@ export const createWebsiteTemplateSchema = z.object({
         .pipe(z.url('Invalid thumbnail URL'))
         .optional(),
 
-    global_styles: z.any().optional(),
-    navbar: z.any().optional(),
-    footer: z.any().optional(),
-    home_layout: z.any().optional(),
+    global_styles: jsonObject.optional(),
+    navbar: jsonObject.optional(),
+    footer: jsonObject.optional(),
+    home_layout: jsonObject.optional(),
 });
 
 export const updateWebsiteTemplateSchema = z.object({
@@ -60,10 +61,10 @@ export const updateWebsiteTemplateSchema = z.object({
         .optional()
         .nullable(),
 
-    global_styles: z.any().optional(),
-    navbar: z.any().optional(),
-    footer: z.any().optional(),
-    home_layout: z.any().optional(),
+    global_styles: jsonObject.optional(),
+    navbar: jsonObject.optional(),
+    footer: jsonObject.optional(),
+    home_layout: jsonObject.optional(),
 
 }).refine(
     (data) => Object.keys(data).length > 0,
@@ -92,7 +93,7 @@ export const createSectionTemplateSchema = z.object({
         .pipe(z.url('Invalid thumbnail URL'))
         .optional(),
 
-    props: z.any()
+    props: jsonObject
 });
 
 export const updateSectionTemplateSchema = z.object({
@@ -116,7 +117,7 @@ export const updateSectionTemplateSchema = z.object({
         .optional()
         .nullable(),
 
-    props: z.json().optional()
+    props: jsonObject.optional()
 }).refine(
     (data) => Object.keys(data).length > 0,
     { message: 'At least one field must be provided for update' }

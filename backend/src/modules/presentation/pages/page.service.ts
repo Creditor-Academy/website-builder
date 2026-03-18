@@ -4,6 +4,7 @@ import { NotFoundError, BadRequestError, ConflictError } from '../../../utils/er
 import type { CreatePageInput, UpdatePageInput, updateSectionSchema } from './page.validation.js';
 import type { DuplicatePageInput } from './page.validation.js';
 import type { Page, Section } from '@prisma/client';
+import { WebsiteWithIncludes } from '../../../types/website.types.js';
 
 class PageService {
     private pageDao: InstanceType<typeof PageDao>;
@@ -110,9 +111,13 @@ class PageService {
     /**
      * Soft delete a page and all its sections.
      */
-    async deletePage(page: Page): Promise<void> {
+    async deletePage(website: WebsiteWithIncludes, page: Page): Promise<void> {
         if (page.deleted_at) {
             throw new BadRequestError('Page is already deleted');
+        }
+
+        if (website.homepageId === page.id) {
+            throw new BadRequestError('Cannot delete the homepage');
         }
 
         await this.pageDao.deletePage(page.id);
@@ -131,28 +136,19 @@ class PageService {
     /**
      * Duplicate a page and all its sections into the same website.
      */
-    async duplicatePage(websiteId: string, sourcePage: Page, data: DuplicatePageInput): Promise<Page> {
+    async duplicatePage(
+        websiteId: string,
+        sourcePage: Page & { sections: Section[] },
+        data: DuplicatePageInput
+    ): Promise<Page> {
         // Validate slug uniqueness within the website
         const isUnique = await this.pageDao.isSlugUnique(data.slug, websiteId);
         if (!isUnique) {
             throw new ConflictError(`Slug "${data.slug}" already exists in this website`);
         }
 
-        const pageSections = await this.sectionDao.getSectionsByPageId(sourcePage.id);
-
         // Create new page
-        const newPage = await this.pageDao.createPage(websiteId, {
-            ...sourcePage,
-            name: data.newName,
-            slug: data.slug,
-            sections: pageSections.map((section) => ({
-                category: section.category,
-                sectionTemplateId: section.sectionTemplateId,
-                order: section.order,
-                props: section.props
-            }))
-        });
-
+        const newPage = await this.pageDao.clonePage(websiteId, sourcePage, data);
         return newPage;
     }
 }

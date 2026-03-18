@@ -1,11 +1,12 @@
 import { z } from 'zod';
+import { jsonObject } from '../../../utils/validator.utils.js';
 
 // ============================================
 // Global Design Schema
 // ============================================
 
 export const updateGlobalDesignSchema = z.object({
-    global_styles: z.record(z.string(), z.any())
+    global_styles: jsonObject
 }).refine(
     (data) => Object.keys(data).length > 0,
     { message: 'At least one field must be provided for update' }
@@ -17,12 +18,12 @@ export const updateGlobalDesignSchema = z.object({
 
 export const createGlobalSlotSchema = z.object({
     type: z.enum(["NAVBAR", "FOOTER"]),
-    section_template_id: z.string(),
-    props: z.record(z.string(), z.any())
+    section_template_id: z.string().nullish(),
+    props: jsonObject
 });
 
 export const updateGlobalSlotSchema = z.object({
-    props: z.record(z.string(), z.any())
+    props: jsonObject.optional()
 }).refine(
     (data) => Object.keys(data).length > 0,
     { message: 'At least one field must be provided for update' }

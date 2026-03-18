@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { jsonArray, jsonObject } from '../../../utils/validator.utils.js';
 
 // ============================================
 // Create Page Schema
@@ -9,7 +10,7 @@ const createSectionSchema = z.object({
         .min(2, 'Category must be at least 2 characters')
         .max(100, 'Category must not exceed 100 characters'),
 
-    props: z.any().optional().default({}),
+    props: jsonObject.optional().default({}),
     sectionTemplateId: z.string()
         .pipe(z.cuid2('Invalid section template ID format'))
         .nullable(),
@@ -27,14 +28,11 @@ export const createPageSchema = z.object({
         .max(100, 'Slug must not exceed 100 characters')
         .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase alphanumeric with hyphens only'),
 
-    templateId: z.string()
-        .pipe(z.cuid2('Invalid template ID format'))
-        .nullable(),
+    meta: jsonObject.default({}),
+    page_styles: jsonObject.default({}),
 
-    meta: z.any().default({}),
-    page_styles: z.any().default({}),
-
-    sections: z.array(createSectionSchema)
+    sections: jsonArray
+        .pipe(z.array(createSectionSchema))
         .default([])
 });
 
@@ -49,7 +47,7 @@ export const updateSectionSchema = z.object({
         .min(2, 'Category must be at least 2 characters')
         .max(100, 'Category must not exceed 100 characters'),
 
-    props: z.any().optional(),
+    props: jsonObject.optional(),
     order: z.number().optional()
 });
 
@@ -65,22 +63,28 @@ export const updatePageSchema = z.object({
         .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase alphanumeric with hyphens only')
         .optional(),
 
-    meta: z.any().optional(),
-    page_styles: z.any().optional(),
+    meta: jsonObject.optional(),
+    page_styles: jsonObject.optional(),
 
-    createSections: z.array(createSectionSchema)
+    createSections: jsonArray
+        .pipe(z.array(createSectionSchema))
         .optional(),
 
-    updateSections: z.array(updateSectionSchema)
+    updateSections: jsonArray
+        .pipe(z.array(updateSectionSchema))
         .optional(),
 
-    deleteSections: z.array(z.string()
-        .pipe(z.cuid2('Invalid section ID format'))
-    ).optional(),
+    deleteSections: jsonArray
+        .pipe(z.array(
+            z.string().pipe(z.cuid2('Invalid section ID format'))
+        ))
+        .optional(),
 
-    restoreSections: z.array(z.string()
-        .pipe(z.cuid2('Invalid section ID format'))
-    ).optional()
+    restoreSections: jsonArray
+        .pipe(z.array(
+            z.string().pipe(z.cuid2('Invalid section ID format'))
+        ))
+        .optional()
 }).refine(
     (data) => Object.keys(data).length > 0,
     { message: 'At least one field must be provided for update' }

@@ -1,6 +1,6 @@
 import prismaClient from '../../../config/prisma.js';
 import { Prisma } from '@prisma/client';
-import type { Page } from '@prisma/client';
+import type { Page, Section } from '@prisma/client';
 import { CreatePageInput, CreateSectionInput, UpdatePageInput } from './page.validation.js';
 
 class PageDao {
@@ -26,7 +26,7 @@ class PageDao {
     /**
      * Get page by ID with sections
      */
-    async getPageById(pageId: string): Promise<Page | null> {
+    async getPageById(pageId: string): Promise<Page & { sections: Section[] } | null> {
         return await prismaClient.page.findFirst({
             where: { id: pageId },
             include: {
@@ -70,7 +70,7 @@ class PageDao {
     /**
      * List all pages for a website (with sections in order)
      */
-    async listPagesByWebsiteId(websiteId: string): Promise<Page[]> {
+    async listPagesByWebsiteId(websiteId: string): Promise<(Page & { sections: Section[] })[]> {
         return await prismaClient.page.findMany({
             where: {
                 website_id: websiteId,
@@ -132,6 +132,41 @@ class PageDao {
             where: { id: pageId },
             data: { deleted_at: null }
         });
+    }
+
+    /**
+     * Clone a page and all its sections
+     */
+    async clonePage(
+        websiteId: string,
+        sourcePage: Page & { sections: Section[] },
+        data: { newName: string, slug: string }
+    ): Promise<Page & { sections: Section[] }> {
+        const createdPage = await prismaClient.page.create({
+            data: {
+                website_id: websiteId,
+                name: data.newName,
+                slug: data.slug,
+                meta: sourcePage.meta as Prisma.InputJsonValue,
+                page_styles: sourcePage.page_styles as Prisma.InputJsonValue,
+                sections: {
+                    create: sourcePage.sections.map((section) => ({
+                        category: section.category,
+                        sectionTemplateId: section.sectionTemplateId,
+                        order: section.order,
+                        props: section.props as Prisma.InputJsonValue
+                    }))
+                }
+            },
+            include: {
+                sections: {
+                    where: { deleted_at: null },
+                    orderBy: { order: 'asc' }
+                }
+            }
+        });
+
+        return createdPage;
     }
 
     /**

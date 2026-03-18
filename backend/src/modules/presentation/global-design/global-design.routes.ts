@@ -7,11 +7,11 @@ const router = express.Router();
 
 // ============================================
 // Global Design Routes
-// /presentation/website/:websiteId/global-design
+// /presentation/:websiteId/global-design
 // ============================================
 
 /**
- * GET /presentation/website/:websiteId/global-design
+ * GET /presentation/:websiteId/global-design
  * Get global design (navbar, footer, global styles) for the website.
  */
 router.get(
@@ -20,7 +20,7 @@ router.get(
 );
 
 /**
- * PATCH /presentation/website/:websiteId/global-design
+ * PATCH /presentation/:websiteId/global-design
  * Update global styles / theme for the website.
  */
 router.patch(
@@ -30,7 +30,7 @@ router.patch(
 );
 
 /**
- * POST /presentation/website/:websiteId/global-design/slots
+ * POST /presentation/:websiteId/global-design/slots
  * Create global slot
  */
 router.post(
@@ -40,23 +40,23 @@ router.post(
 );
 
 /**
- * PATCH /presentation/website/:websiteId/global-design/slots/:slotId
+ * PATCH /presentation/:websiteId/global-design/slots/:slotId
  * Update global slot
  */
 router.patch(
     "/slots/:slotId",
-    validateRequest(globalSlotParamsSchema),
+    validateRequest(globalSlotParamsSchema, "params"),
     validateRequest(updateGlobalSlotSchema),
     globalDesignController.updateGlobalSlot
 );
 
 /**
- * DELETE /presentation/website/:websiteId/global-design/slots/:slotId
+ * DELETE /presentation/:websiteId/global-design/slots/:slotId
  * Delete global slot
  */
 router.delete(
     "/slots/:slotId",
-    validateRequest(globalSlotParamsSchema),
+    validateRequest(globalSlotParamsSchema, "params"),
     globalDesignController.deleteGlobalSlot
 );
 
