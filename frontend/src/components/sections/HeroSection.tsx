@@ -129,8 +129,8 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
 
               {content.ctaSecondaryText && (
                 <button
-                  className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 bg-white transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
-                  style={{ color: buttonSecondaryText }}
+                  className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
+                  style={{ color: buttonSecondaryText, background: buttonSecondaryBg }}
                   onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
                 >
                   <Play className="w-4 h-4 fill-current opacity-70" />
@@ -220,8 +220,8 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </button>
               <button
-                className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 bg-white transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
-                style={{ color: buttonSecondaryText }}
+                className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
+                style={{ color: buttonSecondaryText, background: buttonSecondaryBg }}
                 onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
               >
                 <Play className="w-4 h-4 fill-current opacity-70" />
@@ -409,8 +409,8 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
 
               {content.ctaSecondaryText && (
                 <button
-                  className="group inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base border border-slate-200 bg-white/70 backdrop-blur-sm transition-all duration-200 hover:border-slate-300 hover:shadow-lg hover:-translate-y-1"
-                  style={{ color: buttonSecondaryText }}
+                  className="group inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base border border-slate-200 backdrop-blur-sm transition-all duration-200 hover:border-slate-300 hover:shadow-lg hover:-translate-y-1"
+                  style={{ color: buttonSecondaryText, background: buttonSecondaryBg }}
                   onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
                 >
                   <Play className="w-5 h-5 fill-current opacity-60" />
@@ -519,8 +519,8 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
 
               {content.ctaSecondaryText && (
                 <button
-                  className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 bg-white transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
-                  style={{ color: buttonSecondaryText }}
+                  className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
+                  style={{ color: buttonSecondaryText, background: buttonSecondaryBg }}
                   onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
                 >
                   <Play className="w-4 h-4 fill-current opacity-60" />

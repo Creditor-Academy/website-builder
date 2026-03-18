@@ -321,56 +321,34 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
 
         {/* ── Bottom bar ──────────────────────────────────────────────── */}
         <div style={{
-          borderTop: '1px solid rgba(255,255,255,0.07)',
-          padding: '24px 0 40px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: 16,
-          flexWrap: 'wrap',
-        }}>
-          {/* Copyright */}
-          <p
-            className="ft-ce"
-            style={{
-              fontFamily: "'Geist', sans-serif",
-              fontSize: 12, color: tc, opacity: 0.35,
-              margin: 0,
-            }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            onBlur={(e) => onUpdate({ copyright: e.target.innerText })}
-          >
-            {config.copyright}
-          </p>
+  borderTop: '1px solid rgba(255,255,255,0.07)',
+  padding: '24px 0 40px',
+  display: 'flex',
+  justifyContent: 'center', // ✅ changed
+  alignItems: 'center',
+  gap: 16,
+  flexWrap: 'wrap',
+}}>
+  {/* Copyright */}
+  <p
+    className="ft-ce"
+    style={{
+      fontFamily: "'Geist', sans-serif",
+      fontSize: 12,
+      color: tc,
+      opacity: 0.35,
+      margin: 0,
+      textAlign: 'center', // ✅ optional (safe)
+           // ✅ ensures proper centering
+    }}
+    contentEditable={isEditing}
+    suppressContentEditableWarning
+    onBlur={(e) => onUpdate({ copyright: e.target.innerText })}
+  >
+    {config.copyright}
+  </p>
+</div>
 
-          {/* Legal links */}
-          <div style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
-            <a
-              href="/privacy"
-              className="ft-bottom-link"
-              style={{
-                fontFamily: "'Geist', sans-serif",
-                fontSize: 12, color: tc, textDecoration: 'none',
-              }}
-              onClick={handlePrivacyClick}
-            >
-              {config.privacyPolicy || 'Privacy Policy'}
-            </a>
-            <div style={{ width: 1, height: 10, background: 'rgba(255,255,255,0.12)' }} />
-            <a
-              href="/terms"
-              className="ft-bottom-link"
-              style={{
-                fontFamily: "'Geist', sans-serif",
-                fontSize: 12, color: tc, textDecoration: 'none',
-              }}
-              onClick={handleTermsClick}
-            >
-              {config.termsOfService || 'Terms of Service'}
-            </a>
-          </div>
-        </div>
 
       </div>
     </footer>

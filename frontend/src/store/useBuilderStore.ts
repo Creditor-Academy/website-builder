@@ -7,7 +7,13 @@ import {
     createServicesPage,
     createPricingPage,
     createContactPage,
-    createAboutPage
+    createAboutPage,
+    getBusinessPage,
+    getPortfolioPage,
+    getEcommercePage,
+    getConsultantPage,
+    getAgenciesPage,
+    getCoachPage
 } from '@/lib/defaultPageData';
 
 interface Page {
@@ -28,6 +34,7 @@ interface Website {
     status: 'Draft' | 'Published';
     pages: Page[];
     activePageId: string | null;
+    templateId?: string; // Add templateId field
 }
 
 interface EditorState {
@@ -40,6 +47,11 @@ interface EditorState {
     previewMode: boolean;
     showLeftPanel: boolean;
     showRightPanel: boolean;
+    tour: {
+        isActive: boolean;
+        step: number;
+        isFinished: boolean;
+    };
 }
 
 interface BuilderStore {
@@ -112,14 +124,41 @@ const useBuilderStore = create<BuilderStore>(
 
             createWebsite: (name, template = 'blank') => {
                 const id = uuidv4();
-                const homePage = getDefaultPage();
-                const newWebsite = {
+                let homePage;
+
+                // Select the appropriate template
+                switch (template) {
+                    case 'business':
+                        homePage = getBusinessPage();
+                        break;
+                    case 'portfolio':
+                        homePage = getPortfolioPage();
+                        break;
+                    case 'ecommerce':
+                        homePage = getEcommercePage();
+                        break;
+                    case 'consultant':
+                        homePage = getConsultantPage();
+                        break;
+                    case 'agencies':
+                        homePage = getAgenciesPage();
+                        break;
+                    case 'coaching':
+                        homePage = getCoachPage();
+                        break;
+                    default:
+                        homePage = getDefaultPage();
+                        break;
+                }
+
+                const newWebsite: Website = {
                     id,
                     name,
                     lastEdited: new Date().toISOString(),
-                    status: 'Draft',
+                    status: 'Draft' as const,
                     pages: [homePage],
                     activePageId: homePage.id,
+                    templateId: template, // Store the template ID
                 };
 
                 set((state) => ({
