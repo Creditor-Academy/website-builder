@@ -16,6 +16,18 @@ class GlobalDesignDao {
     }
 
     /**
+     * Create global design
+     */
+    async createGlobalDesign(websiteId: string, data: { global_styles: any }): Promise<GlobalDesign> {
+        return await prismaClient.globalDesign.create({
+            data: {
+                website_id: websiteId,
+                ...data
+            }
+        });
+    }
+
+    /**
      * Update global design by its own ID
     */
     async update(globalDesignId: string, data: { global_styles: any }): Promise<GlobalDesign> {

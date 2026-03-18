@@ -1,5 +1,5 @@
 import type { WebsiteWithIncludes } from "./website.types";
-import type { Page, PageTemplate, Section, SectionTemplate } from "@prisma/client";
+import type { Page, WebsiteTemplate, Section, SectionTemplate } from "@prisma/client";
 import "express";
 
 declare global {
@@ -18,7 +18,7 @@ declare global {
         page?: Page;
         section?: Section;
 
-        pageTemplate?: PageTemplate;
+        websiteTemplate?: WebsiteTemplate;
         sectionTemplate?: SectionTemplate;
       }
     }

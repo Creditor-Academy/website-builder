@@ -8,7 +8,10 @@ export const createWebsiteSchema = z.object({
     name: z.string()
         .min(2, 'Name must be at least 2 characters')
         .max(100, 'Name must not exceed 100 characters'),
-    templateId: z.string().optional()
+
+    templateId: z.string()
+        .pipe(z.cuid2('Invalid template ID format'))
+        .optional()
 });
 
 // Get websites schema

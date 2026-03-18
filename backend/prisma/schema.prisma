@@ -220,9 +220,8 @@ model Page {
   deleted_at DateTime?
 
   // Relation
-  website    Website       @relation("WebsitePages", fields: [website_id], references: [id], onDelete: Cascade)
-  homepageOf Website?      @relation("Homepage")
-  template   PageTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  website    Website   @relation("WebsitePages", fields: [website_id], references: [id], onDelete: Cascade)
+  homepageOf Website?  @relation("Homepage")
   sections   Section[]
 
   @@unique([slug, website_id])
@@ -253,19 +252,21 @@ model Section {
 }
 
 // ================================
-// Template Tables (website, page, section)
+// Template Tables (website, section)
 // ================================
 
 // Website Template
 model WebsiteTemplate {
   id            String  @id @default(cuid())
   name          String
+  description   String?
   category      String
   thumbnail_url String?
 
-  global_style Json?
-  navbar       Json?
-  footer       Json?
+  global_styles Json?
+  navbar        Json?
+  footer        Json?
+  home_layout   Json?
 
   created_at    DateTime       @default(now())
   deleted_at    DateTime?
@@ -277,28 +278,11 @@ model WebsiteTemplate {
   @@map("website_templates")
 }
 
-// Page Template Model
-model PageTemplate {
-  id            String  @id @default(cuid())
-  name          String
-  category      String
-  thumbnail_url String?
-  sections      Json
-
-  created_at DateTime  @default(now())
-  deleted_at DateTime?
-  pages      Page[]
-
-  @@index([name])
-  @@index([category])
-  @@index([deleted_at])
-  @@map("page_templates")
-}
-
 // Section Template
 model SectionTemplate {
   id            String  @id @default(cuid())
   name          String
+  description   String?
   category      String
   thumbnail_url String?
   props         Json

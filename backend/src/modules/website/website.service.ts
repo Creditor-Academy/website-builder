@@ -6,9 +6,10 @@ import type {
     UpdateWebsiteInput,
     UpdateWebsiteSettingsInput
 } from './website.validation.js';
-import { WebsiteStatus, type Website } from '@prisma/client';
+import { GlobalSlotType, WebsiteStatus, type Website } from '@prisma/client';
 import PageDao from '../presentation/pages/page.dao.js';
 import TemplateDao from '../templates/template.dao.js';
+import type { CreatePageInput } from '../presentation/pages/page.validation.js';
 
 class WebsiteService {
     private websiteDao: WebsiteDao;
@@ -25,31 +26,55 @@ class WebsiteService {
 
     async createWebsite(userId: string, data: CreateWebsiteInput) {
         const { name, templateId } = data;
-        const website = await this.websiteDao.createWebsite(userId, { name });
+        // const website = await this.websiteDao.createWebsite(userId, { name });
 
-        if (templateId && templateId !== 'blank') {
-            const template = await this.templateDao.findWebsiteTemplateById(templateId);
-            if (template && Array.isArray(template.content)) {
-                // Instantiate pages from template
-                for (const pageData of (template.content as any[])) {
-                    await this.pageDao.createPage({
-                        website_id: website.id,
-                        ...pageData
-                    });
-                }
-            }
-        } else {
-            // Create default Home page
-            await this.pageDao.createPage({
-                website_id: website.id,
+        if (!templateId) {
+            const defaultPage: CreatePageInput = {
                 name: 'Home',
                 slug: '/home',
+                templateId: null,
                 page_styles: {},
-                meta: {}
-            });
+                meta: {},
+                sections: []
+            };
+
+            const website = await this.websiteDao.createWebsiteWithPage(
+                userId, defaultPage, { name },
+                {}, []
+            );
+            return website;
         }
 
-        return await this.websiteDao.findWebsiteById(website.id);
+        if (templateId) {
+            const template = await this.templateDao.getWebsiteTemplateById(templateId);
+            if (!template) {
+                throw Error("Template not found");
+            }
+
+            const { navbar, footer, home_layout, global_styles } = template;
+
+            const homepage: CreatePageInput = {
+                name: 'Home',
+                slug: '/home',
+                templateId: template.id,
+                page_styles: home_layout,
+                meta: {},
+                sections: []
+            };
+
+            const website = await this.websiteDao.createWebsiteWithPage(
+                userId, homepage, { name },
+                global_styles,
+                [
+                    { type: GlobalSlotType.NAVBAR, props: navbar },
+                    { type: GlobalSlotType.FOOTER, props: footer }
+                ]
+            );
+
+            return website;
+        }
+
+        return;
     }
 
     async listWebsites(userId: string, filters: ListWebsitesQuerySchema) {

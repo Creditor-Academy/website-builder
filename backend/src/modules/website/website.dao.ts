@@ -1,7 +1,8 @@
-import { Prisma, WebsiteStatus } from "@prisma/client";
+import { GlobalSlotType, Prisma, WebsiteStatus } from "@prisma/client";
 import prismaClient from "../../config/prisma.js";
 import { DELETED_WEBSITE_RETENTION_TIME, SELECT_WEBSITE_FIELDS } from "../../constants/website.constants.js";
 import type { ListWebsitesQuerySchema, UpdateWebsiteSettingsInput } from "./website.validation.js";
+import { CreatePageInput } from "../presentation/pages/page.validation.js";
 
 class WebsiteDao {
     async findWebsiteById(id: string, options?: { include_global_design?: boolean }) {
@@ -21,7 +22,7 @@ class WebsiteDao {
 
         const skip = (page - 1) * limit;
 
-        const where: Prisma.WebsiteWhereInput = {};
+        const where: Prisma.WebsiteWhereInput = { deleted_at: null };
 
         if (status) where.status = status;
         if (ownerId) where.owner_id = ownerId;
@@ -65,6 +66,40 @@ class WebsiteDao {
                 settings: { create: {} },
                 globalDesign: { create: { global_styles: {} } }
                 // Nested settings and globalDesign creation (atomic)
+            }
+        });
+    }
+
+    async createWebsiteWithPage(
+        userId: string,
+        pageData: CreatePageInput,
+        websiteData: any,
+        global_styles: any,
+        global_slots: { type: GlobalSlotType, props: any }[]
+    ) {
+        return await prismaClient.website.create({
+            data: {
+                ...websiteData,
+                owner: { connect: { id: userId } },
+                settings: { create: {} },
+                globalDesign: {
+                    create: {
+                        global_styles,
+                        ...(global_slots.length > 0 && {
+                            globalSlots: {
+                                create: global_slots
+                            }
+                        })
+                    }
+                },
+                pages: {
+                    create: {
+                        ...pageData,
+                        sections: {
+                            create: pageData.sections
+                        }
+                    }
+                }
             }
         });
     }

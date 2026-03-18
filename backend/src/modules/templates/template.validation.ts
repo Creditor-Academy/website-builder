@@ -12,47 +12,58 @@ export const listTemplatesQuerySchema = z.object({
 });
 
 // ============================================
-// Page Template Schemas
+// Website Template Schemas
 // ============================================
 
-export const createPageTemplateSchema = z.object({
-    name: z.string()
+export const createWebsiteTemplateSchema = z.object({
+    name: z.string().trim()
         .min(2, 'Template name must be at least 2 characters')
         .max(100, 'Template name must not exceed 100 characters'),
 
-    category: z.string()
+    description: z.string().trim()
+        .min(1, 'Description is required')
+        .max(500, 'Description must not exceed 500 characters')
+        .optional(),
+
+    category: z.string().trim()
         .min(1, 'Category is required')
         .max(50, 'Category must not exceed 50 characters'),
 
-    thumbnail_url: z.string()
+    thumbnail_url: z.string().trim()
         .pipe(z.url('Invalid thumbnail URL'))
         .optional(),
 
-    sections: z.array(
-        z.string().pipe(z.cuid2())
-    ).min(1, 'At least one section must be added')
+    global_styles: z.any().optional(),
+    navbar: z.any().optional(),
+    footer: z.any().optional(),
+    home_layout: z.any().optional(),
 });
 
-export const updatePageTemplateSchema = z.object({
-    name: z.string()
+export const updateWebsiteTemplateSchema = z.object({
+    name: z.string().trim()
         .min(2, 'Template name must be at least 2 characters')
         .max(100, 'Template name must not exceed 100 characters')
         .optional(),
 
-    category: z.string()
+    description: z.string().trim()
+        .min(1, 'Description is required')
+        .max(500, 'Description must not exceed 500 characters')
+        .optional(),
+
+    category: z.string().trim()
         .min(1, 'Category is required')
         .max(50, 'Category must not exceed 50 characters')
         .optional(),
 
-    thumbnail_url: z.string()
+    thumbnail_url: z.string().trim()
         .pipe(z.url('Invalid thumbnail URL'))
         .optional()
         .nullable(),
 
-    sections: z.array(
-        z.string().pipe(z.cuid2())
-    ).min(1, 'At least one section must be added')
-        .optional()
+    global_styles: z.any().optional(),
+    navbar: z.any().optional(),
+    footer: z.any().optional(),
+    home_layout: z.any().optional(),
 
 }).refine(
     (data) => Object.keys(data).length > 0,
@@ -64,15 +75,20 @@ export const updatePageTemplateSchema = z.object({
 // ============================================
 
 export const createSectionTemplateSchema = z.object({
-    name: z.string()
+    name: z.string().trim()
         .min(2, 'Template name must be at least 2 characters')
         .max(100, 'Template name must not exceed 100 characters'),
 
-    category: z.string()
+    description: z.string().trim()
+        .min(1, 'Description is required')
+        .max(500, 'Description must not exceed 500 characters')
+        .optional(),
+
+    category: z.string().trim()
         .min(1, 'Category is required')
         .max(50, 'Category must not exceed 50 characters'),
 
-    thumbnail_url: z.string()
+    thumbnail_url: z.string().trim()
         .pipe(z.url('Invalid thumbnail URL'))
         .optional(),
 
@@ -80,17 +96,22 @@ export const createSectionTemplateSchema = z.object({
 });
 
 export const updateSectionTemplateSchema = z.object({
-    name: z.string()
+    name: z.string().trim()
         .min(2, 'Template name must be at least 2 characters')
         .max(100, 'Template name must not exceed 100 characters')
         .optional(),
 
-    category: z.string()
+    description: z.string().trim()
+        .min(1, 'Description is required')
+        .max(500, 'Description must not exceed 500 characters')
+        .optional(),
+
+    category: z.string().trim()
         .min(1, 'Category is required')
         .max(50, 'Category must not exceed 50 characters')
         .optional(),
 
-    thumbnail_url: z.string()
+    thumbnail_url: z.string().trim()
         .pipe(z.url('Invalid thumbnail URL'))
         .optional()
         .nullable(),
@@ -116,7 +137,7 @@ export const templateIdParamsSchema = z.object({
 
 export type ListTemplatesQueryInput = z.infer<typeof listTemplatesQuerySchema>;
 export type TemplateIdParams = z.infer<typeof templateIdParamsSchema>;
-export type CreatePageTemplateInput = z.infer<typeof createPageTemplateSchema>;
-export type UpdatePageTemplateInput = z.infer<typeof updatePageTemplateSchema>;
+export type CreateWebsiteTemplateInput = z.infer<typeof createWebsiteTemplateSchema>;
+export type UpdateWebsiteTemplateInput = z.infer<typeof updateWebsiteTemplateSchema>;
 export type CreateSectionTemplateInput = z.infer<typeof createSectionTemplateSchema>;
 export type UpdateSectionTemplateInput = z.infer<typeof updateSectionTemplateSchema>;

@@ -13,33 +13,16 @@ class TemplateController {
     // Website Template Routes
     // ============================================
 
-    // GET /websites/templates - List all templates
-    listWebsiteTemplates = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const templates = await this.templateService.listWebsiteTemplates(req.validated.query);
-            res.status(200).json({
-                data: templates,
-                count: templates.length
-            });
-        } catch (error: any) {
-            next(error);
-        }
-    }
-
-    // ============================================
-    // Page Template Routes
-    // ============================================
-
     /**
-     * POST /templates/pages
-     * Create a new page template
+     * POST /templates/websites
+     * Create a new website template
      */
-    createPageTemplate = async (req: Request, res: Response, next: NextFunction) => {
+    createWebsiteTemplate = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const template = await this.templateService.createPageTemplate(req.validated.body);
+            const template = await this.templateService.createWebsiteTemplate(req.validated.body);
 
             res.status(201).json({
-                message: 'Page template created successfully',
+                message: 'Website template created successfully',
                 data: template
             });
         } catch (error: any) {
@@ -48,12 +31,12 @@ class TemplateController {
     };
 
     /**
-     * GET /templates/pages
-     * Get all page templates
+     * GET /templates/websites
+     * Get all website templates
      */
-    listPageTemplates = async (req: Request, res: Response, next: NextFunction) => {
+    listWebsiteTemplates = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const templates = await this.templateService.listPageTemplates(req.validated.query);
+            const templates = await this.templateService.listWebsiteTemplates(req.validated.query);
 
             res.status(200).json({
                 data: templates,
@@ -65,15 +48,15 @@ class TemplateController {
     };
 
     /**
-     * GET /templates/pages/:templateId
-     * Get single page template by ID
+     * GET /templates/websites/:templateId
+     * Get single website template by ID
      */
-    getPageTemplate = async (req: Request, res: Response, next: NextFunction) => {
+    getWebsiteTemplate = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const template = req.context.pageTemplate;
+            const template = req.context.websiteTemplate;
 
             if (!template) {
-                throw new NotFoundError('Page template not found');
+                throw new NotFoundError('Website template not found');
             }
 
             res.status(200).json({ data: template });
@@ -83,20 +66,20 @@ class TemplateController {
     };
 
     /**
-     * PATCH /templates/pages/:templateId
-     * Update page template
+     * PATCH /templates/websites/:templateId
+     * Update website template
      */
-    updatePageTemplate = async (req: Request, res: Response, next: NextFunction) => {
+    updateWebsiteTemplate = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const template = req.context.pageTemplate!;
+            const template = req.context.websiteTemplate!;
 
-            const updatedTemplate = await this.templateService.updatePageTemplate(
+            const updatedTemplate = await this.templateService.updateWebsiteTemplate(
                 template,
                 req.validated.body
             );
 
             res.status(200).json({
-                message: 'Page template updated successfully',
+                message: 'Website template updated successfully',
                 data: updatedTemplate
             });
         } catch (error: any) {
@@ -105,17 +88,17 @@ class TemplateController {
     };
 
     /**
-     * DELETE /templates/pages/:templateId
-     * Delete (soft delete) page template
+     * DELETE /templates/websites/:templateId
+     * Delete (soft delete) website template
      */
-    deletePageTemplate = async (req: Request, res: Response, next: NextFunction) => {
+    deleteWebsiteTemplate = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const template = req.context.pageTemplate!;
+            const template = req.context.websiteTemplate!;
 
-            await this.templateService.deletePageTemplate(template);
+            await this.templateService.deleteWebsiteTemplate(template);
 
             res.status(200).json({
-                message: 'Page template deleted successfully'
+                message: 'Website template deleted successfully'
             });
         } catch (error: any) {
             next(error);
@@ -123,17 +106,17 @@ class TemplateController {
     };
 
     /**
-     * POST /templates/pages/:templateId/restore
-     * Restore deleted page template
+     * POST /templates/websites/:templateId/restore
+     * Restore deleted website template
      */
-    restorePageTemplate = async (req: Request, res: Response, next: NextFunction) => {
+    restoreWebsiteTemplate = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const template = req.context.pageTemplate!;
+            const template = req.context.websiteTemplate!;
 
-            const updatedTemplate = await this.templateService.restorePageTemplate(template);
+            const updatedTemplate = await this.templateService.restoreWebsiteTemplate(template);
 
             res.status(200).json({
-                message: 'Page template restored successfully',
+                message: 'Website template restored successfully',
                 data: updatedTemplate
             });
         } catch (error: any) {

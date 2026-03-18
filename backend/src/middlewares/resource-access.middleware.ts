@@ -93,17 +93,17 @@ export const validatePage = async (req: Request, res: Response, next: NextFuncti
 
 /**
  * validateTemplate
- * Verifies template by ID and type (page | section).
+ * Verifies template by ID and type (website | section).
  */
-export const validateTemplate = (type: 'page' | 'section') => {
+export const validateTemplate = (type: 'website' | 'section') => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
             const templateId = req.validated.params.templateId;
 
-            if (type === 'page') {
-                const template = await templateDao.getPageTemplateById(templateId);
+            if (type === 'website') {
+                const template = await templateDao.getWebsiteTemplateById(templateId);
                 if (!template) return res.status(404).json({ error: 'Template not found' });
-                req.context.pageTemplate = template;
+                req.context.websiteTemplate = template;
             } else {
                 const template = await templateDao.getSectionTemplateById(templateId);
                 if (!template) return res.status(404).json({ error: 'Template not found' });

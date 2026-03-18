@@ -1,20 +1,33 @@
 import prismaClient from '../../config/prisma.js';
-import type { PageTemplate, Prisma, SectionTemplate } from '@prisma/client';
+import type { Prisma, SectionTemplate, WebsiteTemplate } from '@prisma/client';
 import type {
-    CreatePageTemplateInput,
+    CreateWebsiteTemplateInput,
     CreateSectionTemplateInput,
     ListTemplatesQueryInput,
-    UpdatePageTemplateInput,
+    UpdateWebsiteTemplateInput,
     UpdateSectionTemplateInput
 } from './template.validation.js';
 
 class TemplateDao {
+
     // ==============================
-    // Page Template Operations
+    // Website Template Operations
     // ==============================
 
     /**
-     * Get all page templates
+     * Create a new website template
+     */
+    async createWebsiteTemplate(data: CreateWebsiteTemplateInput): Promise<WebsiteTemplate> {
+        return await prismaClient.websiteTemplate.create({
+            data: {
+                ...data,
+                thumbnail_url: data.thumbnail_url || null
+            }
+        });
+    }
+
+    /**
+     * Get all website templates
      */
     async listWebsiteTemplates(options: ListTemplatesQueryInput) {
         const { page = 1, limit = 10, category, search } = options;
@@ -40,95 +53,57 @@ class TemplateDao {
     }
 
     /**
-     * Create a new page template
+     * Get website template by ID
      */
-    async createPageTemplate(data: CreatePageTemplateInput): Promise<PageTemplate> {
-        return await prismaClient.pageTemplate.create({
-            data: {
-                ...data,
-                thumbnail_url: data.thumbnail_url || null
-            }
-        });
-    }
-
-    /**
-     * Get all page templates
-     */
-    async listPageTemplates(options: ListTemplatesQueryInput) {
-        const { page = 1, limit = 10, category, search } = options;
-        const skip = (page - 1) * limit;
-
-        const where: Prisma.PageTemplateWhereInput = {};
-
-        where.deleted_at = null;
-        if (category) where.category = category;
-
-        if (search) {
-            where.OR = [
-                { name: { contains: search, mode: 'insensitive' } },
-                { category: { contains: category || '', mode: 'insensitive' } },
-            ]
-        }
-
-        return await prismaClient.pageTemplate.findMany({
-            where, skip,
-            take: limit,
-            orderBy: { created_at: 'desc' }
-        });
-    }
-
-    /**
-     * Get page template by ID
-     */
-    async getPageTemplateById(templateId: string): Promise<PageTemplate | null> {
-        return await prismaClient.pageTemplate.findFirst({
+    async getWebsiteTemplateById(templateId: string): Promise<WebsiteTemplate | null> {
+        return await prismaClient.websiteTemplate.findFirst({
             where: { id: templateId }
         });
     }
 
     /**
-     * Update page template
+     * Update website template
      */
-    async updatePageTemplate(
+    async updateWebsiteTemplate(
         templateId: string,
-        data: UpdatePageTemplateInput
-    ): Promise<PageTemplate> {
+        data: UpdateWebsiteTemplateInput
+    ): Promise<WebsiteTemplate> {
         // Removed Undefined Values from Object
         const updatedData = Object.fromEntries(
             Object.entries(data).filter(([key, value]) => value !== undefined)
         );
 
-        return await prismaClient.pageTemplate.update({
+        return await prismaClient.websiteTemplate.update({
             where: { id: templateId },
             data: updatedData
         });
     }
 
     /**
-     * Soft delete page template
+     * Soft delete website template
      */
-    async deletePageTemplate(templateId: string): Promise<PageTemplate> {
-        return await prismaClient.pageTemplate.update({
+    async deleteWebsiteTemplate(templateId: string): Promise<WebsiteTemplate> {
+        return await prismaClient.websiteTemplate.update({
             where: { id: templateId },
             data: { deleted_at: new Date() }
         });
     }
 
     /**
-     * Restore deleted page template
+     * Restore deleted website template
      */
-    async restorePageTemplate(templateId: string): Promise<PageTemplate> {
-        return await prismaClient.pageTemplate.update({
+    async restoreWebsiteTemplate(templateId: string): Promise<WebsiteTemplate> {
+        return await prismaClient.websiteTemplate.update({
             where: { id: templateId },
             data: { deleted_at: null }
         });
     }
 
     /**
-     * Get unique categories for page templates
+     * Get unique categories for website templates
      */
-    async getPageTemplateCategories(): Promise<string[]> {
-        const templates = await prismaClient.pageTemplate.findMany({
+    async getWebsiteTemplateCategories(): Promise<string[]> {
+        const templates = await prismaClient.websiteTemplate.findMany({
             where: { deleted_at: null },
             distinct: ['category'],
             select: { category: true }
@@ -185,7 +160,7 @@ class TemplateDao {
      */
     async getSectionTemplateById(templateId: string): Promise<SectionTemplate | null> {
         return await prismaClient.sectionTemplate.findFirst({
-            where: { id: templateId, deleted_at: null }
+            where: { id: templateId }
         });
     }
 

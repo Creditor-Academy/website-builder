@@ -5,8 +5,8 @@ import templateController from "./template.controller.js";
 import {
     listTemplatesQuerySchema,
     templateIdParamsSchema,
-    createPageTemplateSchema,
-    updatePageTemplateSchema,
+    createWebsiteTemplateSchema,
+    updateWebsiteTemplateSchema,
     createSectionTemplateSchema,
     updateSectionTemplateSchema
 } from "./template.validation.js";
@@ -22,84 +22,73 @@ router.use(authenticate);
 // Website Template Routes
 // ============================================
 
-// GET /websites/templates - List all website templates
+/**
+ * POST /templates/websites
+ * Create a new website template
+ */
+router.post(
+    "/websites",
+    authorize([UserRole.ADMIN]),
+    validateRequest(createWebsiteTemplateSchema),
+    templateController.createWebsiteTemplate
+);
+
+/**
+ * GET /templates/Websites
+ * List all website templates with optional filters
+ */
 router.get(
-    '/websites',
+    "/Websites",
     validateRequest(listTemplatesQuerySchema, 'query'),
     templateController.listWebsiteTemplates
 );
 
-// ============================================
-// Page Template Routes
-// ============================================
-
 /**
- * POST /templates/pages
- * Create a new page template
- */
-router.post(
-    "/pages",
-    authorize([UserRole.ADMIN]),
-    validateRequest(createPageTemplateSchema),
-    templateController.createPageTemplate
-);
-
-/**
- * GET /templates/pages
- * List all page templates with optional filters
+ * GET /templates/Websites/:templateId
+ * Get single website template by ID
  */
 router.get(
-    "/pages",
-    validateRequest(listTemplatesQuerySchema, 'query'),
-    templateController.listPageTemplates
-);
-
-/**
- * GET /templates/pages/:templateId
- * Get single page template by ID
- */
-router.get(
-    "/pages/:templateId",
+    "/Websites/:templateId",
     validateRequest(templateIdParamsSchema, 'params'),
-    validateTemplate('page'),
-    templateController.getPageTemplate
+    validateTemplate('website'),
+    templateController.getWebsiteTemplate
 );
 
 /**
- * PATCH /templates/pages/:templateId
- * Update page template
+ * PATCH /templates/Websites/:templateId
+ * Update website template
  */
 router.patch(
-    "/pages/:templateId",
+    "/Websites/:templateId",
     authorize([UserRole.ADMIN]),
     validateRequest(templateIdParamsSchema, 'params'),
-    validateRequest(updatePageTemplateSchema),
-    validateTemplate('page'),
-    templateController.updatePageTemplate
+    validateRequest(updateWebsiteTemplateSchema),
+    validateTemplate('website'),
+    templateController.updateWebsiteTemplate
 );
 
 /**
- * DELETE /templates/pages/:templateId
- * Delete (soft delete) page template
+ * DELETE /templates/Websites/:templateId
+ * Delete (soft delete) website template
  */
 router.delete(
-    "/pages/:templateId",
+    "/Websites/:templateId",
     authorize([UserRole.ADMIN]),
     validateRequest(templateIdParamsSchema, 'params'),
-    validateTemplate('page'),
-    templateController.deletePageTemplate
+    validateTemplate('website'),
+    templateController.deleteWebsiteTemplate
 );
 
 /**
- * POST /templates/pages/:templateId/restore
- * Restore deleted page template
+ * POST /templates/Websites/:templateId/restore
+ * Restore deleted website template
  */
 router.post(
-    "/pages/:templateId/restore",
+    "/Websites/:templateId/restore",
     authorize([UserRole.ADMIN]),
     validateRequest(templateIdParamsSchema, 'params'),
-    validateTemplate('page'),
-    templateController.restorePageTemplate
+    validateTemplate('website'),
+    templateController.restoreWebsiteTemplate
 );
 
 // ============================================

@@ -1,10 +1,10 @@
 import TemplateDao from './template.dao.js';
 import { NotFoundError, BadRequestError } from '../../utils/error.utils.js';
-import type { PageTemplate, SectionTemplate } from '@prisma/client';
+import type { WebsiteTemplate, SectionTemplate } from '@prisma/client';
 import type {
     ListTemplatesQueryInput,
-    CreatePageTemplateInput,
-    UpdatePageTemplateInput,
+    CreateWebsiteTemplateInput,
+    UpdateWebsiteTemplateInput,
     CreateSectionTemplateInput,
     UpdateSectionTemplateInput
 } from './template.validation.js';
@@ -17,6 +17,13 @@ class TemplateService {
     }
 
     /**
+     * Create a new website template
+     */
+    async createWebsiteTemplate(data: CreateWebsiteTemplateInput): Promise<WebsiteTemplate> {
+        return await this.templateDao.createWebsiteTemplate(data);
+    }
+
+    /**
      * Get all website templates
      */
     async listWebsiteTemplates(query: ListTemplatesQueryInput) {
@@ -25,66 +32,51 @@ class TemplateService {
     }
 
     /**
-     * Create a new page template
+     * Get single website template
      */
-    async createPageTemplate(data: CreatePageTemplateInput): Promise<PageTemplate> {
-        return await this.templateDao.createPageTemplate(data);
-    }
-
-    /**
-     * Get all page templates
-     */
-    async listPageTemplates(query: ListTemplatesQueryInput) {
-        let templates = await this.templateDao.listPageTemplates(query);
-        return templates;
-    }
-
-    /**
-     * Get single page template
-     */
-    async getPageTemplate(template: PageTemplate): Promise<PageTemplate> {
+    async getWebsiteTemplate(template: WebsiteTemplate): Promise<WebsiteTemplate> {
         if (!template || template.deleted_at !== null) {
-            throw new NotFoundError('Page template not found');
+            throw new NotFoundError('Website template not found');
         }
 
         return template;
     }
 
     /**
-     * Update page template
+     * Update website template
      */
-    async updatePageTemplate(template: PageTemplate, data: UpdatePageTemplateInput): Promise<PageTemplate> {
+    async updateWebsiteTemplate(template: WebsiteTemplate, data: UpdateWebsiteTemplateInput): Promise<WebsiteTemplate> {
         if (!template || template.deleted_at !== null) {
-            throw new NotFoundError('Page template not found');
+            throw new NotFoundError('Website template not found');
         }
 
-        return await this.templateDao.updatePageTemplate(template.id, data);
+        return await this.templateDao.updateWebsiteTemplate(template.id, data);
     }
 
     /**
-     * Delete page template
+     * Delete website template
      */
-    async deletePageTemplate(template: PageTemplate): Promise<void> {
+    async deleteWebsiteTemplate(template: WebsiteTemplate): Promise<void> {
         if (!template || template.deleted_at !== null) {
-            throw new NotFoundError('Page template not found');
+            throw new NotFoundError('Website template not found');
         }
 
-        await this.templateDao.deletePageTemplate(template.id);
+        await this.templateDao.deleteWebsiteTemplate(template.id);
     }
 
     /**
-     * Restore deleted page template
+     * Restore deleted website template
      */
-    async restorePageTemplate(template: PageTemplate): Promise<PageTemplate> {
+    async restoreWebsiteTemplate(template: WebsiteTemplate): Promise<WebsiteTemplate> {
         if (!template) {
-            throw new NotFoundError('Page template not found');
+            throw new NotFoundError('Website template not found');
         }
 
         if (!template.deleted_at) {
             throw new BadRequestError('Template is not deleted');
         }
 
-        return await this.templateDao.restorePageTemplate(template.id);
+        return await this.templateDao.restoreWebsiteTemplate(template.id);
     }
 
     /**
@@ -155,7 +147,7 @@ class TemplateService {
      */
     async getAvailableCategories(type: 'pages' | 'sections') {
         if (type === 'pages') {
-            return await this.templateDao.getPageTemplateCategories();
+            return await this.templateDao.getWebsiteTemplateCategories();
         } else {
             return await this.templateDao.getSectionTemplateCategories();
         }

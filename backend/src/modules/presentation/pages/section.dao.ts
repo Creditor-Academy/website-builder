@@ -28,10 +28,6 @@ class SectionDao {
     async getSectionById(sectionId: string): Promise<Section | null> {
         return await prismaClient.section.findFirst({
             where: { id: sectionId, deleted_at: null },
-            include: {
-                sectionTemplate: true,
-                page: true
-            }
         });
     }
 
@@ -41,10 +37,6 @@ class SectionDao {
     async getSectionByIdWithDeleted(sectionId: string): Promise<Section | null> {
         return await prismaClient.section.findUnique({
             where: { id: sectionId },
-            include: {
-                sectionTemplate: true,
-                page: true
-            }
         });
     }
 
@@ -55,9 +47,6 @@ class SectionDao {
         return await prismaClient.section.findMany({
             where: { page_id: pageId, deleted_at: null },
             orderBy: { order: 'asc' },
-            include: {
-                sectionTemplate: true
-            }
         });
     }
 
@@ -68,9 +57,6 @@ class SectionDao {
         return await prismaClient.section.findMany({
             where: { page_id: pageId },
             orderBy: { order: 'asc' },
-            include: {
-                sectionTemplate: true
-            }
         });
     }
 
@@ -86,10 +72,6 @@ class SectionDao {
         return await prismaClient.section.update({
             where: { id: sectionId },
             data: updateData,
-            include: {
-                sectionTemplate: true,
-                page: true
-            }
         });
     }
 
@@ -101,7 +83,6 @@ class SectionDao {
             prismaClient.section.update({
                 where: { id },
                 data: { order },
-                include: { sectionTemplate: true }
             })
         );
 
@@ -115,10 +96,6 @@ class SectionDao {
         return await prismaClient.section.update({
             where: { id: sectionId },
             data: { deleted_at: new Date() },
-            include: {
-                sectionTemplate: true,
-                page: true
-            }
         });
     }
 
@@ -139,10 +116,6 @@ class SectionDao {
         return await prismaClient.section.update({
             where: { id: sectionId },
             data: { deleted_at: null },
-            include: {
-                sectionTemplate: true,
-                page: true
-            }
         });
     }
 
