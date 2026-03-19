@@ -281,7 +281,7 @@ export default function DashboardUsers() {
           <Button
             variant={filterStatus === 'all' ? 'default' : 'outline'}
             className={`rounded-full h-10 px-4 text-sm font-semibold 
-                        ${filterStatus === 'all' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}
+                        ${filterStatus === 'all' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
                         transition-all duration-200`}
             onClick={() => setFilterStatus('all')}
           >
@@ -290,7 +290,7 @@ export default function DashboardUsers() {
           <Button
             variant={filterStatus === 'Active' ? 'default' : 'outline'}
             className={`rounded-full h-10 px-4 text-sm font-semibold 
-                        ${filterStatus === 'Active' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}
+                        ${filterStatus === 'Active' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
                         transition-all duration-200`}
             onClick={() => setFilterStatus('Active')}
           >
@@ -299,7 +299,7 @@ export default function DashboardUsers() {
           <Button
             variant={filterStatus === 'Inactive' ? 'default' : 'outline'}
             className={`rounded-full h-10 px-4 text-sm font-semibold 
-                        ${filterStatus === 'Inactive' ? 'bg-amber-600 text-white shadow-md shadow-amber-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}
+                        ${filterStatus === 'Inactive' ? 'bg-amber-600 text-white shadow-md shadow-amber-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
                         transition-all duration-200`}
             onClick={() => setFilterStatus('Inactive')}
           >
@@ -310,7 +310,7 @@ export default function DashboardUsers() {
         <Select value={sortBy} onValueChange={setSortBy}>
           <SelectTrigger className="w-full md:w-[180px] h-11 rounded-full bg-white border-slate-200 
                                     shadow-md shadow-slate-200/50 focus:ring-2 focus:ring-blue-500/20 
-                                    focus:border-blue-500 transition-all duration-300">
+                                    focus:border-blue-500 transition-all duration-300 hover:bg-slate-100 hover:text-indigo-700">
             <SelectValue placeholder="Sort By" />
           </SelectTrigger>
           <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">

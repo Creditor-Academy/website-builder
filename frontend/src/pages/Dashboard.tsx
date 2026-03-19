@@ -383,8 +383,8 @@ const Dashboard = () => {
                                 value="1,234"
                                 description="+20.1% from last month"
                                 icon={<Globe className="w-5 h-5" />}
-                                iconBgClass="bg-purple-100"
-                                iconColorClass="text-purple-600"
+                                iconBgClass="bg-gradient-to-br from-purple-600 to-indigo-600"
+                                iconColorClass="text-white"
                             />
                             {isAdmin && (
                                 <OverviewCard
@@ -401,8 +401,8 @@ const Dashboard = () => {
                                 value="42"
                                 description="New templates added frequently"
                                 icon={<Layout className="w-5 h-5" />}
-                                iconBgClass="bg-emerald-100"
-                                iconColorClass="text-emerald-600"
+                                iconBgClass="bg-gradient-to-br from-emerald-600 to-teal-600"
+                                iconColorClass="text-white"
                             />
                             {isAdmin && (
                                 <OverviewCard
@@ -439,17 +439,35 @@ const Dashboard = () => {
                                 </SelectContent>
                             </Select>
 
-                            <Select value={filterStatus} onValueChange={setFilterStatus}>
-                                <SelectTrigger className="w-full md:w-[160px] h-12 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-primary/20 focus:shadow-lg focus:shadow-slate-300/50 transition-all flex items-center justify-between px-4">
-                                    <Filter className="w-4 h-4 text-slate-400" />
-                                    <SelectValue placeholder="Filter Status" />
-                                </SelectTrigger>
-                                <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">
-                                    <SelectItem value="all">All</SelectItem>
-                                    <SelectItem value="draft">Draft</SelectItem>
-                                    <SelectItem value="published">Published</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant={filterStatus === 'all' ? 'default' : 'outline'}
+                                    className={`rounded-full h-10 px-4 text-sm font-semibold
+                                                ${filterStatus === 'all' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
+                                                transition-all duration-200`}
+                                    onClick={() => setFilterStatus('all')}
+                                >
+                                    All
+                                </Button>
+                                <Button
+                                    variant={filterStatus === 'draft' ? 'default' : 'outline'}
+                                    className={`rounded-full h-10 px-4 text-sm font-semibold
+                                                ${filterStatus === 'draft' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
+                                                transition-all duration-200`}
+                                    onClick={() => setFilterStatus('draft')}
+                                >
+                                    Draft
+                                </Button>
+                                <Button
+                                    variant={filterStatus === 'published' ? 'default' : 'outline'}
+                                    className={`rounded-full h-10 px-4 text-sm font-semibold
+                                                ${filterStatus === 'published' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
+                                                transition-all duration-200`}
+                                    onClick={() => setFilterStatus('published')}
+                                >
+                                    Published
+                                </Button>
+                            </div>
                         </div>
 
                         {/* Website Cards */}
@@ -487,7 +505,7 @@ const WebsiteCard = ({ site, index, onDelete, onEdit }) => {
                 {template && template.id !== 'blank' ? (
                     <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105 p-4">
                         <img src={template.image} alt={site.name} className="w-full h-full object-cover rounded-2xl border border-slate-200 shadow-sm" />
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
                 ) : (
                     <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105 p-4">

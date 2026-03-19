@@ -150,7 +150,7 @@ export default function DashboardWebsites() {
           <p className="text-slate-500 mt-1">Manage your deployed and draft websites.</p>
         </div>
         <div className="flex items-center gap-4">
-          <Button onClick={() => setIsAdmin(!isAdmin)} className="gap-2 w-full md:w-auto h-11 rounded-full bg-white text-slate-700 border border-slate-200 shadow-md shadow-slate-200/50 hover:bg-slate-50 hover:shadow-lg transition-all">
+          <Button onClick={() => setIsAdmin(!isAdmin)} className="gap-2 w-full md:w-auto h-11 rounded-full bg-white text-slate-700 border border-slate-200 shadow-md shadow-slate-200/50 hover:bg-slate-100 hover:shadow-lg hover:text-indigo-700 transition-all">
             {isAdmin ? <ShieldCheck className="w-4 h-4" /> : <UserIcon className="w-4 h-4" />}
             Admin View ({isAdmin ? "ON" : "OFF"})
           </Button>
@@ -178,7 +178,7 @@ export default function DashboardWebsites() {
           <Button
             variant={filterStatus === 'all' ? 'default' : 'outline'}
             className={`rounded-full h-10 px-4 text-sm font-semibold 
-                        ${filterStatus === 'all' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}
+                        ${filterStatus === 'all' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
                         transition-all duration-200`}
             onClick={() => setFilterStatus('all')}
           >
@@ -187,7 +187,7 @@ export default function DashboardWebsites() {
           <Button
             variant={filterStatus === 'Published' ? 'default' : 'outline'}
             className={`rounded-full h-10 px-4 text-sm font-semibold 
-                        ${filterStatus === 'Published' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}
+                        ${filterStatus === 'Published' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
                         transition-all duration-200`}
             onClick={() => setFilterStatus('Published')}
           >
@@ -196,7 +196,7 @@ export default function DashboardWebsites() {
           <Button
             variant={filterStatus === 'Draft' ? 'default' : 'outline'}
             className={`rounded-full h-10 px-4 text-sm font-semibold 
-                        ${filterStatus === 'Draft' ? 'bg-amber-600 text-white shadow-md shadow-amber-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}
+                        ${filterStatus === 'Draft' ? 'bg-amber-600 text-white shadow-md shadow-amber-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
                         transition-all duration-200`}
             onClick={() => setFilterStatus('Draft')}
           >
@@ -205,7 +205,7 @@ export default function DashboardWebsites() {
           <Button
             variant={filterStatus === 'Deleted' ? 'default' : 'outline'}
             className={`rounded-full h-10 px-4 text-sm font-semibold 
-                        ${filterStatus === 'Deleted' ? 'bg-rose-600 text-white shadow-md shadow-rose-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}
+                        ${filterStatus === 'Deleted' ? 'bg-rose-600 text-white shadow-md shadow-rose-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
                         transition-all duration-200`}
             onClick={() => setFilterStatus('Deleted')}
           >
@@ -216,7 +216,7 @@ export default function DashboardWebsites() {
         <Select value={sortBy} onValueChange={setSortBy}>
           <SelectTrigger className="w-full md:w-[180px] h-11 rounded-full bg-white border-slate-200 
                                     shadow-md shadow-slate-200/50 focus:ring-2 focus:ring-blue-500/20 
-                                    focus:border-blue-500 transition-all duration-300">
+                                    focus:border-blue-500 transition-all duration-300 hover:bg-slate-100 hover:text-indigo-700">
             <SelectValue placeholder="Sort By" />
           </SelectTrigger>
           <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">
@@ -288,11 +288,11 @@ export default function DashboardWebsites() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-slate-200 shadow-lg">
-                        <DropdownMenuItem onClick={() => handleEdit(website)} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100">
+                        <DropdownMenuItem onClick={() => handleEdit(website)} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100 focus:text-indigo-700">
                           <Edit className="w-4 h-4" /> Edit
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleDelete(website)} className="rounded-lg gap-2 cursor-pointer text-destructive focus:bg-destructive/5">
+                        <DropdownMenuItem onClick={() => handleDelete(website)} className="rounded-lg gap-2 cursor-pointer text-destructive focus:bg-destructive/5 focus:text-rose-600">
                           <Trash2 className="w-4 h-4" /> Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
