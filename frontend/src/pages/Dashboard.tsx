@@ -40,35 +40,34 @@ export const templatesList = [
 ];
 
 // OverviewCard component
-const OverviewCard = ({ title, value, icon, description }) => (
-    <Card className="rounded-xl border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-base font-medium text-slate-700">{title}</CardTitle>
-            {icon}
+const OverviewCard = ({ title, value, icon, description, iconBgClass, iconColorClass }) => (
+    <Card className="rounded-3xl bg-white/70 backdrop-blur-md border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-300 hover:-translate-y-1">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 p-6 pb-4">
+            <CardTitle className="text-base font-semibold text-slate-700">{title}</CardTitle>
+            <div className={cn("w-9 h-9 rounded-full flex items-center justify-center", iconBgClass, iconColorClass)}>{icon}</div>
         </CardHeader>
-        <CardContent>
-            <div className="text-3xl font-bold text-slate-900">{value}</div>
-            {description && <p className="text-xs text-slate-500 mt-1">{description}</p>}
+        <CardContent className="px-6 pb-6">
+            <div className="text-4xl font-bold text-slate-900">{value}</div>
+            {description && <p className="text-xs text-slate-500 mt-2">{description}</p>}
         </CardContent>
     </Card>
 );
 
 // NavItem — supports router Link + active state
-const NavItem = ({ icon, label, to, activeColor = 'text-primary', hoverBg = 'hover:bg-blue-50', hoverText = 'hover:text-slate-600', defaultText = 'text-slate-600' }) => {
+const NavItem = ({ icon, label, to, activeColor = 'text-white', hoverBg = 'hover:bg-slate-700', hoverText = 'hover:text-white', defaultText = 'text-slate-300' }) => {
     const location = useLocation();
     const isActive = location.pathname === to;
     return (
         <Button
             variant="ghost"
-            className={`w-full justify-start gap-2 h-8 text-sm transition-all duration-200 group 
-                ${isActive ? `bg-primary/5 ${activeColor} font-semibold` : `${defaultText} ${hoverText} ${hoverBg}`}
+            className={`w-full justify-start gap-2 py-2 px-3 text-sm transition-all duration-300 group rounded-full
+                ${isActive ? `bg-gradient-to-r from-purple-600 to-indigo-600 ${activeColor} font-semibold shadow-lg shadow-purple-500/30` : `${defaultText} ${hoverText} ${hoverBg}`}
             `}
             asChild
         >
             <Link to={to}>
-                <span className={`transition-colors duration-200 ${isActive ? activeColor : `${defaultText} ${hoverText}`}`}>{icon}</span>
+                <span className={`transition-colors duration-300 ${isActive ? activeColor : `${defaultText} ${hoverText}`}`}>{icon}</span>
                 {label}
-                {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
             </Link>
         </Button>
     );
@@ -148,7 +147,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] flex font-sans selection:bg-primary/10">
+        <div className="min-h-screen bg-[#f8fafc] flex font-sans selection:bg-primary/10 relative overflow-hidden">
             <Helmet>
                 <title>Dashboard | Buildora</title>
             </Helmet>
@@ -164,7 +163,7 @@ const Dashboard = () => {
             {/* Sidebar */}
             <aside
                 className={cn(
-                    "fixed inset-y-0 left-0 w-64 bg-gradient-to-br from-slate-900 to-slate-800 border-r border-slate-700 flex flex-col z-50",
+                    "fixed inset-y-0 left-0 w-64 bg-gradient-to-br from-purple-900 to-indigo-950 border-r border-slate-700 flex flex-col z-50 rounded-tr-3xl rounded-br-3xl",
                     "lg:static lg:flex",
                     isMobile ? "transition-transform duration-300 ease-in-out" : "",
                     isMobile && !isSidebarOpen ? "-translate-x-full" : "translate-x-0"
@@ -172,7 +171,7 @@ const Dashboard = () => {
             >
                 <div className="p-4 shrink-0">
                     <div className="flex items-center gap-2.5 px-2">
-                        <h1 className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500">
+                        <h1 className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-300">
                             Buildora
                         </h1>
                         {isMobile && (
@@ -191,32 +190,32 @@ const Dashboard = () => {
                 <nav className="flex-1 px-4 py-1 space-y-0.5">
                     <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest px-3 mb-1">Main Menu</p>
                     {!isAdmin && (
-                        <NavItem icon={<Globe className="w-4 h-4" />} label="Dashboard" to="/dashboard" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
+                        <NavItem icon={<Globe className="w-4 h-4" />} label="Dashboard" to="/dashboard" />
                     )}
-                    <NavItem icon={<Layout className="w-4 h-4" />} label="Templates" to="/dashboard/templates" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
-                    <NavItem icon={<FileText className="w-4 h-4" />} label="Assets" to="/dashboard/assets" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
+                    <NavItem icon={<Layout className="w-4 h-4" />} label="Templates" to="/dashboard/templates" />
+                    <NavItem icon={<FileText className="w-4 h-4" />} label="Assets" to="/dashboard/assets" />
                     {isAdmin && (
                         <div className="pt-1">
                             <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest px-3 mb-1">System</p>
-                            <NavItem icon={<Users className="w-4 h-4" />} label="Users" to="/dashboard/users" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
-                            <NavItem icon={<Layout className="w-4 h-4" />} label="Websites" to="/dashboard/websites" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
-                            <NavItem icon={<Activity className="w-4 h-4" />} label="Deployment Monitoring" to="/dashboard/deployment" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
-                            <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" to="/dashboard/settings" activeColor="text-purple-400" hoverBg="hover:bg-slate-700" hoverText="hover:text-white" defaultText="text-slate-300" />
+                            <NavItem icon={<Users className="w-4 h-4" />} label="Users" to="/dashboard/users" activeColor="text-white" />
+                            <NavItem icon={<Layout className="w-4 h-4" />} label="Websites" to="/dashboard/websites" activeColor="text-white" />
+                            <NavItem icon={<Activity className="w-4 h-4" />} label="Deployment Monitoring" to="/dashboard/deployment" activeColor="text-white" />
+                            <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" to="/dashboard/settings" activeColor="text-white" />
                         </div>
                     )}
                 </nav>
 
-                <div className="p-1 space-y-2 shrink-0">
-                    <div className="bg-slate-700 rounded-2xl p-1 border border-slate-600">
-                        <p className="text-xs font-semibold text-white mb-1">Free Plan</p>
-                        <div className="w-full bg-slate-600 h-1.5 rounded-full mb-1">
-                            <div className="bg-purple-500 h-full w-1/3 rounded-full" />
+                <div className="p-4 space-y-2 shrink-0">
+                    <div className="bg-white/5 rounded-2xl p-3 border border-slate-700 backdrop-blur-sm">
+                        <p className="text-xs font-semibold text-slate-100 mb-1">Free Plan</p>
+                        <div className="w-full bg-white/10 h-1.5 rounded-full mb-1">
+                            <div className="bg-indigo-400 h-full w-1/3 rounded-full" />
                         </div>
                         <p className="text-[10px] text-slate-400">3 of 10 projects used</p>
                     </div>
 
                     <Button
-                        className="w-full justify-start gap-3 h-8 bg-slate-700 text-slate-300 border border-slate-500 hover:bg-slate-600 hover:text-white"
+                        className="w-full justify-start gap-3 py-2 px-3 text-sm rounded-full bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-slate-700/20"
                         onClick={() => setIsAdmin(!isAdmin)}
                     >
                         {isAdmin
@@ -227,11 +226,11 @@ const Dashboard = () => {
                     </Button>
 
                     <div
-                        className="flex items-center gap-3 p-1 rounded-xl hover:bg-slate-700 transition-colors cursor-pointer border border-transparent hover:border-slate-600"
+                        className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-slate-700"
                         onClick={handleLogout}
                     >
                         <div className="relative">
-                            <div className="w-9 h-9 rounded-full bg-indigo-300 text-indigo-800 flex items-center justify-center font-bold text-sm">JD</div>
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-sm">JD</div>
                             <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-slate-800 rounded-full" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -262,16 +261,16 @@ const Dashboard = () => {
                                 )}
                                 <div>
                                     <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">Project Hub</h2>
-                                                                        <p className="text-lg text-slate-600 flex items-center gap-2 mt-1">
-                                        Welcome back! You have <span className="text-primary font-medium">{websites.length} active projects</span>
+                                    <p className="text-lg text-slate-600 flex items-center gap-2 mt-1">
+                                        Welcome back! You have <span className="text-indigo-600 font-medium">{websites.length} active projects</span>
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-4">
                                 <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
                                     <DialogTrigger asChild>
-                                        <Button className="gap-2 h-12 px-6 text-base rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
+                                        <Button className="gap-2 h-12 px-6 text-base rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/50 transition-all">
                                             <Plus className="w-5 h-5" /> New Project
                                         </Button>
                                     </DialogTrigger>
@@ -371,6 +370,9 @@ const Dashboard = () => {
                                         </div>
                                     </DialogContent>
                                 </Dialog>
+                                <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-medium text-sm border-2 border-slate-300 shadow-sm">
+                                    JD
+                                </div>
                             </div>
                         </header>
 
@@ -380,46 +382,54 @@ const Dashboard = () => {
                                 title="Total Websites"
                                 value="1,234"
                                 description="+20.1% from last month"
-                                icon={<Globe className="w-4 h-4 text-slate-400" />}
+                                icon={<Globe className="w-5 h-5" />}
+                                iconBgClass="bg-purple-100"
+                                iconColorClass="text-purple-600"
                             />
                             {isAdmin && (
                                 <OverviewCard
                                     title="Active Users"
                                     value="250"
                                     description="+15% from last month"
-                                    icon={<Users className="w-4 h-4 text-slate-400" />}
+                                    icon={<Users className="w-5 h-5" />}
+                                    iconBgClass="bg-blue-100"
+                                    iconColorClass="text-blue-600"
                                 />
                             )}
                             <OverviewCard
                                 title="Templates Available"
                                 value="42"
                                 description="New templates added frequently"
-                                icon={<Layout className="w-4 h-4 text-slate-400" />}
+                                icon={<Layout className="w-5 h-5" />}
+                                iconBgClass="bg-emerald-100"
+                                iconColorClass="text-emerald-600"
                             />
                             {isAdmin && (
                                 <OverviewCard
                                     title="Deployments Today"
                                     value="78"
                                     description="Successfully deployed websites"
-                                    icon={<Activity className="w-4 h-4 text-slate-400" />}
+                                    icon={<Activity className="w-5 h-5" />}
+                                    iconBgClass="bg-rose-100"
+                                    iconColorClass="text-rose-600"
                                 />
                             )}
                         </section>
 
                         {/* Search and Filters */}
-                        <div className="flex flex-col sm:flex-row items-center gap-3 mb-6">
-                            <div className="relative flex-1 w-full sm:w-auto">
-                                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
+                            <div className="relative flex-1 w-full">
+                                <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                                 <Input
                                     placeholder="Search projects..."
-                                    className="pl-9 w-full bg-white border-slate-200 focus:ring-primary/20"
+                                    className="pl-10 w-full h-12 bg-white border-slate-200 rounded-full shadow-md shadow-slate-200/50 focus:ring-primary/20 focus:shadow-lg focus:shadow-slate-300/50 transition-all"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
 
                             <Select value={sortBy} onValueChange={setSortBy}>
-                                <SelectTrigger className="w-full sm:w-[160px] h-12 rounded-xl bg-white border-slate-200 focus:ring-primary/20">
+                                <SelectTrigger className="w-full md:w-[160px] h-12 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-primary/20 focus:shadow-lg focus:shadow-slate-300/50 transition-all">
                                     <SelectValue placeholder="Sort By" />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">
@@ -429,7 +439,7 @@ const Dashboard = () => {
                             </Select>
 
                             <Select value={filterStatus} onValueChange={setFilterStatus}>
-                                <SelectTrigger className="w-full sm:w-[160px] h-12 rounded-xl bg-white border-slate-200 focus:ring-primary/20">
+                                <SelectTrigger className="w-full md:w-[160px] h-12 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-primary/20 focus:shadow-lg focus:shadow-slate-300/50 transition-all">
                                     <SelectValue placeholder="Filter Status" />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">
@@ -470,15 +480,16 @@ const WebsiteCard = ({ site, index, onDelete, onEdit }) => {
     const template = templatesList.find(t => t.id === site.templateId);
 
     return (
-        <Card className="group border-slate-200 hover:border-primary/20 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] hover:scale-[1.01] bg-white rounded-3xl overflow-hidden flex flex-col">
+        <Card className="group border border-slate-200 bg-white rounded-3xl overflow-hidden flex flex-col shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 hover:-translate-y-1 transition-all duration-300">
             <div className="aspect-[16/10] bg-slate-50 relative overflow-hidden">
                 {template && template.id !== 'blank' ? (
-                    <div className="absolute inset-0 p-4 transition-transform duration-500 group-hover:scale-105">
-                        <img src={template.image} alt={site.name} className="w-full h-full object-cover rounded-xl border border-slate-200 shadow-sm" />
+                    <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105 p-4">
+                        <img src={template.image} alt={site.name} className="w-full h-full object-cover rounded-2xl border border-slate-200 shadow-sm" />
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
                 ) : (
-                    <div className="absolute inset-0 p-4 transition-transform duration-500 group-hover:scale-105">
-                        <div className="w-full h-full border border-slate-200 rounded-xl bg-white shadow-sm flex flex-col overflow-hidden">
+                    <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105 p-4">
+                        <div className="w-full h-full border border-slate-200 rounded-2xl bg-white shadow-sm flex flex-col overflow-hidden">
                             <div className="h-6 bg-slate-50 border-b border-slate-100 flex items-center px-3 gap-1.5">
                                 <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
                                 <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
@@ -493,44 +504,45 @@ const WebsiteCard = ({ site, index, onDelete, onEdit }) => {
                                 </div>
                             </div>
                         </div>
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
                 )}
 
                 {/* Hover Actions Overlay */}
-                <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
-                    <Button size="sm" onClick={onEdit} className="bg-white text-slate-900 hover:bg-white/90">
+                <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
+                    <Button size="sm" onClick={onEdit} className="bg-white text-slate-900 hover:bg-white/90 rounded-full shadow-lg">
                         <Edit2 className="w-4 h-4 mr-1" /> Edit
                     </Button>
                 </div>
             </div>
 
-            <CardHeader className="p-5 pb-2">
+            <CardHeader className="p-6 pb-3">
                 <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                        <CardTitle className="text-lg font-bold text-slate-800 group-hover:text-primary transition-colors">
+                        <CardTitle className="text-xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors leading-tight">
                             {site.name}
                         </CardTitle>
-                        <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-                            <Clock className="w-3 h-3" />
+                        <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mt-1">
+                            <Clock className="w-3 h-3 text-slate-400" />
                             {format(new Date(site.lastEdited), 'MMM d, p')}
                         </div>
                     </div>
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 text-slate-400 hover:bg-slate-200 hover:text-slate-600">
+                            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
                                 <MoreVertical className="w-4 h-4" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 rounded-xl p-2">
-                            <DropdownMenuItem onClick={onEdit} className="rounded-lg gap-2 cursor-pointer">
+                        <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-slate-200 shadow-lg">
+                            <DropdownMenuItem onClick={onEdit} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100">
                                 <Edit2 className="w-4 h-4" /> Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer">
+                            <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100">
                                 <Files className="w-4 h-4" /> Duplicate
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={onDelete} className="rounded-lg gap-2 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/5">
+                            <DropdownMenuItem onClick={onDelete} className="rounded-lg gap-2 cursor-pointer text-rose-500 focus:bg-rose-50 focus:text-rose-600">
                                 <Trash2 className="w-4 h-4" /> Delete Project
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -538,15 +550,15 @@ const WebsiteCard = ({ site, index, onDelete, onEdit }) => {
                 </div>
             </CardHeader>
 
-            <CardFooter className="p-5 pt-0 mt-auto flex justify-between items-center">
-                <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${site.status === 'Published'
+            <CardFooter className="p-6 pt-3 mt-auto flex justify-between items-center">
+                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${site.status === 'Published'
                     ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                    : 'bg-slate-100 text-slate-500 border border-slate-200'
+                    : 'bg-amber-50 text-amber-600 border border-amber-100'
                 }`}>
-                    <div className={`w-1.5 h-1.5 rounded-full ${site.status === 'Published' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+                    <div className={`w-1.5 h-1.5 rounded-full ${site.status === 'Published' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
                     {site.status}
                 </div>
-                <Button variant="link" className="text-primary p-0 h-auto text-sm font-bold group-hover:underline underline-offset-4" onClick={onEdit}>
+                <Button variant="link" className="text-indigo-600 p-0 h-auto text-sm font-bold group-hover:underline underline-offset-4" onClick={onEdit}>
                     Open Editor →
                 </Button>
             </CardFooter>
