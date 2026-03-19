@@ -5,7 +5,7 @@ import {
     Plus, Globe, MoreVertical, Edit2, Trash2,
     Layout, Settings, LogOut, Clock, CheckCircle,
     FileText, Search, Sparkles, Zap, Files, Users, Activity, Menu, X, ShieldCheck,
-    Building2, ShoppingBag, LayoutTemplate, ArrowRight
+    Building2, ShoppingBag, LayoutTemplate, ArrowRight, ListFilter, Filter
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -429,7 +429,8 @@ const Dashboard = () => {
                             </div>
 
                             <Select value={sortBy} onValueChange={setSortBy}>
-                                <SelectTrigger className="w-full md:w-[160px] h-12 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-primary/20 focus:shadow-lg focus:shadow-slate-300/50 transition-all">
+                                <SelectTrigger className="w-full md:w-[160px] h-12 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-primary/20 focus:shadow-lg focus:shadow-slate-300/50 transition-all flex items-center justify-between px-4">
+                                    <ListFilter className="w-4 h-4 text-slate-400" />
                                     <SelectValue placeholder="Sort By" />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">
@@ -439,7 +440,8 @@ const Dashboard = () => {
                             </Select>
 
                             <Select value={filterStatus} onValueChange={setFilterStatus}>
-                                <SelectTrigger className="w-full md:w-[160px] h-12 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-primary/20 focus:shadow-lg focus:shadow-slate-300/50 transition-all">
+                                <SelectTrigger className="w-full md:w-[160px] h-12 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-primary/20 focus:shadow-lg focus:shadow-slate-300/50 transition-all flex items-center justify-between px-4">
+                                    <Filter className="w-4 h-4 text-slate-400" />
                                     <SelectValue placeholder="Filter Status" />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">
