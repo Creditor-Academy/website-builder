@@ -147,7 +147,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] flex font-sans selection:bg-primary/10 relative overflow-hidden">
+        <div className="h-screen bg-[#f8fafc] flex font-sans selection:bg-primary/10 relative overflow-hidden">
             <Helmet>
                 <title>Dashboard | Buildora</title>
             </Helmet>
@@ -163,7 +163,7 @@ const Dashboard = () => {
             {/* Sidebar */}
             <aside
                 className={cn(
-                    "fixed inset-y-0 left-0 w-64 bg-gradient-to-br from-purple-900 to-indigo-950 border-r border-slate-700 flex flex-col z-50 rounded-tr-3xl rounded-br-3xl",
+                    "fixed inset-y-0 left-0 w-64 bg-gradient-to-br from-purple-900 to-indigo-950 border-r border-slate-700 flex flex-col justify-between z-50 rounded-tr-3xl rounded-br-3xl",
                     "lg:static lg:flex",
                     isMobile ? "transition-transform duration-300 ease-in-out" : "",
                     isMobile && !isSidebarOpen ? "-translate-x-full" : "translate-x-0"
@@ -187,7 +187,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <nav className="flex-1 px-4 py-1 space-y-0.5">
+                <nav className="flex-1 px-4 py-1 space-y-0.5 overflow-y-auto ">
                     <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest px-3 mb-1">Main Menu</p>
                     {!isAdmin && (
                         <NavItem icon={<Globe className="w-4 h-4" />} label="Dashboard" to="/dashboard" />
