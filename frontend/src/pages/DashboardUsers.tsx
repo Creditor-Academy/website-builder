@@ -44,7 +44,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Users, UserPlus, Search, Edit, UserX, UserCheck, UserCog, AlertTriangle, Clock, CalendarDays, ShieldCheck, User as UserIcon, Briefcase, CheckCircle, AlertCircle, XCircle, MoreVertical, Trash2 } from 'lucide-react'; // Import icons
+import { Users, UserPlus, Search, Edit, UserX, UserCheck, UserCog, AlertTriangle, Clock, CalendarDays, ShieldCheck, User as UserIcon, Briefcase, CheckCircle, AlertCircle, XCircle, MoreVertical, Trash2, ListFilter } from 'lucide-react'; // Import icons
 import { useToast } from '@/components/ui/use-toast';
 import UserShimmer from '@/components/dashboard/UserShimmer';
 
@@ -272,8 +272,8 @@ export default function DashboardUsers() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-11 pr-4 w-full h-11 rounded-full bg-white border-slate-200 
-                       shadow-md shadow-slate-200/50 focus:ring-2 focus:ring-blue-500/20 
-                       focus:border-blue-500 transition-all duration-300"
+                       shadow-md shadow-slate-200/50 focus:ring-4 focus:ring-blue-500/50 
+                       focus:border-blue-600 focus:shadow-lg focus:shadow-blue-500/40 focus:outline-none transition-all duration-300"
           />
         </div>
 
@@ -311,6 +311,7 @@ export default function DashboardUsers() {
           <SelectTrigger className="w-full md:w-[180px] h-11 rounded-full bg-white border-slate-200 
                                     shadow-md shadow-slate-200/50 focus:ring-2 focus:ring-blue-500/20 
                                     focus:border-blue-500 transition-all duration-300 hover:bg-slate-100 hover:text-indigo-700">
+            <ListFilter className="h-4 w-4 text-slate-400 mr-2" />
             <SelectValue placeholder="Sort By" />
           </SelectTrigger>
           <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">
