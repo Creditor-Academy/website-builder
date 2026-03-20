@@ -154,6 +154,38 @@
 }
 
 @layer utilities {
+  /* Fix text direction for contenteditable elements */
+  [contenteditable="true"] {
+    direction: ltr !important;
+    unicode-bidi: bidi-override !important;
+    text-align: left !important;
+    writing-mode: horizontal-tb !important;
+    text-orientation: mixed !important;
+  }
+
+  /* Additional fix for any class-based contenteditable elements */
+  [class*="ce"][contenteditable="true"],
+  [class*="-ce"][contenteditable="true"],
+  [class*="editable"][contenteditable="true"] {
+    direction: ltr !important;
+    unicode-bidi: bidi-override !important;
+    text-align: left !important;
+    writing-mode: horizontal-tb !important;
+    text-orientation: mixed !important;
+  }
+
+  /* Fix cursor position in contenteditable elements */
+  [contenteditable="true"]:focus {
+    outline: none;
+    caret-color: currentColor;
+  }
+
+  /* Force LTR for all text inputs */
+  input, textarea {
+    direction: ltr !important;
+    unicode-bidi: bidi-override !important;
+  }
+
   /* Smooth transitions */
   .transition-smooth {
     @apply transition-all duration-300 ease-out;
@@ -274,22 +306,28 @@
   }
 }
 
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out forwards;
+@keyframes infinite-scroll-vertical {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
 }
 
-.animate-slide-in-right {
-  animation: slide-in-right 0.3s ease-out forwards;
+@keyframes infinite-scroll-vertical-reverse {
+  from {
+    transform: translateY(-50%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
-.animate-slide-in-left {
-  animation: slide-in-left 0.3s ease-out forwards;
+.animate-infinite-scroll-vertical {
+  animation: infinite-scroll-vertical 40s linear infinite;
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-.animate-bounce-subtle {
-  animation: bounce-subtle 0.6s ease-in-out;
+.animate-infinite-scroll-vertical-reverse {
+  animation: infinite-scroll-vertical-reverse 40s linear infinite;
 }

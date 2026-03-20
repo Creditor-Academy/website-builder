@@ -1,172 +1,460 @@
 import React from 'react';
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, ArrowUpRight, Users, MessageSquare, Clock } from 'lucide-react';
 
+// ─── Styles ───────────────────────────────────────────────────────────────
+const STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;0,900;1,400;1,700&family=Geist:wght@300;400;500;600&display=swap');
+
+  @keyframes ct-up  { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes ct-in  { from { opacity:0; transform:scale(0.97);      } to { opacity:1; transform:scale(1);      } }
+  @keyframes ct-bar { from { transform:scaleX(0); }                  to { transform:scaleX(1); }                 }
+
+  .ct-ce:focus { outline: none; }
+  .ct-ce[data-editing="true"] {
+    border-bottom: 1.5px dashed rgba(0,0,0,0.18);
+    cursor: text; padding-bottom: 1px; min-width: 12px;
+  }
+  .ct-ce[data-editing="true"]:focus { outline: none; }
+  .ct-inv[data-editing="true"] {
+    border-bottom: 1.5px dashed rgba(255,255,255,0.28);
+    cursor: text; padding-bottom: 1px;
+  }
+
+  /* Form inputs */
+  .ct-input {
+    width: 100%; box-sizing: border-box;
+    font-family: 'Geist', sans-serif;
+    font-size: 14px; font-weight: 400;
+    background: #fafaf9;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 3px;
+    padding: 13px 16px;
+    color: #0f172a;
+    outline: none;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    resize: none;
+  }
+  .ct-input::placeholder { color: rgba(0,0,0,0.25); }
+  .ct-input:focus {
+    border-color: #E11D48;
+    background: #fff;
+  }
+
+  /* Label */
+  .ct-label {
+    font-family: 'Geist', sans-serif;
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(0,0,0,0.38);
+    display: block; margin-bottom: 8px;
+  }
+
+  /* Submit button */
+  .ct-submit {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font-family: 'Geist', sans-serif;
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    border: none; border-radius: 3px;
+    padding: 16px 32px; cursor: pointer; width: 100%;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .ct-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  /* Contact info items */
+  .ct-info-item {
+    display: flex; gap: 18px; align-items: flex-start;
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+    transition: padding-left 0.2s ease;
+  }
+  .ct-info-item:hover { padding-left: 4px; }
+  .ct-info-item:last-child { border-bottom: none; }
+`;
+
+function InjectStyles() {
+  if (typeof document !== 'undefined' && !document.getElementById('contact-section-styles')) {
+    const el = document.createElement('style');
+    el.id = 'contact-section-styles';
+    el.textContent = STYLES;
+    document.head.appendChild(el);
+  }
+  return null;
+}
+
+// ─── CE helper ────────────────────────────────────────────────────────────
+function CE({ as: Tag = 'span', value, onSave, isEditing, style, className = '', inv = false }) {
+  return (
+    <Tag
+      className={`ct-ce ${inv ? 'ct-inv' : ''} ${className}`}
+      data-editing={isEditing ? 'true' : 'false'}
+      contentEditable={isEditing ? 'true' : 'false'}
+      suppressContentEditableWarning
+      style={{ ...style, pointerEvents: isEditing ? 'auto' : 'inherit' }}
+      onBlur={isEditing && onSave ? (e) => onSave(e.currentTarget.textContent || '') : undefined}
+      onClick={isEditing ? (e) => e.stopPropagation() : undefined}
+    >
+      {value}
+    </Tag>
+  );
+}
+
+// ─── Shared form ──────────────────────────────────────────────────────────
+function ContactForm({ content, isEditing, onContentChange, buttonPrimaryBg, buttonPrimaryText }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* Name row */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        <div>
+          <CE
+            as="label" value={content.labelFirstName || 'First Name'} isEditing={isEditing}
+            onSave={(val) => onContentChange?.('labelFirstName', val)}
+            className="ct-label"
+          />
+          <input type="text" className="ct-input" placeholder="Jane" />
+        </div>
+        <div>
+          <CE
+            as="label" value={content.labelLastName || 'Last Name'} isEditing={isEditing}
+            onSave={(val) => onContentChange?.('labelLastName', val)}
+            className="ct-label"
+          />
+          <input type="text" className="ct-input" placeholder="Doe" />
+        </div>
+      </div>
+
+      {/* Email */}
+      <div>
+        <CE
+          as="label" value={content.labelEmail || 'Email'} isEditing={isEditing}
+          onSave={(val) => onContentChange?.('labelEmail', val)}
+          className="ct-label"
+        />
+        <input type="email" className="ct-input" placeholder="jane@example.com" />
+      </div>
+
+      {/* Message */}
+      <div>
+        <CE
+          as="label" value={content.labelMessage || 'Message'} isEditing={isEditing}
+          onSave={(val) => onContentChange?.('labelMessage', val)}
+          className="ct-label"
+        />
+        <textarea rows={5} className="ct-input" placeholder="Tell us what's on your mind…" />
+      </div>
+
+      {/* Submit */}
+      <button
+        type="submit"
+        className="ct-submit"
+        style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
+      >
+        <Send size={14} />
+        <CE
+          as="span" value={content.buttonText || 'Send Message'} isEditing={isEditing}
+          onSave={(val) => onContentChange?.('buttonText', val)}
+          inv={buttonPrimaryText === '#ffffff'}
+        />
+      </button>
+    </div>
+  );
+}
+
+// ─── Shared section header ────────────────────────────────────────────────
+function ContactHeader({ content, isEditing, onContentChange, headingColor, paragraphColor, centered }) {
+  return (
+    <div style={{
+      maxWidth: centered ? 600 : 520,
+      margin: centered ? '0 auto' : '0',
+      marginBottom: 64,
+      textAlign: centered ? 'center' : 'left',
+    }}>
+      <div style={{
+        display: 'inline-flex', alignItems: 'center', gap: 10,
+        fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase',
+        color: 'rgba(0,0,0,0.3)', marginBottom: 16, pointerEvents: 'none',
+      }}>
+        <div style={{ width: 20, height: 1, background: 'rgba(0,0,0,0.2)' }} />
+        contact us
+      </div>
+
+      <CE
+        as="h2" value={content.headline || 'Get In Touch'} isEditing={isEditing}
+        onSave={(val) => onContentChange?.('headline', val)}
+        style={{
+          fontFamily: "'Fraunces', serif",
+          fontSize: 'clamp(34px, 4.5vw, 60px)',
+          fontWeight: 900, lineHeight: 1.0, letterSpacing: '-0.02em',
+          color: headingColor, display: 'block',
+          animation: 'ct-up 0.6s ease both',
+        }}
+      />
+
+      <div style={{
+        width: 36, height: 3, background: '#E11D48',
+        margin: centered ? '18px auto 18px' : '18px 0',
+        transformOrigin: 'left', animation: 'ct-bar 0.7s ease 0.1s both',
+      }} />
+
+      <CE
+        as="p" value={content.subheadline || "We'd love to hear from you."} isEditing={isEditing}
+        onSave={(val) => onContentChange?.('subheadline', val)}
+        style={{
+          fontFamily: "'Geist', sans-serif",
+          fontSize: 16, lineHeight: 1.75,
+          color: paragraphColor, opacity: 0.7, display: 'block',
+        }}
+      />
+    </div>
+  );
+}
+
+// ─── Info items (used in split variant) ──────────────────────────────────
+function InfoItems({ content, isEditing, onContentChange, headingColor, paragraphColor }) {
+  // Use dynamic contact fields if available, otherwise fall back to legacy fields
+  const contactFields = content.contactFields || [
+    { field: 'labelEmailUs', label: content.labelEmailUs || 'Email Us', value: content.email || 'hello@example.com', icon: 'Mail', accent: '#E11D48' },
+    { field: 'labelCallUs', label: content.labelCallUs || 'Call Us', value: content.phone || '+1 (555) 123-4567', icon: 'Phone', accent: '#0891B2' },
+    { field: 'labelVisitUs', label: content.labelVisitUs || 'Visit Us', value: content.address || '123 Business St', icon: 'MapPin', accent: '#059669' },
+  ];
+
+  const getIcon = (iconName) => {
+    switch(iconName) {
+      case 'Mail': return Mail;
+      case 'Phone': return Phone;
+      case 'MapPin': return MapPin;
+      case 'Globe': return Users;
+      case 'MessageSquare': return MessageSquare;
+      case 'Clock': return Clock;
+      default: return Mail;
+    }
+  };
+
+  return (
+    <div>
+      {contactFields.map((field) => {
+        const Icon = getIcon(field.icon);
+        return (
+          <div key={field.id || field.field} className="ct-info-item">
+            {/* icon box */}
+            <div style={{
+              width: 44, height: 44, borderRadius: '3px', flexShrink: 0,
+              background: `${field.accent}12`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: field.accent,
+            }}>
+              <Icon size={18} />
+            </div>
+
+            <div style={{ flex: 1 }}>
+              <CE
+                as="h4" value={field.label} isEditing={isEditing}
+                onSave={(val) => {
+                  if (field.id) {
+                    // Dynamic field - update in contactFields array
+                    const updated = content.contactFields.map(x => 
+                      x.id === field.id ? { ...x, label: val } : x
+                    );
+                    onContentChange('contactFields', updated);
+                  } else {
+                    // Legacy field - update directly
+                    onContentChange(field.field, val);
+                  }
+                }}
+                style={{
+                  fontFamily: "'Geist', sans-serif",
+                  fontWeight: 600, fontSize: 12,
+                  letterSpacing: '0.1em', textTransform: 'uppercase',
+                  color: field.accent, marginBottom: 5, display: 'block',
+                }}
+              />
+              <CE
+                as="p" value={field.value} isEditing={isEditing}
+                onSave={(val) => {
+                  if (field.id) {
+                    // Dynamic field - update in contactFields array
+                    const updated = content.contactFields.map(x => 
+                      x.id === field.id ? { ...x, value: val } : x
+                    );
+                    onContentChange('contactFields', updated);
+                  } else {
+                    // Legacy field - update directly
+                    const valueField = field.field.replace('label', '').toLowerCase();
+                    onContentChange(valueField, val);
+                  }
+                }}
+                style={{
+                  fontFamily: "'Fraunces', serif",
+                  fontSize: 18, fontWeight: 400,
+                  color: headingColor, display: 'block', lineHeight: 1.3,
+                }}
+              />
+            </div>
+
+            <div style={{ alignSelf: 'center', color: 'rgba(0,0,0,0.18)' }}>
+              <ArrowUpRight size={16} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Form panel wrapper ───────────────────────────────────────────────────
+function FormPanel({ content, isEditing, onContentChange, buttonPrimaryBg, buttonPrimaryText, dark = false }) {
+  return (
+    <div style={{
+      background: dark ? '#0f172a' : '#fff',
+      borderRadius: '4px',
+      padding: '44px 40px',
+      border: dark ? 'none' : '1px solid rgba(0,0,0,0.07)',
+      animation: 'ct-in 0.6s ease 0.1s both',
+    }}>
+      {dark && (
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ fontFamily: "'Fraunces', serif", fontSize: 22, fontWeight: 700, color: '#f8fafc', marginBottom: 6 }}>
+            Send us a message
+          </div>
+          <div style={{ width: 28, height: 2, background: '#E11D48' }} />
+        </div>
+      )}
+      <ContactForm
+        content={content} isEditing={isEditing}
+        onContentChange={onContentChange}
+        buttonPrimaryBg={dark ? '#E11D48' : buttonPrimaryBg}
+        buttonPrimaryText={buttonPrimaryText}
+      />
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// VARIANT: split  →  Info Left / Form Right
+// ──────────────────────────────────────────────────────────────────────────
+function SplitVariant({ content, isEditing, onContentChange, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText }) {
+  return (
+    <div>
+      <ContactHeader content={content} isEditing={isEditing} onContentChange={onContentChange} headingColor={headingColor} paragraphColor={paragraphColor} centered={false} />
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 56, alignItems: 'start' }}>
+        <InfoItems content={content} isEditing={isEditing} onContentChange={onContentChange} headingColor={headingColor} paragraphColor={paragraphColor} />
+        <FormPanel content={content} isEditing={isEditing} onContentChange={onContentChange} buttonPrimaryBg={buttonPrimaryBg} buttonPrimaryText={buttonPrimaryText} />
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// VARIANT: centered  →  Centered Header + Single Form Card
+// ──────────────────────────────────────────────────────────────────────────
+function CenteredVariant({ content, isEditing, onContentChange, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText }) {
+  return (
+    <div>
+      <ContactHeader content={content} isEditing={isEditing} onContentChange={onContentChange} headingColor={headingColor} paragraphColor={paragraphColor} centered />
+
+      <div style={{ maxWidth: 640, margin: '0 auto' }}>
+        <FormPanel content={content} isEditing={isEditing} onContentChange={onContentChange} buttonPrimaryBg={buttonPrimaryBg} buttonPrimaryText={buttonPrimaryText} />
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// VARIANT: map  →  Dark Form Left / Map Right
+// ──────────────────────────────────────────────────────────────────────────
+function MapVariant({ content, isEditing, onContentChange, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText }) {
+  return (
+    <div>
+      <ContactHeader content={content} isEditing={isEditing} onContentChange={onContentChange} headingColor={headingColor} paragraphColor={paragraphColor} centered={false} />
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, alignItems: 'stretch' }}>
+        {/* Form — dark panel */}
+        <FormPanel
+          content={content} isEditing={isEditing}
+          onContentChange={onContentChange}
+          buttonPrimaryBg={buttonPrimaryBg} buttonPrimaryText={buttonPrimaryText}
+          dark
+        />
+
+        {/* Map */}
+        <div style={{
+          borderRadius: '4px', overflow: 'hidden',
+          background: '#e2e8f0',
+          minHeight: 440,
+          position: 'relative',
+        }}>
+          {content.mapEmbed ? (
+            <iframe
+              title="map"
+              src={content.mapEmbed}
+              style={{ width: '100%', height: '100%', border: 'none', display: 'block', minHeight: 440 }}
+            />
+          ) : (
+            <div style={{
+              width: '100%', height: '100%', minHeight: 440,
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center',
+              background: '#f1f5f9',
+            }}>
+              <MapPin size={32} style={{ color: 'rgba(0,0,0,0.18)', marginBottom: 12 }} />
+              <CE
+                as="p" value={content.mapPlaceholder || 'Add a Map Embed URL in the Properties panel'} isEditing={isEditing}
+                onSave={(val) => onContentChange?.('mapPlaceholder', val)}
+                style={{
+                  fontFamily: "'Geist', sans-serif",
+                  fontSize: 13, color: 'rgba(0,0,0,0.35)',
+                  textAlign: 'center', maxWidth: 260, lineHeight: 1.6,
+                  display: 'block',
+                }}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Main export
+// ──────────────────────────────────────────────────────────────────────────
 export function ContactSection({ section, isSelected, isEditing, onContentChange }) {
   const { content, styles } = section;
   const variant = section.variant || 'split';
-  const background = styles.useGradient ? (styles.backgroundGradient || styles.backgroundColor) : (styles.backgroundColor || '#f8fafc');
+  const background = styles.useGradient
+    ? (styles.backgroundGradient || styles.backgroundColor)
+    : (styles.backgroundColor || '#fafaf8');
   const padding = styles.padding || '100px 0';
-  
-  // Get text colors with fallbacks
-  const headingColor = styles.headingColor || '#0f172a';
-  const paragraphColor = styles.paragraphColor || '#64748b';
-  
-  // Get button colors with fallbacks
-  const buttonPrimaryBg = styles.buttonPrimaryBg || 'linear-gradient(to right, #2563eb, #9333ea)';
+
+  const headingColor    = styles.headingColor    || '#0f172a';
+  const paragraphColor  = styles.paragraphColor  || '#64748b';
+  const buttonPrimaryBg = styles.buttonPrimaryBg || '#0f172a';
   const buttonPrimaryText = styles.buttonPrimaryText || '#ffffff';
 
-  if (variant === 'centered') {
-    return (
-      <section className="relative" style={{ background, padding }}>
-        <div className="container mx-auto px-6 max-w-7xl">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: headingColor }} contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('headline', e.currentTarget.textContent)}>{content.headline || 'Get In Touch'}</h2>
-            <p className="text-lg opacity-80" style={{ color: paragraphColor }} contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.textContent)}>{content.subheadline || "We'd love to hear from you."}</p>
-          </div>
+  const shared = { content, isEditing, onContentChange, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText };
 
-          <div className="max-w-2xl mx-auto bg-white rounded-3xl p-8 shadow-lg border border-slate-100">
-            <form className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium text-slate-700 mb-2" contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('labelFirstName', e.currentTarget.textContent)}>{content.labelFirstName || 'First Name'}</label><input type="text" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none" placeholder="John" /></div>
-                <div><label className="block text-sm font-medium text-slate-700 mb-2" contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('labelLastName', e.currentTarget.textContent)}>{content.labelLastName || 'Last Name'}</label><input type="text" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none" placeholder="Doe" /></div>
-              </div>
-              <div><label className="block text-sm font-medium text-slate-700 mb-2" contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('labelEmail', e.currentTarget.textContent)}>{content.labelEmail || 'Email'}</label><input type="email" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none" placeholder="john@example.com" /></div>
-              <div><label className="block text-sm font-medium text-slate-700 mb-2" contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('labelMessage', e.currentTarget.textContent)}>{content.labelMessage || 'Message'}</label><textarea rows={4} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none resize-none" placeholder="Your message..." /></div>
-              <button type="submit" className="w-full py-4 font-semibold rounded-xl hover:opacity-90 flex items-center justify-center gap-2" style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}><Send className="w-5 h-5" /><span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('buttonText', e.currentTarget.textContent)}>{content.buttonText || 'Send Message'}</span></button>
-            </form>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (variant === 'map') {
-    return (
-      <section className="relative" style={{ background, padding }}>
-        <div className="container mx-auto px-6 max-w-7xl">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: headingColor }} contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('headline', e.currentTarget.textContent)}>{content.headline || 'Get In Touch'}</h2>
-            <p className="text-lg opacity-80" style={{ color: paragraphColor }} contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.textContent)}>{content.subheadline || "We'd love to hear from you."}</p>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-12 max-w-5xl mx-auto items-start">
-            <div className="bg-white rounded-3xl p-8 shadow-lg border border-slate-100">
-              <form className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div><label className="block text-sm font-medium text-slate-700 mb-2">First Name</label><input type="text" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none" placeholder="John" /></div>
-                  <div><label className="block text-sm font-medium text-slate-700 mb-2">Last Name</label><input type="text" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none" placeholder="Doe" /></div>
-                </div>
-                <div><label className="block text-sm font-medium text-slate-700 mb-2">Email</label><input type="email" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none" placeholder="john@example.com" /></div>
-                <div><label className="block text-sm font-medium text-slate-700 mb-2">Message</label><textarea rows={4} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none resize-none" placeholder="Your message..." /></div>
-                <button type="submit" className="w-full py-4 font-semibold rounded-xl hover:opacity-90 flex items-center justify-center gap-2" style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}><Send className="w-5 h-5" />Send Message</button>
-              </form>
-            </div>
-            <div className="rounded-3xl overflow-hidden bg-white/5">
-              {content.mapEmbed ? (
-                <iframe title="map" src={content.mapEmbed} className="w-full h-full min-h-[360px] border-0" />
-              ) : (
-                <div 
-                  className="w-full h-[360px] flex items-center justify-center text-muted-foreground"
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => onContentChange?.('mapPlaceholder', e.currentTarget.textContent)}
-                >
-                  {content.mapPlaceholder || 'Add a Map Embed URL in the Properties panel (e.g., Google Maps iframe URL)'}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // default split
   return (
-    <section className="relative" style={{ background, padding }}>
-      <div className="container mx-auto px-6 max-w-7xl">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: '#0f172a' }} contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('headline', e.currentTarget.textContent)}>{content.headline || 'Get In Touch'}</h2>
-          <p className="text-lg opacity-80" style={{ color: '#64748b' }} contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.textContent)}>{content.subheadline || "We'd love to hear from you."}</p>
-        </div>
-        <div className="grid lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
-          <div className="space-y-8">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0"><Mail className="w-6 h-6 text-blue-600" /></div>
-              <div>
-                <h4 
-                  className="font-semibold text-slate-900 mb-1"
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => onContentChange?.('labelEmailUs', e.currentTarget.textContent)}
-                >
-                  {content.labelEmailUs || 'Email Us'}
-                </h4>
-                <p 
-                  className="text-slate-600"
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => onContentChange?.('email', e.currentTarget.textContent)}
-                >
-                  {content.email || 'hello@example.com'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0"><Phone className="w-6 h-6 text-green-600" /></div>
-              <div>
-                <h4 
-                  className="font-semibold text-slate-900 mb-1"
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => onContentChange?.('labelCallUs', e.currentTarget.textContent)}
-                >
-                  {content.labelCallUs || 'Call Us'}
-                </h4>
-                <p 
-                  className="text-slate-600"
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => onContentChange?.('phone', e.currentTarget.textContent)}
-                >
-                  {content.phone || '+1 (555) 123-4567'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0"><MapPin className="w-6 h-6 text-purple-600" /></div>
-              <div>
-                <h4 
-                  className="font-semibold text-slate-900 mb-1"
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => onContentChange?.('labelVisitUs', e.currentTarget.textContent)}
-                >
-                  {content.labelVisitUs || 'Visit Us'}
-                </h4>
-                <p 
-                  className="text-slate-600"
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => onContentChange?.('address', e.currentTarget.textContent)}
-                >
-                  {content.address || '123 Business St'}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-3xl p-8 shadow-lg border border-slate-100">
-            <form className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium text-slate-700 mb-2" contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('labelFirstName', e.currentTarget.textContent)}>{content.labelFirstName || 'First Name'}</label><input type="text" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none" placeholder="John" /></div>
-                <div><label className="block text-sm font-medium text-slate-700 mb-2" contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('labelLastName', e.currentTarget.textContent)}>{content.labelLastName || 'Last Name'}</label><input type="text" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none" placeholder="Doe" /></div>
-              </div>
-              <div><label className="block text-sm font-medium text-slate-700 mb-2" contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('labelEmail', e.currentTarget.textContent)}>{content.labelEmail || 'Email'}</label><input type="email" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none" placeholder="john@example.com" /></div>
-              <div><label className="block text-sm font-medium text-slate-700 mb-2" contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('labelMessage', e.currentTarget.textContent)}>{content.labelMessage || 'Message'}</label><textarea rows={4} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none resize-none" placeholder="Your message..." /></div>
-              <button type="submit" className="w-full py-4 font-semibold rounded-xl hover:opacity-90 flex items-center justify-center gap-2" style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}><Send className="w-5 h-5" /><span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('buttonText', e.currentTarget.textContent)}>{content.buttonText || 'Send Message'}</span></button>
-            </form>
-          </div>
-        </div>
+    <section style={{
+      background, padding,
+      fontFamily: "'Geist', sans-serif",
+      position: 'relative',
+      outline: isSelected ? '2px solid #E11D48' : 'none',
+      outlineOffset: isSelected ? '3px' : '0',
+    }}>
+      <InjectStyles />
+
+      {/* ambient texture */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        backgroundImage: 'radial-gradient(ellipse at 90% 5%, rgba(225,29,72,0.04) 0%, transparent 55%), radial-gradient(ellipse at 5% 92%, rgba(8,145,178,0.04) 0%, transparent 50%)',
+      }} />
+
+      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px', position: 'relative' }}>
+        {variant === 'centered' && <CenteredVariant {...shared} />}
+        {variant === 'map'      && <MapVariant      {...shared} />}
+        {variant === 'split'    && <SplitVariant    {...shared} />}
+        {!['centered','map','split'].includes(variant) && <SplitVariant {...shared} />}
       </div>
     </section>
   );

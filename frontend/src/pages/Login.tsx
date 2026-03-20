@@ -284,10 +284,10 @@ export default function LoginSignup() {
         initial={{ scale: 1 }}
         animate={{ scale: 1.05 }}
         transition={{ duration: 20, repeat: Infinity, repeatType: "mirror" }}
-        className="absolute inset-0 bg-no-repeat bg-center bg-cover opacity-60 mix-blend-screen"
+        className="absolute inset-0 bg-no-repeat bg-center bg-cover opacity-90"
         style={{ backgroundImage: `url(${loginbg})` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/60 to-slate-950/40" />
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-slate-950/20" />
 
       <div className={`absolute top-8 left-8 right-8 z-50 flex items-center justify-between pointer-events-none ${isSignup ? "md:justify-end" : "md:justify-start"}`}>
         <motion.div layout transition={{ type: "spring", stiffness: 220, damping: 28 }} className="flex items-center justify-between w-full md:w-auto">
