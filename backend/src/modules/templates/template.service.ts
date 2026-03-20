@@ -152,6 +152,15 @@ class TemplateService {
             return await this.templateDao.getSectionTemplateCategories();
         }
     }
+
+    /**
+     * Cleanup deleted templates
+     */
+    async cleanupDeletedTemplates() {
+        // Hard delete templates that were soft deleted more than 30 days ago
+        await this.templateDao.cleanupDeletedWebsiteTemplates();
+        await this.templateDao.cleanupDeletedSectionTemplates();
+    }
 }
 
 export default TemplateService;

@@ -79,6 +79,8 @@ class PageService {
         if (data.meta !== undefined) updateData.meta = data.meta;
         if (data.page_styles !== undefined) updateData.page_styles = data.page_styles;
 
+        // Section Operations (not atomic)
+        // can be partially updated
         let updates: Promise<Section>[] = [];
         let deletes: Promise<Section>[] = [];
         let restores: Promise<Section>[] = [];
@@ -150,6 +152,13 @@ class PageService {
         // Create new page
         const newPage = await this.pageDao.clonePage(websiteId, sourcePage, data);
         return newPage;
+    }
+
+    /**
+     * Cleanup deleted pages
+     */
+    async cleanupDeletedPages() {
+        await this.pageDao.cleanupDeletedPages();
     }
 }
 

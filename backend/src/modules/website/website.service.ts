@@ -36,7 +36,6 @@ class WebsiteService {
             const defaultPage: CreatePageInput = {
                 name: 'Home',
                 slug: '/home',
-                templateId: null,
                 page_styles: {},
                 meta: {},
                 sections: []
@@ -60,7 +59,6 @@ class WebsiteService {
             const homepage: CreatePageInput = {
                 name: 'Home',
                 slug: '/home',
-                templateId: template.id,
                 page_styles: home_layout as JsonObjectType || {},
                 meta: {},
                 sections: []

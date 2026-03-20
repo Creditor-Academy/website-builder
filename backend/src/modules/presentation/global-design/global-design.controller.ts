@@ -16,11 +16,11 @@ class GlobalDesignController {
     getGlobalDesign = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const websiteId = req.context.website!.id;
-            const globalDesign = await this.service.getGlobalDesign(websiteId);
-
-            if (!globalDesign) {
+            if (!req.context.website.globalDesign) {
                 throw new NotFoundError('Global design not found. Initialize it first.');
             }
+
+            const globalDesign = await this.service.getGlobalDesign(websiteId);
 
             res.status(200).json({ data: globalDesign });
         } catch (error: any) {
@@ -35,6 +35,10 @@ class GlobalDesignController {
     updateGlobalDesign = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const websiteId = req.context.website!.id;
+            if (!req.context.website.globalDesign) {
+                throw new NotFoundError('Global design not found. Initialize it first.');
+            }
+
             const globalDesign = await this.service.updateGlobalDesign(websiteId, req.validated.body);
 
             res.status(200).json({
@@ -52,12 +56,16 @@ class GlobalDesignController {
      */
     createGlobalSlot = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const globalDesignId = req.context.website!.globalDesign!.id;
-            const globalDesign = await this.service.createGlobalSlot(globalDesignId, req.validated.body);
+            const globalDesign = req.context.website!.globalDesign;
+            if (!globalDesign) {
+                throw new NotFoundError('Global design not found. Initialize it first.');
+            }
+
+            const globalSlot = await this.service.createGlobalSlot(globalDesign.id, req.validated.body);
 
             res.status(200).json({
                 message: 'Global slot created successfully',
-                data: globalDesign
+                data: globalSlot
             });
         } catch (error: any) {
             next(error);
@@ -70,9 +78,13 @@ class GlobalDesignController {
      */
     updateGlobalSlot = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const global_design_id = req.context.website!.globalDesign!.id;
+            const globalDesign = req.context.website!.globalDesign;
+            if (!globalDesign) {
+                throw new NotFoundError('Global design not found. Initialize it first.');
+            }
+
             const slotId = req.validated.params.slotId!;
-            const globalSlot = await this.service.updateGlobalSlot(global_design_id, slotId, req.validated.body);
+            const globalSlot = await this.service.updateGlobalSlot(globalDesign.id, slotId, req.validated.body);
 
             res.status(200).json({
                 message: 'Global slot updated successfully',
@@ -89,9 +101,13 @@ class GlobalDesignController {
      */
     deleteGlobalSlot = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const global_design_id = req.context.website!.globalDesign!.id;
+            const globalDesign = req.context.website!.globalDesign;
+            if (!globalDesign) {
+                throw new NotFoundError('Global design not found. Initialize it first.');
+            }
+
             const slotId = req.validated.params.slotId!;
-            const globalSlot = await this.service.deleteGlobalSlot(global_design_id, slotId);
+            const globalSlot = await this.service.deleteGlobalSlot(globalDesign.id, slotId);
 
             res.status(200).json({
                 message: 'Global slot deleted successfully',

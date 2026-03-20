@@ -47,14 +47,22 @@ class GlobalDesignService {
      * Update global slot
      */
     async updateGlobalSlot(globalDesignId: string, slotId: string, data: UpdateGlobalSlotInput) {
-        return await this.dao.updateGlobalSlot(globalDesignId, slotId, data);
+        const globalSlot = await this.dao.getGlobalSlotById(slotId, globalDesignId);
+        if (!globalSlot) {
+            throw new NotFoundError('Global slot not found for this website');
+        }
+        return await this.dao.updateGlobalSlot(slotId, data);
     }
 
     /**
      * Delete global slot
      */
     async deleteGlobalSlot(globalDesignId: string, slotId: string) {
-        return await this.dao.deleteGlobalSlot(globalDesignId, slotId);
+        const globalSlot = await this.dao.getGlobalSlotById(slotId, globalDesignId);
+        if (!globalSlot) {
+            throw new NotFoundError('Global slot not found for this website');
+        }
+        return await this.dao.deleteGlobalSlot(slotId);
     }
 }
 

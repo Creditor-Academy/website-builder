@@ -7,6 +7,7 @@ import type {
     UpdateWebsiteTemplateInput,
     UpdateSectionTemplateInput
 } from './template.validation.js';
+import { DELETED_TEMPLATES_RETENTION_TIME } from '../../constants/templates.constants.js';
 
 class TemplateDao {
 
@@ -21,7 +22,12 @@ class TemplateDao {
         return await prismaClient.websiteTemplate.create({
             data: {
                 ...data,
-                thumbnail_url: data.thumbnail_url || null
+                description: data.description ?? null,
+                thumbnail_url: data.thumbnail_url ?? null,
+                global_styles: data.global_styles ?? {},
+                navbar: data.navbar ?? {},
+                footer: data.footer ?? {},
+                home_layout: data.home_layout ?? {},
             }
         });
     }
@@ -122,9 +128,11 @@ class TemplateDao {
     async createSectionTemplate(data: CreateSectionTemplateInput): Promise<SectionTemplate> {
         return await prismaClient.sectionTemplate.create({
             data: {
-                ...data,
-                thumbnail_url: data.thumbnail_url || null,
-                props: data.props as any
+                name: data.name,
+                description: data.description ?? null,
+                category: data.category,
+                thumbnail_url: data.thumbnail_url ?? null,
+                props: data.props as Prisma.InputJsonValue
             }
         });
     }
@@ -221,6 +229,34 @@ class TemplateDao {
         });
 
         return templates.map(t => t.category);
+    }
+
+    /**
+     * Cleanup deleted templates
+     */
+    async cleanupDeletedWebsiteTemplates() {
+        const retentionDate = new Date(Date.now() - DELETED_TEMPLATES_RETENTION_TIME);
+
+        // Delete website templates
+        await prismaClient.websiteTemplate.deleteMany({
+            where: {
+                deleted_at: { lte: retentionDate }
+            }
+        });
+    }
+
+    /**
+     * Cleanup deleted section templates
+     */
+    async cleanupDeletedSectionTemplates() {
+        const retentionDate = new Date(Date.now() - DELETED_TEMPLATES_RETENTION_TIME);
+
+        // Delete section templates
+        await prismaClient.sectionTemplate.deleteMany({
+            where: {
+                deleted_at: { lte: retentionDate }
+            }
+        });
     }
 }
 

@@ -2,6 +2,7 @@ import prismaClient from '../../../config/prisma.js';
 import { Prisma } from '@prisma/client';
 import type { Page, Section } from '@prisma/client';
 import { CreatePageInput, CreateSectionInput, UpdatePageInput } from './page.validation.js';
+import { DELETED_PAGES_RETENTION_TIME } from '../../../constants/presentation.constants.js';
 
 class PageDao {
     /**
@@ -225,6 +226,20 @@ class PageDao {
                 sections: {
                     orderBy: { order: 'asc' },
                 }
+            }
+        });
+    }
+
+    /**
+     * Cleanup deleted pages
+     */
+    async cleanupDeletedPages() {
+        const retentionDate = new Date(Date.now() - DELETED_PAGES_RETENTION_TIME);
+
+        // Delete pages
+        await prismaClient.page.deleteMany({
+            where: {
+                deleted_at: { lte: retentionDate }
             }
         });
     }

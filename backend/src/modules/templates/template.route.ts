@@ -34,32 +34,32 @@ router.post(
 );
 
 /**
- * GET /templates/Websites
+ * GET /templates/websites
  * List all website templates with optional filters
  */
 router.get(
-    "/Websites",
+    "/websites",
     validateRequest(listTemplatesQuerySchema, 'query'),
     templateController.listWebsiteTemplates
 );
 
 /**
- * GET /templates/Websites/:templateId
+ * GET /templates/websites/:templateId
  * Get single website template by ID
  */
 router.get(
-    "/Websites/:templateId",
+    "/websites/:templateId",
     validateRequest(templateIdParamsSchema, 'params'),
     validateTemplate('website'),
     templateController.getWebsiteTemplate
 );
 
 /**
- * PATCH /templates/Websites/:templateId
+ * PATCH /templates/websites/:templateId
  * Update website template
  */
 router.patch(
-    "/Websites/:templateId",
+    "/websites/:templateId",
     authorize([UserRole.ADMIN]),
     validateRequest(templateIdParamsSchema, 'params'),
     validateRequest(updateWebsiteTemplateSchema),
@@ -68,11 +68,11 @@ router.patch(
 );
 
 /**
- * DELETE /templates/Websites/:templateId
+ * DELETE /templates/websites/:templateId
  * Delete (soft delete) website template
  */
 router.delete(
-    "/Websites/:templateId",
+    "/websites/:templateId",
     authorize([UserRole.ADMIN]),
     validateRequest(templateIdParamsSchema, 'params'),
     validateTemplate('website'),
@@ -80,11 +80,11 @@ router.delete(
 );
 
 /**
- * POST /templates/Websites/:templateId/restore
+ * POST /templates/websites/:templateId/restore
  * Restore deleted website template
  */
 router.post(
-    "/Websites/:templateId/restore",
+    "/websites/:templateId/restore",
     authorize([UserRole.ADMIN]),
     validateRequest(templateIdParamsSchema, 'params'),
     validateTemplate('website'),

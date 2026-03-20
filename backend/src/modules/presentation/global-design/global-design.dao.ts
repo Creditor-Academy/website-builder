@@ -1,5 +1,5 @@
 import prismaClient from '../../../config/prisma.js';
-import type { GlobalDesign, GlobalSlot } from '@prisma/client';
+import type { GlobalDesign, GlobalSlot, Prisma } from '@prisma/client';
 import type { CreateGlobalSlotInput, UpdateGlobalSlotInput } from './global-design.validation.js';
 
 class GlobalDesignDao {
@@ -42,13 +42,24 @@ class GlobalDesignDao {
     }
 
     /**
+     * Get global slot by ID
+     */
+    async getGlobalSlotById(slotId: string, globalDesignId: string): Promise<GlobalSlot | null> {
+        return await prismaClient.globalSlot.findUnique({
+            where: { id: slotId, global_design_id: globalDesignId }
+        });
+    }
+
+    /**
      * Create global slot
      */
     async createGlobalSlot(globalDesignId: string, data: CreateGlobalSlotInput): Promise<GlobalSlot> {
         return await prismaClient.globalSlot.create({
             data: {
                 global_design_id: globalDesignId,
-                ...data
+                type: data.type,
+                section_template_id: data.section_template_id ?? null,
+                props: data.props as Prisma.InputJsonValue
             }
         });
     }
@@ -56,9 +67,9 @@ class GlobalDesignDao {
     /**
      * Update global slot
      */
-    async updateGlobalSlot(globalDesignId: string, slotId: string, data: UpdateGlobalSlotInput): Promise<GlobalSlot> {
+    async updateGlobalSlot(slotId: string, data: UpdateGlobalSlotInput): Promise<GlobalSlot> {
         return await prismaClient.globalSlot.update({
-            where: { id: slotId, global_design_id: globalDesignId },
+            where: { id: slotId },
             data: {
                 props: data.props!
             }
@@ -68,9 +79,9 @@ class GlobalDesignDao {
     /**
      * Delete global slot
      */
-    async deleteGlobalSlot(globalDesignId: string, slotId: string): Promise<void> {
+    async deleteGlobalSlot(slotId: string): Promise<void> {
         await prismaClient.globalSlot.delete({
-            where: { id: slotId, global_design_id: globalDesignId }
+            where: { id: slotId }
         });
     }
 }
