@@ -57,19 +57,24 @@ const OverviewCard = ({ title, value, icon, description, iconBgClass, iconColorC
 // NavItem — supports router Link + active state
 const NavItem = ({ icon, label, to, activeColor = 'text-white', hoverBg = 'hover:bg-slate-700', hoverText = 'hover:text-white', defaultText = 'text-slate-300' }) => {
     const location = useLocation();
+    const navigate = useNavigate();
     const isActive = location.pathname === to;
+
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault(); // Prevent default button behavior
+        navigate(to);
+    };
+
     return (
         <Button
             variant="ghost"
             className={`w-full justify-start gap-2 py-2 px-3 text-sm transition-all duration-300 group rounded-full
                 ${isActive ? `bg-gradient-to-r from-purple-600 to-indigo-600 ${activeColor} font-semibold shadow-lg shadow-purple-500/30` : `${defaultText} ${hoverText} ${hoverBg}`}
             `}
-            asChild
+            onClick={handleClick}
         >
-            <Link to={to}>
-                <span className={`transition-colors duration-300 ${isActive ? activeColor : `${defaultText} ${hoverText}`}`}>{icon}</span>
-                {label}
-            </Link>
+            <span className={`transition-colors duration-300 ${isActive ? activeColor : `${defaultText} ${hoverText}`}`}>{icon}</span>
+            {label}
         </Button>
     );
 };
