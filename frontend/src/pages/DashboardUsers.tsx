@@ -47,6 +47,7 @@ import {
 import { Users, UserPlus, Search, Edit, UserX, UserCheck, UserCog, AlertTriangle, Clock, CalendarDays, ShieldCheck, User as UserIcon, Briefcase, CheckCircle, AlertCircle, XCircle, MoreVertical, Trash2, ListFilter } from 'lucide-react'; // Import icons
 import { useToast } from '@/components/ui/use-toast';
 import UserShimmer from '@/components/dashboard/UserShimmer';
+import GradientButton from '@/components/ui/GradientButton';
 
 interface User {
   id: string;
@@ -252,15 +253,13 @@ export default function DashboardUsers() {
           <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Users Management</h2>
           <p className="text-slate-500 mt-1">Manage your users and permissions.</p>
         </div>
-        <Button 
+        <GradientButton 
           onClick={handleAddUserClick} 
-          className="gap-2 w-full md:w-auto h-11 rounded-full 
-            bg-gradient-to-r from-blue-600 to-indigo-600 text-white 
-            shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 
-            transition-all duration-300 hover:scale-[1.02]"
+          className="w-full md:w-auto h-11"
+          icon={<UserPlus className="w-5 h-5" />}
         >
-          <UserPlus className="w-5 h-5" /> Add User
-        </Button>
+          Add User
+        </GradientButton>
       </div>
 
       {/* Search and Filters */}

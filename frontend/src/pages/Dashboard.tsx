@@ -19,6 +19,7 @@ import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import GradientButton from '@/components/ui/GradientButton';
 
 // Import template assets
 import business from "../assets/Bussiness.jpg";
@@ -214,16 +215,16 @@ const Dashboard = () => {
                         <p className="text-[10px] text-slate-400">3 of 10 projects used</p>
                     </div>
 
-                    <Button
-                        className="w-full justify-start gap-3 py-2 px-3 text-sm rounded-full bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-slate-700/20"
+                    <GradientButton
+                        className="w-full justify-start py-2 px-3 text-sm"
                         onClick={() => setIsAdmin(!isAdmin)}
-                    >
-                        {isAdmin
+                        icon={isAdmin
                             ? <ShieldCheck className="w-4 h-4 text-purple-400" />
                             : <Users className="w-4 h-4" />
                         }
+                    >
                         {isAdmin ? "Admin Mode On" : "Switch to Admin Mode"}
-                    </Button>
+                    </GradientButton>
 
                     <div
                         className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-slate-700"
@@ -270,9 +271,9 @@ const Dashboard = () => {
                             <div className="flex items-center gap-4">
                                 <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
                                     <DialogTrigger asChild>
-                                        <Button className="gap-2 h-12 px-6 text-base rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/50 transition-all">
-                                            <Plus className="w-5 h-5" /> New Project
-                                        </Button>
+                                        <GradientButton className="h-12 px-6 text-base w-auto" icon={<Plus className="w-5 h-5" />}> 
+                                            New Project
+                                        </GradientButton>
                                     </DialogTrigger>
                                     <DialogContent className="sm:max-w-5xl rounded-[2.5rem] p-0 overflow-hidden bg-slate-50 border-slate-200">
                                         <DialogTitle className="sr-only">Create New Website</DialogTitle>
@@ -302,13 +303,14 @@ const Dashboard = () => {
                                                     </div>
                                                 </div>
                                                 <div className="mt-auto pt-8 border-t border-slate-100">
-                                                    <Button
+                                                    <GradientButton
                                                         onClick={handleCreateSite}
                                                         disabled={!newSiteName.trim()}
-                                                        className="w-full h-14 rounded-xl font-bold bg-slate-900 hover:bg-slate-800 text-white shadow-xl disabled:opacity-50 transition-all text-lg flex items-center justify-center gap-2 group active:scale-[0.98]"
+                                                        className="w-full h-14 font-bold text-lg flex items-center justify-center group active:scale-[0.98]"
+                                                        icon={<ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
                                                     >
-                                                        Start Building <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                                    </Button>
+                                                        Start Building 
+                                                    </GradientButton>
                                                 </div>
                                             </div>
 

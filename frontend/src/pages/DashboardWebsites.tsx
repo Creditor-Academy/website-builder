@@ -34,9 +34,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Globe2, LayoutGrid, ShieldCheck, User as UserIcon, Hash, FileText, Link, Clock, Edit, Copy, Eye, Trash2, MoreVertical, CheckCircle, CircleDotDashed, Ban, Search, Plus
+  Globe2, LayoutGrid, ShieldCheck, User as UserIcon, Hash, FileText, Link, Clock, Edit, Copy, Eye, Trash2, MoreVertical, CheckCircle, CircleDotDashed, Ban, Search, Plus, ListFilter
 } from 'lucide-react';
 import WebsiteShimmer from '@/components/dashboard/WebsiteShimmer';
+import GradientButton from '@/components/ui/GradientButton';
 
 interface Website {
   id: string;
@@ -150,13 +151,16 @@ export default function DashboardWebsites() {
           <p className="text-slate-500 mt-1">Manage your deployed and draft websites.</p>
         </div>
         <div className="flex items-center gap-4">
-          <Button onClick={() => setIsAdmin(!isAdmin)} className="gap-2 w-full md:w-auto h-11 rounded-full bg-white text-slate-700 border border-slate-200 shadow-md shadow-slate-200/50 hover:bg-slate-100 hover:shadow-lg hover:text-indigo-700 transition-all">
-            {isAdmin ? <ShieldCheck className="w-4 h-4" /> : <UserIcon className="w-4 h-4" />}
+          <GradientButton
+            onClick={() => setIsAdmin(!isAdmin)}
+            className="w-full md:w-auto"
+            icon={isAdmin ? <ShieldCheck className="w-4 h-4" /> : <UserIcon className="w-4 h-4" />}
+          >
             Admin View ({isAdmin ? "ON" : "OFF"})
-          </Button>
-          <Button className="gap-2 w-full md:w-auto h-11 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 hover:scale-[1.02]">
-            <Plus className="w-5 h-5" /> New Website
-          </Button>
+          </GradientButton>
+          <GradientButton className="w-full md:w-auto" icon={<Plus className="w-5 h-5" />}>
+            New Website
+          </GradientButton>
         </div>
       </div>
 
@@ -217,6 +221,7 @@ export default function DashboardWebsites() {
           <SelectTrigger className="w-full md:w-[180px] h-11 rounded-full bg-white border-slate-200 
                                     shadow-md shadow-slate-200/50 focus:ring-2 focus:ring-blue-500/20 
                                     focus:border-blue-500 transition-all duration-300 hover:bg-slate-100 hover:text-indigo-700">
+            <ListFilter className="h-4 w-4 text-slate-400 mr-2" />
             <SelectValue placeholder="Sort By" />
           </SelectTrigger>
           <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">
