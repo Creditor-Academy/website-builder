@@ -34,46 +34,48 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <HelmetProvider>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster position="top-right" />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard" element={<Dashboard />}>
-              <Route index element={null} /> {/* This will be handled by Dashboard component's internal routing or default view */}
-              <Route path="users" element={<DashboardUsers />} />
-              <Route path="websites" element={<DashboardWebsites />} />
-              <Route path="templates" element={<DashboardTemplates />} />
-              <Route path="deployment" element={<DashboardDeployment />} />
-              <Route path="assets" element={<DashboardAssets />} />
-              <Route path="settings" element={<DashboardSettings />} />
-            </Route>
-            <Route path="/builder/:id" element={<WebsiteEditor />} />
-            <Route path="/features" element={<Features />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/resources" element={<Resources />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/start" element={<Start />} />
-            <Route path="/templates" element={<Templates />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/careers" element={<Careers />} />
-            <Route path="/help" element={<Help />} />
-            <Route path="/status" element={<Status />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/terms-of-service" element={<TermsOfService />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </HelmetProvider>
+  <GoogleOAuthProvider clientId="90594881643-luse261854af5fofeek084bmusinauqv.apps.googleusercontent.com">
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />}>
+                <Route index element={null} /> {/* This will be handled by Dashboard component's internal routing or default view */}
+                <Route path="users" element={<DashboardUsers />} />
+                <Route path="websites" element={<DashboardWebsites />} />
+                <Route path="templates" element={<DashboardTemplates />} />
+                <Route path="deployment" element={<DashboardDeployment />} />
+                <Route path="assets" element={<DashboardAssets />} />
+                <Route path="settings" element={<DashboardSettings />} />
+              </Route>
+              <Route path="/builder/:id" element={<WebsiteEditor />} />
+              <Route path="/features" element={<Features />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/resources" element={<Resources />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/start" element={<Start />} />
+              <Route path="/templates" element={<Templates />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/careers" element={<Careers />} />
+              <Route path="/help" element={<Help />} />
+              <Route path="/status" element={<Status />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-of-service" element={<TermsOfService />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
+  </GoogleOAuthProvider>
 );
 
 export default App;

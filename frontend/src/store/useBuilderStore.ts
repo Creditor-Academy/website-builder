@@ -20,11 +20,11 @@ interface Page {
     id: string;
     name: string;
     slug: string;
-    sections: any[]; // Define a more specific type for sections if available
+    sections: any[]; 
     meta: { title: string; description: string };
-    navbar: any; // Define a more specific type for navbar if available
-    footer: any; // Define a more specific type for footer if available
-    globalStyles: any; // Define a more specific type for globalStyles if available
+    navbar: any; 
+    footer: any; 
+    globalStyles: any;
 }
 
 interface Website {
@@ -71,6 +71,7 @@ interface BuilderStore {
     duplicatePage: (pageId: string) => void;
     deletePage: (pageId: string) => void;
     updatePageSEO: (pageId: string, seoUpdates: Partial<{ title: string; description: string }>) => void;
+    updateWebsite: (id: string, updates: Partial<Website>) => void;
     updateWebsitePages: (newPages: Page[]) => void;
     addSection: (section: any, index?: number) => void;
     updateSection: (sectionId: string, updates: any) => void;
@@ -251,6 +252,14 @@ const useBuilderStore = create<BuilderStore>(
                     p.id === pageId ? { ...p, meta: { ...p.meta, ...seoUpdates } } : p
                 );
                 get().updateWebsitePages(newPages);
+            },
+
+            updateWebsite: (id, updates) => {
+                set((state) => ({
+                    websites: state.websites.map((w) =>
+                        w.id === id ? { ...w, ...updates, lastEdited: new Date().toISOString() } : w
+                    ),
+                }));
             },
 
             updateWebsitePages: (newPages) => {
