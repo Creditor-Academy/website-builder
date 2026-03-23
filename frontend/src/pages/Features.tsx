@@ -231,21 +231,21 @@ const FeaturesPage = () => {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vw] h-[150vh] transform -rotate-[12deg] skew-x-[12deg] flex gap-8 justify-center items-center opacity-80 md:opacity-100 select-none">
             <div className="flex flex-col gap-8 animate-infinite-scroll-vertical">
               {[dragDropImg, templatesImg, uiShowcase1, componentsImg].map((img, i) => (
-                <div key={i} className={cn("w-[250px] md:w-[450px] aspect-video rounded-3xl border overflow-hidden shadow-2xl", isDark ? "border-slate-800 bg-slate-900" : "border-slate-200 bg-white")}>
+                <div key={i} className={cn("w-[250px] md:w-[450px] aspect-video rounded-3xl overflow-hidden shadow-2xl", isDark ? "bg-slate-900" : "bg-white")}>
                   <img src={img} className="w-full h-full object-cover transition-all duration-700" alt="Showcase" />
                 </div>
               ))}
             </div>
             <div className="flex flex-col gap-8 animate-infinite-scroll-vertical-reverse mt-40">
               {[uiShowcase2, dragDropImg, componentsImg, templatesImg].map((img, i) => (
-                <div key={i} className={cn("w-[250px] md:w-[450px] aspect-video rounded-3xl border overflow-hidden shadow-2xl", isDark ? "border-slate-800 bg-slate-900" : "border-slate-200 bg-white")}>
+                <div key={i} className={cn("w-[250px] md:w-[450px] aspect-video rounded-3xl overflow-hidden shadow-2xl", isDark ? "bg-slate-900" : "bg-white")}>
                   <img src={img} className="w-full h-full object-cover transition-all duration-700" alt="Showcase" />
                 </div>
               ))}
             </div>
             <div className="hidden lg:flex flex-col gap-8 animate-infinite-scroll-vertical">
               {[templatesImg, uiShowcase1, dragDropImg, uiShowcase2].map((img, i) => (
-                <div key={i} className={cn("w-[250px] md:w-[450px] aspect-video rounded-3xl border overflow-hidden shadow-2xl", isDark ? "border-slate-800 bg-slate-900" : "border-slate-200 bg-white")}>
+                <div key={i} className={cn("w-[250px] md:w-[450px] aspect-video rounded-3xl overflow-hidden shadow-2xl", isDark ? "bg-slate-900" : "bg-white")}>
                   <img src={img} className="w-full h-full object-cover transition-all duration-700" alt="Showcase" />
                 </div>
               ))}

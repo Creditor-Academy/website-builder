@@ -250,7 +250,7 @@ const Resources = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "circOut" }}
             className={cn(
-              "text-7xl md:text-[10rem] font-black tracking-tighter leading-[0.9] mb-8",
+              "text-7xl md:text-[10rem] font-black tracking-tighter leading-[0.9] mb-8 transition-colors duration-1000",
               isDark ? "text-white" : "text-white"
             )}
           >

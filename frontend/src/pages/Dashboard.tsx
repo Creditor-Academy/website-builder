@@ -5,7 +5,8 @@ import {
     Plus, Globe, MoreVertical, Edit2, Play, Trash2,
     Layout, Settings, LogOut, Clock, CheckCircle,
     FileText, Search, Sparkles, Zap, Files, Building2, ShoppingBag, Users,
-    ArrowRight, ChevronLeft, Palette, Layers, MonitorPlay, Move, LayoutTemplate
+    ArrowRight, ChevronLeft, Palette, Layers, MonitorPlay, Move, LayoutTemplate,
+    Upload, Monitor, Link as LinkIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -371,13 +372,39 @@ const Dashboard = () => {
 };
 
 const AssetsView = () => {
-    // Mock assets data
-    const assets = [
-        { id: '1', name: 'Hero bg.jpg', type: 'image', size: '1.2 MB', date: '2024-03-01', url: business },
-        { id: '2', name: 'Product 1.png', type: 'image', size: '0.8 MB', date: '2024-03-02', url: ecommerce },
-        { id: '3', name: 'Logo.svg', type: 'image', size: '0.1 MB', date: '2024-03-05', url: portfolio },
-        { id: '4', name: 'Profile.jpg', type: 'image', size: '0.4 MB', date: '2024-03-06', url: school },
-    ];
+    const { assets, addAsset, deleteAsset } = useBuilderStore();
+    const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
+    const [urlInput, setUrlInput] = useState('');
+    const [urlName, setUrlName] = useState('');
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+    const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            addAsset({
+                name: file.name,
+                url,
+                type: file.type.startsWith('video') ? 'video' : 'image',
+                size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+            });
+            if (e.target) e.target.value = '';
+        }
+    };
+
+    const handleUrlUpload = () => {
+        if (urlInput) {
+            addAsset({
+                name: urlName || 'Imported Asset',
+                url: urlInput,
+                type: urlInput.match(/\.(mp4|webm|ogg)$/i) ? 'video' : 'image',
+                size: 'External'
+            });
+            setUrlInput('');
+            setUrlName('');
+            setIsUrlDialogOpen(false);
+        }
+    };
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 pb-20">
@@ -387,15 +414,49 @@ const AssetsView = () => {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-                <div className="aspect-square border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center gap-3 hover:border-primary/40 hover:bg-white cursor-pointer transition-all group">
-                    <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-primary group-hover:bg-primary/5 transition-colors">
-                        <Plus className="w-6 h-6" />
-                    </div>
-                    <span className="text-sm font-bold text-slate-500 group-hover:text-primary">Upload</span>
-                </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <div className="aspect-square border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center gap-3 hover:border-primary/40 hover:bg-white cursor-pointer transition-all group">
+                            <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-primary group-hover:bg-primary/5 transition-colors">
+                                <Plus className="w-6 h-6" />
+                            </div>
+                            <span className="text-sm font-bold text-slate-500 group-hover:text-primary">Upload</span>
+                        </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-48 rounded-xl p-2">
+                        <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer py-2.5" onSelect={() => fileInputRef.current?.click()}>
+                            <Monitor className="w-4 h-4" /> From Disk
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer py-2.5" onSelect={() => setIsUrlDialogOpen(true)}>
+                            <LinkIcon className="w-4 h-4" /> From URL
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    onChange={handleUpload}
+                    accept="image/*,video/*"
+                />
+
                 {assets.map(asset => (
                     <div key={asset.id} className="group relative aspect-square bg-white border border-slate-100 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all cursor-pointer">
                         <img src={asset.url} alt={asset.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                                variant="destructive"
+                                size="icon"
+                                className="h-8 w-8 rounded-full shadow-lg"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteAsset(asset.id);
+                                }}
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </Button>
+                        </div>
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-6 flex flex-col justify-end">
                             <p className="text-white text-sm font-bold truncate">{asset.name}</p>
                             <p className="text-white/70 text-[10px] uppercase font-black tracking-widest mt-0.5">{asset.size}</p>
@@ -403,6 +464,41 @@ const AssetsView = () => {
                     </div>
                 ))}
             </div>
+
+            {/* URL Upload Dialog */}
+            <Dialog open={isUrlDialogOpen} onOpenChange={setIsUrlDialogOpen}>
+                <DialogContent className="sm:max-w-md rounded-[2rem]">
+                    <DialogHeader>
+                        <DialogTitle>Import via URL</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                            <label htmlFor="url-name" className="text-sm font-medium">Asset Name</label>
+                            <Input
+                                id="url-name"
+                                placeholder="E.g. Logo, Banner Image..."
+                                value={urlName}
+                                onChange={(e) => setUrlName(e.target.value)}
+                                className="rounded-xl bg-slate-50"
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <label htmlFor="url" className="text-sm font-medium">Image or Video URL</label>
+                            <Input
+                                id="url"
+                                placeholder="https://example.com/image.png"
+                                value={urlInput}
+                                onChange={(e) => setUrlInput(e.target.value)}
+                                className="rounded-xl bg-slate-50"
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button variant="outline" onClick={() => setIsUrlDialogOpen(false)} className="rounded-xl">Cancel</Button>
+                        <Button onClick={handleUrlUpload} disabled={!urlInput} className="rounded-xl">Import Asset</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

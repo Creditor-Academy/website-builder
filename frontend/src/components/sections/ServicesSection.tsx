@@ -1,8 +1,9 @@
 import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
 
-export function ServicesSection({ section, isSelected, isEditing, onContentChange }) {
+export function ServicesSection({ section, isSelected, isEditing, onContentChange, isAlternate }) {
   const { content, styles, variant = 'cards' } = section;
+  const services = content.services || [];
 
   const handleTextEdit = (field, e) => {
     if (onContentChange && isEditing) {
@@ -10,11 +11,19 @@ export function ServicesSection({ section, isSelected, isEditing, onContentChang
     }
   };
 
-  const background = styles.useGradient ? (styles.backgroundGradient || styles.backgroundColor) : (styles.backgroundColor || '#ffffff');
+  const handleCardEdit = (field, index, e) => {
+    if (onContentChange && isEditing) {
+      const updatedServices = [...services];
+      updatedServices[index] = { ...updatedServices[index], [field]: e.currentTarget.textContent || '' };
+      onContentChange('services', updatedServices);
+    }
+  };
+
+  const background = styles.useGradient ? (styles.backgroundGradient || styles.backgroundColor) : (styles.backgroundColor || (isAlternate ? 'var(--theme-bg-alt, #f8fafc)' : 'var(--theme-bg, #ffffff)'));
   
   // Get text colors with fallbacks
-  const headingColor = styles.headingColor || '#0f172a';
-  const paragraphColor = styles.paragraphColor || '#475569';
+  const headingColor = styles.headingColor || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
+  const paragraphColor = styles.paragraphColor || (isAlternate ? 'var(--theme-text-alt, #475569)' : 'var(--theme-text, #475569)');
 
   const sectionStyle = {
     background,
@@ -96,7 +105,7 @@ export function ServicesSection({ section, isSelected, isEditing, onContentChang
                 className="flex flex-col items-center text-center p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
                 style={{ 
                   background: styles.cardBackgroundColor || '#f8fafc',
-                  borderRadius: styles.borderRadius || '12px'
+                  borderRadius: styles.borderRadius || 'var(--radius, 16px)'
                 }}
               >
                 <div className="w-20 h-20 flex items-center justify-center mb-4" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)', borderRadius: styles.borderRadius ? `calc(${styles.borderRadius} * 0.5)` : '8px' }}>
@@ -143,7 +152,7 @@ export function ServicesSection({ section, isSelected, isEditing, onContentChang
                 className="group relative overflow-hidden transition-all duration-500 hover:-translate-y-2"
                 style={{ 
                   animationDelay: `${index * 0.1}s`,
-                  borderRadius: styles.borderRadius || '16px'
+                  borderRadius: styles.borderRadius || 'var(--radius, 16px)'
                 }}
               >
                 {/* Image */}

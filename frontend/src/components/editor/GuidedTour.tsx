@@ -14,7 +14,7 @@ const TOUR_STEPS = [
   },
   {
     id: 'sections',
-    title: "Start Building jn",
+    title: "Start Building",
     message: "Browse our 500+ pre-designed sections and drag them onto your canvas to get started.",
     target: '#tour-nav-add',
     mascotState: 'pointing',

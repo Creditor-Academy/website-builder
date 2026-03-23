@@ -138,7 +138,7 @@ const PlanCard = ({ plan, isEditing, onContentChange, content, buttonPrimaryBg, 
           letterSpacing: '0.08em', textTransform: 'uppercase',
           padding: '5px 16px', borderRadius: '0 0 12px 12px',
           display: 'flex', alignItems: 'center', gap: '5px',
-          boxShadow: '0 4px 12px rgba(239,68,68,0.35)',
+          boxShadow: 'var(--shadow, 0 4px 12px rgba(239,68,68,0.35))',
         }}>
           <Zap width={10} height={10} />
           <span contentEditable={isEditing} suppressContentEditableWarning
@@ -258,7 +258,7 @@ const renderTable = ({ content, isEditing, onContentChange, headingColor, paragr
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 2rem' }}>
       <SectionHeader content={content} isEditing={isEditing} onContentChange={onContentChange} headingColor={headingColor} paragraphColor={paragraphColor} />
 
-      <div style={{ overflowX: 'auto', borderRadius: '20px', border: '1px solid rgba(99,102,241,0.12)', background: '#fff', boxShadow: '0 8px 40px rgba(0,0,0,0.06)' }}>
+      <div style={{ overflowX: 'auto', borderRadius: '20px', border: '1px solid rgba(99,102,241,0.12)', background: '#fff', boxShadow: 'var(--shadow, 0 8px 40px rgba(0,0,0,0.06))' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
           <thead>
             <tr style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(6,182,212,0.04))' }}>

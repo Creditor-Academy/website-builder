@@ -271,6 +271,11 @@ export const createBusinessFooter = () => ({
 export const getBusinessPage = () => ({
   id: uuidv4(),
   name: 'Home',
+  slug: '/',
+  meta: {
+    title: 'BizCorp - Strategic Business Solutions',
+    description: 'Empowering enterprises with cutting-edge technology and strategic consulting.'
+  },
   navbar: createBusinessNavbar(),
   sections: [
     createBusinessHeroSection(),

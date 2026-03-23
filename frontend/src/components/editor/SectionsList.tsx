@@ -71,6 +71,7 @@ import {
   createDefaultBlogListSection,
   createDefaultMasonryGallerySection,
   createDefaultAboutSection,
+  createDefaultCaseStudiesSection,
   getBusinessPage,
   getPortfolioPage,
   getEcommercePage,
@@ -92,6 +93,7 @@ const ELEMENT_CATEGORIES = [
       { type: "cta", name: "Call to Action", icon: MousePointer2, description: "Action-oriented CTA section", create: createDefaultCTASection },
       { type: "pricing", name: "Pricing", icon: DollarSign, description: "Pricing tiers & plans", create: createDefaultPricingSection },
       { type: "testimonials", name: "Testimonials", icon: Quote, description: "Customer reviews", create: createDefaultTestimonialsSection },
+      { type: "casestudies", name: "Case Studies", icon: BarChart2, description: "Display client success stories", create: createDefaultCaseStudiesSection },
     ]
   },
   {

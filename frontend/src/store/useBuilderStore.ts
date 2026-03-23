@@ -20,6 +20,15 @@ const TEMPLATE_MAP: Record<string, () => any> = {
     coaching: getCoachPage,
 };
 
+export interface Asset {
+    id: string;
+    name: string;
+    type: 'image' | 'video' | 'file';
+    url: string;
+    size?: string;
+    date: string;
+}
+
 export interface Website {
     id: string;
     name: string;
@@ -29,7 +38,6 @@ export interface Website {
     activePageId: string;
     templateId?: string;
 }
-
 export interface BuilderState {
     websites: Website[];
     activeWebsiteId: string | null;
@@ -50,6 +58,7 @@ export interface BuilderState {
             isFinished: boolean;
         };
     };
+    assets: Asset[];
     history: any[][];
     historyIndex: number;
 
@@ -71,6 +80,8 @@ export interface BuilderState {
     addComponent: (sectionId: string, component: any) => void;
     updateComponent: (sectionId: string, componentId: string, updates: any) => void;
     deleteComponent: (sectionId: string, componentId: string) => void;
+    addAsset: (asset: Omit<Asset, 'id' | 'date'>) => void;
+    deleteAsset: (id: string) => void;
     getActiveWebsite: () => Website | undefined;
     getActivePage: () => any | null;
     updateCurrentPage: (updates: any) => void;
@@ -111,6 +122,13 @@ export const useBuilderStore = create<BuilderState>()(
         history: [],
         historyIndex: -1,
 
+        assets: [
+            { id: '1', name: 'Coffee Shop', url: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80', type: 'image', size: '1.2 MB', date: new Date().toISOString() },
+            { id: '2', name: 'Modern Office', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80', type: 'image', size: '0.8 MB', date: new Date().toISOString() },
+            { id: '3', name: 'Team Meeting', url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&q=80', type: 'image', size: '0.5 MB', date: new Date().toISOString() },
+            { id: '4', name: 'Startup Laptop', url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&q=80', type: 'image', size: '1.1 MB', date: new Date().toISOString() },
+        ],
+
         // Actions
         setWebsites: (websites) => set({ websites }),
 
@@ -134,6 +152,14 @@ export const useBuilderStore = create<BuilderState>()(
                 activePageId: homePage.id,
                 history: [newWebsite.pages],
                 historyIndex: 0,
+                editor: {
+                    ...state.editor,
+                    tour: {
+                        isActive: true,
+                        step: 0,
+                        isFinished: false,
+                    }
+                }
             }));
             return id;
         },
@@ -340,6 +366,22 @@ export const useBuilderStore = create<BuilderState>()(
 
             get().updateCurrentPage({ sections: newSections });
         },
+
+        addAsset: (asset) => set((state) => ({
+            assets: [
+                {
+                    ...asset,
+                    id: uuidv4(),
+                    date: new Date().toISOString(),
+                    size: asset.size || '0.5 MB'
+                },
+                ...state.assets
+            ]
+        })),
+
+        deleteAsset: (id) => set((state) => ({
+            assets: state.assets.filter(a => a.id !== id)
+        })),
 
         // Helper Getters
         getActiveWebsite: () => {

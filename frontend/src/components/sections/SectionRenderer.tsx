@@ -8,6 +8,7 @@ import { PricingSection } from './PricingSection';
 import { GallerySection } from './GallerySection';
 import { GalleryMasonrySection } from './GalleryMasonrySection';
 import { BlogListSection } from './BlogListSection';
+import { CaseStudiesSection } from './CaseStudiesSection';
 import { ContactSection } from './ContactSection';
 import { StatsSection } from './StatsSection';
 import { TeamSection } from './TeamSection';
@@ -15,7 +16,6 @@ import { FAQSection } from './FAQSection';
 import { LogoCloudSection } from './LogoCloudSection';
 import { ContentSection } from './ContentSection';
 import { AboutSection } from './AboutSection';
-import { CaseStudiesSection } from './CaseStudiesSection';
 import { TextBlock } from './TextBlock';
 import { ButtonBlock } from './ButtonBlock';
 import { HTMLBlock } from './HTMLBlock';
@@ -309,11 +309,11 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
   );
 };
 
-export function SectionRenderer({ section, isSelected, isEditing, onContentChange }) {
+export function SectionRenderer({ section, idx, isAlternate, isSelected, isEditing, onContentChange }) {
   const { updateComponent, deleteComponent, selectComponent, selectSection, state } = useBuilder();
   const { editor } = state;
 
-  const commonProps = { section, isSelected, isEditing, onContentChange };
+  const commonProps = { section, isSelected, isEditing, onContentChange, isAlternate };
 
   const renderBaseSection = () => {
     switch (section.type) {

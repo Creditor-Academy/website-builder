@@ -1,5 +1,5 @@
-import React from 'react';
 import { ArrowRight, Sparkles, ChevronRight, Zap, Shield, Star } from 'lucide-react';
+import { useBuilder } from '@/contexts/BuilderContext';
 
 // ─── Shared Tokens ─────────────────────────────────────────────────────────────
 const accentGrad = 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)';
@@ -14,16 +14,17 @@ const sharedStyles = `
   .cta-btn-primary {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 14px 32px;
-    background: #ffffff;
-    color: #4f46e5;
+    background: var(--theme-primary, #ffffff);
+    color: var(--theme-bg, #4f46e5);
     font-weight: 700; font-size: 0.95rem;
-    border: none; border-radius: 12px; cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: none; border-radius: var(--radius, 12px); cursor: pointer;
+    transition: all var(--animation-speed, 0.2s) ease;
     font-family: 'Sora', sans-serif;
     letter-spacing: -0.01em;
     white-space: nowrap;
+    box-shadow: var(--shadow, none);
   }
-  .cta-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,255,255,0.25); }
+  .cta-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.15); }
 
   .cta-btn-secondary {
     display: inline-flex; align-items: center; gap: 8px;
@@ -31,8 +32,8 @@ const sharedStyles = `
     background: rgba(255,255,255,0.08);
     color: #ffffff;
     font-weight: 600; font-size: 0.95rem;
-    border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; cursor: pointer;
-    transition: transform 0.2s ease, background 0.2s ease;
+    border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius, 12px); cursor: pointer;
+    transition: all var(--animation-speed, 0.2s) ease;
     font-family: 'Sora', sans-serif;
     letter-spacing: -0.01em;
     white-space: nowrap;
@@ -51,6 +52,11 @@ const sharedStyles = `
     color: rgba(255,255,255,0.9);
     margin-bottom: 1.5rem;
     font-family: 'Sora', sans-serif;
+  }
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
   }
 `;
 
@@ -91,7 +97,7 @@ const renderSimple = ({ content, styles, isEditing, onContentChange, headingColo
 
       {/* Subheadline */}
       <p
-        style={{ margin: '0 auto 2.5rem', maxWidth: '560px', fontSize: '1.05rem', lineHeight: 1.75, color: paragraphColor }}
+        style={{ margin: '0 auto 2.25rem', maxWidth: '560px', fontSize: '1.05rem', lineHeight: 1.75, color: paragraphColor }}
         contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('subheadline', e)}
       >
         {content.subheadline}
@@ -99,11 +105,11 @@ const renderSimple = ({ content, styles, isEditing, onContentChange, headingColo
 
       {/* Buttons */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', marginBottom: '3rem' }}>
-        <button className="cta-btn-primary" style={{ background: buttonPrimaryBg, color: buttonPrimaryText, borderRadius: styles.borderRadius || '12px' }}>
+        <button className="cta-btn-primary" style={{ background: buttonPrimaryBg, color: buttonPrimaryText, borderRadius: styles.borderRadius || 'var(--radius, 16px)' }}>
           <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaText', e)}>{content.ctaText}</span>
           <ArrowRight width={16} height={16} />
         </button>
-        <button className="cta-btn-secondary" style={{ background: buttonSecondaryBg, color: buttonSecondaryText, borderRadius: styles.borderRadius || '12px' }}>
+        <button className="cta-btn-secondary" style={{ background: buttonSecondaryBg, color: buttonSecondaryText, borderRadius: styles.borderRadius || 'var(--radius, 16px)' }}>
           <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}>{content.ctaSecondaryText}</span>
         </button>
       </div>
@@ -120,7 +126,7 @@ const renderSimple = ({ content, styles, isEditing, onContentChange, headingColo
             onBlur={(e) => {
               if (!isEditing || !onContentChange) return;
               const updated = [...(content.trustCompanies || ['Google', 'Microsoft', 'Apple', 'Amazon'])];
-              updated[i] = e.currentTarget.textContent;
+              updated[i] = e.currentTarget.textContent || '';
               onContentChange('trustCompanies', updated);
             }}>
             {company}
@@ -169,7 +175,7 @@ const renderSplit = ({ content, styles, isEditing, onContentChange, headingColor
                   onBlur={(e) => {
                     if (!isEditing || !onContentChange) return;
                     const updated = [...(content.featureBullets || ['No credit card required', 'Cancel anytime', '24/7 Support'])];
-                    updated[i] = e.currentTarget.textContent;
+                    updated[i] = e.currentTarget.textContent || '';
                     onContentChange('featureBullets', updated);
                   }}
                 >
@@ -180,11 +186,11 @@ const renderSplit = ({ content, styles, isEditing, onContentChange, headingColor
           </div>
 
           <div style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap' }}>
-            <button className="cta-btn-primary" style={{ background: buttonPrimaryBg, color: buttonPrimaryText, borderRadius: styles.borderRadius || '12px' }}>
+            <button className="cta-btn-primary" style={{ background: buttonPrimaryBg, color: buttonPrimaryText, borderRadius: styles.borderRadius || 'var(--radius, 16px)' }}>
               <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaText', e)}>{content.ctaText}</span>
               <ChevronRight width={16} height={16} />
             </button>
-            <button className="cta-btn-secondary" style={{ background: buttonSecondaryBg, color: buttonSecondaryText, borderRadius: styles.borderRadius || '12px' }}>
+            <button className="cta-btn-secondary" style={{ background: buttonSecondaryBg, color: buttonSecondaryText, borderRadius: styles.borderRadius || 'var(--radius, 16px)' }}>
               <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}>{content.ctaSecondaryText}</span>
             </button>
           </div>
@@ -194,7 +200,7 @@ const renderSplit = ({ content, styles, isEditing, onContentChange, headingColor
         <div style={{
           background: 'rgba(255,255,255,0.07)',
           border: '1px solid rgba(255,255,255,0.12)',
-          borderRadius: styles.borderRadius || '24px',
+          borderRadius: styles.borderRadius || 'var(--radius, 16px)',
           overflow: 'hidden',
           backdropFilter: 'blur(8px)',
           minHeight: '320px',
@@ -256,11 +262,11 @@ const renderBanner = ({ content, styles, isEditing, headingColor, paragraphColor
 
         {/* Right: buttons */}
         <div style={{ display: 'flex', gap: '0.75rem', flexShrink: 0 }}>
-          <button className="cta-btn-primary" style={{ background: buttonPrimaryBg, color: buttonPrimaryText, borderRadius: styles.borderRadius || '10px', padding: '10px 22px', fontSize: '0.875rem' }}
+          <button className="cta-btn-primary" style={{ background: buttonPrimaryBg, color: buttonPrimaryText, borderRadius: styles.borderRadius || 'var(--radius, 16px)', padding: '10px 22px', fontSize: '0.875rem' }}
             contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaText', e)}>
             {content.ctaText}
           </button>
-          <button className="cta-btn-secondary" style={{ background: buttonSecondaryBg, color: buttonSecondaryText, borderRadius: styles.borderRadius || '10px', padding: '10px 22px', fontSize: '0.875rem' }}
+          <button className="cta-btn-secondary" style={{ background: buttonSecondaryBg, color: buttonSecondaryText, borderRadius: styles.borderRadius || 'var(--radius, 16px)', padding: '10px 22px', fontSize: '0.875rem' }}
             contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}>
             {content.ctaSecondaryText}
           </button>
@@ -276,8 +282,8 @@ const renderFloating = ({ content, styles, isEditing, headingColor, paragraphCol
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '0 2rem' }}>
       <div style={{
         background: '#ffffff',
-        borderRadius: styles.borderRadius || '28px',
-        boxShadow: '0 32px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.04)',
+        borderRadius: styles.borderRadius || 'var(--radius, 16px)',
+        boxShadow: 'var(--shadow, 0 32px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.04))',
         padding: '3.5rem 3rem',
         textAlign: 'center',
         position: 'relative',
@@ -308,14 +314,14 @@ const renderFloating = ({ content, styles, isEditing, headingColor, paragraphCol
           </span>
         </div>
 
-        <h2 style={{ margin: '0 0 0.75rem', fontSize: 'clamp(1.6rem, 3vw, 2.4rem)', fontWeight: 700, color: styles.headingColor || '#0f172a', letterSpacing: '-0.025em', lineHeight: 1.2 }}
+        <h2 style={{ margin: '0 0 0.75rem', fontSize: 'clamp(1.6rem, 3vw, 2.4rem)', fontWeight: 700, color: '#0f172a', letterSpacing: '-0.025em', lineHeight: 1.2 }}
           contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('headline', e)}>
           {content.headline}
         </h2>
 
         <div style={{ width: '48px', height: '3px', background: accentGrad, borderRadius: '999px', margin: '0 auto 1.25rem' }} />
 
-        <p style={{ margin: '0 auto 2.25rem', maxWidth: '480px', fontSize: '0.95rem', lineHeight: 1.75, color: styles.paragraphColor || '#64748b' }}
+        <p style={{ margin: '0 auto 2.25rem', maxWidth: '480px', fontSize: '0.95rem', lineHeight: 1.75, color: '#64748b' }}
           contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('subheadline', e)}>
           {content.subheadline}
         </p>
@@ -327,13 +333,13 @@ const renderFloating = ({ content, styles, isEditing, headingColor, paragraphCol
             background: accentGrad,
             color: '#fff',
             fontWeight: 700, fontSize: '0.92rem',
-            border: 'none', borderRadius: styles.borderRadius || '12px', cursor: 'pointer',
+            border: 'none', borderRadius: styles.borderRadius || 'var(--radius, 16px)', cursor: 'pointer',
             fontFamily: 'Sora, sans-serif',
-            boxShadow: '0 8px 24px rgba(99,102,241,0.3)',
-            transition: 'transform 0.2s, box-shadow 0.2s',
+            boxShadow: 'var(--shadow, 0 8px 24px rgba(99,102,241,0.3))',
+            transition: 'transform var(--animation-speed, 0.2s), box-shadow var(--animation-speed, 0.2s)',
           }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 36px rgba(99,102,241,0.35)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(99,102,241,0.3)'; }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--shadow, 0 16px 36px rgba(99,102,241,0.35))'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'var(--shadow, 0 8px 24px rgba(99,102,241,0.3))'; }}
           >
             <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaText', e)}>{content.ctaText}</span>
             <ArrowRight width={15} height={15} />
@@ -345,9 +351,9 @@ const renderFloating = ({ content, styles, isEditing, headingColor, paragraphCol
             background: 'transparent',
             color: '#6366f1',
             fontWeight: 600, fontSize: '0.92rem',
-            border: '1.5px solid rgba(99,102,241,0.25)', borderRadius: styles.borderRadius || '12px', cursor: 'pointer',
+            border: '1.5px solid rgba(99,102,241,0.25)', borderRadius: styles.borderRadius || 'var(--radius, 16px)', cursor: 'pointer',
             fontFamily: 'Sora, sans-serif',
-            transition: 'border-color 0.2s, background 0.2s',
+            transition: 'border-color var(--animation-speed, 0.2s), background var(--animation-speed, 0.2s)',
           }}
             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.05)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; }}
             onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.25)'; }}
@@ -361,20 +367,21 @@ const renderFloating = ({ content, styles, isEditing, headingColor, paragraphCol
 );
 
 // ─── MAIN EXPORT ───────────────────────────────────────────────────────────────
-export function CTASection({ section, isSelected, isEditing, onContentChange }) {
-  const { content, styles } = section;
-  const variant = section.variant || 'simple';
+export function CTASection({ section, isSelected, isEditing, onContentChange, isAlternate }) {
+  const { content, styles, variant = 'classic' } = section;
+  const { state } = useBuilder();
+  const globalStyles = state.page?.globalStyles || {};
 
   const background = styles.useGradient
     ? (styles.backgroundGradient || styles.backgroundColor)
-    : (styles.backgroundColor || 'linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%)');
+    : (styles.backgroundColor || (isAlternate ? 'var(--theme-bg-alt, #f8fafc)' : 'var(--theme-primary, linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%))'));
 
-  const headingColor = styles.headingColor || '#ffffff';
-  const paragraphColor = styles.paragraphColor || 'rgba(255,255,255,0.72)';
-  const buttonPrimaryBg = styles.buttonPrimaryBg || '#ffffff';
-  const buttonPrimaryText = styles.buttonPrimaryText || '#4f46e5';
+  const headingColor = styles.headingColor || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-bg, #ffffff)');
+  const paragraphColor = styles.paragraphColor || (isAlternate ? 'var(--theme-text-alt, rgba(15, 23, 42, 0.72))' : 'var(--theme-bg, rgba(255, 255, 255, 0.72))');
+  const buttonPrimaryBg = styles.buttonPrimaryBg || (isAlternate ? 'var(--theme-primary, #4f46e5)' : 'var(--theme-bg, #ffffff)');
+  const buttonPrimaryText = styles.buttonPrimaryText || (isAlternate ? 'var(--theme-bg-alt, #ffffff)' : 'var(--theme-primary, #4f46e5)');
   const buttonSecondaryBg = styles.buttonSecondaryBg || 'transparent';
-  const buttonSecondaryText = styles.buttonSecondaryText || '#ffffff';
+  const buttonSecondaryText = styles.buttonSecondaryText || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-bg, #ffffff)');
 
   const handleTextEdit = (field, e) => {
     if (onContentChange && isEditing) onContentChange(field, e.currentTarget.textContent || '');
@@ -386,17 +393,22 @@ export function CTASection({ section, isSelected, isEditing, onContentChange }) 
   const isFloating = variant === 'floating';
   const isBanner = variant === 'banner';
 
+  const globalClasses = `
+    ${globalStyles.glassmorphism ? 'glass-effect' : ''}
+  `.trim();
+
   return (
     <>
       <style>{sharedStyles}</style>
 
       <section
-        className={`cta-section relative transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}
+        className={`cta-section relative transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${globalClasses}`}
         style={{
           background: background,
           padding: styles.padding || (isBanner ? '1.25rem 0' : isFloating ? '4rem 0' : '5.5rem 0'),
           position: 'relative',
           overflow: 'hidden',
+          borderRadius: isFloating ? '0' : 'var(--radius, 0)',
         }}
       >
         {variant === 'simple' && renderSimple(shared)}

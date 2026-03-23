@@ -41,19 +41,19 @@ const renderGrid = ({ content, styles, isEditing, onContentChange, headingColor,
             padding: '2rem',
             background: styles.cardBackgroundColor || '#ffffff',
             border: `1px solid ${ACCENT_BORDER}`,
-            borderRadius: styles.borderRadius || '16px',
-            transition: 'transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease',
+            borderRadius: styles.borderRadius || 'var(--radius, 16px)',
+            transition: 'transform var(--animation-speed, 0.22s) ease, box-shadow var(--animation-speed, 0.22s) ease, border-color var(--animation-speed, 0.22s) ease',
             cursor: 'default',
             overflow: 'hidden',
           }}
           onMouseEnter={e => {
             e.currentTarget.style.transform = 'translateY(-4px)';
-            e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.08)';
+            e.currentTarget.style.boxShadow = 'var(--shadow, 0 16px 40px rgba(0,0,0,0.08))';
             e.currentTarget.style.borderColor = '#d1d5db';
           }}
           onMouseLeave={e => {
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
+            e.currentTarget.style.boxShadow = 'var(--shadow, 0 1px 3px rgba(0,0,0,0.04))';
             e.currentTarget.style.borderColor = ACCENT_BORDER;
           }}
         >
@@ -135,7 +135,7 @@ const renderGrid = ({ content, styles, isEditing, onContentChange, headingColor,
             position: 'absolute', bottom: 0, left: 0, right: 0, height: '3px',
             background: `linear-gradient(90deg, ${tag.dot}, transparent)`,
             opacity: 0,
-            transition: 'opacity 0.22s ease',
+            transition: 'opacity var(--animation-speed, 0.22s) ease',
           }} />
         </div>
       );
@@ -158,7 +158,7 @@ const renderList = ({ content, styles, isEditing, onContentChange, headingColor,
             padding: '1.75rem 1.25rem',
             borderBottom: index < content.features.length - 1 ? `1px solid ${ACCENT_BORDER}` : 'none',
             borderRadius: '12px',
-            transition: 'background 0.2s ease',
+            transition: 'background var(--animation-speed, 0.2s) ease',
           }}
           onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
@@ -263,20 +263,20 @@ const renderIcons = ({ content, styles, isEditing, onContentChange, headingColor
             padding: '2rem 1.25rem 1.75rem',
             background: styles.cardBackgroundColor || '#ffffff',
             border: `1px solid ${ACCENT_BORDER}`,
-            borderRadius: styles.borderRadius || '16px',
-            transition: 'transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease',
+            borderRadius: styles.borderRadius || 'var(--radius, 16px)',
+            transition: 'transform var(--animation-speed, 0.22s) ease, box-shadow var(--animation-speed, 0.22s) ease, border-color var(--animation-speed, 0.22s) ease',
             cursor: 'default',
             position: 'relative',
             overflow: 'hidden',
           }}
           onMouseEnter={e => {
             e.currentTarget.style.transform = 'translateY(-3px)';
-            e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.07)';
+            e.currentTarget.style.boxShadow = 'var(--shadow, 0 12px 32px rgba(0,0,0,0.07))';
             e.currentTarget.style.borderColor = '#d1d5db';
           }}
           onMouseLeave={e => {
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
+            e.currentTarget.style.boxShadow = 'var(--shadow, 0 1px 3px rgba(0,0,0,0.04))';
             e.currentTarget.style.borderColor = ACCENT_BORDER;
           }}
         >
@@ -362,18 +362,18 @@ const renderCards = ({ content, styles, isEditing, onContentChange, headingColor
             alignItems: 'stretch',
             background: '#ffffff',
             border: `1px solid ${ACCENT_BORDER}`,
-            borderRadius: styles.borderRadius || '16px',
+            borderRadius: styles.borderRadius || 'var(--radius, 16px)',
             overflow: 'hidden',
-            transition: 'box-shadow 0.22s ease, border-color 0.22s ease, transform 0.22s ease',
+            transition: 'box-shadow var(--animation-speed, 0.22s) ease, border-color var(--animation-speed, 0.22s) ease, transform var(--animation-speed, 0.22s) ease',
             cursor: 'default',
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.08)';
+            e.currentTarget.style.boxShadow = 'var(--shadow, 0 8px 30px rgba(0,0,0,0.08))';
             e.currentTarget.style.borderColor = '#d1d5db';
             e.currentTarget.style.transform = 'translateX(4px)';
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
+            e.currentTarget.style.boxShadow = 'var(--shadow, 0 1px 3px rgba(0,0,0,0.04))';
             e.currentTarget.style.borderColor = ACCENT_BORDER;
             e.currentTarget.style.transform = 'translateX(0)';
           }}
@@ -544,8 +544,8 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
                 padding: 0,
                 position: 'relative',
                 overflow: 'hidden',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-                transition: 'transform 0.15s',
+                boxShadow: 'var(--shadow, 0 2px 6px rgba(0,0,0,0.15))',
+                transition: 'transform var(--animation-speed, 0.15s)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
               onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.12)'}
@@ -573,7 +573,7 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
                   border: '1px solid #e5e7eb',
                   borderRadius: '12px',
                   padding: '12px',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.13)',
+                  boxShadow: 'var(--shadow, 0 8px 30px rgba(0,0,0,0.13))',
                   zIndex: 9999,
                   minWidth: '200px',
                   display: 'flex',
@@ -608,7 +608,7 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
                         cursor: 'pointer',
                         padding: 0,
                         boxShadow: background === color ? '0 0 0 2px #bfdbfe' : 'none',
-                        transition: 'transform 0.12s',
+                        transition: 'transform var(--animation-speed, 0.12s)',
                       }}
                       onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.15)'}
                       onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}

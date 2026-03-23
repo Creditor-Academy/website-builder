@@ -1,16 +1,16 @@
 import React from 'react';
 import { Quote, Star } from 'lucide-react';
 
-export function TestimonialsSection({ section, isSelected, isEditing, onContentChange }) {
+export function TestimonialsSection({ section, isSelected, isEditing, onContentChange, isAlternate }) {
   const { content, styles } = section;
   const testimonials = content.testimonials || [];
   const variant = section.variant || 'cards';
-  const background = styles.useGradient ? (styles.backgroundGradient || styles.backgroundColor) : (styles.backgroundColor || '#ffffff');
+  const background = styles.useGradient ? (styles.backgroundGradient || styles.backgroundColor) : (styles.backgroundColor || (isAlternate ? 'var(--theme-bg-alt, #f8fafc)' : 'var(--theme-bg, #ffffff)'));
   const padding = styles.padding || '100px 0';
   
   // Get text colors with fallbacks
-  const headingColor = styles.headingColor || '#0f172a';
-  const paragraphColor = styles.paragraphColor || '#64748b';
+  const headingColor = styles.headingColor || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
+  const paragraphColor = styles.paragraphColor || (isAlternate ? 'var(--theme-text-alt, #64748b)' : 'var(--theme-text, #64748b)');
 
   if (variant === 'carousel') {
     return (
@@ -38,7 +38,7 @@ export function TestimonialsSection({ section, isSelected, isEditing, onContentC
           </div>
           <div className="overflow-x-auto whitespace-nowrap py-4 hide-scrollbar">
             {testimonials.map((t, i) => (
-              <div key={t.id || i} className="inline-block w-80 mr-4 p-6 shadow-lg border border-slate-100" style={{ borderRadius: styles.borderRadius || '16px', background: styles.cardBackgroundColor || '#ffffff' }}>
+              <div key={t.id || i} className="inline-block w-80 mr-4 p-6 shadow-lg border border-slate-100" style={{ borderRadius: styles.borderRadius || 'var(--radius, 16px)', background: styles.cardBackgroundColor || '#ffffff' }}>
                 <Quote className="w-8 h-8 text-blue-500/30 mb-4" />
                 <p 
                   className="text-slate-600 mb-4"
@@ -235,7 +235,7 @@ export function TestimonialsSection({ section, isSelected, isEditing, onContentC
         {/* Testimonials Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
-            <div key={testimonial.id || index} className="p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100" style={{ borderRadius: styles.borderRadius || '16px', background: styles.cardBackgroundColor || '#ffffff' }}>
+            <div key={testimonial.id || index} className="p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100" style={{ borderRadius: styles.borderRadius || 'var(--radius, 16px)', background: styles.cardBackgroundColor || '#ffffff' }}>
               <Quote className="w-10 h-10 text-blue-500/30 mb-4" />
               <p 
                 className="text-slate-600 mb-6 leading-relaxed"

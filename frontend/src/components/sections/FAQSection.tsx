@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 
-export function FAQSection({ section, isEditing, onContentChange }) {
+export function FAQSection({ section, isSelected, isEditing, onContentChange, isAlternate }) {
   const { content, styles } = section;
   const faqs = content.faqs || [];
   const [openIndex, setOpenIndex] = useState(0);
 
-  const categories = Array.from(new Set<string>(faqs.map((f: any) => f.category || 'General')));
+  const categories = content.categories || ['General'];
   const [active, setActive] = useState(categories[0] || 'General');
 
   const variant = section.variant || 'accordion';
-  const background = styles.useGradient ? (styles.backgroundGradient || styles.backgroundColor) : (styles.backgroundColor || '#f8fafc');
+  const background = styles.useGradient ? (styles.backgroundGradient || styles.backgroundColor) : (styles.backgroundColor || (isAlternate ? 'var(--theme-bg-alt, #f8fafc)' : 'var(--theme-bg, #f8fafc)'));
   const padding = styles.padding || '100px 0';
 
   // Get text colors with fallbacks
-  const headingColor = styles.headingColor || '#0f172a';
-  const paragraphColor = styles.paragraphColor || '#64748b';
+  const headingColor = styles.headingColor || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
+  const paragraphColor = styles.paragraphColor || (isAlternate ? 'var(--theme-text-alt, #64748b)' : 'var(--theme-text, #64748b)');
 
   if (variant === 'grid') {
     return (
@@ -116,8 +116,8 @@ export function FAQSection({ section, isEditing, onContentChange }) {
     <section className="relative" style={{ background, padding }}>
       <div className="container mx-auto px-6 max-w-4xl">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: '#0f172a' }} contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('headline', e.currentTarget.textContent)}>{content.headline || 'Frequently Asked Questions'}</h2>
-          <p className="text-lg opacity-80" style={{ color: '#64748b' }} contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.textContent)}>{content.subheadline}</p>
+          <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: headingColor }} contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('headline', e.currentTarget.textContent)}>{content.headline || 'Frequently Asked Questions'}</h2>
+          <p className="text-lg opacity-80" style={{ color: paragraphColor }} contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.textContent)}>{content.subheadline}</p>
         </div>
         <div className="space-y-4">
           {faqs.map((faq, index) => (

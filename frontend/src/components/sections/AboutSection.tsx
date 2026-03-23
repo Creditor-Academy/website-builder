@@ -9,7 +9,7 @@ const iconMap = {
   Users,
 };
 
-export function AboutSection({ section, isSelected, isEditing, onContentChange }) {
+export function AboutSection({ section, isSelected, isEditing, onContentChange, isAlternate }) {
   const { content, styles, variant = 'split' } = section;
 
   const handleTextEdit = (field, e) => {
@@ -20,10 +20,10 @@ export function AboutSection({ section, isSelected, isEditing, onContentChange }
 
   const background = styles.useGradient 
     ? (styles.backgroundGradient || styles.backgroundColor) 
-    : (styles.backgroundColor || '#ffffff');
+    : (styles.backgroundColor || (isAlternate ? 'var(--theme-bg-alt, #f8fafc)' : 'var(--theme-bg, #ffffff)'));
 
-  const headingColor = styles.headingColor || '#0f172a';
-  const paragraphColor = styles.paragraphColor || '#475569';
+  const headingColor = styles.headingColor || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
+  const paragraphColor = styles.paragraphColor || (isAlternate ? 'var(--theme-text-alt, #475569)' : 'var(--theme-text, #475569)');
 
   const sectionStyle = {
     background,

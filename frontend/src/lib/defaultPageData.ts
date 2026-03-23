@@ -18,7 +18,7 @@ export const createDefaultHeroSection = (variant = 'split') => ({
   visible: true,
   locked: false,
   styles: {
-    backgroundColor: '#ffffff',
+    backgroundColor: 'transparent',
     backgroundGradient: variant === 'gradient' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)' : null,
     useGradient: variant === 'gradient',
     padding: variant === 'minimal' ? '60px 0' : '120px 0',
@@ -41,7 +41,7 @@ export const createDefaultFeaturesSection = (variant = 'grid') => ({
   visible: true,
   locked: false,
   styles: {
-    backgroundColor: '#ffffff',
+    backgroundColor: 'transparent',
     padding: '100px 0',
   },
   content: {
@@ -60,7 +60,7 @@ export const createDefaultServicesSection = () => ({
   name: 'Services Section',
   visible: true,
   locked: false,
-  styles: { backgroundColor: '#ffffff', padding: '100px 0' },
+  styles: { backgroundColor: 'transparent', padding: '100px 0' },
   content: {
     headline: 'Our Services',
     services: [
@@ -88,11 +88,40 @@ export const createDefaultTestimonialsSection = () => ({
   name: 'Testimonials',
   visible: true,
   locked: false,
-  styles: { backgroundColor: '#ffffff', padding: '100px 0' },
+  styles: { backgroundColor: 'transparent', padding: '100px 0' },
   content: {
     headline: 'What Our Clients Say',
     testimonials: [
       { id: uuidv4(), quote: 'Amazing tool!', name: 'Sarah J.' },
+    ],
+  },
+  components: [],
+});
+
+export const createDefaultCaseStudiesSection = () => ({
+  id: uuidv4(),
+  type: 'casestudies',
+  name: 'Case Studies',
+  visible: true,
+  locked: false,
+  styles: {
+    backgroundColor: '#0f172a',
+    padding: '110px 0',
+    color: '#e2e8f0',
+  },
+  content: {
+    headline: 'Proven Results',
+    subheadline: 'Real transformations. Real numbers.',
+    accentColor: '#d4af37',
+    cases: [
+      {
+        id: uuidv4(),
+        industry: 'Example Industry',
+        client: 'Example Client',
+        challenge: 'Describe the challenge here.',
+        result: 'Describe the result here.',
+        metric: 'Impact Metric',
+      },
     ],
   },
   components: [],
@@ -301,7 +330,13 @@ export const createFeaturesPage = () => ({
     fontFamily: 'Inter, system-ui, sans-serif',
     primaryColor: '#3b82f6',
     secondaryColor: '#8b5cf6',
+    accentColor: '#f59e0b',
     backgroundColor: '#ffffff',
+    textColor: '#0f172a',
+    borderRadius: '12px',
+    glassmorphism: false,
+    animations: true,
+    shadows: 'subtle',
   },
 });
 
@@ -369,7 +404,13 @@ export const createAboutPage = () => ({
     fontFamily: 'Inter, system-ui, sans-serif',
     primaryColor: '#3b82f6',
     secondaryColor: '#8b5cf6',
+    accentColor: '#f59e0b',
     backgroundColor: '#ffffff',
+    textColor: '#0f172a',
+    borderRadius: '12px',
+    glassmorphism: false,
+    animations: true,
+    shadows: 'subtle',
   },
 });
 
@@ -565,7 +606,18 @@ export const getDefaultPage = () => ({
   navbar: createDefaultNavbar(),
   sections: [createDefaultHeroSection(), createDefaultFeaturesSection()],
   footer: createDefaultFooter(),
-  globalStyles: { fontFamily: 'Inter', primaryColor: '#3b82f6' },
+  globalStyles: { 
+    fontFamily: 'Inter', 
+    primaryColor: '#3b82f6',
+    secondaryColor: '#8b5cf6',
+    accentColor: '#f59e0b',
+    backgroundColor: '#ffffff',
+    textColor: '#0f172a',
+    borderRadius: '12px',
+    glassmorphism: false,
+    animations: true,
+    shadows: 'subtle',
+  },
 });
 
 

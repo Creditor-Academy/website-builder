@@ -31,8 +31,9 @@ export function PropertiesPanel() {
     setMediaOpen(true);
   };
 
-  const handleMediaSelect = (url) => {
-    if (!activeMediaField) return;
+  const handleMediaSelect = (urls: string[]) => {
+    if (!activeMediaField || urls.length === 0) return;
+    const url = urls[0];
     const { sectionId, field, isStyle, itemId, listField } = activeMediaField;
 
     if (itemId === 'floating-comp') {

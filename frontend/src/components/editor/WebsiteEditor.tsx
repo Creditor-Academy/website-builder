@@ -9,6 +9,8 @@ import { CanvasPreview } from "./CanvasPreview";
 import { PropertiesPanel } from "./PropertiesPanel";
 import { TextColorPicker } from "./TextColorPicker";
 import { GuidedTour } from "./GuidedTour";
+import { AssetLibraryPanel } from "./AssetLibraryPanel";
+import { DesignSystemPanel } from "./DesignSystemPanel";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -29,6 +31,8 @@ import {
   Link,
   Download,
   AlertCircle,
+  Image as ImageIcon,
+  Wand2
 } from "lucide-react";
 import useBuilderStore from "@/store/useBuilderStore";
 import {
@@ -74,7 +78,8 @@ function EditorContent() {
   const navItems = [
     { id: "add", icon: Plus, label: "Sections" },
     { id: "layers", icon: Layers, label: "Layers" },
-    { id: "edit", icon: Plus, label: "Add Elements" },
+    { id: "assets", icon: ImageIcon, label: "Assets" },
+    { id: "design", icon: Wand2, label: "Design System" },
     { id: "pages", icon: FileText, label: "Pages" },
     // { id: 'settings', icon: Settings, label: 'Site Settings' },
   ];
@@ -83,7 +88,12 @@ function EditorContent() {
     <div className="h-screen flex flex-col bg-white overflow-hidden font-sans relative">
       <GuidedTour />
       <div className={`flex flex-col h-full transition-all duration-500 ${editor.tour.isActive ? 'pointer-events-none' : ''}`}>
-        <EditorToolbar theme={theme} onToggleTheme={toggleTheme} websiteId={activeWebsiteId || id} />
+        <EditorToolbar 
+          theme={theme} 
+          onToggleTheme={toggleTheme} 
+          websiteId={activeWebsiteId || id} 
+          onTabChange={setLeftNavTab}
+        />
         <TextColorPicker />
         <div className="flex-1 min-h-0">
         <ResizablePanelGroup direction="horizontal" className="h-full">
@@ -154,6 +164,8 @@ function EditorContent() {
                   <div className="h-full overflow-hidden">
                     {leftNavTab === "add" && <SectionsList view="add" />}
                     {leftNavTab === "layers" && <SectionsList view="layers" />}
+                    {leftNavTab === "assets" && <AssetLibraryPanel />}
+                    {leftNavTab === "design" && <DesignSystemPanel />}
                     {leftNavTab === "pages" && <PageManager />}
                     {leftNavTab === "edit" && <PropertiesPanel />}
                     {leftNavTab === "settings" && <SiteSettings />}

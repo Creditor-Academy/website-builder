@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { PublishDialog } from './PublishDialog';
 
-export function EditorToolbar({ theme = 'light', onToggleTheme, websiteId }) {
+export function EditorToolbar({ theme = 'light', onToggleTheme, websiteId, onTabChange }) {
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const { state, undo, redo, canUndo, canRedo, setPreviewMode, setLeftPanelVisible } = useBuilder();
   const { editor, page } = state;
@@ -21,6 +21,13 @@ export function EditorToolbar({ theme = 'light', onToggleTheme, websiteId }) {
     a.download = `${page?.slug === '/' ? 'home' : page?.slug}-page.json`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleDesignTab = () => {
+    if (onTabChange) {
+      onTabChange('design');
+      setLeftPanelVisible(true);
+    }
   };
 
   
@@ -155,6 +162,7 @@ export function EditorToolbar({ theme = 'light', onToggleTheme, websiteId }) {
                 variant="ghost"
                 size="icon"
                 id="tour-palette"
+                onClick={handleDesignTab}
                 className="w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-indigo-600 transition-all duration-200"
               >
                 <Palette className="w-4 h-4" />
@@ -170,6 +178,7 @@ export function EditorToolbar({ theme = 'light', onToggleTheme, websiteId }) {
                 variant="ghost"
                 size="icon"
                 id="tour-global-fx"
+                onClick={handleDesignTab}
                 className="w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-amber-500 transition-all duration-200"
               >
                 <Sparkles className="w-4 h-4" />

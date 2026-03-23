@@ -42,11 +42,11 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
   const navBg =
     config.styles.backgroundColor && config.styles.backgroundColor !== 'transparent'
       ? config.styles.backgroundColor
-      : '#ffffff';
+      : 'var(--theme-bg, #ffffff)';
 
   const navStyle = {
     backgroundColor: navBg,
-    color: config.styles.textColor,
+    color: config.styles.textColor || 'var(--theme-text, #0f172a)',
   };
 
   const navigate = useNavigate();

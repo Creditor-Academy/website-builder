@@ -35,8 +35,8 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
   const { updatePageName, pages, setActivePage, createPage, selectSection } = useBuilder();
 
   const footerStyle = {
-    backgroundColor: config.styles.backgroundColor,
-    color: config.styles.textColor,
+    backgroundColor: config.styles.backgroundColor || 'var(--theme-bg, #ffffff)',
+    color: config.styles.textColor || 'var(--theme-text, #0f172a)',
   };
 
   const handleFooterClick = (e) => {
