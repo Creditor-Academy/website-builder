@@ -1,11 +1,14 @@
 # Admin Dashboard Implementation Doc
 
-This document provides a detailed overview of the current administrative dashboard functionality, covering various routes, features, and their purposes.
+This document provides a detailed overview of the current administrative dashboard functionality, covering various routes, features, and their purposes. It now includes dynamic switching between user and admin modes.
 
 ## 1. Dashboard (Main Overview)
 *   **File:** `src/pages/Dashboard.tsx`
-*   **Purpose:** Serves as the central hub, offering a quick overview of projects and navigation to other management sections.
+*   **Purpose:** Serves as the central hub, offering a quick overview of projects and navigation to other management sections. This component now dynamically adapts its content and navigation based on the active `isAdmin` state.
 *   **Key Features:**
+    *   **Admin Mode Toggle:** A prominent button allows users to switch between "Admin Mode On" and "Switch to Admin Mode". This action updates the `isAdmin` state, which controls the visibility of administrative features and navigation links.
+    *   **Dynamic Navigation:** Navigation items within the sidebar are conditionally rendered. In "Admin Mode", specific administrative routes become visible, while in default user mode, a streamlined set of user-focused links is displayed.
+    *   **Route Protection/Redirection:** The dashboard implements logic to redirect users if they attempt to access admin-specific routes (defined in `adminRoutes` within `Dashboard.tsx`) while `isAdmin` is false, ensuring that administrative sections are only accessible when the admin mode is active.
     *   **Website Listing:** Displays all created websites with essential information such as name, last edited timestamp, and publication status (Published/Draft).
     *   **Search Functionality:** Users can efficiently find specific websites using a search bar that filters by website name.
     *   **New Project Creation:** Provides a modal dialog for users to create a new website by simply inputting a desired name.
@@ -72,12 +75,12 @@ This document provides a detailed overview of the current administrative dashboa
 *   **Key Features:** (Currently a placeholder)
     *   Displays a title "Templates Library" and a descriptive paragraph. Functionality for browsing, selecting, and applying templates is not yet implemented.
 
-## 9. Website Management (Admin View)
+## 9. Website Management
 *   **File:** `src/pages/DashboardWebsites.tsx`
-*   **Purpose:** Offers a comprehensive view and management capabilities for all websites, with an administrator toggle.
+*   **Purpose:** Offers comprehensive view and management capabilities for websites, adapting based on user role.
 *   **Key Features:**
-    *   **Website Table:** Lists websites with their ID, Name, Domain, Status (Draft, Published, Deleted), and Last Updated date.
-    *   **Admin View Toggle:** A button to switch between "My Websites" (displaying only the current user's sites) and "All Websites" (displaying all sites, simulating an administrator's view).
+    *   **Admin View Toggle:** A button within this page allows switching between "My Websites" (displaying only the current user's sites) and "All Websites" (displaying all sites, mimicking an administrator's view). This toggle is independent of the global `isAdmin` state but provides similar functionality within this specific section.
+    *   **Website Table:** Lists websites with their ID, Name, Domain, Status (Draft, Published, Deleted), and Last Updated date. The displayed websites change based on the "Admin View Toggle".
     *   **Website Actions:** Each website entry includes a dropdown menu for:
         *   **Edit:** Placeholder for navigating to an edit page or modal.
         *   **Duplicate:** Placeholder for creating a copy.
