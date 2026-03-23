@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useMemo } from 'react';
-import useBuilderStore, { BuilderState } from '@/store/useBuilderStore';
+import useBuilderStore from '@/store/useBuilderStore';
 import { v4 as uuidv4 } from 'uuid';
 
-const BuilderContext = createContext<any>(undefined);
+const BuilderContext = createContext(undefined);
 
 export function BuilderProvider({ children }) {
-  const store = useBuilderStore((state: BuilderState) => state);
+  const store = useBuilderStore();
   const activePage = store.getActivePage();
   const activeWebsite = store.getActiveWebsite();
 
@@ -72,8 +72,7 @@ export function BuilderProvider({ children }) {
     addPage: (page) => store.addPage(page),
     duplicatePage: store.duplicatePage,
     deletePage: store.deletePage,
-    updatePageName: (slug, name) => store.updateCurrentPage({ name }),
-    updateCurrentPage: store.updateCurrentPage
+    updatePageName: (slug, name) => store.updateCurrentPage({ name })
   }), [store, activePage, activeWebsite, selectedSection, selectedComponent]);
 
   return <BuilderContext.Provider value={value}>{children}</BuilderContext.Provider>;

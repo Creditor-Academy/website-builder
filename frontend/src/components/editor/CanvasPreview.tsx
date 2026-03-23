@@ -39,6 +39,7 @@ export function CanvasPreview() {
 
   return (
     <div
+      id="tour-canvas"
       className="h-full overflow-y-auto scrollbar-thin bg-[hsl(var(--builder-panel))] w-full max-w-full overflow-x-hidden"
       onClick={handleCanvasClick}
     >
@@ -58,7 +59,6 @@ export function CanvasPreview() {
             .map(section => (
               <div
                 key={section.id}
-                id={section.id || section.type}
                 onClick={(e) => handleSectionClick(section.id, e)}
                 className={`relative transition-all duration-200 ${!editor.previewMode ? 'cursor-pointer' : ''
                   } ${editor.selectedSectionId === section.id && !editor.previewMode

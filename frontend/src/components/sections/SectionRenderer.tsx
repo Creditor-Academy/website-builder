@@ -15,7 +15,7 @@ import { FAQSection } from './FAQSection';
 import { LogoCloudSection } from './LogoCloudSection';
 import { ContentSection } from './ContentSection';
 import { AboutSection } from './AboutSection';
-import { CaseStudiesSection } from './CaseStudiesSection';
+import { LayoutSection } from './LayoutSection';
 import { TextBlock } from './TextBlock';
 import { ButtonBlock } from './ButtonBlock';
 import { HTMLBlock } from './HTMLBlock';
@@ -334,6 +334,7 @@ export function SectionRenderer({ section, isSelected, isEditing, onContentChang
       case 'logocloud': return <LogoCloudSection {...commonProps} />;
       case 'content': return <ContentSection {...commonProps} />;
       case 'about': return <AboutSection {...commonProps} />;
+      case 'layout': return <LayoutSection {...commonProps} />;
       case 'text': return <TextBlock {...commonProps} />;
       case 'button': return <ButtonBlock {...commonProps} />;
       case 'html': return <HTMLBlock {...commonProps} />;

@@ -31,6 +31,8 @@ export const createConsultantHeroSection = () => ({
     padding: '140px 0',
     minHeight: '100vh',
     color: '#ffffff',
+    headingColor: '#ffffff',
+    paragraphColor: '#ffffff',
   },
   content: {
     headline: 'Strategic Intelligence for High-Performance Leaders',
