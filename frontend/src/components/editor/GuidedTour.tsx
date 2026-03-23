@@ -67,6 +67,10 @@ export function GuidedTour() {
   const { tour } = editor;
   const currentStepData = TOUR_STEPS[tour.step];
 
+  // Debug: Log tour state
+  console.log('Tour state:', tour);
+  console.log('Current step data:', currentStepData);
+
   const [spotlight, setSpotlight] = useState({ x: 0, y: 0, width: 0, height: 0 });
 
   useEffect(() => {
@@ -74,8 +78,12 @@ export function GuidedTour() {
 
     const updateSpotlight = () => {
       const element = document.querySelector(currentStepData.target);
+      console.log('Looking for element:', currentStepData.target);
+      console.log('Found element:', element);
+      
       if (element) {
         const rect = element.getBoundingClientRect();
+        console.log('Element rect:', rect);
         setSpotlight({
           x: rect.left,
           y: rect.top,
@@ -90,6 +98,8 @@ export function GuidedTour() {
             useBuilderStore.getState().selectSection(page.sections[0].id);
           }
         }
+      } else {
+        console.warn('Tour target element not found:', currentStepData.target);
       }
     };
 

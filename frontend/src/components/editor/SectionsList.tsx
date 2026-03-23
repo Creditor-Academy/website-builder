@@ -76,6 +76,12 @@ import {
   getPortfolioPage,
   getEcommercePage,
   getConsultantPage,
+  createDefaultTextOnlySection,
+  createDefaultImageTextLeftSection,
+  createDefaultImageTextRightSection,
+  createDefaultTextButtonSection,
+  createDefaultHeadingTextButtonSection,
+  createDefaultTwoColumnSection,
 } from "@/lib/defaultPageData";
 import { Badge } from "@/components/ui/badge";
 
@@ -94,15 +100,20 @@ const ELEMENT_CATEGORIES = [
       { type: "pricing", name: "Pricing", icon: DollarSign, description: "Pricing tiers & plans", create: createDefaultPricingSection },
       { type: "testimonials", name: "Testimonials", icon: Quote, description: "Customer reviews", create: createDefaultTestimonialsSection },
       { type: "casestudies", name: "Case Studies", icon: BarChart2, description: "Display client success stories", create: createDefaultCaseStudiesSection },
+      { type: "contact", name: "Contact", icon: Mail, description: "Contact form & information", create: createDefaultContactSection },
+      { type: "faq", name: "FAQ", icon: HelpCircle, description: "Frequently asked questions", create: createDefaultFAQSection },
     ]
   },
   {
     name: "Full Templates",
+    color: "from-indigo-500/10 to-indigo-400/5",
+    borderColor: "border-indigo-200/50",
+    badgeColor: "bg-indigo-50 text-indigo-700",
     items: [
-      { type: "business", name: "Business", icon: Building2, create: getBusinessPage, isFullPage: true },
-      { type: "portfolio", name: "Portfolio", icon: Layout, create: getPortfolioPage, isFullPage: true },
-      { type: "ecommerce", name: "Ecommerce", icon: ShoppingBag, create: getEcommercePage, isFullPage: true },
-      { type: "consultant", name: "Consultant", icon: Users, create: getConsultantPage, isFullPage: true },
+      { type: "business", name: "Business", icon: Building2, description: "Professional business site template", create: getBusinessPage, isFullPage: true },
+      { type: "portfolio", name: "Portfolio", icon: Layout, description: "Clean portfolio template", create: getPortfolioPage, isFullPage: true },
+      { type: "ecommerce", name: "Ecommerce", icon: ShoppingBag, description: "Modern shop template", create: getEcommercePage, isFullPage: true },
+      { type: "consultant", name: "Consultant", icon: Users, description: "Personal consultant template", create: getConsultantPage, isFullPage: true },
     ]
   },
   {
@@ -113,8 +124,23 @@ const ELEMENT_CATEGORIES = [
     items: [
       { type: "gallery", name: "Gallery", icon: ImageIcon, description: "Photo gallery layout", create: createDefaultGallerySection },
       { type: "blog", name: "Blog", icon: FileText, description: "Blog post listings", create: createDefaultBlogListSection },
+      { type: "logocloud", name: "Logo Cloud", icon: Building2, description: "Display partner/client logos", create: createDefaultLogoCloudSection },
       { type: "stats", name: "Stats", icon: BarChart2, description: "Display statistics", create: createDefaultStatsSection },
       { type: "team", name: "Team", icon: Users, description: "Team members grid", create: createDefaultTeamSection },
+    ]
+  },
+  {
+    name: "Layouts",
+    color: "from-amber-500/10 to-amber-400/5",
+    borderColor: "border-amber-200/50",
+    badgeColor: "bg-amber-50 text-amber-700",
+    items: [
+      { type: "layout", name: "Text Only", icon: Type, description: "Simple text paragraph layout", create: createDefaultTextOnlySection },
+      { type: "layout", name: "Image + Text (Left)", icon: Layout, description: "Image on left, text on right", create: createDefaultImageTextLeftSection },
+      { type: "layout", name: "Image + Text (Right)", icon: Layout, description: "Text on left, image on right", create: createDefaultImageTextRightSection },
+      { type: "layout", name: "Text + Button", icon: MousePointer2, description: "Text content with call-to-action button", create: createDefaultTextButtonSection },
+      { type: "layout", name: "Heading + Text + Button", icon: Sparkles, description: "Full layout with heading, description, and button", create: createDefaultHeadingTextButtonSection },
+      { type: "layout", name: "Two Column", icon: ColumnsIcon, description: "Split content into two columns", create: createDefaultTwoColumnSection },
     ]
   },
   {
@@ -176,14 +202,8 @@ const ELEMENT_CATEGORIES = [
 ];
 
 export function SectionsList({ view = "add" }) {
-  const { state, selectSection, reorderSections, addSection, deleteSection, addComponent, updateCurrentPage } = useBuilder();
+  const { state, selectSection, reorderSections, addSection, deleteSection, addComponent } = useBuilder();
   const { page, editor } = state;
-  const [query, setQuery] = useState('');
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
 
   if (!page) {
     return (
@@ -195,6 +215,13 @@ export function SectionsList({ view = "add" }) {
       </div>
     );
   }
+
+  const [query, setQuery] = useState('');
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
@@ -211,18 +238,6 @@ export function SectionsList({ view = "add" }) {
   };
 
   const handleAddElement = (item) => {
-    if (item.isFullPage) {
-      if (window.confirm("This will replace all sections, navbar, and footer on the current page with the template. Continue?")) {
-        const templatePage = item.create();
-        updateCurrentPage({
-          sections: templatePage.sections,
-          navbar: templatePage.navbar,
-          footer: templatePage.footer,
-          globalStyles: templatePage.globalStyles
-        });
-      }
-      return;
-    }
     if (item.isComponent) {
       const sectionId = editor.selectedSectionId || (page.sections[0]?.id);
       if (!sectionId) return;
@@ -304,14 +319,15 @@ export function SectionsList({ view = "add" }) {
                 <SortableContext items={filteredLayers.map((s) => s.id)} strategy={verticalListSortingStrategy}>
                   {filteredLayers.length > 0 ? filteredLayers.map((section, index) => (
                     <SectionItem
-                      key={section.id}
-                      id={section.id}
-                      name={section.name}
-                      type={section.type}
-                      visible={section.visible}
-                      isSelected={editor.selectedSectionId === section.id}
-                      onClick={() => selectSection(section.id)}
-                    />
+                       key={section.id}
+                       id={section.id}
+                       name={section.name}
+                       type={section.type}
+                       visible={section.visible}
+                       isSelected={editor.selectedSectionId === section.id}
+                       onClick={() => selectSection(section.id)}
+                       index={index}
+                     />
                   )) : (
                     <div className="text-center py-16 border-2 border-dashed border-slate-200 rounded-2xl bg-gradient-to-br from-slate-50/50 to-white">
                       <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -332,21 +348,21 @@ export function SectionsList({ view = "add" }) {
                   <div className="w-1 h-6 rounded-full bg-gradient-to-b from-primary to-primary/50"></div>
                   <h3 className="text-sm font-bold text-slate-900">Popular Elements</h3>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2">
                   {ELEMENT_CATEGORIES[0].items.slice(0, 4).map((item, idx) => (
                     <button
                       key={item.type}
                       onClick={() => handleAddElement(item)}
-                      className="group relative bg-white border-2 border-slate-200 hover:border-primary hover:shadow-lg rounded-2xl p-4 transition-all duration-300 hover:scale-105 active:scale-95"
+                      className="group relative bg-white border-2 border-slate-200 hover:border-primary hover:shadow-lg rounded-xl p-3 transition-all duration-300 hover:scale-105 active:scale-95"
                       style={{ animationDelay: `${idx * 50}ms` }}
                     >
-                      <div className="aspect-square bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
-                        <item.icon className="w-6 h-6 text-primary" />
+                      <div className="aspect-square bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
+                        <item.icon className="w-5 h-5 text-primary" />
                       </div>
                       <h4 className="text-xs font-bold text-slate-900 text-center">{item.name}</h4>
-                      <p className="text-[9px] text-slate-500 text-center mt-1 line-clamp-2">{item.description}</p>
-                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <Plus className="w-3 h-3 text-white" />
+                      <p className="text-[8px] text-slate-500 text-center mt-1 line-clamp-2">{item.description}</p>
+                      <div className="absolute -top-2 -right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <Plus className="w-2.5 h-2.5 text-white" />
                       </div>
                     </button>
                   ))}
@@ -355,9 +371,9 @@ export function SectionsList({ view = "add" }) {
 
               {/* All Categories */}
               {ELEMENT_CATEGORIES.map((cat, catIndex) => {
-                const filteredItems = cat.items.filter((item: any) =>
+                const filteredItems = cat.items.filter(item =>
                   item.name.toLowerCase().includes(query.toLowerCase()) ||
-                  (item as any).description?.toLowerCase().includes(query.toLowerCase())
+                  item.description?.toLowerCase().includes(query.toLowerCase())
                 );
 
                 if (filteredItems.length === 0) return null;
@@ -382,7 +398,7 @@ export function SectionsList({ view = "add" }) {
 
                     {/* Elements Grid */}
                     <div className="grid grid-cols-2 gap-2">
-                      {filteredItems.map((item, idx) => (
+                       {filteredItems.map((item, idx) => (
                         <button
                           key={item.type}
                           onClick={() => handleAddElement(item)}
@@ -395,7 +411,7 @@ export function SectionsList({ view = "add" }) {
                             </div>
                             <div className="flex-1 text-left min-w-0">
                               <h4 className="text-[10px] font-bold text-slate-900 truncate">{item.name}</h4>
-                              <p className="text-[8px] text-slate-500 mt-0.5 line-clamp-2 leading-tight">{(item as any).description}</p>
+                              <p className="text-[8px] text-slate-500 mt-0.5 line-clamp-2 leading-tight">{item.description}</p>
                             </div>
                           </div>
                           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -423,12 +439,6 @@ export function SectionsList({ view = "add" }) {
               {view === 'add' ? 'Click any element to add it to your page' : 'Drag to reorder sections'}
             </p>
           </div>
-          {view === 'add' && (
-            <div className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-              <span className="text-[9px] text-slate-500">Ready to build</span>
-            </div>
-          )}
         </div>
       </div>
     </div>

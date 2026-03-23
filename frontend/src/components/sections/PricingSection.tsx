@@ -1,373 +1,565 @@
 import React, { useState } from 'react';
 import { Check, Sparkles, Zap, ArrowRight } from 'lucide-react';
+import { useBuilder } from '@/contexts/BuilderContext';
 
-// ─── Shared Tokens ─────────────────────────────────────────────────────────────
-const accentGrad = 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)';
+// ─── Styles ───────────────────────────────────────────────────────────────
+const STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap');
 
-const sharedStyles = `
-  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Sora:wght@300;400;500;600;700;800&display=swap');
-  .pricing-section * { box-sizing: border-box; font-family: 'Sora', sans-serif; }
-  .pricing-section h2, .pricing-section h3, .pricing-section h4 {
-    font-family: 'DM Serif Display', Georgia, serif !important;
+  @keyframes pr-up  { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes pr-in  { from { opacity:0; transform:scale(0.96);      } to { opacity:1; transform:scale(1);      } }
+  @keyframes pr-bar { from { transform:scaleX(0); }                  to { transform:scaleX(1); }                 }
+
+  .pr-sect * { box-sizing: border-box; }
+
+  .pr-ce:focus { outline: none; }
+  .pr-ce[contenteditable="true"] {
+    border-bottom: 1.5px dashed rgba(0,0,0,0.18);
+    cursor: text; padding-bottom: 1px;
+    direction: ltr !important;
+    unicode-bidi: normal !important;
+    text-align: left !important;
   }
-  .pricing-chip {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 16px;
-    background: rgba(99,102,241,0.1);
-    border: 1px solid rgba(99,102,241,0.22);
-    border-radius: 999px;
-    font-size: 0.72rem; font-weight: 700;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    color: #6366f1; margin-bottom: 1.25rem;
+  .pr-ce-inv[contenteditable="true"] {
+    border-bottom: 1.5px dashed rgba(255,255,255,0.28);
+    cursor: text; padding-bottom: 1px;
+    direction: ltr !important;
+    unicode-bidi: normal !important;
+    text-align: left !important;
   }
-  .toggle-pill {
+
+  /* Toggle */
+  .pr-toggle {
     display: inline-flex;
-    background: rgba(99,102,241,0.08);
-    border: 1px solid rgba(99,102,241,0.15);
-    border-radius: 999px;
-    padding: 4px;
-    gap: 2px;
-    margin-top: 1.5rem;
+    background: rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.09);
+    border-radius: 3px; padding: 4px; gap: 3px;
+    margin-top: 28px;
   }
-  .toggle-pill button {
-    padding: 8px 22px;
-    border-radius: 999px;
+  .pr-toggle button {
+    padding: 8px 22px; border-radius: 2px;
     border: none; cursor: pointer;
-    font-size: 0.82rem; font-weight: 700;
-    font-family: 'Sora', sans-serif;
-    letter-spacing: 0.02em;
-    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    font-family: 'Geist', sans-serif;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    transition: background 0.2s, color 0.2s;
   }
-  .toggle-pill .active {
-    background: linear-gradient(135deg, #6366f1, #06b6d4);
-    color: #fff;
-    box-shadow: 0 4px 14px rgba(99,102,241,0.3);
+  .pr-toggle .active   { background: #0f172a; color: #fff; }
+  .pr-toggle .inactive { background: transparent; color: rgba(0,0,0,0.4); }
+
+  /* Cards */
+  .pr-card {
+    position: relative; overflow: hidden; border-radius: 4px;
+    transition: transform 0.35s cubic-bezier(0.34,1.2,0.64,1), box-shadow 0.35s ease;
   }
-  .toggle-pill .inactive {
-    background: transparent;
-    color: #6366f1;
+  .pr-card:hover { transform: translateY(-7px); }
+  .pr-card-default {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.04);
   }
-  .plan-card {
-    position: relative;
-    border-radius: 24px;
-    padding: 2.25rem;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    overflow: hidden;
+  .pr-card-default:hover { box-shadow: 0 28px 60px rgba(0,0,0,0.10); }
+  .pr-card-popular {
+    background: #0f172a;
+    box-shadow: 0 20px 60px rgba(15,23,42,0.38);
   }
-  .plan-card:hover { transform: translateY(-6px); }
-  .plan-card-default {
-    background: #ffffff;
-    border: 1px solid rgba(99,102,241,0.12);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.05);
-  }
-  .plan-card-default:hover { box-shadow: 0 24px 56px rgba(99,102,241,0.14); border-color: rgba(99,102,241,0.3); }
-  .plan-card-popular {
-    background: linear-gradient(145deg, #4f46e5 0%, #0891b2 100%);
-    box-shadow: 0 20px 60px rgba(79,70,229,0.35);
-  }
-  .plan-card-popular:hover { box-shadow: 0 32px 72px rgba(79,70,229,0.45); }
-  .pricing-cta-default {
-    width: 100%; padding: 13px;
-    background: transparent;
-    border: 1.5px solid rgba(99,102,241,0.25);
-    border-radius: 14px; cursor: pointer;
-    font-weight: 700; font-size: 0.9rem;
-    font-family: 'Sora', sans-serif;
-    color: #6366f1;
+  .pr-card-popular:hover { box-shadow: 0 32px 80px rgba(15,23,42,0.48); }
+
+  /* CTA */
+  .pr-cta {
+    width: 100%; padding: 14px; border-radius: 3px; border: none; cursor: pointer;
+    font-family: 'Geist', sans-serif; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase;
     display: flex; align-items: center; justify-content: center; gap: 8px;
-    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    transition: opacity 0.2s ease, transform 0.2s ease;
   }
-  .pricing-cta-default:hover { background: rgba(99,102,241,0.06); border-color: rgba(99,102,241,0.5); transform: translateY(-1px); }
-  .pricing-cta-popular {
-    width: 100%; padding: 13px;
-    background: #ffffff;
-    border: none; border-radius: 14px; cursor: pointer;
-    font-weight: 800; font-size: 0.9rem;
-    font-family: 'Sora', sans-serif;
-    color: #4f46e5;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    transition: box-shadow 0.2s, transform 0.2s;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-  }
-  .pricing-cta-popular:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.18); transform: translateY(-1px); }
+  .pr-cta:hover { opacity: 0.85; transform: translateY(-1px); }
+  .pr-cta-default { background: #0f172a; color: #fff; }
+  .pr-cta-popular { background: #fff;    color: #0f172a; }
+
+  /* Table */
+  .pr-trow { transition: background 0.18s ease; }
+  .pr-trow:hover { background: rgba(0,0,0,0.015) !important; }
 `;
 
-// ─── Section Header ────────────────────────────────────────────────────────────
-const SectionHeader = ({ content, isEditing, onContentChange, headingColor, paragraphColor, showToggle = false, annual = false, setAnnual = () => { } }: any) => (
-  <div style={{ textAlign: 'center', maxWidth: '620px', margin: '0 auto 4rem' }}>
-    <div className="pricing-chip">
-      <Sparkles width={10} height={10} />
-      Pricing
-    </div>
-    <h2 style={{ margin: '0 0 1rem', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, color: headingColor, lineHeight: 1.2, letterSpacing: '-0.025em' }}
-      contentEditable={isEditing} suppressContentEditableWarning
-      onBlur={(e) => onContentChange?.('headline', e.currentTarget.textContent)}>
-      {content.headline || 'Simple, Transparent Pricing'}
-    </h2>
-    <div style={{ width: '56px', height: '3px', background: accentGrad, borderRadius: '999px', margin: '0 auto 1.25rem' }} />
-    <p style={{ margin: 0, fontSize: '1rem', lineHeight: 1.75, color: paragraphColor, opacity: 0.85 }}
-      contentEditable={isEditing} suppressContentEditableWarning
-      onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.textContent)}>
-      {content.subheadline || 'Choose the plan that works best for you'}
-    </p>
-    {showToggle && (
-      <div className="toggle-pill">
-        <button className={annual ? 'inactive' : 'active'} onClick={() => setAnnual(false)}>Monthly</button>
-        <button className={annual ? 'active' : 'inactive'} onClick={() => setAnnual(true)}>
-          Yearly
-          <span style={{ marginLeft: '6px', fontSize: '0.65rem', background: 'rgba(255,255,255,0.25)', padding: '2px 7px', borderRadius: '999px', fontWeight: 700 }}>−20%</span>
-        </button>
-      </div>
-    )}
-  </div>
-);
+function InjectStyles() {
+  if (typeof document !== 'undefined' && !document.getElementById('pricing-s-styles')) {
+    const el = document.createElement('style');
+    el.id = 'pricing-s-styles';
+    el.textContent = STYLES;
+    document.head.appendChild(el);
+  }
+  return null;
+}
 
-// ─── Plan Card (shared between cards + toggle) ─────────────────────────────────
-const PlanCard = ({ plan, isEditing, onContentChange, content, buttonPrimaryBg, buttonPrimaryText, price, period, styles }) => {
-  const isPopular = plan.popular;
+const ACCENTS = ['#E11D48', '#0891B2', '#059669', '#7C3AED', '#D97706'];
+
+// ─── Section Header ───────────────────────────────────────────────────────
+function SectionHeader({ content, isEditing, onContentChange, headingColor, paragraphColor, showToggle = false, annual = false, setAnnual = (val: boolean) => {}, centered = true }: any) {
   return (
-    <div className={`plan-card ${isPopular ? 'plan-card-popular' : 'plan-card-default'}`}
-      style={{ transform: isPopular ? 'scale(1.03)' : undefined, zIndex: isPopular ? 2 : 1 }}>
+    <div style={{ maxWidth: 560, margin: centered ? '0 auto 72px' : '0 0 64px', textAlign: centered ? 'center' : 'left' }}>
+      <div style={{
+        display: 'inline-flex', alignItems: 'center', gap: 8,
+        fontFamily: "'Geist', sans-serif",
+        fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase',
+        color: 'rgba(0,0,0,0.3)', marginBottom: 16,
+      }}>
+        {centered && <div style={{ width: 18, height: 1, background: 'rgba(0,0,0,0.2)' }} />}
+        {!centered && <div style={{ width: 20, height: 1, background: 'rgba(0,0,0,0.2)' }} />}
+        pricing
+        {centered && <div style={{ width: 18, height: 1, background: 'rgba(0,0,0,0.2)' }} />}
+      </div>
 
-      {/* Popular badge */}
+      <h2
+        className="pr-ce"
+        style={{
+          fontFamily: "'Instrument Serif', serif",
+          fontSize: 'clamp(30px, 4vw, 54px)',
+          fontWeight: 400, fontStyle: 'italic',
+          lineHeight: 1.05, letterSpacing: '-0.02em',
+          color: headingColor, display: 'block', marginBottom: 0,
+          animation: 'pr-up 0.6s ease both',
+        }}
+        contentEditable={isEditing}
+        suppressContentEditableWarning
+        ref={(el) => {
+          if (el && el.innerHTML !== (content.headline || 'Simple, Transparent Pricing')) {
+            el.innerHTML = content.headline || 'Simple, Transparent Pricing';
+          }
+        }}
+        onBlur={(e) => onContentChange?.('headline', e.currentTarget.innerHTML)}
+      />
+
+      <div style={{
+        width: 36, height: 3, background: '#E11D48',
+        margin: centered ? '18px auto' : '18px 0',
+        transformOrigin: 'left', animation: 'pr-bar 0.7s ease 0.1s both',
+      }} />
+
+      <p
+        className="pr-ce"
+        style={{
+          fontFamily: "'Geist', sans-serif",
+          fontSize: 15, lineHeight: 1.75,
+          color: paragraphColor, opacity: 0.7, display: 'block', margin: 0,
+        }}
+        contentEditable={isEditing}
+        suppressContentEditableWarning
+        ref={(el) => {
+          if (el && el.innerHTML !== (content.subheadline || 'Choose the plan that works best for you')) {
+            el.innerHTML = content.subheadline || 'Choose the plan that works best for you';
+          }
+        }}
+        onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.innerHTML)}
+      />
+
+      {showToggle && (
+        <div className="pr-toggle">
+          <button className={annual ? 'inactive' : 'active'} onClick={() => setAnnual(false)}>Monthly</button>
+          <button className={annual ? 'active' : 'inactive'} onClick={() => setAnnual(true)}>
+            Yearly
+            <span style={{
+              marginLeft: 6, fontSize: 9,
+              background: annual ? 'rgba(255,255,255,0.18)' : '#E11D48',
+              color: '#fff', padding: '2px 6px', borderRadius: 2, fontWeight: 700,
+            }}>−20%</span>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Plan Card ────────────────────────────────────────────────────────────
+function PlanCard({ plan, index, isEditing, onContentChange, content, price, period, styles }: any) {
+  const isPopular = plan.popular;
+  const accent = ACCENTS[index % ACCENTS.length];
+
+  const updatePlan = (field, val) => {
+    if (!isEditing || !onContentChange) return;
+    onContentChange('plans', content.plans.map(p => p.id === plan.id ? { ...p, [field]: val } : p));
+  };
+  const updateFeature = (i, val) => {
+    if (!isEditing || !onContentChange) return;
+    const f = [...(plan.features || [])]; f[i] = val;
+    onContentChange('plans', content.plans.map(p => p.id === plan.id ? { ...p, features: f } : p));
+  };
+
+  return (
+    <div
+      className={`pr-card ${isPopular ? 'pr-card-popular' : 'pr-card-default'}`}
+      style={{
+        transform: isPopular ? 'scale(1.03)' : undefined,
+        zIndex: isPopular ? 2 : 1,
+        borderRadius: styles.borderRadius || '4px',
+        animation: `pr-in 0.5s ease ${index * 0.08}s both`,
+      }}
+    >
+      {/* colored top accent */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: isPopular ? '#E11D48' : accent }} />
+
+      {/* popular badge */}
       {isPopular && (
         <div style={{
-          position: 'absolute', top: '-1px', left: '50%', transform: 'translateX(-50%)',
-          background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
-          color: '#fff', fontSize: '0.7rem', fontWeight: 800,
-          letterSpacing: '0.08em', textTransform: 'uppercase',
-          padding: '5px 16px', borderRadius: '0 0 12px 12px',
-          display: 'flex', alignItems: 'center', gap: '5px',
-          boxShadow: 'var(--shadow, 0 4px 12px rgba(239,68,68,0.35))',
+          position: 'absolute', top: 16, right: 16,
+          display: 'flex', alignItems: 'center', gap: 5,
+          fontFamily: "'Geist', sans-serif",
+          fontSize: 9, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase',
+          color: '#E11D48',
+          background: 'rgba(225,29,72,0.12)',
+          padding: '4px 10px', borderRadius: 2,
         }}>
-          <Zap width={10} height={10} />
-          <span contentEditable={isEditing} suppressContentEditableWarning
-            onBlur={(e) => {
-              if (!isEditing || !onContentChange) return;
-              const updated = content.plans.map(p => p.id === plan.id ? { ...p, popularLabel: e.currentTarget.textContent } : p);
-              onContentChange('plans', updated);
-            }}>
-            {plan.popularLabel || 'Most Popular'}
-          </span>
+          <Zap size={9} />
+          <span
+            className="pr-ce-inv"
+            contentEditable={isEditing}
+            suppressContentEditableWarning
+            ref={(el) => {
+              if (el && el.innerHTML !== (plan.popularLabel || 'Most Popular')) {
+                el.innerHTML = plan.popularLabel || 'Most Popular';
+              }
+            }}
+            onBlur={(e) => updatePlan('popularLabel', e.currentTarget.innerHTML)}
+          />
         </div>
       )}
 
-      {/* Ghost number */}
+      {/* ghost watermark numeral */}
       <div style={{
-        position: 'absolute', bottom: '-12px', right: '16px',
-        fontSize: '7rem', fontWeight: 900, lineHeight: 1,
-        color: isPopular ? 'rgba(255,255,255,0.05)' : 'rgba(99,102,241,0.04)',
-        fontFamily: '"DM Serif Display", serif',
-        userSelect: 'none', pointerEvents: 'none',
+        position: 'absolute', bottom: -20, right: 12,
+        fontFamily: "'Instrument Serif', serif",
+        fontSize: 96, fontWeight: 700,
+        color: isPopular ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+        lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
       }}>
-        {typeof price === 'number' || !isNaN(price) ? `$${price}` : plan.price}
+        {String(index + 1).padStart(2, '0')}
       </div>
 
-      {/* Plan name */}
-      <h3 style={{ margin: '1.5rem 0 0.35rem', fontSize: '1.15rem', fontWeight: 700, color: isPopular ? '#fff' : '#0f172a', letterSpacing: '-0.01em' }}
-        contentEditable={isEditing} suppressContentEditableWarning
-        onBlur={(e) => {
-          if (!isEditing || !onContentChange) return;
-          const updated = content.plans.map(p => p.id === plan.id ? { ...p, name: e.currentTarget.textContent } : p);
-          onContentChange('plans', updated);
+      <div style={{ padding: '36px 32px 32px' }}>
+        {/* Plan name */}
+        <h3
+          className={isPopular ? 'pr-ce-inv' : 'pr-ce'}
+          style={{
+            fontFamily: "'Instrument Serif', serif",
+            fontSize: 22, fontWeight: 400, fontStyle: 'italic',
+            color: isPopular ? '#f8fafc' : '#0f172a',
+            marginBottom: 8, display: 'block', lineHeight: 1.2,
+          }}
+          contentEditable={isEditing}
+          suppressContentEditableWarning
+          ref={(el) => {
+            if (el && el.innerHTML !== (plan.name || '')) {
+              el.innerHTML = plan.name || '';
+            }
+          }}
+          onBlur={(e) => updatePlan('name', e.currentTarget.innerHTML)}
+        />
+
+        <p
+          className={isPopular ? 'pr-ce-inv' : 'pr-ce'}
+          style={{
+            fontFamily: "'Geist', sans-serif",
+            fontSize: 13, lineHeight: 1.65,
+            color: isPopular ? 'rgba(255,255,255,0.5)' : '#94a3b8',
+            marginBottom: 28, display: 'block',
+          }}
+          contentEditable={isEditing}
+          suppressContentEditableWarning
+          ref={(el) => {
+            if (el && el.innerHTML !== (plan.description || '')) {
+              el.innerHTML = plan.description || '';
+            }
+          }}
+          onBlur={(e) => updatePlan('description', e.currentTarget.innerHTML)}
+        />
+
+        {/* Price */}
+        <div style={{
+          paddingBottom: 24, marginBottom: 24,
+          borderBottom: `1px solid ${isPopular ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
         }}>
-        {plan.name}
-      </h3>
-
-      <p style={{ margin: '0 0 1.5rem', fontSize: '0.85rem', lineHeight: 1.6, color: isPopular ? 'rgba(255,255,255,0.65)' : '#64748b' }}
-        contentEditable={isEditing} suppressContentEditableWarning
-        onBlur={(e) => {
-          if (!isEditing || !onContentChange) return;
-          const updated = content.plans.map(p => p.id === plan.id ? { ...p, description: e.currentTarget.textContent } : p);
-          onContentChange('plans', updated);
-        }}>
-        {plan.description}
-      </p>
-
-      {/* Price */}
-      <div style={{ marginBottom: '1.75rem', paddingBottom: '1.75rem', borderBottom: `1px solid ${isPopular ? 'rgba(255,255,255,0.15)' : 'rgba(99,102,241,0.1)'}` }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-          <span style={{ fontSize: '0.95rem', fontWeight: 700, color: isPopular ? 'rgba(255,255,255,0.7)' : '#6366f1', alignSelf: 'flex-start', paddingTop: '8px' }}>$</span>
-          <span style={{ fontSize: '3.25rem', fontWeight: 800, color: isPopular ? '#fff' : '#0f172a', lineHeight: 1, letterSpacing: '-0.04em' }}
-            contentEditable={isEditing} suppressContentEditableWarning
-            onBlur={(e) => {
-              if (!isEditing || !onContentChange) return;
-              const updated = content.plans.map(p => p.id === plan.id ? { ...p, price: e.currentTarget.textContent.replace('$', '').trim() } : p);
-              onContentChange('plans', updated);
-            }}>
-            {price ?? plan.price}
-          </span>
-          <span style={{ fontSize: '0.85rem', color: isPopular ? 'rgba(255,255,255,0.5)' : '#94a3b8', marginLeft: '2px' }}
-            contentEditable={isEditing} suppressContentEditableWarning
-            onBlur={(e) => {
-              if (!isEditing || !onContentChange) return;
-              const updated = content.plans.map(p => p.id === plan.id ? { ...p, pricePeriod: e.currentTarget.textContent } : p);
-              onContentChange('plans', updated);
-            }}>
-            {period || plan.pricePeriod || '/mo'}
-          </span>
-        </div>
-      </div>
-
-      {/* Features */}
-      <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 2rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        {(plan.features || []).map((feature, i) => (
-          <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{
-              width: '20px', height: '20px', flexShrink: 0, borderRadius: '6px',
-              background: isPopular ? 'rgba(255,255,255,0.18)' : 'rgba(99,102,241,0.1)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Check width={11} height={11} color={isPopular ? '#fff' : '#6366f1'} strokeWidth={3} />
-            </div>
-            <span style={{ fontSize: '0.875rem', color: isPopular ? 'rgba(255,255,255,0.85)' : '#475569' }}
-              contentEditable={isEditing} suppressContentEditableWarning
-              onBlur={(e) => {
-                if (!isEditing || !onContentChange) return;
-                const updatedFeatures = [...(plan.features || [])];
-                updatedFeatures[i] = e.currentTarget.textContent;
-                const updated = content.plans.map(p => p.id === plan.id ? { ...p, features: updatedFeatures } : p);
-                onContentChange('plans', updated);
-              }}>
-              {feature}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
+            <span style={{
+              fontFamily: "'Geist', sans-serif",
+              fontSize: 16, fontWeight: 500, alignSelf: 'flex-start', paddingTop: 10,
+              color: isPopular ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)',
+            }}>$</span>
+            <span
+              className={isPopular ? 'pr-ce-inv' : 'pr-ce'}
+              style={{
+                fontFamily: "'Instrument Serif', serif",
+                fontSize: 56, fontWeight: 700, lineHeight: 1, letterSpacing: '-0.03em',
+                color: isPopular ? '#fff' : '#0f172a',
+              }}
+              contentEditable={isEditing}
+              suppressContentEditableWarning
+              ref={(el) => {
+                if (el && el.innerHTML !== (price ?? plan.price)) {
+                  el.innerHTML = price ?? plan.price;
+                }
+              }}
+              onBlur={(e) => updatePlan('price', e.currentTarget.textContent.replace('$', '').trim())}
+            >
+              {price ?? plan.price}
             </span>
-          </li>
-        ))}
-      </ul>
+            <span
+              className={isPopular ? 'pr-ce-inv' : 'pr-ce'}
+              style={{
+                fontFamily: "'Geist', sans-serif",
+                fontSize: 12, color: isPopular ? 'rgba(255,255,255,0.35)' : '#94a3b8',
+                marginLeft: 2,
+              }}
+              contentEditable={isEditing}
+              suppressContentEditableWarning
+              ref={(el) => {
+                if (el && el.innerHTML !== (period || plan.pricePeriod || '/mo')) {
+                  el.innerHTML = period || plan.pricePeriod || '/mo';
+                }
+              }}
+              onBlur={(e) => updatePlan('pricePeriod', e.currentTarget.textContent)}
+            >
+              {period || plan.pricePeriod || '/mo'}
+            </span>
+          </div>
+        </div>
 
-      {/* CTA */}
-      <button className={isPopular ? 'pricing-cta-popular' : 'pricing-cta-default'}>
-        <span contentEditable={isEditing} suppressContentEditableWarning
-          onBlur={(e) => {
-            if (!isEditing || !onContentChange) return;
-            const updated = content.plans.map(p => p.id === plan.id ? { ...p, ctaText: e.currentTarget.textContent } : p);
-            onContentChange('plans', updated);
-          }}>
-          {plan.ctaText || 'Get Started'}
-        </span>
-        <ArrowRight width={14} height={14} />
-      </button>
+        {/* Features */}
+        <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 28px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {(plan.features || []).map((feature, i) => (
+            <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+              <div style={{
+                width: 18, height: 18, flexShrink: 0, borderRadius: '50%', marginTop: 1,
+                background: isPopular ? 'rgba(225,29,72,0.2)' : `${accent}15`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Check size={10} color={isPopular ? '#E11D48' : accent} strokeWidth={3} />
+              </div>
+              <span
+                className={isPopular ? 'pr-ce-inv' : 'pr-ce'}
+                style={{
+                  fontFamily: "'Geist', sans-serif",
+                  fontSize: 13, lineHeight: 1.5,
+                  color: isPopular ? 'rgba(255,255,255,0.75)' : '#475569',
+                }}
+                contentEditable={isEditing}
+                suppressContentEditableWarning
+                ref={(el) => {
+                  if (el && el.innerHTML !== (feature || '')) {
+                    el.innerHTML = feature || '';
+                  }
+                }}
+                onBlur={(e) => updateFeature(i, e.currentTarget.innerHTML)}
+              />
+            </li>
+          ))}
+        </ul>
+
+        {/* CTA */}
+        <button className={`pr-cta ${isPopular ? 'pr-cta-popular' : 'pr-cta-default'}`}>
+          <span
+            className={isPopular ? 'pr-ce-inv' : 'pr-ce'}
+            contentEditable={isEditing}
+            suppressContentEditableWarning
+            ref={(el) => {
+              if (el && el.innerHTML !== (plan.ctaText || 'Get Started')) {
+                el.innerHTML = plan.ctaText || 'Get Started';
+              }
+            }}
+            onBlur={(e) => updatePlan('ctaText', e.currentTarget.innerHTML)}
+          />
+          <ArrowRight size={13} />
+        </button>
+      </div>
     </div>
   );
-};
+}
 
-// ─── VARIANT: TABLE ────────────────────────────────────────────────────────────
-const renderTable = ({ content, isEditing, onContentChange, headingColor, paragraphColor, plans }: any) => {
-  const allFeatures = Array.from(new Set<string>(plans.flatMap((p: any) => p.features || [])));
+// ─── VARIANT: TABLE ───────────────────────────────────────────────────────
+function TableVariant({ content, isEditing, onContentChange, headingColor, paragraphColor, plans, styles }: any) {
+  const allFeatures = Array.from(new Set((plans as any[]).flatMap(p => p.features || []))) as string[];
+
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 2rem' }}>
-      <SectionHeader content={content} isEditing={isEditing} onContentChange={onContentChange} headingColor={headingColor} paragraphColor={paragraphColor} />
+    <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 40px' }}>
+      <SectionHeader
+        content={content} isEditing={isEditing} onContentChange={onContentChange}
+        headingColor={headingColor} paragraphColor={paragraphColor}
+      />
 
-      <div style={{ overflowX: 'auto', borderRadius: '20px', border: '1px solid rgba(99,102,241,0.12)', background: '#fff', boxShadow: 'var(--shadow, 0 8px 40px rgba(0,0,0,0.06))' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
+      <div style={{
+        overflowX: 'auto',
+        border: '1px solid rgba(0,0,0,0.08)',
+        borderRadius: styles.borderRadius || '4px',
+        background: '#fff',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.05)',
+      }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
           <thead>
-            <tr style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(6,182,212,0.04))' }}>
-              <th style={{ padding: '1.25rem 1.5rem', textAlign: 'left', fontSize: '0.8rem', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.08em', textTransform: 'uppercase', borderBottom: '1px solid rgba(99,102,241,0.1)' }}>
-                Plan
-              </th>
-              <th style={{ padding: '1.25rem 1.5rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.08em', textTransform: 'uppercase', borderBottom: '1px solid rgba(99,102,241,0.1)' }}>
-                Price
-              </th>
-              {allFeatures.map((f: string) => (
-                <th key={f} style={{ padding: '1.25rem 1rem', textAlign: 'center', fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', letterSpacing: '0.06em', textTransform: 'uppercase', borderBottom: '1px solid rgba(99,102,241,0.1)', whiteSpace: 'nowrap' }}>
-                  {f}
-                </th>
+            <tr style={{ background: '#fafaf9', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+              <th style={{
+                padding: '18px 24px', textAlign: 'left',
+                fontFamily: "'Geist', sans-serif",
+                fontSize: 9, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase',
+                color: 'rgba(0,0,0,0.35)',
+              }}>Plan</th>
+              <th style={{
+                padding: '18px 24px', textAlign: 'center',
+                fontFamily: "'Geist', sans-serif",
+                fontSize: 9, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase',
+                color: 'rgba(0,0,0,0.35)',
+              }}>Price</th>
+              {allFeatures.map(f => (
+                <th key={f} style={{
+                  padding: '18px 14px', textAlign: 'center',
+                  fontFamily: "'Geist', sans-serif",
+                  fontSize: 9, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase',
+                  color: 'rgba(0,0,0,0.35)', whiteSpace: 'nowrap',
+                }}>{f}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {plans.map((p, idx) => (
-              <tr key={p.id} style={{ background: p.popular ? 'linear-gradient(135deg, rgba(99,102,241,0.04), rgba(6,182,212,0.03))' : 'transparent', borderBottom: idx < plans.length - 1 ? '1px solid rgba(99,102,241,0.07)' : 'none' }}>
-                <td style={{ padding: '1.25rem 1.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: p.popular ? accentGrad : 'rgba(99,102,241,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Sparkles width={14} height={14} color={p.popular ? '#fff' : '#6366f1'} />
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a', fontFamily: '"DM Serif Display", serif' }}>{p.name}</div>
-                      {p.popular && <div style={{ fontSize: '0.7rem', color: '#6366f1', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Most Popular</div>}
-                    </div>
-                  </div>
-                </td>
-                <td style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
-                  <span style={{ fontWeight: 800, fontSize: '1.25rem', color: '#0f172a', fontFamily: '"DM Serif Display", serif' }}>${p.price}</span>
-                  <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>/mo</span>
-                </td>
-                {allFeatures.map((f: string) => (
-                  <td key={f} style={{ padding: '1.25rem 1rem', textAlign: 'center' }}>
-                    {(p.features || []).includes(f)
-                      ? <div style={{ width: '22px', height: '22px', borderRadius: '6px', background: p.popular ? accentGrad : 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-                        <Check width={12} height={12} color={p.popular ? '#fff' : '#6366f1'} strokeWidth={3} />
+            {plans.map((p, idx) => {
+              const accent = ACCENTS[idx % ACCENTS.length];
+              return (
+                <tr
+                  key={p.id}
+                  className="pr-trow"
+                  style={{
+                    background: p.popular ? '#fafaf9' : 'transparent',
+                    borderBottom: idx < plans.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none',
+                  }}
+                >
+                  <td style={{ padding: '20px 24px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                      <div style={{
+                        width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
+                        background: p.popular ? '#E11D48' : accent,
+                      }} />
+                      <div>
+                        <div style={{
+                          fontFamily: "'Instrument Serif', serif",
+                          fontSize: 17, fontStyle: 'italic', fontWeight: 400,
+                          color: '#0f172a',
+                        }}>{p.name}</div>
+                        {p.popular && (
+                          <div style={{
+                            fontFamily: "'Geist', sans-serif",
+                            fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase',
+                            color: '#E11D48',
+                          }}>Most Popular</div>
+                        )}
                       </div>
-                      : <div style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(148,163,184,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', color: '#cbd5e1', fontSize: '1rem' }}>–</div>
-                    }
+                    </div>
                   </td>
-                ))}
-              </tr>
-            ))}
+                  <td style={{ padding: '20px 24px', textAlign: 'center' }}>
+                    <span style={{
+                      fontFamily: "'Instrument Serif', serif",
+                      fontSize: 22, fontWeight: 700,
+                      color: '#0f172a',
+                    }}>${p.price}</span>
+                    <span style={{
+                      fontFamily: "'Geist', sans-serif",
+                      fontSize: 11, color: 'rgba(0,0,0,0.35)', marginLeft: 3,
+                    }}>/mo</span>
+                  </td>
+                  {allFeatures.map(f => (
+                    <td key={f} style={{ padding: '20px 14px', textAlign: 'center' }}>
+                      {(p.features || []).includes(f) ? (
+                        <div style={{
+                          width: 20, height: 20, borderRadius: '50%',
+                          background: p.popular ? '#E11D48' : `${accent}15`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          margin: '0 auto',
+                        }}>
+                          <Check size={10} color={p.popular ? '#fff' : accent} strokeWidth={3} />
+                        </div>
+                      ) : (
+                        <span style={{ color: 'rgba(0,0,0,0.18)', fontSize: 14, fontFamily: "'Geist', sans-serif" }}>–</span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
     </div>
   );
-};
+}
 
-// ─── MAIN EXPORT ───────────────────────────────────────────────────────────────
-export function PricingSection({ section, isSelected, isEditing, onContentChange }) {
+// ─── MAIN EXPORT ──────────────────────────────────────────────────────────
+export function PricingSection({ section, isSelected, isEditing, onContentChange, isAlternate }: any) {
   const { content, styles } = section;
+  const { state } = useBuilder();
+  const globalStyles = state.page?.globalStyles || {};
+
   const plans = content.plans || [];
   const variant = section.variant || 'cards';
   const [annual, setAnnual] = useState(false);
 
   const background = styles.useGradient
     ? (styles.backgroundGradient || styles.backgroundColor)
-    : (styles.backgroundColor || '#f8fafc');
-
-  const headingColor = styles.headingColor || '#0f172a';
-  const paragraphColor = styles.paragraphColor || '#64748b';
+    : (styles.backgroundColor || (isAlternate ? 'var(--theme-bg-alt, #f8fafc)' : 'var(--theme-bg, #fafaf8)'));
   
-  // Get button colors with fallbacks
+  const headingColor = styles.headingColor || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
+  const paragraphColor = styles.paragraphColor || (isAlternate ? 'var(--theme-text-alt, #64748b)' : 'var(--theme-text, #64748b)');
+
   const buttonPrimaryBg = styles.buttonPrimaryBg || '#0f172a';
   const buttonPrimaryText = styles.buttonPrimaryText || '#ffffff';
 
   const shared = { content, isEditing, onContentChange, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText, plans, styles };
 
+  const globalClasses = `
+    ${globalStyles.glassmorphism ? 'glass-effect' : ''}
+  `.trim();
 
   return (
     <>
-      <style>{sharedStyles}</style>
+      <style>{STYLES}</style>
+      <InjectStyles />
       <section
-        className={`pricing-section relative transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}
-        style={{ background, padding: styles.padding || '6rem 0', position: 'relative', overflow: 'hidden' }}
+        className={`pr-sect relative transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${globalClasses}`}
+        style={{
+          background,
+          padding: styles.padding || '100px 0',
+          position: 'relative', overflow: 'hidden',
+          borderRadius: variant === 'table' ? '0' : 'var(--radius, 0)',
+        }}
       >
-        {/* Background decoration */}
-        <div style={{ position: 'absolute', top: '-160px', right: '-160px', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 65%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-100px', left: '-100px', width: '380px', height: '380px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(6,182,212,0.05) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          backgroundImage: 'radial-gradient(ellipse at 88% 8%, rgba(225,29,72,0.04) 0%, transparent 55%), radial-gradient(ellipse at 5% 92%, rgba(8,145,178,0.04) 0%, transparent 50%)',
+        }} />
 
         <div style={{ position: 'relative', zIndex: 1 }}>
-          {variant === 'table' && renderTable(shared)}
+          {variant === 'table' && <TableVariant {...shared} />}
 
           {(variant === 'cards' || variant === 'toggle') && (
-            <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 2rem' }}>
+            <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 40px' }}>
               <SectionHeader
                 content={content} isEditing={isEditing} onContentChange={onContentChange}
                 headingColor={headingColor} paragraphColor={paragraphColor}
                 showToggle={variant === 'toggle'} annual={annual} setAnnual={setAnnual}
               />
 
-              <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(plans.length, 3)}, 1fr)`, gap: '1.5rem', alignItems: 'center' }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(${Math.min(plans.length, 3)}, 1fr)`,
+                gap: 20,
+                alignItems: 'center',
+              }}>
                 {plans.map((plan, index) => {
                   const price = variant === 'toggle' && annual
-                    ? Math.round(plan.price * 10 * 0.8)
+                    ? Math.round(Number(plan.price) * 10 * 0.8)
                     : plan.price;
                   const period = variant === 'toggle' ? (annual ? '/yr' : '/mo') : (plan.pricePeriod || '/mo');
                   return (
                     <PlanCard
                       key={plan.id || index}
-                      plan={plan} price={price} period={period}
+                      plan={plan} index={index} price={price} period={period}
                       isEditing={isEditing} onContentChange={onContentChange}
                       content={content} styles={styles}
-                      buttonPrimaryBg={buttonPrimaryBg} buttonPrimaryText={buttonPrimaryText}
                     />
                   );
                 })}

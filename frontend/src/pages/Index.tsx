@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, MouseEvent } from "react";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue, useInView } from "framer-motion";
 import { ChevronDown, ArrowRight, MousePointer2, Sparkles, Menu, X, Zap, LayoutTemplate, Layers, Palette, MonitorPlay, Move, Sun, Moon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import useBuilderStore, { BuilderState } from "@/store/useBuilderStore";
+import useBuilderStore, { type BuilderStore } from "@/store/useBuilderStore";
 import Footer from "./Footer";
 import { cn } from "@/lib/utils";
 
@@ -58,7 +58,7 @@ const FloatingElement = ({ children, x, y, delay = 0, className, isDark }: any) 
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const createWebsite = useBuilderStore((state: BuilderState) => state.createWebsite);
+  const createWebsite = useBuilderStore((state: BuilderStore) => state.createWebsite);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);

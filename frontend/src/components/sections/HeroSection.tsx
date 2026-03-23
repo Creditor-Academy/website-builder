@@ -32,7 +32,7 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange, i
 
   const handleTextEdit = (field, e) => {
     if (onContentChange && isEditing) {
-      onContentChange(field, e.currentTarget.textContent || '');
+      onContentChange(field, e.currentTarget.innerHTML || '');
     }
   };
 
@@ -87,10 +87,10 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange, i
               style={{ color: '#475569' }}
               contentEditable={isEditing}
               suppressContentEditableWarning
+              dangerouslySetInnerHTML={{ __html: content.eyebrowText || 'New Release' }}
+              onInput={(e) => handleTextEdit('eyebrowText', e)}
               onBlur={(e) => handleTextEdit('eyebrowText', e)}
-            >
-              {content.eyebrowText || 'New Release'}
-            </span>
+            />
           </div>
 
           <div className="max-w-4xl space-y-6">
@@ -99,20 +99,20 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange, i
               style={{ color: headingColor, letterSpacing: '-0.03em' }}
               contentEditable={isEditing}
               suppressContentEditableWarning
+              dangerouslySetInnerHTML={{ __html: content.headline }}
+              onInput={(e) => handleTextEdit('headline', e)}
               onBlur={(e) => handleTextEdit('headline', e)}
-            >
-              {content.headline}
-            </h1>
+            />
 
             <p
               className="text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
               style={{ color: paragraphColor }}
               contentEditable={isEditing}
               suppressContentEditableWarning
+              dangerouslySetInnerHTML={{ __html: content.subheadline }}
+              onInput={(e) => handleTextEdit('subheadline', e)}
               onBlur={(e) => handleTextEdit('subheadline', e)}
-            >
-              {content.subheadline}
-            </p>
+            />
 
             <div className={`flex flex-wrap justify-center gap-3 pt-4 ${globalClasses}`}>
               {content.ctaText && (
@@ -130,8 +130,8 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange, i
 
               {content.ctaSecondaryText && (
                 <button
-                  className={`group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 bg-white transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 ${globalClasses} glass-effect`}
-                  style={{ color: buttonSecondaryText }}
+                  className={`group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 ${globalClasses} glass-effect`}
+                  style={{ color: buttonSecondaryText, background: buttonSecondaryBg }}
                   onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
                 >
                   <Play className="w-4 h-4 fill-current opacity-70" />
@@ -188,29 +188,27 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange, i
                 style={{ color: '#475569' }}
                 contentEditable={isEditing}
                 suppressContentEditableWarning
+                dangerouslySetInnerHTML={{ __html: content.eyebrowText || 'Video Story' }}
                 onBlur={(e) => handleTextEdit('eyebrowText', e)}
-              >
-                {content.eyebrowText || 'Video Story'}
-              </span>
+              />
             </div>
             <h1
               className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight"
               style={{ color: headingColor, letterSpacing: '-0.03em' }}
               contentEditable={isEditing}
               suppressContentEditableWarning
+              dangerouslySetInnerHTML={{ __html: content.headline }}
               onBlur={(e) => handleTextEdit('headline', e)}
-            >
-              {content.headline}
-            </h1>
+            />
             <p
               className="text-lg leading-relaxed"
               style={{ color: paragraphColor }}
               contentEditable={isEditing}
               suppressContentEditableWarning
+              dangerouslySetInnerHTML={{ __html: content.subheadline }}
+              onInput={(e) => handleTextEdit('subheadline', e)}
               onBlur={(e) => handleTextEdit('subheadline', e)}
-            >
-              {content.subheadline}
-            </p>
+            />
             <div className="flex flex-wrap gap-3 pt-2">
               <button
                 className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:shadow-slate-900/20 hover:-translate-y-0.5"
@@ -223,8 +221,8 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange, i
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </button>
               <button
-                className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 bg-white transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
-                style={{ color: buttonSecondaryText }}
+                className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
+                style={{ color: buttonSecondaryText, background: buttonSecondaryBg }}
                 onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
               >
                 <Play className="w-4 h-4 fill-current opacity-70" />
@@ -276,20 +274,18 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange, i
               style={{ color: '#94a3b8' }}
               contentEditable={isEditing}
               suppressContentEditableWarning
+              dangerouslySetInnerHTML={{ __html: content.eyebrowText || '— Professional · Minimal · Clean' }}
               onBlur={(e) => handleTextEdit('eyebrowText', e)}
-            >
-              {content.eyebrowText || '— Professional · Minimal · Clean'}
-            </p>
+            />
 
             <h1
               className="text-4xl md:text-5xl lg:text-6xl font-black leading-[1.08]"
               style={{ color: headingColor, letterSpacing: '-0.03em' }}
               contentEditable={isEditing}
               suppressContentEditableWarning
+              dangerouslySetInnerHTML={{ __html: content.headline }}
               onBlur={(e) => handleTextEdit('headline', e)}
-            >
-              {content.headline}
-            </h1>
+            />
 
             <div className="w-12 h-0.5 bg-slate-900 rounded-full" />
 
@@ -298,10 +294,10 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange, i
               style={{ color: paragraphColor }}
               contentEditable={isEditing}
               suppressContentEditableWarning
+              dangerouslySetInnerHTML={{ __html: content.subheadline }}
+              onInput={(e) => handleTextEdit('subheadline', e)}
               onBlur={(e) => handleTextEdit('subheadline', e)}
-            >
-              {content.subheadline}
-            </p>
+            />
 
             <div className="flex flex-wrap gap-3 pt-2">
               {content.ctaText && (
@@ -374,10 +370,9 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange, i
                 style={{ color: '#475569' }}
                 contentEditable={isEditing}
                 suppressContentEditableWarning
+                dangerouslySetInnerHTML={{ __html: content.eyebrowText || 'Introducing v2.0' }}
                 onBlur={(e) => handleTextEdit('eyebrowText', e)}
-              >
-                {content.eyebrowText || 'Introducing v2.0'}
-              </span>
+              />
             </div>
 
             <h1
@@ -385,20 +380,19 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange, i
               style={{ color: headingColor, letterSpacing: '-0.04em', lineHeight: 1.0 }}
               contentEditable={isEditing}
               suppressContentEditableWarning
+              dangerouslySetInnerHTML={{ __html: content.headline }}
               onBlur={(e) => handleTextEdit('headline', e)}
-            >
-              {content.headline}
-            </h1>
+            />
 
             <p
               className="text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
               style={{ color: paragraphColor }}
               contentEditable={isEditing}
               suppressContentEditableWarning
+              dangerouslySetInnerHTML={{ __html: content.subheadline }}
+              onInput={(e) => handleTextEdit('subheadline', e)}
               onBlur={(e) => handleTextEdit('subheadline', e)}
-            >
-              {content.subheadline}
-            </p>
+            />
 
             <div className="flex flex-wrap justify-center gap-3 pt-4">
               {content.ctaText && (
@@ -416,8 +410,8 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange, i
 
               {content.ctaSecondaryText && (
                 <button
-                  className="group inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base border border-slate-200 bg-white/70 backdrop-blur-sm transition-all duration-200 hover:border-slate-300 hover:shadow-lg hover:-translate-y-1"
-                  style={{ color: buttonSecondaryText }}
+                  className="group inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base border border-slate-200 backdrop-blur-sm transition-all duration-200 hover:border-slate-300 hover:shadow-lg hover:-translate-y-1"
+                  style={{ color: buttonSecondaryText, background: buttonSecondaryBg }}
                   onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
                 >
                   <Play className="w-5 h-5 fill-current opacity-60" />
@@ -486,10 +480,9 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange, i
                 style={{ color: '#475569' }}
                 contentEditable={isEditing}
                 suppressContentEditableWarning
+                dangerouslySetInnerHTML={{ __html: content.eyebrowText || 'Now Available' }}
                 onBlur={(e) => handleTextEdit('eyebrowText', e)}
-              >
-                {content.eyebrowText || 'Now Available'}
-              </span>
+              />
             </div>
 
             <h1
@@ -497,20 +490,19 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange, i
               style={{ color: headingColor, letterSpacing: '-0.03em' }}
               contentEditable={isEditing}
               suppressContentEditableWarning
+              dangerouslySetInnerHTML={{ __html: content.headline }}
               onBlur={(e) => handleTextEdit('headline', e)}
-            >
-              {content.headline}
-            </h1>
+            />
 
             <p
               className="text-base md:text-lg leading-relaxed max-w-md"
               style={{ color: paragraphColor }}
               contentEditable={isEditing}
               suppressContentEditableWarning
+              dangerouslySetInnerHTML={{ __html: content.subheadline }}
+              onInput={(e) => handleTextEdit('subheadline', e)}
               onBlur={(e) => handleTextEdit('subheadline', e)}
-            >
-              {content.subheadline}
-            </p>
+            />
 
             <div className="flex flex-wrap gap-3">
               {content.ctaText && (
@@ -528,8 +520,8 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange, i
 
               {content.ctaSecondaryText && (
                 <button
-                  className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 bg-white transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
-                  style={{ color: buttonSecondaryText }}
+                  className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
+                  style={{ color: buttonSecondaryText, background: buttonSecondaryBg }}
                   onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
                 >
                   <Play className="w-4 h-4 fill-current opacity-60" />

@@ -1,420 +1,474 @@
 import React from 'react';
 import { Target, Eye, Heart, Award, Users } from 'lucide-react';
+import { useBuilder } from '@/contexts/BuilderContext';
 
-const iconMap = {
-  Target,
-  Eye,
-  Heart,
-  Award,
-  Users,
-};
+const iconMap = { Target, Eye, Heart, Award, Users };
 
-export function AboutSection({ section, isSelected, isEditing, onContentChange, isAlternate }) {
-  const { content, styles, variant = 'split' } = section;
+// ─── Styles ───────────────────────────────────────────────────────────────
+const STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Epilogue:wght@300;400;500;600&display=swap');
 
-  const handleTextEdit = (field, e) => {
-    if (onContentChange && isEditing) {
-      onContentChange(field, e.currentTarget.textContent || '');
-    }
+  @keyframes ab-up   { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes ab-in   { from { opacity:0; transform:scale(0.95);      } to { opacity:1; transform:scale(1);      } }
+  @keyframes ab-line { from { transform:scaleX(0); }                  to { transform:scaleX(1); }                 }
+  @keyframes ab-img-pan { 0%,100% { transform:scale(1.04) translateY(0); } 50% { transform:scale(1.04) translateY(-8px); } }
+
+  .ab-ce:focus { outline: none; }
+  .ab-ce[data-editing="true"] {
+    border-bottom: 1.5px dashed rgba(0,0,0,0.22);
+    cursor: text;
+    padding-bottom: 1px;
+    min-width: 20px;
+  }
+  .ab-ce[data-editing="true"]:focus { outline: none; }
+  .ab-inv[data-editing="true"] {
+    border-bottom: 1.5px dashed rgba(255,255,255,0.35);
+    cursor: text;
+    padding-bottom: 1px;
+  }
+  .ab-inv[data-editing="true"]:focus { outline: none; }
+
+  .ab-val-item { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+  .ab-val-item:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.13); }
+
+  .ab-img-wrap img { animation: ab-img-pan 8s ease-in-out infinite; }
+
+  .ab-icon-wrap { transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+  .ab-val-item:hover .ab-icon-wrap { transform: scale(1.15) rotate(-4deg); }
+`;
+
+function InjectStyles() {
+  if (typeof document !== 'undefined' && !document.getElementById('about-section-styles')) {
+    const el = document.createElement('style');
+    el.id = 'about-section-styles';
+    el.textContent = STYLES;
+    document.head.appendChild(el);
+  }
+  return null;
+}
+
+const ACCENTS = ['#D97706', '#0891B2', '#059669', '#7C3AED', '#DB2777'];
+
+function getIcon(name, size = 20) {
+  const IC = iconMap[name] || Target;
+  return <IC size={size} />;
+}
+
+function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '', inv = false }: any) {
+  const editing = !!isEditing;
+  return (
+    <Tag
+      className={`ab-ce ${inv ? 'ab-inv' : ''} ${className}`}
+      data-editing={editing ? 'true' : 'false'}
+      contentEditable={editing ? 'true' : 'false'}
+      suppressContentEditableWarning
+      style={{
+        ...style,
+        pointerEvents: editing ? 'auto' : 'inherit',
+        userSelect: editing ? 'text' : undefined,
+        WebkitUserSelect: editing ? 'text' : undefined,
+        cursor: editing ? 'text' : undefined,
+      }}
+      onBlur={editing && onSave ? (e) => onSave(e.currentTarget.innerHTML || '') : undefined}
+      onClick={editing ? (e) => e.stopPropagation() : undefined}
+      dangerouslySetInnerHTML={{ __html: value || '' }}
+    />
+  );
+}
+
+function MicroLabel({ text, light = false }: { text: string; light?: boolean }) {
+  return (
+    <div style={{
+      display: 'inline-flex', alignItems: 'center', gap: 10,
+      fontFamily: "'Epilogue', sans-serif",
+      fontSize: 10, letterSpacing: '0.24em', textTransform: 'uppercase',
+      color: light ? 'rgba(255,255,255,0.42)' : 'rgba(0,0,0,0.32)',
+      marginBottom: 16, pointerEvents: 'none',
+    }}>
+      <div style={{ width: 22, height: 1, background: light ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.22)' }} />
+      {text}
+    </div>
+  );
+}
+
+function Badge({ text, isEditing, onSave }) {
+  if (!text) return null;
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <CE
+        as="span" value={text} isEditing={isEditing} onSave={onSave}
+        style={{
+          display: 'inline-block',
+          fontFamily: "'Epilogue', sans-serif",
+          fontSize: 11, fontWeight: 600,
+          letterSpacing: '0.16em', textTransform: 'uppercase',
+          color: '#D97706',
+          border: '1px solid rgba(217,119,6,0.3)',
+          borderRadius: 2, padding: '5px 14px',
+        }}
+      />
+    </div>
+  );
+}
+
+function ImageBlock({ src, alt, isEditing, onContentChange, height = 480, borderRadius = '4px' }: { src: any; alt: any; isEditing: any; onContentChange: any; height?: string | number; borderRadius?: any }) {
+  return (
+    <div
+      className="ab-img-wrap"
+      style={{ borderRadius, overflow: 'hidden', height, position: 'relative' }}
+    >
+      <img src={src} alt={alt || 'About us'} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(160deg, transparent 50%, rgba(0,0,0,0.38) 100%)', pointerEvents: 'none' }} />
+      {isEditing && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            const url = window.prompt('Enter image URL', src || 'https://');
+            if (url !== null && onContentChange) onContentChange('imageUrl', url);
+          }}
+          style={{
+            position: 'absolute', bottom: 16, right: 16, zIndex: 10,
+            background: 'rgba(0,0,0,0.65)', color: '#fff',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: 3, padding: '6px 14px',
+            fontFamily: "'Epilogue',sans-serif", fontSize: 11,
+            letterSpacing: '0.08em', textTransform: 'uppercase',
+            cursor: 'pointer',
+          }}
+        >
+          Change Image
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ─── VARIANT: split ──────────────────────────────────────────────────────────
+function SplitVariant({ content, styles, isEditing, onContentChange, headingColor, paragraphColor }) {
+  const imgRight = content.imagePosition === 'right';
+
+  const updateValue = (index, field, val) => {
+    if (!isEditing || !onContentChange) return;
+    const updated = content.values.map((v, i) => i === index ? { ...v, [field]: val } : v);
+    onContentChange('values', updated);
   };
 
-  const background = styles.useGradient 
-    ? (styles.backgroundGradient || styles.backgroundColor) 
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, minHeight: 580 }}>
+      {/* Content column */}
+      <div style={{
+        order: imgRight ? 0 : 1,
+        padding: '72px 56px',
+        display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        position: 'relative',
+      }}>
+        <div style={{
+          position: 'absolute',
+          [imgRight ? 'right' : 'left']: 0,
+          top: '10%', bottom: '10%', width: 1,
+          background: 'rgba(0,0,0,0.08)', pointerEvents: 'none',
+        }} />
+
+        <Badge text={content.badge} isEditing={isEditing} onSave={(val) => onContentChange?.('badge', val)} />
+
+        <CE
+          as="h2" value={content.headline} isEditing={isEditing}
+          onSave={(val) => onContentChange?.('headline', val)}
+          style={{
+            fontFamily: "'Libre Baskerville', serif",
+            fontSize: 'clamp(30px, 3.5vw, 50px)',
+            fontWeight: 700, lineHeight: 1.1, letterSpacing: '-0.01em',
+            color: headingColor, marginBottom: 22, display: 'block',
+          }}
+        />
+
+        <CE
+          as="p" value={content.description} isEditing={isEditing}
+          onSave={(val) => onContentChange?.('description', val)}
+          style={{
+            fontFamily: "'Epilogue', sans-serif",
+            fontSize: 16, lineHeight: 1.8,
+            color: paragraphColor, opacity: 0.78,
+            marginBottom: 36, display: 'block',
+          }}
+        />
+
+        {content.values?.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {content.values.map((value, index) => {
+              const accent = ACCENTS[index % ACCENTS.length];
+              return (
+                <div key={value.id || index} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                  <div className="ab-icon-wrap" style={{
+                    width: 44, height: 44, borderRadius: '4px', flexShrink: 0,
+                    background: `${accent}15`, border: `1px solid ${accent}30`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: accent,
+                  }}>
+                    {getIcon(value.icon, 18)}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <CE
+                      as="h4" value={value.title} isEditing={isEditing}
+                      onSave={(val) => updateValue(index, 'title', val)}
+                      style={{ fontFamily: "'Epilogue', sans-serif", fontWeight: 600, fontSize: 14, color: headingColor, marginBottom: 4, display: 'block' }}
+                    />
+                    <CE
+                      as="p" value={value.description} isEditing={isEditing}
+                      onSave={(val) => updateValue(index, 'description', val)}
+                      style={{ fontFamily: "'Epilogue', sans-serif", fontSize: 13, color: paragraphColor, opacity: 0.68, lineHeight: 1.6, display: 'block' }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Image column */}
+      <div style={{ order: imgRight ? 1 : 0, position: 'relative', minHeight: 480 }}>
+        <ImageBlock
+          src={content.imageUrl} alt={content.imageAlt}
+          isEditing={isEditing} onContentChange={onContentChange}
+          height="100%" borderRadius="0"
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─── VARIANT: centered ───────────────────────────────────────────────────────
+function CenteredVariant({ content, styles, isEditing, onContentChange, headingColor, paragraphColor }) {
+  const updateValue = (index, field, val) => {
+    if (!isEditing || !onContentChange) return;
+    const updated = content.values.map((v, i) => i === index ? { ...v, [field]: val } : v);
+    onContentChange('values', updated);
+  };
+
+  return (
+    <div>
+      <div style={{ position: 'relative', marginBottom: 72 }}>
+        <ImageBlock
+          src={content.imageUrl} alt={content.imageAlt}
+          isEditing={isEditing} onContentChange={onContentChange}
+          height={440} borderRadius={styles.borderRadius || '4px'}
+        />
+        <div style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.78) 0%, transparent 100%)',
+          padding: '48px 60px 40px',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
+        }}>
+          <Badge text={content.badge} isEditing={isEditing} onSave={(val) => onContentChange?.('badge', val)} />
+          <CE
+            as="h2" value={content.headline} isEditing={isEditing} inv
+            onSave={(val) => onContentChange?.('headline', val)}
+            style={{
+              fontFamily: "'Libre Baskerville', serif",
+              fontSize: 'clamp(28px, 3.8vw, 52px)',
+              fontWeight: 700, lineHeight: 1.1,
+              color: '#fff', maxWidth: 700, display: 'block',
+            }}
+          />
+        </div>
+      </div>
+
+      <CE
+        as="p" value={content.description} isEditing={isEditing}
+        onSave={(val) => onContentChange?.('description', val)}
+        style={{
+          fontFamily: "'Epilogue', sans-serif",
+          fontSize: 18, lineHeight: 1.8,
+          color: paragraphColor, opacity: 0.75,
+          textAlign: 'center', maxWidth: 680,
+          margin: '0 auto 64px', display: 'block',
+        }}
+      />
+
+      {content.values?.length > 0 && (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${Math.min(content.values.length, 3)}, 1fr)`,
+          gap: 2,
+        }}>
+          {content.values.map((value, index) => {
+            const accent = ACCENTS[index % ACCENTS.length];
+            return (
+              <div
+                key={value.id || index}
+                className="ab-val-item"
+                style={{
+                  background: styles.cardBackgroundColor || '#fafaf8',
+                  padding: '36px 32px', position: 'relative',
+                }}
+              >
+                <div style={{ height: 3, background: accent, marginBottom: 28, pointerEvents: 'none' }} />
+                <div className="ab-icon-wrap" style={{ width: 46, height: 46, borderRadius: '4px', background: `${accent}12`, color: accent, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18 }}>
+                  {getIcon(value.icon, 20)}
+                </div>
+                <CE
+                  as="h4" value={value.title} isEditing={isEditing}
+                  onSave={(val) => updateValue(index, 'title', val)}
+                  style={{ fontFamily: "'Libre Baskerville', serif", fontWeight: 700, fontSize: 16, color: headingColor, marginBottom: 8, display: 'block' }}
+                />
+                <CE
+                  as="p" value={value.description} isEditing={isEditing}
+                  onSave={(val) => updateValue(index, 'description', val)}
+                  style={{ fontFamily: "'Epilogue', sans-serif", fontSize: 13, color: paragraphColor, opacity: 0.7, lineHeight: 1.65, display: 'block' }}
+                />
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── VARIANT: cards ──────────────────────────────────────────────────────────
+function CardsVariant({ content, styles, isEditing, onContentChange, headingColor, paragraphColor }) {
+  const updateValue = (index, field, val) => {
+    if (!isEditing || !onContentChange) return;
+    const updated = content.values.map((v, i) => i === index ? { ...v, [field]: val } : v);
+    onContentChange('values', updated);
+  };
+
+  return (
+    <div>
+      <div style={{ maxWidth: 600, marginBottom: 64 }}>
+        <MicroLabel text="about us" />
+        <Badge text={content.badge} isEditing={isEditing} onSave={(val) => onContentChange?.('badge', val)} />
+        <CE
+          as="h2" value={content.headline} isEditing={isEditing}
+          onSave={(val) => onContentChange?.('headline', val)}
+          style={{
+            fontFamily: "'Libre Baskerville', serif",
+            fontSize: 'clamp(32px, 4vw, 54px)',
+            fontWeight: 700, lineHeight: 1.1,
+            color: headingColor, marginBottom: 18, display: 'block',
+          }}
+        />
+        <CE
+          as="p" value={content.description} isEditing={isEditing}
+          onSave={(val) => onContentChange?.('description', val)}
+          style={{ fontFamily: "'Epilogue', sans-serif", fontSize: 16, lineHeight: 1.8, color: paragraphColor, opacity: 0.75, display: 'block' }}
+        />
+      </div>
+
+      <div style={{
+        display: 'grid', gridTemplateColumns: '3fr 2fr',
+        background: '#0f172a',
+        borderRadius: styles.borderRadius || '4px',
+        overflow: 'hidden', marginBottom: 24, minHeight: 320,
+      }}>
+        <div style={{ position: 'relative' }}>
+          <ImageBlock
+            src={content.imageUrl} alt={content.imageAlt}
+            isEditing={isEditing} onContentChange={onContentChange}
+            height="100%" borderRadius="0"
+          />
+        </div>
+        <div style={{ padding: '48px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ width: 28, height: 2, background: '#D97706', marginBottom: 24, pointerEvents: 'none' }} />
+          <CE
+            as="h3" value={content.storyTitle || 'Our Story'} isEditing={isEditing} inv
+            onSave={(val) => onContentChange?.('storyTitle', val)}
+            style={{
+              fontFamily: "'Libre Baskerville', serif",
+              fontSize: 22, fontWeight: 700,
+              color: '#f8fafc', marginBottom: 16, lineHeight: 1.25, display: 'block',
+            }}
+          />
+          <CE
+            as="p" value={content.storyContent || content.description} isEditing={isEditing} inv
+            onSave={(val) => onContentChange?.('storyContent', val)}
+            style={{ fontFamily: "'Epilogue', sans-serif", fontSize: 14, color: 'rgba(248,250,252,0.65)', lineHeight: 1.75, display: 'block' }}
+          />
+        </div>
+      </div>
+
+      {content.values?.length > 0 && (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${Math.min(content.values.length, 4)}, 1fr)`,
+          gap: 2,
+        }}>
+          {content.values.map((value, index) => {
+            const accent = ACCENTS[index % ACCENTS.length];
+            return (
+              <div
+                key={value.id || index}
+                className="ab-val-item"
+                style={{
+                  background: '#fff', border: '1px solid rgba(0,0,0,0.07)',
+                  padding: '30px 24px', position: 'relative',
+                }}
+              >
+                <div className="ab-icon-wrap" style={{ width: 42, height: 42, borderRadius: 3, background: `${accent}12`, color: accent, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                  {getIcon(value.icon, 18)}
+                </div>
+                <CE
+                  as="h4" value={value.title} isEditing={isEditing}
+                  onSave={(val) => updateValue(index, 'title', val)}
+                  style={{ fontFamily: "'Epilogue', sans-serif", fontWeight: 600, fontSize: 14, color: headingColor, marginBottom: 6, display: 'block' }}
+                />
+                <CE
+                  as="p" value={value.description} isEditing={isEditing}
+                  onSave={(val) => updateValue(index, 'description', val)}
+                  style={{ fontFamily: "'Epilogue', sans-serif", fontSize: 12, color: paragraphColor, opacity: 0.68, lineHeight: 1.65, display: 'block' }}
+                />
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 2, background: accent, pointerEvents: 'none' }} />
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── MAIN EXPORT ─────────────────────────────────────────────────────────────
+export function AboutSection({ section, isSelected, isEditing, onContentChange, isAlternate }) {
+  const { content, styles, variant = 'split' } = section;
+  const { state } = useBuilder();
+  const globalStyles = state.page?.globalStyles || {};
+
+  const background = styles.useGradient
+    ? (styles.backgroundGradient || styles.backgroundColor)
     : (styles.backgroundColor || (isAlternate ? 'var(--theme-bg-alt, #f8fafc)' : 'var(--theme-bg, #ffffff)'));
 
   const headingColor = styles.headingColor || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
   const paragraphColor = styles.paragraphColor || (isAlternate ? 'var(--theme-text-alt, #475569)' : 'var(--theme-text, #475569)');
+  const shared = { content, styles, isEditing, onContentChange, headingColor, paragraphColor };
 
-  const sectionStyle = {
-    background,
-    padding: styles.padding || '100px 0',
-  };
-
-  const getIcon = (iconName) => {
-    const IconComponent = iconMap[iconName];
-    return IconComponent ? <IconComponent className="w-6 h-6" /> : <Target className="w-6 h-6" />;
-  };
-
-  // Split variant - image on one side, content on the other
-  const renderSplit = () => (
-    <div className={`grid lg:grid-cols-2 gap-12 lg:gap-16 items-center ${content.imagePosition === 'right' ? '' : 'lg:grid-flow-dense'}`}>
-      {/* Content Side */}
-      <div className={content.imagePosition === 'right' ? 'order-1' : 'order-2 lg:order-1'}>
-        {content.badge && (
-          <span 
-            className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-6"
-            style={{ 
-              background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-              color: '#ffffff'
-            }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            onBlur={(e) => handleTextEdit('badge', e)}
-          >
-            {content.badge}
-          </span>
-        )}
-        
-        <h2 
-          className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight"
-          style={{ color: headingColor }}
-          contentEditable={isEditing}
-          suppressContentEditableWarning
-          onBlur={(e) => handleTextEdit('headline', e)}
-        >
-          {content.headline}
-        </h2>
-        
-        <p 
-          className="text-lg leading-relaxed mb-8 opacity-80"
-          style={{ color: paragraphColor }}
-          contentEditable={isEditing}
-          suppressContentEditableWarning
-          onBlur={(e) => handleTextEdit('description', e)}
-        >
-          {content.description}
-        </p>
-
-        {/* Values/Features List */}
-        {content.values && content.values.length > 0 && (
-          <div className="space-y-4">
-            {content.values.map((value, index) => (
-              <div 
-                key={value.id || index}
-                className="flex items-start gap-4 group"
-              >
-                <div 
-                  className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110"
-                  style={{ 
-                    background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-                    color: '#ffffff'
-                  }}
-                >
-                  {getIcon(value.icon)}
-                </div>
-                <div>
-                  <h4 
-                    className="font-semibold mb-1"
-                    style={{ color: headingColor }}
-                    contentEditable={isEditing}
-                    suppressContentEditableWarning
-                    onBlur={(e) => {
-                      if (!isEditing || !onContentChange) return;
-                      const updated = content.values.map((v, i) =>
-                        i === index ? { ...v, title: e.currentTarget.textContent } : v
-                      );
-                      onContentChange('values', updated);
-                    }}
-                  >
-                    {value.title}
-                  </h4>
-                  <p 
-                    className="text-sm opacity-70"
-                    style={{ color: paragraphColor }}
-                    contentEditable={isEditing}
-                    suppressContentEditableWarning
-                    onBlur={(e) => {
-                      if (!isEditing || !onContentChange) return;
-                      const updated = content.values.map((v, i) =>
-                        i === index ? { ...v, description: e.currentTarget.textContent } : v
-                      );
-                      onContentChange('values', updated);
-                    }}
-                  >
-                    {value.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-      </div>
-
-      {/* Image Side */}
-      <div className={`relative ${content.imagePosition === 'right' ? 'order-2' : 'order-1 lg:order-2'}`}>
-        <div
-          className={`relative rounded-2xl overflow-hidden shadow-2xl ${isEditing ? 'cursor-pointer' : ''}`}
-          onClick={() => {
-            if (!isEditing || !onContentChange) return;
-            const url = window.prompt('Enter image URL', content.imageUrl || 'https://');
-            if (url !== null) onContentChange('imageUrl', url);
-          }}
-          title={isEditing ? 'Click to change image URL' : undefined}
-        >
-          <img 
-            src={content.imageUrl}
-            alt={content.imageAlt || 'About us'}
-            className="w-full h-auto object-cover"
-          />
-          {/* Decorative gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent opacity-60" />
-        </div>
-        
-        {/* Decorative elements */}
-        <div 
-          className="absolute -top-6 -right-6 w-24 h-24 rounded-2xl -z-10"
-          style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)' }}
-        />
-        <div 
-          className="absolute -bottom-6 -left-6 w-32 h-32 rounded-full -z-10 opacity-20"
-          style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)' }}
-        />
-      </div>
-    </div>
-  );
-
-  // Centered variant - image above content
-  const renderCentered = () => (
-    <div className="max-w-4xl mx-auto text-center">
-      {/* Image */}
-      <div
-        className={`relative mb-12 rounded-2xl overflow-hidden shadow-2xl ${isEditing ? 'cursor-pointer' : ''}`}
-        onClick={() => {
-          if (!isEditing || !onContentChange) return;
-          const url = window.prompt('Enter image URL', content.imageUrl || 'https://');
-          if (url !== null) onContentChange('imageUrl', url);
-        }}
-        title={isEditing ? 'Click to change image URL' : undefined}
-      >
-        <img 
-          src={content.imageUrl}
-          alt={content.imageAlt || 'About us'}
-          className="w-full h-[400px] object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-      </div>
-
-      {content.badge && (
-        <span 
-          className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-6"
-          style={{ 
-            background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-            color: '#ffffff'
-          }}
-          contentEditable={isEditing}
-          suppressContentEditableWarning
-          onBlur={(e) => handleTextEdit('badge', e)}
-        >
-          {content.badge}
-        </span>
-      )}
-      
-      <h2 
-        className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
-        style={{ color: headingColor }}
-        contentEditable={isEditing}
-        suppressContentEditableWarning
-        onBlur={(e) => handleTextEdit('headline', e)}
-      >
-        {content.headline}
-      </h2>
-      
-      <p 
-        className="text-lg leading-relaxed mb-10 opacity-80 max-w-3xl mx-auto"
-        style={{ color: paragraphColor }}
-        contentEditable={isEditing}
-        suppressContentEditableWarning
-        onBlur={(e) => handleTextEdit('description', e)}
-      >
-        {content.description}
-      </p>
-
-      {/* Values Grid */}
-      {content.values && content.values.length > 0 && (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-          {content.values.map((value, index) => (
-            <div 
-              key={value.id || index}
-              className="p-6 rounded-2xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-              style={{ background: '#f8fafc' }}
-            >
-              <div 
-                className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4"
-                style={{ 
-                  background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-                  color: '#ffffff'
-                }}
-              >
-                {getIcon(value.icon)}
-              </div>
-              <h4 
-                className="font-semibold mb-2"
-                style={{ color: headingColor }}
-                contentEditable={isEditing}
-                suppressContentEditableWarning
-                onBlur={(e) => {
-                  if (!isEditing || !onContentChange) return;
-                  const updated = content.values.map((v, i) =>
-                    i === index ? { ...v, title: e.currentTarget.textContent } : v
-                  );
-                  onContentChange('values', updated);
-                }}
-              >
-                {value.title}
-              </h4>
-              <p 
-                className="text-sm opacity-70"
-                style={{ color: paragraphColor }}
-                contentEditable={isEditing}
-                suppressContentEditableWarning
-                onBlur={(e) => {
-                  if (!isEditing || !onContentChange) return;
-                  const updated = content.values.map((v, i) =>
-                    i === index ? { ...v, description: e.currentTarget.textContent } : v
-                  );
-                  onContentChange('values', updated);
-                }}
-              >
-                {value.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-
-    </div>
-  );
-
-  // Cards variant - story cards layout
-  const renderCards = () => (
-    <div>
-      {/* Header */}
-      <div className="text-center max-w-3xl mx-auto mb-16">
-        {content.badge && (
-          <span 
-            className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-6"
-            style={{ 
-              background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-              color: '#ffffff'
-            }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            onBlur={(e) => handleTextEdit('badge', e)}
-          >
-            {content.badge}
-          </span>
-        )}
-        
-        <h2 
-          className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
-          style={{ color: headingColor }}
-          contentEditable={isEditing}
-          suppressContentEditableWarning
-          onBlur={(e) => handleTextEdit('headline', e)}
-        >
-          {content.headline}
-        </h2>
-        
-        <p 
-          className="text-lg opacity-80"
-          style={{ color: paragraphColor }}
-          contentEditable={isEditing}
-          suppressContentEditableWarning
-          onBlur={(e) => handleTextEdit('description', e)}
-        >
-          {content.description}
-        </p>
-      </div>
-
-      {/* Main Content Card with Image */}
-      <div className="grid lg:grid-cols-5 gap-8 mb-12">
-        <div className="lg:col-span-3 rounded-2xl overflow-hidden shadow-xl">
-          <img 
-            src={content.imageUrl}
-            alt={content.imageAlt || 'About us'}
-            className="w-full h-full object-cover min-h-[300px]"
-          />
-        </div>
-        
-        <div className="lg:col-span-2 flex flex-col justify-center">
-          <h3 
-            className="text-2xl font-bold mb-4"
-            style={{ color: headingColor }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            onBlur={(e) => handleTextEdit('storyTitle', e)}
-          >
-            {content.storyTitle || 'Our Story'}
-          </h3>
-          <p 
-            className="opacity-80 leading-relaxed"
-            style={{ color: paragraphColor }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            onBlur={(e) => handleTextEdit('storyContent', e)}
-          >
-            {content.storyContent || content.description}
-          </p>
-        </div>
-      </div>
-
-      {/* Values Cards */}
-      {content.values && content.values.length > 0 && (
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {content.values.map((value, index) => (
-            <div 
-              key={value.id || index}
-              className="p-6 rounded-2xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border border-gray-100"
-              style={{ background: '#ffffff' }}
-            >
-              <div 
-                className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
-                style={{ 
-                  background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-                  color: '#ffffff'
-                }}
-              >
-                {getIcon(value.icon)}
-              </div>
-              <h4 
-                className="font-semibold mb-2"
-                style={{ color: headingColor }}
-                contentEditable={isEditing}
-                suppressContentEditableWarning
-                onBlur={(e) => {
-                  if (!isEditing || !onContentChange) return;
-                  const updated = content.values.map((v, i) =>
-                    i === index ? { ...v, title: e.currentTarget.textContent } : v
-                  );
-                  onContentChange('values', updated);
-                }}
-              >
-                {value.title}
-              </h4>
-              <p 
-                className="text-sm opacity-70"
-                style={{ color: paragraphColor }}
-                contentEditable={isEditing}
-                suppressContentEditableWarning
-                onBlur={(e) => {
-                  if (!isEditing || !onContentChange) return;
-                  const updated = content.values.map((v, i) =>
-                    i === index ? { ...v, description: e.currentTarget.textContent } : v
-                  );
-                  onContentChange('values', updated);
-                }}
-              >
-                {value.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  const globalClasses = `
+    ${globalStyles.glassmorphism ? 'glass-effect' : ''}
+  `.trim();
 
   return (
-    <section 
-      className={`relative transition-all duration-300 ${
-        isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''
-      }`}
-      style={sectionStyle}
+    <section
+      style={{
+        background,
+        padding: styles.padding || '100px 0',
+        fontFamily: "'Epilogue', sans-serif",
+        position: 'relative',
+        outline: isSelected ? '2px solid #D97706' : 'none',
+        outlineOffset: isSelected ? '3px' : '0',
+        transition: 'outline 0.2s ease',
+      }}
+      className={globalClasses}
     >
-      <div className="container mx-auto px-6">
-        {variant === 'centered' ? renderCentered() : variant === 'cards' ? renderCards() : renderSplit()}
+      <InjectStyles />
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        backgroundImage: 'radial-gradient(ellipse at 85% 15%, rgba(217,119,6,0.05) 0%, transparent 55%), radial-gradient(ellipse at 10% 85%, rgba(8,145,178,0.04) 0%, transparent 50%)',
+      }} />
+      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px', position: 'relative' }}>
+        {variant === 'centered' && <CenteredVariant {...shared} />}
+        {variant === 'cards'    && <CardsVariant    {...shared} />}
+        {variant === 'split'    && <SplitVariant    {...shared} />}
+        {!['centered','cards','split'].includes(variant) && <SplitVariant {...shared} />}
       </div>
     </section>
   );
 }
-

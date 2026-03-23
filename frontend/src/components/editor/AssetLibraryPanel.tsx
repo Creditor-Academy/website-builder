@@ -15,6 +15,7 @@ export function AssetLibraryPanel() {
     const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
     const [urlInput, setUrlInput] = useState('');
     const [urlName, setUrlName] = useState('');
+    const [copiedId, setCopiedId] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const filteredMedia = assets.filter(item =>
@@ -52,6 +53,12 @@ export function AssetLibraryPanel() {
     const copyToClipboard = (url: string) => {
         navigator.clipboard.writeText(url);
         // Could add a toast notification here
+    };
+
+    const handleCopy = (id: string, url: string) => {
+        copyToClipboard(url);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
     };
 
     return (
@@ -138,9 +145,9 @@ export function AssetLibraryPanel() {
                                                     size="sm" 
                                                     variant="secondary" 
                                                     className="h-7 text-[10px] w-full font-bold shadow-lg"
-                                                    onClick={() => copyToClipboard(item.url)}
+                                                    onClick={() => handleCopy(item.id, item.url)}
                                                 >
-                                                    Copy Link
+                                                    {copiedId === item.id ? 'Copied!' : 'Copy Link'}
                                                 </Button>
                                                 <Button 
                                                     size="sm" 
@@ -177,7 +184,9 @@ export function AssetLibraryPanel() {
                                         >
                                             <img src={item.url} alt={item.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-2">
-                                                <Button size="sm" variant="secondary" className="h-7 text-[10px] w-full font-bold shadow-lg" onClick={() => copyToClipboard(item.url)}>Copy Link</Button>
+                                                <Button size="sm" variant="secondary" className="h-7 text-[10px] w-full font-bold shadow-lg" onClick={() => handleCopy(item.id, item.url)}>
+                                                    {copiedId === item.id ? 'Copied!' : 'Copy Link'}
+                                                </Button>
                                                 <Button size="sm" variant="destructive" className="h-7 text-[10px] w-full font-bold shadow-lg bg-red-500 hover:bg-red-600 border-none" onClick={() => deleteAsset(item.id)}>Delete</Button>
                                             </div>
                                             <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
@@ -208,7 +217,9 @@ export function AssetLibraryPanel() {
                                                 <Video className="w-6 h-6 text-white/50" />
                                             </div>
                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-2">
-                                                <Button size="sm" variant="secondary" className="h-7 text-[10px] w-full font-bold shadow-lg" onClick={() => copyToClipboard(item.url)}>Copy Link</Button>
+                                                <Button size="sm" variant="secondary" className="h-7 text-[10px] w-full font-bold shadow-lg" onClick={() => handleCopy(item.id, item.url)}>
+                                                    {copiedId === item.id ? 'Copied!' : 'Copy Link'}
+                                                </Button>
                                                 <Button size="sm" variant="destructive" className="h-7 text-[10px] w-full font-bold shadow-lg bg-red-500 hover:bg-red-600 border-none" onClick={() => deleteAsset(item.id)}>Delete</Button>
                                             </div>
                                             <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 via-black/40 to-transparent">

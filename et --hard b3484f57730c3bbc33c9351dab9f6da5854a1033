@@ -1,0 +1,491 @@
+[33mcommit ff9fbb3d65c21bf0e47096d72a21238b3d2ff7f6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mamaan[m[33m)[m
+Merge: b3484f5 4224f1b
+Author: amaan-lms <amaan.javed@lmsathena.com>
+Date:   Thu Mar 12 15:08:23 2026 +0530
+
+    Merge branch 'dev' of https://github.com/DevTech-IT-Team/website-builder into amaan
+
+[33mcommit b3484f57730c3bbc33c9351dab9f6da5854a1033[m
+Author: amaan-lms <amaan.javed@lmsathena.com>
+Date:   Thu Mar 12 15:07:45 2026 +0530
+
+    add layouts sectins
+
+[33mcommit f36cb94ff684d849ed9a5d97ff8a1d88a3278204[m[33m ([m[1;31morigin/amaan[m[33m)[m
+Author: amaan-lms <amaan.javed@lmsathena.com>
+Date:   Wed Mar 11 17:20:15 2026 +0530
+
+    edesign the Gallery and Blog section
+            •       Add layout variations for them.
+            •       Add custom content options.
+            •       Perform testing after implementation.
+            2.      Redesign the Contact Page
+            •       Add a custom new field functionality.
+            •       Users should be able to add new fields to the page.
+            3.      Redesign the Navbar
+            4.      Redesign the Pricing, Logo Cloud, and FAQ sections
+            5.      Add more sections to the Website Builder
+            6.      Add more settings to the Navbar
+            •       Allow users to add or delete links
+            •       Add edit button CSS options
+            •       Allow manual addition of social menu/icons
+
+[33mcommit 4224f1b011c515851b3af469d58490abea6f6255[m[33m ([m[1;31morigin/dev[m[33m)[m
+Merge: 9da3237 f6230bf
+Author: PrernaCreditor <prerna@creditoracademy.com>
+Date:   Wed Mar 11 15:45:59 2026 +0530
+
+    Merge branch 'prerna' of https://github.com/DevTech-IT-Team/website-builder into dev
+
+[33mcommit f6230bfa2205498523766251cc5c6b522276cb95[m[33m ([m[1;31morigin/prerna[m[33m)[m
+Author: PrernaCreditor <prerna@creditoracademy.com>
+Date:   Tue Mar 10 17:51:31 2026 +0530
+
+    merged niharika's  code
+
+[33mcommit d7eecef6f6248d4a4f382f0b0ba49661f498a81e[m
+Merge: c6c91b0 d4c838c
+Author: PrernaCreditor <prerna@creditoracademy.com>
+Date:   Tue Mar 10 17:49:15 2026 +0530
+
+    Merge branch 'niharika-new' of https://github.com/DevTech-IT-Team/website-builder into prerna
+
+[33mcommit 9a2b67b5ab7533404241505391699c25f9c14b7d[m
+Author: amaan-lms <amaan.javed@lmsathena.com>
+Date:   Tue Mar 10 17:29:14 2026 +0530
+
+    redesign stats about testimonial team ssctions fix errors
+
+[33mcommit d4c838c70f0df75d23e72235bae1d1b130bebe49[m
+Author: Niharika <niharika.rai@lmsathena.com>
+Date:   Tue Mar 10 16:19:28 2026 +0530
+
+    ok
+
+[33mcommit 9da32379f14bf3cd3f6e870ee537648498a3ab46[m
+Merge: a47157e c6c91b0
+Author: Prerna Mishra <prerna@creditoracademy.com>
+Date:   Tue Mar 10 15:48:26 2026 +0530
+
+    Merge pull request #4 from DevTech-IT-Team/prerna
+    
+    Prerna
+
+[33mcommit c6c91b085f28bc80e53b330f67b11d547d6b72e1[m
+Author: PrernaCreditor <prerna@creditoracademy.com>
+Date:   Tue Mar 10 15:48:20 2026 +0530
+
+    Ui updates in landing page,login page and template,assets  setting also
+
+[33mcommit 61c67b015a66a5fe80eab6dae89878a795815b2f[m
+Author: PrernaCreditor <prerna@creditoracademy.com>
+Date:   Tue Mar 10 12:51:06 2026 +0530
+
+    pull from dev
+
+[33mcommit 513a9f6515e7104e23cc677346b9c88150cb69d3[m
+Merge: 1b5fa5d a47157e
+Author: PrernaCreditor <prerna@creditoracademy.com>
+Date:   Tue Mar 10 12:49:31 2026 +0530
+
+    Merge branch 'dev' of https://github.com/DevTech-IT-Team/website-builder into prerna
+
+[33mcommit a47157e991c1de072a8f22ae40414b40a86669fd[m
+Merge: d003a91 e8a333b
+Author: Prerna Mishra <prerna@creditoracademy.com>
+Date:   Tue Mar 10 12:27:56 2026 +0530
+
+    Merge pull request #3 from DevTech-IT-Team/main
+    
+    Merge pull request #1 from DevTech-IT-Team/dev
+
+[33mcommit d003a91066b06b5bce5b0ac232290b0db17372c1[m
+Author: PrernaCreditor <prerna@creditoracademy.com>
+Date:   Tue Mar 10 12:27:47 2026 +0530
+
+    merged niharika's code tilll 4 template cards
+
+[33mcommit 9fb1d32aaeb3b680ce64e896d1a5e974757462a0[m
+Merge: 5531cc4 c5fa447
+Author: PrernaCreditor <prerna@creditoracademy.com>
+Date:   Tue Mar 10 12:08:01 2026 +0530
+
+    Merge branch 'niharika-new' of https://github.com/DevTech-IT-Team/website-builder into dev
+
+[33mcommit e8a333b1c158cc1036cf23184d714abbc123d8f3[m[33m ([m[1;31morigin/sakshi[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Merge: 26bf18d 5531cc4
+Author: Prerna Mishra <prerna@creditoracademy.com>
+Date:   Mon Mar 9 17:35:10 2026 +0530
+
+    Merge pull request #1 from DevTech-IT-Team/dev
+    
+    Dev
+
+[33mcommit 1b5fa5d600e4d02e603036c93b8141720dd6e793[m
+Author: PrernaCreditor <prerna@creditoracademy.com>
+Date:   Mon Mar 9 17:34:16 2026 +0530
+
+    added logout button
+
+[33mcommit c5fa447dea1ec9ab82ffbdd0bccc3432c015fdbe[m
+Author: Niharika <niharika.rai@lmsathena.com>
+Date:   Mon Mar 9 17:28:36 2026 +0530
+
+    ok
+
+[33mcommit 16ce65ce472cdf80b88838e2bd8280ac44f15422[m
+Author: PrernaCreditor <prerna@creditoracademy.com>
+Date:   Mon Mar 9 17:22:22 2026 +0530
+
+    added publish modal in button
+
+[33mcommit 87fdb1164aba4eb23024a45e0d5a5dc6bcba70b9[m
+Merge: 081ac09 5531cc4
+Author: amaan-lms <amaan.javed@lmsathena.com>
+Date:   Mon Mar 9 15:43:47 2026 +0530
+
+    Merge branch 'dev' of https://github.com/DevTech-IT-Team/website-builder into amaan
+
+[33mcommit 081ac09b35174dd584da8242422bd5d0976d0307[m
+Author: amaan-lms <amaan.javed@lmsathena.com>
+Date:   Mon Mar 9 15:42:03 2026 +0530
+
+    text color picker
+
+[33mcommit 7671d83bb92dabf9071f65404d43d8d4c7f19be1[m
+Author: amaan-lms <amaan.javed@lmsathena.com>
+Date:   Mon Mar 9 15:41:37 2026 +0530
+
+    add a new feature text colorpicker
+
+[33mcommit 5531cc4279f534076b545c88b185cf86b5bcf912[m
+Merge: bc1a2c3 9bf26f3
+Author: PrernaCreditor <prerna@creditoracademy.com>
+Date:   Mon Mar 9 15:07:19 2026 +0530
+
+    Merge branch 'amaan' of https://github.com/DevTech-IT-Team/website-builder into dev
+
+[33mcommit 9bf26f33ebd4539fab979606962bee2df3a7d8cd[m
+Author: amaan-lms <amaan.javed@lmsathena.com>
+Date:   Mon Mar 9 12:26:14 2026 +0530
+
+    redesign the Hero, Features, CTA, Pricing components
+    
+    Add multiple layout variations for each component
+    
+    Improve alignment, spacing, and responsive behavior
+    
+    Ensure layouts render properly inside builder canvas
+    
+    add new feautre where user can able to chnge any text collor
+
+[33mcommit bc1a2c3c13657bcdfd759f29d12862e1ee2a798f[m[33m ([m[1;31morigin/anmol[m[33m)[m
+Author: Anmol Khurana <anmol.khurana@lmsathena.com>
+Date:   Sat Mar 7 17:30:27 2026 +0530
+
+    Website module created and further enhancements in existing code
+
+[33mcommit e0df96200b07a9948e036573620df8dd98cd68cc[m
+Author: Anmol Khurana <anmol.khurana@lmsathena.com>
+Date:   Thu Mar 5 17:35:17 2026 +0530
+
+    package-lock.json reinitialized
+
+[33mcommit 67ac7277a6752c045906b9fddf113c84172ec0fa[m
+Author: Anmol Khurana <anmol.khurana@lmsathena.com>
+Date:   Thu Mar 5 17:11:15 2026 +0530
+
+    Converted all backend code into Typescript
+
+[33mcommit 1b092c85543281e662700f978f709bf068b5d705[m
+Author: amaan-lms <amaan.javed@lmsathena.com>
+Date:   Thu Mar 5 13:53:18 2026 +0530
+
+    redesign the left side add elements section and add new function where user can able to managee the border radius of any cards and buttions
+
+[33mcommit bc1965d4c412ea2fa7b951cdfdf31af2b389cff0[m
+Author: Anmol Khurana <anmol.khurana@lmsathena.com>
+Date:   Thu Mar 5 11:34:12 2026 +0530
+
+    Project Backend Initialized, Authentication and User module completed
+
+[33mcommit 6c4bd30fc0c89171d62b568bca562c99578751a3[m
+Author: amaan-lms <amaan.javed@lmsathena.com>
+Date:   Mon Mar 2 17:16:23 2026 +0530
+
+    left pannel layers components padding fix / reove individual delete copy or visible buttion add three dots to open them.. redesign or inhance the layout of cards from add elements section
+
+[33mcommit 26bf18da4514063ebba8ec6ce5529a369c4b05fa[m[33m ([m[1;31morigin/development[m[33m, [m[1;32mmain[m[33m)[m
+Author: PrernaCreditor <prerna@creditoracademy.com>
+Date:   Sat Feb 28 15:20:57 2026 +0530
+
+    Migrated code in frontend folder
+
+[33mcommit fe51fa3746dd9be51c37cce1fe37c5dd935f9121[m
+Author: PrernaCreditor <prerna@creditoracademy.com>
+Date:   Wed Feb 25 16:57:02 2026 +0530
+
+    ui updates
+
+[33mcommit 7ad586a7a967a0b4b4335ddbce4b544c8dfedbce[m
+Author: PrernaCreditor <prerna@creditoracademy.com>
+Date:   Wed Feb 25 12:31:38 2026 +0530
+
+    chnges
+
+[33mcommit 53c64f7376fd47f1ba3a73d0aa598362eab7acca[m
+Merge: 2f592e5 106cefa
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Wed Jan 7 13:51:04 2026 +0530
+
+    Merge pull request #10 from amaan-sys/amaan
+    
+    theme changes
+
+[33mcommit 106cefac938da1bf4268abd4cd5355922a72e9df[m
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Wed Jan 7 13:50:22 2026 +0530
+
+    theme changes
+
+[33mcommit 2f592e5fc1d977037df6eed29411f72873a01050[m
+Merge: 4afd81a 6d4aa98
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Tue Jan 6 17:20:13 2026 +0530
+
+    Merge pull request #9 from amaan-sys/amaan
+    
+    imporve left panner and give option of hiding left and right pannel t…
+
+[33mcommit 6d4aa9800df8a4ef59fd611e3d92a4f58e035267[m
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Tue Jan 6 17:19:43 2026 +0530
+
+    imporve left panner and give option of hiding left and right pannel to the user
+
+[33mcommit 4afd81a30a95d4e660814176373841fbc9298ac3[m
+Merge: 3a76362 630f0e5
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Tue Jan 6 09:43:36 2026 +0530
+
+    Merge pull request #8 from amaan-sys/amaan
+    
+    fix preview buttion
+
+[33mcommit 630f0e59351b0e7ac943a77d74bfc987e5553141[m
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Tue Jan 6 09:42:46 2026 +0530
+
+    fix preview buttion
+
+[33mcommit 3a763623fb0acd0499492732b4bdeef8f11e0d30[m
+Merge: b03bc6c dcb1d0e
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Sat Jan 3 14:51:48 2026 +0530
+
+    Merge pull request #7 from amaan-sys/amaan
+    
+    add privacy policy and terms page
+
+[33mcommit dcb1d0e92f2358e45e8f4c0f2fe22d4dc3ead32b[m
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Sat Jan 3 14:51:12 2026 +0530
+
+    add privacy policy and terms page
+
+[33mcommit b03bc6ca3d58700eb7f83d16e58c3497620b20dc[m
+Merge: e276ff6 7df36ff
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Sat Jan 3 12:02:02 2026 +0530
+
+    Merge pull request #6 from amaan-sys/amaan
+    
+    Amaan
+
+[33mcommit 7df36ffe2067b27c4fef9ea830c48e9bfad5c522[m
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Sat Jan 3 12:01:20 2026 +0530
+
+    user can now able to edit all the content and buttion bg and text
+
+[33mcommit f25f418e4c74761fd9eee54577a38f54168944f9[m
+Merge: da015b0 b14f9c3
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Sat Jan 3 11:05:43 2026 +0530
+
+    Merge branch 'amaan' of https://github.com/amaan-sys/website_builder_canvas-craft into amaan
+
+[33mcommit da015b00c128a2efcd968c5924060e48ea7e404c[m
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Sat Jan 3 11:05:13 2026 +0530
+
+    new folder new folder
+
+[33mcommit e276ff647935c6e2d44bc3bb814de212096607d0[m
+Merge: 1a31092 b14f9c3
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Sat Jan 3 11:01:24 2026 +0530
+
+    Merge pull request #5 from amaan-sys/amaan
+    
+    Amaan
+
+[33mcommit b14f9c3f20193a4962bffe59fc751b0e6680bdc1[m
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Sat Jan 3 10:58:07 2026 +0530
+
+    neww folder
+
+[33mcommit fe4738ceb5c286b400e3f8a6e3817e4c28648641[m
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Fri Jan 2 16:15:46 2026 +0530
+
+    components bg can be editable and fix the layout
+
+[33mcommit 1a31092683b3e8c4e92314bf488c2681ec57e686[m
+Merge: 19f70d8 c1a11a4
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Wed Dec 31 17:56:14 2025 +0530
+
+    Merge pull request #4 from amaan-sys/amaan
+    
+    nav link fix
+
+[33mcommit c1a11a489c205dfafc7b35f130ee4d7970926705[m
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Wed Dec 31 17:54:58 2025 +0530
+
+    nav link fix
+
+[33mcommit 19f70d8d4e6ae4c5b802386bdbfed89955c32d22[m
+Merge: bd5e895 80c80da
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Tue Dec 30 16:44:16 2025 +0530
+
+    Merge pull request #3 from amaan-sys/amaan
+    
+    fixing main canvas , padding , remove favicon
+
+[33mcommit 80c80da226f430cc336886aa1e2f482b01acf34f[m
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Tue Dec 30 16:42:37 2025 +0530
+
+    fixing main canvas , padding , remove favicon
+
+[33mcommit bd5e895e3a3923aa38bf2148022ee119ec1a27da[m
+Merge: d6dceca 3dc303a
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Tue Dec 30 09:57:28 2025 +0530
+
+    Merge pull request #2 from amaan-sys/amaan
+    
+    newwww
+
+[33mcommit 3dc303ac05a9f34a22e1abe3d154e7f0caec3dd9[m
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Tue Dec 30 09:55:29 2025 +0530
+
+    fixing ui
+
+[33mcommit b9660a8e83e842a912144b4f5eb5436a05b29731[m
+Merge: 9939505 d6dceca
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Sat Dec 27 15:01:02 2025 +0530
+
+    Merge branch 'main' of https://github.com/amaan-sys/website_builder_canvas-craft into amaan
+
+[33mcommit d6dceca4fc9470732d56541ea1aa73d7624ab343[m
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Sat Dec 27 14:55:55 2025 +0530
+
+    new jsx file css fixed
+
+[33mcommit bd334f47023cec776889147e712b62c80fd43fb0[m
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Sat Dec 27 11:12:39 2025 +0530
+
+    Refactor NavbarPreview to include onUpdate prop
+
+[33mcommit 99395051811d91cc70cc131c327e3cf45855467d[m
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Sat Dec 27 11:07:14 2025 +0530
+
+    lllll
+
+[33mcommit a3a6ed6e6f379babbd8c1d4fad05b097b5379f5e[m
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Sat Dec 27 11:04:39 2025 +0530
+
+    newwww
+
+[33mcommit f41b4ba523fb122624a54bf5606f4fcb804ef947[m
+Merge: e1c6907 42281fe
+Author: amaan-sys <amaan@creditoracademy.com>
+Date:   Fri Dec 26 12:01:04 2025 +0530
+
+    Merge pull request #1 from amaan-sys/sakshi
+    
+    tsx
+
+[33mcommit 42281fed2c7b90035a8c359bdfbd5187f13437fc[m
+Author: sakshi_er <sakshi.anand@lmsathena.com>
+Date:   Fri Dec 26 11:57:01 2025 +0530
+
+    tsx
+
+[33mcommit e1c6907c0a64f1340fd99ec3332b4bbef6993123[m
+Merge: 089ea22 86bfaa5
+Author: gpt-engineer-app[bot] <159125892+gpt-engineer-app[bot]@users.noreply.github.com>
+Date:   Fri Dec 26 06:18:03 2025 +0000
+
+    Convert project to JS JSX
+    
+    Switch project from TypeScript to JavaScript/JSX; remove TS files, adjust imports, and implement missing JS hooks for UI components to run without TS. Update HTML to load main.jsx and replace TS-specific modules with JS equivalents.
+    
+    X-Lovable-Edit-ID: edt-2cbc9966-fb5d-44a6-a936-fbc292a77c01
+
+[33mcommit 86bfaa51bac6c3f67e6f90da9211ff7810ea9ce4[m
+Author: gpt-engineer-app[bot] <159125892+gpt-engineer-app[bot]@users.noreply.github.com>
+Date:   Fri Dec 26 06:17:58 2025 +0000
+
+    Changes
+
+[33mcommit 089ea228247d2383a22767c4eb46497f1f5d726e[m
+Merge: 7dafe52 2fb08f6
+Author: gpt-engineer-app[bot] <159125892+gpt-engineer-app[bot]@users.noreply.github.com>
+Date:   Fri Dec 26 06:16:28 2025 +0000
+
+    Convert project to JSX/JS
+    
+    Transforms the codebase from TypeScript to JavaScript/JSX, including:
+    - Replacing TS/TSX files with JS/JSX equivalents
+    - Stripping type annotations and interfaces
+    - Implementing JS versions of core, section, editor, preview, and canvas components
+    - Adding JS utilities and adjusted simple data modules
+    - Providing JSX-friendly versions of SectionRenderer, NavbarPreview, FooterPreview, SectionItem, SectionsList, PropertiesPanel, EditorToolbar, CanvasPreview, WebsiteEditor, and Page/index wiring
+    - Updating minimal entry points to work without TypeScript
+    
+    X-Lovable-Edit-ID: edt-168762e6-2a24-4926-9d4d-047b1e81c0ba
+
+[33mcommit 2fb08f66849fbd26b5a3380a506a1a1d180dc989[m
+Author: gpt-engineer-app[bot] <159125892+gpt-engineer-app[bot]@users.noreply.github.com>
+Date:   Fri Dec 26 06:16:28 2025 +0000
+
+    Changes
+
+[33mcommit 7dafe52ebb355648197f9a6a84cbe25134b5999a[m
+Merge: 0d94841 3565fb2
+Author: gpt-engineer-app[bot] <159125892+gpt-engineer-app[bot]@users.noreply.github.com>
+Date:   Wed Dec 24 08:49:26 2025 +0000
+
+    Add hero layout variants
+    
+    Introduce multiple section variant options and wire up variant switching in UI:
+    - Extend types to support section.variant and add Hero variants (split, centered, video, minimal, gradient)
+    - Create sectionVariants data and helper utilities
+    - Update HeroSection to render multiple variants
+    - Add variant selector to PropertiesPanel (Layout Variant) with live preview
+    - Update default page data to include new variant-driven styles
+    - Ensure new variants are editable via content and styling panels
+    
+    X-Lovable-Edit-ID: edt-c485b24b-cee7-477e-a4a2-50b4bbdec397
