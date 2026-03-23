@@ -99,23 +99,23 @@ const ELEMENT_CATEGORIES = [
       { type: "cta", name: "Call to Action", icon: MousePointer2, description: "Action-oriented CTA section", create: createDefaultCTASection },
       { type: "pricing", name: "Pricing", icon: DollarSign, description: "Pricing tiers & plans", create: createDefaultPricingSection },
       { type: "testimonials", name: "Testimonials", icon: Quote, description: "Customer reviews", create: createDefaultTestimonialsSection },
-      { type: "casestudies", name: "Case Studies", icon: BarChart2, description: "Display client success stories", create: createDefaultCaseStudiesSection },
+      // { type: "casestudies", name: "Case Studies", icon: BarChart2, description: "Display client success stories", create: createDefaultCaseStudiesSection },
       { type: "contact", name: "Contact", icon: Mail, description: "Contact form & information", create: createDefaultContactSection },
       { type: "faq", name: "FAQ", icon: HelpCircle, description: "Frequently asked questions", create: createDefaultFAQSection },
     ]
   },
-  {
-    name: "Full Templates",
-    color: "from-indigo-500/10 to-indigo-400/5",
-    borderColor: "border-indigo-200/50",
-    badgeColor: "bg-indigo-50 text-indigo-700",
-    items: [
-      { type: "business", name: "Business", icon: Building2, description: "Professional business site template", create: getBusinessPage, isFullPage: true },
-      { type: "portfolio", name: "Portfolio", icon: Layout, description: "Clean portfolio template", create: getPortfolioPage, isFullPage: true },
-      { type: "ecommerce", name: "Ecommerce", icon: ShoppingBag, description: "Modern shop template", create: getEcommercePage, isFullPage: true },
-      { type: "consultant", name: "Consultant", icon: Users, description: "Personal consultant template", create: getConsultantPage, isFullPage: true },
-    ]
-  },
+  // {
+  //   name: "Full Templates",
+  //   color: "from-indigo-500/10 to-indigo-400/5",
+  //   borderColor: "border-indigo-200/50",
+  //   badgeColor: "bg-indigo-50 text-indigo-700",
+  //   items: [
+  //     { type: "business", name: "Business", icon: Building2, description: "Professional business site template", create: getBusinessPage, isFullPage: true },
+  //     { type: "portfolio", name: "Portfolio", icon: Layout, description: "Clean portfolio template", create: getPortfolioPage, isFullPage: true },
+  //     { type: "ecommerce", name: "Ecommerce", icon: ShoppingBag, description: "Modern shop template", create: getEcommercePage, isFullPage: true },
+  //     { type: "consultant", name: "Consultant", icon: Users, description: "Personal consultant template", create: getConsultantPage, isFullPage: true },
+  //   ]
+  // },
   {
     name: "Media & Info",
     color: "from-purple-500/10 to-purple-400/5",

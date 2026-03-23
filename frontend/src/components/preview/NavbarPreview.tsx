@@ -132,8 +132,9 @@ function buildPage(slug, label) {
 
 export function NavbarPreview({ config, isEditing, onUpdate }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { pages, setActivePage, updatePageName, createPage, selectSection } = useBuilder();
+  const { pages, setActivePage, updatePageName, createPage, selectSection, state } = useBuilder();
   const navigate = useNavigate();
+  const { editor } = state;
 
   const navBg =
     config.styles.backgroundColor && config.styles.backgroundColor !== 'transparent'
@@ -142,11 +143,32 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
 
   const tc = config.styles.textColor || 'var(--theme-text, #0f172a)';
 
-  // ── Original handleNavClick logic, unchanged ──────────────────────────
+  // ── Enhanced handleNavClick logic with preview mode support ──────────────────────────
   const handleNavClick = (e, link) => {
     // Scroll to top on any navigation click
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
+    // If in preview mode, handle navigation differently
+    if (editor.previewMode) {
+      const targetPage = pages.find((p) => p.slug === link.href);
+      if (targetPage) {
+        e.preventDefault();
+        setActivePage(targetPage.id);
+        setMobileMenuOpen(false);
+        return;
+      }
+      // If page doesn't exist, create it in preview mode
+      if (link.href && link.href.startsWith('/')) {
+        e.preventDefault();
+        createPage(buildPage(link.href, link.label));
+        setMobileMenuOpen(false);
+        return;
+      }
+      // For external links, allow default behavior
+      return;
+    }
+    
+    // Original editing mode logic
     if (isEditing) {
       const targetPage = pages.find((p) => p.slug === link.href);
       if (targetPage) {
