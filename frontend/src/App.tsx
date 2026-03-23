@@ -30,15 +30,20 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
 
+import { ScrollToTop } from "./components/utils/ScrollToTop";
+import { JumpToTop } from "./components/ui/JumpToTop";
+
 const queryClient = new QueryClient();
 
 const App = () => (
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster position="top-right" />
+        <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ScrollToTop />
+          <JumpToTop />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />

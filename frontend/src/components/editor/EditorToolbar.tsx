@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useBuilder } from '@/contexts/BuilderContext';
 import useBuilderStore from '@/store/useBuilderStore';
-import { Undo2, Redo2, Eye, Download, Play, Share2, ChevronRight, Globe, Home, HelpCircle } from 'lucide-react';
+import { Undo2, Redo2, Eye, Download, Play, Share2, ChevronRight, Globe, Home, HelpCircle, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
-export function EditorToolbar() {
+export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websiteId = '', onTabChange = (tab: string) => {} }: any) {
+  const [showPublishDialog, setShowPublishDialog] = useState(false);
   const { state, undo, redo, canUndo, canRedo, setPreviewMode, setLeftPanelVisible } = useBuilder();
   const { editor, page } = state;
   const store = useBuilderStore();
@@ -26,7 +27,14 @@ export function EditorToolbar() {
     a.download = `${page?.slug === '/' ? 'home' : page?.slug}-page.json`;
     a.click();
     URL.revokeObjectURL(url);
-  }; // Layout export functionality
+  };
+
+  const handleDesignTab = () => {
+    if (onTabChange) {
+      onTabChange('design');
+      setLeftPanelVisible(true);
+    }
+  };
 
   return (
     <div className="h-16 px-6 border-b border-slate-200 bg-white sticky top-0 z-50 flex items-center justify-between shadow-sm">
@@ -69,7 +77,7 @@ export function EditorToolbar() {
 
           <div className="hidden md:flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 hover:border-primary/50 transition-all duration-200">
             <Globe className="w-4 h-4 text-slate-600" />
-            <span className="text-[11px] font-bold text-slate-700">{state.activeWebsite?.name || 'Project'}</span>
+            <span className="text-[11px] font-bold text-slate-700">{websiteId || store.activeWebsiteId || 'Project'}</span>
             <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
             <span className="text-[11px] font-black text-slate-900">{page?.name || 'Page'}</span>
           </div>
@@ -79,8 +87,6 @@ export function EditorToolbar() {
             <span className="text-[10px] text-slate-600 font-medium">Auto-saved</span>
           </div>
         </div>
-
-        {/* CENTER - Removed Viewport Switcher as requested */}
 
         {/* RIGHT */}
         <div className="flex items-center gap-3">
@@ -148,20 +154,36 @@ export function EditorToolbar() {
             <TooltipContent side="bottom">Export JSON</TooltipContent>
           </Tooltip>
 
-          {/* <Separator orientation="vertical" className="h-6 mx-2" /> */}
-
-          {/* SHARE */}
+          {/* PALETTE */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="w-9 h-9 rounded-lg text-slate-600 hover:bg-primary/5 hover:text-primary hover:shadow-md hover:shadow-primary/10 transition-all duration-200"
+                id="tour-palette"
+                onClick={handleDesignTab}
+                className="w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-indigo-600 transition-all duration-200"
+              >
+                <Palette className="w-4 h-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">Switch Palette</TooltipContent>
+          </Tooltip>
+
+          {/* SHARE / GLOBAL FX */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                id="tour-global-fx"
+                onClick={handleDesignTab}
+                className="w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-amber-500 transition-all duration-200"
               >
                 <Share2 className="w-4 h-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom">Share Project</TooltipContent>
+            <TooltipContent side="bottom">Share Project / Global FX</TooltipContent>
           </Tooltip>
 
           <Separator orientation="vertical" className="h-6 mx-2" />

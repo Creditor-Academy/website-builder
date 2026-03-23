@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const BuilderContext = createContext(undefined);
 
-export function BuilderProvider({ children }) {
+export function BuilderProvider({ children, initialPage }: any) {
   const store = useBuilderStore();
   const activePage = store.getActivePage();
   const activeWebsite = store.getActiveWebsite();
@@ -72,7 +72,8 @@ export function BuilderProvider({ children }) {
     addPage: (page) => store.addPage(page),
     duplicatePage: store.duplicatePage,
     deletePage: store.deletePage,
-    updatePageName: (slug, name) => store.updateCurrentPage({ name })
+    updatePageName: (slug, name) => store.updateCurrentPage({ name }),
+    updateCurrentPage: store.updateCurrentPage,
   }), [store, activePage, activeWebsite, selectedSection, selectedComponent]);
 
   return <BuilderContext.Provider value={value}>{children}</BuilderContext.Provider>;

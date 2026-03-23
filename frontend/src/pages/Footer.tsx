@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 export default function Footer({ isDark = true }: { isDark?: boolean }) {
   return (
     <footer className={cn("pt-16 pb-12 px-6 transition-colors duration-1000", isDark ? "bg-[#020617] text-white" : "bg-blue-900 text-white")}>
-      <div className={cn("max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 border-b pb-12 transition-colors duration-1000", isDark ? "border-white/5" : "border-white/20")}>
+       <div className={cn("max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 border-b pb-12 transition-colors duration-1000", isDark ? "border-white/5" : "border-white/20")}> 
         <div className="md:col-span-2 space-y-10">
           <div className="flex items-center gap-4">
             <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl shadow-xl transition-colors duration-1000", isDark ? "bg-white text-black" : "bg-white text-blue-600")}>B</div>
@@ -20,7 +20,7 @@ export default function Footer({ isDark = true }: { isDark?: boolean }) {
             <li><Link to="/features" className={cn("cursor-pointer transition-colors w-fit", isDark ? "hover:text-blue-500" : "hover:text-white")}>Features</Link></li>
             <li><Link to="/resources" className={cn("cursor-pointer transition-colors w-fit", isDark ? "hover:text-blue-500" : "hover:text-white")}>Resources</Link></li>
           </ul>
-        </div>
+        </div> 
         <div>
           <h4 className={cn("font-black text-xl mb-10 transition-colors duration-1000", isDark ? "text-white" : "text-white")}>Legal</h4>
           <ul className={cn("space-y-5 text-lg font-bold transition-colors duration-1000", isDark ? "text-slate-500" : "text-blue-100")}>

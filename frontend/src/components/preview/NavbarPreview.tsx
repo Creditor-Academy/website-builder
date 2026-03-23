@@ -138,9 +138,9 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
   const navBg =
     config.styles.backgroundColor && config.styles.backgroundColor !== 'transparent'
       ? config.styles.backgroundColor
-      : '#ffffff';
+      : 'var(--theme-bg, #ffffff)';
 
-  const tc = config.styles.textColor || '#0f172a';
+  const tc = config.styles.textColor || 'var(--theme-text, #0f172a)';
 
   // ── Original handleNavClick logic, unchanged ──────────────────────────
   const handleNavClick = (e, link) => {

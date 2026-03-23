@@ -1,10 +1,16 @@
 import React from 'react';
 
-export function TextBlock({ section, isSelected }) {
+export function TextBlock({ section, isSelected, isEditing, onContentChange }) {
     const { content, styles } = section;
     const background = styles.useGradient
         ? styles.backgroundGradient
         : styles.backgroundColor;
+
+    const handleTextEdit = (field, e) => {
+        if (onContentChange && isEditing) {
+            onContentChange(field, e.currentTarget.textContent || '');
+        }
+    };
 
     return (
         <section
@@ -22,8 +28,12 @@ export function TextBlock({ section, isSelected }) {
                         color: styles.paragraphColor || '#334155',
                         textAlign: content.align || 'left'
                     }}
-                    dangerouslySetInnerHTML={{ __html: content.text || 'Enter your text here...' }}
-                />
+                    contentEditable={isEditing}
+                    suppressContentEditableWarning
+                    onBlur={(e) => handleTextEdit('text', e)}
+                >
+                    {content.text || 'Enter your text here...'}
+                </div>
             </div>
         </section>
     );

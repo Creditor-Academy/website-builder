@@ -18,7 +18,7 @@ export const createDefaultHeroSection = (variant = 'split') => ({
   visible: true,
   locked: false,
   styles: {
-    backgroundColor: '#ffffff',
+    backgroundColor: 'transparent',
     backgroundGradient: variant === 'gradient' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)' : null,
     useGradient: variant === 'gradient',
     padding: variant === 'minimal' ? '15px 0' : '15px 0',
@@ -43,7 +43,7 @@ export const createDefaultFeaturesSection = (variant = 'grid') => ({
   visible: true,
   locked: false,
   styles: {
-    backgroundColor: '#ffffff',
+    backgroundColor: 'transparent',
     padding: '100px 0',
   },
   content: {
@@ -122,6 +122,35 @@ export const createDefaultTestimonialsSection = () => ({
       { id: uuidv4(), quote: 'This builder transformed how we create websites. Incredibly intuitive and powerful!', name: 'Sarah Johnson', role: 'CEO, TechStart', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80', rating: 5 },
       { id: uuidv4(), quote: 'The best investment we made for our design workflow. Highly recommended!', name: 'Michael Chen', role: 'Design Lead, Creative Co', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&q=80', rating: 5 },
       { id: uuidv4(), quote: 'Finally a tool that lets me build professional sites without writing code.', name: 'Emily Davis', role: 'Freelancer', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&q=80', rating: 5 },
+    ],
+  },
+  components: [],
+});
+
+export const createDefaultCaseStudiesSection = () => ({
+  id: uuidv4(),
+  type: 'casestudies',
+  name: 'Case Studies',
+  visible: true,
+  locked: false,
+  styles: {
+    backgroundColor: '#0f172a',
+    padding: '110px 0',
+    color: '#e2e8f0',
+  },
+  content: {
+    headline: 'Proven Results',
+    subheadline: 'Real transformations. Real numbers.',
+    accentColor: '#d4af37',
+    cases: [
+      {
+        id: uuidv4(),
+        industry: 'Example Industry',
+        client: 'Example Client',
+        challenge: 'Describe the challenge here.',
+        result: 'Describe the result here.',
+        metric: 'Impact Metric',
+      },
     ],
   },
   components: [],
@@ -447,7 +476,13 @@ export const createFeaturesPage = () => ({
     fontFamily: 'Inter, system-ui, sans-serif',
     primaryColor: '#3b82f6',
     secondaryColor: '#8b5cf6',
+    accentColor: '#f59e0b',
     backgroundColor: '#ffffff',
+    textColor: '#0f172a',
+    borderRadius: '12px',
+    glassmorphism: false,
+    animations: true,
+    shadows: 'subtle',
   },
 });
 
@@ -515,7 +550,13 @@ export const createAboutPage = () => ({
     fontFamily: 'Inter, system-ui, sans-serif',
     primaryColor: '#3b82f6',
     secondaryColor: '#8b5cf6',
+    accentColor: '#f59e0b',
     backgroundColor: '#ffffff',
+    textColor: '#0f172a',
+    borderRadius: '12px',
+    glassmorphism: false,
+    animations: true,
+    shadows: 'subtle',
   },
 });
 
@@ -725,7 +766,13 @@ export const getDefaultPage = () => ({
     fontFamily: 'Inter, system-ui, sans-serif',
     primaryColor: '#3b82f6',
     secondaryColor: '#8b5cf6',
+    accentColor: '#f59e0b',
     backgroundColor: '#ffffff',
+    textColor: '#0f172a',
+    borderRadius: '12px',
+    glassmorphism: false,
+    animations: true,
+    shadows: 'subtle',
   },
 });
 

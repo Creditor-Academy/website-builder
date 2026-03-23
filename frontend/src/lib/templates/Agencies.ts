@@ -332,7 +332,12 @@ export const createDevPage = () => ({
 
 export const getAgenciesPage = () => ({
   id: uuidv4(),
-  name: 'Agency Home',
+  name: 'Home',
+  slug: '/',
+  meta: {
+    title: 'NexusAgency - Creative Digital Solutions',
+    description: 'Scaling brands through innovation, design, and custom development.'
+  },
   navbar: createAgenciesNavbar(),
   sections: [
     createAgenciesHeroSection(),

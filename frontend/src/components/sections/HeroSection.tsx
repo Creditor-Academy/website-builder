@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, Play, ChevronRight } from 'lucide-react';
 
-export function HeroSection({ section, isSelected, isEditing, onContentChange }) {
+export function HeroSection({ section, isSelected, isEditing, onContentChange, isAlternate }) {
   const { content, styles, variant = 'split' } = section;
   const [showBgPicker, setShowBgPicker] = useState(false);
 
@@ -36,17 +36,17 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
     }
   };
 
-  // White by default — always respect styles if set
+  // Use CSS variables for global styling
   const background = (styles.backgroundColor && styles.backgroundColor !== 'transparent')
     ? styles.backgroundColor
-    : '#ffffff';
+    : isAlternate ? 'var(--theme-bg-alt, #f8fafc)' : 'var(--theme-bg, #ffffff)';
 
-  const headingColor = styles.headingColor || '#0f172a';
-  const paragraphColor = styles.paragraphColor || '#475569';
-  const buttonPrimaryBg = styles.buttonPrimaryBg || '#0f172a';
-  const buttonPrimaryText = styles.buttonPrimaryText || '#ffffff';
+  const headingColor = styles.headingColor || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
+  const paragraphColor = styles.paragraphColor || (isAlternate ? 'var(--theme-text-alt, #475569)' : 'var(--theme-text, #475569)');
+  const buttonPrimaryBg = styles.buttonPrimaryBg || 'var(--theme-primary, #0f172a)';
+  const buttonPrimaryText = styles.buttonPrimaryText || (isAlternate ? 'var(--theme-bg-alt, #ffffff)' : 'var(--theme-bg, #ffffff)');
   const buttonSecondaryBg = styles.buttonSecondaryBg || 'transparent';
-  const buttonSecondaryText = styles.buttonSecondaryText || '#0f172a';
+  const buttonSecondaryText = styles.buttonSecondaryText || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
 
   const sectionStyle = {
     background,
@@ -56,6 +56,7 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
   };
 
   const selectionRing = isSelected ? 'ring-2 ring-slate-900 ring-offset-2 ring-offset-white' : '';
+  const globalClasses = "global-radius global-shadow global-transition";
 
   /* ─────────────────────────────────────────────
      CENTERED VARIANT
@@ -113,10 +114,10 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
               onBlur={(e) => handleTextEdit('subheadline', e)}
             />
 
-            <div className="flex flex-wrap justify-center gap-3 pt-4">
+            <div className={`flex flex-wrap justify-center gap-3 pt-4 ${globalClasses}`}>
               {content.ctaText && (
                 <button
-                  className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:shadow-slate-900/20 hover:-translate-y-0.5 active:translate-y-0"
+                  className={`group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:shadow-slate-900/20 hover:-translate-y-0.5 active:translate-y-0 ${globalClasses}`}
                   style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
                   onClick={() => handleButtonClick(content.primaryRouteType, content.primaryRouteUrl)}
                 >
@@ -129,7 +130,7 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
 
               {content.ctaSecondaryText && (
                 <button
-                  className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
+                  className={`group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 ${globalClasses} glass-effect`}
                   style={{ color: buttonSecondaryText, background: buttonSecondaryBg }}
                   onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
                 >
@@ -143,10 +144,10 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
           </div>
 
           {/* Hero image with elegant frame */}
-          <div className="pt-16 w-full max-w-4xl mx-auto">
-            <div className="relative group">
+          <div className={`pt-16 w-full max-w-4xl mx-auto ${globalClasses}`}>
+            <div className={`relative group ${globalClasses}`}>
               <div className="absolute -inset-1 rounded-2xl bg-gradient-to-b from-slate-200 to-slate-100 blur-sm" />
-              <div className="relative rounded-2xl overflow-hidden border border-slate-200 shadow-2xl shadow-slate-200/80">
+              <div className={`relative rounded-2xl overflow-hidden border border-slate-200 shadow-2xl shadow-slate-200/80 ${globalClasses} glass-effect`}>
                 {/* Browser chrome bar */}
                 <div className="flex items-center gap-1.5 px-4 py-3 bg-slate-50 border-b border-slate-200">
                   <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
@@ -552,7 +553,7 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
                         { value: '99%', label: 'Uptime' },
                       ])];
                       updated[i] = { ...updated[i], value: e.currentTarget.textContent };
-                      handleTextEdit('stats', updated);
+                      onContentChange('stats', updated);
                     }}
                   >
                     {stat.value}
@@ -570,7 +571,7 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
                         { value: '99%', label: 'Uptime' },
                       ])];
                       updated[i] = { ...updated[i], label: e.currentTarget.textContent };
-                      handleTextEdit('stats', updated);
+                      onContentChange('stats', updated);
                     }}
                   >
                     {stat.label}

@@ -64,8 +64,8 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
   const navigate = useNavigate();
   const { updatePageName, pages, setActivePage, createPage, selectSection } = useBuilder();
 
-  const bg = config.styles.backgroundColor || '#0a0a0f';
-  const tc = config.styles.textColor || '#f8fafc';
+  const bg = config.styles.backgroundColor || 'var(--theme-bg, #0a0a0f)';
+  const tc = config.styles.textColor || 'var(--theme-text, #f8fafc)';
 
   const handleFooterClick = (e) => {
     if (isEditing && e.target.closest('a, button') === null) {
