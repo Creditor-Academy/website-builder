@@ -1,8 +1,9 @@
 import React from 'react';
 import { Quote, Star } from 'lucide-react';
+import { useBuilder } from '@/contexts/BuilderContext';
 
 // ─── Cursor Position Utility ───────────────────────────────────────────────────
-function setCursorToEnd(element) {
+function setCursorToEnd(element: HTMLElement) {
   const range = document.createRange();
   const selection = window.getSelection();
   range.selectNodeContents(element);
@@ -82,7 +83,7 @@ function InjectStyles() {
 }
 
 // ─── Shared editable wrappers ──────────────────────────────────────────────
-function EditEl({ as: Tag = 'span', value, onBlur, isEditing, style, className, lightMode }) {
+function EditEl({ as: Tag = 'span', value, onBlur, isEditing, style, className, lightMode }: any) {
   return (
     <Tag
       className={`t-ce ${lightMode ? 't-ce-light' : ''} ${className || ''}`}
@@ -112,7 +113,7 @@ function starRow(rating = 5) {
   );
 }
 
-function avatarStyle(borderRadius, size = 44) {
+function avatarStyle(borderRadius: any, size = 44): React.CSSProperties {
   return {
     width: size,
     height: size,
@@ -123,7 +124,7 @@ function avatarStyle(borderRadius, size = 44) {
 }
 
 // ─── Section label component ──────────────────────────────────────────────
-function SectionLabel({ text }) {
+function SectionLabel({ text }: { text: string }) {
   return (
     <div style={{
       display: 'inline-flex', alignItems: 'center', gap: 10,
@@ -141,7 +142,7 @@ function SectionLabel({ text }) {
 // ──────────────────────────────────────────────────────────────────────────
 // VARIANT: cards  →  Luxury Editorial Grid
 // ──────────────────────────────────────────────────────────────────────────
-function CardsVariant({ testimonials, content, styles, isEditing, onContentChange, background, padding, headingColor, paragraphColor }) {
+function CardsVariant({ testimonials, content, styles, isEditing, onContentChange, background, padding, headingColor, paragraphColor }: any) {
   const updateT = (t, field, val) => {
     if (!isEditing || !onContentChange) return;
     const updated = content.testimonials.map((test) =>
@@ -214,7 +215,7 @@ function CardsVariant({ testimonials, content, styles, isEditing, onContentChang
               className="t-card-hover"
               style={{
                 background: styles.cardBackgroundColor || '#ffffff',
-                borderRadius: styles.borderRadius || '4px',
+                borderRadius: styles.borderRadius || 'var(--radius, 4px)',
                 padding: '40px 36px',
                 border: '1px solid rgba(0,0,0,0.07)',
                 position: 'relative',
@@ -251,10 +252,10 @@ function CardsVariant({ testimonials, content, styles, isEditing, onContentChang
                 suppressContentEditableWarning
                 dangerouslySetInnerHTML={{ __html: t.quote ? `"${t.quote}"` : '""' }}
                 onInput={(e) => {
-                updateT(t, 'quote', e.currentTarget.innerHTML.replace(/^"|"$/g, ''));
-                // Preserve cursor position
-                setTimeout(() => setCursorToEnd(e.currentTarget), 0);
-              }}
+                  updateT(t, 'quote', e.currentTarget.innerHTML.replace(/^"|"$/g, ''));
+                  // Preserve cursor position
+                  setTimeout(() => setCursorToEnd(e.currentTarget), 0);
+                }}
               ></p>
 
               {/* author */}
@@ -272,10 +273,10 @@ function CardsVariant({ testimonials, content, styles, isEditing, onContentChang
                     suppressContentEditableWarning
                     dangerouslySetInnerHTML={{ __html: t.name || '' }}
                     onInput={(e) => {
-                    updateT(t, 'name', e.currentTarget.innerHTML);
-                    // Preserve cursor position
-                    setTimeout(() => setCursorToEnd(e.currentTarget), 0);
-                  }}
+                      updateT(t, 'name', e.currentTarget.innerHTML);
+                      // Preserve cursor position
+                      setTimeout(() => setCursorToEnd(e.currentTarget), 0);
+                    }}
                   ></p>
                   <p
                     className="t-ce"
@@ -284,10 +285,10 @@ function CardsVariant({ testimonials, content, styles, isEditing, onContentChang
                     suppressContentEditableWarning
                     dangerouslySetInnerHTML={{ __html: t.role || '' }}
                     onInput={(e) => {
-                    updateT(t, 'role', e.currentTarget.innerHTML);
-                    // Preserve cursor position
-                    setTimeout(() => setCursorToEnd(e.currentTarget), 0);
-                  }}
+                      updateT(t, 'role', e.currentTarget.innerHTML);
+                      // Preserve cursor position
+                      setTimeout(() => setCursorToEnd(e.currentTarget), 0);
+                    }}
                   ></p>
                 </div>
               </div>
@@ -302,7 +303,7 @@ function CardsVariant({ testimonials, content, styles, isEditing, onContentChang
 // ──────────────────────────────────────────────────────────────────────────
 // VARIANT: carousel  →  Infinite Dark Marquee
 // ──────────────────────────────────────────────────────────────────────────
-function CarouselVariant({ testimonials, content, styles, isEditing, onContentChange, background, padding, headingColor, paragraphColor }) {
+function CarouselVariant({ testimonials, content, styles, isEditing, onContentChange, background, padding, headingColor, paragraphColor }: any) {
   const updateT = (t, field, val) => {
     if (!isEditing || !onContentChange) return;
     const updated = content.testimonials.map((test) =>
@@ -380,13 +381,13 @@ function CarouselVariant({ testimonials, content, styles, isEditing, onContentCh
   );
 }
 
-function CarouselCard({ t, i, styles, isEditing, updateT, paragraphColor, headingColor }) {
+function CarouselCard({ t, i, styles, isEditing, updateT, paragraphColor, headingColor }: any) {
   return (
     <div style={{
       minWidth: 320, maxWidth: 320,
       background: 'rgba(255,255,255,0.04)',
       border: '1px solid rgba(255,255,255,0.08)',
-      borderRadius: styles.borderRadius || '4px',
+      borderRadius: styles.borderRadius || 'var(--radius, 4px)',
       padding: '32px 28px',
       flexShrink: 0,
     }}>
@@ -434,7 +435,7 @@ function CarouselCard({ t, i, styles, isEditing, updateT, paragraphColor, headin
 // ──────────────────────────────────────────────────────────────────────────
 // VARIANT: quote  →  Cinematic Full-Bleed Pull Quote
 // ──────────────────────────────────────────────────────────────────────────
-function QuoteVariant({ testimonials, content, styles, isEditing, onContentChange, background, padding, headingColor, paragraphColor }) {
+function QuoteVariant({ testimonials, content, styles, isEditing, onContentChange, background, padding, headingColor, paragraphColor }: any) {
   const t = testimonials[0] || {};
   const updateT = (field, val) => {
     if (!isEditing || !onContentChange) return;
@@ -524,7 +525,7 @@ function QuoteVariant({ testimonials, content, styles, isEditing, onContentChang
 // ──────────────────────────────────────────────────────────────────────────
 // VARIANT: minimal  →  Refined Left-Spine Layout
 // ──────────────────────────────────────────────────────────────────────────
-function MinimalVariant({ testimonials, content, styles, isEditing, onContentChange, background, padding, headingColor, paragraphColor }) {
+function MinimalVariant({ testimonials, content, styles, isEditing, onContentChange, background, padding, headingColor, paragraphColor }: any) {
   const updateT = (t, field, val) => {
     if (!isEditing || !onContentChange) return;
     const updated = content.testimonials.map((test) =>
@@ -648,21 +649,35 @@ function MinimalVariant({ testimonials, content, styles, isEditing, onContentCha
 // ──────────────────────────────────────────────────────────────────────────
 // Main export — identical prop API & logic
 // ──────────────────────────────────────────────────────────────────────────
-export function TestimonialsSection({ section, isSelected, isEditing, onContentChange }) {
+export function TestimonialsSection({ section, isSelected, isEditing, onContentChange, isAlternate }: any) {
   const { content, styles } = section;
+  const { state } = useBuilder();
+  const globalStyles = state.page?.globalStyles || {};
+
   const testimonials = content.testimonials || [];
   const variant = section.variant || 'cards';
   const background = styles.useGradient
     ? (styles.backgroundGradient || styles.backgroundColor)
-    : (styles.backgroundColor || '#ffffff');
+    : (styles.backgroundColor || (isAlternate ? 'var(--theme-bg-alt, #f8fafc)' : 'var(--theme-bg, #ffffff)'));
+  
   const padding = styles.padding || '100px 0';
-  const headingColor = styles.headingColor || '#0f172a';
-  const paragraphColor = styles.paragraphColor || '#64748b';
+  
+  const headingColor = styles.headingColor || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
+  const paragraphColor = styles.paragraphColor || (isAlternate ? 'var(--theme-text-alt, #64748b)' : 'var(--theme-text, #64748b)');
 
   const shared = { testimonials, content, styles, isEditing, onContentChange, background, padding, headingColor, paragraphColor };
 
-  if (variant === 'carousel') return <CarouselVariant {...shared} />;
-  if (variant === 'quote')    return <QuoteVariant {...shared} />;
-  if (variant === 'minimal')  return <MinimalVariant {...shared} />;
-  return <CardsVariant {...shared} />;
+  const globalClasses = `
+    ${globalStyles.glassmorphism ? 'glass-effect' : ''}
+  `.trim();
+
+  return (
+    <div className={globalClasses}>
+      {variant === 'carousel' && <CarouselVariant {...shared} />}
+      {variant === 'quote'    && <QuoteVariant {...shared} />}
+      {variant === 'minimal'  && <MinimalVariant {...shared} />}
+      {variant === 'cards'    && <CardsVariant {...shared} />}
+      {!['carousel','quote','minimal','cards'].includes(variant) && <CardsVariant {...shared} />}
+    </div>
+  );
 }

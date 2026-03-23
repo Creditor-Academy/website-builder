@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { BuilderProvider } from "@/contexts/BuilderContext";
-import { EditorToolbar } from './EditorToolbar';
-import { SectionsList } from './SectionsList';
-import { PageManager } from './PageManager';
-import { CanvasPreview } from './CanvasPreview';
-import { PropertiesPanel } from './PropertiesPanel';
-import { TextColorPicker } from './TextColorPicker';
-import { GuidedTour } from './GuidedTour';
-import { SiteSettings } from './SiteSettings';
+import { BuilderProvider, useBuilder } from "@/contexts/BuilderContext";
 import useBuilderStore from '@/store/useBuilderStore';
-import { useBuilder } from '@/contexts/BuilderContext';
+import { EditorToolbar } from "./EditorToolbar";
+import { SectionsList } from "./SectionsList";
+import { PageManager } from "./PageManager";
+import { SiteSettings } from "./SiteSettings";
+import { CanvasPreview } from "./CanvasPreview";
+import { PropertiesPanel } from "./PropertiesPanel";
+import { TextColorPicker } from "./TextColorPicker";
+import { GuidedTour } from "./GuidedTour";
+import { AssetLibraryPanel } from "./AssetLibraryPanel";
+import { DesignSystemPanel } from "./DesignSystemPanel";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -22,6 +23,13 @@ import {
   Plus,
   Settings,
   Sliders,
+  Rocket,
+  Link,
+  Download,
+  AlertCircle,
+  Image as ImageIcon,
+  Wand2,
+  Edit
 } from "lucide-react";
 import {
   Tooltip,
@@ -33,7 +41,8 @@ import {
 function EditorContent() {
   const [leftNavTab, setLeftNavTab] = useState("add"); // 'add', 'layers', 'pages', 'settings', 'edit'
   const store = useBuilderStore();
-  const { editor, setTourState } = store;
+  const { editor, setTourState, activeWebsiteId } = store;
+  const { id } = useParams();
 
   // Auto-switch to edit tab when a section or component is selected
   useEffect(() => {
@@ -43,27 +52,34 @@ function EditorContent() {
   }, [editor.selectedSectionId, editor.selectedComponentId]);
 
   const navItems = [
-    { id: "add", icon: Plus, label: "Add Elements" },
+    { id: "add", icon: Plus, label: "Sections" },
     { id: "layers", icon: Layers, label: "Layers" },
     { id: "pages", icon: FileText, label: "Pages" },
-    { id: "edit", icon: Sliders, label: "Edit Properties" },
-    // { id: 'settings', icon: Settings, label: 'Site Settings' },
+    { id: "assets", icon: ImageIcon, label: "Assets" },
+    { id: "design", icon: Wand2, label: "Design System" },
+    { id: "edit", icon: Edit, label: "Edit" },
   ];
 
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden font-sans">
-      <EditorToolbar />
+      <EditorToolbar 
+        websiteId={activeWebsiteId || id} 
+        onTabChange={setLeftNavTab}
+      />
       <TextColorPicker />
       <GuidedTour />
-      {/* Debug: Test Tour Button */}
-      <button
-  onClick={() => setTourState({ isActive: true, step: 0, isFinished: false })}
-  className="fixed bottom-4 right-4 z-50 w-12 h-12 flex items-center justify-center bg-sky-400 text-white rounded-full shadow-lg hover:bg-sky-500 transition-colors"
->
-  ?
-</button>
 
-      <div className="flex-1 min-h-0">
+      {/* Debug: Test Tour Button */}
+      {!editor.tour.isActive && (
+        <button
+          onClick={() => setTourState({ isActive: true, step: 0, isFinished: false })}
+          className="fixed bottom-4 right-4 z-50 w-12 h-12 flex items-center justify-center bg-sky-400 text-white rounded-full shadow-lg hover:bg-sky-500 transition-colors"
+        >
+          ?
+        </button>
+      )}
+
+      <div className={`flex-1 min-h-0 transition-all duration-500 ${editor.tour.isActive ? 'pointer-events-none opacity-90' : ''}`}>
         <ResizablePanelGroup direction="horizontal" className="h-full">
           {!editor.previewMode && editor.showLeftPanel && (
             <>
@@ -134,6 +150,8 @@ function EditorContent() {
                   <div className="h-full overflow-hidden">
                     {leftNavTab === "add" && <SectionsList view="add" />}
                     {leftNavTab === "layers" && <SectionsList view="layers" />}
+                    {leftNavTab === "assets" && <AssetLibraryPanel />}
+                    {leftNavTab === "design" && <DesignSystemPanel />}
                     {leftNavTab === "pages" && <PageManager />}
                     {leftNavTab === "edit" && <PropertiesPanel />}
                     {leftNavTab === "settings" && <SiteSettings />}
@@ -171,7 +189,7 @@ function EditorContent() {
   );
 }
 
-export function WebsiteEditor() {
+export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
   const { id } = useParams();
   const store = useBuilderStore();
   const { selectWebsite, activeWebsiteId } = store;
@@ -194,7 +212,7 @@ export function WebsiteEditor() {
   }
 
   return (
-    <BuilderProvider>
+    <BuilderProvider initialPage={initialPage}>
       <EditorContent />
     </BuilderProvider>
   );

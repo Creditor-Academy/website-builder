@@ -83,7 +83,7 @@ function InjectStyles() {
 }
 
 // ─── CE helper ────────────────────────────────────────────────────────────
-function CE({ as: Tag = 'span', value, onSave, isEditing, style, className = '', inv = false }) {
+function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '', inv = false }: any) {
   return (
     <Tag
       className={`ct-ce ${inv ? 'ct-inv' : ''} ${className}`}
@@ -419,7 +419,7 @@ function MapVariant({ content, isEditing, onContentChange, headingColor, paragra
 // ──────────────────────────────────────────────────────────────────────────
 // Main export
 // ──────────────────────────────────────────────────────────────────────────
-export function ContactSection({ section, isSelected, isEditing, onContentChange }) {
+export function ContactSection({ section, isSelected, isEditing, onContentChange }: any) {
   const { content, styles } = section;
   const variant = section.variant || 'split';
   const background = styles.useGradient

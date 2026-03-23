@@ -1,0 +1,74 @@
+﻿src/App.tsx(42,18): error TS2322: Type '{ position: string; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'position' does not exist on type 'IntrinsicAttributes'.
+src/components/dashboard/DeploymentMonitoring.tsx(148,48): error TS2322: Type '{ status: string; id: string; version: string; deployedAt: string; deployedBy: string; websiteId: string; websiteName: string; }' is not assignable to type 'Deployment'.
+  Types of property 'status' are incompatible.
+    Type 'string' is not assignable to type '"Success" | "Failed" | "Pending" | "Rolled Back"'.
+src/components/editor/PropertiesPanel.tsx(499,28): error TS2322: Type '{ children: Element[]; value: any; onValueChange: (value: string) => void; className: string; }' is not assignable to type 'IntrinsicAttributes & SelectSharedProps & { value?: string; defaultValue?: string; onValueChange?(value: string): void; }'.
+  Property 'className' does not exist on type 'IntrinsicAttributes & SelectSharedProps & { value?: string; defaultValue?: string; onValueChange?(value: string): void; }'.
+src/components/editor/PublishDialog.tsx(54,11): error TS2820: Type '"published"' is not assignable to type '"Draft" | "Published"'. Did you mean '"Published"'?
+src/components/editor/PublishDialog.tsx(117,16): error TS2367: This comparison appears to be unintentional because the types '"Draft" | "Published"' and '"published"' have no overlap.
+src/components/editor/SectionsList.tsx(329,24): error TS2322: Type '{ key: any; id: any; name: any; type: any; visible: any; isSelected: boolean; onClick: () => any; index: any; }' is not assignable to type 'IntrinsicAttributes & { id: any; name: any; type: any; visible: any; isSelected: any; onClick: any; }'.
+  Property 'index' does not exist on type 'IntrinsicAttributes & { id: any; name: any; type: any; visible: any; isSelected: any; onClick: any; }'.
+src/components/editor/WebsiteEditor.tsx(63,8): error TS2741: Property 'onToggleTheme' is missing in type '{ websiteId: string; onTabChange: Dispatch<SetStateAction<string>>; }' but required in type '{ theme?: string; onToggleTheme: any; websiteId: any; onTabChange: any; }'.
+src/components/sections/AboutSection.tsx(61,7): error TS2322: Type '{ className: string; "data-editing": string; contentEditable: string; suppressContentEditableWarning: true; style: any; onBlur: (e: any) => any; onClick: (e: any) => any; dangerouslySetInnerHTML: { ...; }; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'className' does not exist on type 'IntrinsicAttributes'.
+src/components/sections/AboutSection.tsx(233,11): error TS2322: Type 'string' is not assignable to type 'number'.
+src/components/sections/AboutSection.tsx(339,10): error TS2741: Property 'light' is missing in type '{ text: string; }' but required in type '{ text: any; light: any; }'.
+src/components/sections/AboutSection.tsx(368,13): error TS2322: Type 'string' is not assignable to type 'number'.
+src/components/sections/BlogListSection.tsx(74,6): error TS2322: Type '{ children: any; className: string; "data-editing": string; contentEditable: string; suppressContentEditableWarning: true; style: any; onBlur: (e: any) => any; onClick: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'children' does not exist on type 'IntrinsicAttributes'.
+src/components/sections/ContactSection.tsx(88,6): error TS2322: Type '{ children: any; className: string; "data-editing": string; contentEditable: string; suppressContentEditableWarning: true; style: any; onBlur: (e: any) => any; onClick: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'children' does not exist on type 'IntrinsicAttributes'.
+src/components/sections/ContactSection.tsx(109,12): error TS2741: Property 'style' is missing in type '{ as: string; value: any; isEditing: any; onSave: (val: any) => any; className: string; }' but required in type '{ as?: string; value: any; onSave: any; isEditing: any; style: any; className?: string; inv?: boolean; }'.
+src/components/sections/ContactSection.tsx(117,12): error TS2741: Property 'style' is missing in type '{ as: string; value: any; isEditing: any; onSave: (val: any) => any; className: string; }' but required in type '{ as?: string; value: any; onSave: any; isEditing: any; style: any; className?: string; inv?: boolean; }'.
+src/components/sections/ContactSection.tsx(128,10): error TS2741: Property 'style' is missing in type '{ as: string; value: any; isEditing: any; onSave: (val: any) => any; className: string; }' but required in type '{ as?: string; value: any; onSave: any; isEditing: any; style: any; className?: string; inv?: boolean; }'.
+src/components/sections/ContactSection.tsx(138,10): error TS2741: Property 'style' is missing in type '{ as: string; value: any; isEditing: any; onSave: (val: any) => any; className: string; }' but required in type '{ as?: string; value: any; onSave: any; isEditing: any; style: any; className?: string; inv?: boolean; }'.
+src/components/sections/ContactSection.tsx(153,10): error TS2741: Property 'style' is missing in type '{ as: string; value: any; isEditing: any; onSave: (val: any) => any; inv: boolean; }' but required in type '{ as?: string; value: any; onSave: any; isEditing: any; style: any; className?: string; inv?: boolean; }'.
+src/components/sections/FAQSection.tsx(92,6): error TS2322: Type '{ children: any; className: string; "data-editing": string; contentEditable: string; suppressContentEditableWarning: true; style: any; onBlur: (e: any) => any; onClick: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'children' does not exist on type 'IntrinsicAttributes'.
+src/components/sections/FAQSection.tsx(341,13): error TS2322: Type 'unknown' is not assignable to type 'Key'.
+src/components/sections/FAQSection.tsx(345,13): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/components/sections/GallerySection.tsx(73,6): error TS2322: Type '{ children: any; className: string; "data-editing": string; contentEditable: string; suppressContentEditableWarning: true; style: any; onBlur: (e: any) => any; onClick: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'children' does not exist on type 'IntrinsicAttributes'.
+src/components/sections/LayoutSection.tsx(97,6): error TS2322: Type '{ children: any; className: string; "data-editing": string; contentEditable: string; suppressContentEditableWarning: true; style: any; onBlur: (e: any) => any; onClick: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'children' does not exist on type 'IntrinsicAttributes'.
+src/components/sections/PricingSection.tsx(383,8): error TS2739: Type '{ content: any; isEditing: any; onContentChange: any; headingColor: any; paragraphColor: any; }' is missing the following properties from type '{ content: any; isEditing: any; onContentChange: any; headingColor: any; paragraphColor: any; showToggle: any; annual: any; setAnnual: any; centered?: boolean; }': showToggle, annual, setAnnual
+src/components/sections/PricingSection.tsx(411,21): error TS2322: Type 'unknown' is not assignable to type 'Key'.
+src/components/sections/PricingSection.tsx(416,20): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/components/sections/PricingSection.tsx(466,25): error TS2322: Type 'unknown' is not assignable to type 'Key'.
+src/components/sections/ServicesSection.tsx(83,7): error TS2322: Type '{ className: string; "data-editing": string; contentEditable: string; suppressContentEditableWarning: true; style: any; onBlur: (e: any) => any; onClick: (e: any) => any; dangerouslySetInnerHTML: { ...; }; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'className' does not exist on type 'IntrinsicAttributes'.
+src/components/sections/ServicesSection.tsx(215,20): error TS2741: Property 'style' is missing in type '{ as: string; value: any; isEditing: any; inv: true; onSave: (val: any) => void; }' but required in type '{ as?: string; value: any; onSave: any; isEditing: any; style: any; className?: string; inv?: boolean; }'.
+src/components/sections/TeamSection.tsx(59,7): error TS2322: Type '{ className: string; "data-editing": string; contentEditable: string; suppressContentEditableWarning: true; style: any; onBlur: (e: any) => any; onClick: (e: any) => any; dangerouslySetInnerHTML: { ...; }; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'className' does not exist on type 'IntrinsicAttributes'.
+src/components/sections/TestimonialsSection.tsx(89,7): error TS2322: Type '{ className: string; style: any; contentEditable: any; suppressContentEditableWarning: true; onBlur: (e: any) => any; dangerouslySetInnerHTML: { __html: any; }; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'className' does not exist on type 'IntrinsicAttributes'.
+src/components/sections/TestimonialsSection.tsx(263,50): error TS2322: Type '{ width: number; height: number; objectFit: string; borderRadius: string; flexShrink: number; }' is not assignable to type 'CSSProperties'.
+  Types of property 'objectFit' are incompatible.
+    Type 'string' is not assignable to type 'ObjectFit'.
+src/components/sections/TestimonialsSection.tsx(409,42): error TS2322: Type '{ width: number; height: number; objectFit: string; borderRadius: string; flexShrink: number; }' is not assignable to type 'CSSProperties'.
+  Types of property 'objectFit' are incompatible.
+    Type 'string' is not assignable to type 'ObjectFit'.
+src/components/sections/TestimonialsSection.tsx(497,44): error TS2322: Type '{ animation: "t-float 3s ease-in-out infinite"; width: number; height: number; objectFit: string; borderRadius: string; flexShrink: number; }' is not assignable to type 'CSSProperties'.
+  Types of property 'objectFit' are incompatible.
+    Type 'string' is not assignable to type 'ObjectFit'.
+src/components/sections/TestimonialsSection.tsx(616,56): error TS2322: Type '{ width: number; height: number; objectFit: string; borderRadius: string; flexShrink: number; }' is not assignable to type 'CSSProperties'.
+  Types of property 'objectFit' are incompatible.
+    Type 'string' is not assignable to type 'ObjectFit'.
+src/pages/About.tsx(12,22): error TS2322: Type '{ initialPage: { id: string; name: string; slug: string; meta: { title: string; description: string; }; navbar: { id: string; style: string; logo: { text: string; }; links: ({ id: string; label: string; href: string; isButton?: undefined; } | { ...; })[]; styles: { ...; }; }; sections: ({ ...; } | ... 1 more ... | {...' is not assignable to type 'IntrinsicAttributes'.
+  Property 'initialPage' does not exist on type 'IntrinsicAttributes'.
+src/pages/Blog.tsx(12,22): error TS2322: Type '{ initialPage: { id: string; name: string; slug: string; navbar: { id: string; style: string; logo: { text: string; }; links: ({ id: string; label: string; href: string; isButton?: undefined; } | { id: string; label: string; href: string; isButton: boolean; })[]; styles: { ...; }; }; sections: any[]; footer: { ...; ...' is not assignable to type 'IntrinsicAttributes'.
+  Property 'initialPage' does not exist on type 'IntrinsicAttributes'.
+src/pages/Careers.tsx(12,22): error TS2322: Type '{ initialPage: { id: string; name: string; slug: string; navbar: { id: string; style: string; logo: { text: string; }; links: ({ id: string; label: string; href: string; isButton?: undefined; } | { id: string; label: string; href: string; isButton: boolean; })[]; styles: { ...; }; }; sections: any[]; footer: { ...; ...' is not assignable to type 'IntrinsicAttributes'.
+  Property 'initialPage' does not exist on type 'IntrinsicAttributes'.
+src/pages/Help.tsx(12,22): error TS2322: Type '{ initialPage: { id: string; name: string; slug: string; navbar: { id: string; style: string; logo: { text: string; }; links: ({ id: string; label: string; href: string; isButton?: undefined; } | { id: string; label: string; href: string; isButton: boolean; })[]; styles: { ...; }; }; sections: ({ ...; } | { ...; })[...' is not assignable to type 'IntrinsicAttributes'.
+  Property 'initialPage' does not exist on type 'IntrinsicAttributes'.
+src/pages/Index.tsx(5,27): error TS2724: '"@/store/useBuilderStore"' has no exported member named 'BuilderState'. Did you mean 'BuilderStore'?
+src/pages/Pricing.tsx(12,22): error TS2322: Type '{ initialPage: { id: string; name: string; slug: string; navbar: { id: string; style: string; logo: { text: string; }; links: ({ id: string; label: string; href: string; isButton?: undefined; } | { id: string; label: string; href: string; isButton: boolean; })[]; styles: { ...; }; }; sections: ({ ...; } | { ...; })[...' is not assignable to type 'IntrinsicAttributes'.
+  Property 'initialPage' does not exist on type 'IntrinsicAttributes'.
+src/pages/Services.tsx(12,22): error TS2322: Type '{ initialPage: { id: string; name: string; slug: string; navbar: { id: string; style: string; logo: { text: string; }; links: ({ id: string; label: string; href: string; isButton?: undefined; } | { id: string; label: string; href: string; isButton: boolean; })[]; styles: { ...; }; }; sections: ({ ...; } | { ...; })[...' is not assignable to type 'IntrinsicAttributes'.
+  Property 'initialPage' does not exist on type 'IntrinsicAttributes'.
+src/pages/Start.tsx(12,22): error TS2322: Type '{ initialPage: { id: string; name: string; slug: string; navbar: { id: string; style: string; logo: { text: string; }; links: ({ id: string; label: string; href: string; isButton?: undefined; } | { id: string; label: string; href: string; isButton: boolean; })[]; styles: { ...; }; }; sections: { ...; }[]; footer: { ...' is not assignable to type 'IntrinsicAttributes'.
+  Property 'initialPage' does not exist on type 'IntrinsicAttributes'.
+src/pages/Status.tsx(12,22): error TS2322: Type '{ initialPage: { id: string; name: string; slug: string; navbar: { id: string; style: string; logo: { text: string; }; links: ({ id: string; label: string; href: string; isButton?: undefined; } | { id: string; label: string; href: string; isButton: boolean; })[]; styles: { ...; }; }; sections: { ...; }[]; footer: { ...' is not assignable to type 'IntrinsicAttributes'.
+  Property 'initialPage' does not exist on type 'IntrinsicAttributes'.

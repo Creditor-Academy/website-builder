@@ -69,7 +69,7 @@ function InjectStyles() {
 }
 
 // ─── CE helper ────────────────────────────────────────────────────────────
-function CE({ as: Tag = 'span', value, onSave, isEditing, style, className = '', inv = false }) {
+function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '', inv = false }: any) {
   return (
     <Tag
       className={`bl-ce ${inv ? 'bl-ce-inv' : ''} ${className}`}
@@ -87,7 +87,7 @@ function CE({ as: Tag = 'span', value, onSave, isEditing, style, className = '',
 
 const ACCENTS = ['#E11D48', '#0891B2', '#059669', '#7C3AED', '#D97706', '#0F766E'];
 
-export function BlogListSection({ section, isSelected, isEditing, onContentChange }) {
+export function BlogListSection({ section, isSelected, isEditing, onContentChange }: any) {
   const { content, styles, variant = 'grid' } = section;
   const posts = content.posts || [];
   const bg = styles.backgroundColor || '#fafaf8';

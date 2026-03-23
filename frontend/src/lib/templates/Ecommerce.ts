@@ -173,7 +173,12 @@ export const createEcommerceFooter = () => ({
 
 export const getEcommercePage = () => ({
   id: uuidv4(),
-  name: 'Ecommerce Home',
+  name: 'Home',
+  slug: '/',
+  meta: {
+    title: 'EcoShop - Conscious Consumerism',
+    description: 'Eco-friendly and ethically sourced goods for the modern home.'
+  },
   navbar: createEcommerceNavbar(),
   sections: [
     createEcommerceHeroSection(),

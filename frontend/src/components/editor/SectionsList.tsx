@@ -44,7 +44,8 @@ import {
   Settings2,
   X,
   Palette,
-  Globe
+  Globe,
+  ShoppingBag
 } from "lucide-react";
 import {
   Collapsible,
@@ -70,6 +71,11 @@ import {
   createDefaultBlogListSection,
   createDefaultMasonryGallerySection,
   createDefaultAboutSection,
+  createDefaultCaseStudiesSection,
+  getBusinessPage,
+  getPortfolioPage,
+  getEcommercePage,
+  getConsultantPage,
   createDefaultTextOnlySection,
   createDefaultImageTextLeftSection,
   createDefaultImageTextRightSection,
@@ -93,8 +99,21 @@ const ELEMENT_CATEGORIES = [
       { type: "cta", name: "Call to Action", icon: MousePointer2, description: "Action-oriented CTA section", create: createDefaultCTASection },
       { type: "pricing", name: "Pricing", icon: DollarSign, description: "Pricing tiers & plans", create: createDefaultPricingSection },
       { type: "testimonials", name: "Testimonials", icon: Quote, description: "Customer reviews", create: createDefaultTestimonialsSection },
+      { type: "casestudies", name: "Case Studies", icon: BarChart2, description: "Display client success stories", create: createDefaultCaseStudiesSection },
       { type: "contact", name: "Contact", icon: Mail, description: "Contact form & information", create: createDefaultContactSection },
       { type: "faq", name: "FAQ", icon: HelpCircle, description: "Frequently asked questions", create: createDefaultFAQSection },
+    ]
+  },
+  {
+    name: "Full Templates",
+    color: "from-indigo-500/10 to-indigo-400/5",
+    borderColor: "border-indigo-200/50",
+    badgeColor: "bg-indigo-50 text-indigo-700",
+    items: [
+      { type: "business", name: "Business", icon: Building2, description: "Professional business site template", create: getBusinessPage, isFullPage: true },
+      { type: "portfolio", name: "Portfolio", icon: Layout, description: "Clean portfolio template", create: getPortfolioPage, isFullPage: true },
+      { type: "ecommerce", name: "Ecommerce", icon: ShoppingBag, description: "Modern shop template", create: getEcommercePage, isFullPage: true },
+      { type: "consultant", name: "Consultant", icon: Users, description: "Personal consultant template", create: getConsultantPage, isFullPage: true },
     ]
   },
   {
@@ -116,12 +135,12 @@ const ELEMENT_CATEGORIES = [
     borderColor: "border-amber-200/50",
     badgeColor: "bg-amber-50 text-amber-700",
     items: [
-      { type: "layout", name: "Text Only", icon: Type, description: "Simple text paragraph layout", create: createDefaultTextOnlySection }, // Text layout section
-      { type: "layout", name: "Image + Text (Left)", icon: Layout, description: "Image on left, text on right", create: createDefaultImageTextLeftSection }, // Left image layout
-      { type: "layout", name: "Image + Text (Right)", icon: Layout, description: "Text on left, image on right", create: createDefaultImageTextRightSection }, // Right image layout
-      { type: "layout", name: "Text + Button", icon: MousePointer2, description: "Text content with call-to-action button", create: createDefaultTextButtonSection }, // Text button layout
-      { type: "layout", name: "Heading + Text + Button", icon: Sparkles, description: "Full layout with heading, description, and button", create: createDefaultHeadingTextButtonSection }, // Complete layout
-      { type: "layout", name: "Two Column", icon: ColumnsIcon, description: "Split content into two columns", create: createDefaultTwoColumnSection }, // Column layout
+      { type: "layout", name: "Text Only", icon: Type, description: "Simple text paragraph layout", create: createDefaultTextOnlySection },
+      { type: "layout", name: "Image + Text (Left)", icon: Layout, description: "Image on left, text on right", create: createDefaultImageTextLeftSection },
+      { type: "layout", name: "Image + Text (Right)", icon: Layout, description: "Text on left, image on right", create: createDefaultImageTextRightSection },
+      { type: "layout", name: "Text + Button", icon: MousePointer2, description: "Text content with call-to-action button", create: createDefaultTextButtonSection },
+      { type: "layout", name: "Heading + Text + Button", icon: Sparkles, description: "Full layout with heading, description, and button", create: createDefaultHeadingTextButtonSection },
+      { type: "layout", name: "Two Column", icon: ColumnsIcon, description: "Split content into two columns", create: createDefaultTwoColumnSection },
     ]
   },
   {
@@ -292,7 +311,7 @@ export function SectionsList({ view = "add" }) {
         </div>
       </div>
 
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1" id="tour-elements-list">
         <div className="p-4">
           {view === 'layers' ? (
             <div className="space-y-2">
@@ -300,15 +319,15 @@ export function SectionsList({ view = "add" }) {
                 <SortableContext items={filteredLayers.map((s) => s.id)} strategy={verticalListSortingStrategy}>
                   {filteredLayers.length > 0 ? filteredLayers.map((section, index) => (
                     <SectionItem
-                      key={section.id}
-                      id={section.id}
-                      name={section.name}
-                      type={section.type}
-                      visible={section.visible}
-                      isSelected={editor.selectedSectionId === section.id}
-                      onClick={() => selectSection(section.id)}
-                      index={index}
-                    />
+                       key={section.id}
+                       id={section.id}
+                       name={section.name}
+                       type={section.type}
+                       visible={section.visible}
+                       isSelected={editor.selectedSectionId === section.id}
+                       onClick={() => selectSection(section.id)}
+                       index={index}
+                     />
                   )) : (
                     <div className="text-center py-16 border-2 border-dashed border-slate-200 rounded-2xl bg-gradient-to-br from-slate-50/50 to-white">
                       <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -379,7 +398,7 @@ export function SectionsList({ view = "add" }) {
 
                     {/* Elements Grid */}
                     <div className="grid grid-cols-2 gap-2">
-                      {filteredItems.map((item, idx) => (
+                       {filteredItems.map((item, idx) => (
                         <button
                           key={item.type}
                           onClick={() => handleAddElement(item)}
@@ -420,12 +439,6 @@ export function SectionsList({ view = "add" }) {
               {view === 'add' ? 'Click any element to add it to your page' : 'Drag to reorder sections'}
             </p>
           </div>
-          {/* {view === 'add' && (
-            <div className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-              <span className="text-[9px] text-slate-500">Ready to build</span>
-            </div>
-          )} */}
         </div>
       </div>
     </div>
