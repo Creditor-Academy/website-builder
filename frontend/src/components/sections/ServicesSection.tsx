@@ -1,5 +1,6 @@
 import React from 'react';
-import { ArrowUpRight, ChevronRight } from 'lucide-react';
+import { ArrowUpRight, ChevronRight, ArrowRight } from 'lucide-react';
+import { useBuilder } from '@/contexts/BuilderContext';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -13,11 +14,17 @@ const STYLES = `
   .sv-ce[data-editing="true"] {
     border-bottom: 1.5px dashed rgba(0,0,0,0.2);
     cursor: text; padding-bottom: 1px;
+    direction: ltr !important;
+    unicode-bidi: normal !important;
+    text-align: left !important;
   }
   .sv-ce[data-editing="true"]:focus { outline: none; }
   .sv-inv[data-editing="true"] {
     border-bottom: 1.5px dashed rgba(255,255,255,0.3);
     cursor: text;
+    direction: ltr !important;
+    unicode-bidi: normal !important;
+    text-align: left !important;
   }
 
   /* card */
@@ -37,8 +44,6 @@ const STYLES = `
   .sv-card:hover .sv-card-desc { opacity: 1; max-height: 120px; }
 
   /* list */
-
-  
   .sv-list-row { transition: background 0.2s ease, padding 0.2s ease; }
   .sv-list-row:hover { background: rgba(0,0,0,0.02); }
   .sv-list-img { filter: grayscale(1); transition: filter 0.4s ease, transform 0.4s ease; }
@@ -72,7 +77,7 @@ function InjectStyles() {
 }
 
 // ─── CE helper ────────────────────────────────────────────────────────────
-function CE({ as: Tag = 'span', value, onSave, isEditing, style, className = '', inv = false }) {
+function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '', inv = false }: any) {
   return (
     <Tag
       className={`sv-ce ${inv ? 'sv-inv' : ''} ${className}`}
@@ -90,20 +95,9 @@ function CE({ as: Tag = 'span', value, onSave, isEditing, style, className = '',
 const ACCENTS = ['#E11D48', '#0891B2', '#059669', '#7C3AED', '#D97706', '#0F766E'];
 
 // ─── Section Header ───────────────────────────────────────────────────────
-function Header({ content, isEditing, onContentChange, headingColor, paragraphColor }) {
+function Header({ content, isEditing, onContentChange, headingColor, paragraphColor }: any) {
   return (
     <div style={{ marginBottom: 80 }}>
-      {/* micro tag
-      <div style={{
-        display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 20,
-        fontFamily: "'Cabinet Grotesk', sans-serif",
-        fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase',
-        color: 'rgba(0,0,0,0.3)',
-      }}>
-        <div style={{ width: 20, height: 1, background: 'rgba(0,0,0,0.2)' }} />
-        what we do
-      </div> */}
-
       <CE
         as="h2" value={content.headline} isEditing={isEditing}
         onSave={(val) => onContentChange?.('headline', val)}
@@ -117,7 +111,6 @@ function Header({ content, isEditing, onContentChange, headingColor, paragraphCo
         }}
       />
 
-      {/* animated underbar */}
       <div style={{
         width: 48, height: 3, background: '#E11D48',
         marginBottom: 24, transformOrigin: 'left',
@@ -138,10 +131,8 @@ function Header({ content, isEditing, onContentChange, headingColor, paragraphCo
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// VARIANT: cards  →  Tall Overlay Cards with Reveal
-// ──────────────────────────────────────────────────────────────────────────
-function CardsVariant({ content, styles, isEditing, onContentChange, headingColor, paragraphColor, borderRadius }) {
+// ─── VARIANT: cards  →  Tall Overlay Cards with Reveal ──────────────────────
+function CardsVariant({ content, styles, isEditing, onContentChange, headingColor, paragraphColor, borderRadius }: any) {
   const updateService = (id, field, val) => {
     if (!isEditing || !onContentChange) return;
     onContentChange('services', content.services.map((s) => s.id === id ? { ...s, [field]: val } : s));
@@ -171,16 +162,13 @@ function CardsVariant({ content, styles, isEditing, onContentChange, headingColo
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
             />
 
-            {/* gradient */}
             <div style={{
               position: 'absolute', inset: 0,
               background: `linear-gradient(170deg, transparent 30%, rgba(0,0,0,0.92) 100%)`,
             }} />
 
-            {/* accent top strip */}
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: accent }} />
 
-            {/* index */}
             <div style={{
               position: 'absolute', top: 22, left: 22,
               fontFamily: "'Cabinet Grotesk', sans-serif",
@@ -190,7 +178,6 @@ function CardsVariant({ content, styles, isEditing, onContentChange, headingColo
               {String(index + 1).padStart(2, '0')}
             </div>
 
-            {/* content */}
             <div
               className="sv-card-body"
               style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '36px 32px' }}
@@ -216,7 +203,7 @@ function CardsVariant({ content, styles, isEditing, onContentChange, headingColo
                   }}
                 />
                 <a
-                  href={service.link}
+                  href={service.link || '#'}
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: 8,
                     fontFamily: "'Cabinet Grotesk', sans-serif",
@@ -240,10 +227,8 @@ function CardsVariant({ content, styles, isEditing, onContentChange, headingColo
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// VARIANT: list  →  Editorial Divider List
-// ──────────────────────────────────────────────────────────────────────────
-function ListVariant({ content, styles, isEditing, onContentChange, headingColor, paragraphColor, borderRadius }) {
+// ─── VARIANT: list  →  Editorial Divider List ──────────────────────────────
+function ListVariant({ content, styles, isEditing, onContentChange, headingColor, paragraphColor, borderRadius }: any) {
   const updateService = (id, field, val) => {
     if (!isEditing || !onContentChange) return;
     onContentChange('services', content.services.map((s) => s.id === id ? { ...s, [field]: val } : s));
@@ -268,7 +253,6 @@ function ListVariant({ content, styles, isEditing, onContentChange, headingColor
               animation: `sv-up 0.5s ease ${index * 0.07}s both`,
             }}
           >
-            {/* Image */}
             <div style={{ overflow: 'hidden', borderRadius: `calc(${borderRadius} * 0.5)`, height: 140 }}>
               <img
                 src={service.imageUrl} alt={service.title}
@@ -277,9 +261,7 @@ function ListVariant({ content, styles, isEditing, onContentChange, headingColor
               />
             </div>
 
-            {/* Text */}
             <div>
-              {/* numbered accent */}
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
                 marginBottom: 12,
@@ -310,14 +292,12 @@ function ListVariant({ content, styles, isEditing, onContentChange, headingColor
               />
             </div>
 
-            {/* Arrow button */}
-           <a
-  href={service.link || '#'}
-  className="w-[52px] h-[52px] rounded-full flex items-center justify-center text-slate-900 hover:bg-slate-900 hover:text-white transition-all duration-300 hover:-translate-y-1"
->
-  <ArrowUpRight size={20} />
-</a>
-
+            <a
+              href={service.link || '#'}
+              className="w-[52px] h-[52px] rounded-full flex items-center justify-center text-slate-900 border border-slate-200 hover:bg-slate-900 hover:text-white transition-all duration-300 hover:rotate-45"
+            >
+              <ArrowUpRight size={20} />
+            </a>
           </div>
         );
       })}
@@ -325,10 +305,8 @@ function ListVariant({ content, styles, isEditing, onContentChange, headingColor
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// VARIANT: grid  →  Clean Bordered Feature Grid
-// ──────────────────────────────────────────────────────────────────────────
-function GridVariant({ content, styles, isEditing, onContentChange, headingColor, paragraphColor, borderRadius }) {
+// ─── VARIANT: grid  →  Clean Bordered Feature Grid ──────────────────────────
+function GridVariant({ content, styles, isEditing, onContentChange, headingColor, paragraphColor, borderRadius }: any) {
   const updateService = (id, field, val) => {
     if (!isEditing || !onContentChange) return;
     onContentChange('services', content.services.map((s) => s.id === id ? { ...s, [field]: val } : s));
@@ -353,7 +331,6 @@ function GridVariant({ content, styles, isEditing, onContentChange, headingColor
               animation: `sv-in 0.5s ease ${index * 0.06}s both`,
             }}
           >
-            {/* top accent line */}
             <div style={{
               position: 'absolute', top: 0, left: 0, right: 0, height: 3,
               background: accent,
@@ -361,7 +338,6 @@ function GridVariant({ content, styles, isEditing, onContentChange, headingColor
               animation: `sv-bar 0.6s ease ${index * 0.07}s both`,
             }} />
 
-            {/* image / monogram */}
             <div style={{
               width: 60, height: 60,
               borderRadius: `calc(${borderRadius} * 0.4)`,
@@ -410,7 +386,6 @@ function GridVariant({ content, styles, isEditing, onContentChange, headingColor
               <ChevronRight size={14} className="sv-grid-chevron" />
             </div>
 
-            {/* decorative corner orb */}
             <div style={{
               position: 'absolute', bottom: -30, right: -30,
               width: 100, height: 100, borderRadius: '50%',
@@ -424,36 +399,38 @@ function GridVariant({ content, styles, isEditing, onContentChange, headingColor
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// Main export
-// ──────────────────────────────────────────────────────────────────────────
-export function ServicesSection({ section, isSelected, isEditing, onContentChange }) {
+// ─── MAIN EXPORT ─────────────────────────────────────────────────────────────
+export function ServicesSection({ section, isSelected, isEditing, onContentChange, isAlternate }: any) {
   const { content, styles, variant = 'cards' } = section;
+  const { state } = useBuilder();
+  const globalStyles = state.page?.globalStyles || {};
 
   const background = styles.useGradient
     ? (styles.backgroundGradient || styles.backgroundColor)
-    : (styles.backgroundColor || '#ffffff');
+    : (styles.backgroundColor || (isAlternate ? 'var(--theme-bg-alt, #f8fafc)' : 'var(--theme-bg, #ffffff)'));
 
-  const headingColor   = styles.headingColor   || '#0f172a';
-  const paragraphColor = styles.paragraphColor || '#475569';
-  const borderRadius   = styles.borderRadius   || '6px';
+  const headingColor = styles.headingColor || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
+  const paragraphColor = styles.paragraphColor || (isAlternate ? 'var(--theme-text-alt, #475569)' : 'var(--theme-text, #475569)');
+  const borderRadius = styles.borderRadius || '6px';
 
   const shared = { content, styles, isEditing, onContentChange, headingColor, paragraphColor, borderRadius };
 
+  const globalClasses = `
+    ${globalStyles.glassmorphism ? 'glass-effect' : ''}
+  `.trim();
+
   return (
     <section
+      className={`relative transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${globalClasses}`}
       style={{
         background,
         padding: styles.padding || '100px 0',
         fontFamily: "'Cabinet Grotesk', sans-serif",
         position: 'relative',
-        outline: isSelected ? '2px solid #E11D48' : 'none',
-        outlineOffset: isSelected ? '3px' : '0',
       }}
     >
       <InjectStyles />
 
-      {/* ambient texture */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
         backgroundImage: 'radial-gradient(ellipse at 92% 8%, rgba(225,29,72,0.04) 0%, transparent 55%), radial-gradient(ellipse at 5% 92%, rgba(8,145,178,0.04) 0%, transparent 50%)',

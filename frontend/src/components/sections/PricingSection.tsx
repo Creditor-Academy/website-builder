@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Check, Sparkles, Zap, ArrowRight } from 'lucide-react';
+import { useBuilder } from '@/contexts/BuilderContext';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -94,7 +95,7 @@ function InjectStyles() {
 const ACCENTS = ['#E11D48', '#0891B2', '#059669', '#7C3AED', '#D97706'];
 
 // ─── Section Header ───────────────────────────────────────────────────────
-function SectionHeader({ content, isEditing, onContentChange, headingColor, paragraphColor, showToggle, annual, setAnnual, centered = true }) {
+function SectionHeader({ content, isEditing, onContentChange, headingColor, paragraphColor, showToggle = false, annual = false, setAnnual = (val: boolean) => {}, centered = true }: any) {
   return (
     <div style={{ maxWidth: 560, margin: centered ? '0 auto 72px' : '0 0 64px', textAlign: centered ? 'center' : 'left' }}>
       <div style={{
@@ -170,7 +171,7 @@ function SectionHeader({ content, isEditing, onContentChange, headingColor, para
 }
 
 // ─── Plan Card ────────────────────────────────────────────────────────────
-function PlanCard({ plan, index, isEditing, onContentChange, content, price, period }) {
+function PlanCard({ plan, index, isEditing, onContentChange, content, price, period, styles }: any) {
   const isPopular = plan.popular;
   const accent = ACCENTS[index % ACCENTS.length];
 
@@ -190,6 +191,7 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
       style={{
         transform: isPopular ? 'scale(1.03)' : undefined,
         zIndex: isPopular ? 2 : 1,
+        borderRadius: styles.borderRadius || '4px',
         animation: `pr-in 0.5s ease ${index * 0.08}s both`,
       }}
     >
@@ -373,8 +375,8 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
 }
 
 // ─── VARIANT: TABLE ───────────────────────────────────────────────────────
-function TableVariant({ content, isEditing, onContentChange, headingColor, paragraphColor, plans }) {
-  const allFeatures = Array.from(new Set(plans.flatMap(p => p.features || [])));
+function TableVariant({ content, isEditing, onContentChange, headingColor, paragraphColor, plans, styles }: any) {
+  const allFeatures = Array.from(new Set((plans as any[]).flatMap(p => p.features || []))) as string[];
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 40px' }}>
@@ -386,7 +388,7 @@ function TableVariant({ content, isEditing, onContentChange, headingColor, parag
       <div style={{
         overflowX: 'auto',
         border: '1px solid rgba(0,0,0,0.08)',
-        borderRadius: 4,
+        borderRadius: styles.borderRadius || '4px',
         background: '#fff',
         boxShadow: '0 4px 24px rgba(0,0,0,0.05)',
       }}>
@@ -429,7 +431,6 @@ function TableVariant({ content, isEditing, onContentChange, headingColor, parag
                 >
                   <td style={{ padding: '20px 24px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                      {/* colored index dot */}
                       <div style={{
                         width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
                         background: p.popular ? '#E11D48' : accent,
@@ -488,48 +489,52 @@ function TableVariant({ content, isEditing, onContentChange, headingColor, parag
 }
 
 // ─── MAIN EXPORT ──────────────────────────────────────────────────────────
-export function PricingSection({ section, isSelected, isEditing, onContentChange }) {
+export function PricingSection({ section, isSelected, isEditing, onContentChange, isAlternate }: any) {
   const { content, styles } = section;
+  const { state } = useBuilder();
+  const globalStyles = state.page?.globalStyles || {};
+
   const plans = content.plans || [];
   const variant = section.variant || 'cards';
   const [annual, setAnnual] = useState(false);
 
   const background = styles.useGradient
     ? (styles.backgroundGradient || styles.backgroundColor)
-    : (styles.backgroundColor || '#fafaf8');
-  const headingColor    = styles.headingColor    || '#0f172a';
-  const paragraphColor  = styles.paragraphColor  || '#64748b';
+    : (styles.backgroundColor || (isAlternate ? 'var(--theme-bg-alt, #f8fafc)' : 'var(--theme-bg, #fafaf8)'));
+  
+  const headingColor = styles.headingColor || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
+  const paragraphColor = styles.paragraphColor || (isAlternate ? 'var(--theme-text-alt, #64748b)' : 'var(--theme-text, #64748b)');
+
   const buttonPrimaryBg = styles.buttonPrimaryBg || '#0f172a';
   const buttonPrimaryText = styles.buttonPrimaryText || '#ffffff';
 
   const shared = { content, isEditing, onContentChange, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText, plans, styles };
 
+  const globalClasses = `
+    ${globalStyles.glassmorphism ? 'glass-effect' : ''}
+  `.trim();
 
   return (
     <>
       <style>{STYLES}</style>
       <InjectStyles />
       <section
-        className="pr-sect"
+        className={`pr-sect relative transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${globalClasses}`}
         style={{
           background,
           padding: styles.padding || '100px 0',
           position: 'relative', overflow: 'hidden',
-          outline: isSelected ? '2px solid #E11D48' : 'none',
-          outlineOffset: isSelected ? '3px' : '0',
+          borderRadius: variant === 'table' ? '0' : 'var(--radius, 0)',
         }}
       >
-        {/* ambient texture */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
           backgroundImage: 'radial-gradient(ellipse at 88% 8%, rgba(225,29,72,0.04) 0%, transparent 55%), radial-gradient(ellipse at 5% 92%, rgba(8,145,178,0.04) 0%, transparent 50%)',
         }} />
 
         <div style={{ position: 'relative', zIndex: 1 }}>
-          {/* TABLE variant */}
           {variant === 'table' && <TableVariant {...shared} />}
 
-          {/* CARDS + TOGGLE variants */}
           {(variant === 'cards' || variant === 'toggle') && (
             <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 40px' }}>
               <SectionHeader
@@ -554,7 +559,7 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
                       key={plan.id || index}
                       plan={plan} index={index} price={price} period={period}
                       isEditing={isEditing} onContentChange={onContentChange}
-                      content={content}
+                      content={content} styles={styles}
                     />
                   );
                 })}

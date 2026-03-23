@@ -12,11 +12,11 @@ export const createConsultantNavbar = () => ({
     { id: uuidv4(), label: 'Book a Call', href: '#contact' },
   ],
   styles: {
-    backgroundColor: '#0f172a',
-    textColor: '#e2e8f0',
+    backgroundColor: 'var(--background, #0f172a)',
+    textColor: 'var(--foreground, #ffffff)',
     height: '90px',
     sticky: true,
-    borderBottom: '1px solid rgba(212,175,55,0.3)',
+    borderBottom: '1px solid var(--accent, rgba(212,175,55,0.3))',
   },
 });
 
@@ -27,12 +27,12 @@ export const createConsultantHeroSection = () => ({
   visible: true,
   locked: false,
   styles: {
-    backgroundColor: '#0f172a',
+    backgroundColor: 'var(--background, #0f172a)',
     padding: '140px 0',
     minHeight: '100vh',
-    color: '#ffffff',
-    headingColor: '#ffffff',
-    paragraphColor: '#ffffff',
+    color: 'var(--foreground, #ffffff)',
+    headingColor: 'var(--foreground, #ffffff)',
+    paragraphColor: 'var(--foreground, #ffffff)',
   },
   content: {
     headline: 'Strategic Intelligence for High-Performance Leaders',
@@ -51,9 +51,9 @@ export const createConsultantAboutSection = () => ({
   visible: true,
   locked: false,
   styles: {
-    backgroundColor: '#ffffff',
+    backgroundColor: 'transparent',
     padding: '110px 0',
-    color: '#0f172a',
+    color: 'var(--foreground, #0f172a)',
   },
   content: {
     badge: 'Our Philosophy',
@@ -77,9 +77,9 @@ export const createConsultantServicesSection = () => ({
   visible: true,
   locked: false,
   styles: {
-    backgroundColor: '#ffffff',
+    backgroundColor: 'transparent',
     padding: '110px 0',
-    color: '#0f172a',
+    color: 'var(--foreground, #0f172a)',
   },
   variant: 'cards',
   content: {
@@ -135,9 +135,9 @@ export const createConsultantCaseStudiesSection = () => ({
   visible: true,
   locked: false,
   styles: {
-    backgroundColor: '#0f172a',
+    backgroundColor: 'var(--background, #0f172a)',
     padding: '110px 0',
-    color: '#e2e8f0',
+    color: 'var(--foreground, #e2e8f0)',
   },
   content: {
     headline: 'Proven Results',
@@ -180,9 +180,9 @@ export const createConsultantTestimonialsSection = () => ({
   visible: true,
   locked: false,
   styles: {
-    backgroundColor: '#ffffff',
+    backgroundColor: 'transparent',
     padding: '110px 0',
-    color: '#e2e8f0',
+    color: 'var(--foreground, #e2e8f0)',
   },
   content: {
     headline: 'What Leaders Say',
@@ -451,6 +451,11 @@ export const createMarketExpansionPage = () => ({
 export const getConsultantPage = () => ({
   id: uuidv4(),
   name: 'Home',
+  slug: '/',
+  meta: {
+    title: 'Executive Consulting - Strategic Excellence',
+    description: 'Bespoke strategic intelligence for high-performance leaders and organizational transformation.'
+  },
   navbar: createConsultantNavbar(),
   sections: [
     createConsultantHeroSection(),
@@ -466,6 +471,13 @@ export const getConsultantPage = () => ({
     fontFamily: 'Inter',
     headingFont: 'Playfair Display',
     primaryColor: '#d4af37',
+    secondaryColor: '#ffffff',
+    accentColor: '#d4af37',
     backgroundColor: '#0f172a',
+    textColor: '#ffffff',
+    borderRadius: '12px',
+    glassmorphism: false,
+    animations: true,
+    shadows: 'subtle',
   },
 }); 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -61,6 +62,7 @@ const dummyAllWebsites: Website[] = [
 ];
 
 export default function DashboardWebsites() {
+  const navigate = useNavigate();
   const [websites, setWebsites] = useState<Website[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false); // Simulate admin role toggle
@@ -120,6 +122,7 @@ export default function DashboardWebsites() {
         icon: <CheckCircle className="h-5 w-5 text-emerald-500" />,
       });
     }
+    navigate(`/builder/${website.id}`);
   };
 
   const handleDelete = (website: Website) => {

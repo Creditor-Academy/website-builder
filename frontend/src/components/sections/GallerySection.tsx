@@ -68,7 +68,7 @@ function InjectStyles() {
 }
 
 // ─── CE helper ────────────────────────────────────────────────────────────
-function CE({ as: Tag = 'span', value, onSave, isEditing, style, className = '', dark = false }) {
+function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '', dark = false }: any) {
   return (
     <Tag
       className={`gl-ce ${dark ? 'gl-ce-dark' : ''} ${className}`}
@@ -87,7 +87,7 @@ function CE({ as: Tag = 'span', value, onSave, isEditing, style, className = '',
 const ACCENTS = ['#E11D48', '#0891B2', '#059669', '#7C3AED', '#D97706', '#0F766E'];
 
 // ── Shared overlay for grid/masonry items ─────────────────────────────────
-function ItemOverlay({ image, index, isEditing, onContentChange, content }) {
+function ItemOverlay({ image, index, isEditing, onContentChange, content }: any) {
   const updateImage = (field, val) => {
     if (!isEditing || !onContentChange) return;
     const updated = content.images.map((img) =>
@@ -157,7 +157,7 @@ function ItemOverlay({ image, index, isEditing, onContentChange, content }) {
 // ──────────────────────────────────────────────────────────────────────────
 // VARIANT: grid  →  Asymmetric Feature Grid
 // ──────────────────────────────────────────────────────────────────────────
-function GridVariant({ images, content, isEditing, onContentChange }) {
+function GridVariant({ images, content, isEditing, onContentChange }: any) {
   return (
     <div style={{
       display: 'grid',
@@ -199,7 +199,7 @@ function GridVariant({ images, content, isEditing, onContentChange }) {
 // ──────────────────────────────────────────────────────────────────────────
 // VARIANT: masonry  →  Editorial Masonry with Side Numbers
 // ──────────────────────────────────────────────────────────────────────────
-function MasonryVariant({ images, content, isEditing, onContentChange }) {
+function MasonryVariant({ images, content, isEditing, onContentChange }: any) {
   return (
     <div style={{
       columns: '4 220px',
@@ -237,7 +237,7 @@ function MasonryVariant({ images, content, isEditing, onContentChange }) {
 // ──────────────────────────────────────────────────────────────────────────
 // VARIANT: carousel  →  Dark Horizontal Film-Strip
 // ──────────────────────────────────────────────────────────────────────────
-function CarouselVariant({ images, content, isEditing, onContentChange }) {
+function CarouselVariant({ images, content, isEditing, onContentChange }: any) {
   const updateImage = (image, field, val) => {
     if (!isEditing || !onContentChange) return;
     const updated = content.images.map((img) =>
@@ -339,7 +339,7 @@ function CarouselVariant({ images, content, isEditing, onContentChange }) {
 // ──────────────────────────────────────────────────────────────────────────
 // Main export
 // ──────────────────────────────────────────────────────────────────────────
-export function GallerySection({ section, isSelected, isEditing, onContentChange }) {
+export function GallerySection({ section, isSelected, isEditing, onContentChange }: any) {
   const { content, styles, variant = 'grid' } = section;
   const images = content.images || [];
   const background = styles.useGradient

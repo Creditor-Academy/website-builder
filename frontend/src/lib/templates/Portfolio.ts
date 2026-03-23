@@ -189,7 +189,12 @@ export const createPortfolioFooter = () => ({
 
 export const getPortfolioPage = () => ({
   id: uuidv4(),
-  name: 'Portfolio Home',
+  name: 'Home',
+  slug: '/',
+  meta: {
+    title: 'Creative Portfolio - Design & Code',
+    description: 'Showcasing high-performance digital experiences and UI/UX design excellence.'
+  },
   navbar: createPortfolioNavbar(),
   sections: [
     createPortfolioHeroSection(),

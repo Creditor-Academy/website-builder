@@ -41,19 +41,19 @@ const renderGrid = ({ content, styles, isEditing, onContentChange, headingColor,
             padding: '2rem',
             background: styles.cardBackgroundColor || '#ffffff',
             border: `1px solid ${ACCENT_BORDER}`,
-            borderRadius: styles.borderRadius || '16px',
-            transition: 'transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease',
+            borderRadius: styles.borderRadius || 'var(--radius, 16px)',
+            transition: 'transform var(--animation-speed, 0.22s) ease, box-shadow var(--animation-speed, 0.22s) ease, border-color var(--animation-speed, 0.22s) ease',
             cursor: 'default',
             overflow: 'hidden',
           }}
           onMouseEnter={e => {
             e.currentTarget.style.transform = 'translateY(-4px)';
-            e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.08)';
+            e.currentTarget.style.boxShadow = 'var(--shadow, 0 16px 40px rgba(0,0,0,0.08))';
             e.currentTarget.style.borderColor = '#d1d5db';
           }}
           onMouseLeave={e => {
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
+            e.currentTarget.style.boxShadow = 'var(--shadow, 0 1px 3px rgba(0,0,0,0.04))';
             e.currentTarget.style.borderColor = ACCENT_BORDER;
           }}
         >
@@ -143,7 +143,7 @@ const renderGrid = ({ content, styles, isEditing, onContentChange, headingColor,
             position: 'absolute', bottom: 0, left: 0, right: 0, height: '3px',
             background: `linear-gradient(90deg, ${tag.dot}, transparent)`,
             opacity: 0,
-            transition: 'opacity 0.22s ease',
+            transition: 'opacity var(--animation-speed, 0.22s) ease',
           }} />
         </div>
       );
@@ -166,7 +166,7 @@ const renderList = ({ content, styles, isEditing, onContentChange, headingColor,
             padding: '1.75rem 1.25rem',
             borderBottom: index < content.features.length - 1 ? `1px solid ${ACCENT_BORDER}` : 'none',
             borderRadius: '12px',
-            transition: 'background 0.2s ease',
+            transition: 'background var(--animation-speed, 0.2s) ease',
           }}
           onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
@@ -279,20 +279,20 @@ const renderIcons = ({ content, styles, isEditing, onContentChange, headingColor
             padding: '2rem 1.25rem 1.75rem',
             background: styles.cardBackgroundColor || '#ffffff',
             border: `1px solid ${ACCENT_BORDER}`,
-            borderRadius: styles.borderRadius || '16px',
-            transition: 'transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease',
+            borderRadius: styles.borderRadius || 'var(--radius, 16px)',
+            transition: 'transform var(--animation-speed, 0.22s) ease, box-shadow var(--animation-speed, 0.22s) ease, border-color var(--animation-speed, 0.22s) ease',
             cursor: 'default',
             position: 'relative',
             overflow: 'hidden',
           }}
           onMouseEnter={e => {
             e.currentTarget.style.transform = 'translateY(-3px)';
-            e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.07)';
+            e.currentTarget.style.boxShadow = 'var(--shadow, 0 12px 32px rgba(0,0,0,0.07))';
             e.currentTarget.style.borderColor = '#d1d5db';
           }}
           onMouseLeave={e => {
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
+            e.currentTarget.style.boxShadow = 'var(--shadow, 0 1px 3px rgba(0,0,0,0.04))';
             e.currentTarget.style.borderColor = ACCENT_BORDER;
           }}
         >
@@ -378,18 +378,18 @@ const renderCards = ({ content, styles, isEditing, onContentChange, headingColor
             alignItems: 'stretch',
             background: '#ffffff',
             border: `1px solid ${ACCENT_BORDER}`,
-            borderRadius: styles.borderRadius || '16px',
+            borderRadius: styles.borderRadius || 'var(--radius, 16px)',
             overflow: 'hidden',
-            transition: 'box-shadow 0.22s ease, border-color 0.22s ease, transform 0.22s ease',
+            transition: 'box-shadow var(--animation-speed, 0.22s) ease, border-color var(--animation-speed, 0.22s) ease, transform var(--animation-speed, 0.22s) ease',
             cursor: 'default',
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.08)';
+            e.currentTarget.style.boxShadow = 'var(--shadow, 0 8px 30px rgba(0,0,0,0.08))';
             e.currentTarget.style.borderColor = '#d1d5db';
             e.currentTarget.style.transform = 'translateX(4px)';
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
+            e.currentTarget.style.boxShadow = 'var(--shadow, 0 1px 3px rgba(0,0,0,0.04))';
             e.currentTarget.style.borderColor = ACCENT_BORDER;
             e.currentTarget.style.transform = 'translateX(0)';
           }}
@@ -536,7 +536,129 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
           pointerEvents: 'none',
         }} />
 
- 
+        {/* Very soft top-right blob */}
+        <div style={{
+          position: 'absolute', top: '-100px', right: '-100px',
+          width: '400px', height: '400px', borderRadius: '50%',
+          background: 'radial-gradient(circle, #f0f9ff 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }} />
+
+        {/* ── BG Color Picker — top-right corner, edit mode only ── */}
+        {isEditing && (
+          <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 50 }}>
+            {/* Swatch button */}
+            <button
+              title="Change section background color"
+              onClick={(e) => { e.stopPropagation(); setShowBgPicker(p => !p); }}
+              style={{
+                width: '28px', height: '28px',
+                borderRadius: '8px',
+                border: '1.5px solid rgba(0,0,0,0.15)',
+                background: background,
+                cursor: 'pointer',
+                padding: 0,
+                position: 'relative',
+                overflow: 'hidden',
+                boxShadow: 'var(--shadow, 0 2px 6px rgba(0,0,0,0.15))',
+                transition: 'transform var(--animation-speed, 0.15s)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.12)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              {/* Checkerboard so it's visible on white */}
+              <div style={{
+                position: 'absolute', inset: 0,
+                backgroundImage: 'linear-gradient(45deg,#aaa 25%,transparent 25%),linear-gradient(-45deg,#aaa 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#aaa 75%),linear-gradient(-45deg,transparent 75%,#aaa 75%)',
+                backgroundSize: '5px 5px',
+                backgroundPosition: '0 0,0 2.5px,2.5px -2.5px,-2.5px 0',
+                opacity: 0.18,
+              }} />
+              <span style={{ fontSize: '10px', lineHeight: 1, position: 'relative', zIndex: 1 }}>🎨</span>
+            </button>
+
+            {/* Picker dropdown */}
+            {showBgPicker && (
+              <div
+                onClick={e => e.stopPropagation()}
+                style={{
+                  position: 'absolute',
+                  top: '36px', right: 0,
+                  background: '#ffffff',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '12px',
+                  padding: '12px',
+                  boxShadow: 'var(--shadow, 0 8px 30px rgba(0,0,0,0.13))',
+                  zIndex: 9999,
+                  minWidth: '200px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                  fontFamily: "'DM Sans', sans-serif",
+                }}
+              >
+                <p style={{ margin: 0, fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9ca3af' }}>
+                  Section Background
+                </p>
+
+                {/* Preset swatches */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  {[
+                    '#ffffff', '#f8fafc', '#f1f5f9', '#f9fafb',
+                    '#111827', '#0f172a', '#1e3a5f', '#065f46',
+                    '#7c3aed', '#be123c', '#1d4ed8', '#000000',
+                  ].map(color => (
+                    <button
+                      key={color}
+                      title={color}
+                      onClick={() => {
+                        if (onContentChange) onContentChange('__styles_backgroundColor', color);
+                        setShowBgPicker(false);
+                      }}
+                      style={{
+                        width: '28px', height: '28px',
+                        borderRadius: '6px',
+                        border: background === color ? '2px solid #3b82f6' : '1.5px solid #e5e7eb',
+                        background: color,
+                        cursor: 'pointer',
+                        padding: 0,
+                        boxShadow: background === color ? '0 0 0 2px #bfdbfe' : 'none',
+                        transition: 'transform var(--animation-speed, 0.12s)',
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.15)'}
+                      onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                    />
+                  ))}
+                </div>
+
+                {/* Color wheel + hex input */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <input
+                    type="color"
+                    value={background.startsWith('#') && background.length === 7 ? background : '#ffffff'}
+                    onChange={e => onContentChange && onContentChange('__styles_backgroundColor', e.target.value)}
+                    style={{ width: '30px', height: '30px', borderRadius: '6px', border: '1px solid #e5e7eb', padding: '2px', cursor: 'pointer', background: 'none', flexShrink: 0 }}
+                  />
+                  <input
+                    type="text"
+                    value={background}
+                    placeholder="#ffffff"
+                    onChange={e => onContentChange && onContentChange('__styles_backgroundColor', e.target.value)}
+                    style={{ flex: 1, padding: '5px 8px', border: '1px solid #e5e7eb', borderRadius: '7px', fontSize: '0.78rem', fontFamily: 'monospace', color: '#111827', background: '#f9fafb', outline: 'none' }}
+                  />
+                </div>
+
+                <button
+                  onClick={() => setShowBgPicker(false)}
+                  style={{ padding: '5px', borderRadius: '7px', border: '1px solid #e5e7eb', background: '#f9fafb', fontSize: '0.73rem', fontWeight: 600, color: '#374151', cursor: 'pointer' }}
+                >
+                  Done
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         <div style={{
           maxWidth: '1200px', margin: '0 auto',

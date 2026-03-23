@@ -212,7 +212,12 @@ export const createCoachFooter = () => ({
 
 export const getCoachPage = () => ({
   id: uuidv4(),
-  name: 'Coaching Home',
+  name: 'Home',
+  slug: '/',
+  meta: {
+    title: 'ElevatePath - Expert Coaching & Training',
+    description: 'Master your craft through expert-led courses and personalized mentorship.'
+  },
   navbar: createCoachNavbar(),
   sections: [
     createCoachHeroSection(),

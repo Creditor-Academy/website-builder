@@ -29,7 +29,7 @@ import dragDropImg from "../assets/drag_drop.png";
 import templatesImg from "../assets/templates_showcase.png";
 import componentsImg from "../assets/components_palette.png";
 import uiShowcase1 from "../assets/ui_showcase_1.png";
-import uiShowcase2 from "../assets/ui_showcase_2.png";
+import uiShowcase2 from "../assets/ui_showcase_1.png";
 
 const FeaturesPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -43,8 +43,8 @@ const FeaturesPage = () => {
   const features = [
     {
       id: "components",
-      title: "Smart Components",
-      description: "Access a rich library of pre-built, high-performance components. From hero sections to interactive forms, we've got you covered.",
+      title: "Components",
+      description: "Access a rich and advanced library of pre-built components for your website. From hero sections to interactive forms, we've got you covered.",
       details: [
         "Advanced UI building blocks",
         "Customizable styles & tokens",
@@ -231,21 +231,21 @@ const FeaturesPage = () => {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vw] h-[150vh] transform -rotate-[12deg] skew-x-[12deg] flex gap-8 justify-center items-center opacity-80 md:opacity-100 select-none">
             <div className="flex flex-col gap-8 animate-infinite-scroll-vertical">
               {[dragDropImg, templatesImg, uiShowcase1, componentsImg].map((img, i) => (
-                <div key={i} className={cn("w-[250px] md:w-[450px] aspect-video rounded-3xl border overflow-hidden shadow-2xl", isDark ? "border-slate-800 bg-slate-900" : "border-slate-200 bg-white")}>
+                <div key={i} className={cn("w-[250px] md:w-[450px] aspect-video rounded-3xl overflow-hidden shadow-2xl", isDark ? "bg-slate-900" : "bg-white")}>
                   <img src={img} className="w-full h-full object-cover transition-all duration-700" alt="Showcase" />
                 </div>
               ))}
             </div>
             <div className="flex flex-col gap-8 animate-infinite-scroll-vertical-reverse mt-40">
               {[uiShowcase2, dragDropImg, componentsImg, templatesImg].map((img, i) => (
-                <div key={i} className={cn("w-[250px] md:w-[450px] aspect-video rounded-3xl border overflow-hidden shadow-2xl", isDark ? "border-slate-800 bg-slate-900" : "border-slate-200 bg-white")}>
+                <div key={i} className={cn("w-[250px] md:w-[450px] aspect-video rounded-3xl overflow-hidden shadow-2xl", isDark ? "bg-slate-900" : "bg-white")}>
                   <img src={img} className="w-full h-full object-cover transition-all duration-700" alt="Showcase" />
                 </div>
               ))}
             </div>
             <div className="hidden lg:flex flex-col gap-8 animate-infinite-scroll-vertical">
               {[templatesImg, uiShowcase1, dragDropImg, uiShowcase2].map((img, i) => (
-                <div key={i} className={cn("w-[250px] md:w-[450px] aspect-video rounded-3xl border overflow-hidden shadow-2xl", isDark ? "border-slate-800 bg-slate-900" : "border-slate-200 bg-white")}>
+                <div key={i} className={cn("w-[250px] md:w-[450px] aspect-video rounded-3xl overflow-hidden shadow-2xl", isDark ? "bg-slate-900" : "bg-white")}>
                   <img src={img} className="w-full h-full object-cover transition-all duration-700" alt="Showcase" />
                 </div>
               ))}
@@ -318,10 +318,10 @@ const FeaturesPage = () => {
               isDark ? "bg-slate-900 border-white/5" : "bg-white border-black/5 shadow-xl"
             )}
           >
-            <div className="max-w-md relative z-10">
+            <div className="max-w-[280px] relative z-10">
               <Layers className="text-emerald-500 w-10 h-10 mb-6" />
-              <h2 className="text-4xl font-bold mb-4">{features[0].title}</h2>
-              <p className="text-slate-400 text-lg mb-6">{features[0].description}</p>
+              <h2 className={cn("text-4xl font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>{features[0].title}</h2>
+              <p className={cn("text-lg mb-6", isDark ? "text-white" : "text-slate-600")}>{features[0].description}</p>
               <Link to="/login" className="text-emerald-500 font-bold flex items-center gap-2 group">
                 Explore Components <ArrowRight className="group-hover:translate-x-1 transition-transform" />
               </Link>
@@ -338,8 +338,8 @@ const FeaturesPage = () => {
             )}
           >
             <LayoutTemplate className="text-purple-500 w-10 h-10 mb-6" />
-            <h2 className="text-3xl font-bold mb-4">{features[1].title}</h2>
-            <p className="text-slate-400 mb-8">{features[1].description}</p>
+            <h2 className={cn("text-3xl font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>{features[1].title}</h2>
+            <p className={cn("mb-8", isDark ? "text-slate-400" : "text-slate-600")}>{features[1].description}</p>
             <img src={templatesImg} className="absolute bottom-[-5%] left-0 w-full rounded-t-3xl shadow-2xl" />
           </motion.div>
 
@@ -353,8 +353,8 @@ const FeaturesPage = () => {
           >
             <div className="flex-1">
               <Move className="text-blue-500 w-10 h-10 mb-6" />
-              <h2 className="text-4xl font-bold mb-4">{features[2].title}</h2>
-              <p className="text-slate-400 text-lg">{features[2].description}</p>
+              <h2 className={cn("text-4xl font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>{features[2].title}</h2>
+              <p className={cn("text-lg", isDark ? "text-slate-400" : "text-slate-600")}>{features[2].description}</p>
               <div className="mt-8 flex flex-wrap gap-4">
                  {features[2].details.map((d, i) => (
                    <span key={i} className="px-4 py-2 rounded-full bg-blue-500/10 text-blue-500 text-sm font-semibold">{d}</span>
@@ -375,8 +375,8 @@ const FeaturesPage = () => {
             )}
           >
             <Palette className="text-emerald-500 w-10 h-10 mb-6" />
-            <h2 className="text-3xl font-bold mb-4 font-sans">{features[3].title}</h2>
-            <p className="text-slate-400 mb-6">{features[3].description}</p>
+            <h2 className={cn("text-3xl font-bold mb-4 font-sans", isDark ? "text-white" : "text-slate-900")}>{features[3].title}</h2>
+            <p className={cn("mb-6", isDark ? "text-slate-400" : "text-slate-600")}>{features[3].description}</p>
             <div className="absolute bottom-0 right-0 w-1/2 opacity-30 group-hover:opacity-100 transition-opacity duration-500">
                <div className="flex gap-2 mb-2 justify-end px-6 pb-6">
                  {[1, 2, 3, 4].map(i => (
@@ -395,8 +395,8 @@ const FeaturesPage = () => {
             )}
           >
             <Smartphone className="text-blue-500 w-10 h-10 mb-6" />
-            <h2 className="text-3xl font-bold mb-4">{features[4].title}</h2>
-            <p className="text-slate-400 mb-6">{features[4].description}</p>
+            <h2 className={cn("text-3xl font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>{features[4].title}</h2>
+            <p className={cn("mb-6", isDark ? "text-slate-400" : "text-slate-600")}>{features[4].description}</p>
             <div className="flex items-center gap-4 mt-auto">
               <Monitor className="w-6 h-6 text-slate-500" />
               <div className="h-px flex-1 bg-slate-800" />

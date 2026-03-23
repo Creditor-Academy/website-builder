@@ -92,7 +92,7 @@ function InjectStyles() {
 }
 
 // ─── CE helper ────────────────────────────────────────────────────────────
-function CE({ as: Tag = 'span', value, onSave, isEditing, style, className = '' }) {
+function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '' }: any) {
   return (
     <Tag
       className={`ly-ce ${className}`}
@@ -112,7 +112,7 @@ function CE({ as: Tag = 'span', value, onSave, isEditing, style, className = '' 
 
 
 // ─── Accent bar ───────────────────────────────────────────────────────────
-function AccentBar({ center = false }) {
+function AccentBar({ center = false }: any) {
   return (
     <div style={{
       width: 32, height: 3, background: '#E11D48',
@@ -124,7 +124,7 @@ function AccentBar({ center = false }) {
 }
 
 // ─── Image block ──────────────────────────────────────────────────────────
-function ImageBlock({ content, section, isEditing, openMediaPicker, aspectRatio = '4/3' }) {
+function ImageBlock({ content, section, isEditing, openMediaPicker, aspectRatio = '4/3' }: any) {
   if (!content.imageUrl) {
     return (
       <div
@@ -173,7 +173,7 @@ function ImageBlock({ content, section, isEditing, openMediaPicker, aspectRatio 
 // VARIANTS
 // ──────────────────────────────────────────────────────────────────────────
 
-function TextOnly({ content, isEditing, updateContent, styles }) { // Text-only layout variant
+function TextOnly({ content, isEditing, updateContent, styles }: any) { // Text-only layout variant
   return (
     <div style={{ maxWidth: 760, margin: '0 auto' }}>
       <CE
@@ -191,7 +191,7 @@ function TextOnly({ content, isEditing, updateContent, styles }) { // Text-only 
   );
 }
 
-function ImageTextLayout({ content, section, isEditing, updateContent, openMediaPicker, styles, imageRight = false }) { // Image-text layout variant (left/right)
+function ImageTextLayout({ content, section, isEditing, updateContent, openMediaPicker, styles, imageRight = false }: any) { // Image-text layout variant (left/right)
   const textBlock = (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
       <CE
@@ -238,7 +238,7 @@ function ImageTextLayout({ content, section, isEditing, updateContent, openMedia
   );
 }
 
-function TextButton({ content, isEditing, updateContent, styles }) { // Text-button layout variant
+function TextButton({ content, isEditing, updateContent, styles }: any) { // Text-button layout variant
   const handleTextEdit = (field, e) => {
     updateContent(field, e.currentTarget.innerHTML);
   };
@@ -292,7 +292,7 @@ function TextButton({ content, isEditing, updateContent, styles }) { // Text-but
   );
 }
 
-function HeadingTextButton({ content, isEditing, updateContent, styles }) { // Heading-text-button layout variant
+function HeadingTextButton({ content, isEditing, updateContent, styles }: any) { // Heading-text-button layout variant
   const handleTextEdit = (field, e) => {
     updateContent(field, e.currentTarget.innerHTML);
   };
@@ -358,7 +358,7 @@ function HeadingTextButton({ content, isEditing, updateContent, styles }) { // H
   );
 }
 
-function TwoColumn({ content, isEditing, updateContent, styles }) { // Two-column layout variant
+function TwoColumn({ content, isEditing, updateContent, styles }: any) { // Two-column layout variant
   const cols = [
     { key: 'leftColumn',  label: '01' },
     { key: 'rightColumn', label: '02' },
@@ -422,7 +422,7 @@ function TwoColumn({ content, isEditing, updateContent, styles }) { // Two-colum
 // ──────────────────────────────────────────────────────────────────────────
 // Main export
 // ──────────────────────────────────────────────────────────────────────────
-export function LayoutSection({ section, isSelected, isEditing, onContentChange }) {
+export function LayoutSection({ section, isSelected, isEditing, onContentChange }: any) {
   const { openMediaPicker } = useBuilder();
   const { content, styles } = section;
   const variant = section.variant || 'text-only';

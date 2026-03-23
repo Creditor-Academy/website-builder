@@ -35,7 +35,7 @@ The Athena Website Builder is designed as a multi-tenant platform with a strong 
     *   **My Websites List:** For `User` role, lists owned websites with details (name, domain, status, last updated) and quick actions.
     *   **All Websites List:** For `Admin` role, view all websites across the platform.
     *   **Users List:** For `Admin` role, manages user accounts.
-    *   **Pages List:** Displays pages belonging to the currently selected website.
+    *   **Pages List:** Displays pages belonging to the currently selected website
     *   **Deployment Management:** Manages website versions and deployment status.
     *   **Other Configurations:** Manages general platform settings.
 

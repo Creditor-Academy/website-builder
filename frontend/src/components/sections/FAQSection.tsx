@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, Plus, Minus } from 'lucide-react';
+import { useBuilder } from '@/contexts/BuilderContext';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -34,7 +35,7 @@ const STYLES = `
   .fq-acc-btn:hover { opacity: 0.72; }
 
   .fq-acc-icon {
-    width: 32px; height: 32px; border-radius: '50%'; flex-shrink: 0;
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
     border: 1px solid rgba(0,0,0,0.12);
     transition: background 0.2s ease, border-color 0.2s ease, transform 0.3s ease;
@@ -86,7 +87,7 @@ function InjectStyles() {
 }
 
 // ─── CE helper ────────────────────────────────────────────────────────────
-function CE({ as: Tag = 'span', value, onSave, isEditing, style, className = '' }) {
+function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '' }: any) {
   return (
     <Tag
       className={`fq-ce ${className}`}
@@ -157,7 +158,7 @@ function Header({ content, isEditing, onContentChange, headingColor, paragraphCo
 }
 
 // ─── updateFaq helper ─────────────────────────────────────────────────────
-function makeUpdater(content, onContentChange) {
+function makeUpdater(content: any, onContentChange: any) {
   return (faq, field, val) => {
     if (!onContentChange) return;
     onContentChange('faqs', content.faqs.map(f => f.id === faq.id ? { ...f, [field]: val } : f));
@@ -186,7 +187,6 @@ function AccordionVariant({ faqs, content, isEditing, onContentChange, headingCo
               className="fq-acc-btn"
               onClick={() => setOpenIndex(isOpen ? null : index)}
             >
-              {/* index + question */}
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20, flex: 1 }}>
                 <span style={{
                   fontFamily: "'Geist', sans-serif",
@@ -213,13 +213,11 @@ function AccordionVariant({ faqs, content, isEditing, onContentChange, headingCo
                 />
               </div>
 
-              {/* icon */}
               <div
                 className="fq-acc-icon"
                 style={{
                   background: isOpen ? '#0f172a' : 'transparent',
                   borderColor: isOpen ? '#0f172a' : 'rgba(0,0,0,0.12)',
-                  borderRadius: '50%',
                 }}
               >
                 {isOpen
@@ -229,16 +227,12 @@ function AccordionVariant({ faqs, content, isEditing, onContentChange, headingCo
               </div>
             </button>
 
-            {/* Answer panel */}
             <div
               className="fq-acc-body"
               style={{ maxHeight: isOpen ? 400 : 0, opacity: isOpen ? 1 : 0 }}
             >
               <div style={{ paddingLeft: 44, paddingBottom: 28 }}>
-                {/* left accent bar */}
-                <div style={{
-                  display: 'flex', gap: 20,
-                }}>
+                <div style={{ display: 'flex', gap: 20 }}>
                   <div style={{
                     width: 2, flexShrink: 0, background: accent, borderRadius: 1,
                     alignSelf: 'stretch', opacity: 0.6,
@@ -283,10 +277,8 @@ function GridVariant({ faqs, content, isEditing, onContentChange, headingColor, 
             className="fq-grid-card"
             style={{ animationDelay: `${idx * 0.05}s` }}
           >
-            {/* top accent strip */}
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: accent }} />
 
-            {/* index */}
             <div style={{
               fontFamily: "'Geist', sans-serif",
               fontSize: 9, fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase',
@@ -305,7 +297,6 @@ function GridVariant({ faqs, content, isEditing, onContentChange, headingColor, 
               }}
             />
 
-            {/* thin rule */}
             <div style={{ width: 24, height: 2, background: accent, marginBottom: 14 }} />
 
             <CE
@@ -318,7 +309,6 @@ function GridVariant({ faqs, content, isEditing, onContentChange, headingColor, 
               }}
             />
 
-            {/* ghost watermark */}
             <div style={{
               position: 'absolute', bottom: -8, right: 14,
               fontFamily: "'Newsreader', serif",
@@ -339,13 +329,12 @@ function GridVariant({ faqs, content, isEditing, onContentChange, headingColor, 
 // ──────────────────────────────────────────────────────────────────────────
 function TabsVariant({ faqs, content, isEditing, onContentChange, headingColor, paragraphColor }) {
   const update = makeUpdater(content, onContentChange);
-  const categories = Array.from(new Set(faqs.map(f => f.category || 'General')));
+  const categories = Array.from(new Set((faqs as any[]).map(f => f.category || 'General')));
   const [active, setActive] = useState(categories[0] || 'General');
-  const filtered = faqs.filter(f => (f.category || 'General') === active);
+  const filtered = (faqs as any[]).filter(f => (f.category || 'General') === active);
 
   return (
     <div>
-      {/* Tab bar */}
       <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 48 }}>
         {categories.map(cat => (
           <button
@@ -358,7 +347,6 @@ function TabsVariant({ faqs, content, isEditing, onContentChange, headingColor, 
         ))}
       </div>
 
-      {/* Items */}
       <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
         {filtered.map((faq, idx) => {
           const accent = ACCENTS[idx % ACCENTS.length];
@@ -375,7 +363,6 @@ function TabsVariant({ faqs, content, isEditing, onContentChange, headingColor, 
                 animation: 'fq-in 0.3s ease both',
               }}
             >
-              {/* left accent line */}
               <div style={{ width: 3, flexShrink: 0, background: accent, borderRadius: 2, alignSelf: 'stretch' }} />
 
               <div style={{ flex: 1 }}>
@@ -406,36 +393,38 @@ function TabsVariant({ faqs, content, isEditing, onContentChange, headingColor, 
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// Main export
-// ──────────────────────────────────────────────────────────────────────────
-export function FAQSection({ section, isEditing, onContentChange }) {
+// ─── MAIN EXPORT ─────────────────────────────────────────────────────────────
+export function FAQSection({ section, isSelected, isEditing, onContentChange, isAlternate }) {
   const { content, styles } = section;
+  const { state } = useBuilder();
+  const globalStyles = state.page?.globalStyles || {};
+
   const faqs = content.faqs || [];
   const [openIndex, setOpenIndex] = useState(0);
-
-  const categories = Array.from(new Set<string>(faqs.map((f: any) => f.category || 'General')));
-  const [active, setActive] = useState(categories[0] || 'General');
 
   const variant = section.variant || 'accordion';
 
   const background = styles.useGradient
     ? (styles.backgroundGradient || styles.backgroundColor)
-    : (styles.backgroundColor || '#fafaf8');
-  const padding     = styles.padding     || '100px 0';
-  const headingColor   = styles.headingColor   || '#0f172a';
-  const paragraphColor = styles.paragraphColor || '#64748b';
+    : (styles.backgroundColor || (isAlternate ? 'var(--theme-bg-alt, #f8fafc)' : 'var(--theme-bg, #f8fafc)'));
 
-  const shared = { faqs, content, isEditing, onContentChange, headingColor, paragraphColor, openIndex, setOpenIndex };
+  const padding = styles.padding || '100px 0';
+  const headingColor = styles.headingColor || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
+  const paragraphColor = styles.paragraphColor || (isAlternate ? 'var(--theme-text-alt, #64748b)' : 'var(--theme-text, #64748b)');
+
+  const shared = { faqs, content, styles, isEditing, onContentChange, headingColor, paragraphColor, openIndex, setOpenIndex };
+
+  const globalClasses = `
+    ${globalStyles.glassmorphism ? 'glass-effect' : ''}
+  `.trim();
 
   return (
     <section
-      className="fq-sect"
-      style={{ background, padding, fontFamily: "'Geist', sans-serif", position: 'relative' }}
+      className={`fq-sect relative transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${globalClasses}`}
+      style={{ background, padding, fontFamily: "'Geist', sans-serif" }}
     >
       <InjectStyles />
 
-      {/* ambient texture */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
         backgroundImage: 'radial-gradient(ellipse at 90% 5%, rgba(225,29,72,0.03) 0%, transparent 55%), radial-gradient(ellipse at 5% 92%, rgba(8,145,178,0.03) 0%, transparent 50%)',

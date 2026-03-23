@@ -1,5 +1,6 @@
 import React from 'react';
 import { Target, Eye, Heart, Award, Users } from 'lucide-react';
+import { useBuilder } from '@/contexts/BuilderContext';
 
 const iconMap = { Target, Eye, Heart, Award, Users };
 
@@ -53,13 +54,7 @@ function getIcon(name, size = 20) {
   return <IC size={size} />;
 }
 
-// ── Single reusable editable text component ──────────────────────────────
-// Key fixes:
-//  1. contentEditable must be the string "true"/"false", not a boolean
-//  2. data-editing attr drives CSS, not [contenteditable] attr (more reliable)
-//  3. pointerEvents explicitly set to 'auto' so parent overlays don't block
-//  4. No animation on the element itself (animations break re-focus)
-function CE({ as: Tag = 'span', value, onSave, isEditing, style, className = '', inv = false }) {
+function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '', inv = false }: any) {
   const editing = !!isEditing;
   return (
     <Tag
@@ -81,7 +76,7 @@ function CE({ as: Tag = 'span', value, onSave, isEditing, style, className = '',
   );
 }
 
-function MicroLabel({ text, light }) {
+function MicroLabel({ text, light = false }: { text: string; light?: boolean }) {
   return (
     <div style={{
       display: 'inline-flex', alignItems: 'center', gap: 10,
@@ -116,7 +111,7 @@ function Badge({ text, isEditing, onSave }) {
   );
 }
 
-function ImageBlock({ src, alt, isEditing, onContentChange, height = 480, borderRadius = '4px' }) {
+function ImageBlock({ src, alt, isEditing, onContentChange, height = 480, borderRadius = '4px' }: { src: any; alt: any; isEditing: any; onContentChange: any; height?: string | number; borderRadius?: any }) {
   return (
     <div
       className="ab-img-wrap"
@@ -148,9 +143,7 @@ function ImageBlock({ src, alt, isEditing, onContentChange, height = 480, border
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// VARIANT: split
-// ──────────────────────────────────────────────────────────────────────────
+// ─── VARIANT: split ──────────────────────────────────────────────────────────
 function SplitVariant({ content, styles, isEditing, onContentChange, headingColor, paragraphColor }) {
   const imgRight = content.imagePosition === 'right';
 
@@ -162,7 +155,6 @@ function SplitVariant({ content, styles, isEditing, onContentChange, headingColo
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, minHeight: 580 }}>
-
       {/* Content column */}
       <div style={{
         order: imgRight ? 0 : 1,
@@ -177,7 +169,6 @@ function SplitVariant({ content, styles, isEditing, onContentChange, headingColo
           background: 'rgba(0,0,0,0.08)', pointerEvents: 'none',
         }} />
 
-        {/* <MicroLabel text="our story" /> */}
         <Badge text={content.badge} isEditing={isEditing} onSave={(val) => onContentChange?.('badge', val)} />
 
         <CE
@@ -241,15 +232,12 @@ function SplitVariant({ content, styles, isEditing, onContentChange, headingColo
           isEditing={isEditing} onContentChange={onContentChange}
           height="100%" borderRadius="0"
         />
-       
       </div>
     </div>
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// VARIANT: centered
-// ──────────────────────────────────────────────────────────────────────────
+// ─── VARIANT: centered ───────────────────────────────────────────────────────
 function CenteredVariant({ content, styles, isEditing, onContentChange, headingColor, paragraphColor }) {
   const updateValue = (index, field, val) => {
     if (!isEditing || !onContentChange) return;
@@ -259,7 +247,6 @@ function CenteredVariant({ content, styles, isEditing, onContentChange, headingC
 
   return (
     <div>
-      {/* Hero image */}
       <div style={{ position: 'relative', marginBottom: 72 }}>
         <ImageBlock
           src={content.imageUrl} alt={content.imageAlt}
@@ -338,9 +325,7 @@ function CenteredVariant({ content, styles, isEditing, onContentChange, headingC
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// VARIANT: cards
-// ──────────────────────────────────────────────────────────────────────────
+// ─── VARIANT: cards ──────────────────────────────────────────────────────────
 function CardsVariant({ content, styles, isEditing, onContentChange, headingColor, paragraphColor }) {
   const updateValue = (index, field, val) => {
     if (!isEditing || !onContentChange) return;
@@ -370,7 +355,6 @@ function CardsVariant({ content, styles, isEditing, onContentChange, headingColo
         />
       </div>
 
-      {/* Story panel */}
       <div style={{
         display: 'grid', gridTemplateColumns: '3fr 2fr',
         background: '#0f172a',
@@ -443,19 +427,23 @@ function CardsVariant({ content, styles, isEditing, onContentChange, headingColo
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// Main export
-// ──────────────────────────────────────────────────────────────────────────
-export function AboutSection({ section, isSelected, isEditing, onContentChange }) {
+// ─── MAIN EXPORT ─────────────────────────────────────────────────────────────
+export function AboutSection({ section, isSelected, isEditing, onContentChange, isAlternate }) {
   const { content, styles, variant = 'split' } = section;
+  const { state } = useBuilder();
+  const globalStyles = state.page?.globalStyles || {};
 
   const background = styles.useGradient
     ? (styles.backgroundGradient || styles.backgroundColor)
-    : (styles.backgroundColor || '#ffffff');
+    : (styles.backgroundColor || (isAlternate ? 'var(--theme-bg-alt, #f8fafc)' : 'var(--theme-bg, #ffffff)'));
 
-  const headingColor = styles.headingColor || '#0f172a';
-  const paragraphColor = styles.paragraphColor || '#475569';
+  const headingColor = styles.headingColor || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
+  const paragraphColor = styles.paragraphColor || (isAlternate ? 'var(--theme-text-alt, #475569)' : 'var(--theme-text, #475569)');
   const shared = { content, styles, isEditing, onContentChange, headingColor, paragraphColor };
+
+  const globalClasses = `
+    ${globalStyles.glassmorphism ? 'glass-effect' : ''}
+  `.trim();
 
   return (
     <section
@@ -468,6 +456,7 @@ export function AboutSection({ section, isSelected, isEditing, onContentChange }
         outlineOffset: isSelected ? '3px' : '0',
         transition: 'outline 0.2s ease',
       }}
+      className={globalClasses}
     >
       <InjectStyles />
       <div style={{
