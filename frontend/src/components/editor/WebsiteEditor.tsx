@@ -28,7 +28,8 @@ import {
   Download,
   AlertCircle,
   Image as ImageIcon,
-  Wand2
+  Wand2,
+  Edit
 } from "lucide-react";
 import {
   Tooltip,
@@ -53,9 +54,10 @@ function EditorContent() {
   const navItems = [
     { id: "add", icon: Plus, label: "Sections" },
     { id: "layers", icon: Layers, label: "Layers" },
+    { id: "pages", icon: FileText, label: "Pages" },
     { id: "assets", icon: ImageIcon, label: "Assets" },
     { id: "design", icon: Wand2, label: "Design System" },
-    { id: "pages", icon: FileText, label: "Pages" },
+    { id: "edit", icon: Edit, label: "Edit" },
   ];
 
   return (
