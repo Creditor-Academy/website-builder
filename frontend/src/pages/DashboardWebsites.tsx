@@ -39,6 +39,7 @@ import {
 } from 'lucide-react';
 import WebsiteShimmer from '@/components/dashboard/WebsiteShimmer';
 import GradientButton from '@/components/ui/GradientButton';
+import { useToast } from '@/components/ui/use-toast';
 
 interface Website {
   id: string;
@@ -63,6 +64,7 @@ const dummyAllWebsites: Website[] = [
 
 export default function DashboardWebsites() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [websites, setWebsites] = useState<Website[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false); // Simulate admin role toggle
@@ -117,9 +119,10 @@ export default function DashboardWebsites() {
       setEditingWebsite(null);
       // Show toast notification
       toast({
-        title: "Website Status Updated ✅",
+        title: "Website Status Updated! ✨",
         description: `Status for \"${editingWebsite.name}\" changed to ${newStatus}.`,
-        icon: <CheckCircle className="h-5 w-5 text-emerald-500" />,
+        variant: "themed",
+        icon: <CheckCircle className="h-5 w-5 text-white" />,
       });
     }
     navigate(`/builder/${website.id}`);
@@ -155,7 +158,18 @@ export default function DashboardWebsites() {
         </div>
         <div className="flex items-center gap-4">
           <GradientButton
-            onClick={() => setIsAdmin(!isAdmin)}
+            onClick={() => {
+              setIsAdmin(prev => {
+                const newAdminState = !prev;
+                toast({
+                  title: newAdminState ? "Admin View Activated! 🛡️" : "User View Activated! 👤",
+                  description: newAdminState ? "You are now viewing all websites as an administrator." : "You are now viewing only your own websites.",
+                  variant: "themed",
+                  icon: newAdminState ? <ShieldCheck className="h-6 w-6 text-white stroke-2" /> : <UserIcon className="h-6 w-6 text-white stroke-2" />,
+                });
+                return newAdminState;
+              });
+            }}
             className="w-full md:w-auto"
             icon={isAdmin ? <ShieldCheck className="w-4 h-4" /> : <UserIcon className="w-4 h-4" />}
           >

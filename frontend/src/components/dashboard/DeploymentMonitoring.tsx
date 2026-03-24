@@ -356,11 +356,11 @@ export default function DeploymentMonitoring() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-slate-200 shadow-lg">
-                        <DropdownMenuItem onClick={() => handleRollback(deployment)} disabled={deployment.status === 'Pending' || deployment.status === 'Rolled Back'} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100">
+                        <DropdownMenuItem onClick={() => handleRollback(deployment)} disabled={deployment.status === 'Pending' || deployment.status === 'Rolled Back'} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100 focus:text-slate-900">
                           <RefreshCw className="w-4 h-4" /> <span>Rollback</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleViewLogs(deployment)} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100">
+                        <DropdownMenuItem onClick={() => handleViewLogs(deployment)} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100 focus:text-slate-900">
                           <FileText className="w-4 h-4" /> <span>View Logs</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
