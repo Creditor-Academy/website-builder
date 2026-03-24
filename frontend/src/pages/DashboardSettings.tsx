@@ -28,7 +28,7 @@ const SettingsNavItem = ({ icon, label, isActive, onClick }) => {
       className={`w-full justify-start gap-3 h-11 px-6 text-base 
         ${isActive 
           ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 rounded-full' 
-          : 'bg-white text-slate-700 font-medium hover:bg-slate-100 hover:text-indigo-700 rounded-full border border-slate-200 shadow-sm' 
+          : 'bg-white text-slate-700 font-medium rounded-full border border-slate-300 shadow-sm hover:bg-slate-100 hover:text-indigo-700 hover:border-indigo-500 hover:border-2 transition-all duration-300 ease-in-out' 
         } transition-all duration-300 ease-in-out`}
       onClick={onClick}
     >
@@ -61,9 +61,10 @@ export default function DashboardSettings() {
     console.log(`Saving changes for ${section} section`);
     setTimeout(() => {
       toast({
-        title: "Settings Updated ✅",
-        description: `Your ${section} settings have been saved.`, 
-        icon: <CheckCircle className="h-5 w-5 text-emerald-500" />,
+        title: "Settings Saved! ✨",
+        description: `Your ${section} settings have been successfully updated.`, 
+        variant: "themed",
+        icon: <CheckCircle className="h-5 w-5 text-white" />,
       });
     }, 500);
   };
@@ -76,20 +77,21 @@ export default function DashboardSettings() {
     const newKey = `sk_dummy_apikey_${Date.now()}`;
     setApiKey(newKey);
     setShowApiKeyConfirm(false);
-    toast({
-      title: "API Key Generated 🔑",
-      description: "A new API key has been generated and the old one invalidated.",
-      variant: "default",
-      icon: <Key className="h-5 w-5 text-indigo-500" />,
-    });
+      toast({
+        title: "API Key Generated! 🚀",
+        description: "A new API key has been generated and the old one invalidated.",
+        variant: "themed",
+        icon: <Key className="h-5 w-5 text-white" />,
+      });
   };
 
   const handleCopyApiKey = () => {
     navigator.clipboard.writeText(apiKey);
     toast({
-      title: "API Key Copied 📋",
-      description: "API Key copied to clipboard.",
-      icon: <ClipboardCheck className="h-5 w-5 text-blue-500" />,
+      title: "API Key Copied!  clipboard",
+      description: "The API Key has been copied to your clipboard. Keep it safe!",
+      variant: "themed",
+      icon: <ClipboardCheck className="h-5 w-5 text-white" />,
     });
   };
 
@@ -159,9 +161,10 @@ export default function DashboardSettings() {
                 <Switch checked={twoFactorEnabled} onCheckedChange={(checked) => {
                   setTwoFactorEnabled(checked);
                   toast({
-                    title: "Two-Factor Authentication 🔐",
+                    title: "2FA Status Updated! 🔒",
                     description: `Two-factor authentication has been ${checked ? 'enabled' : 'disabled'}.`,
-                    icon: <Lock className="h-5 w-5 text-slate-500" />,
+                    variant: "themed",
+                    icon: <Lock className="h-5 w-5 text-white" />,
                   });
                 }} />
               </CardContent>
