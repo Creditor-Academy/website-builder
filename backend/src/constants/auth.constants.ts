@@ -29,7 +29,7 @@ export const PASSWORD_RESET_TOKEN_EXPIRY_HOURS = 1;
 export const EMAIL_VERIFICATION_TOKEN_EXPIRY_HOURS = 24;
 
 export const LOGIN_LIMIT = {
-  LIMIT: 5,
+  LIMIT: 10,
   WINDOW_SEC: 10 * 60 // 10min
 }
 

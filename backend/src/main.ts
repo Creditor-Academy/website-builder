@@ -9,7 +9,11 @@ const app = express();
 
 await initRedis();
 
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:8081", // your frontend URL
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser());
