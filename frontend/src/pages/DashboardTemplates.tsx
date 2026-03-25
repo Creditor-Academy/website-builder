@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,27 +11,43 @@ import { cn } from '@/lib/utils';
 export default function DashboardTemplates() {
   const navigate = useNavigate();
   const createWebsite = useBuilderStore(state => state.createWebsite);
+  const [activeCategory, setActiveCategory] = useState<'All' | 'Business' | 'E-commerce' | 'Personal'>('All');
 
   const handleUseTemplate = (templateId: string, title: string) => {
     const id = createWebsite(`${title} Site`, templateId);
     navigate(`/builder/${id}`);
   };
 
+  const handleCategoryClick = (category: 'All' | 'Business' | 'E-commerce' | 'Personal') => {
+    setActiveCategory(category);
+  };
+
   return (
-    <div className="p-4 md:p-10 bg-white rounded-[2.5rem] shadow-sm border border-slate-100 min-h-[80vh]">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+    <Card className="rounded-3xl shadow-xl shadow-slate-200/50 p-8 min-h-[80vh]">
+      {/* Breadcrumbs */}
+      <div className="mb-4 text-sm text-slate-500">
+        <a href="/dashboard" className="hover:underline">Dashboard</a> / <span className="font-semibold text-slate-700">Templates</span>
+      </div>
+
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
         <div>
-          <h2 className="text-4xl font-black text-slate-900 flex items-center gap-4 tracking-tighter">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <Sparkles className="w-7 h-7 text-primary fill-primary/20" />
-            </div>
-            Templates Library
-          </h2>
-          <p className="text-slate-500 mt-2 font-medium text-lg leading-relaxed">Choose a professional starting point for your next digital venture</p>
+          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Templates Library</h2>
+          <p className="text-slate-500 mt-1">Choose a professional starting point for your next digital venture.</p>
         </div>
-        <div className="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-100 gap-1">
+        <div className="flex items-center gap-2">
           {['All', 'Business', 'E-commerce', 'Personal'].map(cat => (
-            <Button key={cat} variant="ghost" size="sm" className="text-xs font-black uppercase tracking-widest rounded-xl hover:bg-white hover:shadow-sm px-6 h-10 transition-all">
+            <Button
+              key={cat}
+              variant={activeCategory === cat ? 'default' : 'outline'}
+              className={cn(
+                "rounded-full h-10 px-4 text-sm font-semibold transition-all duration-200",
+                activeCategory === cat
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/20 hover:bg-blue-700"
+                  : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700"
+              )}
+              onClick={() => handleCategoryClick(cat as 'All' | 'Business' | 'E-commerce' | 'Personal')}
+            >
               {cat}
             </Button>
           ))}
@@ -39,24 +55,28 @@ export default function DashboardTemplates() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {templatesList.map((template) => (
-          <Card key={template.id} className="group overflow-hidden border-2 border-slate-100 hover:border-primary/40 rounded-[2rem] transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 cursor-pointer bg-white">
-            <div className="aspect-[4/3] bg-slate-50 relative overflow-hidden">
+        {templatesList
+          .filter(template => activeCategory === 'All' || template.category === activeCategory)
+          .map((template) => (
+          <Card key={template.id} className="group overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer bg-white">
+            <div className="aspect-[4/3] bg-slate-50 relative overflow-hidden rounded-t-2xl">
               <img 
                 src={template.image} 
                 alt={template.name} 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
               />
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               
               {template.tag && (
-                <Badge className="absolute top-5 left-5 bg-primary text-white font-black text-[10px] px-3 py-1 tracking-[0.2em] uppercase rounded-full shadow-lg border-2 border-white/20 backdrop-blur-md">
+                <Badge className="absolute top-4 left-4 bg-white/90 text-slate-800 font-semibold text-xs px-3 py-1 rounded-full shadow-sm backdrop-blur-[2px]">
                   {template.tag}
                 </Badge>
               )}
               
-              <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3 z-20 backdrop-blur-[4px]">
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
                 <Button 
-                   className="font-black bg-white text-slate-900 hover:bg-white hover:scale-105 transition-all shadow-2xl rounded-2xl px-8 h-12 text-sm tracking-tight uppercase" 
+                   className="bg-blue-600 text-white font-semibold rounded-full px-6 h-11 text-sm shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:scale-105 transition-all duration-200"
                    onClick={(e) => { e.stopPropagation(); handleUseTemplate(template.id, template.name); }}
                 >
                    <Plus className="w-4 h-4 mr-2" /> Start Building
@@ -64,39 +84,31 @@ export default function DashboardTemplates() {
               </div>
             </div>
             
-            <CardHeader className="p-6 pb-2">
+            <CardHeader className="p-6 pt-4 pb-2">
               <div className="flex justify-between items-start mb-2">
-                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary bg-primary/5 px-3 py-1 rounded-full border border-primary/10">
+                 <Badge className="bg-blue-100 text-blue-700 font-medium px-3 py-1 rounded-full text-xs">
                   {template.category}
-                </span>
-                <template.icon className="w-5 h-5 text-slate-300 group-hover:text-primary transition-colors" />
+                </Badge>
+                <template.icon className="w-5 h-5 text-slate-400" />
               </div>
-              <CardTitle className="text-xl font-black text-slate-900 tracking-tight group-hover:text-primary transition-colors leading-none pt-1">
+              <CardTitle className="text-xl font-bold text-slate-900 leading-tight mt-1">
                 {template.name}
               </CardTitle>
             </CardHeader>
             <CardContent className="px-6 pb-6 pt-2">
-              <p className="text-sm text-slate-500 font-medium leading-relaxed">
+              <p className="text-sm text-slate-500 leading-relaxed line-clamp-2">
                 {template.desc}
               </p>
               
-              <div className="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between text-primary font-black text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
+              <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-blue-600 font-semibold text-xs uppercase tracking-wider group-hover:text-blue-700 transition-all">
                   <span>View Details</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-3 h-3" />
               </div>
             </CardContent>
           </Card>
         ))}
-        
-        {/* Custom Template Card
-        <div className="group border-2 border-dashed border-slate-200 bg-slate-50/50 hover:bg-white hover:border-primary/40 rounded-[2rem] transition-all duration-500 cursor-pointer flex flex-col items-center justify-center p-12 text-center">
-           <div className="w-16 h-16 rounded-[1.5rem] bg-white border-2 border-slate-100 flex items-center justify-center mb-6 group-hover:bg-primary/5 group-hover:border-primary/20 transition-all duration-300 shadow-sm group-hover:shadow-xl group-hover:scale-110">
-              <Plus className="w-7 h-7 text-slate-400 group-hover:text-primary transition-colors" />
-           </div>
-           <p className="text-lg font-black text-slate-900 tracking-tight">Custom Template</p>
-           <p className="text-sm text-slate-400 font-medium mt-1">Start with a blank workspace</p>
-        </div> */}
+
       </div>
-    </div>
+    </Card>
   );
 }
