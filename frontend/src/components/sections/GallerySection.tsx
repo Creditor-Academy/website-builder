@@ -159,12 +159,7 @@ function ItemOverlay({ image, index, isEditing, onContentChange, content }: any)
 // ──────────────────────────────────────────────────────────────────────────
 function GridVariant({ images, content, isEditing, onContentChange }: any) {
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(4, 1fr)',
-      gridAutoRows: '220px',
-      gap: 6,
-    }}>
+    <div className="grid grid-cols-2 md:grid-cols-4" style={{ gridAutoRows: '180px', gap: 6 }}>
       {images.map((image, index) => {
         const isFeatured = index % 5 === 0;
         return (
@@ -201,10 +196,7 @@ function GridVariant({ images, content, isEditing, onContentChange }: any) {
 // ──────────────────────────────────────────────────────────────────────────
 function MasonryVariant({ images, content, isEditing, onContentChange }: any) {
   return (
-    <div style={{
-      columns: '4 220px',
-      gap: 6,
-    }}>
+    <div style={{ columns: '2 180px', gap: 6 }}>
       {images.map((image, index) => (
         <div
           key={image.id || index}
@@ -355,7 +347,7 @@ export function GallerySection({ section, isSelected, isEditing, onContentChange
     <section
       style={{
         background,
-        padding: styles.padding || '100px 0',
+        padding: styles.padding || '60px 0',
         fontFamily: "'DM Sans', sans-serif",
         position: 'relative',
         outline: isSelected ? '2px solid #E11D48' : 'none',
@@ -370,7 +362,7 @@ export function GallerySection({ section, isSelected, isEditing, onContentChange
         backgroundImage: 'radial-gradient(ellipse at 88% 8%, rgba(225,29,72,0.04) 0%, transparent 55%), radial-gradient(ellipse at 5% 92%, rgba(8,145,178,0.04) 0%, transparent 50%)',
       }} />
 
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 40px', position: 'relative' }}>
+      <div className="container mx-auto px-4 sm:px-6 relative">
 
         {/* ── Header — left-aligned, asymmetric ──────────────────── */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 56, flexWrap: 'wrap', gap: 20 }}>

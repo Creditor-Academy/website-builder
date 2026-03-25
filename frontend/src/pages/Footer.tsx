@@ -9,12 +9,12 @@ export default function Footer({ isDark = true }: { isDark?: boolean }) {
         <div className="md:col-span-2 space-y-10">
           <div className="flex items-center gap-4">
             <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl shadow-xl transition-colors duration-1000", isDark ? "bg-white text-black" : "bg-white text-blue-600")}>B</div>
-            <span className="text-4xl font-black tracking-tighter">BUILDORA</span>
+            <span className="text-2xl md:text-4xl font-black tracking-tighter">BUILDORA</span>
           </div>
-          <p className={cn("text-xl max-w-md leading-relaxed font-medium transition-colors duration-1000", isDark ? "text-slate-400" : "text-blue-50")}>Build modern, responsive websites with powerful tools, flexible layouts, and complete creative control — no coding required.</p>
+          <p className={cn("text-base md:text-xl max-w-md leading-relaxed font-medium transition-colors duration-1000", isDark ? "text-slate-400" : "text-blue-50")}>Build modern, responsive websites with powerful tools, flexible layouts, and complete creative control — no coding required.</p>
         </div>
         <div>
-          <h4 className={cn("font-black text-xl mb-10 transition-colors duration-1000", isDark ? "text-white" : "text-white")}>Explore</h4>
+          <h4 className={cn("font-black text-lg md:text-xl mb-6 md:mb-10 transition-colors duration-1000", isDark ? "text-white" : "text-white")}>Explore</h4>
           <ul className={cn("space-y-5 text-lg font-bold transition-colors duration-1000", isDark ? "text-slate-500" : "text-blue-100")}>
             <li><Link to="/templates" className={cn("cursor-pointer transition-colors w-fit", isDark ? "hover:text-blue-500" : "hover:text-white")}>Templates</Link></li>
             <li><Link to="/features" className={cn("cursor-pointer transition-colors w-fit", isDark ? "hover:text-blue-500" : "hover:text-white")}>Features</Link></li>
@@ -22,7 +22,7 @@ export default function Footer({ isDark = true }: { isDark?: boolean }) {
           </ul>
         </div> 
         <div>
-          <h4 className={cn("font-black text-xl mb-10 transition-colors duration-1000", isDark ? "text-white" : "text-white")}>Legal</h4>
+          <h4 className={cn("font-black text-lg md:text-xl mb-6 md:mb-10 transition-colors duration-1000", isDark ? "text-white" : "text-white")}>Legal</h4>
           <ul className={cn("space-y-5 text-lg font-bold transition-colors duration-1000", isDark ? "text-slate-500" : "text-blue-100")}>
             <li><Link to="/privacy-policy" className={cn("transition-colors", isDark ? "hover:text-blue-500" : "hover:text-white")}>Privacy Policy</Link></li>
             <li><Link to="/terms-of-service" className={cn("transition-colors", isDark ? "hover:text-blue-500" : "hover:text-white")}>Terms of Service</Link></li>

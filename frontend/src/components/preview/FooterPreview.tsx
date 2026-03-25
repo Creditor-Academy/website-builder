@@ -48,6 +48,26 @@ const STYLES = `
     transition: opacity 0.18s ease;
   }
   .ft-bottom-link:hover { opacity: 0.75; }
+  .ft-grid {
+    display: grid;
+    grid-template-columns: 2fr repeat(3, 1fr);
+    gap: 0 56px;
+  }
+
+  @media (max-width: 768px) {
+    .ft-grid {
+      grid-template-columns: 1fr;
+      gap: 48px 0;
+    }
+    .ft-brand {
+      padding-right: 0 !important;
+    }
+    .ft-wrapper {
+      padding-left: 20px !important;
+      padding-right: 20px !important;
+      padding-top: 40px !important;
+    }
+  }
 `;
 
 function InjectStyles() {
@@ -224,18 +244,13 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
         background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.12) 30%, rgba(255,255,255,0.12) 70%, transparent)',
       }} />
 
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '72px 40px 0', position: 'relative' }}>
+      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '48px 24px 0', position: 'relative' }} className="ft-wrapper">
 
         {/* ── Main grid ─────────────────────────────────────────────── */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '2fr repeat(3, 1fr)',
-          gap: '0 56px',
-          marginBottom: 64,
-        }}>
+        <div className="ft-grid" style={{ marginBottom: 64 }}>
 
           {/* ── Brand column ──────────────────────────────────────── */}
-          <div style={{ paddingRight: 40 }}>
+          <div className="ft-brand" style={{ paddingRight: 40 }}>
             {/* Logo */}
             <div style={{ marginBottom: 24 }}>
               {config.logo.imageUrl ? (
@@ -298,9 +313,16 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
                       color: tc, textDecoration: 'none',
                     }}
                     onClick={(e) => {
-                      if (social.platform === 'email') { e.preventDefault(); window.location.href = `mailto:${social.href.replace('mailto:', '')}`; }
-                      else if (social.platform === 'phone') { e.preventDefault(); window.location.href = `tel:${social.href.replace('tel:', '')}`; }
-                      else if (social.platform === 'location') { e.preventDefault(); window.open(`https://maps.google.com/?q=${encodeURIComponent(social.href)}`, '_blank'); }
+                      if (social.platform === "email") {
+                        e.preventDefault();
+                        window.location.href = `mailto:${social.href.replace("mailto:", "")}`;
+                      } else if (social.platform === "phone") {
+                        e.preventDefault();
+                        window.location.href = `tel:${social.href.replace("tel:", "")}`;
+                      } else if (social.platform === "location") {
+                        e.preventDefault();
+                        window.open(`https://maps.google.com/?q=${encodeURIComponent(social.href)}`, "_blank");
+                      }
                     }}
                   >
                     <Icon size={15} />

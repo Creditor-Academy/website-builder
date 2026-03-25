@@ -29,13 +29,13 @@ export default function DashboardTemplates() {
           </h2>
           <p className="text-slate-500 mt-2 font-medium text-lg leading-relaxed">Choose a professional starting point for your next digital venture</p>
         </div>
-        <div className="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-100 gap-1">
+         <div className="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-100 gap-1">
           {['All', 'Business', 'E-commerce', 'Personal'].map(cat => (
             <Button key={cat} variant="ghost" size="sm" className="text-xs font-black uppercase tracking-widest rounded-xl hover:bg-white hover:shadow-sm px-6 h-10 transition-all">
               {cat}
             </Button>
           ))}
-        </div>
+        </div> 
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">

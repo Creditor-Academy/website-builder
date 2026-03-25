@@ -135,8 +135,8 @@ const renderSplit = ({ content, styles, isEditing, onContentChange, headingColor
   <div style={{ position: 'relative', overflow: 'hidden' }}>
     <div style={{ position: 'absolute', top: '-100px', right: '-100px', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 65%)', pointerEvents: 'none' }} />
 
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 2rem', position: 'relative', zIndex: 1 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem', position: 'relative', zIndex: 1 }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
 
         {/* Left: Text */}
         <div>
@@ -373,7 +373,7 @@ export function CTASection({ section, isSelected, isEditing, onContentChange, is
         className={`cta-section relative transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${globalClasses}`}
         style={{
           background: background,
-          padding: styles.padding || (isBanner ? '1.25rem 0' : isFloating ? '4rem 0' : '5.5rem 0'),
+          padding: styles.padding || (isBanner ? '1.25rem 0' : isFloating ? '3rem 0' : '4rem 0'),
           position: 'relative',
           overflow: 'hidden',
           borderRadius: isFloating ? '0' : 'var(--radius, 0)',

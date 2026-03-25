@@ -42,7 +42,7 @@ const Templates = () => {
     document.body.style.backgroundColor = isDark ? '#020617' : '#f8fafc';
   }, [isDark]);
 
-  const categories = ['All', 'Business', 'Creative', 'E-commerce', 'Portfolio', 'Specialized'];
+   const categories = ['All', 'Business', 'Creative', 'E-commerce', 'Portfolio', 'Specialized'];
 
   const templates = [
     {
@@ -228,7 +228,7 @@ const Templates = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
             className={cn(
-              "text-[4.5rem] sm:text-[6rem] md:text-[7.5rem] font-bold tracking-tighter leading-[1.1] mb-8 transition-colors duration-1000",
+              "text-5xl sm:text-7xl md:text-[7.5rem] font-bold tracking-tighter leading-[1.1] mb-8 transition-colors duration-1000",
               isDark ? "text-white" : "text-slate-900"
             )}
           >

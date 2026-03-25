@@ -122,10 +122,54 @@ export default function Contact() {
           </button>
         </motion.div>
 
-        {/* Mobile Menu Overlay omitted for brevity, but could be included */}
+
+        {/* Mobile Menu Overlay */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className={cn(
+                "absolute top-24 left-6 right-6 p-6 rounded-3xl border backdrop-blur-3xl md:hidden pointer-events-auto",
+                isDark ? "bg-slate-900/90 border-slate-700 shadow-2xl" : "bg-white/90 border-slate-200 shadow-xl"
+              )}
+            >
+              <div className="flex flex-col gap-4">
+                {["Features", "Templates", "Resources"].map((item) => (
+                  <Link
+                    key={item}
+                    to={`/${item.toLowerCase()}`}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={cn(
+                      "text-lg font-semibold p-2 rounded-xl transition-colors",
+                      isDark ? "text-slate-300 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                    )}
+                  >
+                    {item}
+                  </Link>
+                ))}
+                <div className={cn("h-px w-full my-2", isDark ? "bg-slate-800" : "bg-slate-100")} />
+                <Link
+                  to="/login"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={cn("text-lg font-semibold p-2", isDark ? "text-slate-300" : "text-slate-600")}
+                >Log in</Link>
+                <button
+                  onClick={() => setTheme(isDark ? 'light' : 'dark')}
+                  className={cn("mt-2 py-4 rounded-2xl text-center font-bold text-lg border",
+                    isDark ? "border-slate-700 text-white hover:bg-slate-800" : "border-slate-200 text-slate-900 hover:bg-slate-50"
+                  )}
+                >
+                  {isDark ? 'Light Mode' : 'Dark Mode'}
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
-      <section className="relative pt-48 pb-32 px-6 overflow-hidden">
+      <section className="relative pt-32 md:pt-48 pb-32 px-6 overflow-hidden">
         {/* Animated Background Orbs */}
         <div className="absolute inset-0 pointer-events-none">
           <motion.div

@@ -189,7 +189,6 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
     <div
       className={`pr-card ${isPopular ? 'pr-card-popular' : 'pr-card-default'}`}
       style={{
-        transform: isPopular ? 'scale(1.03)' : undefined,
         zIndex: isPopular ? 2 : 1,
         borderRadius: styles.borderRadius || '4px',
         animation: `pr-in 0.5s ease ${index * 0.08}s both`,
@@ -379,7 +378,7 @@ function TableVariant({ content, isEditing, onContentChange, headingColor, parag
   const allFeatures = Array.from(new Set((plans as any[]).flatMap(p => p.features || []))) as string[];
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 40px' }}>
+    <div className="container mx-auto px-4 sm:px-6 lg:px-10">
       <SectionHeader
         content={content} isEditing={isEditing} onContentChange={onContentChange}
         headingColor={headingColor} paragraphColor={paragraphColor}
@@ -522,7 +521,7 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
         className={`pr-sect relative transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${globalClasses}`}
         style={{
           background,
-          padding: styles.padding || '100px 0',
+          padding: styles.padding || '60px 0',
           position: 'relative', overflow: 'hidden',
           borderRadius: variant === 'table' ? '0' : 'var(--radius, 0)',
         }}
@@ -536,19 +535,14 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
           {variant === 'table' && <TableVariant {...shared} />}
 
           {(variant === 'cards' || variant === 'toggle') && (
-            <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 40px' }}>
+            <div className="container mx-auto px-4 sm:px-6 lg:px-10">
               <SectionHeader
                 content={content} isEditing={isEditing} onContentChange={onContentChange}
                 headingColor={headingColor} paragraphColor={paragraphColor}
                 showToggle={variant === 'toggle'} annual={annual} setAnnual={setAnnual}
               />
 
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: `repeat(${Math.min(plans.length, 3)}, 1fr)`,
-                gap: 20,
-                alignItems: 'center',
-              }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
                 {plans.map((plan, index) => {
                   const price = variant === 'toggle' && annual
                     ? Math.round(Number(plan.price) * 10 * 0.8)

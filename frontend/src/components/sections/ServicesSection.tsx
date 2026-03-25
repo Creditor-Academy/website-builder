@@ -139,11 +139,7 @@ function CardsVariant({ content, styles, isEditing, onContentChange, headingColo
   };
 
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-      gap: 20,
-    }}>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
       {content.services?.map((service, index) => {
         const accent = ACCENTS[index % ACCENTS.length];
         return (
@@ -151,7 +147,7 @@ function CardsVariant({ content, styles, isEditing, onContentChange, headingColo
             key={service.id}
             className="sv-card"
             style={{
-              position: 'relative', height: 520, overflow: 'hidden',
+              position: 'relative', height: 400, overflow: 'hidden',
               borderRadius: borderRadius,
               animation: `sv-in 0.5s ease ${index * 0.08}s both`,
             }}
@@ -241,19 +237,15 @@ function ListVariant({ content, styles, isEditing, onContentChange, headingColor
         return (
           <div
             key={service.id}
-            className="sv-list-row"
+            className="sv-list-row flex flex-col sm:flex-row items-start sm:items-center gap-6"
             style={{
-              display: 'grid',
-              gridTemplateColumns: '200px 1fr 56px',
-              gap: '0 48px',
-              alignItems: 'center',
-              padding: '36px 16px',
+              padding: '28px 16px',
               borderBottom: '1px solid rgba(0,0,0,0.08)',
               borderRadius: 4,
               animation: `sv-up 0.5s ease ${index * 0.07}s both`,
             }}
           >
-            <div style={{ overflow: 'hidden', borderRadius: `calc(${borderRadius} * 0.5)`, height: 140 }}>
+            <div className="w-full sm:w-[200px] flex-shrink-0" style={{ overflow: 'hidden', borderRadius: `calc(${borderRadius} * 0.5)`, height: 140 }}>
               <img
                 src={service.imageUrl} alt={service.title}
                 className="sv-list-img"
@@ -424,7 +416,7 @@ export function ServicesSection({ section, isSelected, isEditing, onContentChang
       className={`relative transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${globalClasses}`}
       style={{
         background,
-        padding: styles.padding || '100px 0',
+        padding: styles.padding || '60px 0',
         fontFamily: "'Cabinet Grotesk', sans-serif",
         position: 'relative',
       }}
@@ -436,7 +428,7 @@ export function ServicesSection({ section, isSelected, isEditing, onContentChang
         backgroundImage: 'radial-gradient(ellipse at 92% 8%, rgba(225,29,72,0.04) 0%, transparent 55%), radial-gradient(ellipse at 5% 92%, rgba(8,145,178,0.04) 0%, transparent 50%)',
       }} />
 
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px', position: 'relative' }}>
+      <div className="container mx-auto px-4 sm:px-6 relative">
         <Header
           content={content} isEditing={isEditing}
           onContentChange={onContentChange}
