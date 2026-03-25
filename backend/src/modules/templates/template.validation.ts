@@ -30,10 +30,6 @@ export const createWebsiteTemplateSchema = z.object({
         .min(1, 'Category is required')
         .max(50, 'Category must not exceed 50 characters'),
 
-    thumbnail_url: z.string().trim()
-        .pipe(z.url('Invalid thumbnail URL'))
-        .optional(),
-
     global_styles: jsonObject.optional(),
     navbar: jsonObject.optional(),
     footer: jsonObject.optional(),
@@ -55,11 +51,6 @@ export const updateWebsiteTemplateSchema = z.object({
         .min(1, 'Category is required')
         .max(50, 'Category must not exceed 50 characters')
         .optional(),
-
-    thumbnail_url: z.string().trim()
-        .pipe(z.url('Invalid thumbnail URL'))
-        .optional()
-        .nullable(),
 
     global_styles: jsonObject.optional(),
     navbar: jsonObject.optional(),
@@ -89,10 +80,6 @@ export const createSectionTemplateSchema = z.object({
         .min(1, 'Category is required')
         .max(50, 'Category must not exceed 50 characters'),
 
-    thumbnail_url: z.string().trim()
-        .pipe(z.url('Invalid thumbnail URL'))
-        .optional(),
-
     props: jsonObject
 });
 
@@ -111,11 +98,6 @@ export const updateSectionTemplateSchema = z.object({
         .min(1, 'Category is required')
         .max(50, 'Category must not exceed 50 characters')
         .optional(),
-
-    thumbnail_url: z.string().trim()
-        .pipe(z.url('Invalid thumbnail URL'))
-        .optional()
-        .nullable(),
 
     props: jsonObject.optional()
 }).refine(

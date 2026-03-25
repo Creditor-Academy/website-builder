@@ -9,6 +9,8 @@ declare global {
         body?: any;
         query?: any;
         params?: any;
+        file?: Express.Multer.File;
+        files?: Express.Multer.File[];
       };
       context: {
         user: AuthUser;
@@ -20,6 +22,8 @@ declare global {
 
         websiteTemplate?: WebsiteTemplate;
         sectionTemplate?: SectionTemplate;
+
+        assetCategory?: string;
       }
     }
   }

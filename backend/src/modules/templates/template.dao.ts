@@ -23,7 +23,6 @@ class TemplateDao {
             data: {
                 ...data,
                 description: data.description ?? null,
-                thumbnail_url: data.thumbnail_url ?? null,
                 global_styles: data.global_styles ?? {},
                 navbar: data.navbar ?? {},
                 footer: data.footer ?? {},
@@ -131,7 +130,6 @@ class TemplateDao {
                 name: data.name,
                 description: data.description ?? null,
                 category: data.category,
-                thumbnail_url: data.thumbnail_url ?? null,
                 props: data.props as Prisma.InputJsonValue
             }
         });

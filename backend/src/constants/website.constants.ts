@@ -4,7 +4,6 @@ export const SELECT_WEBSITE_FIELDS = {
     id: true,
     name: true,
     status: true,
-    thumbnail_url: true,
     created_at: true
 } satisfies Prisma.WebsiteSelect;
 

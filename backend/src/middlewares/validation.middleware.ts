@@ -3,7 +3,7 @@ import { ZodError, ZodType } from 'zod';
 
 export const validateRequest = (
   schema: ZodType<any>,
-  source: 'body' | 'query' | 'params' = 'body'
+  source: 'body' | 'query' | 'params' | 'file' | 'files' = 'body'
 ) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {

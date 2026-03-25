@@ -45,6 +45,7 @@ model User {
   passwordResetTokens     PasswordResetToken[]
   emailVerificationTokens EmailVerificationToken[]
   refreshTokens           RefreshToken[]
+  assets                  Asset[]
 
   @@index([email])
   @@index([deleted_at])
@@ -124,9 +125,8 @@ model Website {
   owner_id String
   status   WebsiteStatus @default(DRAFT)
 
-  homepageId    String? @unique
-  settings_id   String  @unique
-  thumbnail_url String?
+  homepageId  String? @unique
+  settings_id String  @unique
 
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
@@ -256,11 +256,10 @@ model Section {
 
 // Website Template
 model WebsiteTemplate {
-  id            String  @id @default(cuid())
-  name          String
-  description   String?
-  category      String
-  thumbnail_url String?
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  category    String
 
   global_styles Json?
   navbar        Json?
@@ -279,12 +278,11 @@ model WebsiteTemplate {
 
 // Section Template
 model SectionTemplate {
-  id            String  @id @default(cuid())
-  name          String
-  description   String?
-  category      String
-  thumbnail_url String?
-  props         Json
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  category    String
+  props       Json
 
   created_at DateTime  @default(now())
   deleted_at DateTime?
@@ -297,4 +295,32 @@ model SectionTemplate {
   @@index([category])
   @@index([deleted_at])
   @@map("section_templates")
+}
+
+// ============================
+// Assets Tables (images, videos)
+// ============================
+
+// Asset Model
+model Asset {
+  id      String @id @default(cuid())
+  key     String
+  url     String
+  user_id String
+
+  name     String
+  type     String
+  category String
+  size     Int
+
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  // Relations
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([key])
+  @@index([user_id])
+  @@index([deletedAt])
+  @@map("assets")
 }
