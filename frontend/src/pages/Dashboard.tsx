@@ -478,8 +478,263 @@ const Dashboard = () => {
                         )}
                     </>
                 ) : location.pathname === '/dashboard' && isAdmin ? (
-                    <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200">
-                        <h2 className="text-xl font-bold text-slate-900 mb-4">Admin Panel</h2>
+                    <div className="relative min-h-screen bg-[#f8fafc] p-6 lg:p-10 overflow-hidden">
+                        {/* Background Gradient Blobs */}
+                        <div className="absolute top-[-200px] left-[-300px] w-[600px] h-[600px] bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" />
+                        <div className="absolute bottom-[-100px] right-[-200px] w-[500px] h-[500px] bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000" />
+                        <div className="absolute top-[100px] right-[-100px] w-[400px] h-[400px] bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000" />
+
+                        {/* Top Hero Section */}
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5 }}
+                            className="relative z-10 p-8 md:p-12 mb-10 bg-white/60 backdrop-blur-lg border border-white/20 rounded-3xl shadow-xl overflow-hidden"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-br from-purple-200 via-blue-200 to-indigo-200 opacity-80 -z-10 transition-all duration-500 group-hover:opacity-100 group-hover:scale-105" />
+                            <h2 className="text-5xl font-extrabold text-slate-900 tracking-tight mb-3">Welcome to Admin Panel</h2>
+                            <p className="text-xl text-slate-700 max-w-2xl leading-relaxed">
+                                Centralized control for managing all aspects of the Buildora platform, from users to deployments.
+                            </p>
+                            <div className="flex gap-4 mt-8">
+                                <Button
+                                    className="h-12 px-6 rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/20"
+                                    onClick={() => navigate('/dashboard/users')}
+                                >
+                                    <Users className="w-5 h-5 mr-2" /> Manage Users
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="h-12 px-6 rounded-full bg-white/80 border-white/40 text-slate-700 hover:bg-white/90 hover:text-slate-900 shadow-lg shadow-slate-200/20"
+                                    onClick={() => navigate('/dashboard/websites')}
+                                >
+                                    <Layout className="w-5 h-5 mr-2" /> View Websites
+                                </Button>
+                            </div>
+                        </motion.div>
+
+                        {/* Quick Action Pills */}
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.1 }}
+                            className="relative z-10 flex flex-wrap gap-3 mb-10"
+                        >
+                            <motion.div
+                                whileHover={{ scale: 1.05 }}
+                                transition={{ duration: 0.2 }}
+                                onClick={() => navigate('/dashboard/users')}
+                                className="cursor-pointer px-5 py-2 rounded-full bg-white/70 backdrop-blur-md border border-white/20 text-slate-700 text-sm font-medium shadow-sm hover:shadow-lg hover:border-purple-300 transition-all duration-200"
+                            >
+                                Users
+                            </motion.div>
+                            <motion.div
+                                whileHover={{ scale: 1.05 }}
+                                transition={{ duration: 0.2 }}
+                                onClick={() => navigate('/dashboard/websites')}
+                                className="cursor-pointer px-5 py-2 rounded-full bg-white/70 backdrop-blur-md border border-white/20 text-slate-700 text-sm font-medium shadow-sm hover:shadow-lg hover:border-indigo-300 transition-all duration-200"
+                            >
+                                Websites
+                            </motion.div>
+                            <motion.div
+                                whileHover={{ scale: 1.05 }}
+                                transition={{ duration: 0.2 }}
+                                onClick={() => navigate('/dashboard/templates')}
+                                className="cursor-pointer px-5 py-2 rounded-full bg-white/70 backdrop-blur-md border border-white/20 text-slate-700 text-sm font-medium shadow-sm hover:shadow-lg hover:border-emerald-300 transition-all duration-200"
+                            >
+                                Templates
+                            </motion.div>
+                            <motion.div
+                                whileHover={{ scale: 1.05 }}
+                                transition={{ duration: 0.2 }}
+                                onClick={() => navigate('/dashboard/assets')}
+                                className="cursor-pointer px-5 py-2 rounded-full bg-white/70 backdrop-blur-md border border-white/20 text-slate-700 text-sm font-medium shadow-sm hover:shadow-lg hover:border-blue-300 transition-all duration-200"
+                            >
+                                Assets
+                            </motion.div>
+                        </motion.div>
+
+                        {/* Main Navigation Grid */}
+                        <section className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* Users Card */}
+                            <motion.div
+                                whileHover={{ scale: 1.03, boxShadow: "0 15px 30px rgba(0, 0, 0, 0.1)", borderColor: "rgba(168, 85, 247, 0.4)" }}
+                                transition={{ duration: 0.3, ease: "easeOut" }}
+                                onClick={() => navigate('/dashboard/users')}
+                                className="relative group cursor-pointer bg-white/70 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <div className="relative z-10 w-16 h-16 bg-purple-100/70 text-purple-600 rounded-xl flex items-center justify-center mb-6 shadow-md">
+                                    <Users className="w-8 h-8" />
+                                </div>
+                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">User Management</h3>
+                                <p className="relative z-10 text-slate-600 text-base leading-relaxed">
+                                    Create, modify, and delete user accounts. Assign roles and permissions.
+                                </p>
+                                {/* Mini Visual Placeholder */}
+                                <div className="relative z-10 w-full mt-6 bg-purple-100 rounded-full h-2.5">
+                                    <div className="bg-purple-500 h-full rounded-full w-[70%]" />
+                                </div>
+                                <span className="relative z-10 text-xs text-slate-500 mt-2">70% active accounts</span>
+                            </motion.div>
+
+                            {/* Websites Card */}
+                            <motion.div
+                                whileHover={{ scale: 1.03, boxShadow: "0 15px 30px rgba(0, 0, 0, 0.1)", borderColor: "rgba(99, 102, 241, 0.4)" }}
+                                transition={{ duration: 0.3, ease: "easeOut" }}
+                                onClick={() => navigate('/dashboard/websites')}
+                                className="relative group cursor-pointer bg-white/70 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <div className="relative z-10 w-16 h-16 bg-indigo-100/70 text-indigo-600 rounded-xl flex items-center justify-center mb-6 shadow-md">
+                                    <Layout className="w-8 h-8" />
+                                </div>
+                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">Website Projects</h3>
+                                <p className="relative z-10 text-slate-600 text-base leading-relaxed">
+                                    Oversee all created websites, their status, and configurations.
+                                </p>
+                                {/* Mini Visual Placeholder */}
+                                <div className="relative z-10 w-full mt-6 bg-indigo-100 rounded-full h-2.5">
+                                    <div className="bg-indigo-500 h-full rounded-full w-[90%]" />
+                                </div>
+                                <span className="relative z-10 text-xs text-slate-500 mt-2">90% projects published</span>
+                            </motion.div>
+
+                            {/* Templates Card */}
+                            <motion.div
+                                whileHover={{ scale: 1.03, boxShadow: "0 15px 30px rgba(0, 0, 0, 0.1)", borderColor: "rgba(16, 185, 129, 0.4)" }}
+                                transition={{ duration: 0.3, ease: "easeOut" }}
+                                onClick={() => navigate('/dashboard/templates')}
+                                className="relative group cursor-pointer bg-white/70 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <div className="relative z-10 w-16 h-16 bg-emerald-100/70 text-emerald-600 rounded-xl flex items-center justify-center mb-6 shadow-md">
+                                    <LayoutTemplate className="w-8 h-8" />
+                                </div>
+                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">Template Library</h3>
+                                <p className="relative z-10 text-slate-600 text-base leading-relaxed">
+                                    Browse, add, and manage all available website templates.
+                                </p>
+                                {/* Mini Visual Placeholder */}
+                                <div className="relative z-10 w-full mt-6 bg-emerald-100 rounded-full h-2.5">
+                                    <div className="bg-emerald-500 h-full rounded-full w-[80%]" />
+                                </div>
+                                <span className="relative z-10 text-xs text-slate-500 mt-2">80% templates actively used</span>
+                            </motion.div>
+
+                            {/* Assets Card */}
+                            <motion.div
+                                whileHover={{ scale: 1.03, boxShadow: "0 15px 30px rgba(0, 0, 0, 0.1)", borderColor: "rgba(59, 130, 246, 0.4)" }}
+                                transition={{ duration: 0.3, ease: "easeOut" }}
+                                onClick={() => navigate('/dashboard/assets')}
+                                className="relative group cursor-pointer bg-white/70 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-sky-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <div className="relative z-10 w-16 h-16 bg-blue-100/70 text-blue-600 rounded-xl flex items-center justify-center mb-6 shadow-md">
+                                    <Files className="w-8 h-8" />
+                                </div>
+                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">Asset Library</h3>
+                                <p className="relative z-10 text-slate-600 text-base leading-relaxed">
+                                    Manage all uploaded images, videos, and various media files.
+                                </p>
+                                {/* Mini Visual Placeholder */}
+                                <div className="relative z-10 w-full mt-6 bg-blue-100 rounded-full h-2.5">
+                                    <div className="bg-blue-500 h-full rounded-full w-[60%]" />
+                                </div>
+                                <span className="relative z-10 text-xs text-slate-500 mt-2">60% storage capacity used</span>
+                            </motion.div>
+
+                            {/* Deployment Monitoring Card */}
+                            <motion.div
+                                whileHover={{ scale: 1.03, boxShadow: "0 15px 30px rgba(0, 0, 0, 0.1)", borderColor: "rgba(244, 63, 94, 0.4)" }}
+                                transition={{ duration: 0.3, ease: "easeOut" }}
+                                onClick={() => navigate('/dashboard/deployment')}
+                                className="relative group cursor-pointer bg-white/70 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <div className="relative z-10 w-16 h-16 bg-rose-100/70 text-rose-600 rounded-xl flex items-center justify-center mb-6 shadow-md">
+                                    <Activity className="w-8 h-8" />
+                                </div>
+                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">Deployment Status</h3>
+                                <p className="relative z-10 text-slate-600 text-base leading-relaxed">
+                                    Monitor the status and history of all website deployments.
+                                </p>
+                                {/* Mini Visual Placeholder */}
+                                <div className="relative z-10 w-full mt-6 bg-rose-100 rounded-full h-2.5">
+                                    <div className="bg-rose-500 h-full rounded-full w-[95%]" />
+                                </div>
+                                <span className="relative z-10 text-xs text-slate-500 mt-2">95% deployments successful</span>
+                            </motion.div>
+
+                            {/* Settings Card */}
+                            <motion.div
+                                whileHover={{ scale: 1.03, boxShadow: "0 15px 30px rgba(0, 0, 0, 0.1)", borderColor: "rgba(251, 191, 36, 0.4)" }}
+                                transition={{ duration: 0.3, ease: "easeOut" }}
+                                onClick={() => navigate('/dashboard/settings')}
+                                className="relative group cursor-pointer bg-white/70 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <div className="relative z-10 w-16 h-16 bg-orange-100/70 text-orange-600 rounded-xl flex items-center justify-center mb-6 shadow-md">
+                                    <Settings className="w-8 h-8" />
+                                </div>
+                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">System Settings</h3>
+                                <p className="relative z-10 text-slate-600 text-base leading-relaxed">
+                                    Configure global platform settings, integrations, and preferences.
+                                </p>
+                                {/* Mini Visual Placeholder */}
+                                <div className="relative z-10 w-full mt-6 bg-orange-100 rounded-full h-2.5">
+                                    <div className="bg-orange-500 h-full rounded-full w-[85%]" />
+                                </div>
+                                <span className="relative z-10 text-xs text-slate-500 mt-2">85% settings configured</span>
+                            </motion.div>
+                        </section>
+
+                        {/* Right Side Feature Card (System Status) */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            className="relative z-10 mt-6 bg-white/60 backdrop-blur-lg border border-white/20 rounded-3xl p-8 shadow-xl overflow-hidden md:col-span-full lg:col-span-1"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-br from-sky-50/10 to-teal-50/10 opacity-50 -z-10" />
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-14 h-14 bg-sky-100/70 text-sky-600 rounded-xl flex items-center justify-center shadow-md">
+                                    <MonitorPlay className="w-7 h-7" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-slate-900">System Status</h3>
+                            </div>
+                            <p className="text-slate-600 mb-6">Overview of core system health and performance metrics.</p>
+                            <div className="flex items-center justify-around text-center">
+                                <div className="relative w-24 h-24">
+                                    <svg className="w-full h-full" viewBox="0 0 100 100">
+                                        <circle
+                                            className="text-slate-200 stroke-current"
+                                            strokeWidth="10"
+                                            cx="50"
+                                            cy="50"
+                                            r="40"
+                                            fill="transparent"
+                                        />
+                                        <circle
+                                            className="text-blue-500 stroke-current"
+                                            strokeWidth="10"
+                                            strokeLinecap="round"
+                                            cx="50"
+                                            cy="50"
+                                            r="40"
+                                            fill="transparent"
+                                            strokeDasharray="251.2"
+                                            strokeDashoffset="62.8" /* 25% of 251.2 */
+                                        />
+                                    </svg>
+                                    <span className="absolute inset-0 flex items-center justify-center text-xl font-bold text-blue-600">75%</span>
+                                </div>
+                                <div>
+                                    <p className="text-lg font-semibold text-slate-800">Uptime</p>
+                                    <p className="text-sm text-slate-500">99.9% (last 30 days)</p>
+                                </div>
+                            </div>
+                        </motion.div>
                     </div>
                 ) : (
                     <Outlet key={location.pathname} />
