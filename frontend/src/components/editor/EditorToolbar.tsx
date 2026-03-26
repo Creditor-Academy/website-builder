@@ -37,10 +37,10 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
   };
 
   return (
-    <div className="h-16 px-6 border-b border-slate-200 bg-white sticky top-0 z-50 flex items-center justify-between shadow-sm">
+    <div className="h-14 md:h-16 px-3 md:px-6 border-b border-slate-200 bg-white sticky top-0 z-50 flex items-center justify-between shadow-sm">
       <TooltipProvider delayDuration={0}>
         {/* LEFT */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2 md:gap-6">
         
           <div id="tour-logo" className="flex items-center gap-3 group">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center shadow-lg shadow-black/20 transition-all duration-300  group-hover:shadow-xl">
@@ -89,7 +89,7 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
         </div>
 
         {/* RIGHT */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1 md:gap-3">
           {/* UNDO / REDO */}
           <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
             <Tooltip>
@@ -122,7 +122,7 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
             </Tooltip>
           </div>
 
-          <Separator orientation="vertical" className="h-6 mx-2" />
+          <Separator orientation="vertical" className="hidden sm:block h-6 mx-2" />
 
           {/* PREVIEW */}
           <Tooltip>
@@ -139,14 +139,14 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
             <TooltipContent side="bottom">Preview Mode</TooltipContent>
           </Tooltip>
 
-          {/* EXPORT */}
+          {/* EXPORT - hidden on mobile */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleExport}
-                className="w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition-all duration-200"
+                className="hidden sm:flex w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition-all duration-200"
               >
                 <Download className="w-4 h-4" />
               </Button>
@@ -154,7 +154,7 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
             <TooltipContent side="bottom">Export JSON</TooltipContent>
           </Tooltip>
 
-          {/* PALETTE */}
+          {/* PALETTE - hidden on mobile */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -162,7 +162,7 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
                 size="icon"
                 id="tour-palette"
                 onClick={handleDesignTab}
-                className="w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-indigo-600 transition-all duration-200"
+                className="hidden sm:flex w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-indigo-600 transition-all duration-200"
               >
                 <Palette className="w-4 h-4" />
               </Button>
@@ -170,7 +170,7 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
             <TooltipContent side="bottom">Switch Palette</TooltipContent>
           </Tooltip>
 
-          {/* SHARE / GLOBAL FX */}
+          {/* SHARE / GLOBAL FX - hidden on mobile */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -178,7 +178,7 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
                 size="icon"
                 id="tour-global-fx"
                 onClick={handleDesignTab}
-                className="w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-amber-500 transition-all duration-200"
+                className="hidden sm:flex w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-amber-500 transition-all duration-200"
               >
                 <Share2 className="w-4 h-4" />
               </Button>
@@ -186,16 +186,16 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
             <TooltipContent side="bottom">Share Project / Global FX</TooltipContent>
           </Tooltip>
 
-          <Separator orientation="vertical" className="h-6 mx-2" />
+          <Separator orientation="vertical" className="hidden sm:block h-6 mx-2" />
 
-          {/* TOUR */}
+          {/* TOUR - hidden on mobile */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={startTour}
-                className="w-9 h-9 rounded-lg text-slate-600 hover:bg-amber-50 hover:text-amber-600 hover:shadow-md hover:shadow-amber-100 transition-all duration-200"
+                className="hidden sm:flex w-9 h-9 rounded-lg text-slate-600 hover:bg-amber-50 hover:text-amber-600 hover:shadow-md hover:shadow-amber-100 transition-all duration-200"
               >
                 <HelpCircle className="w-4 h-4" />
               </Button>
@@ -203,7 +203,7 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
             <TooltipContent side="bottom">Start Tour</TooltipContent>
           </Tooltip>
 
-          <Separator orientation="vertical" className="h-6 mx-2" />
+          <Separator orientation="vertical" className="hidden sm:block h-6 mx-2" />
 
           {/* PUBLISH */}
           <Button id="tour-publish" className="h-10 gap-2 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white rounded-xl px-6 text-xs font-bold shadow-lg shadow-primary/25 transition-all duration-200 hover:shadow-xl hover:shadow-primary/30 active:scale-95">

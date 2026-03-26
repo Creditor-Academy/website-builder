@@ -262,7 +262,7 @@ const FeaturesPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
             className={cn(
-              "text-[4.5rem] sm:text-[6rem] md:text-[7.5rem] font-bold tracking-tighter leading-[0.9] mb-8 transition-colors duration-1000",
+              "text-5xl sm:text-7xl md:text-[7.5rem] font-bold tracking-tighter leading-[0.9] mb-8 transition-colors duration-1000",
               isDark ? "text-white" : "text-slate-900"
             )}
           >
@@ -309,7 +309,7 @@ const FeaturesPage = () => {
 
       {/* ================= BENTO FEATURES SHOWCASE ================= */}
       <section className="py-24 px-6 max-w-7xl mx-auto relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[400px]">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-auto md:auto-rows-[400px]">
           {/* Feature 1: Large Bento */}
           <motion.div 
             whileHover={{ y: -5 }}
@@ -485,7 +485,7 @@ const FeaturesPage = () => {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           className={cn(
-            "max-w-5xl mx-auto p-12 md:p-32 rounded-[5rem] border relative overflow-hidden group shadow-[0_32px_120px_rgba(59,130,246,0.3)]",
+            "max-w-5xl mx-auto p-8 md:p-32 rounded-[2.5rem] md:rounded-[5rem] border relative overflow-hidden group shadow-[0_32px_120px_rgba(59,130,246,0.3)]",
             isDark 
               ? "bg-slate-900 border-white/10" 
               : "bg-white border-slate-200"

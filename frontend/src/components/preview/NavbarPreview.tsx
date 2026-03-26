@@ -90,6 +90,22 @@ const STYLES = `
     height: 1.5px; background: currentColor;
     transition: width 0.2s ease;
   }
+  /* Responsive nav container */
+  .nb-inner {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 40px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  @media (max-width: 768px) {
+    .nb-inner {
+      padding: 0 20px;
+      height: 60px;
+    }
+  }
 `;
 
 function InjectStyles() {
@@ -132,8 +148,9 @@ function buildPage(slug, label) {
 
 export function NavbarPreview({ config, isEditing, onUpdate }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { pages, setActivePage, updatePageName, createPage, selectSection } = useBuilder();
+  const { pages, setActivePage, updatePageName, createPage, selectSection, state } = useBuilder();
   const navigate = useNavigate();
+  const { editor } = state;
 
   const navBg =
     config.styles.backgroundColor && config.styles.backgroundColor !== 'transparent'
@@ -142,11 +159,32 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
 
   const tc = config.styles.textColor || 'var(--theme-text, #0f172a)';
 
-  // ── Original handleNavClick logic, unchanged ──────────────────────────
+  // ── Enhanced handleNavClick logic with preview mode support ──────────────────────────
   const handleNavClick = (e, link) => {
     // Scroll to top on any navigation click
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
+    // If in preview mode, handle navigation differently
+    if (editor.previewMode) {
+      const targetPage = pages.find((p) => p.slug === link.href);
+      if (targetPage) {
+        e.preventDefault();
+        setActivePage(targetPage.id);
+        setMobileMenuOpen(false);
+        return;
+      }
+      // If page doesn't exist, create it in preview mode
+      if (link.href && link.href.startsWith('/')) {
+        e.preventDefault();
+        createPage(buildPage(link.href, link.label));
+        setMobileMenuOpen(false);
+        return;
+      }
+      // For external links, allow default behavior
+      return;
+    }
+    
+    // Original editing mode logic
     if (isEditing) {
       const targetPage = pages.find((p) => p.slug === link.href);
       if (targetPage) {
@@ -202,12 +240,7 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
     >
       <InjectStyles />
 
-      <div style={{
-        maxWidth: 1240, margin: '0 auto',
-        padding: '0 40px',
-        height: 68,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
+      <div className="nb-inner">
 
         {/* ── Logo ─────────────────────────────────────────────── */}
         <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>

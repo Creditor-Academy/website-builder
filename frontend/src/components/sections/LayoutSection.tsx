@@ -92,11 +92,12 @@ function InjectStyles() {
 }
 
 // ─── CE helper ────────────────────────────────────────────────────────────
-function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '' }: any) {
+function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '', inv = false }: any) {
   return (
     <Tag
       className={`ly-ce ${className}`}
       data-editing={isEditing ? 'true' : 'false'}
+      data-inv={inv ? 'true' : 'false'}
       contentEditable={isEditing ? 'true' : 'false'}
       suppressContentEditableWarning
       style={{ ...style, pointerEvents: isEditing ? 'auto' : 'inherit' }}
@@ -226,13 +227,7 @@ function ImageTextLayout({ content, section, isEditing, updateContent, openMedia
   );
 
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: 64,
-      alignItems: 'center',
-      maxWidth: 1100, margin: '0 auto',
-    }}>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center max-w-5xl mx-auto">
       {imageRight ? <>{textBlock}{imageBlock}</> : <>{imageBlock}{textBlock}</>}
     </div>
   );
@@ -365,13 +360,7 @@ function TwoColumn({ content, isEditing, updateContent, styles }: any) { // Two-
   ];
 
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: '1fr 1px 1fr',
-      gap: '0 56px',
-      maxWidth: 1100, margin: '0 auto',
-      alignItems: 'start',
-    }}>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 max-w-5xl mx-auto items-start">
       {cols.map((col, i) => (
         <React.Fragment key={col.key}>
           <div style={{ animation: `ly-up 0.5s ease ${i * 0.08}s both` }}>
@@ -412,7 +401,7 @@ function TwoColumn({ content, isEditing, updateContent, styles }: any) { // Two-
           </div>
 
           {/* divider between columns only */}
-          {i === 0 && <div className="ly-divider" />}
+          {i === 0 && <div className="hidden md:block" style={{ borderLeft: '1px solid rgba(0,0,0,0.08)', alignSelf: 'stretch' }} />}
         </React.Fragment>
       ))}
     </div>
@@ -454,7 +443,7 @@ export function LayoutSection({ section, isSelected, isEditing, onContentChange 
 
       {isEditing && <div className="ly-badge">Layout</div>}
 
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px', position: 'relative' }}>
+      <div className="container mx-auto px-4 sm:px-6 relative">
         {variant === 'text-only'           && <TextOnly         {...shared} />} 
         {variant === 'image-text-left'     && <ImageTextLayout  {...shared} imageRight={false} />}          {variant === 'image-text-right'    && <ImageTextLayout  {...shared} imageRight={true}  />}
         {variant === 'text-button'         && <TextButton        {...shared} />}

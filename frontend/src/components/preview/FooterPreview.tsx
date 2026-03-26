@@ -48,6 +48,26 @@ const STYLES = `
     transition: opacity 0.18s ease;
   }
   .ft-bottom-link:hover { opacity: 0.75; }
+  .ft-grid {
+    display: grid;
+    grid-template-columns: 2fr repeat(3, 1fr);
+    gap: 0 56px;
+  }
+
+  @media (max-width: 768px) {
+    .ft-grid {
+      grid-template-columns: 1fr;
+      gap: 48px 0;
+    }
+    .ft-brand {
+      padding-right: 0 !important;
+    }
+    .ft-wrapper {
+      padding-left: 20px !important;
+      padding-right: 20px !important;
+      padding-top: 40px !important;
+    }
+  }
 `;
 
 function InjectStyles() {
@@ -62,7 +82,8 @@ function InjectStyles() {
 
 export function FooterPreview({ config, isEditing, onUpdate }) {
   const navigate = useNavigate();
-  const { updatePageName, pages, setActivePage, createPage, selectSection } = useBuilder();
+  const { updatePageName, pages, setActivePage, createPage, selectSection, state } = useBuilder();
+  const { editor } = state;
 
   const bg = config.styles.backgroundColor || 'var(--theme-bg, #0a0a0f)';
   const tc = config.styles.textColor || 'var(--theme-text, #f8fafc)';
@@ -74,11 +95,56 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
     }
   };
 
-  // ── Link click handler (original logic, unchanged) ──────────────────────
+  // ── Enhanced link click handler with preview mode support ──────────────────────
   const handleLinkClick = (e, link, column) => {
     // Scroll to top on any footer link click
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
+    // If in preview mode, handle navigation differently
+    if (editor.previewMode) {
+      const target = pages.find(p => p.slug === link.href);
+      if (target) {
+        e.preventDefault();
+        setActivePage(target.id);
+        return;
+      }
+      // If page doesn't exist, create it in preview mode
+      if (link.href && link.href.startsWith('/')) {
+        e.preventDefault();
+        const slug = link.href;
+        let newPage = null;
+        switch (slug) {
+          case '/features':  newPage = createFeaturesPage();      break;
+          case '/services':  newPage = createServicesPage();      break;
+          case '/pricing':   newPage = createPricingPage();       break;
+          case '/contact':   newPage = createContactPage();       break;
+          case '/start':     newPage = createStartPage();         break;
+          case '/templates': newPage = createTemplatesPage();     break;
+          case '/about':     newPage = createAboutPage();         break;
+          case '/blog':      newPage = createBlogPage();          break;
+          case '/careers':   newPage = createCareersPage();       break;
+          case '/help':      newPage = createHelpPage();          break;
+          case '/status':    newPage = createStatusPage();        break;
+          case '/privacy':   newPage = createPrivacyPolicyPage(); break;
+          case '/terms':     newPage = createTermsOfServicePage();break;
+          default:
+            newPage = {
+              id: (Math.random()+1).toString(36).substring(7),
+              name: link.label || slug.replace('/', '') || 'New Page',
+              slug,
+              navbar: createDefaultNavbar(),
+              sections: [createDefaultHeroSection(), createDefaultCTASection()],
+              footer: createDefaultFooter(),
+            };
+        }
+        createPage(newPage);
+        return;
+      }
+      // For external links, allow default behavior
+      return;
+    }
+    
+    // Original editing mode logic
     if (isEditing) {
       const target = pages.find(p => p.slug === link.href);
       if (target) {
@@ -114,11 +180,11 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
         }
         createPage(newPage);
       }
-    } else {
-      if (link.href && link.href.startsWith('/')) {
-        e.preventDefault();
-        navigate(link.href);
-      }
+      return;
+    }
+    if (link.href && link.href.startsWith('/')) {
+      e.preventDefault();
+      navigate(link.href);
     }
   };
 
@@ -128,9 +194,16 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
     const target = pages.find(p => p.slug === '/privacy');
-    if (target) { setActivePage(target.id); }
-    else { createPage(createPrivacyPolicyPage()); }
-    if (!isEditing) navigate('/privacy', { replace: true });
+    if (target) { 
+      setActivePage(target.id); 
+    } else { 
+      createPage(createPrivacyPolicyPage()); 
+    }
+    
+    // Only navigate if not in preview mode
+    if (!editor.previewMode && !isEditing) {
+      navigate('/privacy', { replace: true });
+    }
   };
 
   const handleTermsClick = (e) => {
@@ -139,9 +212,16 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
     const target = pages.find(p => p.slug === '/terms');
-    if (target) { setActivePage(target.id); }
-    else { createPage(createTermsOfServicePage()); }
-    if (!isEditing) navigate('/terms', { replace: true });
+    if (target) { 
+      setActivePage(target.id); 
+    } else { 
+      createPage(createTermsOfServicePage()); 
+    }
+    
+    // Only navigate if not in preview mode
+    if (!editor.previewMode && !isEditing) {
+      navigate('/terms', { replace: true });
+    }
   };
 
   return (
@@ -164,18 +244,13 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
         background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.12) 30%, rgba(255,255,255,0.12) 70%, transparent)',
       }} />
 
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '72px 40px 0', position: 'relative' }}>
+      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '48px 24px 0', position: 'relative' }} className="ft-wrapper">
 
         {/* ── Main grid ─────────────────────────────────────────────── */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '2fr repeat(3, 1fr)',
-          gap: '0 56px',
-          marginBottom: 64,
-        }}>
+        <div className="ft-grid" style={{ marginBottom: 64 }}>
 
           {/* ── Brand column ──────────────────────────────────────── */}
-          <div style={{ paddingRight: 40 }}>
+          <div className="ft-brand" style={{ paddingRight: 40 }}>
             {/* Logo */}
             <div style={{ marginBottom: 24 }}>
               {config.logo.imageUrl ? (
@@ -238,9 +313,16 @@ export function FooterPreview({ config, isEditing, onUpdate }) {
                       color: tc, textDecoration: 'none',
                     }}
                     onClick={(e) => {
-                      if (social.platform === 'email') { e.preventDefault(); window.location.href = `mailto:${social.href.replace('mailto:', '')}`; }
-                      else if (social.platform === 'phone') { e.preventDefault(); window.location.href = `tel:${social.href.replace('tel:', '')}`; }
-                      else if (social.platform === 'location') { e.preventDefault(); window.open(`https://maps.google.com/?q=${encodeURIComponent(social.href)}`, '_blank'); }
+                      if (social.platform === "email") {
+                        e.preventDefault();
+                        window.location.href = `mailto:${social.href.replace("mailto:", "")}`;
+                      } else if (social.platform === "phone") {
+                        e.preventDefault();
+                        window.location.href = `tel:${social.href.replace("tel:", "")}`;
+                      } else if (social.platform === "location") {
+                        e.preventDefault();
+                        window.open(`https://maps.google.com/?q=${encodeURIComponent(social.href)}`, "_blank");
+                      }
                     }}
                   >
                     <Icon size={15} />

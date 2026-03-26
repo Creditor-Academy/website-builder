@@ -154,20 +154,10 @@ function SplitVariant({ content, styles, isEditing, onContentChange, headingColo
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, minHeight: 580 }}>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-0 min-h-[500px] lg:min-h-[580px]">
       {/* Content column */}
-      <div style={{
-        order: imgRight ? 0 : 1,
-        padding: '72px 56px',
-        display: 'flex', flexDirection: 'column', justifyContent: 'center',
-        position: 'relative',
-      }}>
-        <div style={{
-          position: 'absolute',
-          [imgRight ? 'right' : 'left']: 0,
-          top: '10%', bottom: '10%', width: 1,
-          background: 'rgba(0,0,0,0.08)', pointerEvents: 'none',
-        }} />
+      <div className={`order-2 ${imgRight ? 'lg:order-1' : 'lg:order-2'} px-6 py-12 sm:px-10 lg:px-14 flex flex-col justify-center relative`}>
+        <div className={`hidden lg:block absolute ${imgRight ? 'right-0' : 'left-0'} top-[10%] bottom-[10%] w-px bg-slate-200 pointer-events-none`} />
 
         <Badge text={content.badge} isEditing={isEditing} onSave={(val) => onContentChange?.('badge', val)} />
 
@@ -226,7 +216,7 @@ function SplitVariant({ content, styles, isEditing, onContentChange, headingColo
       </div>
 
       {/* Image column */}
-      <div style={{ order: imgRight ? 1 : 0, position: 'relative', minHeight: 480 }}>
+      <div className={`order-1 ${imgRight ? 'lg:order-2' : 'lg:order-1'} relative h-[350px] sm:h-[450px] lg:h-auto`}>
         <ImageBlock
           src={content.imageUrl} alt={content.imageAlt}
           isEditing={isEditing} onContentChange={onContentChange}
@@ -247,25 +237,20 @@ function CenteredVariant({ content, styles, isEditing, onContentChange, headingC
 
   return (
     <div>
-      <div style={{ position: 'relative', marginBottom: 72 }}>
+        <div className="relative mb-12 lg:mb-20">
         <ImageBlock
           src={content.imageUrl} alt={content.imageAlt}
           isEditing={isEditing} onContentChange={onContentChange}
-          height={440} borderRadius={styles.borderRadius || '4px'}
+          height={320} borderRadius={styles.borderRadius || '4px'}
         />
-        <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0,
-          background: 'linear-gradient(to top, rgba(0,0,0,0.78) 0%, transparent 100%)',
-          padding: '48px 60px 40px',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
-        }}>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 sm:p-10 lg:p-14 flex flex-col items-center justify-end text-center">
           <Badge text={content.badge} isEditing={isEditing} onSave={(val) => onContentChange?.('badge', val)} />
           <CE
             as="h2" value={content.headline} isEditing={isEditing} inv
             onSave={(val) => onContentChange?.('headline', val)}
             style={{
               fontFamily: "'Libre Baskerville', serif",
-              fontSize: 'clamp(28px, 3.8vw, 52px)',
+              fontSize: 'clamp(24px, 4vw, 52px)',
               fontWeight: 700, lineHeight: 1.1,
               color: '#fff', maxWidth: 700, display: 'block',
             }}
@@ -281,16 +266,13 @@ function CenteredVariant({ content, styles, isEditing, onContentChange, headingC
           fontSize: 18, lineHeight: 1.8,
           color: paragraphColor, opacity: 0.75,
           textAlign: 'center', maxWidth: 680,
-          margin: '0 auto 64px', display: 'block',
+          margin: '0 auto 48px', display: 'block',
         }}
+        className="px-4"
       />
 
       {content.values?.length > 0 && (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${Math.min(content.values.length, 3)}, 1fr)`,
-          gap: 2,
-        }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
           {content.values.map((value, index) => {
             const accent = ACCENTS[index % ACCENTS.length];
             return (
@@ -335,7 +317,7 @@ function CardsVariant({ content, styles, isEditing, onContentChange, headingColo
 
   return (
     <div>
-      <div style={{ maxWidth: 600, marginBottom: 64 }}>
+      <div className="max-w-2xl px-4 lg:px-0 mb-12 lg:mb-16">
         <MicroLabel text="about us" />
         <Badge text={content.badge} isEditing={isEditing} onSave={(val) => onContentChange?.('badge', val)} />
         <CE
@@ -343,7 +325,7 @@ function CardsVariant({ content, styles, isEditing, onContentChange, headingColo
           onSave={(val) => onContentChange?.('headline', val)}
           style={{
             fontFamily: "'Libre Baskerville', serif",
-            fontSize: 'clamp(32px, 4vw, 54px)',
+            fontSize: 'clamp(28px, 5vw, 54px)',
             fontWeight: 700, lineHeight: 1.1,
             color: headingColor, marginBottom: 18, display: 'block',
           }}
@@ -355,20 +337,15 @@ function CardsVariant({ content, styles, isEditing, onContentChange, headingColo
         />
       </div>
 
-      <div style={{
-        display: 'grid', gridTemplateColumns: '3fr 2fr',
-        background: '#0f172a',
-        borderRadius: styles.borderRadius || '4px',
-        overflow: 'hidden', marginBottom: 24, minHeight: 320,
-      }}>
-        <div style={{ position: 'relative' }}>
+      <div className="flex flex-col lg:grid lg:grid-cols-5 bg-slate-900 rounded-xl overflow-hidden mb-6 min-h-[400px]">
+        <div className="lg:col-span-3 relative h-[300px] lg:h-auto">
           <ImageBlock
             src={content.imageUrl} alt={content.imageAlt}
             isEditing={isEditing} onContentChange={onContentChange}
             height="100%" borderRadius="0"
           />
         </div>
-        <div style={{ padding: '48px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div className="lg:col-span-2 p-8 sm:p-10 lg:p-12 flex flex-col justify-center bg-slate-900">
           <div style={{ width: 28, height: 2, background: '#D97706', marginBottom: 24, pointerEvents: 'none' }} />
           <CE
             as="h3" value={content.storyTitle || 'Our Story'} isEditing={isEditing} inv
@@ -388,11 +365,7 @@ function CardsVariant({ content, styles, isEditing, onContentChange, headingColo
       </div>
 
       {content.values?.length > 0 && (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${Math.min(content.values.length, 4)}, 1fr)`,
-          gap: 2,
-        }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1">
           {content.values.map((value, index) => {
             const accent = ACCENTS[index % ACCENTS.length];
             return (
@@ -449,7 +422,7 @@ export function AboutSection({ section, isSelected, isEditing, onContentChange, 
     <section
       style={{
         background,
-        padding: styles.padding || '100px 0',
+        padding: styles.padding || '60px 0 lg:100px 0',
         fontFamily: "'Epilogue', sans-serif",
         position: 'relative',
         outline: isSelected ? '2px solid #D97706' : 'none',
@@ -463,7 +436,7 @@ export function AboutSection({ section, isSelected, isEditing, onContentChange, 
         position: 'absolute', inset: 0, pointerEvents: 'none',
         backgroundImage: 'radial-gradient(ellipse at 85% 15%, rgba(217,119,6,0.05) 0%, transparent 55%), radial-gradient(ellipse at 10% 85%, rgba(8,145,178,0.04) 0%, transparent 50%)',
       }} />
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px', position: 'relative' }}>
+      <div className="container mx-auto px-4 sm:px-6 relative">
         {variant === 'centered' && <CenteredVariant {...shared} />}
         {variant === 'cards'    && <CardsVariant    {...shared} />}
         {variant === 'split'    && <SplitVariant    {...shared} />}

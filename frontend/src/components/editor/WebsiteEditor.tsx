@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { BuilderProvider, useBuilder } from "@/contexts/BuilderContext";
 import useBuilderStore from '@/store/useBuilderStore';
+import { useIsMobile } from "@/hooks/use-mobile";
 import { EditorToolbar } from "./EditorToolbar";
 import { SectionsList } from "./SectionsList";
 import { PageManager } from "./PageManager";
@@ -43,6 +44,14 @@ function EditorContent() {
   const store = useBuilderStore();
   const { editor, setTourState, activeWebsiteId } = store;
   const { id } = useParams();
+  const isMobile = useIsMobile();
+
+  // On mobile, collapse the left panel by default
+  useEffect(() => {
+    if (isMobile) {
+      store.setEditorState({ showLeftPanel: false });
+    }
+  }, [isMobile]);
 
   // Auto-switch to edit tab when a section or component is selected
   useEffect(() => {

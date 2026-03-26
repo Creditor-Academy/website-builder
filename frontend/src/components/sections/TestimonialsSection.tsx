@@ -161,7 +161,7 @@ function CardsVariant({ testimonials, content, styles, isEditing, onContentChang
         backgroundImage: 'radial-gradient(circle at 80% 20%, rgba(245,158,11,0.05) 0%, transparent 60%), radial-gradient(circle at 10% 80%, rgba(99,102,241,0.04) 0%, transparent 50%)',
       }} />
 
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px', position: 'relative' }}>
+      <div className="container mx-auto px-4 sm:px-6 relative">
 
         {/* Header */}
         <div style={{ maxWidth: 600, marginBottom: 64 }}>
@@ -204,11 +204,7 @@ function CardsVariant({ testimonials, content, styles, isEditing, onContentChang
         </div>
 
         {/* Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: 24,
-        }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {testimonials.map((t, index) => (
             <div
               key={t.id || index}
@@ -330,7 +326,7 @@ function CarouselVariant({ testimonials, content, styles, isEditing, onContentCh
         pointerEvents: 'none',
       }} />
 
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px', position: 'relative' }}>
+      <div className="container mx-auto px-4 sm:px-6 relative">
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 64 }}>
           <SectionLabel text="testimonials" />
@@ -364,7 +360,7 @@ function CarouselVariant({ testimonials, content, styles, isEditing, onContentCh
       <div style={{ overflow: 'hidden', width: '100%' }}>
         {isEditing ? (
           // In editing mode, show static row
-          <div style={{ display: 'flex', gap: 20, padding: '0 40px', overflowX: 'auto' }} className="t-hide-scroll">
+          <div style={{ display: 'flex', gap: 20, padding: '0 1rem', overflowX: 'auto' }} className="t-hide-scroll">
             {testimonials.map((t, i) => (
               <CarouselCard key={t.id || i} t={t} i={i} styles={styles} isEditing={isEditing} updateT={updateT} paragraphColor={paragraphColor} headingColor={headingColor} />
             ))}
@@ -660,7 +656,7 @@ export function TestimonialsSection({ section, isSelected, isEditing, onContentC
     ? (styles.backgroundGradient || styles.backgroundColor)
     : (styles.backgroundColor || (isAlternate ? 'var(--theme-bg-alt, #f8fafc)' : 'var(--theme-bg, #ffffff)'));
   
-  const padding = styles.padding || '100px 0';
+  const padding = styles.padding || '60px 0';
   
   const headingColor = styles.headingColor || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
   const paragraphColor = styles.paragraphColor || (isAlternate ? 'var(--theme-text-alt, #64748b)' : 'var(--theme-text, #64748b)');
