@@ -477,6 +477,10 @@ const Dashboard = () => {
                             </div>
                         )}
                     </>
+                ) : location.pathname === '/dashboard' && isAdmin ? (
+                    <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200">
+                        <h2 className="text-xl font-bold text-slate-900 mb-4">Admin Panel</h2>
+                    </div>
                 ) : (
                     <Outlet key={location.pathname} />
                 )}
