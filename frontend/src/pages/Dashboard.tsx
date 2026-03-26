@@ -221,16 +221,18 @@ const Dashboard = () => {
                         <p className="text-[10px] text-slate-400">3 of 10 projects used</p>
                     </div> */}
 
-                    <GradientButton
-                        className="w-full justify-start py-2 px-3 text-sm"
-                        onClick={() => setIsAdmin(!isAdmin)}
-                        icon={isAdmin
-                            ? <ShieldCheck className="w-4 h-4 text-purple-400" />
-                            : <Users className="w-4 h-4" />
-                        }
-                    >
-                        {isAdmin ? "Admin Mode On" : "Switch to Admin Mode"}
-                    </GradientButton>
+                    {user?.role === 'ADMIN' && (
+                        <GradientButton
+                            className="w-full justify-start py-2 px-3 text-sm"
+                            onClick={() => setIsAdmin(!isAdmin)}
+                            icon={isAdmin
+                                ? <ShieldCheck className="w-4 h-4 text-purple-400" />
+                                : <Users className="w-4 h-4" />
+                            }
+                        >
+                            {isAdmin ? "Admin Mode On" : "Switch to Admin Mode"}
+                        </GradientButton>
+                    )}
 
                   <div
   className={`flex items-center gap-3 p-2 rounded-xl transition-colors border border-transparent 
