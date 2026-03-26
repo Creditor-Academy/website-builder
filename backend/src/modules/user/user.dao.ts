@@ -82,6 +82,15 @@ class UserDao {
   }
 
   async cleanupDeletedUsers() {
+    const deletedUsers = await prismaClient.user.findMany({
+      where: {
+        isActive: false,
+        deleted_at: {
+          lte: new Date(Date.now() - DELETED_USER_RETENTION_TIME)
+        }
+      }
+    });
+
     await prismaClient.user.deleteMany({
       where: {
         isActive: false,
@@ -90,6 +99,8 @@ class UserDao {
         }
       }
     });
+
+    return deletedUsers;
   }
 }
 

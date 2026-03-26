@@ -3,6 +3,7 @@ import UserService from '../modules/user/user.service.js';
 import TemplateService from '../modules/templates/template.service.js';
 import PageService from '../modules/presentation/pages/page.service.js';
 import WebsiteService from '../modules/website/website.service.js';
+import AssetsService from '../modules/assets/core/assets.service.js';
 
 class CleanupService {
   private authService: AuthService;
@@ -10,6 +11,7 @@ class CleanupService {
   private websiteService: WebsiteService;
   private templateService: TemplateService;
   private pageService: PageService;
+  private assetService: AssetsService;
 
   constructor() {
     this.authService = new AuthService();
@@ -17,6 +19,7 @@ class CleanupService {
     this.websiteService = new WebsiteService();
     this.templateService = new TemplateService();
     this.pageService = new PageService();
+    this.assetService = new AssetsService();
   }
 
   // Method to clean up expired tokens
@@ -43,6 +46,11 @@ class CleanupService {
   // Method to clean up deleted pages
   async cleanupDeletedPages() {
     await this.pageService.cleanupDeletedPages();
+  }
+
+  // Method to clean up deleted assets
+  async cleanupDeletedAssets() {
+    await this.assetService.cleanupDeletedAssets();
   }
 }
 

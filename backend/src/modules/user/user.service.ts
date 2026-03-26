@@ -7,14 +7,18 @@ import AuthDao from '../auth/auth.dao.js';
 import type { AuthUser } from '../../types/auth.types.js';
 import type { ListUsersQueryInput, UpdateOwnProfileInput } from './user.validation.js';
 import { NotFoundError, UnauthorizedError, UnprocessableEntityError } from '../../utils/error.utils.js';
+import S3Service from '../../services/s3.service.js';
+
 
 class UserService {
   private userDao: UserDao;
   private authDao: AuthDao;
+  private s3Service: S3Service;
 
   constructor() {
     this.userDao = new UserDao();
     this.authDao = new AuthDao();
+    this.s3Service = new S3Service();
   }
 
   async getProfile(userId: string) {
@@ -157,7 +161,12 @@ class UserService {
 
   async cleanupDeletedUsers() {
     // Hard delete users that were soft deleted more than 30 days ago
-    await this.userDao.cleanupDeletedUsers();
+    const deletedUsers = await this.userDao.cleanupDeletedUsers();
+
+    // Delete all assets of deleted users
+    await Promise.all(deletedUsers.map(
+      (user) => this.s3Service.deleteAllFilesFromS3(`${user.id}/`)
+    ));
   }
 }
 

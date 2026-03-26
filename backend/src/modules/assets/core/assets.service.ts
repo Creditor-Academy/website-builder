@@ -4,21 +4,15 @@ import AssetsDao from "./assets.dao.js";
 import { ListAssetsQuerySchema } from "./assets.validation.js";
 import { ForbiddenError, NotFoundError } from "../../../utils/error.utils.js";
 import { User, UserRole } from "@prisma/client";
+import S3Service from "../../../services/s3.service.js";
 
 class AssetsService {
     private assetsDao: AssetsDao;
-    private s3: S3;
+    private s3Service: S3Service;
 
     constructor() {
         this.assetsDao = new AssetsDao();
-
-        this.s3 = new S3({
-            credentials: {
-                accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
-                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "",
-            },
-            region: process.env.AWS_REGION || "",
-        });
+        this.s3Service = new S3Service();
     }
 
     async uploadSingle(user: User, file: Express.Multer.File, category: string) {
@@ -28,14 +22,7 @@ class AssetsService {
             const mimeType = file.mimetype.split("/")[0] || "others";
             const key = `${user.id}/${category}/${mimeType}/${uuid()}.${fileExtension}`;
 
-            const params = {
-                Bucket: process.env.AWS_BUCKET_NAME,
-                Key: key,
-                Body: file.buffer,
-                ContentType: file.mimetype,
-            };
-
-            await this.s3.send(new PutObjectCommand(params));
+            await this.s3Service.uploadFileToS3(file, key);
 
             const fileUrl = `${process.env.AWS_ASSET_BASE_URL}/${key}`;
 
@@ -101,19 +88,11 @@ class AssetsService {
         ));
     }
 
-    async deleteAssetFromS3(key: string) {
-        const params = {
-            Bucket: process.env.AWS_BUCKET_NAME,
-            Key: key,
-        };
-        await this.s3.send(new DeleteObjectCommand(params));
-    }
-
     async cleanupDeletedAssets() {
         const deletedAssets = await this.assetsDao.cleanupDeletedAssets();
 
         await Promise.all(deletedAssets.map(
-            (asset) => this.deleteAssetFromS3(asset.key)
+            (asset) => this.s3Service.deleteFileFromS3(asset.key)
         ));
     }
 }
