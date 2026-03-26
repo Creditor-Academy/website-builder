@@ -2,10 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff, LayoutTemplate } from "lucide-react";
-import { GoogleLogin } from "@react-oauth/google";
 import loginbg from "../assets/login.png";
 
-const LoginForm = ({ email, setEmail, password, setPassword, loading, error, isSignup, handleLogin, toggleMode, onGoogleSuccess }: any) => {
+const LoginForm = ({ email, setEmail, password, setPassword, loading, error, isSignup, handleLogin, toggleMode }: any) => {
   const [showPassword, setShowPassword] = useState(false);
   return (
     <div className="w-full max-w-[400px] flex flex-col justify-center h-full mx-auto">
@@ -61,22 +60,7 @@ const LoginForm = ({ email, setEmail, password, setPassword, loading, error, isS
         {loading ? "Logging in..." : "Login"}
       </button>
 
-      <div className="relative flex items-center justify-center mb-8">
-        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
-        <span className="relative px-4 bg-white text-xs text-slate-400">Or continue with</span>
-      </div>
 
-      <div className="w-full flex justify-center">
-        <GoogleLogin
-          onSuccess={onGoogleSuccess}
-          onError={() => { }}
-          useOneTap
-          theme="outline"
-          shape="circle"
-          size="large"
-          text="continue_with"
-        />
-      </div>
 
       <p className="text-slate-500 text-center text-sm mt-8 hidden md:block">
         Don't have an account?{" "}
@@ -88,7 +72,7 @@ const LoginForm = ({ email, setEmail, password, setPassword, loading, error, isS
   );
 };
 
-const SignupForm = ({ name, setName, email, setEmail, password, setPassword, loading, error, isSignup, handleSignup, toggleMode, onGoogleSuccess }: any) => {
+const SignupForm = ({ name, setName, email, setEmail, password, setPassword, loading, error, isSignup, handleSignup, toggleMode }: any) => {
   const [showPassword, setShowPassword] = useState(false);
   return (
     <div className="w-full max-w-[400px] flex flex-col justify-center h-full mx-auto">
@@ -150,22 +134,6 @@ const SignupForm = ({ name, setName, email, setEmail, password, setPassword, loa
         {loading ? "Signing up..." : "Sign Up"}
       </button>
 
-      <div className="relative flex items-center justify-center mb-8">
-        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
-        <span className="relative px-4 bg-white text-xs text-slate-400">Or continue with</span>
-      </div>
-
-      <div className="w-full flex justify-center">
-        <GoogleLogin
-          onSuccess={onGoogleSuccess}
-          onError={() => { }}
-          useOneTap
-          theme="outline"
-          shape="circle"
-          size="large"
-          text="continue_with"
-        />
-      </div>
 
       <p className="text-slate-500 text-center text-sm mt-8 hidden md:block">
         Joined us before?{" "}
@@ -194,47 +162,17 @@ export default function LoginSignup() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleGoogleSuccess = async (credentialResponse: any) => {
-    setLoading(true);
-    setError("");
-    try {
-      const response = await fetch("http://localhost:5000/api/v1/auth/google", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken: credentialResponse.credential }),
-        credentials: "include",
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Google login failed");
-
-      navigate("/dashboard");
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setLoading(true);
     setError("");
     try {
-      const response = await fetch("http://localhost:5000/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        const errorMsg = data.errors ? data.errors.join(", ") : (data.error || data.message || "Login failed");
-        throw new Error(errorMsg);
-      }
-
+      // Bypassing API integration for now
+      await new Promise(resolve => setTimeout(resolve, 1000));
       navigate("/dashboard");
     } catch (err: any) {
-      setError(err.message);
+      setError("Login failed");
     } finally {
       setLoading(false);
     }
@@ -245,22 +183,12 @@ export default function LoginSignup() {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch("http://localhost:5000/api/v1/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
-        credentials: "include",
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        const errorMsg = data.errors ? data.errors.join(", ") : (data.error || data.message || "Registration failed");
-        throw new Error(errorMsg);
-      }
-
+      // Bypassing API integration for now
+      await new Promise(resolve => setTimeout(resolve, 1000));
       setIsSignup(false);
-      alert(data.message || "Registration successful! Please check your email.");
+      alert("Registration successful! (Integration bypassed)");
     } catch (err: any) {
-      setError(err.message);
+      setError("Registration failed");
     } finally {
       setLoading(false);
     }
@@ -310,7 +238,6 @@ export default function LoginSignup() {
                     password={password} setPassword={setPassword}
                     loading={loading} error={error} isSignup={isSignup}
                     handleLogin={handleLogin} toggleMode={toggleMode}
-                    onGoogleSuccess={handleGoogleSuccess}
                   />
                   <p className="text-slate-500 text-center text-sm mt-8 block md:hidden">
                     Don't have an account?{" "}
@@ -327,7 +254,6 @@ export default function LoginSignup() {
                     password={password} setPassword={setPassword}
                     loading={loading} error={error} isSignup={isSignup}
                     handleSignup={handleSignup} toggleMode={toggleMode}
-                    onGoogleSuccess={handleGoogleSuccess}
                   />
                   <p className="text-slate-500 text-center text-sm mt-8 block md:hidden">
                     Joined us before?{" "}
@@ -392,7 +318,6 @@ export default function LoginSignup() {
                     password={password} setPassword={setPassword}
                     loading={loading} error={error} isSignup={isSignup}
                     handleLogin={handleLogin} toggleMode={toggleMode}
-                    onGoogleSuccess={handleGoogleSuccess}
                   />
                 </motion.div>
               ) : (
@@ -403,7 +328,6 @@ export default function LoginSignup() {
                     password={password} setPassword={setPassword}
                     loading={loading} error={error} isSignup={isSignup}
                     handleSignup={handleSignup} toggleMode={toggleMode}
-                    onGoogleSuccess={handleGoogleSuccess}
                   />
                 </motion.div>
               )}
