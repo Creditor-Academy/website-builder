@@ -4,11 +4,9 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import dotenv from 'dotenv';
 dotenv.config({ quiet: true });
 
-import pg from 'pg';
-const pool = new pg.Pool({ connectionString: process.env.POSTGRESQL_URL });
-const adapter = new PrismaPg(pool);
+const adapter = new PrismaPg({ connectionString: process.env.POSTGRESQL_URL })
 const prismaClient = new PrismaClient({ adapter });
 
-console.log("Prisma PostgreSQL connected successfully");
+console.log("Prisma PostgreSQL connected succcessfully");
 
 export default prismaClient;

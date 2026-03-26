@@ -1,4 +1,3 @@
-import { OAuth2Client } from 'google-auth-library';
 import AuthDao from './auth.dao.js';
 import { hashPassword, comparePassword } from '../../utils/password.util.js';
 import { generateAccessToken } from '../../utils/jwt.util.js';
@@ -19,11 +18,8 @@ import { BadRequestError, ConflictError, UnauthorizedError } from '../../utils/e
 class AuthService {
   private authDao: AuthDao;
 
-  private googleClient: OAuth2Client;
-
   constructor() {
     this.authDao = new AuthDao();
-    this.googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID!);
   }
 
   // Helper to generate random token
@@ -82,10 +78,6 @@ class AuthService {
     }
 
     // Compare passwords
-    if (!user.password_hash) {
-      throw new UnauthorizedError('Invalid email or password');
-    }
-
     const isPasswordValid = await comparePassword(password, user.password_hash);
     if (!isPasswordValid) {
       throw new UnauthorizedError('Invalid email or password');
@@ -120,82 +112,6 @@ class AuthService {
     return {
       message: 'Login successful',
       accessToken, refreshToken,
-      user: userWithoutPassword,
-    };
-  }
-
-  async googleLogin(idToken: string) {
-    if (!process.env.GOOGLE_CLIENT_ID) {
-      throw new BadRequestError('Google login is not configured');
-    }
-
-    let payload;
-    try {
-      const ticket = await this.googleClient.verifyIdToken({
-        idToken,
-        audience: process.env.GOOGLE_CLIENT_ID!,
-      });
-      payload = ticket.getPayload();
-    } catch (error) {
-      throw new UnauthorizedError('Invalid Google token');
-    }
-
-    if (!payload || !payload.email) {
-      throw new UnauthorizedError('Invalid Google token payload');
-    }
-
-    const { email, name, picture, sub: googleId } = payload;
-
-    // Find user by email
-    let user = await this.authDao.findUserByEmail(email, { include_password_hash: true });
-
-    if (!user) {
-      // Create new user if not exists
-      const newUser = await this.authDao.createUser({
-        email: email as string,
-        name: (name || email.split('@')[0]) as string,
-      });
-      // Mark as verified since it's Google
-      await this.authDao.updateUser(newUser.id, { isVerified: true });
-
-      // Fetch user again to get the full object (with optional password_hash)
-      user = await this.authDao.findUserByEmail(email, { include_password_hash: true });
-    }
-
-    const userForAuth = user!; // Guaranteed to exist now
-
-    if (!userForAuth.isActive) {
-      throw new UnauthorizedError('Account is disabled');
-    }
-
-    await this.authDao.updateUser(userForAuth.id, { lastLoginAt: new Date() });
-
-    const refreshToken = this._generateRandomToken();
-    const refreshTokenHash = this._hashToken(refreshToken);
-    const refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS);
-
-    const sessionId = crypto.randomUUID();
-    const sessionKey = generateAuthSessionKey(userForAuth.id, sessionId);
-
-    await this.authDao.createRefreshToken({
-      userId: userForAuth.id,
-      token_hash: refreshTokenHash,
-      sessionId: sessionId,
-      expiresAt: refreshTokenExpiresAt,
-    });
-
-    const sessionPayload = generateSessionPayload(userForAuth as any, refreshTokenHash);
-    await cacheService.set(sessionKey, sessionPayload, AUTH_REDIS_EXPIRY_SECONDS);
-
-    const jwtPayload = generateJWTPayload(userForAuth as any, sessionId);
-    const accessToken = generateAccessToken(jwtPayload);
-
-    const { password_hash, ...userWithoutPassword } = userForAuth;
-
-    return {
-      message: 'Login successful',
-      accessToken,
-      refreshToken,
       user: userWithoutPassword,
     };
   }

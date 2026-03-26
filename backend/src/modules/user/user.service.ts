@@ -42,10 +42,6 @@ class UserService {
     }
 
     // Verify old password by fetching with password
-    if (!userWithPassword.password_hash) {
-      throw new UnauthorizedError('Current password is incorrect');
-    }
-
     const isPasswordValid = await comparePassword(oldPassword, userWithPassword.password_hash);
     if (!isPasswordValid) {
       throw new UnauthorizedError('Current password is incorrect');

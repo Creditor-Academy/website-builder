@@ -23,6 +23,10 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import GradientButton from '@/components/ui/GradientButton';
 
 import { templatesList } from '@/lib/templates';
+import { loginUser,  logoutUser } from "../api/auth";
+
+
+
 
 // OverviewCard component
 const OverviewCard = ({ title, value, icon, description, iconBgClass, iconColorClass }) => (
@@ -68,6 +72,10 @@ const Dashboard = () => {
     const location = useLocation();
     const { websites, createWebsite, deleteWebsite } = useBuilderStore();
     const isMobile = useIsMobile();
+    const user = JSON.parse(localStorage.getItem("user"));
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+
 
     const [newSiteName, setNewSiteName] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -91,13 +99,23 @@ const Dashboard = () => {
         }
     }, [isAdmin, location.pathname, navigate]);
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('user');
-        navigate('/');
-    };
+
+    const handleLogout = async () => {
+  try {
+    setIsLoggingOut(true);
+
+    await logoutUser();
+
+    localStorage.removeItem("user"); // ✅ clear user
+    navigate("/");
+  } catch (err) {
+    console.error(err);
+    alert("Logout failed");
+  } finally {
+    setIsLoggingOut(false);
+  }
+};
+
 
     const handleDialogClose = (open) => {
         setIsDialogOpen(open);
@@ -195,13 +213,13 @@ const Dashboard = () => {
                 </nav>
 
                 <div className="p-4 mt-auto space-y-3">
-                    <div className="bg-slate-700 rounded-2xl p-4 border border-slate-600">
+                    {/* <div className="bg-slate-700 rounded-2xl p-4 border border-slate-600">
                         <p className="text-xs font-semibold text-white mb-1">Free Plan</p>
                         <div className="w-full bg-slate-600 h-1.5 rounded-full mb-2">
                             <div className="bg-purple-500 h-full w-1/3 rounded-full" />
                         </div>
                         <p className="text-[10px] text-slate-400">3 of 10 projects used</p>
-                    </div>
+                    </div> */}
 
                     <GradientButton
                         className="w-full justify-start py-2 px-3 text-sm"
@@ -214,16 +232,22 @@ const Dashboard = () => {
                         {isAdmin ? "Admin Mode On" : "Switch to Admin Mode"}
                     </GradientButton>
 
-                    <div
-                        className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-slate-700"
-                        onClick={handleLogout}
-                    >
+                  <div
+  className={`flex items-center gap-3 p-2 rounded-xl transition-colors border border-transparent 
+    ${isLoggingOut ? "opacity-50 cursor-not-allowed" : "hover:bg-white/10 cursor-pointer hover:border-slate-700"}
+  `}
+  onClick={!isLoggingOut ? handleLogout : undefined}
+>
+
                         <div className="relative">
                             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-sm">JD</div>
                             <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-slate-800 rounded-full" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-white truncate">John Doe</p>
+                            <p className="text-sm font-semibold text-white truncate">
+  {isLoggingOut ? "Logging out..." : (user?.name || "User")}
+</p>
+
                             <p className="text-xs text-slate-400 truncate">Pro Plan</p>
                         </div>
                         <LogOut className="w-4 h-4 text-slate-400 hover:text-red-400 transition-colors" />
