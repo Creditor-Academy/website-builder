@@ -10,7 +10,7 @@ const app = express();
 await initRedis();
 
 app.use(cors({
-  origin: "http://localhost:8081", // your frontend URL
+  origin: "http://localhost:8080", // your frontend URL
   credentials: true
 }));
 

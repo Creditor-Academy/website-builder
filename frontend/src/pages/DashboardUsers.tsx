@@ -35,7 +35,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
   DropdownMenu,
@@ -48,6 +47,7 @@ import { Users, UserPlus, Search, Edit, UserX, UserCheck, UserCog, AlertTriangle
 import { useToast } from '@/components/ui/use-toast';
 import UserShimmer from '@/components/dashboard/UserShimmer';
 import GradientButton from '@/components/ui/GradientButton';
+import { getUsers, updateUserRole, updateUserStatus, restoreUser } from '../api/user';
 
 interface User {
   id: string;
@@ -71,22 +71,30 @@ export default function DashboardUsers() {
   const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
   const [userToDeactivate, setUserToDeactivate] = useState<User | null>(null);
 
-  const dummyUsers: User[] = [
-    { id: "1", name: "Alice Smith", email: "alice@example.com", role: "Admin", status: "Active", createdAt: "2023-01-15", lastLogin: "2024-03-14" },
-    { id: "2", name: "Bob Johnson", email: "bob@example.com", role: "Editor", status: "Inactive", createdAt: "2023-02-20", lastLogin: "2024-03-10" },
-    { id: "3", name: "Charlie Brown", email: "charlie@example.com", role: "User", status: "Active", createdAt: "2023-03-10", lastLogin: "2024-03-13" },
-    { id: "4", name: "Diana Prince", email: "diana@example.com", role: "User", status: "Suspended", createdAt: "2023-04-01", lastLogin: "2024-03-05" },
-    { id: "5", name: "Eve Adams", email: "eve@example.com", role: "User", status: "Active", createdAt: "2023-05-01", lastLogin: "2024-03-14" },
-  ];
-
   useEffect(() => {
-    // Simulate API call with dummy data
-    setIsLoading(true);
-    setTimeout(() => {
-      setUsers(dummyUsers);
-      setIsLoading(false);
-    }, 500); // Simulate network delay
-  }, []);
+    const fetchUsersData = async () => {
+      try {
+        setIsLoading(true);
+        const res = await getUsers({ limit: 100 });
+        const fetchedUsers = res.data.users.map((u: any) => ({
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          role: u.role === 'ADMIN' ? 'Admin' : 'User',
+          status: u.isActive ? 'Active' : (u.deleted_at ? 'Suspended' : 'Inactive'),
+          createdAt: new Date(u.created_at).toISOString().split('T')[0],
+          lastLogin: u.lastLoginAt ? new Date(u.lastLoginAt).toISOString().split('T')[0] : 'Never',
+        }));
+        setUsers(fetchedUsers);
+      } catch (error) {
+        console.error("Failed to fetch users", error);
+        toast({ title: "Error", description: "Failed to fetch users", variant: "destructive" });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchUsersData();
+  }, [toast]);
 
   const handleEditClick = (user: User) => {
     setEditingUser(user);
@@ -96,19 +104,37 @@ export default function DashboardUsers() {
   const handleSaveUser = async () => {
     if (!editingUser) return;
 
-    // Simulate API call and success
-    setTimeout(() => {
+    try {
+      // Find the original user to check for changes
+      const originalUser = users.find(u => u.id === editingUser.id);
+      if (!originalUser) return;
+
+      // Update role if changed
+      if (originalUser.role !== editingUser.role) {
+        const backendRole = editingUser.role === 'Admin' ? 'ADMIN' : 'USER';
+        await updateUserRole(editingUser.id, backendRole);
+      }
+
+      // Update local state and close modal
       setUsers((prevUsers) =>
         prevUsers.map((user) => (user.id === editingUser.id ? editingUser : user))
       );
       setIsModalOpen(false);
       setEditingUser(null);
+
       toast({
         title: "User Updated ✅",
         description: `User ${editingUser.name} has been updated.`, 
         icon: <CheckCircle className="h-5 w-5 text-emerald-500" />,
       });
-    }, 300); // Simulate network delay
+    } catch (error: any) {
+      console.error("Failed to update user", error);
+      toast({ 
+        title: "Update Failed", 
+        description: error.response?.data?.message || "Failed to update user role", 
+        variant: "destructive" 
+      });
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -132,8 +158,9 @@ export default function DashboardUsers() {
   const handleDeactivateConfirm = async () => {
     if (!userToDeactivate) return;
 
-    // Simulate API call and success
-    setTimeout(() => {
+    try {
+      await updateUserStatus(userToDeactivate.id, false);
+      
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.id === userToDeactivate.id ? { ...user, status: "Inactive" } : user
@@ -146,12 +173,20 @@ export default function DashboardUsers() {
         description: `User ${userToDeactivate.name} has been deactivated.`, 
         icon: <XCircle className="h-5 w-5 text-destructive" />,
       });
-    }, 300); // Simulate network delay
+    } catch (error: any) {
+      console.error("Failed to deactivate user", error);
+      toast({ 
+        title: "Deactivation Failed", 
+        description: error.response?.data?.message || "Failed to deactivate user", 
+        variant: "destructive" 
+      });
+    }
   };
 
-  const handleRestoreClick = (user: User) => {
-    // Simulate API call to restore user
-    setTimeout(() => {
+  const handleRestoreClick = async (user: User) => {
+    try {
+      await restoreUser(user.id);
+      
       setUsers((prevUsers) =>
         prevUsers.map((u) => (u.id === user.id ? { ...u, status: "Active" } : u))
       );
@@ -160,7 +195,14 @@ export default function DashboardUsers() {
         description: `User ${user.name} has been restored to active status.`, 
         icon: <CheckCircle className="h-5 w-5 text-primary" />,
       });
-    }, 300);
+    } catch (error: any) {
+      console.error("Failed to restore user", error);
+      toast({ 
+        title: "Restoration Failed", 
+        description: error.response?.data?.message || "Failed to restore user", 
+        variant: "destructive" 
+      });
+    }
   };
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -326,7 +368,6 @@ export default function DashboardUsers() {
           <TableHeader className="bg-slate-50 border-b border-slate-200">
             <TableRow className="hover:bg-transparent">
               <TableHead className="w-[40px] px-2 text-center"><input type="checkbox" className="form-checkbox h-4 w-4 text-blue-600 rounded" /></TableHead>
-              <TableHead className="w-[80px] px-4 py-3 text-slate-500">ID</TableHead>
               <TableHead className="min-w-[200px] px-4 py-3 text-slate-500">User</TableHead>
               <TableHead className="min-w-[100px] px-4 py-3 text-slate-500">Role</TableHead>
               <TableHead className="min-w-[120px] px-4 py-3 text-slate-500">Status</TableHead>
@@ -352,7 +393,6 @@ export default function DashboardUsers() {
               sortedUsers.map((user) => (
                 <TableRow key={user.id} className="group h-16 border-b border-slate-100 hover:bg-slate-50/70 transition-all duration-200">
                   <TableCell className="px-2 text-center"><input type="checkbox" className="form-checkbox h-4 w-4 text-blue-600 rounded" /></TableCell>
-                  <TableCell className="font-medium text-slate-600 px-4 py-3">#{user.id}</TableCell>
                   <TableCell className="flex items-center gap-3 px-4 py-3">
                     <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-semibold text-xs">
                       {user.name.split(' ').map(n => n[0]).join('')}
@@ -367,13 +407,10 @@ export default function DashboardUsers() {
                       className={
                         user.role === "Admin"
                           ? "bg-purple-100 text-purple-700 hover:bg-purple-100/80"
-                          : user.role === "Editor"
-                          ? "bg-blue-100 text-blue-700 hover:bg-blue-100/80"
                           : "bg-slate-100 text-slate-600 hover:bg-slate-100/80"
                       }
                     >
                       {user.role === "Admin" && <ShieldCheck className="w-3 h-3 mr-1" />}
-                      {user.role === "Editor" && <Briefcase className="w-3 h-3 mr-1" />}
                       {user.role === "User" && <UserIcon className="w-3 h-3 mr-1" />}
                       {user.role}
                     </Badge>
@@ -485,7 +522,6 @@ export default function DashboardUsers() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Admin">Admin</SelectItem>
-                  <SelectItem value="Editor">Editor</SelectItem>
                   <SelectItem value="User">User</SelectItem>
                 </SelectContent>
               </Select>
@@ -559,7 +595,6 @@ export default function DashboardUsers() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Admin">Admin</SelectItem>
-                  <SelectItem value="Editor">Editor</SelectItem>
                   <SelectItem value="User">User</SelectItem>
                 </SelectContent>
               </Select>
