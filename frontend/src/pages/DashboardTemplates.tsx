@@ -58,15 +58,15 @@ export default function DashboardTemplates() {
         {templatesList
           .filter(template => activeCategory === 'All' || template.category === activeCategory)
           .map((template) => (
-          <Card key={template.id} className="group overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer bg-white">
+          <Card key={template.id} className="group/template-card overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer bg-white">
             <div className="aspect-[4/3] bg-slate-50 relative overflow-hidden rounded-t-2xl">
               <img 
                 src={template.image} 
                 alt={template.name} 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                className="w-full h-full object-cover transition-transform duration-500 group-hover/template-card:scale-105" 
               />
               {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover/template-card:opacity-100 transition-opacity duration-300"></div>
               
               {template.tag && (
                 <Badge className="absolute top-4 left-4 bg-white/90 text-slate-800 font-semibold text-xs px-3 py-1 rounded-full shadow-sm backdrop-blur-[2px]">
@@ -74,7 +74,7 @@ export default function DashboardTemplates() {
                 </Badge>
               )}
               
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/template-card:opacity-100 transition-all duration-300 z-20">
                 <Button 
                    className="bg-blue-600 text-white font-semibold rounded-full px-6 h-11 text-sm shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:scale-105 transition-all duration-200"
                    onClick={(e) => { e.stopPropagation(); handleUseTemplate(template.id, template.name); }}
@@ -100,7 +100,7 @@ export default function DashboardTemplates() {
                 {template.desc}
               </p>
               
-              <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-blue-600 font-semibold text-xs uppercase tracking-wider group-hover:text-blue-700 transition-all">
+              <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-blue-600 font-semibold text-xs uppercase tracking-wider group-hover/template-card:text-blue-700 transition-all"> 
                   <span>View Details</span>
                   <ArrowRight className="w-3 h-3" />
               </div>

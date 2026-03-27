@@ -52,7 +52,7 @@ const NavItem = ({ icon, label, to, activeColor = 'text-white', hoverBg = 'hover
     return (
         <Button
             variant="ghost"
-            className={`w-full justify-start gap-2 py-2 px-3 text-sm transition-all duration-300 group rounded-full
+            className={`w-full justify-start gap-2 py-2 px-3 text-sm transition-all duration-300 group/nav-item rounded-full
                 ${isActive ? `bg-gradient-to-r from-purple-600 to-indigo-600 ${activeColor} font-semibold shadow-lg shadow-purple-500/30` : `${defaultText} ${hoverText} ${hoverBg}`}
             `}
             onClick={handleClick}
