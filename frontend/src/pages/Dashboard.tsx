@@ -26,10 +26,10 @@ import { templatesList } from '@/lib/templates';
 
 // OverviewCard component
 const OverviewCard = ({ title, value, icon, description, iconBgClass, iconColorClass }) => (
-    <Card className="rounded-3xl bg-white/70 backdrop-blur-md border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-300 hover:-translate-y-1">
+    <Card className="rounded-3xl bg-white/70 backdrop-blur-md border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-300 hover:-translate-y-1 group/overview-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 p-6 pb-4">
             <CardTitle className="text-base font-semibold text-slate-700">{title}</CardTitle>
-            <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform", iconBgClass, iconColorClass)}>{icon}</div>
+            <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shadow-lg group-hover/overview-card:scale-105 transition-transform", iconBgClass, iconColorClass)}>{icon}</div>
         </CardHeader>
         <CardContent className="px-6 pb-6">
             <div className="text-4xl font-bold text-slate-900">{value}</div>
@@ -294,8 +294,8 @@ const Dashboard = () => {
                                                     <GradientButton
                                                         onClick={handleCreateSite}
                                                         disabled={!newSiteName.trim()}
-                                                        className="w-full h-14 font-bold text-lg flex items-center justify-center group active:scale-[0.98]"
-                                                        icon={<ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
+                                                        className="w-full h-14 font-bold text-lg flex items-center justify-center group/button-create-site active:scale-[0.98]"
+                                                        icon={<ArrowRight className="w-5 h-5 group-hover/button-create-site:translate-x-1 transition-transform" />}
                                                     >
                                                         Start Building 
                                                     </GradientButton>
@@ -316,7 +316,7 @@ const Dashboard = () => {
                                                             key={tpl.id}
                                                             onClick={() => setSelectedTemplate(tpl.id)}
                                                             className={cn(
-                                                                "group cursor-pointer rounded-[1.5rem] overflow-hidden transition-all duration-300 relative border-[3px] bg-white flex flex-col",
+                                                                "group/template-dialog-card cursor-pointer rounded-[1.5rem] overflow-hidden transition-all duration-300 relative border-[3px] bg-white flex flex-col",
                                                                 selectedTemplate === tpl.id
                                                                     ? "border-blue-500 shadow-[0_10px_40px_rgba(59,130,246,0.15)] scale-[1.02]"
                                                                     : "border-transparent border-slate-200 hover:border-blue-300 hover:shadow-xl opacity-80 hover:opacity-100"
@@ -326,7 +326,7 @@ const Dashboard = () => {
                                                                 <img
                                                                     src={tpl.image}
                                                                     alt={tpl.name}
-                                                                    className={cn("w-full h-full object-cover transition-transform duration-700", selectedTemplate === tpl.id ? "scale-105" : "group-hover:scale-105")}
+                                                                    className={cn("w-full h-full object-cover transition-transform duration-700", selectedTemplate === tpl.id ? "scale-105" : "group-hover/template-dialog-card:scale-105")}
                                                                 />
                                                                 <AnimatePresence>
                                                                     {selectedTemplate === tpl.id && (
@@ -340,7 +340,7 @@ const Dashboard = () => {
                                                                         </motion.div>
                                                                     )}
                                                                 </AnimatePresence>
-                                                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                                                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover/template-dialog-card:opacity-100 transition-opacity duration-300 flex items-end p-6">
                                                                     <p className="text-white font-semibold text-sm drop-shadow-md">{tpl.desc}</p>
                                                                 </div>
                                                             </div>
@@ -600,11 +600,11 @@ const Dashboard = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.4 }}
-                                className="bg-white/70 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300"
+                                className="bg-white/70 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300 group/stat-card"
                             >
 
                                 <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-12 h-12 bg-blue-600/20 text-blue-400 rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+                                    <div className="w-12 h-12 bg-blue-600/20 text-blue-400 rounded-full flex items-center justify-center shadow-lg group-hover/stat-card:scale-105 transition-transform">
                                         <Files className="w-6 h-6" />
                                     </div>
                                     <p className="text-sm font-medium text-slate-600">Total Assets</p>
@@ -620,11 +620,11 @@ const Dashboard = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.5 }}
-                                className="bg-white/70 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300"
+                                className="bg-white/70 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300 group/stat-card"
                             >
 
                                 <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-12 h-12 bg-rose-600/20 text-rose-400 rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+                                    <div className="w-12 h-12 bg-rose-600/20 text-rose-400 rounded-full flex items-center justify-center shadow-lg group-hover/stat-card:scale-105 transition-transform">
                                         <Activity className="w-6 h-6" />
                                     </div>
                                     <p className="text-sm font-medium text-slate-600">Deployments Today</p>
@@ -645,10 +645,10 @@ const Dashboard = () => {
                                 whileHover={{ scale: 1.03, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(168, 85, 247, 0.6)" }}
                                 transition={{ duration: 0.3, ease: "easeOut" }}
                                 onClick={() => navigate('/dashboard/users')}
-                                className="relative group cursor-pointer bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:ring-2 hover:ring-purple-500/50"
+                                className="relative group/admin-action-card cursor-pointer bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:ring-2 hover:ring-purple-500/50"
                             >
 
-                                <div className="relative z-10 w-16 h-16 bg-purple-600/20 text-purple-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-105 transition-transform duration-300 shadow-inner">
+                                <div className="relative z-10 w-16 h-16 bg-purple-600/20 text-purple-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover/admin-action-card:scale-105 transition-transform duration-300 shadow-inner">
                                     <Users className="w-8 h-8" />
                                 </div>
                                 <h3 className="relative z-10 text-2xl font-bold text-white mb-2">Manage Users</h3>
@@ -660,10 +660,10 @@ const Dashboard = () => {
                                 whileHover={{ scale: 1.03, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(99, 102, 241, 0.6)" }}
                                 transition={{ duration: 0.3, ease: "easeOut" }}
                                 onClick={() => navigate('/dashboard/websites')}
-                                className="relative group cursor-pointer bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:ring-2 hover:ring-indigo-500/50"
+                                className="relative group/admin-action-card cursor-pointer bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:ring-2 hover:ring-indigo-500/50"
                             >
 
-                                <div className="relative z-10 w-16 h-16 bg-indigo-600/20 text-indigo-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-105 transition-transform duration-300 shadow-inner">
+                                <div className="relative z-10 w-16 h-16 bg-indigo-600/20 text-indigo-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover/admin-action-card:scale-105 transition-transform duration-300 shadow-inner">
                                     <Layout className="w-8 h-8" />
                                 </div>
                                 <h3 className="relative z-10 text-2xl font-bold text-white mb-2">Manage Websites</h3>
@@ -677,10 +677,10 @@ const Dashboard = () => {
                                 whileHover={{ scale: 1.03, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(16, 185, 129, 0.6)" }}
                                 transition={{ duration: 0.3, ease: "easeOut" }}
                                 onClick={() => navigate('/dashboard/templates')}
-                                className="relative group cursor-pointer bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:ring-2 hover:ring-emerald-500/50"
+                                className="relative group/admin-action-card cursor-pointer bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:ring-2 hover:ring-emerald-500/50"
                             >
 
-                                <div className="relative z-10 w-16 h-16 bg-emerald-600/20 text-emerald-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-105 transition-transform duration-300 shadow-inner">
+                                <div className="relative z-10 w-16 h-16 bg-emerald-600/20 text-emerald-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover/admin-action-card:scale-105 transition-transform duration-300 shadow-inner">
                                     <LayoutTemplate className="w-8 h-8" />
                                 </div>
                                 <h3 className="relative z-10 text-2xl font-bold text-white mb-2">Manage Templates</h3>
@@ -694,10 +694,10 @@ const Dashboard = () => {
                                 whileHover={{ scale: 1.03, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(244, 63, 94, 0.6)" }}
                                 transition={{ duration: 0.3, ease: "easeOut" }}
                                 onClick={() => navigate('/dashboard/deployment')}
-                                className="relative group cursor-pointer bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:ring-2 hover:ring-rose-500/50"
+                                className="relative group/admin-action-card cursor-pointer bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:ring-2 hover:ring-rose-500/50"
                             >
 
-                                <div className="relative z-10 w-16 h-16 bg-rose-600/20 text-rose-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-105 transition-transform duration-300 shadow-inner">
+                                <div className="relative z-10 w-16 h-16 bg-rose-600/20 text-rose-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover/admin-action-card:scale-105 transition-transform duration-300 shadow-inner">
                                     <Activity className="w-8 h-8" />
                                 </div>
                                 <h3 className="relative z-10 text-2xl font-bold text-white mb-2">Monitor Deployments</h3>
@@ -721,15 +721,15 @@ const WebsiteCard = ({ site, index, onDelete, onEdit }) => {
     const template = templatesList.find(t => t.id === site.templateId);
 
     return (
-        <Card className="group border border-slate-200 bg-white rounded-3xl overflow-hidden flex flex-col shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 hover:-translate-y-1 transition-all duration-300">
+        <Card className="group/website-card border border-slate-200 bg-white rounded-3xl overflow-hidden flex flex-col shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 hover:-translate-y-1 transition-all duration-300">
             <div className="aspect-[16/10] bg-slate-50 relative overflow-hidden">
                 {template && template.id !== 'blank' ? (
-                    <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105 p-4">
+                    <div className="absolute inset-0 transition-transform duration-500 group-hover/website-card:scale-105 p-4">
                         <img src={template.image} alt={site.name} className="w-full h-full object-cover rounded-2xl border border-slate-200 shadow-sm" />
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-0 group-hover/website-card:opacity-100 transition-opacity duration-300" />
                     </div>
                 ) : (
-                    <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105 p-4">
+                    <div className="absolute inset-0 transition-transform duration-500 group-hover/website-card:scale-105 p-4">
                         <div className="w-full h-full border border-slate-200 rounded-2xl bg-white shadow-sm flex flex-col overflow-hidden">
                             <div className="h-6 bg-slate-50 border-b border-slate-100 flex items-center px-3 gap-1.5">
                                 <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
@@ -745,12 +745,12 @@ const WebsiteCard = ({ site, index, onDelete, onEdit }) => {
                                 </div>
                             </div>
                         </div>
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover/website-card:opacity-100 transition-opacity duration-300" />
                     </div>
                 )}
 
                 {/* Hover Actions Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
+                <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover/website-card:opacity-100 transition-all duration-300 z-10">
                     <Button size="sm" onClick={onEdit} className="bg-white text-slate-900 hover:bg-white/90 rounded-full shadow-lg">
                         <Edit2 className="w-4 h-4 mr-1" /> Edit
                     </Button>
@@ -760,7 +760,7 @@ const WebsiteCard = ({ site, index, onDelete, onEdit }) => {
             <CardHeader className="p-6 pb-3">
                 <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                        <CardTitle className="text-xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors leading-tight">
+                        <CardTitle className="text-xl font-bold text-slate-800 group-hover/website-card:text-indigo-600 transition-colors leading-tight">
                             {site.name}
                         </CardTitle>
                         <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mt-1">
@@ -799,7 +799,7 @@ const WebsiteCard = ({ site, index, onDelete, onEdit }) => {
                     <div className={`w-1.5 h-1.5 rounded-full ${site.status === 'Published' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
                     {site.status}
                 </div>
-                <Button variant="link" className="text-indigo-600 p-0 h-auto text-sm font-bold group-hover:underline underline-offset-4" onClick={onEdit}>
+                <Button variant="link" className="text-indigo-600 p-0 h-auto text-sm font-bold group-hover/website-card:underline underline-offset-4" onClick={onEdit}>
                     Open Editor →
                 </Button>
             </CardFooter>
