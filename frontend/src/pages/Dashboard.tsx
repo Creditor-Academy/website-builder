@@ -24,8 +24,64 @@ import GradientButton from '@/components/ui/GradientButton';
 
 import { templatesList } from '@/lib/templates';
 
+interface Website {
+    id: string;
+    name: string;
+    templateId: string;
+    lastEdited: string;
+    status: 'Draft' | 'Published';
+}
+
+interface Asset {
+    id: string;
+    name: string;
+    url: string;
+    type: 'image' | 'video';
+    size: string;
+}
+
+interface OverviewCardProps {
+    title: string;
+    value: string;
+    icon: React.ReactNode;
+    description?: string;
+    iconBgClass: string;
+    iconColorClass: string;
+}
+
+interface NavItemProps {
+    icon: React.ReactNode;
+    label: string;
+    to: string;
+    activeColor?: string;
+    hoverBg?: string;
+    hoverText?: string;
+    defaultText?: string;
+}
+
+interface Template {
+    id: string;
+    name: string;
+    image: string;
+    desc: string;
+    icon: React.ElementType;
+    category: string;
+}
+
+interface WebsiteCardProps {
+    site: Website;
+    index: number;
+    onDelete: () => void;
+    onEdit: () => void;
+}
+
+interface EmptyStateProps {
+    onAction: () => void;
+}
+
+
 // OverviewCard component
-const OverviewCard = ({ title, value, icon, description, iconBgClass, iconColorClass }) => (
+const OverviewCard: React.FC<OverviewCardProps> = ({ title, value, icon, description, iconBgClass, iconColorClass }) => (
     <Card className="rounded-3xl bg-white/70 backdrop-blur-md border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-300 hover:-translate-y-1 group/overview-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 p-6 pb-4">
             <CardTitle className="text-base font-semibold text-slate-700">{title}</CardTitle>
@@ -38,8 +94,18 @@ const OverviewCard = ({ title, value, icon, description, iconBgClass, iconColorC
     </Card>
 );
 
+interface NavItemProps {
+    icon: React.ReactNode;
+    label: string;
+    to: string;
+    activeColor?: string;
+    hoverBg?: string;
+    hoverText?: string;
+    defaultText?: string;
+}
+
 // NavItem — supports router Link + active state
-const NavItem = ({ icon, label, to, activeColor = 'text-white', hoverBg = 'hover:bg-slate-700', hoverText = 'hover:text-white', defaultText = 'text-slate-300' }) => {
+const NavItem: React.FC<NavItemProps> = ({ icon, label, to, activeColor = 'text-white', hoverBg = 'hover:bg-slate-700', hoverText = 'hover:text-white', defaultText = 'text-slate-300' }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const isActive = location.pathname === to;
@@ -99,7 +165,7 @@ const Dashboard = () => {
         navigate('/');
     };
 
-    const handleDialogClose = (open) => {
+    const handleDialogClose = (open: boolean) => {
         setIsDialogOpen(open);
         if (!open) {
             setNewSiteName('');
@@ -232,7 +298,7 @@ const Dashboard = () => {
             </aside>
 
             {/* Main Content */}
-                        <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
+            <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
 
                 {location.pathname === '/dashboard' && !isAdmin ? (
                     <>
@@ -279,7 +345,7 @@ const Dashboard = () => {
                                                     </p>
                                                 </div>
                                                 <div className="mt-4 space-y-4 flex-1">
-                                                    <div className="relative group">
+                                                    <div className="relative group/input-wrapper">
                                                         <label className="text-xs font-bold text-slate-800 mb-2 block uppercase tracking-wider">Project Name</label>
                                                         <Input
                                                             placeholder="e.g., My Awesome Site"
@@ -394,16 +460,7 @@ const Dashboard = () => {
                                 iconBgClass="bg-gradient-to-br from-emerald-600 to-teal-600"
                                 iconColorClass="text-white"
                             />
-                            {isAdmin && (
-                                <OverviewCard
-                                    title="Deployments Today"
-                                    value="78"
-                                    description="Successfully deployed websites"
-                                    icon={<Activity className="w-5 h-5" />}
-                                    iconBgClass="bg-rose-100"
-                                    iconColorClass="text-rose-600"
-                                />
-                            )}
+
                         </section>
 
                         {/* Search and Filters */}
@@ -508,14 +565,7 @@ const Dashboard = () => {
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
-                                {/* Global Search Input */}
-                                <div className="relative hidden lg:block">
-                                    <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                                    <Input
-                                        placeholder="Search anything..."
-                                        className="pl-12 h-11 w-64 rounded-full bg-white border-slate-200 shadow-sm focus:ring-2 focus:ring-purple-500/20"
-                                    />
-                                </div>
+
                                 {/* Notification Icon */}
                                 <Button variant="ghost" size="icon" className="relative rounded-full h-11 w-11 text-slate-600 hover:bg-slate-100">
                                     <Bell className="w-5 h-5" />
@@ -525,13 +575,7 @@ const Dashboard = () => {
                                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-sm shadow-lg">
                                     AD
                                 </div>
-                                {/* Optional Quick Actions */}
-                                <Button
-                                    className="h-11 px-5 rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/20 hidden md:flex items-center gap-2"
-                                    onClick={() => navigate('/dashboard/websites')} // Example: Create Website
-                                >
-                                    <Plus className="w-5 h-5" /> Create Website
-                                </Button>
+
                             </div>
                         </motion.header>
 
@@ -616,26 +660,7 @@ const Dashboard = () => {
                                     </span>
                                 </div>
                             </motion.div>
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.5 }}
-                                className="bg-white/70 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300 group/stat-card"
-                            >
 
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-12 h-12 bg-rose-600/20 text-rose-400 rounded-full flex items-center justify-center shadow-lg group-hover/stat-card:scale-105 transition-transform">
-                                        <Activity className="w-6 h-6" />
-                                    </div>
-                                    <p className="text-sm font-medium text-slate-600">Deployments Today</p>
-                                </div>
-                                <div className="flex items-end justify-between">
-                                    <span className="text-4xl font-extrabold text-slate-900">48</span>
-                                    <span className="text-sm font-semibold text-emerald-500 flex items-center">
-                                        <ArrowUp className="w-4 h-4 mr-0.5" /> +15%
-                                    </span>
-                                </div>
-                            </motion.div>
                         </section>
 
                         {/* Admin Quick Actions Grid */}
@@ -651,8 +676,8 @@ const Dashboard = () => {
                                 <div className="relative z-10 w-16 h-16 bg-purple-600/20 text-purple-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover/admin-action-card:scale-105 transition-transform duration-300 shadow-inner">
                                     <Users className="w-8 h-8" />
                                 </div>
-                                <h3 className="relative z-10 text-2xl font-bold text-white mb-2">Manage Users</h3>
-                                <p className="relative z-10 text-slate-300 text-base">Overview and control of all user accounts.</p>
+                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">Manage Users</h3>
+                                <p className="relative z-10 text-slate-600 text-base">Overview and control of all user accounts.</p>
                             </motion.div>
 
                             {/* Manage Websites Card */}
@@ -666,8 +691,8 @@ const Dashboard = () => {
                                 <div className="relative z-10 w-16 h-16 bg-indigo-600/20 text-indigo-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover/admin-action-card:scale-105 transition-transform duration-300 shadow-inner">
                                     <Layout className="w-8 h-8" />
                                 </div>
-                                <h3 className="relative z-10 text-2xl font-bold text-white mb-2">Manage Websites</h3>
-                                <p className="relative z-10 text-slate-300 text-base leading-relaxed">
+                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">Manage Websites</h3>
+                                <p className="relative z-10 text-slate-600 text-base leading-relaxed">
                                     Oversee all created websites, their status, and configurations.
                                 </p>
                             </motion.div>
@@ -683,8 +708,8 @@ const Dashboard = () => {
                                 <div className="relative z-10 w-16 h-16 bg-emerald-600/20 text-emerald-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover/admin-action-card:scale-105 transition-transform duration-300 shadow-inner">
                                     <LayoutTemplate className="w-8 h-8" />
                                 </div>
-                                <h3 className="relative z-10 text-2xl font-bold text-white mb-2">Manage Templates</h3>
-                                <p className="relative z-10 text-slate-300 text-base leading-relaxed">
+                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">Manage Templates</h3>
+                                <p className="relative z-10 text-slate-600 text-base leading-relaxed">
                                     Browse, add, and manage all available website templates.
                                 </p>
                             </motion.div>
@@ -700,11 +725,13 @@ const Dashboard = () => {
                                 <div className="relative z-10 w-16 h-16 bg-rose-600/20 text-rose-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover/admin-action-card:scale-105 transition-transform duration-300 shadow-inner">
                                     <Activity className="w-8 h-8" />
                                 </div>
-                                <h3 className="relative z-10 text-2xl font-bold text-white mb-2">Monitor Deployments</h3>
-                                <p className="relative z-10 text-slate-300 text-base leading-relaxed">
+                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">Monitor Deployments</h3>
+                                <p className="relative z-10 text-slate-600 text-base leading-relaxed">
                                     Track the status and history of all website deployments.
                                 </p>
                             </motion.div>
+
+
                         </section>
 
                     </div>
@@ -716,9 +743,25 @@ const Dashboard = () => {
     );
 };
 
+interface Template {
+    id: string;
+    name: string;
+    image: string;
+    desc: string;
+    icon: React.ElementType;
+    category: string;
+}
+
+interface WebsiteCardProps {
+    site: Website;
+    index: number;
+    onDelete: () => void;
+    onEdit: () => void;
+}
+
 // --- WebsiteCard ---
-const WebsiteCard = ({ site, index, onDelete, onEdit }) => {
-    const template = templatesList.find(t => t.id === site.templateId);
+const WebsiteCard: React.FC<WebsiteCardProps> = ({ site, index, onDelete, onEdit }) => {
+    const template = templatesList.find((t: Template) => t.id === site.templateId);
 
     return (
         <Card className="group/website-card border border-slate-200 bg-white rounded-3xl overflow-hidden flex flex-col shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 hover:-translate-y-1 transition-all duration-300">
@@ -807,8 +850,12 @@ const WebsiteCard = ({ site, index, onDelete, onEdit }) => {
     );
 };
 
+interface EmptyStateProps {
+    onAction: () => void;
+}
+
 // --- EmptyState ---
-const EmptyState = ({ onAction }) => (
+const EmptyState: React.FC<EmptyStateProps> = ({ onAction }) => (
     <div className="h-[400px] flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-[2rem] bg-white p-12 text-center transition-all hover:border-primary/20 hover:bg-slate-50/50">
         <div className="w-20 h-20 bg-primary/5 rounded-3xl flex items-center justify-center mb-6">
             <Globe className="w-10 h-10 text-primary" />
@@ -824,7 +871,7 @@ const EmptyState = ({ onAction }) => (
 );
 
 // --- AssetsView ---
-const AssetsView = () => {
+const AssetsView: React.FC = () => {
     const { assets, addAsset, deleteAsset } = useBuilderStore();
     const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
     const [urlInput, setUrlInput] = useState('');
@@ -868,11 +915,11 @@ const AssetsView = () => {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <div className="aspect-square border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center gap-3 hover:border-primary/40 hover:bg-white cursor-pointer transition-all group">
-                            <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-primary group-hover:bg-primary/5 transition-colors">
+                        <div className="aspect-square border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center gap-3 hover:border-primary/40 hover:bg-white cursor-pointer transition-all group/upload-button">
+                            <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 group-hover/upload-button:text-primary group-hover/upload-button:bg-primary/5 transition-colors">
                                 <Plus className="w-6 h-6" />
                             </div>
-                            <span className="text-sm font-bold text-slate-500 group-hover:text-primary">Upload</span>
+                            <span className="text-sm font-bold text-slate-500 group-hover/upload-button:text-primary">Upload</span>
                         </div>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="w-48 rounded-xl p-2">
@@ -894,9 +941,9 @@ const AssetsView = () => {
                 />
 
                 {assets.map(asset => (
-                    <div key={asset.id} className="group relative aspect-square bg-white border border-slate-100 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all cursor-pointer">
-                        <img src={asset.url} alt={asset.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                        <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div key={asset.id} className="group/asset-card relative aspect-square bg-white border border-slate-100 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all cursor-pointer">
+                        <img src={asset.url} alt={asset.name} className="w-full h-full object-cover opacity-80 group-hover/asset-card:opacity-100 transition-opacity" />
+                        <div className="absolute top-4 right-4 z-10 opacity-0 group-hover/asset-card:opacity-100 transition-opacity">
                             <Button
                                 variant="destructive"
                                 size="icon"
@@ -909,7 +956,7 @@ const AssetsView = () => {
                                 <Trash2 className="w-4 h-4" />
                             </Button>
                         </div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-6 flex flex-col justify-end">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/asset-card:opacity-100 transition-opacity p-6 flex flex-col justify-end">
                             <p className="text-white text-sm font-bold truncate">{asset.name}</p>
                             <p className="text-white/70 text-[10px] uppercase font-black tracking-widest mt-0.5">S{asset.size}</p>
                         </div>
@@ -956,7 +1003,7 @@ const AssetsView = () => {
 };
 
 // --- SettingsView ---
-const SettingsView = () => {
+const SettingsView: React.FC = () => {
     const [name, setName] = useState('John Doe');
     const [email] = useState('john@example.com');
     const { toast } = useToast();
