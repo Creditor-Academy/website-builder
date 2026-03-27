@@ -102,7 +102,18 @@ class UserController {
     }
   };
 
-  // DELETE /users/:id - Restore user
+  // DELETE /users/:id - Delete user
+  deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const params = req.validated.params as UserIdParams;
+      await this.userService.deleteUser(req.context.user, params.id);
+      res.status(200).json({ message: 'User deleted successfully' });
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
+  // POST /users/:id/restore - Restore user
   restoreUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const params = req.validated.params as UserIdParams;

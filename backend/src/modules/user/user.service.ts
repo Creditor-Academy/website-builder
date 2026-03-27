@@ -142,6 +142,26 @@ class UserService {
     return updatedUser;
   }
 
+  async deleteUser(currentUser: AuthUser, userId: string) {
+    const user = await this.userDao.findUserById(userId);
+    if (!user || user.deleted_at) {
+      throw new NotFoundError('User not found');
+    }
+
+    // Cannot delete yourself
+    if (currentUser.id === userId) {
+      throw new UnprocessableEntityError('You cannot delete yourself');
+    }
+
+    await this.userDao.updateUser(userId, { isActive: false, deleted_at: new Date() });
+
+    // Revoke all refresh tokens and sessions
+    await this.authDao.revokeAllRefreshTokens(userId);
+
+    const sessionKeyPattern = generateAuthSessionKey(userId, '*');
+    await cacheService.clear(sessionKeyPattern);
+  }
+
   async restoreUser(currentUser: AuthUser, userId: string) {
     const user = await this.userDao.findUserById(userId);
     if (!user) {

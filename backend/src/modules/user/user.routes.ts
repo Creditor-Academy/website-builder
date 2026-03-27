@@ -75,7 +75,15 @@ router.patch(
   userController.updateUserStatus
 );
 
-// DELETE /users/:id - Restore User (Admin only)
+// DELETE /users/:id - Delete user (Admin only)
+router.delete(
+  '/:id',
+  authorize([UserRole.ADMIN]),
+  validateRequest(userIdParamsSchema, 'params'),
+  userController.deleteUser
+);
+
+// POST /users/:id/restore - Restore User (Admin only)
 router.post(
   '/:id/restore',
   authorize([UserRole.ADMIN]),
