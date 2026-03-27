@@ -6,7 +6,7 @@ import {
     Layout, Settings, LogOut, Clock, CheckCircle,
     FileText, Search, Sparkles, Zap, Files, Building2, ShoppingBag, Users,
     ArrowRight, ChevronLeft, Palette, Layers, MonitorPlay, Move, LayoutTemplate,
-    Upload, Monitor, Link as LinkIcon, Activity, Menu, X, ShieldCheck, ListFilter
+    Upload, Monitor, Link as LinkIcon, Activity, Menu, X, ShieldCheck, ListFilter, Bell, ArrowUp, ArrowDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,7 +29,7 @@ const OverviewCard = ({ title, value, icon, description, iconBgClass, iconColorC
     <Card className="rounded-3xl bg-white/70 backdrop-blur-md border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-300 hover:-translate-y-1">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 p-6 pb-4">
             <CardTitle className="text-base font-semibold text-slate-700">{title}</CardTitle>
-            <div className={cn("w-9 h-9 rounded-full flex items-center justify-center", iconBgClass, iconColorClass)}>{icon}</div>
+            <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform", iconBgClass, iconColorClass)}>{icon}</div>
         </CardHeader>
         <CardContent className="px-6 pb-6">
             <div className="text-4xl font-bold text-slate-900">{value}</div>
@@ -478,263 +478,235 @@ const Dashboard = () => {
                         )}
                     </>
                 ) : location.pathname === '/dashboard' && isAdmin ? (
-                    <div className="relative min-h-screen bg-[#f8fafc] p-6 lg:p-10 overflow-hidden">
+                    <div className="relative min-h-screen bg-[#f8fafc] p-8 lg:p-12 overflow-hidden">
                         {/* Background Gradient Blobs */}
                         <div className="absolute top-[-200px] left-[-300px] w-[600px] h-[600px] bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" />
                         <div className="absolute bottom-[-100px] right-[-200px] w-[500px] h-[500px] bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000" />
                         <div className="absolute top-[100px] right-[-100px] w-[400px] h-[400px] bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000" />
 
-                        {/* Top Hero Section */}
-                        <motion.div
+                        {/* Dashboard Header */}
+                        <motion.header
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
-                            className="relative z-10 p-8 md:p-12 mb-10 bg-white/60 backdrop-blur-lg border border-white/20 rounded-3xl shadow-xl overflow-hidden"
+                            className="relative z-10 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
                         >
-                            <div className="absolute inset-0 bg-gradient-to-br from-purple-200 via-blue-200 to-indigo-200 opacity-80 -z-10 transition-all duration-500 group-hover:opacity-100 group-hover:scale-105" />
-                            <h2 className="text-5xl font-extrabold text-slate-900 tracking-tight mb-3">Welcome to Admin Panel</h2>
-                            <p className="text-xl text-slate-700 max-w-2xl leading-relaxed">
-                                Centralized control for managing all aspects of the Buildora platform, from users to deployments.
-                            </p>
-                            <div className="flex gap-4 mt-8">
-                                <Button
-                                    className="h-12 px-6 rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/20"
-                                    onClick={() => navigate('/dashboard/users')}
-                                >
-                                    <Users className="w-5 h-5 mr-2" /> Manage Users
+                            <div className="flex items-center gap-4">
+                                {isMobile && (
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="lg:hidden"
+                                        onClick={() => setIsSidebarOpen(true)}
+                                    >
+                                        <Menu className="w-6 h-6" />
+                                    </Button>
+                                )}
+                                <div>
+                                    <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">Admin Dashboard</h2>
+                                    <p className="text-lg text-slate-600 mt-1">Platform overview and management at a glance.</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                {/* Global Search Input */}
+                                <div className="relative hidden lg:block">
+                                    <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                    <Input
+                                        placeholder="Search anything..."
+                                        className="pl-12 h-11 w-64 rounded-full bg-white border-slate-200 shadow-sm focus:ring-2 focus:ring-purple-500/20"
+                                    />
+                                </div>
+                                {/* Notification Icon */}
+                                <Button variant="ghost" size="icon" className="relative rounded-full h-11 w-11 text-slate-600 hover:bg-slate-100">
+                                    <Bell className="w-5 h-5" />
+                                    <span className="absolute top-2 right-2 block w-2 h-2 rounded-full bg-red-500" />
                                 </Button>
+                                {/* Admin Profile Avatar */}
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-sm shadow-lg">
+                                    AD
+                                </div>
+                                {/* Optional Quick Actions */}
                                 <Button
-                                    variant="outline"
-                                    className="h-12 px-6 rounded-full bg-white/80 border-white/40 text-slate-700 hover:bg-white/90 hover:text-slate-900 shadow-lg shadow-slate-200/20"
-                                    onClick={() => navigate('/dashboard/websites')}
+                                    className="h-11 px-5 rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/20 hidden md:flex items-center gap-2"
+                                    onClick={() => navigate('/dashboard/websites')} // Example: Create Website
                                 >
-                                    <Layout className="w-5 h-5 mr-2" /> View Websites
+                                    <Plus className="w-5 h-5" /> Create Website
                                 </Button>
                             </div>
-                        </motion.div>
+                        </motion.header>
 
-                        {/* Quick Action Pills */}
-                        <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.1 }}
-                            className="relative z-10 flex flex-wrap gap-3 mb-10"
-                        >
+                        {/* Platform Overview (Stats Cards) */}
+                        <section className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
                             <motion.div
-                                whileHover={{ scale: 1.05 }}
-                                transition={{ duration: 0.2 }}
-                                onClick={() => navigate('/dashboard/users')}
-                                className="cursor-pointer px-5 py-2 rounded-full bg-white/70 backdrop-blur-md border border-white/20 text-slate-700 text-sm font-medium shadow-sm hover:shadow-lg hover:border-purple-300 transition-all duration-200"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.1 }}
+                                className="bg-white/70 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300"
                             >
-                                Users
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center">
+                                        <Users className="w-5 h-5" />
+                                    </div>
+                                    <p className="text-sm font-medium text-slate-600">Total Users</p>
+                                </div>
+                                <div className="flex items-end justify-between">
+                                    <span className="text-4xl font-extrabold text-slate-900">2,345</span>
+                                    <span className="text-sm font-semibold text-emerald-500 flex items-center">
+                                        <ArrowUp className="w-4 h-4 mr-0.5" /> +12.5%
+                                    </span>
+                                </div>
                             </motion.div>
                             <motion.div
-                                whileHover={{ scale: 1.05 }}
-                                transition={{ duration: 0.2 }}
-                                onClick={() => navigate('/dashboard/websites')}
-                                className="cursor-pointer px-5 py-2 rounded-full bg-white/70 backdrop-blur-md border border-white/20 text-slate-700 text-sm font-medium shadow-sm hover:shadow-lg hover:border-indigo-300 transition-all duration-200"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.2 }}
+                                className="bg-white/70 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300"
                             >
-                                Websites
-                            </motion.div>
-                            <motion.div
-                                whileHover={{ scale: 1.05 }}
-                                transition={{ duration: 0.2 }}
-                                onClick={() => navigate('/dashboard/templates')}
-                                className="cursor-pointer px-5 py-2 rounded-full bg-white/70 backdrop-blur-md border border-white/20 text-slate-700 text-sm font-medium shadow-sm hover:shadow-lg hover:border-emerald-300 transition-all duration-200"
-                            >
-                                Templates
-                            </motion.div>
-                            <motion.div
-                                whileHover={{ scale: 1.05 }}
-                                transition={{ duration: 0.2 }}
-                                onClick={() => navigate('/dashboard/assets')}
-                                className="cursor-pointer px-5 py-2 rounded-full bg-white/70 backdrop-blur-md border border-white/20 text-slate-700 text-sm font-medium shadow-sm hover:shadow-lg hover:border-blue-300 transition-all duration-200"
-                            >
-                                Assets
-                            </motion.div>
-                        </motion.div>
 
-                        {/* Main Navigation Grid */}
-                        <section className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {/* Users Card */}
-                            <motion.div
-                                whileHover={{ scale: 1.03, boxShadow: "0 15px 30px rgba(0, 0, 0, 0.1)", borderColor: "rgba(168, 85, 247, 0.4)" }}
-                                transition={{ duration: 0.3, ease: "easeOut" }}
-                                onClick={() => navigate('/dashboard/users')}
-                                className="relative group cursor-pointer bg-white/70 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300"
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                <div className="relative z-10 w-16 h-16 bg-purple-100/70 text-purple-600 rounded-xl flex items-center justify-center mb-6 shadow-md">
-                                    <Users className="w-8 h-8" />
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center">
+                                        <Globe className="w-6 h-6" />
+                                    </div>
+                                    <p className="text-sm font-medium text-slate-600">Active Websites</p>
                                 </div>
-                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">User Management</h3>
-                                <p className="relative z-10 text-slate-600 text-base leading-relaxed">
-                                    Create, modify, and delete user accounts. Assign roles and permissions.
-                                </p>
-                                {/* Mini Visual Placeholder */}
-                                <div className="relative z-10 w-full mt-6 bg-purple-100 rounded-full h-2.5">
-                                    <div className="bg-purple-500 h-full rounded-full w-[70%]" />
+                                <div className="flex items-end justify-between">
+                                    <span className="text-4xl font-extrabold text-slate-900">876</span>
+                                    <span className="text-sm font-semibold text-rose-500 flex items-center">
+                                        <ArrowDown className="w-4 h-4 mr-0.5" /> -3.2%
+                                    </span>
                                 </div>
-                                <span className="relative z-10 text-xs text-slate-500 mt-2">70% active accounts</span>
                             </motion.div>
-
-                            {/* Websites Card */}
                             <motion.div
-                                whileHover={{ scale: 1.03, boxShadow: "0 15px 30px rgba(0, 0, 0, 0.1)", borderColor: "rgba(99, 102, 241, 0.4)" }}
-                                transition={{ duration: 0.3, ease: "easeOut" }}
-                                onClick={() => navigate('/dashboard/websites')}
-                                className="relative group cursor-pointer bg-white/70 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.3 }}
+                                className="bg-white/70 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300"
                             >
-                                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                <div className="relative z-10 w-16 h-16 bg-indigo-100/70 text-indigo-600 rounded-xl flex items-center justify-center mb-6 shadow-md">
-                                    <Layout className="w-8 h-8" />
+
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
+                                        <LayoutTemplate className="w-5 h-5" />
+                                    </div>
+                                    <p className="text-sm font-medium text-slate-600">Total Templates</p>
                                 </div>
-                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">Website Projects</h3>
-                                <p className="relative z-10 text-slate-600 text-base leading-relaxed">
-                                    Oversee all created websites, their status, and configurations.
-                                </p>
-                                {/* Mini Visual Placeholder */}
-                                <div className="relative z-10 w-full mt-6 bg-indigo-100 rounded-full h-2.5">
-                                    <div className="bg-indigo-500 h-full rounded-full w-[90%]" />
+                                <div className="flex items-end justify-between">
+                                    <span className="text-4xl font-extrabold text-slate-900">48</span>
+                                    <span className="text-sm font-semibold text-emerald-500 flex items-center">
+                                        <ArrowUp className="w-4 h-4 mr-0.5" /> +2 Templates
+                                    </span>
                                 </div>
-                                <span className="relative z-10 text-xs text-slate-500 mt-2">90% projects published</span>
                             </motion.div>
-
-                            {/* Templates Card */}
                             <motion.div
-                                whileHover={{ scale: 1.03, boxShadow: "0 15px 30px rgba(0, 0, 0, 0.1)", borderColor: "rgba(16, 185, 129, 0.4)" }}
-                                transition={{ duration: 0.3, ease: "easeOut" }}
-                                onClick={() => navigate('/dashboard/templates')}
-                                className="relative group cursor-pointer bg-white/70 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.4 }}
+                                className="bg-white/70 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300"
                             >
-                                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                <div className="relative z-10 w-16 h-16 bg-emerald-100/70 text-emerald-600 rounded-xl flex items-center justify-center mb-6 shadow-md">
-                                    <LayoutTemplate className="w-8 h-8" />
+
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-12 h-12 bg-blue-600/20 text-blue-400 rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+                                        <Files className="w-6 h-6" />
+                                    </div>
+                                    <p className="text-sm font-medium text-slate-600">Total Assets</p>
                                 </div>
-                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">Template Library</h3>
-                                <p className="relative z-10 text-slate-600 text-base leading-relaxed">
-                                    Browse, add, and manage all available website templates.
-                                </p>
-                                {/* Mini Visual Placeholder */}
-                                <div className="relative z-10 w-full mt-6 bg-emerald-100 rounded-full h-2.5">
-                                    <div className="bg-emerald-500 h-full rounded-full w-[80%]" />
+                                <div className="flex items-end justify-between">
+                                    <span className="text-4xl font-extrabold text-slate-900">48</span>
+                                    <span className="text-sm font-semibold text-emerald-500 flex items-center">
+                                        <ArrowUp className="w-4 h-4 mr-0.5" /> +8.1%
+                                    </span>
                                 </div>
-                                <span className="relative z-10 text-xs text-slate-500 mt-2">80% templates actively used</span>
                             </motion.div>
-
-                            {/* Assets Card */}
                             <motion.div
-                                whileHover={{ scale: 1.03, boxShadow: "0 15px 30px rgba(0, 0, 0, 0.1)", borderColor: "rgba(59, 130, 246, 0.4)" }}
-                                transition={{ duration: 0.3, ease: "easeOut" }}
-                                onClick={() => navigate('/dashboard/assets')}
-                                className="relative group cursor-pointer bg-white/70 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.5 }}
+                                className="bg-white/70 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300"
                             >
-                                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-sky-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                <div className="relative z-10 w-16 h-16 bg-blue-100/70 text-blue-600 rounded-xl flex items-center justify-center mb-6 shadow-md">
-                                    <Files className="w-8 h-8" />
-                                </div>
-                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">Asset Library</h3>
-                                <p className="relative z-10 text-slate-600 text-base leading-relaxed">
-                                    Manage all uploaded images, videos, and various media files.
-                                </p>
-                                {/* Mini Visual Placeholder */}
-                                <div className="relative z-10 w-full mt-6 bg-blue-100 rounded-full h-2.5">
-                                    <div className="bg-blue-500 h-full rounded-full w-[60%]" />
-                                </div>
-                                <span className="relative z-10 text-xs text-slate-500 mt-2">60% storage capacity used</span>
-                            </motion.div>
 
-                            {/* Deployment Monitoring Card */}
-                            <motion.div
-                                whileHover={{ scale: 1.03, boxShadow: "0 15px 30px rgba(0, 0, 0, 0.1)", borderColor: "rgba(244, 63, 94, 0.4)" }}
-                                transition={{ duration: 0.3, ease: "easeOut" }}
-                                onClick={() => navigate('/dashboard/deployment')}
-                                className="relative group cursor-pointer bg-white/70 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300"
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                <div className="relative z-10 w-16 h-16 bg-rose-100/70 text-rose-600 rounded-xl flex items-center justify-center mb-6 shadow-md">
-                                    <Activity className="w-8 h-8" />
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-12 h-12 bg-rose-600/20 text-rose-400 rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+                                        <Activity className="w-6 h-6" />
+                                    </div>
+                                    <p className="text-sm font-medium text-slate-600">Deployments Today</p>
                                 </div>
-                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">Deployment Status</h3>
-                                <p className="relative z-10 text-slate-600 text-base leading-relaxed">
-                                    Monitor the status and history of all website deployments.
-                                </p>
-                                {/* Mini Visual Placeholder */}
-                                <div className="relative z-10 w-full mt-6 bg-rose-100 rounded-full h-2.5">
-                                    <div className="bg-rose-500 h-full rounded-full w-[95%]" />
+                                <div className="flex items-end justify-between">
+                                    <span className="text-4xl font-extrabold text-slate-900">48</span>
+                                    <span className="text-sm font-semibold text-emerald-500 flex items-center">
+                                        <ArrowUp className="w-4 h-4 mr-0.5" /> +15%
+                                    </span>
                                 </div>
-                                <span className="relative z-10 text-xs text-slate-500 mt-2">95% deployments successful</span>
-                            </motion.div>
-
-                            {/* Settings Card */}
-                            <motion.div
-                                whileHover={{ scale: 1.03, boxShadow: "0 15px 30px rgba(0, 0, 0, 0.1)", borderColor: "rgba(251, 191, 36, 0.4)" }}
-                                transition={{ duration: 0.3, ease: "easeOut" }}
-                                onClick={() => navigate('/dashboard/settings')}
-                                className="relative group cursor-pointer bg-white/70 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300"
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                <div className="relative z-10 w-16 h-16 bg-orange-100/70 text-orange-600 rounded-xl flex items-center justify-center mb-6 shadow-md">
-                                    <Settings className="w-8 h-8" />
-                                </div>
-                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">System Settings</h3>
-                                <p className="relative z-10 text-slate-600 text-base leading-relaxed">
-                                    Configure global platform settings, integrations, and preferences.
-                                </p>
-                                {/* Mini Visual Placeholder */}
-                                <div className="relative z-10 w-full mt-6 bg-orange-100 rounded-full h-2.5">
-                                    <div className="bg-orange-500 h-full rounded-full w-[85%]" />
-                                </div>
-                                <span className="relative z-10 text-xs text-slate-500 mt-2">85% settings configured</span>
                             </motion.div>
                         </section>
 
-                        {/* Right Side Feature Card (System Status) */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.2 }}
-                            className="relative z-10 mt-6 bg-white/60 backdrop-blur-lg border border-white/20 rounded-3xl p-8 shadow-xl overflow-hidden md:col-span-full lg:col-span-1"
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-br from-sky-50/10 to-teal-50/10 opacity-50 -z-10" />
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="w-14 h-14 bg-sky-100/70 text-sky-600 rounded-xl flex items-center justify-center shadow-md">
-                                    <MonitorPlay className="w-7 h-7" />
+                        {/* Admin Quick Actions Grid */}
+                        <section className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {/* Manage Users Card */}
+                            <motion.div
+                                whileHover={{ scale: 1.03, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(168, 85, 247, 0.6)" }}
+                                transition={{ duration: 0.3, ease: "easeOut" }}
+                                onClick={() => navigate('/dashboard/users')}
+                                className="relative group cursor-pointer bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:ring-2 hover:ring-purple-500/50"
+                            >
+
+                                <div className="relative z-10 w-16 h-16 bg-purple-600/20 text-purple-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-105 transition-transform duration-300 shadow-inner">
+                                    <Users className="w-8 h-8" />
                                 </div>
-                                <h3 className="text-2xl font-bold text-slate-900">System Status</h3>
-                            </div>
-                            <p className="text-slate-600 mb-6">Overview of core system health and performance metrics.</p>
-                            <div className="flex items-center justify-around text-center">
-                                <div className="relative w-24 h-24">
-                                    <svg className="w-full h-full" viewBox="0 0 100 100">
-                                        <circle
-                                            className="text-slate-200 stroke-current"
-                                            strokeWidth="10"
-                                            cx="50"
-                                            cy="50"
-                                            r="40"
-                                            fill="transparent"
-                                        />
-                                        <circle
-                                            className="text-blue-500 stroke-current"
-                                            strokeWidth="10"
-                                            strokeLinecap="round"
-                                            cx="50"
-                                            cy="50"
-                                            r="40"
-                                            fill="transparent"
-                                            strokeDasharray="251.2"
-                                            strokeDashoffset="62.8" /* 25% of 251.2 */
-                                        />
-                                    </svg>
-                                    <span className="absolute inset-0 flex items-center justify-center text-xl font-bold text-blue-600">75%</span>
+                                <h3 className="relative z-10 text-2xl font-bold text-white mb-2">Manage Users</h3>
+                                <p className="relative z-10 text-slate-300 text-base">Overview and control of all user accounts.</p>
+                            </motion.div>
+
+                            {/* Manage Websites Card */}
+                            <motion.div
+                                whileHover={{ scale: 1.03, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(99, 102, 241, 0.6)" }}
+                                transition={{ duration: 0.3, ease: "easeOut" }}
+                                onClick={() => navigate('/dashboard/websites')}
+                                className="relative group cursor-pointer bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:ring-2 hover:ring-indigo-500/50"
+                            >
+
+                                <div className="relative z-10 w-16 h-16 bg-indigo-600/20 text-indigo-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-105 transition-transform duration-300 shadow-inner">
+                                    <Layout className="w-8 h-8" />
                                 </div>
-                                <div>
-                                    <p className="text-lg font-semibold text-slate-800">Uptime</p>
-                                    <p className="text-sm text-slate-500">99.9% (last 30 days)</p>
+                                <h3 className="relative z-10 text-2xl font-bold text-white mb-2">Manage Websites</h3>
+                                <p className="relative z-10 text-slate-300 text-base leading-relaxed">
+                                    Oversee all created websites, their status, and configurations.
+                                </p>
+                            </motion.div>
+
+                            {/* Manage Templates Card */}
+                            <motion.div
+                                whileHover={{ scale: 1.03, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(16, 185, 129, 0.6)" }}
+                                transition={{ duration: 0.3, ease: "easeOut" }}
+                                onClick={() => navigate('/dashboard/templates')}
+                                className="relative group cursor-pointer bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:ring-2 hover:ring-emerald-500/50"
+                            >
+
+                                <div className="relative z-10 w-16 h-16 bg-emerald-600/20 text-emerald-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-105 transition-transform duration-300 shadow-inner">
+                                    <LayoutTemplate className="w-8 h-8" />
                                 </div>
-                            </div>
-                        </motion.div>
+                                <h3 className="relative z-10 text-2xl font-bold text-white mb-2">Manage Templates</h3>
+                                <p className="relative z-10 text-slate-300 text-base leading-relaxed">
+                                    Browse, add, and manage all available website templates.
+                                </p>
+                            </motion.div>
+
+                            {/* Monitor Deployments Card */}
+                            <motion.div
+                                whileHover={{ scale: 1.03, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(244, 63, 94, 0.6)" }}
+                                transition={{ duration: 0.3, ease: "easeOut" }}
+                                onClick={() => navigate('/dashboard/deployment')}
+                                className="relative group cursor-pointer bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:ring-2 hover:ring-rose-500/50"
+                            >
+
+                                <div className="relative z-10 w-16 h-16 bg-rose-600/20 text-rose-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-105 transition-transform duration-300 shadow-inner">
+                                    <Activity className="w-8 h-8" />
+                                </div>
+                                <h3 className="relative z-10 text-2xl font-bold text-white mb-2">Monitor Deployments</h3>
+                                <p className="relative z-10 text-slate-300 text-base leading-relaxed">
+                                    Track the status and history of all website deployments.
+                                </p>
+                            </motion.div>
+                        </section>
+
                     </div>
                 ) : (
                     <Outlet key={location.pathname} />
@@ -939,7 +911,7 @@ const AssetsView = () => {
                         </div>
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-6 flex flex-col justify-end">
                             <p className="text-white text-sm font-bold truncate">{asset.name}</p>
-                            <p className="text-white/70 text-[10px] uppercase font-black tracking-widest mt-0.5">{asset.size}</p>
+                            <p className="text-white/70 text-[10px] uppercase font-black tracking-widest mt-0.5">S{asset.size}</p>
                         </div>
                     </div>
                 ))}

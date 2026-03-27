@@ -35,7 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Globe2, LayoutGrid, ShieldCheck, User as UserIcon, Hash, FileText, Link, Clock, Edit, Copy, Eye, Trash2, MoreVertical, CheckCircle, CircleDotDashed, Ban, Search, Plus, ListFilter
+  Globe2, LayoutGrid, ShieldCheck, User as UserIcon, Hash, FileText, Link, Clock, Edit, Copy, Eye, Trash2, MoreVertical, CheckCircle, CircleDotDashed, Ban, Search, ListFilter
 } from 'lucide-react';
 import WebsiteShimmer from '@/components/dashboard/WebsiteShimmer';
 import GradientButton from '@/components/ui/GradientButton';
@@ -175,9 +175,7 @@ export default function DashboardWebsites() {
           >
             Admin View ({isAdmin ? "ON" : "OFF"})
           </GradientButton>
-          <GradientButton className="w-full md:w-auto" icon={<Plus className="w-5 h-5" />}>
-            New Website
-          </GradientButton>
+
         </div>
       </div>
 
