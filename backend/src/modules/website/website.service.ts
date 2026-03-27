@@ -10,8 +10,10 @@ import { GlobalSlotType, WebsiteStatus, type Website } from '@prisma/client';
 import PageDao from '../presentation/pages/page.dao.js';
 import TemplateDao from '../templates/template.dao.js';
 import GlobalDesignDao from '../presentation/global-design/global-design.dao.js';
+import DomainDao from '../domain/domain.dao.js';
 import type { CreatePageInput } from '../presentation/pages/page.validation.js';
 import { JsonObjectType } from '../../utils/validator.utils.js';
+import { ConflictError, NotFoundError } from '../../utils/error.utils.js';
 
 class WebsiteService {
     private websiteDao: WebsiteDao;
@@ -19,6 +21,7 @@ class WebsiteService {
     private userDao: UserDao;
     private templateDao: TemplateDao;
     private globalDesignDao: GlobalDesignDao;
+    private domainDao: DomainDao;
 
     constructor() {
         this.websiteDao = new WebsiteDao();
@@ -26,11 +29,21 @@ class WebsiteService {
         this.userDao = new UserDao();
         this.templateDao = new TemplateDao();
         this.globalDesignDao = new GlobalDesignDao();
+        this.domainDao = new DomainDao();
+    }
+
+    generateUniqueSubdomain(name: string) {
+        // replaces non-alphanumeric characters with hyphens and converts to lowercase
+        // and appends last 7 characters of current timestamp in base 36 (collision chances once in 36^7ms = 2.5 years)
+        const subdomain = name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now().toString(36).slice(-7);
+        return subdomain;
     }
 
     async createWebsite(userId: string, data: CreateWebsiteInput) {
         const { name, templateId } = data;
         // const website = await this.websiteDao.createWebsite(userId, { name });
+
+        const subdomain = this.generateUniqueSubdomain(name);
 
         if (!templateId) {
             const defaultPage: CreatePageInput = {
@@ -43,7 +56,8 @@ class WebsiteService {
 
             const website = await this.websiteDao.createWebsiteWithPage(
                 userId, defaultPage, { name },
-                {}, []
+                {}, [],
+                subdomain
             );
             return website;
         }
@@ -51,7 +65,7 @@ class WebsiteService {
         if (templateId) {
             const template = await this.templateDao.getWebsiteTemplateById(templateId);
             if (!template) {
-                throw Error("Template not found");
+                throw new NotFoundError("Template not found");
             }
 
             const { navbar, footer, home_layout, global_styles } = template;
@@ -70,7 +84,8 @@ class WebsiteService {
                 [
                     { type: GlobalSlotType.NAVBAR, props: navbar },
                     { type: GlobalSlotType.FOOTER, props: footer }
-                ]
+                ],
+                subdomain
             );
 
             return website;
@@ -92,45 +107,55 @@ class WebsiteService {
         const ownerPromise = this.userDao.findUserById(website.owner_id);
         const pagesPromise = this.pageDao.findPagesByWebsiteId(website.id);
         const globalDesignPromise = this.globalDesignDao.getByWebsiteId(website.id);
+        const domainsPromise = this.domainDao.getDomainsByWebsiteId(website.id);
 
-        const [settings, owner, pages, globalDesign] = await Promise.all([settingsPromise, ownerPromise, pagesPromise, globalDesignPromise]);
+        const [settings, owner, pages, globalDesign, domains] = await Promise.all(
+            [settingsPromise, ownerPromise, pagesPromise, globalDesignPromise, domainsPromise]
+        );
 
-        return { website, settings, owner, pages, globalDesign };
+        // process domains to add platform domain if not custom
+        const processedDomains = domains.map((domain) => {
+            return {
+                ...domain,
+                name: domain.custom ? domain.name : `${domain.name}.${process.env.PLATFORM_DOMAIN}`
+            };
+        });
+
+        return { website, settings, owner, pages, globalDesign, domains: processedDomains };
     }
 
     async updateWebsite(website: Website, data: UpdateWebsiteInput) {
         if (website.status === WebsiteStatus.DELETED) {
-            throw Error("Website not found")
+            throw new NotFoundError("Website not found")
         }
         await this.websiteDao.updateWebsite(website.id, data);
     }
 
     async deleteWebsite(website: Website) {
         if (website.status === WebsiteStatus.DELETED) {
-            throw Error("Website Already Deleted");
+            throw new ConflictError("Website Already Deleted");
         }
         await this.websiteDao.updateWebsite(website.id, {
             status: WebsiteStatus.DELETED,
             deleted_at: new Date()
         });
         // Remove domain mapping from cache  and invalidate cache
-        // mark all domains.status = deleted
+        // mark all domains.status = inactive
     }
 
     async restoreWebsite(website: Website) {
         if (website.status !== WebsiteStatus.DELETED) {
-            throw Error("Website Already not Deleted");
+            throw new ConflictError("Website Already not Deleted");
         }
         await this.websiteDao.updateWebsite(website.id, {
             status: WebsiteStatus.DRAFT,
             deleted_at: null
         });
-        // mark all domains.status = inactive
     }
 
     async duplicateWebsite(website: Website) {
         if (website.status === WebsiteStatus.DELETED) {
-            throw Error("Website Deleted");
+            throw new NotFoundError("Website Deleted");
         }
 
         const settingsPromise = this.websiteDao.getWebsiteSettings(website.settings_id!);
@@ -139,15 +164,17 @@ class WebsiteService {
 
         const [settings, globalDesign, pages] = await Promise.all([settingsPromise, globalDesignPromise, pagesPromise]);
 
-        const newWebsite = await this.websiteDao.cloneWebsite(website, settings!, globalDesign!, pages);
-
         // generate new subdomain
+        const subdomain = this.generateUniqueSubdomain(website.name + "-copy");
+
+        const newWebsite = await this.websiteDao.cloneWebsite(website, settings!, globalDesign!, pages, subdomain);
+
         return newWebsite;
     }
 
     async updateWebsiteSettings(website: Website, data: UpdateWebsiteSettingsInput) {
         if (website.status === WebsiteStatus.DELETED) {
-            throw Error("Website Deleted");
+            throw new NotFoundError("Website Deleted");
         }
         const settingId = website.settings_id!;
         await this.websiteDao.updateWebsiteSettings(settingId, data);
@@ -155,14 +182,14 @@ class WebsiteService {
 
     async publishWebsite(website: Website) {
         if (website.status === WebsiteStatus.DELETED) {
-            throw Error("Website Deleted");
+            throw new NotFoundError("Website Deleted");
         }
         return await this.websiteDao.updateWebsite(website.id, { status: WebsiteStatus.PUBLISHED });
     }
 
     async unpublishWebsite(website: Website) {
         if (website.status === WebsiteStatus.DELETED) {
-            throw Error("Website Deleted");
+            throw new NotFoundError("Website Deleted");
         }
         return await this.websiteDao.updateWebsite(website.id, { status: WebsiteStatus.DRAFT });
     }

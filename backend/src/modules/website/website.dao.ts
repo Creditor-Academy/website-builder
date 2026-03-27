@@ -58,14 +58,19 @@ class WebsiteDao {
         };
     }
 
-    async createWebsite(userId: string, websiteData: { name: string }) {
+    async createWebsite(userId: string, websiteData: { name: string }, subdomain: string) {
         return await prismaClient.website.create({
             data: {
                 ...websiteData,
                 owner: { connect: { id: userId } },
                 settings: { create: {} },
-                globalDesign: { create: { global_styles: {} } }
-                // Nested settings and globalDesign creation (atomic)
+                globalDesign: { create: { global_styles: {} } },
+                domains: { create: { name: subdomain, verified: true } }
+            },
+            include: {
+                settings: true,
+                globalDesign: true,
+                domains: true
             }
         });
     }
@@ -75,7 +80,8 @@ class WebsiteDao {
         pageData: CreatePageInput,
         websiteData: any,
         global_styles: any,
-        global_slots: { type: GlobalSlotType, props: any }[]
+        global_slots: { type: GlobalSlotType, props: any }[],
+        subdomain: string
     ) {
         return await prismaClient.$transaction(async (tx) => {
             const website = await tx.website.create({
@@ -100,17 +106,24 @@ class WebsiteDao {
                                 create: pageData.sections
                             }
                         }
-                    }
+                    },
+                    domains: { create: { name: subdomain, verified: true } }
                 },
                 include: {
-                    pages: true
+                    pages: true,
+                    globalDesign: true,
+                    settings: true
                 }
             });
 
             if (website.pages?.length > 0) {
                 return await tx.website.update({
                     where: { id: website.id },
-                    data: { homepageId: website.pages[0]!.id }
+                    data: { homepageId: website.pages[0]!.id },
+                    include: {
+                        settings: true,
+                        globalDesign: true
+                    }
                 });
             }
 
@@ -143,7 +156,8 @@ class WebsiteDao {
         website: Website,
         settings: Settings,
         globalDesign: GlobalDesign & { globalSlots: GlobalSlot[] },
-        pages: (Page & { sections: Section[] })[]
+        pages: (Page & { sections: Section[] })[],
+        subdomain: string
     ) {
         return await prismaClient.$transaction(async (tx) => {
             const clonePages = pages.map(({ id, website_id, created_at, ...page }) => ({
@@ -175,12 +189,14 @@ class WebsiteDao {
                             }
                         }
                     },
-                    pages: { create: clonePages as Prisma.PageCreateInput[] }
+                    pages: { create: clonePages as Prisma.PageCreateInput[] },
+                    domains: { create: { name: subdomain, verified: true } }
                 },
                 include: {
                     pages: true,
                     settings: true,
-                    globalDesign: true
+                    globalDesign: true,
+                    domains: true
                 }
             });
 

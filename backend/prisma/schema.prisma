@@ -138,6 +138,7 @@ model Website {
   homepage     Page?         @relation("Homepage", fields: [homepageId], references: [id], onDelete: SetNull)
   globalDesign GlobalDesign? // back-reference; FK lives on GlobalDesign
   pages        Page[]        @relation("WebsitePages")
+  domains      Domain[]
 
   @@index([owner_id])
   @@index([status])
@@ -323,4 +324,35 @@ model Asset {
   @@index([user_id])
   @@index([deletedAt])
   @@map("assets")
+}
+
+// ============================
+// Domain Tables
+// ============================
+
+// Domain Model
+model Domain {
+  id              String  @id @default(cuid())
+  name            String  @unique // hostname or subdomain
+  platform_target String?
+
+  website_id String
+  custom     Boolean @default(false)
+  verified   Boolean @default(false)
+
+  created_at DateTime  @default(now())
+  deleted_at DateTime?
+
+  // optional fields for later
+  // primary_domain Boolean @default(false)
+  // ssl_status     String? // pending, active, inactive, error
+
+  // Relations
+  website Website @relation(fields: [website_id], references: [id], onDelete: Cascade)
+
+  @@index([name])
+  @@index([website_id])
+  @@index([website_id, custom])
+  @@index([deleted_at])
+  @@map("domains")
 }

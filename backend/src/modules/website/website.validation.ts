@@ -6,7 +6,7 @@ const WebsiteStatusValues = Object.values(WebsiteStatus);
 
 // Create website schema
 export const createWebsiteSchema = z.object({
-    name: z.string()
+    name: z.string().trim()
         .min(2, 'Name must be at least 2 characters')
         .max(100, 'Name must not exceed 100 characters'),
 
