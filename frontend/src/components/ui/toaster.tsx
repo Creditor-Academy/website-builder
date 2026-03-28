@@ -18,7 +18,7 @@ export function Toaster() {
           </Toast>
         );
       })}
-      <ToastViewport position="top-right" />
+      <ToastViewport position="bottom-right" />
     </ToastProvider>
   );
 }

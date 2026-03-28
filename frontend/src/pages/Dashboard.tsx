@@ -141,8 +141,20 @@ const Dashboard = () => {
     const [selectedTemplate, setSelectedTemplate] = useState('blank');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [isUserProfileDialogOpen, setIsUserProfileDialogOpen] = useState(false);
     const [sortBy, setSortBy] = useState('recent'); // 'recent' or 'name'
     const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'draft', 'published'
+
+    const [userName, setUserName] = useState('John Doe');
+    const [userEmail, setUserEmail] = useState('john@example.com');
+    const { toast } = useToast();
+
+    const handleProfileSave = () => {
+        // In a real app, this would involve API calls to update user data
+        console.log('Saving profile:', { userName, userEmail });
+        toast({ title: "Profile Updated", description: "Your profile has been updated successfully." });
+        setIsUserProfileDialogOpen(false);
+    };
 
     const adminRoutes = [
         '/dashboard/users',
@@ -426,9 +438,50 @@ const Dashboard = () => {
                                         </div>
                                     </DialogContent>
                                 </Dialog>
-                                <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-medium text-sm border-2 border-slate-300 shadow-sm">
-                                    JD
-                                </div>
+                                <Dialog open={isUserProfileDialogOpen} onOpenChange={setIsUserProfileDialogOpen}>
+                                    <DialogTrigger asChild>
+                                        <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-medium text-sm border-2 border-slate-300 shadow-sm cursor-pointer hover:bg-slate-100 transition-colors">
+                                            {userName.substring(0, 1).toUpperCase()}D
+                                        </div>
+                                    </DialogTrigger>
+                                    <DialogContent className="sm:max-w-[425px] rounded-[2rem] p-8 bg-white border-slate-200 shadow-xl">
+                                        <DialogHeader>
+                                            <DialogTitle className="text-2xl font-bold text-slate-900">User Profile</DialogTitle>
+                                            <DialogDescription className="text-slate-500">View and update your profile information.</DialogDescription>
+                                        </DialogHeader>
+                                        <div className="flex flex-col items-center gap-4 py-4">
+                                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-4xl shadow-lg">
+                                                {userName.substring(0, 1).toUpperCase()}D
+                                            </div>
+                                            <div className="grid gap-2 w-full">
+                                                <label htmlFor="name" className="text-sm font-medium text-slate-700">Name</label>
+                                                <Input
+                                                    id="name"
+                                                    value={userName}
+                                                    onChange={(e) => setUserName(e.target.value)}
+                                                    className="rounded-xl bg-slate-50 border-slate-200 px-4 h-12 text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                                />
+                                            </div>
+                                            <div className="grid gap-2 w-full">
+                                                <label htmlFor="email" className="text-sm font-medium text-slate-700">Email</label>
+                                                <Input
+                                                    id="email"
+                                                    value={userEmail}
+                                                    disabled
+                                                    className="rounded-xl bg-slate-100 border-slate-200 px-4 h-12 text-slate-500 cursor-not-allowed"
+                                                />
+                                            </div>
+                                        </div>
+                                        <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-3">
+                                            <Button variant="outline" onClick={() => setIsUserProfileDialogOpen(false)} className="rounded-xl h-12 px-6 text-base border-slate-200 text-slate-700 hover:bg-slate-100">
+                                                Cancel
+                                            </Button>
+                                            <Button type="submit" onClick={handleProfileSave} className="rounded-xl h-12 px-6 text-base bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-600/30 transition-all">
+                                                Save Changes
+                                            </Button>
+                                        </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
                             </div>
                         </header>
 
