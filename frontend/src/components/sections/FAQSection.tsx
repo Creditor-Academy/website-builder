@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, Plus, Minus } from 'lucide-react';
+import { Editable } from '@/components/ui/Editable';
 import { useBuilder } from '@/contexts/BuilderContext';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
@@ -89,17 +90,14 @@ function InjectStyles() {
 // ─── CE helper ────────────────────────────────────────────────────────────
 function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '' }: any) {
   return (
-    <Tag
+    <Editable
+      as={Tag}
       className={`fq-ce ${className}`}
-      data-editing={isEditing ? 'true' : 'false'}
-      contentEditable={isEditing ? 'true' : 'false'}
-      suppressContentEditableWarning
+      isEditing={isEditing}
       style={{ ...style, pointerEvents: isEditing ? 'auto' : 'inherit' }}
-      onBlur={isEditing && onSave ? (e) => onSave(e.currentTarget.textContent || '') : undefined}
-      onClick={isEditing ? (e) => e.stopPropagation() : undefined}
-    >
-      {value}
-    </Tag>
+      onSave={onSave}
+      value={value || ''}
+    />
   );
 }
 

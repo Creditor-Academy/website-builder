@@ -9,7 +9,7 @@ import { PageManager } from "./PageManager";
 import { SiteSettings } from "./SiteSettings";
 import { CanvasPreview } from "./CanvasPreview";
 import { PropertiesPanel } from "./PropertiesPanel";
-import { TextColorPicker } from "./TextColorPicker";
+import { TextFormattingToolbar } from "./TextFormattingToolbar";
 import { GuidedTour } from "./GuidedTour";
 import { AssetLibraryPanel } from "./AssetLibraryPanel";
 import { DesignSystemPanel } from "./DesignSystemPanel";
@@ -75,7 +75,7 @@ function EditorContent() {
         websiteId={activeWebsiteId || id} 
         onTabChange={setLeftNavTab}
       />
-      <TextColorPicker />
+      <TextFormattingToolbar />
       <GuidedTour />
 
       {/* Debug: Test Tour Button */}

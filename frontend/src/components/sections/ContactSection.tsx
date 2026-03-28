@@ -1,5 +1,6 @@
 import React from 'react';
 import { Mail, Phone, MapPin, Send, ArrowUpRight, Users, MessageSquare, Clock } from 'lucide-react';
+import { Editable } from '@/components/ui/Editable';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -85,17 +86,14 @@ function InjectStyles() {
 // ─── CE helper ────────────────────────────────────────────────────────────
 function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '', inv = false }: any) {
   return (
-    <Tag
+    <Editable
+      as={Tag}
       className={`ct-ce ${inv ? 'ct-inv' : ''} ${className}`}
-      data-editing={isEditing ? 'true' : 'false'}
-      contentEditable={isEditing ? 'true' : 'false'}
-      suppressContentEditableWarning
+      isEditing={isEditing}
       style={{ ...style, pointerEvents: isEditing ? 'auto' : 'inherit' }}
-      onBlur={isEditing && onSave ? (e) => onSave(e.currentTarget.textContent || '') : undefined}
-      onClick={isEditing ? (e) => e.stopPropagation() : undefined}
-    >
-      {value}
-    </Tag>
+      onSave={onSave}
+      value={value || ''}
+    />
   );
 }
 
