@@ -94,16 +94,6 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ title, value, icon, descrip
     </Card>
 );
 
-interface NavItemProps {
-    icon: React.ReactNode;
-    label: string;
-    to: string;
-    activeColor?: string;
-    hoverBg?: string;
-    hoverText?: string;
-    defaultText?: string;
-}
-
 // NavItem — supports router Link + active state
 const NavItem: React.FC<NavItemProps> = ({ icon, label, to, activeColor = 'text-white', hoverBg = 'hover:bg-slate-700', hoverText = 'hover:text-white', defaultText = 'text-slate-300' }) => {
     const location = useLocation();
@@ -118,14 +108,347 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, to, activeColor = 'text-
     return (
         <Button
             variant="ghost"
-            className={`w-full justify-start gap-2 py-2 px-3 text-sm transition-all duration-300 group/nav-item rounded-full
-                ${isActive ? `bg-gradient-to-r from-purple-600 to-indigo-600 ${activeColor} font-semibold shadow-lg shadow-purple-500/30` : `${defaultText} ${hoverText} ${hoverBg}`}
-            `}
+            className={cn(
+                "w-full justify-start gap-2 py-2 px-3 text-sm transition-all duration-300 group/nav-item rounded-full",
+                isActive
+                    ? `bg-gradient-to-r from-purple-600 to-indigo-600 ${activeColor} font-semibold shadow-lg shadow-purple-500/30`
+                    : `${defaultText} ${hoverText} ${hoverBg}`
+            )}
             onClick={handleClick}
         >
-            <span className={`transition-colors duration-300 ${isActive ? activeColor : `${defaultText} ${hoverText}`}`}>{icon}</span>
+            <span className={cn("transition-colors duration-300", isActive ? activeColor : `${defaultText} ${hoverText}`)}>{icon}</span>
             {label}
         </Button>
+    );
+};
+
+const WebsiteCard: React.FC<WebsiteCardProps> = ({ site, index, onDelete, onEdit }) => {
+    const template = templatesList.find((t: Template) => t.id === site.templateId);
+
+    return (
+        <Card className="group/website-card border border-slate-200 bg-white rounded-3xl overflow-hidden flex flex-col shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 hover:-translate-y-1 transition-all duration-300">
+            <div className="aspect-[16/10] bg-slate-50 relative overflow-hidden">
+                {template && template.id !== 'blank' ? (
+                    <div className="absolute inset-0 transition-transform duration-500 group-hover/website-card:scale-105 p-4">
+                        <img src={template.image} alt={site.name} className="w-full h-full object-cover rounded-2xl border border-slate-200 shadow-sm" />
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-0 group-hover/website-card:opacity-100 transition-opacity duration-300" />
+                    </div>
+                ) : (
+                    <div className="absolute inset-0 transition-transform duration-500 group-hover/website-card:scale-105 p-4">
+                        <div className="w-full h-full border border-slate-200 rounded-2xl bg-white shadow-sm flex flex-col overflow-hidden">
+                            <div className="h-6 bg-slate-50 border-b border-slate-100 flex items-center px-3 gap-1.5">
+                                <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
+                                <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
+                                <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
+                            </div>
+                            <div className="p-4 space-y-3">
+                                <div className="h-3 w-3/4 bg-slate-100 rounded-full animate-pulse" />
+                                <div className="h-3 w-1/2 bg-slate-100 rounded-full" />
+                                <div className="flex gap-2 pt-2">
+                                    <div className="h-8 w-8 rounded-lg bg-slate-50" />
+                                    <div className="h-8 w-8 rounded-lg bg-slate-50" />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover/website-card:opacity-100 transition-opacity duration-300" />
+                    </div>
+                )}
+
+                {/* Hover Actions Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover/website-card:opacity-100 transition-all duration-300 z-10">
+                    <Button size="sm" onClick={onEdit} className="bg-white text-slate-900 hover:bg-white/90 rounded-full shadow-lg">
+                        <Edit2 className="w-4 h-4 mr-1" /> Edit
+                    </Button>
+                </div>
+            </div>
+
+            <CardHeader className="p-6 pb-3">
+                <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                        <CardTitle className="text-xl font-bold text-slate-800 group-hover/website-card:text-indigo-600 transition-colors leading-tight">
+                            {site.name}
+                        </CardTitle>
+                        <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mt-1">
+                            <Clock className="w-3 h-3 text-slate-400" />
+                            {format(new Date(site.lastEdited), 'MMM d, p')}
+                        </div>
+                    </div>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+                                <MoreVertical className="w-4 h-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-slate-200 shadow-lg">
+                            <DropdownMenuItem onClick={onEdit} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100">
+                                <Edit2 className="w-4 h-4" /> Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100">
+                                <Files className="w-4 h-4" /> Duplicate
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={onDelete} className="rounded-lg gap-2 cursor-pointer text-rose-500 focus:bg-rose-50 focus:text-rose-600">
+                                <Trash2 className="w-4 h-4" /> Delete Project
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            </CardHeader>
+
+            <CardFooter className="p-6 pt-3 mt-auto flex justify-between items-center">
+                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${site.status === 'Published'
+                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                    : 'bg-amber-50 text-amber-600 border border-amber-100'
+                }`}>
+                    <div className={`w-1.5 h-1.5 rounded-full ${site.status === 'Published' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                    {site.status}
+                </div>
+                <Button variant="link" className="text-indigo-600 p-0 h-auto text-sm font-bold group-hover/website-card:underline underline-offset-4" onClick={onEdit}>
+                    Open Editor →
+                </Button>
+            </CardFooter>
+        </Card>
+    );
+};
+
+const EmptyState: React.FC<EmptyStateProps> = ({ onAction }) => (
+    <div className="h-[400px] flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-[2rem] bg-white p-12 text-center transition-all hover:border-primary/20 hover:bg-slate-50/50">
+        <div className="w-20 h-20 bg-primary/5 rounded-3xl flex items-center justify-center mb-6">
+            <Globe className="w-10 h-10 text-primary" />
+        </div>
+        <h3 className="text-2xl font-bold text-slate-900">Your creative journey starts here</h3>
+        <p className="text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">
+            Every great brand starts with a single page. Build yours with our visual canvas.
+        </p>
+        <Button size="lg" className="mt-6 rounded-full px-8 gap-2 shadow-lg shadow-primary/20" onClick={onAction}>
+            <Plus className="w-5 h-5" /> Create Your First Site
+        </Button>
+    </div>
+);
+
+
+const AssetsView: React.FC = () => {
+    const { assets, addAsset, deleteAsset } = useBuilderStore();
+    const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
+    const [urlInput, setUrlInput] = useState('');
+    const [urlName, setUrlName] = useState('');
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+    const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            addAsset({
+                name: file.name,
+                url,
+                type: file.type.startsWith('video') ? 'video' : 'image',
+                size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+            });
+            if (e.target) e.target.value = '';
+        }
+    };
+
+    const handleUrlUpload = () => {
+        if (urlInput) {
+            addAsset({
+                name: urlName || 'Imported Asset',
+                url: urlInput,
+                type: urlInput.match(/\.(mp4|webm|ogg)$/i) ? 'video' : 'image',
+                size: 'External'
+            });
+            setUrlInput('');
+            setUrlName('');
+            setIsUrlDialogOpen(false);
+        }
+    };
+
+    return (
+        <div className="space-y-8 animate-in fade-in duration-500 pb-20">
+            <div>
+                <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Assets Management</h2>
+                <p className="text-slate-500 mt-1">Manage your images, videos, and documents.</p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <div className="aspect-square border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center gap-3 hover:border-primary/40 hover:bg-white cursor-pointer transition-all group/upload-button">
+                            <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 group-hover/upload-button:text-primary group-hover/upload-button:bg-primary/5 transition-colors">
+                                <Plus className="w-6 h-6" />
+                            </div>
+                            <span className="text-sm font-bold text-slate-500 group-hover/upload-button:text-primary">Upload</span>
+                        </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-48 rounded-xl p-2">
+                        <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer py-2.5" onSelect={() => fileInputRef.current?.click()}>
+                            <Monitor className="w-4 h-4" /> From Disk
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer py-2.5" onSelect={() => setIsUrlDialogOpen(true)}>
+                            <LinkIcon className="w-4 h-4" /> From URL
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    onChange={handleUpload}
+                    accept="image/*,video/*"
+                />
+
+                {assets.map(asset => (
+                    <div key={asset.id} className="group/asset-card relative aspect-square bg-white border border-slate-100 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all cursor-pointer">
+                        <img src={asset.url} alt={asset.name} className="w-full h-full object-cover opacity-80 group-hover/asset-card:opacity-100 transition-opacity" />
+                        <div className="absolute top-4 right-4 z-10 opacity-0 group-hover/asset-card:opacity-100 transition-opacity">
+                            <Button
+                                variant="destructive"
+                                size="icon"
+                                className="h-8 w-8 rounded-full shadow-lg"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteAsset(asset.id);
+                                }}
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </Button>
+                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/asset-card:opacity-100 transition-opacity p-6 flex flex-col justify-end">
+                            <p className="text-white text-sm font-bold truncate">{asset.name}</p>
+                            <p className="text-white/70 text-[10px] uppercase font-black tracking-widest mt-0.5">S{asset.size}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* URL Upload Dialog */}
+            <Dialog open={isUrlDialogOpen} onOpenChange={setIsUrlDialogOpen}>
+                <DialogContent className="sm:max-w-md rounded-[2rem]">
+                    <DialogHeader>
+                        <DialogTitle>Import via URL</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                            <label htmlFor="url-name" className="text-sm font-medium">Asset Name</label>
+                            <Input
+                                id="url-name"
+                                placeholder="E.g. Logo, Banner Image..."
+                                value={urlName}
+                                onChange={(e) => setUrlName(e.target.value)}
+                                className="rounded-xl bg-slate-50"
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <label htmlFor="url" className="text-sm font-medium">Image or Video URL</label>
+                            <Input
+                                id="url"
+                                placeholder="https://example.com/image.png"
+                                value={urlInput}
+                                onChange={(e) => setUrlInput(e.target.value)}
+                                className="rounded-xl bg-slate-50"
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button variant="outline" onClick={() => setIsUrlDialogOpen(false)} className="rounded-xl">Cancel</Button>
+                        <Button onClick={handleUrlUpload} disabled={!urlInput} className="rounded-xl">Import Asset</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div>
+    );
+};
+
+const SettingsView: React.FC = () => {
+    const [name, setName] = useState('John Doe');
+    const [email] = useState('john@example.com');
+    const { toast } = useToast();
+
+    return (
+        <div className="max-w-4xl space-y-12 animate-in fade-in duration-500 pb-32">
+            <div>
+                <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Settings</h2>
+                <p className="text-slate-500 mt-1">Manage your profile, security, and account preferences.</p>
+            </div>
+
+            <section className="bg-white border rounded-[2.5rem] p-8 md:p-12 shadow-sm space-y-8">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center">
+                        <Users className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-bold text-slate-900">Profile Information</h3>
+                        <p className="text-sm text-slate-500">Update your personal details.</p>
+                    </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-8">
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Full Name</label>
+                        <Input value={name} onChange={(e) => setName(e.target.value)} className="h-14 rounded-2xl bg-slate-50 border-transparent focus:bg-white transition-all shadow-inner" />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Email Address</label>
+                        <Input value={email} disabled className="h-14 rounded-2xl bg-slate-100 text-slate-400 border-transparent cursor-not-allowed opacity-60" />
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Email cannot be changed directly.</p>
+                    </div>
+                </div>
+                <Button className="rounded-2xl px-10 h-14 font-bold text-white shadow-xl shadow-primary/20" onClick={() => toast({ title: "Profile updated", description: "Name updated successfully." })}>
+                    Save Changes
+                </Button>
+            </section>
+
+            <section className="bg-white border rounded-[2.5rem] p-8 md:p-12 shadow-sm space-y-8">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center">
+                        <Zap className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-bold text-slate-900">Security</h3>
+                        <p className="text-sm text-slate-500">Manage your password.</p>
+                    </div>
+                </div>
+                <div className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-8">
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Current Password</label>
+                            <Input type="password" placeholder="••••••••" className="h-14 rounded-2xl bg-slate-50 border-transparent focus:bg-white transition-all shadow-inner" />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">New Password</label>
+                            <Input type="password" placeholder="••••••••" className="h-14 rounded-2xl bg-slate-50 border-transparent focus:bg-white transition-all shadow-inner" />
+                        </div>
+                    </div>
+                    <Button className="rounded-2xl px-10 h-14 font-bold" variant="secondary" onClick={() => toast({ title: "Password changed", description: "Password updated successfully." })}>
+                        Update Password
+                    </Button>
+                </div>
+            </section>
+
+            <section className="bg-rose-50 border border-rose-100 rounded-[3rem] p-8 md:p-12 space-y-8 shadow-sm">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center">
+                        <Trash2 className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-bold text-slate-900">Danger Zone</h3>
+                        <p className="text-sm text-rose-600">Irreversible account actions.</p>
+                    </div>
+                </div>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 p-8 bg-white/60 backdrop-blur-sm rounded-[2rem] border border-rose-100/50">
+                    <div className="space-y-1">
+                        <p className="font-black text-slate-900 text-lg">Deactivate Account</p>
+                        <p className="text-sm text-slate-500 max-w-md font-medium">Temporarily disable your profile and all websites.</p>
+                    </div>
+                    <Button variant="destructive" className="rounded-2xl font-black h-14 px-8 shadow-lg shadow-rose-200" onClick={() => {
+                        if (confirm("Are you sure you want to deactivate your account?")) {
+                            window.location.href = "/";
+                        }
+                    }}>
+                        Deactivate Profile
+                    </Button>
+                </div>
+            </section>
+        </div>
     );
 };
 
@@ -360,18 +683,18 @@ const Dashboard = () => {
                             <div className="flex items-center gap-4">
                                 <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
                                     <DialogTrigger asChild>
-                                        <GradientButton className="h-12 px-6 text-base w-auto" icon={<Plus className="w-5 h-5" />}> 
+                                        <Button className="h-12 px-6 text-base w-auto rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/30 transition-all" icon={<Plus className="w-5 h-5" />}> 
                                             New Project
-                                        </GradientButton>
+                                        </Button>
                                     </DialogTrigger>
-                                    <DialogContent className="sm:max-w-5xl rounded-[2.5rem] p-0 overflow-hidden bg-slate-50 border-slate-200">
+                                    <DialogContent className="sm:max-w-5xl rounded-[2rem] p-0 overflow-hidden bg-white border-slate-100 shadow-2xl">
                                         <DialogTitle className="sr-only">Create New Website</DialogTitle>
                                         <div className="flex flex-col md:flex-row h-[700px] w-full">
 
                                             {/* Left: Form */}
-                                            <div className="w-full md:w-1/3 bg-white p-10 flex flex-col pt-12 border-r border-slate-100 relative z-10 shadow-2xl">
+                                            <div className="w-full md:w-1/3 bg-white p-10 flex flex-col pt-12 border-r border-slate-100 relative z-10 shadow-xl rounded-l-[2rem]">
                                                 <div>
-                                                    <div className="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+                                                    <div className="w-14 h-14 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
                                                         <LayoutTemplate className="w-7 h-7" />
                                                     </div>
                                                     <h2 className="text-[2rem] font-black text-slate-900 tracking-tight mb-3 leading-none">Create a Project</h2>
@@ -386,20 +709,19 @@ const Dashboard = () => {
                                                             placeholder="e.g., My Awesome Site"
                                                             value={newSiteName}
                                                             onChange={(e) => setNewSiteName(e.target.value)}
-                                                            className="h-14 bg-slate-50 border-slate-200 rounded-xl px-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-900 shadow-inner"
+                                                            className="h-14 bg-slate-50 border-slate-200 rounded-xl px-4 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all font-medium text-slate-900 shadow-inner"
                                                             onKeyDown={(e) => e.key === 'Enter' && handleCreateSite()}
                                                         />
                                                     </div>
                                                 </div>
                                                 <div className="mt-auto pt-8 border-t border-slate-100">
-                                                    <GradientButton
+                                                    <Button
                                                         onClick={handleCreateSite}
                                                         disabled={!newSiteName.trim()}
-                                                        className="w-full h-14 font-bold text-lg flex items-center justify-center group/button-create-site active:scale-[0.98]"
-                                                        icon={<ArrowRight className="w-5 h-5 group-hover/button-create-site:translate-x-1 transition-transform" />}
-                                                    >
+                                                        className="w-full h-14 font-bold text-lg flex items-center justify-center group/button-create-site active:scale-[0.98] rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/30 transition-all"
+                                                        icon={<ArrowRight className="w-5 h-5 group-hover/button-create-site:translate-x-1 transition-transform" />}>
                                                         Start Building 
-                                                    </GradientButton>
+                                                    </Button>
                                                 </div>
                                             </div>
 
@@ -451,7 +773,7 @@ const Dashboard = () => {
                                                                 </div>
                                                                 <div>
                                                                     <h4 className={cn("font-bold text-lg transition-colors leading-tight", selectedTemplate === tpl.id ? "text-slate-900" : "text-slate-700")}>{tpl.name}</h4>
-                                                                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">{tpl.category}</p>
+                                                                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">S{tpl.category}</p>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -565,27 +887,39 @@ const Dashboard = () => {
                             <div className="flex items-center gap-2">
                                 <Button
                                     variant={filterStatus === 'all' ? 'default' : 'outline'}
-                                    className={`rounded-full h-10 px-4 text-sm font-semibold
-                                                ${filterStatus === 'all' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
-                                                transition-all duration-200`}
+                                    className={cn(
+                                        "rounded-full h-10 px-4 text-sm font-semibold",
+                                        filterStatus === 'all'
+                                            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20"
+                                            : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700",
+                                        "transition-all duration-200"
+                                    )}
                                     onClick={() => setFilterStatus('all')}
                                 >
                                     All
                                 </Button>
                                 <Button
                                     variant={filterStatus === 'draft' ? 'default' : 'outline'}
-                                    className={`rounded-full h-10 px-4 text-sm font-semibold
-                                                ${filterStatus === 'draft' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
-                                                transition-all duration-200`}
+                                    className={cn(
+                                        "rounded-full h-10 px-4 text-sm font-semibold",
+                                        filterStatus === 'draft'
+                                            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20"
+                                            : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700",
+                                        "transition-all duration-200"
+                                    )}
                                     onClick={() => setFilterStatus('draft')}
                                 >
                                     Draft
                                 </Button>
                                 <Button
                                     variant={filterStatus === 'published' ? 'default' : 'outline'}
-                                    className={`rounded-full h-10 px-4 text-sm font-semibold
-                                                ${filterStatus === 'published' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
-                                                transition-all duration-200`}
+                                    className={cn(
+                                        "rounded-full h-10 px-4 text-sm font-semibold",
+                                        filterStatus === 'published'
+                                            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20"
+                                            : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700",
+                                        "transition-all duration-200"
+                                    )}
                                     onClick={() => setFilterStatus('published')}
                                 >
                                     Published
@@ -611,563 +945,262 @@ const Dashboard = () => {
                         )}
                     </>
                 ) : location.pathname === '/dashboard' && isAdmin ? (
-                    <div className="relative min-h-screen bg-[#f8fafc] p-8 lg:p-12 overflow-hidden">
-                        {/* Background Gradient Blobs */}
-                        <div className="absolute top-[-200px] left-[-300px] w-[600px] h-[600px] bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" />
-                        <div className="absolute bottom-[-100px] right-[-200px] w-[500px] h-[500px] bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000" />
-                        <div className="absolute top-[100px] right-[-100px] w-[400px] h-[400px] bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000" />
-
-                        {/* Dashboard Header */}
+                    <div className="relative min-h-screen py-0 px-0 overflow-hidden">
+                        {/* Admin Dashboard Header */}
                         <motion.header
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
-                            className="relative z-10 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
+                            className="sticky top-0 z-30 flex items-center justify-between h-20 px-6 lg:px-8 bg-white/80 backdrop-blur-md border-b border-slate-100 shrink-0"
                         >
                             <div className="flex items-center gap-4">
-                                {isMobile && (
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="lg:hidden"
-                                        onClick={() => setIsSidebarOpen(true)}
-                                    >
-                                        <Menu className="w-6 h-6" />
-                                    </Button>
-                                )}
                                 <div>
-                                    <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">Admin Dashboard</h2>
-                                    <p className="text-lg text-slate-600 mt-1">Platform overview and management at a glance.</p>
+                                    <h2 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600 tracking-tight">Admin Dashboard</h2>
+                                    <p className="text-sm text-slate-600 mt-0.5">Platform overview and management at a glance.</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4">
-
+                            <div className="flex items-center gap-3">
                                 {/* Notification Icon */}
-                                <Button variant="ghost" size="icon" className="relative rounded-full h-11 w-11 text-slate-600 hover:bg-slate-100">
+                                <Button variant="ghost" size="icon" className="relative rounded-full h-10 w-10 text-slate-500 hover:bg-slate-100 transition-colors">
                                     <Bell className="w-5 h-5" />
                                     <span className="absolute top-2 right-2 block w-2 h-2 rounded-full bg-red-500" />
                                 </Button>
                                 {/* Admin Profile Avatar */}
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-sm shadow-lg">
-                                    AD
-                                </div>
-
+                                <DropdownMenu open={isUserProfileDialogOpen} onOpenChange={setIsUserProfileDialogOpen}>
+                                    <DropdownMenuTrigger asChild>
+                                        <div className="w-10 h-10 rounded-full bg-purple-500 text-white flex items-center justify-center font-medium text-sm cursor-pointer shadow-md hover:shadow-lg transition-all">
+                                            {getInitials(userName)}
+                                        </div>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-slate-200 shadow-lg">
+                                        <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100" onClick={() => navigate('/dashboard/settings')}>
+                                            <Settings className="w-4 h-4" /> Settings
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem onClick={handleLogout} className="rounded-lg gap-2 cursor-pointer text-rose-500 focus:bg-rose-50 focus:text-rose-600">
+                                            <LogOut className="w-4 h-4" /> Log Out
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
                         </motion.header>
 
-                        {/* Platform Overview (Stats Cards) */}
-                        <section className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.1 }}
-                                className="bg-white/70 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300"
-                            >
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center">
-                                        <Users className="w-5 h-5" />
+                        {/* Main Content Wrapper for max-width and padding */}
+                        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 md:py-10">
+
+                            {/* Platform Overview (Stats Cards) */}
+                            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.1 }}
+                                    className="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300"
+                                >
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
+                                            <Users className="w-5 h-5" />
+                                        </div>
+                                        <p className="text-sm font-medium text-slate-600">Total Users</p>
                                     </div>
-                                    <p className="text-sm font-medium text-slate-600">Total Users</p>
-                                </div>
-                                <div className="flex items-end justify-between">
-                                    <span className="text-4xl font-extrabold text-slate-900">2,345</span>
-                                    <span className="text-sm font-semibold text-emerald-500 flex items-center">
-                                        <ArrowUp className="w-4 h-4 mr-0.5" /> +12.5%
-                                    </span>
-                                </div>
-                            </motion.div>
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.2 }}
-                                className="bg-white/70 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300"
-                            >
-
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center">
-                                        <Globe className="w-6 h-6" />
+                                    <div className="flex items-end justify-between">
+                                        <span className="text-4xl font-extrabold text-slate-900">2,345</span>
+                                        <span className="text-sm font-semibold text-emerald-500 flex items-center">
+                                            <ArrowUp className="w-4 h-4 mr-0.5" /> +12.5%
+                                        </span>
                                     </div>
-                                    <p className="text-sm font-medium text-slate-600">Active Websites</p>
-                                </div>
-                                <div className="flex items-end justify-between">
-                                    <span className="text-4xl font-extrabold text-slate-900">876</span>
-                                    <span className="text-sm font-semibold text-rose-500 flex items-center">
-                                        <ArrowDown className="w-4 h-4 mr-0.5" /> -3.2%
-                                    </span>
-                                </div>
-                            </motion.div>
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.3 }}
-                                className="bg-white/70 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300"
-                            >
+                                </motion.div>
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.2 }}
+                                    className="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300"
+                                >
 
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
-                                        <LayoutTemplate className="w-5 h-5" />
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center">
+                                            <Globe className="w-6 h-6" />
+                                        </div>
+                                        <p className="text-sm font-medium text-slate-600">Active Websites</p>
                                     </div>
-                                    <p className="text-sm font-medium text-slate-600">Total Templates</p>
-                                </div>
-                                <div className="flex items-end justify-between">
-                                    <span className="text-4xl font-extrabold text-slate-900">48</span>
-                                    <span className="text-sm font-semibold text-emerald-500 flex items-center">
-                                        <ArrowUp className="w-4 h-4 mr-0.5" /> +2 Templates
-                                    </span>
-                                </div>
-                            </motion.div>
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.4 }}
-                                className="bg-white/70 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300 group/stat-card"
-                            >
-
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-12 h-12 bg-blue-600/20 text-blue-400 rounded-full flex items-center justify-center shadow-lg group-hover/stat-card:scale-105 transition-transform">
-                                        <Files className="w-6 h-6" />
+                                    <div className="flex items-end justify-between">
+                                        <span className="text-4xl font-extrabold text-slate-900">876</span>
+                                        <span className="text-sm font-semibold text-rose-500 flex items-center">
+                                            <ArrowDown className="w-4 h-4 mr-0.5" /> -3.2%
+                                        </span>
                                     </div>
-                                    <p className="text-sm font-medium text-slate-600">Total Assets</p>
+                                </motion.div>
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.3 }}
+                                    className="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300"
+                                >
+
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
+                                            <LayoutTemplate className="w-5 h-5" />
+                                        </div>
+                                        <p className="text-sm font-medium text-slate-600">Total Templates</p>
+                                    </div>
+                                    <div className="flex items-end justify-between">
+                                        <span className="text-4xl font-extrabold text-slate-900">48</span>
+                                        <span className="text-sm font-semibold text-emerald-500 flex items-center">
+                                            <ArrowUp className="w-4 h-4 mr-0.5" /> +2 Templates
+                                        </span>
+                                    </div>
+                                </motion.div>
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.4 }}
+                                    className="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 group/stat-card"
+                                >
+
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover/stat-card:scale-105 transition-transform">
+                                            <Files className="w-6 h-6" />
+                                        </div>
+                                        <p className="text-sm font-medium text-slate-600">Total Assets</p>
+                                    </div>
+                                    <div className="flex items-end justify-between">
+                                        <span className="text-4xl font-extrabold text-slate-900">48</span>
+                                        <span className="text-sm font-semibold text-emerald-500 flex items-center">
+                                            <ArrowUp className="w-4 h-4 mr-0.5" /> +8.1%
+                                        </span>
+                                    </div>
+                                </motion.div>
+
+                            </section>
+
+                            {/* Main Content Grid (Users, Websites, Templates | Deployments, Activity) */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                {/* Left Column: Manage Users, Websites, Templates */}
+                                <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <motion.div
+                                        whileHover={{ scale: 1.02, boxShadow: "0 8px 25px rgba(0, 0, 0, 0.05)", borderColor: "#a78bfa" }}
+                                        transition={{ duration: 0.3, ease: "easeOut" }}
+                                        onClick={() => navigate('/dashboard/users')}
+                                        className="relative group/admin-action-card cursor-pointer bg-white rounded-2xl p-6 shadow-lg border border-slate-100 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-purple-300"
+                                    >
+
+                                        <div className="relative z-10 w-14 h-14 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover/admin-action-card:scale-105 transition-transform duration-300">
+                                            <Users className="w-7 h-7" />
+                                        </div>
+                                        <h3 className="relative z-10 text-xl font-bold text-slate-900 mb-1">Manage Users</h3>
+                                        <p className="relative z-10 text-slate-600 text-sm">Overview and control of all user accounts.</p>
+                                    </motion.div>
+
+                                    <motion.div
+                                        whileHover={{ scale: 1.02, boxShadow: "0 8px 25px rgba(0, 0, 0, 0.05)", borderColor: "#818cf8" }}
+                                        transition={{ duration: 0.3, ease: "easeOut" }}
+                                        onClick={() => navigate('/dashboard/websites')}
+                                        className="relative group/admin-action-card cursor-pointer bg-white rounded-2xl p-6 shadow-lg border border-slate-100 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-indigo-300"
+                                    >
+
+                                        <div className="relative z-10 w-14 h-14 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover/admin-action-card:scale-105 transition-transform duration-300">
+                                            <Layout className="w-7 h-7" />
+                                        </div>
+                                        <h3 className="relative z-10 text-xl font-bold text-slate-900 mb-1">Manage Websites</h3>
+                                        <p className="relative z-10 text-slate-600 text-sm leading-relaxed">
+                                            Oversee all created websites, their status, and configurations.
+                                        </p>
+                                    </motion.div>
+
+                                    <motion.div
+                                        whileHover={{ scale: 1.02, boxShadow: "0 8px 25px rgba(0, 0, 0, 0.05)", borderColor: "#34d399" }}
+                                        transition={{ duration: 0.3, ease: "easeOut" }}
+                                        onClick={() => navigate('/dashboard/templates')}
+                                        className="relative group/admin-action-card cursor-pointer bg-white rounded-2xl p-6 shadow-lg border border-slate-100 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300"
+                                    >
+
+                                        <div className="relative z-10 w-14 h-14 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover/admin-action-card:scale-105 transition-transform duration-300">
+                                            <LayoutTemplate className="w-7 h-7" />
+                                        </div>
+                                        <h3 className="relative z-10 text-xl font-bold text-slate-900 mb-1">Manage Templates</h3>
+                                        <p className="relative z-10 text-slate-600 text-sm leading-relaxed">
+                                            Browse, add, and manage all available website templates.
+                                        </p>
+                                    </motion.div>
                                 </div>
-                                <div className="flex items-end justify-between">
-                                    <span className="text-4xl font-extrabold text-slate-900">48</span>
-                                    <span className="text-sm font-semibold text-emerald-500 flex items-center">
-                                        <ArrowUp className="w-4 h-4 mr-0.5" /> +8.1%
-                                    </span>
+
+                                {/* Right Column: Monitor Deployments & Other Info */}
+                                <div className="lg:col-span-1 space-y-6">
+                                    <motion.div
+                                        whileHover={{ scale: 1.02, boxShadow: "0 8px 25px rgba(0, 0, 0, 0.05)", borderColor: "#fb7185" }}
+                                        transition={{ duration: 0.3, ease: "easeOut" }}
+                                        onClick={() => navigate('/dashboard/deployment')}
+                                        className="relative group/admin-action-card cursor-pointer bg-white rounded-2xl p-6 shadow-lg border border-slate-100 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-rose-300"
+                                    >
+
+                                        <div className="relative z-10 w-14 h-14 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover/admin-action-card:scale-105 transition-transform duration-300">
+                                            <Activity className="w-7 h-7" />
+                                        </div>
+                                        <h3 className="relative z-10 text-xl font-bold text-slate-900 mb-1">Monitor Deployments</h3>
+                                        <p className="relative z-10 text-slate-600 text-sm leading-relaxed">
+                                            Track the status and history of all website deployments.
+                                        </p>
+                                    </motion.div>
+
+                                    {/* Placeholder for other secondary info */}
+                                    <Card className="rounded-2xl bg-white border border-slate-100 shadow-lg p-6 flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                                        <h3 className="text-xl font-bold text-slate-900 mb-4">Quick Insights</h3>
+                                        <p className="text-sm text-slate-600">Additional admin information can go here. For example, recent logs, system health, or quick links.</p>
+                                        <Button variant="link" className="mt-4 self-start text-purple-600 p-0 h-auto text-sm font-bold">
+                                            View Details →
+                                        </Button>
+                                    </Card>
                                 </div>
-                            </motion.div>
+                            </div>
 
-                        </section>
+                            {/* Boards / Task Section - Placeholder */}
+                            <section className="grid gap-6 mt-8 mb-10">
+                                <Card className="rounded-[1.5rem] bg-white border border-slate-100 shadow-lg shadow-slate-100/50 p-8 flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                                    <h3 className="text-xl font-bold text-slate-900 mb-6">Upcoming Tasks</h3>
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-2 h-2 rounded-full bg-purple-500" />
+                                            <p className="text-sm font-medium text-slate-800 flex-1">Design System Review</p>
+                                            <span className="px-3 py-1 bg-purple-50 rounded-full text-purple-600 text-xs font-medium">Today</span>
+                                        </div>
+                                        <div className="border-t border-dashed border-slate-200 ml-3" />
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-2 h-2 rounded-full bg-blue-500" />
+                                            <p className="text-sm font-medium text-slate-800 flex-1">Implement New Homepage</p>
+                                            <span className="px-3 py-1 bg-blue-50 rounded-full text-blue-600 text-xs font-medium">Tomorrow</span>
+                                        </div>
+                                        <div className="border-t border-dashed border-slate-200 ml-3" />
+                                        <Button variant="outline" className="w-full rounded-full border-dashed border-slate-300 text-slate-500 hover:text-purple-600 hover:border-purple-300 hover:bg-purple-50">
+                                            <Plus className="w-4 h-4 mr-2" /> Add New Task
+                                        </Button>
+                                    </div>
+                                </Card>
+                            </section>
 
-                        {/* Admin Quick Actions Grid */}
-                        <section className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {/* Manage Users Card */}
-                            <motion.div
-                                whileHover={{ scale: 1.03, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(168, 85, 247, 0.6)" }}
-                                transition={{ duration: 0.3, ease: "easeOut" }}
-                                onClick={() => navigate('/dashboard/users')}
-                                className="relative group/admin-action-card cursor-pointer bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:ring-2 hover:ring-purple-500/50"
-                            >
+                            {/* Activity Chart - Placeholder */}
+                            <section className="grid gap-6 mb-10">
+                                <Card className="rounded-[1.5rem] bg-white border border-slate-100 shadow-lg shadow-slate-100/50 p-8 flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                                    <h3 className="text-xl font-bold text-slate-900 mb-6">Platform Usage (Last 7 Days)</h3>
+                                    <div className="h-48 flex items-end justify-around gap-2">
+                                        {/* Placeholder Bars */}
+                                        {[1, 2, 3, 4, 5, 6, 7].map((day) => (
+                                            <div key={day} className={`flex-1 flex flex-col justify-end items-center group`}>
+                                                <div
+                                                    className={`w-4 rounded-t-full transition-all duration-300 ease-out ${day === 5 ? 'bg-purple-500 h-full' : 'bg-purple-200 group-hover:bg-purple-300'}`}
+                                                    style={{ height: `${Math.random() * 80 + 20}%` }}
+                                                />
+                                                <span className="text-xs text-slate-500 mt-2">Day {day}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </Card>
+                            </section>
 
-                                <div className="relative z-10 w-16 h-16 bg-purple-600/20 text-purple-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover/admin-action-card:scale-105 transition-transform duration-300 shadow-inner">
-                                    <Users className="w-8 h-8" />
-                                </div>
-                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">Manage Users</h3>
-                                <p className="relative z-10 text-slate-600 text-base">Overview and control of all user accounts.</p>
-                            </motion.div>
-
-                            {/* Manage Websites Card */}
-                            <motion.div
-                                whileHover={{ scale: 1.03, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(99, 102, 241, 0.6)" }}
-                                transition={{ duration: 0.3, ease: "easeOut" }}
-                                onClick={() => navigate('/dashboard/websites')}
-                                className="relative group/admin-action-card cursor-pointer bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:ring-2 hover:ring-indigo-500/50"
-                            >
-
-                                <div className="relative z-10 w-16 h-16 bg-indigo-600/20 text-indigo-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover/admin-action-card:scale-105 transition-transform duration-300 shadow-inner">
-                                    <Layout className="w-8 h-8" />
-                                </div>
-                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">Manage Websites</h3>
-                                <p className="relative z-10 text-slate-600 text-base leading-relaxed">
-                                    Oversee all created websites, their status, and configurations.
-                                </p>
-                            </motion.div>
-
-                            {/* Manage Templates Card */}
-                            <motion.div
-                                whileHover={{ scale: 1.03, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(16, 185, 129, 0.6)" }}
-                                transition={{ duration: 0.3, ease: "easeOut" }}
-                                onClick={() => navigate('/dashboard/templates')}
-                                className="relative group/admin-action-card cursor-pointer bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:ring-2 hover:ring-emerald-500/50"
-                            >
-
-                                <div className="relative z-10 w-16 h-16 bg-emerald-600/20 text-emerald-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover/admin-action-card:scale-105 transition-transform duration-300 shadow-inner">
-                                    <LayoutTemplate className="w-8 h-8" />
-                                </div>
-                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">Manage Templates</h3>
-                                <p className="relative z-10 text-slate-600 text-base leading-relaxed">
-                                    Browse, add, and manage all available website templates.
-                                </p>
-                            </motion.div>
-
-                            {/* Monitor Deployments Card */}
-                            <motion.div
-                                whileHover={{ scale: 1.03, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(244, 63, 94, 0.6)" }}
-                                transition={{ duration: 0.3, ease: "easeOut" }}
-                                onClick={() => navigate('/dashboard/deployment')}
-                                className="relative group/admin-action-card cursor-pointer bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:ring-2 hover:ring-rose-500/50"
-                            >
-
-                                <div className="relative z-10 w-16 h-16 bg-rose-600/20 text-rose-400 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover/admin-action-card:scale-105 transition-transform duration-300 shadow-inner">
-                                    <Activity className="w-8 h-8" />
-                                </div>
-                                <h3 className="relative z-10 text-2xl font-bold text-slate-900 mb-2">Monitor Deployments</h3>
-                                <p className="relative z-10 text-slate-600 text-base leading-relaxed">
-                                    Track the status and history of all website deployments.
-                                </p>
-                            </motion.div>
-
-
-                        </section>
-
+                        </div>
                     </div>
-                ) : (
+                 ) : (
                     <Outlet key={location.pathname} />
                 )}
             </main>
-        </div>
-    );
-};
-
-interface Template {
-    id: string;
-    name: string;
-    image: string;
-    desc: string;
-    icon: React.ElementType;
-    category: string;
-}
-
-interface WebsiteCardProps {
-    site: Website;
-    index: number;
-    onDelete: () => void;
-    onEdit: () => void;
-}
-
-// --- WebsiteCard ---
-const WebsiteCard: React.FC<WebsiteCardProps> = ({ site, index, onDelete, onEdit }) => {
-    const template = templatesList.find((t: Template) => t.id === site.templateId);
-
-    return (
-        <Card className="group/website-card border border-slate-200 bg-white rounded-3xl overflow-hidden flex flex-col shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 hover:-translate-y-1 transition-all duration-300">
-            <div className="aspect-[16/10] bg-slate-50 relative overflow-hidden">
-                {template && template.id !== 'blank' ? (
-                    <div className="absolute inset-0 transition-transform duration-500 group-hover/website-card:scale-105 p-4">
-                        <img src={template.image} alt={site.name} className="w-full h-full object-cover rounded-2xl border border-slate-200 shadow-sm" />
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-0 group-hover/website-card:opacity-100 transition-opacity duration-300" />
-                    </div>
-                ) : (
-                    <div className="absolute inset-0 transition-transform duration-500 group-hover/website-card:scale-105 p-4">
-                        <div className="w-full h-full border border-slate-200 rounded-2xl bg-white shadow-sm flex flex-col overflow-hidden">
-                            <div className="h-6 bg-slate-50 border-b border-slate-100 flex items-center px-3 gap-1.5">
-                                <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
-                                <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
-                                <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
-                            </div>
-                            <div className="p-4 space-y-3">
-                                <div className="h-3 w-3/4 bg-slate-100 rounded-full animate-pulse" />
-                                <div className="h-3 w-1/2 bg-slate-100 rounded-full" />
-                                <div className="flex gap-2 pt-2">
-                                    <div className="h-8 w-8 rounded-lg bg-slate-50" />
-                                    <div className="h-8 w-8 rounded-lg bg-slate-50" />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover/website-card:opacity-100 transition-opacity duration-300" />
-                    </div>
-                )}
-
-                {/* Hover Actions Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover/website-card:opacity-100 transition-all duration-300 z-10">
-                    <Button size="sm" onClick={onEdit} className="bg-white text-slate-900 hover:bg-white/90 rounded-full shadow-lg">
-                        <Edit2 className="w-4 h-4 mr-1" /> Edit
-                    </Button>
-                </div>
-            </div>
-
-            <CardHeader className="p-6 pb-3">
-                <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                        <CardTitle className="text-xl font-bold text-slate-800 group-hover/website-card:text-indigo-600 transition-colors leading-tight">
-                            {site.name}
-                        </CardTitle>
-                        <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mt-1">
-                            <Clock className="w-3 h-3 text-slate-400" />
-                            {format(new Date(site.lastEdited), 'MMM d, p')}
-                        </div>
-                    </div>
-
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
-                                <MoreVertical className="w-4 h-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-slate-200 shadow-lg">
-                            <DropdownMenuItem onClick={onEdit} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100">
-                                <Edit2 className="w-4 h-4" /> Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100">
-                                <Files className="w-4 h-4" /> Duplicate
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={onDelete} className="rounded-lg gap-2 cursor-pointer text-rose-500 focus:bg-rose-50 focus:text-rose-600">
-                                <Trash2 className="w-4 h-4" /> Delete Project
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-            </CardHeader>
-
-            <CardFooter className="p-6 pt-3 mt-auto flex justify-between items-center">
-                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${site.status === 'Published'
-                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                    : 'bg-amber-50 text-amber-600 border border-amber-100'
-                }`}>
-                    <div className={`w-1.5 h-1.5 rounded-full ${site.status === 'Published' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
-                    {site.status}
-                </div>
-                <Button variant="link" className="text-indigo-600 p-0 h-auto text-sm font-bold group-hover/website-card:underline underline-offset-4" onClick={onEdit}>
-                    Open Editor →
-                </Button>
-            </CardFooter>
-        </Card>
-    );
-};
-
-interface EmptyStateProps {
-    onAction: () => void;
-}
-
-// --- EmptyState ---
-const EmptyState: React.FC<EmptyStateProps> = ({ onAction }) => (
-    <div className="h-[400px] flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-[2rem] bg-white p-12 text-center transition-all hover:border-primary/20 hover:bg-slate-50/50">
-        <div className="w-20 h-20 bg-primary/5 rounded-3xl flex items-center justify-center mb-6">
-            <Globe className="w-10 h-10 text-primary" />
-        </div>
-        <h3 className="text-2xl font-bold text-slate-900">Your creative journey starts here</h3>
-        <p className="text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">
-            Every great brand starts with a single page. Build yours with our visual canvas.
-        </p>
-        <Button size="lg" className="mt-6 rounded-full px-8 gap-2 shadow-lg shadow-primary/20" onClick={onAction}>
-            <Plus className="w-5 h-5" /> Create Your First Site
-        </Button>
-    </div>
-);
-
-// --- AssetsView ---
-const AssetsView: React.FC = () => {
-    const { assets, addAsset, deleteAsset } = useBuilderStore();
-    const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
-    const [urlInput, setUrlInput] = useState('');
-    const [urlName, setUrlName] = useState('');
-    const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-    const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const url = URL.createObjectURL(file);
-            addAsset({
-                name: file.name,
-                url,
-                type: file.type.startsWith('video') ? 'video' : 'image',
-                size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`
-            });
-            if (e.target) e.target.value = '';
-        }
-    };
-
-    const handleUrlUpload = () => {
-        if (urlInput) {
-            addAsset({
-                name: urlName || 'Imported Asset',
-                url: urlInput,
-                type: urlInput.match(/\.(mp4|webm|ogg)$/i) ? 'video' : 'image',
-                size: 'External'
-            });
-            setUrlInput('');
-            setUrlName('');
-            setIsUrlDialogOpen(false);
-        }
-    };
-
-    return (
-        <div className="space-y-8 animate-in fade-in duration-500 pb-20">
-            <div>
-                <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Assets Management</h2>
-                <p className="text-slate-500 mt-1">Manage your images, videos, and documents.</p>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <div className="aspect-square border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center gap-3 hover:border-primary/40 hover:bg-white cursor-pointer transition-all group/upload-button">
-                            <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 group-hover/upload-button:text-primary group-hover/upload-button:bg-primary/5 transition-colors">
-                                <Plus className="w-6 h-6" />
-                            </div>
-                            <span className="text-sm font-bold text-slate-500 group-hover/upload-button:text-primary">Upload</span>
-                        </div>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-48 rounded-xl p-2">
-                        <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer py-2.5" onSelect={() => fileInputRef.current?.click()}>
-                            <Monitor className="w-4 h-4" /> From Disk
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer py-2.5" onSelect={() => setIsUrlDialogOpen(true)}>
-                            <LinkIcon className="w-4 h-4" /> From URL
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    className="hidden"
-                    onChange={handleUpload}
-                    accept="image/*,video/*"
-                />
-
-                {assets.map(asset => (
-                    <div key={asset.id} className="group/asset-card relative aspect-square bg-white border border-slate-100 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all cursor-pointer">
-                        <img src={asset.url} alt={asset.name} className="w-full h-full object-cover opacity-80 group-hover/asset-card:opacity-100 transition-opacity" />
-                        <div className="absolute top-4 right-4 z-10 opacity-0 group-hover/asset-card:opacity-100 transition-opacity">
-                            <Button
-                                variant="destructive"
-                                size="icon"
-                                className="h-8 w-8 rounded-full shadow-lg"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    deleteAsset(asset.id);
-                                }}
-                            >
-                                <Trash2 className="w-4 h-4" />
-                            </Button>
-                        </div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/asset-card:opacity-100 transition-opacity p-6 flex flex-col justify-end">
-                            <p className="text-white text-sm font-bold truncate">{asset.name}</p>
-                            <p className="text-white/70 text-[10px] uppercase font-black tracking-widest mt-0.5">S{asset.size}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* URL Upload Dialog */}
-            <Dialog open={isUrlDialogOpen} onOpenChange={setIsUrlDialogOpen}>
-                <DialogContent className="sm:max-w-md rounded-[2rem]">
-                    <DialogHeader>
-                        <DialogTitle>Import via URL</DialogTitle>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                            <label htmlFor="url-name" className="text-sm font-medium">Asset Name</label>
-                            <Input
-                                id="url-name"
-                                placeholder="E.g. Logo, Banner Image..."
-                                value={urlName}
-                                onChange={(e) => setUrlName(e.target.value)}
-                                className="rounded-xl bg-slate-50"
-                            />
-                        </div>
-                        <div className="grid gap-2">
-                            <label htmlFor="url" className="text-sm font-medium">Image or Video URL</label>
-                            <Input
-                                id="url"
-                                placeholder="https://example.com/image.png"
-                                value={urlInput}
-                                onChange={(e) => setUrlInput(e.target.value)}
-                                className="rounded-xl bg-slate-50"
-                            />
-                        </div>
-                    </div>
-                    <DialogFooter className="gap-2 sm:gap-0">
-                        <Button variant="outline" onClick={() => setIsUrlDialogOpen(false)} className="rounded-xl">Cancel</Button>
-                        <Button onClick={handleUrlUpload} disabled={!urlInput} className="rounded-xl">Import Asset</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </div>
-    );
-};
-
-// --- SettingsView ---
-const SettingsView: React.FC = () => {
-    const [name, setName] = useState('John Doe');
-    const [email] = useState('john@example.com');
-    const { toast } = useToast();
-
-    return (
-        <div className="max-w-4xl space-y-12 animate-in fade-in duration-500 pb-32">
-            <div>
-                <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Settings</h2>
-                <p className="text-slate-500 mt-1">Manage your profile, security, and account preferences.</p>
-            </div>
-
-            <section className="bg-white border rounded-[2.5rem] p-8 md:p-12 shadow-sm space-y-8">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center">
-                        <Users className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <h3 className="text-xl font-bold text-slate-900">Profile Information</h3>
-                        <p className="text-sm text-slate-500">Update your personal details.</p>
-                    </div>
-                </div>
-                <div className="grid md:grid-cols-2 gap-8">
-                    <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Full Name</label>
-                        <Input value={name} onChange={(e) => setName(e.target.value)} className="h-14 rounded-2xl bg-slate-50 border-transparent focus:bg-white transition-all shadow-inner" />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Email Address</label>
-                        <Input value={email} disabled className="h-14 rounded-2xl bg-slate-100 text-slate-400 border-transparent cursor-not-allowed opacity-60" />
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Email cannot be changed directly.</p>
-                    </div>
-                </div>
-                <Button className="rounded-2xl px-10 h-14 font-bold text-white shadow-xl shadow-primary/20" onClick={() => toast({ title: "Profile updated", description: "Name updated successfully." })}>
-                    Save Changes
-                </Button>
-            </section>
-
-            <section className="bg-white border rounded-[2.5rem] p-8 md:p-12 shadow-sm space-y-8">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center">
-                        <Zap className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <h3 className="text-xl font-bold text-slate-900">Security</h3>
-                        <p className="text-sm text-slate-500">Manage your password.</p>
-                    </div>
-                </div>
-                <div className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-8">
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Current Password</label>
-                            <Input type="password" placeholder="••••••••" className="h-14 rounded-2xl bg-slate-50 border-transparent focus:bg-white transition-all shadow-inner" />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">New Password</label>
-                            <Input type="password" placeholder="••••••••" className="h-14 rounded-2xl bg-slate-50 border-transparent focus:bg-white transition-all shadow-inner" />
-                        </div>
-                    </div>
-                    <Button className="rounded-2xl px-10 h-14 font-bold" variant="secondary" onClick={() => toast({ title: "Password changed", description: "Password updated successfully." })}>
-                        Update Password
-                    </Button>
-                </div>
-            </section>
-
-            <section className="bg-rose-50 border border-rose-100 rounded-[3rem] p-8 md:p-12 space-y-8 shadow-sm">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center">
-                        <Trash2 className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <h3 className="text-xl font-bold text-slate-900">Danger Zone</h3>
-                        <p className="text-sm text-rose-600">Irreversible account actions.</p>
-                    </div>
-                </div>
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 p-8 bg-white/60 backdrop-blur-sm rounded-[2rem] border border-rose-100/50">
-                    <div className="space-y-1">
-                        <p className="font-black text-slate-900 text-lg">Deactivate Account</p>
-                        <p className="text-sm text-slate-500 max-w-md font-medium">Temporarily disable your profile and all websites.</p>
-                    </div>
-                    <Button variant="destructive" className="rounded-2xl font-black h-14 px-8 shadow-lg shadow-rose-200" onClick={() => {
-                        if (confirm("Are you sure you want to deactivate your account?")) {
-                            window.location.href = "/";
-                        }
-                    }}>
-                        Deactivate Profile
-                    </Button>
-                </div>
-            </section>
         </div>
     );
 };
