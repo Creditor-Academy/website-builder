@@ -951,24 +951,38 @@ const Dashboard = () => {
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
-                            className="sticky top-0 z-30 flex items-center justify-between h-20 px-6 lg:px-8 bg-white/80 backdrop-blur-md border-b border-slate-100 shrink-0"
+                            className="sticky top-0 z-30 flex items-center justify-between min-h-[180px] px-6 lg:px-8 bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-xl shadow-purple-500/30 shrink-0 rounded-b-[2rem]"
                         >
-                            <div className="flex items-center gap-4">
-                                <div>
-                                    <h2 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600 tracking-tight">Admin Dashboard</h2>
-                                    <p className="text-sm text-slate-600 mt-0.5">Platform overview and management at a glance.</p>
+                            <motion.div
+                                initial="hidden"
+                                animate="visible"
+                                variants={{
+                                    hidden: { opacity: 0 },
+                                    visible: {
+                                        opacity: 1,
+                                        transition: {
+                                            staggerChildren: 0.1,
+                                            delayChildren: 0.3
+                                        }
+                                    }
+                                }}
+                                className="flex items-center gap-4">
+                                <div className="flex flex-col">
+                                    <motion.p variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }} className="text-2xl font-semibold text-white/80 mb-1">Welcome back, {userName}!</motion.p>
+                                    <motion.h2 variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }} className="text-4xl font-extrabold text-white tracking-tight">Admin Dashboard</motion.h2>
+                                    <motion.p variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }} className="text-lg text-white/80 mt-0.5">Platform overview and management at a glance.</motion.p>
                                 </div>
-                            </div>
+                            </motion.div>
                             <div className="flex items-center gap-3">
                                 {/* Notification Icon */}
-                                <Button variant="ghost" size="icon" className="relative rounded-full h-10 w-10 text-slate-500 hover:bg-slate-100 transition-colors">
-                                    <Bell className="w-5 h-5" />
-                                    <span className="absolute top-2 right-2 block w-2 h-2 rounded-full bg-red-500" />
+                                <Button variant="ghost" size="icon" className="relative rounded-full h-12 w-12 text-white hover:bg-white/10 transition-colors">
+                                    <Bell className="w-6 h-6" />
+                                    <span className="absolute top-3 right-3 block w-2.5 h-2.5 rounded-full bg-white" />
                                 </Button>
                                 {/* Admin Profile Avatar */}
                                 <DropdownMenu open={isUserProfileDialogOpen} onOpenChange={setIsUserProfileDialogOpen}>
                                     <DropdownMenuTrigger asChild>
-                                        <div className="w-10 h-10 rounded-full bg-purple-500 text-white flex items-center justify-center font-medium text-sm cursor-pointer shadow-md hover:shadow-lg transition-all">
+                                        <div className="w-12 h-12 rounded-full bg-purple-500 text-white flex items-center justify-center font-semibold text-base cursor-pointer shadow-md hover:shadow-lg transition-all">
                                             {getInitials(userName)}
                                         </div>
                                     </DropdownMenuTrigger>
