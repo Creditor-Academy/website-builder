@@ -27,7 +27,7 @@ model User {
   id            String   @id @default(cuid())
   name          String
   email         String   @unique
-  password_hash String
+  password_hash String?
   role          UserRole @default(USER)
 
   isActive   Boolean @default(true)
@@ -45,6 +45,7 @@ model User {
   passwordResetTokens     PasswordResetToken[]
   emailVerificationTokens EmailVerificationToken[]
   refreshTokens           RefreshToken[]
+  assets                  Asset[]
 
   @@index([email])
   @@index([deleted_at])
@@ -119,23 +120,24 @@ enum WebsiteStatus {
 
 // Website Model
 model Website {
-  id            String        @id @default(cuid())
-  name          String
-  owner_id      String
-  status        WebsiteStatus @default(DRAFT)
-  settings_id   String        @unique
-  thumbnail_url String?
+  id       String        @id @default(cuid())
+  name     String
+  owner_id String
+  status   WebsiteStatus @default(DRAFT)
 
-  currentDraftVersionId     String? // references the current draft version of the website
-  currentPublishedVersionId String? // references the current published version of the website
+  homepageId  String? @unique
+  settings_id String  @unique
 
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
   deleted_at DateTime?
 
   // Relations
-  owner    User     @relation("WebsiteOwner", fields: [owner_id], references: [id], onDelete: Cascade)
-  settings Settings @relation(fields: [settings_id], references: [id], onDelete: Cascade)
+  owner        User          @relation("WebsiteOwner", fields: [owner_id], references: [id], onDelete: Cascade)
+  settings     Settings      @relation(fields: [settings_id], references: [id])
+  homepage     Page?         @relation("Homepage", fields: [homepageId], references: [id], onDelete: SetNull)
+  globalDesign GlobalDesign? // back-reference; FK lives on GlobalDesign
+  pages        Page[]        @relation("WebsitePages")
 
   @@index([owner_id])
   @@index([status])
@@ -157,4 +159,168 @@ model Settings {
   website Website?
 
   @@map("settings")
+}
+
+// ============================================
+// Presentation Tables (Pages, Sections, Templates, Global Design)
+// ============================================
+
+// Global Design
+model GlobalDesign {
+  id                String  @id @default(cuid())
+  website_id        String  @unique // FK for 1-to-1 with Website
+  websiteTemplateId String?
+
+  global_styles Json
+
+  // Relations
+  website         Website          @relation(fields: [website_id], references: [id], onDelete: Cascade)
+  websiteTemplate WebsiteTemplate? @relation(fields: [websiteTemplateId], references: [id], onDelete: SetNull)
+  globalSlots     GlobalSlot[]
+
+  @@index([website_id])
+  @@map("global_design")
+}
+
+enum GlobalSlotType {
+  NAVBAR
+  FOOTER
+}
+
+// GlobalSlot — storing Global Components
+model GlobalSlot {
+  id                  String         @id @default(cuid())
+  global_design_id    String
+  type                GlobalSlotType
+  section_template_id String?
+  props               Json
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  global_design    GlobalDesign     @relation(fields: [global_design_id], references: [id], onDelete: Cascade)
+  section_template SectionTemplate? @relation(fields: [section_template_id], references: [id], onDelete: SetNull)
+
+  @@unique([global_design_id, type])
+  @@map("global_slots")
+}
+
+// Page Model
+model Page {
+  id          String @id @default(cuid())
+  name        String
+  slug        String
+  website_id  String
+  meta        Json
+  page_styles Json?
+
+  created_at DateTime  @default(now())
+  deleted_at DateTime?
+
+  // Relation
+  website    Website   @relation("WebsitePages", fields: [website_id], references: [id], onDelete: Cascade)
+  homepageOf Website?  @relation("Homepage")
+  sections   Section[]
+
+  @@unique([slug, website_id])
+  @@index([slug, website_id])
+  @@index([deleted_at])
+  @@map("pages")
+}
+
+// Section Model
+model Section {
+  id                String  @id @default(cuid())
+  page_id           String
+  category          String
+  sectionTemplateId String?
+  order             Int
+  props             Json
+
+  created_at DateTime  @default(now())
+  deleted_at DateTime?
+
+  // Relation
+  page            Page             @relation(fields: [page_id], references: [id], onDelete: Cascade)
+  sectionTemplate SectionTemplate? @relation(fields: [sectionTemplateId], references: [id], onDelete: SetNull)
+
+  @@index([page_id, order])
+  @@index([deleted_at])
+  @@map("sections")
+}
+
+// ================================
+// Template Tables (website, section)
+// ================================
+
+// Website Template
+model WebsiteTemplate {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  category    String
+
+  global_styles Json?
+  navbar        Json?
+  footer        Json?
+  home_layout   Json?
+
+  created_at    DateTime       @default(now())
+  deleted_at    DateTime?
+  globalDesigns GlobalDesign[]
+
+  @@index([name])
+  @@index([category])
+  @@index([deleted_at])
+  @@map("website_templates")
+}
+
+// Section Template
+model SectionTemplate {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  category    String
+  props       Json
+
+  created_at DateTime  @default(now())
+  deleted_at DateTime?
+
+  // Relations
+  sections    Section[]
+  globalSlots GlobalSlot[]
+
+  @@index([name])
+  @@index([category])
+  @@index([deleted_at])
+  @@map("section_templates")
+}
+
+// ============================
+// Assets Tables (images, videos)
+// ============================
+
+// Asset Model
+model Asset {
+  id      String @id @default(cuid())
+  key     String
+  url     String
+  user_id String
+
+  name     String
+  type     String
+  category String
+  size     Int
+
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  // Relations
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([key])
+  @@index([user_id])
+  @@index([deletedAt])
+  @@map("assets")
 }

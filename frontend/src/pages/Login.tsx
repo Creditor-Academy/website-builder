@@ -22,16 +22,21 @@ interface LoginFormProps {
   setLoginData: React.Dispatch<React.SetStateAction<{ email: string; password: string }>>;
   handleLogin: () => void;
   setIsSignup: (v: boolean) => void;
-  isLoadingLogin: boolean; // ✅ ADD THIS
+  isLoadingLogin: boolean; 
+  showPassword: boolean;      
+  setShowPassword: (v: boolean) => void; 
+
 }
 
 
-const LoginForm = ({ 
-  loginData, 
-  setLoginData, 
-  handleLogin, 
-  setIsSignup, 
-  isLoadingLogin 
+const LoginForm = ({
+  loginData,
+  setLoginData,
+  handleLogin,
+  setIsSignup,
+  isLoadingLogin,
+  showPassword,
+  setShowPassword
 }: LoginFormProps) => (
 
   <div className="w-full max-w-[400px] flex flex-col justify-center h-full mx-auto">
@@ -55,13 +60,18 @@ const LoginForm = ({
         <label className="text-xs font-bold text-slate-800 mb-2 block">Password</label>
         <div className="relative">
           <input
-            type="password"
+              type={showPassword ? "text" : "password"}   // ✅ toggle
+
             placeholder="Input your password"
             value={loginData.password}
             onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
             className="w-full bg-white border border-slate-200 rounded-xl py-4 pl-4 pr-12 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all outline-none"
           />
-          <Eye className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 cursor-pointer hover:text-slate-600" />
+          <Eye
+  onClick={() => setShowPassword(!showPassword)}   // ✅ toggle
+  className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 cursor-pointer hover:text-slate-600"
+/>
+
         </div>
       </div>
       <div className="flex items-center justify-between pt-2">
@@ -74,12 +84,12 @@ const LoginForm = ({
     </div>
 
     <button
-  onClick={handleLogin}
-  disabled={isLoadingLogin}
-  className="w-full bg-slate-950 hover:bg-slate-800 text-white font-medium py-4 rounded-xl transition-all active:scale-[0.98] mb-8 disabled:opacity-50 disabled:cursor-not-allowed"
->
-  {isLoadingLogin ? "Logging in..." : "Login"}
-</button>
+      onClick={handleLogin}
+      disabled={isLoadingLogin}
+      className="w-full bg-slate-950 hover:bg-slate-800 text-white font-medium py-4 rounded-xl transition-all active:scale-[0.98] mb-8 disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      {isLoadingLogin ? "Logging in..." : "Login"}
+    </button>
 
 
     <div className="relative flex items-center justify-center mb-8">
@@ -106,16 +116,21 @@ interface SignupFormProps {
   setSignupData: React.Dispatch<React.SetStateAction<{ name: string; email: string; password: string }>>;
   handleSignup: () => void;
   setIsSignup: (v: boolean) => void;
-  isLoadingSignup: boolean; // ✅ ADD THIS
+  isLoadingSignup: boolean; 
+  showSignupPassword: boolean;
+setShowSignupPassword: (v: boolean) => void;
+
 }
 
 
-const SignupForm = ({ 
-  signupData, 
-  setSignupData, 
-  handleSignup, 
-  setIsSignup, 
-  isLoadingSignup 
+const SignupForm = ({
+  signupData,
+  setSignupData,
+  handleSignup,
+  setIsSignup,
+  isLoadingSignup,
+  showSignupPassword,
+  setShowSignupPassword
 }: SignupFormProps) => (
   <div className="w-full max-w-[400px] flex flex-col justify-center h-full mx-auto">
     <div className="mb-10 text-left">
@@ -147,23 +162,28 @@ const SignupForm = ({
         <label className="text-xs font-bold text-slate-800 mb-1 block">Password</label>
         <div className="relative">
           <input
-            type="password"
+              type={showSignupPassword ? "text" : "password"}
+
             value={signupData.password}
             onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
             className="w-full bg-white border border-slate-200 rounded-xl py-4 pl-4 pr-12 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all outline-none"
           />
-          <Eye className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 cursor-pointer hover:text-slate-600" />
+         <Eye
+  onClick={() => setShowSignupPassword(!showSignupPassword)}
+  className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 cursor-pointer"
+/>
+
         </div>
       </div>
     </div>
 
-   <button
-  onClick={handleSignup}
-  disabled={isLoadingSignup}
-  className="w-full bg-slate-950 hover:bg-slate-800 text-white font-medium py-4 rounded-xl transition-all active:scale-[0.98] mb-8 disabled:opacity-50 disabled:cursor-not-allowed"
->
-  {isLoadingSignup ? "Creating account..." : "Sign Up"}
-</button>
+    <button
+      onClick={handleSignup}
+      disabled={isLoadingSignup}
+      className="w-full bg-slate-950 hover:bg-slate-800 text-white font-medium py-4 rounded-xl transition-all active:scale-[0.98] mb-8 disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      {isLoadingSignup ? "Creating account..." : "Sign Up"}
+    </button>
 
 
     <div className="relative flex items-center justify-center mb-8">
@@ -193,44 +213,48 @@ export default function LoginSignup() {
   const [isSignup, setIsSignup] = useState(false);
   const navigate = useNavigate();
   const [isLoadingLogin, setIsLoadingLogin] = useState(false);
-const [isLoadingSignup, setIsLoadingSignup] = useState(false);
+  const [isLoadingSignup, setIsLoadingSignup] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+const [showSignupPassword, setShowSignupPassword] = useState(false);
 
 
- const handleLogin = async () => {
-  try {
-    setIsLoadingLogin(true);
 
-    const res = await loginUser(loginData);
-    localStorage.setItem("user", JSON.stringify(res.data.user));
+  const handleLogin = async () => {
+    try {
+      setIsLoadingLogin(true);
 
-    navigate("/dashboard");
-  } catch (err) {
-    console.error(err);
-    alert(err.response?.data?.message || "Login failed");
-  } finally {
-    setIsLoadingLogin(false);
-  }
-};
+      const res = await loginUser(loginData);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Login failed");
+    } finally {
+      setIsLoadingLogin(false);
+    }
+  };
 
 
   const handleSignup = async () => {
-  try {
-    setIsLoadingSignup(true);
+    try {
+      setIsLoadingSignup(true);
 
-    const res = await registerUser(signupData);
-    alert("Registered! Check your email.");
-    setIsSignup(false);
-  } catch (err) {
-    console.error(err);
-    alert(err.response?.data?.message || "Signup failed");
-  } finally {
-    setIsLoadingSignup(false);
-  }
-};
+      const res = await registerUser(signupData);
+      alert("Registered! Check your email.");
+      setIsSignup(false);
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Signup failed");
+    } finally {
+      setIsLoadingSignup(false);
+    }
+  };
 
 
-  const loginProps = { loginData, setLoginData, handleLogin, setIsSignup, isLoadingLogin };
-  const signupProps = { signupData, setSignupData, handleSignup, setIsSignup, isLoadingSignup };
+  const loginProps = { loginData, setLoginData, handleLogin, setIsSignup, isLoadingLogin, showPassword, setShowPassword
+ };
+  const signupProps = { signupData, setSignupData, handleSignup, setIsSignup, isLoadingSignup, showSignupPassword, setShowSignupPassword };
 
 
   return (
