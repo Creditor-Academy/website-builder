@@ -147,13 +147,36 @@ const Dashboard = () => {
 
     const [userName, setUserName] = useState('John Doe');
     const [userEmail, setUserEmail] = useState('john@example.com');
+    const [tempUserName, setTempUserName] = useState(userName);
+    const [tempUserEmail, setTempUserEmail] = useState(userEmail);
     const { toast } = useToast();
+
+    useEffect(() => {
+        if (isUserProfileDialogOpen) {
+            setTempUserName(userName);
+            setTempUserEmail(userEmail);
+        }
+    }, [isUserProfileDialogOpen, userName, userEmail]);
 
     const handleProfileSave = () => {
         // In a real app, this would involve API calls to update user data
-        console.log('Saving profile:', { userName, userEmail });
+        setUserName(tempUserName);
+        setUserEmail(tempUserEmail);
+        console.log('Saving profile:', { userName: tempUserName, userEmail: tempUserEmail });
         toast({ title: "Profile Updated", description: "Your profile has been updated successfully." });
         setIsUserProfileDialogOpen(false);
+    };
+
+    const getInitials = (name: string) => {
+        if (!name) return '';
+        const parts = name.split(' ').filter(Boolean); // Filter out empty strings from multiple spaces
+        let initials = '';
+        if (parts.length > 1 && parts[1].length > 0) {
+            initials = parts[0][0] + parts[1][0];
+        } else if (parts[0] && parts[0].length > 0) {
+            initials = parts[0][0];
+        }
+        return initials.toUpperCase();
     };
 
     const adminRoutes = [
@@ -297,11 +320,11 @@ const Dashboard = () => {
                         onClick={handleLogout}
                     >
                         <div className="relative">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-sm">JD</div>
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-sm">{getInitials(userName)}</div>
                             <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-slate-800 rounded-full" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-white truncate">John Doe</p>
+                            <p className="text-sm font-semibold text-white truncate">{userName}</p>
                             <p className="text-xs text-slate-400 truncate">Pro Plan</p>
                         </div>
                         <LogOut className="w-4 h-4 text-slate-400 hover:text-red-400 transition-colors" />
@@ -441,7 +464,7 @@ const Dashboard = () => {
                                 <Dialog open={isUserProfileDialogOpen} onOpenChange={setIsUserProfileDialogOpen}>
                                     <DialogTrigger asChild>
                                         <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-medium text-sm border-2 border-slate-300 shadow-sm cursor-pointer hover:bg-slate-100 transition-colors">
-                                            {userName.substring(0, 1).toUpperCase()}D
+                                            {getInitials(tempUserName)}
                                         </div>
                                     </DialogTrigger>
                                     <DialogContent className="sm:max-w-[425px] rounded-[2rem] p-8 bg-white border-slate-200 shadow-xl">
@@ -451,14 +474,14 @@ const Dashboard = () => {
                                         </DialogHeader>
                                         <div className="flex flex-col items-center gap-4 py-4">
                                             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-4xl shadow-lg">
-                                                {userName.substring(0, 1).toUpperCase()}D
+                                                {getInitials(tempUserName)}
                                             </div>
                                             <div className="grid gap-2 w-full">
                                                 <label htmlFor="name" className="text-sm font-medium text-slate-700">Name</label>
                                                 <Input
                                                     id="name"
-                                                    value={userName}
-                                                    onChange={(e) => setUserName(e.target.value)}
+                                                    value={tempUserName}
+                                                    onChange={(e) => setTempUserName(e.target.value)}
                                                     className="rounded-xl bg-slate-50 border-slate-200 px-4 h-12 text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                                                 />
                                             </div>
@@ -466,7 +489,7 @@ const Dashboard = () => {
                                                 <label htmlFor="email" className="text-sm font-medium text-slate-700">Email</label>
                                                 <Input
                                                     id="email"
-                                                    value={userEmail}
+                                                    value={tempUserEmail}
                                                     disabled
                                                     className="rounded-xl bg-slate-100 border-slate-200 px-4 h-12 text-slate-500 cursor-not-allowed"
                                                 />
