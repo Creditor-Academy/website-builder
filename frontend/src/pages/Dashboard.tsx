@@ -1166,49 +1166,9 @@ const Dashboard = () => {
                                 </div>
                             </div>
 
-                            {/* Boards / Task Section - Placeholder */}
-                            <section className="grid gap-6 mt-8 mb-10">
-                                <Card className="rounded-[1.5rem] bg-white border border-slate-100 shadow-lg shadow-slate-100/50 p-8 flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                                    <h3 className="text-xl font-bold text-slate-900 mb-6">Upcoming Tasks</h3>
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-2 h-2 rounded-full bg-purple-500" />
-                                            <p className="text-sm font-medium text-slate-800 flex-1">Design System Review</p>
-                                            <span className="px-3 py-1 bg-purple-50 rounded-full text-purple-600 text-xs font-medium">Today</span>
-                                        </div>
-                                        <div className="border-t border-dashed border-slate-200 ml-3" />
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-2 h-2 rounded-full bg-blue-500" />
-                                            <p className="text-sm font-medium text-slate-800 flex-1">Implement New Homepage</p>
-                                            <span className="px-3 py-1 bg-blue-50 rounded-full text-blue-600 text-xs font-medium">Tomorrow</span>
-                                        </div>
-                                        <div className="border-t border-dashed border-slate-200 ml-3" />
-                                        <Button variant="outline" className="w-full rounded-full border-dashed border-slate-300 text-slate-500 hover:text-purple-600 hover:border-purple-300 hover:bg-purple-50">
-                                            <Plus className="w-4 h-4 mr-2" /> Add New Task
-                                        </Button>
-                                    </div>
-                                </Card>
-                            </section>
+                            
 
-                            {/* Activity Chart - Placeholder */}
-                            <section className="grid gap-6 mb-10">
-                                <Card className="rounded-[1.5rem] bg-white border border-slate-100 shadow-lg shadow-slate-100/50 p-8 flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                                    <h3 className="text-xl font-bold text-slate-900 mb-6">Platform Usage (Last 7 Days)</h3>
-                                    <div className="h-48 flex items-end justify-around gap-2">
-                                        {/* Placeholder Bars */}
-                                        {[1, 2, 3, 4, 5, 6, 7].map((day) => (
-                                            <div key={day} className={`flex-1 flex flex-col justify-end items-center group`}>
-                                                <div
-                                                    className={`w-4 rounded-t-full transition-all duration-300 ease-out ${day === 5 ? 'bg-purple-500 h-full' : 'bg-purple-200 group-hover:bg-purple-300'}`}
-                                                    style={{ height: `${Math.random() * 80 + 20}%` }}
-                                                />
-                                                <span className="text-xs text-slate-500 mt-2">Day {day}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </Card>
-                            </section>
-
+                            
                         </div>
                     </div>
                  ) : (
