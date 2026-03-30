@@ -29,6 +29,7 @@ model User {
   email         String   @unique
   password_hash String?
   role          UserRole @default(USER)
+  auth_provider String   @default("email")
 
   isActive   Boolean @default(true)
   isVerified Boolean @default(false)
