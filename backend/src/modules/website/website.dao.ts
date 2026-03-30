@@ -172,7 +172,7 @@ class WebsiteDao {
             );
 
             const { id, created_at, updated_at, ...cleanSettings } = settings;
-            const { id: gdId, website_id: gdWebsiteId, globalSlots, ...cleanGlobalDesign } = globalDesign;
+            const { id: gdId, globalSlots, ...cleanGlobalDesign } = globalDesign;
 
             const newWebsite = await tx.website.create({
                 data: {

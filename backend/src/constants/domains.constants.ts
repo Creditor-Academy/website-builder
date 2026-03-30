@@ -13,3 +13,6 @@ export const DOMAIN_REGEX = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 // 30 days in milliseconds
 export const DELETED_DOMAIN_RETENTION_TIME = 30 * 24 * 60 * 60 * 1000;
+
+// Domain Redis TTL
+export const DOMAIN_REDIS_TTL = 60 * 60 * 24 * 30; // 30 days

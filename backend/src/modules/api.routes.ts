@@ -6,6 +6,7 @@ import presentationRoutes from "./presentation/presentation.routes.js";
 import templateRoutes from "./templates/template.route.js";
 import assetsRoutes from "./assets/assets.routes.js";
 import domainRoutes from "./domain/domain.routes.js";
+import deploymentRoutes from "./deployment/deployment.routes.js";
 
 const router = Router();
 
@@ -17,5 +18,6 @@ router.use('/presentation', presentationRoutes);
 router.use('/templates', templateRoutes);
 router.use('/assets', assetsRoutes);
 router.use('/domains', domainRoutes);
+router.use('/deploy', deploymentRoutes);
 
 export default router;

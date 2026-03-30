@@ -14,15 +14,15 @@ class GlobalDesignService {
      * Get global design for a website.
      * Returns null if not yet initialized.
      */
-    async getGlobalDesign(websiteId: string) {
-        return await this.dao.getByWebsiteId(websiteId);
+    async getGlobalDesign(globalDesignId: string) {
+        return await this.dao.getGlobalDesignById(globalDesignId);
     }
 
     /**
      * Update global styles on existing global design.
      */
-    async updateGlobalDesign(websiteId: string, data: UpdateGlobalDesignInput) {
-        const globalDesign = await this.dao.getByWebsiteId(websiteId);
+    async updateGlobalDesign(globalDesignId: string, data: UpdateGlobalDesignInput) {
+        const globalDesign = await this.dao.getGlobalDesignById(globalDesignId);
         if (!globalDesign) {
             throw new NotFoundError('Global design not found. Initialize it first.');
         }

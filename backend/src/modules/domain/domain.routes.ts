@@ -16,7 +16,14 @@ import { requireWebsiteAccess } from '../../middlewares/resource-access.middlewa
 const router = express.Router();
 const domainController = new DomainController();
 
-// All routes require authentication
+// GET /domains/check - Check if domain is available
+router.get(
+    '/check',
+    validateRequest(hostnameCheckQuerySchema, 'query'),
+    domainController.checkDomainAvailability
+);
+
+// All other routes require authentication
 router.use(authenticate);
 
 // GET /domains - Get all custom domains (Admin)
@@ -33,13 +40,6 @@ router.get(
     validateRequest(websiteIdParamsSchema, 'params'),
     requireWebsiteAccess,
     domainController.getDomainsByWebsiteId
-);
-
-// GET /domains/check - Check if domain is available
-router.get(
-    '/check',
-    validateRequest(hostnameCheckQuerySchema, 'query'),
-    domainController.checkDomainAvailability
 );
 
 // POST /domains/website/:id - Register Custom domain

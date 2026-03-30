@@ -125,20 +125,22 @@ model Website {
   owner_id String
   status   WebsiteStatus @default(DRAFT)
 
-  homepageId  String? @unique
-  settings_id String  @unique
+  homepageId     String? @unique
+  settings_id    String  @unique
+  globalDesignId String  @unique
 
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
   deleted_at DateTime?
 
   // Relations
-  owner        User          @relation("WebsiteOwner", fields: [owner_id], references: [id], onDelete: Cascade)
-  settings     Settings      @relation(fields: [settings_id], references: [id])
-  homepage     Page?         @relation("Homepage", fields: [homepageId], references: [id], onDelete: SetNull)
-  globalDesign GlobalDesign? // back-reference; FK lives on GlobalDesign
-  pages        Page[]        @relation("WebsitePages")
-  domains      Domain[]
+  owner         User           @relation("WebsiteOwner", fields: [owner_id], references: [id], onDelete: Cascade)
+  settings      Settings       @relation(fields: [settings_id], references: [id])
+  homepage      Page?          @relation("Homepage", fields: [homepageId], references: [id], onDelete: SetNull)
+  globalDesign  GlobalDesign   @relation(fields: [globalDesignId], references: [id])
+  pages         Page[]         @relation("WebsitePages")
+  domains       Domain[]
+  pageSnapshots PageSnapshot[]
 
   @@index([owner_id])
   @@index([status])
@@ -169,17 +171,15 @@ model Settings {
 // Global Design
 model GlobalDesign {
   id                String  @id @default(cuid())
-  website_id        String  @unique // FK for 1-to-1 with Website
   websiteTemplateId String?
 
   global_styles Json
 
   // Relations
-  website         Website          @relation(fields: [website_id], references: [id], onDelete: Cascade)
+  website         Website?
   websiteTemplate WebsiteTemplate? @relation(fields: [websiteTemplateId], references: [id], onDelete: SetNull)
   globalSlots     GlobalSlot[]
 
-  @@index([website_id])
   @@map("global_design")
 }
 
@@ -220,9 +220,10 @@ model Page {
   deleted_at DateTime?
 
   // Relation
-  website    Website   @relation("WebsitePages", fields: [website_id], references: [id], onDelete: Cascade)
-  homepageOf Website?  @relation("Homepage")
-  sections   Section[]
+  website       Website       @relation("WebsitePages", fields: [website_id], references: [id], onDelete: Cascade)
+  homepageOf    Website?      @relation("Homepage")
+  sections      Section[]
+  pageSnapshots PageSnapshot?
 
   @@unique([slug, website_id])
   @@index([slug, website_id])
@@ -355,4 +356,27 @@ model Domain {
   @@index([website_id, custom])
   @@index([deleted_at])
   @@map("domains")
+}
+
+// ======================
+// Page Snapshots
+// ======================
+
+model PageSnapshot {
+  id         String   @id @default(cuid())
+  website_id String
+  page_id    String   @unique
+  slug       String
+  snapshot   Json
+  created_at DateTime @default(now())
+
+  // Relations
+  website Website @relation(fields: [website_id], references: [id], onDelete: Cascade)
+  page    Page    @relation(fields: [page_id], references: [id], onDelete: Cascade)
+
+  @@unique([website_id, slug])
+  @@index([website_id])
+  @@index([website_id, slug])
+  @@index([page_id])
+  @@map("page_snapshots")
 }

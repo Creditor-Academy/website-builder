@@ -12,7 +12,7 @@ async function seed() {
             content: [
                 {
                     name: "Home",
-                    slug: "/home",
+                    slug: "/",
                     content: [
                         {
                             id: randomUUID(),
@@ -49,7 +49,7 @@ async function seed() {
             content: [
                 {
                     name: "Home",
-                    slug: "/home",
+                    slug: "/",
                     content: [
                         {
                             id: randomUUID(),

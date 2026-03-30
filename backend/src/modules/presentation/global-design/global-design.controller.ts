@@ -15,12 +15,12 @@ class GlobalDesignController {
      */
     getGlobalDesign = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const websiteId = req.context.website!.id;
-            if (!req.context.website.globalDesign) {
+            const globalDesignId = req.context.website!.globalDesignId;
+            if (!globalDesignId) {
                 throw new NotFoundError('Global design not found. Initialize it first.');
             }
 
-            const globalDesign = await this.service.getGlobalDesign(websiteId);
+            const globalDesign = await this.service.getGlobalDesign(globalDesignId);
 
             res.status(200).json({ data: globalDesign });
         } catch (error: any) {
@@ -34,12 +34,12 @@ class GlobalDesignController {
      */
     updateGlobalDesign = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const websiteId = req.context.website!.id;
-            if (!req.context.website.globalDesign) {
+            const globalDesignId = req.context.website!.globalDesignId;
+            if (!globalDesignId) {
                 throw new NotFoundError('Global design not found. Initialize it first.');
             }
 
-            const globalDesign = await this.service.updateGlobalDesign(websiteId, req.validated.body);
+            const globalDesign = await this.service.updateGlobalDesign(globalDesignId, req.validated.body);
 
             res.status(200).json({
                 message: 'Global design updated successfully',

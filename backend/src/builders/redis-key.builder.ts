@@ -3,3 +3,13 @@
 export const generateAuthSessionKey = (userId: string = '*', sessionId: string = '*') => {
     return `session:${userId}:${sessionId}`;
 }
+
+// Generates Redis key for snapshots
+export const generateSnapshotKey = (domain: string, slug: string) => {
+    return `website:${domain}:${slug}`;
+}
+
+// Generates Redis key for domains
+export const generateDomainKey = (domain: string) => {
+    return `domain:${domain}`;
+}

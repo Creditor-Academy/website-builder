@@ -32,6 +32,29 @@ class DomainDao {
         }
     }
 
+    // Get domain by hostname
+    async fetchDomainByHostnameWithWebsite(hostname: string) {
+        try {
+            const result = await prismaClient.domain.findUnique({
+                where: {
+                    name: hostname,
+                    deleted_at: null,
+                },
+                include: {
+                    website: {
+                        select: {
+                            id: true,
+                            status: true
+                        }
+                    },
+                },
+            });
+            return result;
+        } catch (error: any) {
+            throw error;
+        }
+    }
+
     // List all custom domains
     async listAllCustomDomains(query: ListDomainsQuerySchemaType) {
         try {

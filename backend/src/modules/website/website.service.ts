@@ -48,7 +48,7 @@ class WebsiteService {
         if (!templateId) {
             const defaultPage: CreatePageInput = {
                 name: 'Home',
-                slug: '/home',
+                slug: '/',
                 page_styles: {},
                 meta: {},
                 sections: []
@@ -72,7 +72,7 @@ class WebsiteService {
 
             const homepage: CreatePageInput = {
                 name: 'Home',
-                slug: '/home',
+                slug: '/',
                 page_styles: home_layout as JsonObjectType || {},
                 meta: {},
                 sections: []
@@ -106,7 +106,7 @@ class WebsiteService {
         const settingsPromise = this.websiteDao.getWebsiteSettings(website.settings_id!);
         const ownerPromise = this.userDao.findUserById(website.owner_id);
         const pagesPromise = this.pageDao.findPagesByWebsiteId(website.id);
-        const globalDesignPromise = this.globalDesignDao.getByWebsiteId(website.id);
+        const globalDesignPromise = this.globalDesignDao.getGlobalDesignById(website.globalDesignId!);
         const domainsPromise = this.domainDao.getDomainsByWebsiteId(website.id);
 
         const [settings, owner, pages, globalDesign, domains] = await Promise.all(
@@ -159,7 +159,7 @@ class WebsiteService {
         }
 
         const settingsPromise = this.websiteDao.getWebsiteSettings(website.settings_id!);
-        const globalDesignPromise = this.globalDesignDao.getByWebsiteId(website.id);
+        const globalDesignPromise = this.globalDesignDao.getGlobalDesignById(website.globalDesignId!);
         const pagesPromise = this.pageDao.listPagesByWebsiteId(website.id);
 
         const [settings, globalDesign, pages] = await Promise.all([settingsPromise, globalDesignPromise, pagesPromise]);

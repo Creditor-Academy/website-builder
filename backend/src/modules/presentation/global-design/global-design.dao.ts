@@ -4,29 +4,29 @@ import type { CreateGlobalSlotInput, UpdateGlobalSlotInput } from './global-desi
 
 class GlobalDesignDao {
     /**
-     * Get global design by website ID (includes navbar + footer sections)
+     * Get global design by ID (includes navbar + footer sections)
      */
-    async getByWebsiteId(websiteId: string):
+    async getGlobalDesignById(globalDesignId: string):
         Promise<GlobalDesign & { globalSlots: GlobalSlot[] } | null> {
         return await prismaClient.globalDesign.findFirst({
-            where: { website_id: websiteId },
+            where: { id: globalDesignId },
             include: {
                 globalSlots: true
             }
         });
     }
 
-    /**
-     * Create global design
-     */
-    async createGlobalDesign(websiteId: string, data: { global_styles: any }): Promise<GlobalDesign> {
-        return await prismaClient.globalDesign.create({
-            data: {
-                website_id: websiteId,
-                ...data
-            }
-        });
-    }
+    // /**
+    //  * Create global design
+    //  */
+    // async createGlobalDesign(websiteId: string, data: { global_styles: any }): Promise<GlobalDesign> {
+    //     return await prismaClient.globalDesign.create({
+    //         data: {
+    //             website_id: websiteId,
+    //             ...data
+    //         }
+    //     });
+    // }
 
     /**
      * Update global design by its own ID
