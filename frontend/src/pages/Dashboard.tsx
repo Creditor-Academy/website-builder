@@ -683,9 +683,13 @@ const Dashboard = () => {
                             <div className="flex items-center gap-4">
                                 <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
                                     <DialogTrigger asChild>
-                                        <Button className="h-12 px-6 text-base w-auto rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/30 transition-all" icon={<Plus className="w-5 h-5" />}> 
+                                        <GradientButton 
+                                            onClick={() => setIsDialogOpen(true)} 
+                                            className="h-11 px-6 text-base w-auto rounded-full" 
+                                            icon={<Plus className="w-5 h-5 text-purple-600 group-hover:text-indigo-600 transition-colors" />} 
+                                        >
                                             New Project
-                                        </Button>
+                                        </GradientButton>
                                     </DialogTrigger>
                                     <DialogContent className="sm:max-w-5xl rounded-[2rem] p-0 overflow-hidden bg-white border-slate-100 shadow-2xl">
                                         <DialogTitle className="sr-only">Create New Website</DialogTitle>
