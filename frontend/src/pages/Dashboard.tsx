@@ -474,6 +474,34 @@ const Dashboard = () => {
     const [tempUserEmail, setTempUserEmail] = useState(userEmail);
     const { toast } = useToast();
 
+    // handleAdminToggle and its related useEffect MUST be defined here, before any JSX.
+    const handleAdminToggle = () => {
+        const nextIsAdmin = !isAdmin;
+        const currentPath = location.pathname;
+
+        const adminOnlyRoutes = ['/dashboard/users', '/dashboard/websites', '/dashboard/deployment', '/dashboard/settings'];
+        const userSharedRoutes = ['/dashboard', '/dashboard/templates', '/dashboard/assets'];
+
+        if (nextIsAdmin) { // Switching to Admin Mode
+            if (userSharedRoutes.includes(currentPath)) {
+                navigate('/dashboard'); // Always go to main admin dashboard when switching from user routes
+            }
+        } else { // Switching to User Mode
+            if (adminOnlyRoutes.includes(currentPath)) {
+                navigate('/dashboard'); // Always go to main user dashboard when switching from admin-only routes
+            }
+        }
+        setIsAdmin(nextIsAdmin);
+    };
+
+    useEffect(() => {
+        const adminOnlyRoutes = ['/dashboard/users', '/dashboard/websites', '/dashboard/deployment', '/dashboard/settings'];
+        if (!isAdmin && adminOnlyRoutes.includes(location.pathname)) {
+            navigate('/dashboard');
+        }
+    }, [isAdmin, location.pathname, navigate]);
+
+
     useEffect(() => {
         if (isUserProfileDialogOpen) {
             setTempUserName(userName);
@@ -508,16 +536,6 @@ const Dashboard = () => {
         '/dashboard/deployment',
         '/dashboard/settings',
     ];
-
-    useEffect(() => {
-        const userDashboardRoutes = ['/dashboard/templates', '/dashboard/assets'];
-        if (!isAdmin && adminRoutes.includes(location.pathname)) {
-            navigate('/dashboard');
-        } else if (isAdmin && userDashboardRoutes.includes(location.pathname)) {
-            // If in admin mode and on a user-specific dashboard route, redirect to main admin dashboard
-            navigate('/dashboard');
-        }
-    }, [isAdmin, location.pathname, navigate]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -633,8 +651,8 @@ const Dashboard = () => {
 
                     <GradientButton
                         className="w-full justify-start py-2 px-3 text-sm"
-                        onClick={() => setIsAdmin(!isAdmin)}
-                        icon={isAdmin
+                        onClick={handleAdminToggle}
+                        icon={!isAdmin
                             ? <ShieldCheck className="w-4 h-4 text-purple-400" />
                             : <Users className="w-4 h-4" />
                         }
