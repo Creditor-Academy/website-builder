@@ -510,7 +510,11 @@ const Dashboard = () => {
     ];
 
     useEffect(() => {
+        const userDashboardRoutes = ['/dashboard/templates', '/dashboard/assets'];
         if (!isAdmin && adminRoutes.includes(location.pathname)) {
+            navigate('/dashboard');
+        } else if (isAdmin && userDashboardRoutes.includes(location.pathname)) {
+            // If in admin mode and on a user-specific dashboard route, redirect to main admin dashboard
             navigate('/dashboard');
         }
     }, [isAdmin, location.pathname, navigate]);
