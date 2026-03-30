@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import * as Icons from 'lucide-react';
+import { Editable } from '@/components/ui/Editable';
 
 // ─── Shared Helpers ────────────────────────────────────────────────────────────
 
@@ -26,11 +27,7 @@ const TAG_COLORS = [
 // ─── VARIANT: GRID ─────────────────────────────────────────────────────────────
 
 const renderGrid = ({ content, styles, isEditing, onContentChange, headingColor, paragraphColor }) => (
-  <div style={{
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
-    gap: '1.25rem',
-  }}>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
     {content.features?.map((feature, index) => {
       const tag = TAG_COLORS[index % TAG_COLORS.length];
       return (
@@ -81,7 +78,8 @@ const renderGrid = ({ content, styles, isEditing, onContentChange, headingColor,
             </div>
           </div>
 
-          <h3
+          <Editable
+            as="h3"
             style={{
               margin: '0 0 0.5rem',
               fontSize: '1.05rem',
@@ -91,39 +89,28 @@ const renderGrid = ({ content, styles, isEditing, onContentChange, headingColor,
               letterSpacing: '-0.01em',
               lineHeight: 1.3,
             }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            dangerouslySetInnerHTML={{ __html: feature.title }}
-            onInput={(e) => {
+            isEditing={isEditing}
+            value={feature.title || ''}
+            onSave={(val) => {
               if (!isEditing || !onContentChange) return;
-              const updated = content.features.map(f => f.id === feature.id ? { ...f, title: e.currentTarget.innerHTML } : f);
-              onContentChange('features', updated);
-            }}
-            onBlur={(e) => {
-              if (!isEditing || !onContentChange) return;
-              const updated = content.features.map(f => f.id === feature.id ? { ...f, title: e.currentTarget.innerHTML } : f);
+              const updated = content.features.map(f => f.id === feature.id ? { ...f, title: val } : f);
               onContentChange('features', updated);
             }}
           />
 
-          <p
+          <Editable
+            as="p"
             style={{
               margin: '0 0 1.5rem',
               fontSize: '0.875rem',
               lineHeight: 1.75,
               color: paragraphColor,
             }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            dangerouslySetInnerHTML={{ __html: feature.description }}
-            onInput={(e) => {
+            isEditing={isEditing}
+            value={feature.description || ''}
+            onSave={(val) => {
               if (!isEditing || !onContentChange) return;
-              const updated = content.features.map(f => f.id === feature.id ? { ...f, description: e.currentTarget.innerHTML } : f);
-              onContentChange('features', updated);
-            }}
-            onBlur={(e) => {
-              if (!isEditing || !onContentChange) return;
-              const updated = content.features.map(f => f.id === feature.id ? { ...f, description: e.currentTarget.innerHTML } : f);
+              const updated = content.features.map(f => f.id === feature.id ? { ...f, description: val } : f);
               onContentChange('features', updated);
             }}
           />
@@ -154,24 +141,20 @@ const renderGrid = ({ content, styles, isEditing, onContentChange, headingColor,
 // ─── VARIANT: LIST ─────────────────────────────────────────────────────────────
 
 const renderList = ({ content, styles, isEditing, onContentChange, headingColor, paragraphColor }) => (
-  <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+  <div className="max-w-2xl mx-auto space-y-4">
     {content.features?.map((feature, index) => {
       const tag = TAG_COLORS[index % TAG_COLORS.length];
       return (
         <div
           key={feature.id}
-          style={{
-            display: 'flex',
-            gap: '1.75rem',
-            padding: '1.75rem 1.25rem',
-            borderBottom: index < content.features.length - 1 ? `1px solid ${ACCENT_BORDER}` : 'none',
-            borderRadius: '12px',
-            transition: 'background var(--animation-speed, 0.2s) ease',
-          }}
+            className="flex flex-col sm:flex-row gap-5 md:gap-7 p-5 md:p-6 transition-all duration-200 hover:bg-slate-50 rounded-xl"
+            style={{
+              borderBottom: index < content.features.length - 1 ? `1px solid ${ACCENT_BORDER}` : 'none',
+            }}
           onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, width: '48px' }}>
+          <div className="flex flex-row sm:flex-col items-center flex-shrink-0 sm:w-12 gap-4 sm:gap-0">
             <div style={{
               width: '48px', height: '48px',
               background: tag.bg,
@@ -180,14 +163,9 @@ const renderList = ({ content, styles, isEditing, onContentChange, headingColor,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: tag.text,
               flexShrink: 0,
-            }}>
-              {getIcon(feature.icon, 19)}
-            </div>
+            }} dangerouslySetInnerHTML={{ __html: getIcon(feature.icon, 19) }} />
             {index < content.features.length - 1 && (
-              <div style={{
-                width: '1px', flex: 1, marginTop: '10px',
-                background: `linear-gradient(to bottom, ${ACCENT_BORDER}, transparent)`,
-              }} />
+              <div className="hidden sm:block w-px flex-1 mt-2.5 bg-gradient-to-b from-slate-200 to-transparent" />
             )}
           </div>
 
@@ -200,7 +178,8 @@ const renderList = ({ content, styles, isEditing, onContentChange, headingColor,
               Step {String(index + 1).padStart(2, '0')}
             </div>
 
-            <h3
+            <Editable
+              as="h3"
               style={{
                 margin: '0 0 0.45rem',
                 fontSize: '1.05rem',
@@ -209,49 +188,34 @@ const renderList = ({ content, styles, isEditing, onContentChange, headingColor,
                 fontFamily: '"Playfair Display", Georgia, serif',
                 letterSpacing: '-0.01em',
               }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              dangerouslySetInnerHTML={{ __html: feature.title }}
-              onInput={(e) => {
+              isEditing={isEditing}
+              value={feature.title || ''}
+              onSave={(val) => {
                 if (!isEditing || !onContentChange) return;
-                const updated = content.features.map(f => f.id === feature.id ? { ...f, title: e.currentTarget.innerHTML } : f);
-                onContentChange('features', updated);
-              }}
-              onBlur={(e) => {
-                if (!isEditing || !onContentChange) return;
-                const updated = content.features.map(f => f.id === feature.id ? { ...f, title: e.currentTarget.innerHTML } : f);
+                const updated = content.features.map(f => f.id === feature.id ? { ...f, title: val } : f);
                 onContentChange('features', updated);
               }}
             />
 
-            <p
+            <Editable
+              as="p"
               style={{
                 margin: 0,
                 fontSize: '0.875rem',
                 lineHeight: 1.75,
                 color: paragraphColor,
               }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              dangerouslySetInnerHTML={{ __html: feature.description }}
-              onInput={(e) => {
+              isEditing={isEditing}
+              value={feature.description || ''}
+              onSave={(val) => {
                 if (!isEditing || !onContentChange) return;
-                const updated = content.features.map(f => f.id === feature.id ? { ...f, description: e.currentTarget.innerHTML } : f);
-                onContentChange('features', updated);
-              }}
-              onBlur={(e) => {
-                if (!isEditing || !onContentChange) return;
-                const updated = content.features.map(f => f.id === feature.id ? { ...f, description: e.currentTarget.innerHTML } : f);
+                const updated = content.features.map(f => f.id === feature.id ? { ...f, description: val } : f);
                 onContentChange('features', updated);
               }}
             />
           </div>
 
-          <div style={{
-            display: 'flex', alignItems: 'center', paddingTop: '8px',
-            color: '#d1d5db',
-            flexShrink: 0,
-          }}>
+          <div className="hidden sm:flex items-center pt-2 text-slate-300 flex-shrink-0">
             <Icons.ArrowRight width={16} height={16} />
           </div>
         </div>
@@ -263,11 +227,7 @@ const renderList = ({ content, styles, isEditing, onContentChange, headingColor,
 // ─── VARIANT: ICONS ─────────────────────────────────────────────────────────────
 
 const renderIcons = ({ content, styles, isEditing, onContentChange, headingColor, paragraphColor }) => (
-  <div style={{
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
-    gap: '1rem',
-  }}>
+  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
     {content.features?.map((feature, index) => {
       const tag = TAG_COLORS[index % TAG_COLORS.length];
       return (
@@ -300,9 +260,7 @@ const renderIcons = ({ content, styles, isEditing, onContentChange, headingColor
             position: 'absolute', bottom: '-12px', right: '-12px',
             opacity: 0.04, color: tag.dot,
             transform: 'rotate(-12deg)', pointerEvents: 'none',
-          }}>
-            {getIcon(feature.icon, 72)}
-          </div>
+          }} dangerouslySetInnerHTML={{ __html: getIcon(feature.icon, 72) }} />
 
           <div style={{
             width: '60px', height: '60px',
@@ -316,7 +274,8 @@ const renderIcons = ({ content, styles, isEditing, onContentChange, headingColor
             {getIcon(feature.icon, 24)}
           </div>
 
-          <h4
+          <Editable
+            as="h4"
             style={{
               margin: '0 0 0.5rem',
               fontSize: '0.95rem',
@@ -325,34 +284,31 @@ const renderIcons = ({ content, styles, isEditing, onContentChange, headingColor
               fontFamily: '"Playfair Display", Georgia, serif',
               lineHeight: 1.3,
             }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            onBlur={(e) => {
+            isEditing={isEditing}
+            value={feature.title || ''}
+            onSave={(val) => {
               if (!isEditing || !onContentChange) return;
-              const updated = content.features.map(f => f.id === feature.id ? { ...f, title: e.currentTarget.textContent } : f);
+              const updated = content.features.map(f => f.id === feature.id ? { ...f, title: val } : f);
               onContentChange('features', updated);
             }}
-          >
-            {feature.title}
-          </h4>
+          />
 
-          <p
+          <Editable
+            as="p"
             style={{
               margin: 0,
               fontSize: '0.78rem',
               lineHeight: 1.65,
               color: paragraphColor,
             }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            onBlur={(e) => {
+            isEditing={isEditing}
+            value={feature.description || ''}
+            onSave={(val) => {
               if (!isEditing || !onContentChange) return;
-              const updated = content.features.map(f => f.id === feature.id ? { ...f, description: e.currentTarget.textContent } : f);
+              const updated = content.features.map(f => f.id === feature.id ? { ...f, description: val } : f);
               onContentChange('features', updated);
             }}
-          >
-            {feature.description}
-          </p>
+          />
 
           <div style={{
             position: 'absolute', bottom: 0, left: '20%', right: '20%', height: '2.5px',
@@ -367,22 +323,13 @@ const renderIcons = ({ content, styles, isEditing, onContentChange, headingColor
 // ─── VARIANT: CARDS ─────────────────────────────────────────────────────────────
 
 const renderCards = ({ content, styles, isEditing, onContentChange, headingColor, paragraphColor }) => (
-  <div style={{ maxWidth: '880px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+  <div className="max-w-4xl mx-auto flex flex-col gap-4">
     {content.features?.map((feature, index) => {
       const tag = TAG_COLORS[index % TAG_COLORS.length];
       return (
         <div
           key={feature.id}
-          style={{
-            display: 'flex',
-            alignItems: 'stretch',
-            background: '#ffffff',
-            border: `1px solid ${ACCENT_BORDER}`,
-            borderRadius: styles.borderRadius || 'var(--radius, 16px)',
-            overflow: 'hidden',
-            transition: 'box-shadow var(--animation-speed, 0.22s) ease, border-color var(--animation-speed, 0.22s) ease, transform var(--animation-speed, 0.22s) ease',
-            cursor: 'default',
-          }}
+          className="flex flex-col sm:flex-row items-stretch bg-white border border-slate-200 rounded-2xl overflow-hidden transition-all duration-200 hover:shadow-xl hover:border-slate-300 hover:translate-x-1"
           onMouseEnter={e => {
             e.currentTarget.style.boxShadow = 'var(--shadow, 0 8px 30px rgba(0,0,0,0.08))';
             e.currentTarget.style.borderColor = '#d1d5db';
@@ -394,25 +341,14 @@ const renderCards = ({ content, styles, isEditing, onContentChange, headingColor
             e.currentTarget.style.transform = 'translateX(0)';
           }}
         >
-          <div style={{
-            width: '72px', flexShrink: 0,
-            background: tag.bg,
-            borderRight: `1px solid ${tag.border}`,
-            display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center',
-            gap: '0.5rem', padding: '1.5rem 0',
-          }}>
-            <div style={{ color: tag.text }}>{getIcon(feature.icon, 22)}</div>
-            <span style={{
-              color: tag.text, fontSize: '0.65rem', fontWeight: 800,
-              letterSpacing: '0.1em', writingMode: 'vertical-rl',
-              textOrientation: 'mixed', transform: 'rotate(180deg)', opacity: 0.7,
-            }}>
+            <div className={`w-full sm:w-[72px] flex-shrink-0 bg-slate-50 border-b sm:border-b-0 sm:border-r border-slate-200 flex flex-row sm:flex-col items-center justify-between sm:justify-center gap-2 p-4 sm:py-6`} style={{ background: tag.bg, borderColor: tag.border }}>
+            <div style={{ color: tag.text }} dangerouslySetInnerHTML={{ __html: getIcon(feature.icon, 22) }} />
+            <span className="text-[10px] font-extrabold tracking-widest sm:rotate-180 sm:[writing-mode:vertical-rl] opacity-70" style={{ color: tag.text }}>
               {String(index + 1).padStart(2, '0')}
             </span>
           </div>
 
-          <div style={{ flex: 1, padding: '1.5rem 1.75rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div className="flex-1 p-6 md:p-7 flex flex-col justify-center">
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', marginBottom: '0.6rem' }}>
               <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: tag.dot, flexShrink: 0 }} />
               <span style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: tag.text }}>
@@ -420,7 +356,8 @@ const renderCards = ({ content, styles, isEditing, onContentChange, headingColor
               </span>
             </div>
 
-            <h3
+            <Editable
+              as="h3"
               style={{
                 margin: '0 0 0.5rem',
                 fontSize: '1.05rem', fontWeight: 700,
@@ -428,36 +365,29 @@ const renderCards = ({ content, styles, isEditing, onContentChange, headingColor
                 fontFamily: '"Playfair Display", Georgia, serif',
                 letterSpacing: '-0.01em',
               }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => {
+              isEditing={isEditing}
+              value={feature.title || ''}
+              onSave={(val) => {
                 if (!isEditing || !onContentChange) return;
-                const updated = content.features.map(f => f.id === feature.id ? { ...f, title: e.currentTarget.textContent } : f);
+                const updated = content.features.map(f => f.id === feature.id ? { ...f, title: val } : f);
                 onContentChange('features', updated);
               }}
-            >
-              {feature.title}
-            </h3>
+            />
 
-            <p
+            <Editable
+              as="p"
               style={{ margin: 0, fontSize: '0.875rem', lineHeight: 1.72, color: paragraphColor }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => {
+              isEditing={isEditing}
+              value={feature.description || ''}
+              onSave={(val) => {
                 if (!isEditing || !onContentChange) return;
-                const updated = content.features.map(f => f.id === feature.id ? { ...f, description: e.currentTarget.textContent } : f);
+                const updated = content.features.map(f => f.id === feature.id ? { ...f, description: val } : f);
                 onContentChange('features', updated);
               }}
-            >
-              {feature.description}
-            </p>
+            />
           </div>
 
-          <div style={{
-            width: '52px', flexShrink: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#d1d5db', borderLeft: `1px solid ${ACCENT_BORDER}`,
-          }}>
+          <div className="hidden sm:flex w-12 flex-shrink-0 items-center justify-center text-slate-300 border-l border-slate-100">
             <Icons.ChevronRight width={18} height={18} />
           </div>
         </div>
@@ -474,7 +404,7 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
 
   const handleTextEdit = (field, e) => {
     if (onContentChange && isEditing) {
-      onContentChange(field, e.currentTarget.textContent || '');
+      onContentChange(field, e.currentTarget.innerHTML || '');
     }
   };
 
@@ -522,7 +452,7 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
         className={`fs-root relative transition-all duration-300 ${isSelected ? 'ring-2 ring-slate-900 ring-offset-2 ring-offset-white' : ''}`}
         style={{
           background,
-          padding: styles.padding || '5rem 0',
+          padding: styles.padding || '4rem 0 md:5rem 0',
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -660,26 +590,20 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
           </div>
         )}
 
-        <div style={{
-          maxWidth: '1200px', margin: '0 auto',
-          padding: '0 2rem', position: 'relative', zIndex: 1,
-        }}>
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
 
           {/* ── Section Header ── */}
-          <div style={{ textAlign: 'center', maxWidth: '600px', margin: '0 auto 4rem' }}>
-
             <div className="fs-chip">
               <span className="fs-chip-dot" />
-              <span
-                contentEditable={isEditing}
-                suppressContentEditableWarning
-                onBlur={(e) => handleTextEdit('chipText', e)}
-              >
-                {content.chipText || 'Features'}
-              </span>
+              <Editable
+                isEditing={isEditing}
+                value={content.chipText || 'Features'}
+                onSave={(val) => onContentChange?.('chipText', val)}
+              />
             </div>
 
-            <h2
+            <Editable
+              as="h2"
               style={{
                 margin: '0 0 1rem',
                 fontSize: 'clamp(1.9rem, 4vw, 2.9rem)',
@@ -688,12 +612,10 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
                 lineHeight: 1.18,
                 letterSpacing: '-0.03em',
               }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => handleTextEdit('headline', e)}
-            >
-              {content.headline}
-            </h2>
+              isEditing={isEditing}
+              value={content.headline || ''}
+              onSave={(val) => onContentChange?.('headline', val)}
+            />
 
             <div style={{
               width: '40px', height: '3px',
@@ -702,15 +624,13 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
               margin: '0 auto 1.25rem',
             }} />
 
-            <p
+            <Editable
+              as="p"
               style={{ margin: 0, fontSize: '1rem', lineHeight: 1.75, color: paragraphColor }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => handleTextEdit('subheadline', e)}
-            >
-              {content.subheadline}
-            </p>
-          </div>
+              isEditing={isEditing}
+              value={content.subheadline || ''}
+              onSave={(val) => onContentChange?.('subheadline', val)}
+            />
 
           {/* ── Variant Renderer ── */}
           {variant === 'list'

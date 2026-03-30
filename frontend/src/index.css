@@ -336,3 +336,35 @@
 .animate-infinite-scroll-vertical-reverse {
   animation: infinite-scroll-vertical-reverse 40s linear infinite;
 }
+
+/* ── Global Responsive Fixes ────────────────────────────────────────────── */
+
+/* Prevent horizontal overflow site-wide */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Ensure all images are responsive by default */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Improve touch target sizes on mobile */
+@media (max-width: 768px) {
+  button, a, [role="button"] {
+    min-height: 36px;
+  }
+
+  /* Prevent big border-radius from clipping content on small screens */
+  .rounded-\[4rem\] {
+    border-radius: 2rem;
+  }
+  .rounded-\[5rem\] {
+    border-radius: 2.5rem;
+  }
+  .rounded-\[3rem\] {
+    border-radius: 1.5rem;
+  }
+}

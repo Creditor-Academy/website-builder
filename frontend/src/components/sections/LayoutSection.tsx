@@ -1,6 +1,7 @@
 import React from 'react';
 import { useBuilder } from '@/contexts/BuilderContext';
 import { Edit, ArrowRight, Image as ImageIcon } from 'lucide-react';
+import { Editable } from '@/components/ui/Editable';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -92,19 +93,17 @@ function InjectStyles() {
 }
 
 // ─── CE helper ────────────────────────────────────────────────────────────
-function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '' }: any) {
+function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '', inv = false }: any) {
   return (
-    <Tag
+    <Editable
+      as={Tag}
       className={`ly-ce ${className}`}
-      data-editing={isEditing ? 'true' : 'false'}
-      contentEditable={isEditing ? 'true' : 'false'}
-      suppressContentEditableWarning
+      isEditing={isEditing}
       style={{ ...style, pointerEvents: isEditing ? 'auto' : 'inherit' }}
-      onBlur={isEditing && onSave ? (e) => onSave(e.currentTarget.textContent || '') : undefined}
-      onClick={isEditing ? (e) => e.stopPropagation() : undefined}
-    >
-      {value}
-    </Tag>
+      onSave={onSave}
+      value={value || ''}
+      data-inv={inv ? 'true' : 'false'}
+    />
   );
 }
 
@@ -226,13 +225,7 @@ function ImageTextLayout({ content, section, isEditing, updateContent, openMedia
   );
 
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: 64,
-      alignItems: 'center',
-      maxWidth: 1100, margin: '0 auto',
-    }}>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center max-w-5xl mx-auto">
       {imageRight ? <>{textBlock}{imageBlock}</> : <>{imageBlock}{textBlock}</>}
     </div>
   );
@@ -278,11 +271,11 @@ function TextButton({ content, isEditing, updateContent, styles }: any) { // Tex
             transition: 'opacity 0.2s ease, transform 0.2s ease'
           }}
         >
-          <span 
-            contentEditable={isEditing} 
-            suppressContentEditableWarning 
-            dangerouslySetInnerHTML={{ __html: content.buttonText || 'Get Started' }} 
-            onInput={(e) => handleTextEdit('buttonText', e)}
+          <Editable
+            as="span"
+            isEditing={isEditing} 
+            value={content.buttonText || 'Get Started'} 
+            onSave={(val) => handleTextEdit('buttonText', { currentTarget: { innerHTML: val } })}
             style={{ outline: 'none' }}
           />
           <ArrowRight width={16} height={16} />
@@ -344,11 +337,11 @@ function HeadingTextButton({ content, isEditing, updateContent, styles }: any) {
             transition: 'opacity 0.2s ease, transform 0.2s ease'
           }}
         >
-          <span 
-            contentEditable={isEditing} 
-            suppressContentEditableWarning 
-            dangerouslySetInnerHTML={{ __html: content.buttonText || 'Get Started' }} 
-            onInput={(e) => handleTextEdit('buttonText', e)}
+          <Editable
+            as="span"
+            isEditing={isEditing} 
+            value={content.buttonText || 'Get Started'} 
+            onSave={(val) => handleTextEdit('buttonText', { currentTarget: { innerHTML: val } })}
             style={{ outline: 'none' }}
           />
           <ArrowRight width={16} height={16} />
@@ -365,13 +358,7 @@ function TwoColumn({ content, isEditing, updateContent, styles }: any) { // Two-
   ];
 
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: '1fr 1px 1fr',
-      gap: '0 56px',
-      maxWidth: 1100, margin: '0 auto',
-      alignItems: 'start',
-    }}>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 max-w-5xl mx-auto items-start">
       {cols.map((col, i) => (
         <React.Fragment key={col.key}>
           <div style={{ animation: `ly-up 0.5s ease ${i * 0.08}s both` }}>
@@ -380,9 +367,7 @@ function TwoColumn({ content, isEditing, updateContent, styles }: any) { // Two-
               fontFamily: "'Geist', sans-serif",
               fontSize: 10, letterSpacing: '0.2em',
               color: '#E11D48', marginBottom: 16,
-            }}>
-              {col.label}
-            </div>
+            }} dangerouslySetInnerHTML={{ __html: col.label }} />
 
             <CE
               as="h3" value={content[col.key]?.heading || 'Click to edit heading…'} isEditing={isEditing}
@@ -412,7 +397,7 @@ function TwoColumn({ content, isEditing, updateContent, styles }: any) { // Two-
           </div>
 
           {/* divider between columns only */}
-          {i === 0 && <div className="ly-divider" />}
+          {i === 0 && <div className="hidden md:block" style={{ borderLeft: '1px solid rgba(0,0,0,0.08)', alignSelf: 'stretch' }} />}
         </React.Fragment>
       ))}
     </div>
@@ -454,7 +439,7 @@ export function LayoutSection({ section, isSelected, isEditing, onContentChange 
 
       {isEditing && <div className="ly-badge">Layout</div>}
 
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px', position: 'relative' }}>
+      <div className="container mx-auto px-4 sm:px-6 relative">
         {variant === 'text-only'           && <TextOnly         {...shared} />} 
         {variant === 'image-text-left'     && <ImageTextLayout  {...shared} imageRight={false} />}          {variant === 'image-text-right'    && <ImageTextLayout  {...shared} imageRight={true}  />}
         {variant === 'text-button'         && <TextButton        {...shared} />}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Mail, Phone, MapPin, Send, ArrowUpRight, Users, MessageSquare, Clock } from 'lucide-react';
+import { Editable } from '@/components/ui/Editable';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -85,17 +86,14 @@ function InjectStyles() {
 // ─── CE helper ────────────────────────────────────────────────────────────
 function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '', inv = false }: any) {
   return (
-    <Tag
+    <Editable
+      as={Tag}
       className={`ct-ce ${inv ? 'ct-inv' : ''} ${className}`}
-      data-editing={isEditing ? 'true' : 'false'}
-      contentEditable={isEditing ? 'true' : 'false'}
-      suppressContentEditableWarning
+      isEditing={isEditing}
       style={{ ...style, pointerEvents: isEditing ? 'auto' : 'inherit' }}
-      onBlur={isEditing && onSave ? (e) => onSave(e.currentTarget.textContent || '') : undefined}
-      onClick={isEditing ? (e) => e.stopPropagation() : undefined}
-    >
-      {value}
-    </Tag>
+      onSave={onSave}
+      value={value || ''}
+    />
   );
 }
 
@@ -104,7 +102,7 @@ function ContactForm({ content, isEditing, onContentChange, buttonPrimaryBg, but
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Name row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <CE
             as="label" value={content.labelFirstName || 'First Name'} isEditing={isEditing}
@@ -166,7 +164,7 @@ function ContactHeader({ content, isEditing, onContentChange, headingColor, para
     <div style={{
       maxWidth: centered ? 600 : 520,
       margin: centered ? '0 auto' : '0',
-      marginBottom: 64,
+      marginBottom: 48,
       textAlign: centered ? 'center' : 'left',
     }}>
       <div style={{
@@ -183,7 +181,7 @@ function ContactHeader({ content, isEditing, onContentChange, headingColor, para
         onSave={(val) => onContentChange?.('headline', val)}
         style={{
           fontFamily: "'Fraunces', serif",
-          fontSize: 'clamp(34px, 4.5vw, 60px)',
+          fontSize: 'clamp(28px, 5vw, 60px)',
           fontWeight: 900, lineHeight: 1.0, letterSpacing: '-0.02em',
           color: headingColor, display: 'block',
           animation: 'ct-up 0.6s ease both',
@@ -304,13 +302,15 @@ function InfoItems({ content, isEditing, onContentChange, headingColor, paragrap
 // ─── Form panel wrapper ───────────────────────────────────────────────────
 function FormPanel({ content, isEditing, onContentChange, buttonPrimaryBg, buttonPrimaryText, dark = false }) {
   return (
-    <div style={{
-      background: dark ? '#0f172a' : '#fff',
-      borderRadius: '4px',
-      padding: '44px 40px',
-      border: dark ? 'none' : '1px solid rgba(0,0,0,0.07)',
-      animation: 'ct-in 0.6s ease 0.1s both',
-    }}>
+    <div
+      style={{
+        background: dark ? '#0f172a' : '#fff',
+        borderRadius: '4px',
+        border: dark ? 'none' : '1px solid rgba(0,0,0,0.07)',
+        animation: 'ct-in 0.6s ease 0.1s both',
+      }}
+      className="px-6 py-10 sm:p-10"
+    >
       {dark && (
         <div style={{ marginBottom: 28 }}>
           <div style={{ fontFamily: "'Fraunces', serif", fontSize: 22, fontWeight: 700, color: '#f8fafc', marginBottom: 6 }}>
@@ -337,7 +337,7 @@ function SplitVariant({ content, isEditing, onContentChange, headingColor, parag
     <div>
       <ContactHeader content={content} isEditing={isEditing} onContentChange={onContentChange} headingColor={headingColor} paragraphColor={paragraphColor} centered={false} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 56, alignItems: 'start' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-start">
         <InfoItems content={content} isEditing={isEditing} onContentChange={onContentChange} headingColor={headingColor} paragraphColor={paragraphColor} />
         <FormPanel content={content} isEditing={isEditing} onContentChange={onContentChange} buttonPrimaryBg={buttonPrimaryBg} buttonPrimaryText={buttonPrimaryText} />
       </div>
@@ -368,7 +368,7 @@ function MapVariant({ content, isEditing, onContentChange, headingColor, paragra
     <div>
       <ContactHeader content={content} isEditing={isEditing} onContentChange={onContentChange} headingColor={headingColor} paragraphColor={paragraphColor} centered={false} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, alignItems: 'stretch' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         {/* Form — dark panel */}
         <FormPanel
           content={content} isEditing={isEditing}
@@ -436,7 +436,8 @@ export function ContactSection({ section, isSelected, isEditing, onContentChange
 
   return (
     <section style={{
-      background, padding,
+      background,
+      padding: styles.padding || '60px 0 lg:100px 0',
       fontFamily: "'Geist', sans-serif",
       position: 'relative',
       outline: isSelected ? '2px solid #E11D48' : 'none',
@@ -450,7 +451,7 @@ export function ContactSection({ section, isSelected, isEditing, onContentChange
         backgroundImage: 'radial-gradient(ellipse at 90% 5%, rgba(225,29,72,0.04) 0%, transparent 55%), radial-gradient(ellipse at 5% 92%, rgba(8,145,178,0.04) 0%, transparent 50%)',
       }} />
 
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px', position: 'relative' }}>
+      <div className="container mx-auto px-4 sm:px-6 relative">
         {variant === 'centered' && <CenteredVariant {...shared} />}
         {variant === 'map'      && <MapVariant      {...shared} />}
         {variant === 'split'    && <SplitVariant    {...shared} />}

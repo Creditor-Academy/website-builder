@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, Plus, Minus } from 'lucide-react';
+import { Editable } from '@/components/ui/Editable';
 import { useBuilder } from '@/contexts/BuilderContext';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
@@ -89,17 +90,14 @@ function InjectStyles() {
 // ─── CE helper ────────────────────────────────────────────────────────────
 function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '' }: any) {
   return (
-    <Tag
+    <Editable
+      as={Tag}
       className={`fq-ce ${className}`}
-      data-editing={isEditing ? 'true' : 'false'}
-      contentEditable={isEditing ? 'true' : 'false'}
-      suppressContentEditableWarning
+      isEditing={isEditing}
       style={{ ...style, pointerEvents: isEditing ? 'auto' : 'inherit' }}
-      onBlur={isEditing && onSave ? (e) => onSave(e.currentTarget.textContent || '') : undefined}
-      onClick={isEditing ? (e) => e.stopPropagation() : undefined}
-    >
-      {value}
-    </Tag>
+      onSave={onSave}
+      value={value || ''}
+    />
   );
 }
 
@@ -408,7 +406,7 @@ export function FAQSection({ section, isSelected, isEditing, onContentChange, is
     ? (styles.backgroundGradient || styles.backgroundColor)
     : (styles.backgroundColor || (isAlternate ? 'var(--theme-bg-alt, #f8fafc)' : 'var(--theme-bg, #f8fafc)'));
 
-  const padding = styles.padding || '100px 0';
+          const padding = styles.padding || '60px 0';
   const headingColor = styles.headingColor || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
   const paragraphColor = styles.paragraphColor || (isAlternate ? 'var(--theme-text-alt, #64748b)' : 'var(--theme-text, #64748b)');
 
@@ -430,7 +428,7 @@ export function FAQSection({ section, isSelected, isEditing, onContentChange, is
         backgroundImage: 'radial-gradient(ellipse at 90% 5%, rgba(225,29,72,0.03) 0%, transparent 55%), radial-gradient(ellipse at 5% 92%, rgba(8,145,178,0.03) 0%, transparent 50%)',
       }} />
 
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px', position: 'relative' }}>
+      <div className="container mx-auto px-4 sm:px-6 relative">
         <Header
           content={content} isEditing={isEditing} onContentChange={onContentChange}
           headingColor={headingColor} paragraphColor={paragraphColor}

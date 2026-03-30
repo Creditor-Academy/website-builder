@@ -131,6 +131,8 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
             });
           }}
           onMouseDown={(e) => {
+            selectSection(section.id);
+            selectComponent(component.id);
             if (isEditingText) e.stopPropagation();
           }}
           style={{
@@ -173,7 +175,7 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
                 onBlur={(e) => {
                   setIsEditingText(false);
                   updateComponent(section.id, component.id, {
-                    content: { ...component.content, text: e.currentTarget.textContent }
+                    content: { ...component.content, text: e.currentTarget.innerHTML }
                   });
                 }}
               >
@@ -411,9 +413,7 @@ export function SectionRenderer({ section, idx, isAlternate, isSelected, isEditi
                     border: 'none',
                     cursor: 'pointer',
                   }}
-                >
-                  {comp.content.text}
-                </button>
+                 dangerouslySetInnerHTML={{ __html: comp.content.text }} />
               )}
             </div>
           ))}

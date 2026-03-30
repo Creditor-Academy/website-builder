@@ -8,7 +8,7 @@ export function TextBlock({ section, isSelected, isEditing, onContentChange }) {
 
     const handleTextEdit = (field, e) => {
         if (onContentChange && isEditing) {
-            onContentChange(field, e.currentTarget.textContent || '');
+            onContentChange(field, e.currentTarget.innerHTML || '');
         }
     };
 
@@ -31,9 +31,7 @@ export function TextBlock({ section, isSelected, isEditing, onContentChange }) {
                     contentEditable={isEditing}
                     suppressContentEditableWarning
                     onBlur={(e) => handleTextEdit('text', e)}
-                >
-                    {content.text || 'Enter your text here...'}
-                </div>
+                 dangerouslySetInnerHTML={{ __html: content.text || 'Enter your text here...' }} />
             </div>
         </section>
     );

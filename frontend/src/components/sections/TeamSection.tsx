@@ -1,5 +1,6 @@
 import React from 'react';
 import { Linkedin, Twitter, Github } from 'lucide-react';
+import { Editable } from '@/components/ui/Editable';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -53,20 +54,19 @@ function InjectStyles() {
 }
 
 // ─── CE helper ────────────────────────────────────────────────────────────
-function CE({ as: Tag = 'span', value, onSave, isEditing, style, className = '', inv = false }) {
+function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '', inv = false }: any) {
   return (
-    <Tag
+    <Editable
+      as={Tag}
       className={`tm-ce ${inv ? 'tm-inv' : ''} ${className}`}
-      data-editing={isEditing ? 'true' : 'false'}
-      contentEditable={isEditing ? 'true' : 'false'}
-      suppressContentEditableWarning
+      isEditing={isEditing}
       style={{ ...style, pointerEvents: isEditing ? 'auto' : 'inherit' }}
-      onBlur={isEditing && onSave ? (e) => onSave(e.currentTarget.innerHTML || '') : undefined}
-      onClick={isEditing ? (e) => e.stopPropagation() : undefined}
-      dangerouslySetInnerHTML={{ __html: value || '' }}
+      onSave={onSave}
+      value={value || ''}
     />
   );
 }
+
 
 const ACCENTS = ['#E11D48', '#0891B2', '#059669', '#7C3AED', '#D97706', '#DB2777'];
 
@@ -366,13 +366,9 @@ function ListVariant({ members, content, isEditing, onContentChange, headingColo
         return (
           <div
             key={member.id || index}
-            className="tm-list-row"
+            className="tm-list-row flex flex-wrap sm:flex-nowrap items-center gap-4 sm:gap-6"
             style={{
-              display: 'grid',
-              gridTemplateColumns: '52px 80px 1fr auto',
-              gap: '0 24px',
-              alignItems: 'center',
-              padding: '20px 0',
+              padding: '16px 0',
               borderBottom: '1px solid rgba(0,0,0,0.07)',
               animation: `tm-up 0.5s ease ${index * 0.06}s both`,
               borderRadius: 3,
@@ -457,7 +453,7 @@ export function TeamSection({ section, isEditing, onContentChange }) {
   const background = styles.useGradient
     ? (styles.backgroundGradient || styles.backgroundColor)
     : (styles.backgroundColor || '#ffffff');
-  const padding = styles.padding || '100px 0';
+  const padding = styles.padding || '60px 0';
   const headingColor = styles.headingColor || '#0f172a';
   const paragraphColor = styles.paragraphColor || '#64748b';
 
@@ -473,7 +469,7 @@ export function TeamSection({ section, isEditing, onContentChange }) {
         backgroundImage: 'radial-gradient(ellipse at 90% 10%, rgba(225,29,72,0.04) 0%, transparent 55%), radial-gradient(ellipse at 5% 90%, rgba(8,145,178,0.04) 0%, transparent 50%)',
       }} />
 
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px', position: 'relative' }}>
+      <div className="container mx-auto px-4 sm:px-6 relative">
         {variant === 'carousel' && <CarouselVariant {...shared} />}
         {variant === 'list'     && <ListVariant     {...shared} />}
         {variant === 'grid'     && <GridVariant     {...shared} />}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Check, Sparkles, Zap, ArrowRight } from 'lucide-react';
 import { useBuilder } from '@/contexts/BuilderContext';
+import { Editable } from '@/components/ui/Editable';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -110,7 +111,8 @@ function SectionHeader({ content, isEditing, onContentChange, headingColor, para
         {centered && <div style={{ width: 18, height: 1, background: 'rgba(0,0,0,0.2)' }} />}
       </div>
 
-      <h2
+      <Editable
+        as="h2"
         className="pr-ce"
         style={{
           fontFamily: "'Instrument Serif', serif",
@@ -120,14 +122,9 @@ function SectionHeader({ content, isEditing, onContentChange, headingColor, para
           color: headingColor, display: 'block', marginBottom: 0,
           animation: 'pr-up 0.6s ease both',
         }}
-        contentEditable={isEditing}
-        suppressContentEditableWarning
-        ref={(el) => {
-          if (el && el.innerHTML !== (content.headline || 'Simple, Transparent Pricing')) {
-            el.innerHTML = content.headline || 'Simple, Transparent Pricing';
-          }
-        }}
-        onBlur={(e) => onContentChange?.('headline', e.currentTarget.innerHTML)}
+        isEditing={isEditing}
+        value={content.headline || 'Simple, Transparent Pricing'}
+        onSave={(val) => onContentChange?.('headline', val)}
       />
 
       <div style={{
@@ -136,21 +133,17 @@ function SectionHeader({ content, isEditing, onContentChange, headingColor, para
         transformOrigin: 'left', animation: 'pr-bar 0.7s ease 0.1s both',
       }} />
 
-      <p
+      <Editable
+        as="p"
         className="pr-ce"
         style={{
           fontFamily: "'Geist', sans-serif",
           fontSize: 15, lineHeight: 1.75,
           color: paragraphColor, opacity: 0.7, display: 'block', margin: 0,
         }}
-        contentEditable={isEditing}
-        suppressContentEditableWarning
-        ref={(el) => {
-          if (el && el.innerHTML !== (content.subheadline || 'Choose the plan that works best for you')) {
-            el.innerHTML = content.subheadline || 'Choose the plan that works best for you';
-          }
-        }}
-        onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.innerHTML)}
+        isEditing={isEditing}
+        value={content.subheadline || 'Choose the plan that works best for you'}
+        onSave={(val) => onContentChange?.('subheadline', val)}
       />
 
       {showToggle && (
@@ -189,7 +182,6 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
     <div
       className={`pr-card ${isPopular ? 'pr-card-popular' : 'pr-card-default'}`}
       style={{
-        transform: isPopular ? 'scale(1.03)' : undefined,
         zIndex: isPopular ? 2 : 1,
         borderRadius: styles.borderRadius || '4px',
         animation: `pr-in 0.5s ease ${index * 0.08}s both`,
@@ -210,16 +202,11 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
           padding: '4px 10px', borderRadius: 2,
         }}>
           <Zap size={9} />
-          <span
+          <Editable
             className="pr-ce-inv"
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            ref={(el) => {
-              if (el && el.innerHTML !== (plan.popularLabel || 'Most Popular')) {
-                el.innerHTML = plan.popularLabel || 'Most Popular';
-              }
-            }}
-            onBlur={(e) => updatePlan('popularLabel', e.currentTarget.innerHTML)}
+            isEditing={isEditing}
+            value={plan.popularLabel || 'Most Popular'}
+            onSave={(val) => updatePlan('popularLabel', val)}
           />
         </div>
       )}
@@ -231,13 +218,12 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
         fontSize: 96, fontWeight: 700,
         color: isPopular ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
         lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
-      }}>
-        {String(index + 1).padStart(2, '0')}
-      </div>
+      }} dangerouslySetInnerHTML={{ __html: String(index + 1).padStart(2, '0') }} />
 
       <div style={{ padding: '36px 32px 32px' }}>
         {/* Plan name */}
-        <h3
+        <Editable
+          as="h3"
           className={isPopular ? 'pr-ce-inv' : 'pr-ce'}
           style={{
             fontFamily: "'Instrument Serif', serif",
@@ -245,17 +231,13 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
             color: isPopular ? '#f8fafc' : '#0f172a',
             marginBottom: 8, display: 'block', lineHeight: 1.2,
           }}
-          contentEditable={isEditing}
-          suppressContentEditableWarning
-          ref={(el) => {
-            if (el && el.innerHTML !== (plan.name || '')) {
-              el.innerHTML = plan.name || '';
-            }
-          }}
-          onBlur={(e) => updatePlan('name', e.currentTarget.innerHTML)}
+          isEditing={isEditing}
+          value={plan.name || ''}
+          onSave={(val) => updatePlan('name', val)}
         />
 
-        <p
+        <Editable
+          as="p"
           className={isPopular ? 'pr-ce-inv' : 'pr-ce'}
           style={{
             fontFamily: "'Geist', sans-serif",
@@ -263,14 +245,9 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
             color: isPopular ? 'rgba(255,255,255,0.5)' : '#94a3b8',
             marginBottom: 28, display: 'block',
           }}
-          contentEditable={isEditing}
-          suppressContentEditableWarning
-          ref={(el) => {
-            if (el && el.innerHTML !== (plan.description || '')) {
-              el.innerHTML = plan.description || '';
-            }
-          }}
-          onBlur={(e) => updatePlan('description', e.currentTarget.innerHTML)}
+          isEditing={isEditing}
+          value={plan.description || ''}
+          onSave={(val) => updatePlan('description', val)}
         />
 
         {/* Price */}
@@ -284,42 +261,28 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
               fontSize: 16, fontWeight: 500, alignSelf: 'flex-start', paddingTop: 10,
               color: isPopular ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)',
             }}>$</span>
-            <span
+            <Editable
               className={isPopular ? 'pr-ce-inv' : 'pr-ce'}
               style={{
                 fontFamily: "'Instrument Serif', serif",
                 fontSize: 56, fontWeight: 700, lineHeight: 1, letterSpacing: '-0.03em',
                 color: isPopular ? '#fff' : '#0f172a',
               }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              ref={(el) => {
-                if (el && el.innerHTML !== (price ?? plan.price)) {
-                  el.innerHTML = price ?? plan.price;
-                }
-              }}
-              onBlur={(e) => updatePlan('price', e.currentTarget.textContent.replace('$', '').trim())}
-            >
-              {price ?? plan.price}
-            </span>
-            <span
+              isEditing={isEditing}
+              value={price ?? plan.price}
+              onSave={(val) => updatePlan('price', val.replace('$', '').trim())}
+            />
+            <Editable
               className={isPopular ? 'pr-ce-inv' : 'pr-ce'}
               style={{
                 fontFamily: "'Geist', sans-serif",
                 fontSize: 12, color: isPopular ? 'rgba(255,255,255,0.35)' : '#94a3b8',
                 marginLeft: 2,
               }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              ref={(el) => {
-                if (el && el.innerHTML !== (period || plan.pricePeriod || '/mo')) {
-                  el.innerHTML = period || plan.pricePeriod || '/mo';
-                }
-              }}
-              onBlur={(e) => updatePlan('pricePeriod', e.currentTarget.textContent)}
-            >
-              {period || plan.pricePeriod || '/mo'}
-            </span>
+              isEditing={isEditing}
+              value={period || plan.pricePeriod || '/mo'}
+              onSave={(val) => updatePlan('pricePeriod', val)}
+            />
           </div>
         </div>
 
@@ -334,21 +297,16 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
               }}>
                 <Check size={10} color={isPopular ? '#E11D48' : accent} strokeWidth={3} />
               </div>
-              <span
+              <Editable
                 className={isPopular ? 'pr-ce-inv' : 'pr-ce'}
                 style={{
                   fontFamily: "'Geist', sans-serif",
                   fontSize: 13, lineHeight: 1.5,
                   color: isPopular ? 'rgba(255,255,255,0.75)' : '#475569',
                 }}
-                contentEditable={isEditing}
-                suppressContentEditableWarning
-                ref={(el) => {
-                  if (el && el.innerHTML !== (feature || '')) {
-                    el.innerHTML = feature || '';
-                  }
-                }}
-                onBlur={(e) => updateFeature(i, e.currentTarget.innerHTML)}
+                isEditing={isEditing}
+                value={feature || ''}
+                onSave={(val) => updateFeature(i, val)}
               />
             </li>
           ))}
@@ -356,16 +314,11 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
 
         {/* CTA */}
         <button className={`pr-cta ${isPopular ? 'pr-cta-popular' : 'pr-cta-default'}`}>
-          <span
+          <Editable
             className={isPopular ? 'pr-ce-inv' : 'pr-ce'}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            ref={(el) => {
-              if (el && el.innerHTML !== (plan.ctaText || 'Get Started')) {
-                el.innerHTML = plan.ctaText || 'Get Started';
-              }
-            }}
-            onBlur={(e) => updatePlan('ctaText', e.currentTarget.innerHTML)}
+            isEditing={isEditing}
+            value={plan.ctaText || 'Get Started'}
+            onSave={(val) => updatePlan('ctaText', val)}
           />
           <ArrowRight size={13} />
         </button>
@@ -379,7 +332,7 @@ function TableVariant({ content, isEditing, onContentChange, headingColor, parag
   const allFeatures = Array.from(new Set((plans as any[]).flatMap(p => p.features || []))) as string[];
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 40px' }}>
+    <div className="container mx-auto px-4 sm:px-6 lg:px-10">
       <SectionHeader
         content={content} isEditing={isEditing} onContentChange={onContentChange}
         headingColor={headingColor} paragraphColor={paragraphColor}
@@ -440,7 +393,7 @@ function TableVariant({ content, isEditing, onContentChange, headingColor, parag
                           fontFamily: "'Instrument Serif', serif",
                           fontSize: 17, fontStyle: 'italic', fontWeight: 400,
                           color: '#0f172a',
-                        }}>{p.name}</div>
+                        }} dangerouslySetInnerHTML={{ __html: p.name }} />
                         {p.popular && (
                           <div style={{
                             fontFamily: "'Geist', sans-serif",
@@ -522,7 +475,7 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
         className={`pr-sect relative transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${globalClasses}`}
         style={{
           background,
-          padding: styles.padding || '100px 0',
+          padding: styles.padding || '60px 0',
           position: 'relative', overflow: 'hidden',
           borderRadius: variant === 'table' ? '0' : 'var(--radius, 0)',
         }}
@@ -536,19 +489,14 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
           {variant === 'table' && <TableVariant {...shared} />}
 
           {(variant === 'cards' || variant === 'toggle') && (
-            <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 40px' }}>
+            <div className="container mx-auto px-4 sm:px-6 lg:px-10">
               <SectionHeader
                 content={content} isEditing={isEditing} onContentChange={onContentChange}
                 headingColor={headingColor} paragraphColor={paragraphColor}
                 showToggle={variant === 'toggle'} annual={annual} setAnnual={setAnnual}
               />
 
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: `repeat(${Math.min(plans.length, 3)}, 1fr)`,
-                gap: 20,
-                alignItems: 'center',
-              }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
                 {plans.map((plan, index) => {
                   const price = variant === 'toggle' && annual
                     ? Math.round(Number(plan.price) * 10 * 0.8)

@@ -90,6 +90,22 @@ const STYLES = `
     height: 1.5px; background: currentColor;
     transition: width 0.2s ease;
   }
+  /* Responsive nav container */
+  .nb-inner {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 40px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  @media (max-width: 768px) {
+    .nb-inner {
+      padding: 0 20px;
+      height: 60px;
+    }
+  }
 `;
 
 function InjectStyles() {
@@ -224,12 +240,7 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
     >
       <InjectStyles />
 
-      <div style={{
-        maxWidth: 1240, margin: '0 auto',
-        padding: '0 40px',
-        height: 68,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
+      <div className="nb-inner">
 
         {/* ── Logo ─────────────────────────────────────────────── */}
         <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>

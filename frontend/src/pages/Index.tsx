@@ -325,7 +325,7 @@ export default function LandingPage() {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className={cn("text-[4.5rem] sm:text-[6rem] md:text-[7.5rem] font-bold tracking-tighter leading-[0.9] mb-8 transition-colors duration-1000", isDark ? "text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]" : "text-slate-900 drop-shadow-xl")}
+            className={cn("text-5xl sm:text-7xl md:text-[7.5rem] font-bold tracking-tighter leading-[0.95] md:leading-[0.9] mb-8 transition-colors duration-1000", isDark ? "text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]" : "text-slate-900 drop-shadow-xl")}
           >
             Design exactly <br />
             <span className={cn("italic font-serif font-light relative", isDark ? "text-blue-200" : "text-blue-900")}>
@@ -405,7 +405,7 @@ export default function LandingPage() {
             <h2 className={cn("text-4xl md:text-6xl font-bold tracking-tight mb-6 drop-shadow-md transition-colors duration-1000", isDark ? "text-white" : "text-slate-900")}>Limitless possibilities. <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-500">Zero compromises.</span></h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 auto-rows-[400px] gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 auto-rows-[280px] md:auto-rows-[400px] gap-6">
             {/* Feature 1 (Large) */}
             <motion.div
               initial={{ opacity: 1, y: 0 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }}
@@ -546,7 +546,7 @@ export default function LandingPage() {
           viewport={{ once: true }}
           transition={{ duration: 1, ease: "easeOut" }}
           className={cn(
-            "relative z-10 max-w-4xl mx-auto backdrop-blur-3xl border p-12 md:p-24 rounded-[4rem] shadow-[0_40px_100px_rgba(59,130,246,0.2)] overflow-hidden group",
+            "relative z-10 max-w-4xl mx-auto backdrop-blur-3xl border p-8 md:p-24 rounded-[2.5rem] md:rounded-[4rem] shadow-[0_40px_100px_rgba(59,130,246,0.2)] overflow-hidden group",
             isDark ? "bg-slate-900/40 border-white/5" : "bg-white/90 border-slate-200"
           )}
         >

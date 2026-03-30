@@ -1,5 +1,6 @@
 import React from "react";
 import { Plus, Trash, Image, ArrowUpRight, Calendar } from "lucide-react";
+import { Editable } from '@/components/ui/Editable';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -71,17 +72,14 @@ function InjectStyles() {
 // ─── CE helper ────────────────────────────────────────────────────────────
 function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '', inv = false }: any) {
   return (
-    <Tag
+    <Editable
+      as={Tag}
       className={`bl-ce ${inv ? 'bl-ce-inv' : ''} ${className}`}
-      data-editing={isEditing ? 'true' : 'false'}
-      contentEditable={isEditing ? 'true' : 'false'}
-      suppressContentEditableWarning
+      isEditing={isEditing}
       style={{ ...style, pointerEvents: isEditing ? 'auto' : 'inherit' }}
-      onBlur={isEditing && onSave ? (e) => onSave(e.currentTarget.textContent || '') : undefined}
-      onClick={isEditing ? (e) => e.stopPropagation() : undefined}
-    >
-      {value}
-    </Tag>
+      onSave={onSave}
+      value={value || ''}
+    />
   );
 }
 
@@ -126,7 +124,7 @@ export function BlogListSection({ section, isSelected, isEditing, onContentChang
     <section
       style={{
         background: bg,
-        padding: styles.padding || '100px 0',
+        padding: styles.padding || '60px 0 lg:100px 0',
         fontFamily: "'Outfit', sans-serif",
         position: 'relative',
         outline: isSelected ? '2px solid #E11D48' : 'none',
@@ -141,11 +139,11 @@ export function BlogListSection({ section, isSelected, isEditing, onContentChang
         backgroundImage: 'radial-gradient(ellipse at 90% 5%, rgba(225,29,72,0.03) 0%, transparent 55%), radial-gradient(ellipse at 5% 95%, rgba(8,145,178,0.03) 0%, transparent 50%)',
       }} />
 
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px', position: 'relative' }}>
+      <div className="container mx-auto px-4 sm:px-6 relative">
 
         {/* ── Header ────────────────────────────────────────────── */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 64, flexWrap: 'wrap', gap: 20 }}>
-          <div style={{ maxWidth: 520 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mdAlignItems: 'flex-end', marginBottom: 48, mdMarginBottom: 64, flexWrap: 'wrap', gap: 24 }}>
+          <div className="w-full md:max-w-xl">
             {/* micro label */}
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 10,
@@ -183,7 +181,7 @@ export function BlogListSection({ section, isSelected, isEditing, onContentChang
               fontFamily: "'Outfit', sans-serif",
               fontSize: 15, lineHeight: 1.75,
               color: paragraphColor, opacity: 0.7,
-              maxWidth: 340, display: 'block',
+              maxWidth: 440, display: 'block',
               animation: 'bl-up 0.6s ease 0.07s both',
             }}
           />
@@ -191,12 +189,7 @@ export function BlogListSection({ section, isSelected, isEditing, onContentChang
 
         {/* ── Posts grid ────────────────────────────────────────── */}
         {variant === 'magazine' && (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))',
-            gap: 32,
-            marginBottom: isEditing ? 40 : 0,
-          }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 mb-10 md:mb-0">
             {content.posts.map((post, index) => {
               const accent = ACCENTS[index % ACCENTS.length];
               const isFeatured = index % 3 === 0;
@@ -204,19 +197,19 @@ export function BlogListSection({ section, isSelected, isEditing, onContentChang
                 <article
                   key={post.id}
                   className="bl-card"
-                  style={{
+                    style={{
                     background: '#fff',
                     borderRadius: '8px',
                     overflow: 'hidden',
                     border: '1px solid rgba(0,0,0,0.07)',
                     position: 'relative',
-                    gridColumn: isFeatured ? 'span 2' : 'span 1',
-                    gridRow: isFeatured ? 'span 2' : 'span 1',
+                    gridColumn: 'span 1',
+                    className: isFeatured ? 'md:col-span-2 md:row-span-2' : '',
                     animation: `bl-in 0.5s ease ${index * 0.07}s both`,
                   }}
                 >
                   {/* Featured image for magazine style */}
-                  <div style={{ height: isFeatured ? 320 : 200, overflow: 'hidden', position: 'relative', background: '#f1f5f9' }}>
+                  <div className={`${isFeatured ? 'h-[240px] md:h-[320px]' : 'h-[200px]'} overflow-hidden relative bg-slate-50`}>
                     {post.imageUrl ? (
                       <img
                         src={post.imageUrl} alt={post.title}
@@ -354,12 +347,7 @@ export function BlogListSection({ section, isSelected, isEditing, onContentChang
         )}
 
         {variant === 'cards' && (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-            gap: 24,
-            marginBottom: isEditing ? 40 : 0,
-          }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-10 md:mb-0">
             {content.posts.map((post, index) => {
               const accent = ACCENTS[index % ACCENTS.length];
               return (
@@ -502,24 +490,19 @@ export function BlogListSection({ section, isSelected, isEditing, onContentChang
         )}
 
         {variant === 'list' && (
-          <div style={{ maxWidth: '800px', margin: '0 auto', marginBottom: isEditing ? 40 : 0 }}>
+          <div className="max-w-3xl mx-auto space-y-8 mb-10 md:mb-0">
             {content.posts.map((post, index) => {
               const accent = ACCENTS[index % ACCENTS.length];
               return (
                 <article
                   key={post.id}
+                  className="flex flex-col sm:flex-row gap-6 pb-8 border-b border-slate-100 last:border-0"
                   style={{
-                    display: 'flex',
-                    gap: 24,
-                    marginBottom: 32,
-                    paddingBottom: 32,
-                    borderBottom: index < content.posts.length - 1 ? '1px solid rgba(0,0,0,0.08)' : 'none',
                     animation: `bl-up 0.5s ease ${index * 0.1}s both`,
                   }}
                 >
                   {/* Image */}
-                  <div style={{
-                    width: 120, height: 120, flexShrink: 0, borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.1)' }}>
+                  <div className="w-full sm:w-32 lg:w-40 h-[200px] sm:h-32 lg:h-40 flex-shrink-0 rounded-lg overflow-hidden border border-slate-200 relative">
                     {post.imageUrl ? (
                       <img
                         src={post.imageUrl} alt={post.title}
@@ -673,12 +656,7 @@ export function BlogListSection({ section, isSelected, isEditing, onContentChang
 
         {/* Default grid variant */}
         {(!variant || variant === 'grid') && (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-            gap: 24,
-            marginBottom: isEditing ? 40 : 0,
-          }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-10 md:mb-0">
             {content.posts.map((post, index) => {
               const accent = ACCENTS[index % ACCENTS.length];
               return (

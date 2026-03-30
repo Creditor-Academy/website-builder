@@ -1,12 +1,13 @@
 import React from 'react';
 import { Briefcase, TrendingUp, Users, Target, ArrowRight } from 'lucide-react';
+import { Editable } from '@/components/ui/Editable';
 
 export function CaseStudiesSection({ section, isSelected, isEditing, onContentChange }) {
   const { content, styles } = section;
 
   const handleTextEdit = (field, e) => {
     if (onContentChange && isEditing) {
-      onContentChange(field, e.currentTarget.textContent || '');
+      onContentChange(field, e.currentTarget.innerHTML || '');
     }
   };
 
@@ -36,23 +37,21 @@ export function CaseStudiesSection({ section, isSelected, isEditing, onContentCh
     >
       <div className="container mx-auto px-6">
         <div className="max-w-3xl mb-16">
-          <h2 
+          <Editable
+            as="h2"
             className="text-4xl md:text-5xl font-bold mb-6 leading-tight"
             style={{ color: '#ffffff', fontFamily: 'Playfair Display' }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            onBlur={(e) => handleTextEdit('headline', e)}
-          >
-            {content.headline}
-          </h2>
-          <p 
+            isEditing={isEditing}
+            value={content.headline || ''}
+            onSave={(val) => onContentChange?.('headline', val)}
+          />
+          <Editable
+            as="p"
             className="text-xl opacity-80"
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            onBlur={(e) => handleTextEdit('subheadline', e)}
-          >
-            {content.subheadline}
-          </p>
+            isEditing={isEditing}
+            value={content.subheadline || ''}
+            onSave={(val) => onContentChange?.('subheadline', val)}
+          />
           <div className="w-20 h-1 mt-8" style={{ backgroundColor: accentColor }}></div>
         </div>
 
@@ -71,35 +70,32 @@ export function CaseStudiesSection({ section, isSelected, isEditing, onContentCh
                 </span>
               </div>
               
-              <h3 
+              <Editable
+                as="h3"
                 className="text-2xl font-bold mb-4 text-white"
-                contentEditable={isEditing}
-                suppressContentEditableWarning
-                onBlur={(e) => handleCaseEdit(index, 'client', e.currentTarget.textContent)}
-              >
-                {item.client}
-              </h3>
+                isEditing={isEditing}
+                value={item.client || ''}
+                onSave={(val) => handleCaseEdit(index, 'client', val)}
+              />
               
               <div className="mb-6 flex-grow">
                 <p className="text-sm opacity-50 mb-2 uppercase font-bold tracking-tighter">The Challenge</p>
-                <p 
+                <Editable
+                  as="p"
                   className="text-sm opacity-80 mb-6 leading-relaxed"
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => handleCaseEdit(index, 'challenge', e.currentTarget.textContent)}
-                >
-                  {item.challenge}
-                </p>
+                  isEditing={isEditing}
+                  value={item.challenge || ''}
+                  onSave={(val) => handleCaseEdit(index, 'challenge', val)}
+                />
                 
                 <p className="text-sm opacity-50 mb-2 uppercase font-bold tracking-tighter">The Result</p>
-                <p 
+                <Editable
+                  as="p"
                   className="text-sm font-medium text-white leading-relaxed"
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => handleCaseEdit(index, 'result', e.currentTarget.textContent)}
-                >
-                  {item.result}
-                </p>
+                  isEditing={isEditing}
+                  value={item.result || ''}
+                  onSave={(val) => handleCaseEdit(index, 'result', val)}
+                />
               </div>
 
               <div className="pt-6 border-t border-white/10 flex items-center gap-2 group-hover:gap-4 transition-all duration-300 text-sm font-bold uppercase tracking-widest cursor-pointer" style={{ color: accentColor }}>
