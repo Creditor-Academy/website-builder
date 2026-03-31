@@ -20,37 +20,51 @@ datasource db {
 enum UserRole {
   USER
   ADMIN
+  STUDENT
+  INSTRUCTOR
+  INSTITUTION_ADMIN
+  SUPER_ADMIN
 }
 
 // User Model
 model User {
-  id            String   @id @default(cuid())
-  name          String
-  email         String   @unique
-  password_hash String?
-  role          UserRole @default(USER)
-  auth_provider String   @default("email")
-
-  isActive   Boolean @default(true)
-  isVerified Boolean @default(false)
-
-  lastLoginAt          DateTime?
-  lastPasswordChangeAt DateTime?
-
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  deleted_at DateTime?
-
-  // Relations
-  ownedWebsites           Website[]                @relation("WebsiteOwner")
-  passwordResetTokens     PasswordResetToken[]
+  id                      String                   @id @default(cuid())
+  name                    String
+  email                   String                   @unique
+  password_hash           String?
+  role                    UserRole                 @default(USER)
+  auth_provider           String                   @default("email")
+  institution_id          String?
+  isActive                Boolean                  @default(true)
+  isVerified              Boolean                  @default(false)
+  lastLoginAt             DateTime?
+  lastPasswordChangeAt    DateTime?
+  created_at              DateTime                 @default(now())
+  updated_at              DateTime                 @updatedAt
+  deleted_at              DateTime?
   emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens     PasswordResetToken[]
   refreshTokens           RefreshToken[]
+  institution             Institution?             @relation(fields: [institution_id], references: [id])
+  ownedWebsites           Website[]                @relation("WebsiteOwner")
   assets                  Asset[]
 
   @@index([email])
   @@index([deleted_at])
   @@map("users")
+}
+
+model Institution {
+  id         String    @id @default(cuid())
+  name       String
+  email      String    @unique
+  status     String    @default("PENDING")
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  users      User[]
+  websites   Website[]
+
+  @@map("institutions")
 }
 
 // Password Reset Token Model
@@ -132,8 +146,10 @@ model Website {
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
   deleted_at DateTime?
+  institution_id String?
 
   // Relations
+  institution  Institution?  @relation(fields: [institution_id], references: [id])
   owner        User          @relation("WebsiteOwner", fields: [owner_id], references: [id], onDelete: Cascade)
   settings     Settings      @relation(fields: [settings_id], references: [id])
   homepage     Page?         @relation("Homepage", fields: [homepageId], references: [id], onDelete: SetNull)
