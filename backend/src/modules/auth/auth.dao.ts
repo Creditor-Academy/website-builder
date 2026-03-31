@@ -11,7 +11,7 @@ class AuthDao {
     return await prismaClient.user.findUnique({
 
       where: { email },
-
+      include: { institution: true },
       omit: {
 
         password_hash: !include_password_hash
@@ -29,7 +29,7 @@ class AuthDao {
     return await prismaClient.user.findUnique({
 
       where: { id },
-
+      include: { institution: true },
       omit: { password_hash: true }
 
     });
@@ -52,7 +52,7 @@ class AuthDao {
 
     };
 
-    
+
 
     // Only include password_hash if it's provided
 
@@ -62,7 +62,7 @@ class AuthDao {
 
     }
 
-    
+
 
     return await prismaClient.user.create({
 

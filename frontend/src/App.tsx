@@ -12,6 +12,7 @@ import DashboardTemplates from "./pages/DashboardTemplates";
 import DashboardDeployment from "./pages/DashboardDeployment";
 import DashboardAssets from "./pages/DashboardAssets";
 import DashboardSettings from "./pages/DashboardSettings";
+import Organizations from "./pages/dashboard/Organizations";
 import { WebsiteEditor } from "./components/editor/WebsiteEditor";
 import Login from "./pages/Login";
 import Features from "./pages/Features";
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />}>
               <Route index element={null} /> {/* This will be handled by Dashboard component's internal routing or default view */}
               <Route path="users" element={<DashboardUsers />} />
+              <Route path="organizations" element={<Organizations />} />
               <Route path="websites" element={<DashboardWebsites />} />
               <Route path="templates" element={<DashboardTemplates />} />
               <Route path="deployment" element={<DashboardDeployment />} />

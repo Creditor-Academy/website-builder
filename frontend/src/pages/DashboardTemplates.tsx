@@ -51,62 +51,62 @@ export default function DashboardTemplates() {
               {cat}
             </Button>
           ))}
-        </div> 
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {templatesList
           .filter(template => activeCategory === 'All' || template.category === activeCategory)
           .map((template) => (
-          <Card key={template.id} className="group/template-card overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer bg-white">
-            <div className="aspect-[4/3] bg-slate-50 relative overflow-hidden rounded-t-2xl">
-              <img 
-                src={template.image} 
-                alt={template.name} 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover/template-card:scale-105" 
-              />
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover/template-card:opacity-100 transition-opacity duration-300"></div>
-              
-              {template.tag && (
-                <Badge className="absolute top-4 left-4 bg-white/90 text-slate-800 font-semibold text-xs px-3 py-1 rounded-full shadow-sm backdrop-blur-[2px]">
-                  {template.tag}
-                </Badge>
-              )}
-              
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/template-card:opacity-100 transition-all duration-300 z-20">
-                <Button 
-                   className="bg-blue-600 text-white font-semibold rounded-full px-6 h-11 text-sm shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:scale-105 transition-all duration-200"
-                   onClick={(e) => { e.stopPropagation(); handleUseTemplate(template.id, template.name); }}
-                >
-                   <Plus className="w-4 h-4 mr-2" /> Start Building
-                </Button>
+            <Card key={template.id} className="group/template-card overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer bg-white">
+              <div className="aspect-[4/3] bg-slate-50 relative overflow-hidden rounded-t-2xl">
+                <img
+                  src={template.image}
+                  alt={template.name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover/template-card:scale-105"
+                />
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover/template-card:opacity-100 transition-opacity duration-300"></div>
+
+                {template.tag && (
+                  <Badge className="absolute top-4 left-4 bg-white/90 text-slate-800 font-semibold text-xs px-3 py-1 rounded-full shadow-sm backdrop-blur-[2px]">
+                    {template.tag}
+                  </Badge>
+                )}
+
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/template-card:opacity-100 transition-all duration-300 z-20">
+                  <Button
+                    className="bg-blue-600 text-white font-semibold rounded-full px-6 h-11 text-sm shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:scale-105 transition-all duration-200"
+                    onClick={(e) => { e.stopPropagation(); handleUseTemplate(template.id, template.name); }}
+                  >
+                    <Plus className="w-4 h-4 mr-2" /> Start Building
+                  </Button>
+                </div>
               </div>
-            </div>
-            
-            <CardHeader className="p-6 pt-4 pb-2">
-              <div className="flex justify-between items-start mb-2">
-                 <Badge className="bg-blue-100 text-blue-700 font-medium px-3 py-1 rounded-full text-xs">
-                  {template.category}
-                </Badge>
-                <template.icon className="w-5 h-5 text-slate-400" />
-              </div>
-              <CardTitle className="text-xl font-bold text-slate-900 leading-tight mt-1">
-                {template.name}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-6 pb-6 pt-2">
-              <p className="text-sm text-slate-500 leading-relaxed line-clamp-2">
-                {template.desc}
-              </p>
-              
-              <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-blue-600 font-semibold text-xs uppercase tracking-wider group-hover/template-card:text-blue-700 transition-all"> 
+
+              <CardHeader className="p-6 pt-4 pb-2">
+                <div className="flex justify-between items-start mb-2">
+                  <Badge className="bg-blue-100 text-blue-700 font-medium px-3 py-1 rounded-full text-xs">
+                    {template.category}
+                  </Badge>
+                  <template.icon className="w-5 h-5 text-slate-400" />
+                </div>
+                <CardTitle className="text-xl font-bold text-slate-900 leading-tight mt-1">
+                  {template.name}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-6 pb-6 pt-2">
+                <p className="text-sm text-slate-500 leading-relaxed line-clamp-2">
+                  {template.desc}
+                </p>
+
+                <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-blue-600 font-semibold text-xs uppercase tracking-wider group-hover/template-card:text-blue-700 transition-all">
                   <span>View Details</span>
                   <ArrowRight className="w-3 h-3" />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
 
       </div>
     </Card>

@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,28 +6,12 @@ datasource db {
   provider = "postgresql"
 }
 
-// ============================================
-// Auth Tables
-// ============================================
-
-// User Role Enum
-enum UserRole {
-  USER
-  ADMIN
-  STUDENT
-  INSTRUCTOR
-  INSTITUTION_ADMIN
-  SUPER_ADMIN
-}
-
-// User Model
 model User {
   id                      String                   @id @default(cuid())
   name                    String
   email                   String                   @unique
-  password_hash           String?
+  password_hash           String
   role                    UserRole                 @default(USER)
-  auth_provider           String                   @default("email")
   institution_id          String?
   isActive                Boolean                  @default(true)
   isVerified              Boolean                  @default(false)
@@ -47,7 +25,6 @@ model User {
   refreshTokens           RefreshToken[]
   institution             Institution?             @relation(fields: [institution_id], references: [id])
   ownedWebsites           Website[]                @relation("WebsiteOwner")
-  assets                  Asset[]
 
   @@index([email])
   @@index([deleted_at])
@@ -67,7 +44,6 @@ model Institution {
   @@map("institutions")
 }
 
-// Password Reset Token Model
 model PasswordResetToken {
   id         String   @id @default(cuid())
   userId     String
@@ -75,9 +51,7 @@ model PasswordResetToken {
   expiresAt  DateTime
   isUsed     Boolean  @default(false)
   created_at DateTime @default(now())
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([token_hash])
@@ -85,16 +59,13 @@ model PasswordResetToken {
   @@map("password_reset_tokens")
 }
 
-// Email Verification Token Model
 model EmailVerificationToken {
   id         String   @id @default(cuid())
   userId     String
   token_hash String   @unique
   expiresAt  DateTime
   created_at DateTime @default(now())
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([token_hash])
@@ -102,7 +73,6 @@ model EmailVerificationToken {
   @@map("email_verification_tokens")
 }
 
-// Refresh Token Model
 model RefreshToken {
   id         String   @id @default(cuid())
   userId     String
@@ -110,11 +80,9 @@ model RefreshToken {
   sessionId  String
   expiresAt  DateTime
   isRevoked  Boolean  @default(false)
-  replacedBy String? // token_hash of the new token that replaces this one
+  replacedBy String?
   created_at DateTime @default(now())
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([token_hash])
@@ -122,39 +90,23 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
-// ============================================
-// Website Tables
-// ============================================
-
-// Website Status Enum
-enum WebsiteStatus {
-  DRAFT
-  PUBLISHED
-  DELETED
-}
-
-// Website Model
 model Website {
-  id       String        @id @default(cuid())
-  name     String
-  owner_id String
-  status   WebsiteStatus @default(DRAFT)
-
-  homepageId  String? @unique
-  settings_id String  @unique
-
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  deleted_at DateTime?
-  institution_id String?
-
-  // Relations
-  institution  Institution?  @relation(fields: [institution_id], references: [id])
-  owner        User          @relation("WebsiteOwner", fields: [owner_id], references: [id], onDelete: Cascade)
-  settings     Settings      @relation(fields: [settings_id], references: [id])
-  homepage     Page?         @relation("Homepage", fields: [homepageId], references: [id], onDelete: SetNull)
-  globalDesign GlobalDesign? // back-reference; FK lives on GlobalDesign
-  pages        Page[]        @relation("WebsitePages")
+  id                        String        @id @default(cuid())
+  name                      String
+  owner_id                  String
+  status                    WebsiteStatus @default(DRAFT)
+  thumbnail_url             String?
+  currentDraftVersionId     String?
+  currentPublishedVersionId String?
+  created_at                DateTime      @default(now())
+  updated_at                DateTime      @updatedAt
+  deleted_at                DateTime?
+  institution_id            String?
+  content                   Json?
+  settings_id               String?       @unique
+  institution               Institution?  @relation(fields: [institution_id], references: [id])
+  owner                     User          @relation("WebsiteOwner", fields: [owner_id], references: [id], onDelete: Cascade)
+  settings                  Settings?     @relation(fields: [settings_id], references: [id], onDelete: Cascade)
 
   @@index([owner_id])
   @@index([status])
@@ -162,182 +114,29 @@ model Website {
   @@map("websites")
 }
 
-// Settings Model (for website configuration)
 model Settings {
-  id           String @id @default(cuid())
-  seo          Json? // {title, description, favicon}
-  contact      Json? // {email, phone, address}
-  social_links Json? // {facebook, twitter, linkedin}
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  // Relations
-  website Website?
+  id           String   @id @default(cuid())
+  seo          Json?
+  contact      Json?
+  social_links Json?
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  website      Website?
 
   @@map("settings")
 }
 
-// ============================================
-// Presentation Tables (Pages, Sections, Templates, Global Design)
-// ============================================
-
-// Global Design
-model GlobalDesign {
-  id                String  @id @default(cuid())
-  website_id        String  @unique // FK for 1-to-1 with Website
-  websiteTemplateId String?
-
-  global_styles Json
-
-  // Relations
-  website         Website          @relation(fields: [website_id], references: [id], onDelete: Cascade)
-  websiteTemplate WebsiteTemplate? @relation(fields: [websiteTemplateId], references: [id], onDelete: SetNull)
-  globalSlots     GlobalSlot[]
-
-  @@index([website_id])
-  @@map("global_design")
+enum UserRole {
+  USER
+  ADMIN
+  STUDENT
+  INSTRUCTOR
+  INSTITUTION_ADMIN
+  SUPER_ADMIN
 }
 
-enum GlobalSlotType {
-  NAVBAR
-  FOOTER
-}
-
-// GlobalSlot — storing Global Components
-model GlobalSlot {
-  id                  String         @id @default(cuid())
-  global_design_id    String
-  type                GlobalSlotType
-  section_template_id String?
-  props               Json
-
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  deleted_at DateTime?
-
-  global_design    GlobalDesign     @relation(fields: [global_design_id], references: [id], onDelete: Cascade)
-  section_template SectionTemplate? @relation(fields: [section_template_id], references: [id], onDelete: SetNull)
-
-  @@unique([global_design_id, type])
-  @@map("global_slots")
-}
-
-// Page Model
-model Page {
-  id          String @id @default(cuid())
-  name        String
-  slug        String
-  website_id  String
-  meta        Json
-  page_styles Json?
-
-  created_at DateTime  @default(now())
-  deleted_at DateTime?
-
-  // Relation
-  website    Website   @relation("WebsitePages", fields: [website_id], references: [id], onDelete: Cascade)
-  homepageOf Website?  @relation("Homepage")
-  sections   Section[]
-
-  @@unique([slug, website_id])
-  @@index([slug, website_id])
-  @@index([deleted_at])
-  @@map("pages")
-}
-
-// Section Model
-model Section {
-  id                String  @id @default(cuid())
-  page_id           String
-  category          String
-  sectionTemplateId String?
-  order             Int
-  props             Json
-
-  created_at DateTime  @default(now())
-  deleted_at DateTime?
-
-  // Relation
-  page            Page             @relation(fields: [page_id], references: [id], onDelete: Cascade)
-  sectionTemplate SectionTemplate? @relation(fields: [sectionTemplateId], references: [id], onDelete: SetNull)
-
-  @@index([page_id, order])
-  @@index([deleted_at])
-  @@map("sections")
-}
-
-// ================================
-// Template Tables (website, section)
-// ================================
-
-// Website Template
-model WebsiteTemplate {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
-  category    String
-
-  global_styles Json?
-  navbar        Json?
-  footer        Json?
-  home_layout   Json?
-
-  created_at    DateTime       @default(now())
-  deleted_at    DateTime?
-  globalDesigns GlobalDesign[]
-
-  @@index([name])
-  @@index([category])
-  @@index([deleted_at])
-  @@map("website_templates")
-}
-
-// Section Template
-model SectionTemplate {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
-  category    String
-  props       Json
-
-  created_at DateTime  @default(now())
-  deleted_at DateTime?
-
-  // Relations
-  sections    Section[]
-  globalSlots GlobalSlot[]
-
-  @@index([name])
-  @@index([category])
-  @@index([deleted_at])
-  @@map("section_templates")
-}
-
-// ============================
-// Assets Tables (images, videos)
-// ============================
-
-// Asset Model
-model Asset {
-  id      String @id @default(cuid())
-  key     String
-  url     String
-  user_id String
-
-  name     String
-  type     String
-  category String
-  size     Int
-
-  createdAt DateTime  @default(now())
-  deletedAt DateTime?
-
-  // Relations
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@unique([key])
-  @@index([user_id])
-  @@index([deletedAt])
-  @@map("assets")
+enum WebsiteStatus {
+  DRAFT
+  PUBLISHED
+  DELETED
 }

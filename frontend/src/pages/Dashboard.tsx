@@ -23,65 +23,10 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import GradientButton from '@/components/ui/GradientButton';
 
 import { templatesList } from '@/lib/templates';
-import { loginUser,  logoutUser } from "../api/auth";
+import { loginUser, logoutUser } from "../api/auth";
+import statsApi from "../api/stats";
 
 
-
-
-interface Website {
-    id: string;
-    name: string;
-    templateId: string;
-    lastEdited: string;
-    status: 'Draft' | 'Published';
-}
-
-interface Asset {
-    id: string;
-    name: string;
-    url: string;
-    type: 'image' | 'video';
-    size: string;
-}
-
-interface OverviewCardProps {
-    title: string;
-    value: string;
-    icon: React.ReactNode;
-    description?: string;
-    iconBgClass: string;
-    iconColorClass: string;
-}
-
-interface NavItemProps {
-    icon: React.ReactNode;
-    label: string;
-    to: string;
-    activeColor?: string;
-    hoverBg?: string;
-    hoverText?: string;
-    defaultText?: string;
-}
-
-interface Template {
-    id: string;
-    name: string;
-    image: string;
-    desc: string;
-    icon: React.ElementType;
-    category: string;
-}
-
-interface WebsiteCardProps {
-    site: Website;
-    index: number;
-    onDelete: () => void;
-    onEdit: () => void;
-}
-
-interface EmptyStateProps {
-    onAction: () => void;
-}
 
 
 // OverviewCard component
@@ -204,7 +149,7 @@ const WebsiteCard: React.FC<WebsiteCardProps> = ({ site, index, onDelete, onEdit
                 <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${site.status === 'Published'
                     ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
                     : 'bg-amber-50 text-amber-600 border border-amber-100'
-                }`}>
+                    }`}>
                     <div className={`w-1.5 h-1.5 rounded-full ${site.status === 'Published' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
                     {site.status}
                 </div>
@@ -459,7 +404,7 @@ const SettingsView: React.FC = () => {
 const Dashboard = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { websites, createWebsite, deleteWebsite } = useBuilderStore();
+    const { websites, fetchWebsites, createWebsite, deleteWebsite } = useBuilderStore();
     const isMobile = useIsMobile();
     const user = JSON.parse(localStorage.getItem("user"));
     const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -475,74 +420,70 @@ const Dashboard = () => {
     const [isUserProfileDialogOpen, setIsUserProfileDialogOpen] = useState(false);
     const [sortBy, setSortBy] = useState('recent'); // 'recent' or 'name'
     const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'draft', 'published'
-
-    const [userName, setUserName] = useState('John Doe');
-    const [userEmail, setUserEmail] = useState('john@example.com');
-    const [tempUserName, setTempUserName] = useState(userName);
-    const [tempUserEmail, setTempUserEmail] = useState(userEmail);
-    const { toast } = useToast();
-
-    useEffect(() => {
-        if (isUserProfileDialogOpen) {
-            setTempUserName(userName);
-            setTempUserEmail(userEmail);
-        }
-    }, [isUserProfileDialogOpen, userName, userEmail]);
-
-    const handleProfileSave = () => {
-        // In a real app, this would involve API calls to update user data
-        setUserName(tempUserName);
-        setUserEmail(tempUserEmail);
-        console.log('Saving profile:', { userName: tempUserName, userEmail: tempUserEmail });
-        toast({ title: "Profile Updated", description: "Your profile has been updated successfully." });
-        setIsUserProfileDialogOpen(false);
-    };
-
-    const getInitials = (name: string) => {
-        if (!name) return '';
-        const parts = name.split(' ').filter(Boolean); // Filter out empty strings from multiple spaces
-        let initials = '';
-        if (parts.length > 1 && parts[1].length > 0) {
-            initials = parts[0][0] + parts[1][0];
-        } else if (parts[0] && parts[0].length > 0) {
-            initials = parts[0][0];
-        }
-        return initials.toUpperCase();
-    };
+    const [stats, setStats] = useState({
+        totalWebsites: 0,
+        totalUsers: 0,
+        activeDeployments: 0,
+        totalOrganizations: 0
+    });
+    const [isLoadingStats, setIsLoadingStats] = useState(true);
 
     const adminRoutes = [
         '/dashboard/users',
+        '/dashboard/organizations',
         '/dashboard/websites',
         '/dashboard/deployment',
         '/dashboard/settings',
     ];
 
     useEffect(() => {
-        const userDashboardRoutes = ['/dashboard/templates', '/dashboard/assets'];
+        if (!user) {
+            navigate('/');
+            return;
+        }
         if (!isAdmin && adminRoutes.includes(location.pathname)) {
             navigate('/dashboard');
         } else if (isAdmin && userDashboardRoutes.includes(location.pathname)) {
             // If in admin mode and on a user-specific dashboard route, redirect to main admin dashboard
             navigate('/dashboard');
         }
-    }, [isAdmin, location.pathname, navigate]);
+    }, [user, isAdmin, location.pathname, navigate]);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                setIsLoadingStats(true);
+                const response = await statsApi.getDashboardStats();
+                if (response.data && response.data.data) {
+                    setStats(response.data.data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch dashboard stats:", err);
+            } finally {
+                setIsLoadingStats(false);
+            }
+        };
+
+        fetchStats();
+        fetchWebsites();
+    }, [isAdmin, fetchWebsites]);
 
 
     const handleLogout = async () => {
-  try {
-    setIsLoggingOut(true);
+        try {
+            setIsLoggingOut(true);
 
-    await logoutUser();
+            await logoutUser();
 
-    localStorage.removeItem("user"); // ✅ clear user
-    navigate("/");
-  } catch (err) {
-    console.error(err);
-    alert("Logout failed");
-  } finally {
-    setIsLoggingOut(false);
-  }
-};
+            localStorage.removeItem("user"); // ✅ clear user
+            navigate("/");
+        } catch (err) {
+            console.error(err);
+            alert("Logout failed");
+        } finally {
+            setIsLoggingOut(false);
+        }
+    };
 
 
     const handleDialogClose = (open: boolean) => {
@@ -554,6 +495,7 @@ const Dashboard = () => {
     };
 
     const filteredWebsites = React.useMemo(() => {
+        if (!websites) return [];
         let tempWebsites = websites.filter(site =>
             site.name.toLowerCase().includes(searchQuery.toLowerCase())
         );
@@ -571,9 +513,9 @@ const Dashboard = () => {
         return tempWebsites;
     }, [websites, searchQuery, sortBy, filterStatus]);
 
-    const handleCreateSite = () => {
+    const handleCreateSite = async () => {
         if (newSiteName.trim()) {
-            const id = createWebsite(newSiteName, selectedTemplate);
+            const id = await createWebsite(newSiteName, selectedTemplate);
             setIsDialogOpen(false);
             setNewSiteName('');
             setSelectedTemplate('blank');
@@ -633,6 +575,9 @@ const Dashboard = () => {
                         <div className="pt-1">
                             <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest px-3 mb-1">System</p>
                             <NavItem icon={<Users className="w-4 h-4" />} label="Users" to="/dashboard/users" activeColor="text-white" />
+                            {user?.role === 'SUPER_ADMIN' && (
+                                <NavItem icon={<Building2 className="w-4 h-4" />} label="Organizations" to="/dashboard/organizations" activeColor="text-white" />
+                            )}
                             <NavItem icon={<Layout className="w-4 h-4" />} label="Websites" to="/dashboard/websites" activeColor="text-white" />
                             <NavItem icon={<Activity className="w-4 h-4" />} label="Deployment Monitoring" to="/dashboard/deployment" activeColor="text-white" />
                             <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" to="/dashboard/settings" activeColor="text-white" />
@@ -649,7 +594,7 @@ const Dashboard = () => {
                         <p className="text-[10px] text-slate-400">3 of 10 projects used</p>
                     </div> */}
 
-                    {user?.role === 'ADMIN' && (
+                    {(user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' || user?.role === 'INSTITUTION_ADMIN') && (
                         <GradientButton
                             className="w-full justify-start py-2 px-3 text-sm"
                             onClick={() => setIsAdmin(!isAdmin)}
@@ -662,12 +607,12 @@ const Dashboard = () => {
                         </GradientButton>
                     )}
 
-                  <div
-  className={`flex items-center gap-3 p-2 rounded-xl transition-colors border border-transparent 
+                    <div
+                        className={`flex items-center gap-3 p-2 rounded-xl transition-colors border border-transparent 
     ${isLoggingOut ? "opacity-50 cursor-not-allowed" : "hover:bg-white/10 cursor-pointer hover:border-slate-700"}
   `}
-  onClick={!isLoggingOut ? handleLogout : undefined}
->
+                        onClick={!isLoggingOut ? handleLogout : undefined}
+                    >
 
                         <div className="relative">
                             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-sm">{getInitials(userName)}</div>
@@ -675,8 +620,8 @@ const Dashboard = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-white truncate">
-  {isLoggingOut ? "Logging out..." : (user?.name || "User")}
-</p>
+                                {isLoggingOut ? "Logging out..." : (user?.name || "User")}
+                            </p>
 
                             <p className="text-xs text-slate-400 truncate">Pro Plan</p>
                         </div>
@@ -703,9 +648,14 @@ const Dashboard = () => {
                                     </Button>
                                 )}
                                 <div>
-                                    <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">Project Hub</h2>
+                                    <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+                                        {isAdmin ? (user?.institution?.name || "Buildora Master Hub") : "Project Hub"}
+                                    </h2>
                                     <p className="text-lg text-slate-600 flex items-center gap-2 mt-1">
-                                        Welcome back! You have <span className="text-indigo-600 font-medium">{websites.length} active projects</span>
+                                        {isAdmin
+                                            ? "Global platform overview and tenant management"
+                                            : <>Welcome back! You have <span className="text-indigo-600 font-medium">{websites.length} active projects</span></>
+                                        }
                                     </p>
                                 </div>
                             </div>
@@ -713,10 +663,10 @@ const Dashboard = () => {
                             <div className="flex items-center gap-4">
                                 <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
                                     <DialogTrigger asChild>
-                                        <GradientButton 
-                                            onClick={() => setIsDialogOpen(true)} 
-                                            className="h-11 px-6 text-base w-auto rounded-full" 
-                                            icon={<Plus className="w-5 h-5 text-purple-600 group-hover:text-indigo-600 transition-colors" />} 
+                                        <GradientButton
+                                            onClick={() => setIsDialogOpen(true)}
+                                            className="h-11 px-6 text-base w-auto rounded-full"
+                                            icon={<Plus className="w-5 h-5 text-purple-600 group-hover:text-indigo-600 transition-colors" />}
                                         >
                                             New Project
                                         </GradientButton>
@@ -754,7 +704,7 @@ const Dashboard = () => {
                                                         disabled={!newSiteName.trim()}
                                                         className="w-full h-14 font-bold text-lg flex items-center justify-center group/button-create-site active:scale-[0.98] rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/30 transition-all"
                                                         icon={<ArrowRight className="w-5 h-5 group-hover/button-create-site:translate-x-1 transition-transform" />}>
-                                                        Start Building 
+                                                        Start Building
                                                     </Button>
                                                 </div>
                                             </div>
@@ -868,8 +818,8 @@ const Dashboard = () => {
                         <section className="grid gap-6 mb-10 md:grid-cols-2 lg:grid-cols-4">
                             <OverviewCard
                                 title="Total Websites"
-                                value="1,234"
-                                description="+20.1% from last month"
+                                value={isLoadingStats ? "..." : stats.totalWebsites}
+                                description="Real-time project count"
                                 icon={<Globe className="w-5 h-5" />}
                                 iconBgClass="bg-gradient-to-br from-purple-600 to-indigo-600"
                                 iconColorClass="text-white"
@@ -877,8 +827,8 @@ const Dashboard = () => {
                             {isAdmin && (
                                 <OverviewCard
                                     title="Active Users"
-                                    value="250"
-                                    description="+15% from last month"
+                                    value={isLoadingStats ? "..." : stats.totalUsers}
+                                    description="Platform active accounts"
                                     icon={<Users className="w-5 h-5" />}
                                     iconBgClass="bg-blue-100"
                                     iconColorClass="text-blue-600"
@@ -886,13 +836,22 @@ const Dashboard = () => {
                             )}
                             <OverviewCard
                                 title="Templates Available"
-                                value="42"
-                                description="New templates added frequently"
+                                value={templatesList.length}
+                                description="Ready to use designs"
                                 icon={<Layout className="w-5 h-5" />}
                                 iconBgClass="bg-gradient-to-br from-emerald-600 to-teal-600"
                                 iconColorClass="text-white"
                             />
-
+                            {isAdmin && (
+                                <OverviewCard
+                                    title="Active Deployments"
+                                    value={isLoadingStats ? "..." : stats.activeDeployments}
+                                    description="Total sites currently online"
+                                    icon={<Activity className="w-5 h-5" />}
+                                    iconBgClass="bg-rose-100"
+                                    iconColorClass="text-rose-600"
+                                />
+                            )}
                         </section>
 
                         {/* Search and Filters */}
@@ -1200,12 +1159,12 @@ const Dashboard = () => {
                                 </div>
                             </div>
 
-                            
 
-                            
+
+
                         </div>
                     </div>
-                 ) : (
+                ) : (
                     <Outlet key={location.pathname} />
                 )}
             </main>

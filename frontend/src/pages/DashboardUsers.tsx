@@ -46,41 +46,60 @@ import {
 import { Users, UserPlus, Search, Edit, UserX, UserCheck, UserCog, AlertTriangle, Clock, CalendarDays, ShieldCheck, User as UserIcon, Briefcase, CheckCircle, AlertCircle, XCircle, MoreVertical, Trash2, ListFilter } from 'lucide-react'; // Import icons
 import { useToast } from '@/components/ui/use-toast';
 import UserShimmer from '@/components/dashboard/UserShimmer';
+import useBuilderStore from '@/store/useBuilderStore';
+import institutionApi from '@/api/institution';
 import GradientButton from '@/components/ui/GradientButton';
-import { getUsers, updateUserRole, updateUserStatus, restoreUser } from '../api/user';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { getUsers, updateUserRole, updateUserStatus, restoreUser, createUser } from '../api/user';
 
 interface User {
   id: string;
   name: string;
   email: string;
   role: string;
-  status: 'Active' | 'Inactive' | 'Suspended'; // Refined status types
+  institution_id: string | null;
+  institution?: { name: string };
+  status: 'Active' | 'Inactive' | 'Suspended';
   createdAt: string;
   lastLogin: string;
 }
 
+interface Institution {
+  id: string;
+  name: string;
+}
+
 export default function DashboardUsers() {
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const orgFilter = searchParams.get('org');
+  
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
-  const [newUser, setNewUser] = useState<Omit<User, 'id' | 'createdAt' | 'lastLogin'> & { id?: string }>({ name: '', email: '', role: 'User', status: 'Active' });
+  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'USER', institution_id: '', status: 'Active' });
+  const [organizations, setOrganizations] = useState<Institution[]>([]);
+  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
+
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
   const [userToDeactivate, setUserToDeactivate] = useState<User | null>(null);
 
   useEffect(() => {
     const fetchUsersData = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-        const res = await getUsers({ limit: 100 });
+        const res = await getUsers({ institution_id: orgFilter || undefined });
         const fetchedUsers = res.data.users.map((u: any) => ({
           id: u.id,
           name: u.name,
           email: u.email,
-          role: u.role === 'ADMIN' ? 'Admin' : 'User',
+          role: u.role === 'SUPER_ADMIN' ? 'Super Admin' : (u.role === 'INSTITUTION_ADMIN' ? 'Inst. Admin' : 'User'),
+          institution_id: u.institution_id,
+          institution: u.institution,
           status: u.isActive ? 'Active' : (u.deleted_at ? 'Suspended' : 'Inactive'),
           createdAt: new Date(u.created_at).toISOString().split('T')[0],
           lastLogin: u.lastLoginAt ? new Date(u.lastLoginAt).toISOString().split('T')[0] : 'Never',
@@ -93,8 +112,20 @@ export default function DashboardUsers() {
         setIsLoading(false);
       }
     };
+
+    const fetchOrgs = async () => {
+        if (!isSuperAdmin) return;
+        try {
+            const res = await institutionApi.list();
+            setOrganizations(res.data?.data || []);
+        } catch (err) {
+            console.error("Failed to fetch organizations", err);
+        }
+    }
+
     fetchUsersData();
-  }, [toast]);
+    fetchOrgs();
+  }, [toast, isSuperAdmin]);
 
   const handleEditClick = (user: User) => {
     setEditingUser(user);
@@ -236,7 +267,7 @@ export default function DashboardUsers() {
 
 
   const handleAddUserClick = () => {
-    setNewUser({ name: '', email: '', role: 'User', status: 'Active' }); // Reset form
+    setNewUser({ name: '', email: '', password: 'Password123!', role: 'USER', institution_id: currentUser?.institution_id || '', status: 'Active' }); // Reset form
     setIsAddUserModalOpen(true);
   };
 
@@ -245,7 +276,7 @@ export default function DashboardUsers() {
     setNewUser({ ...newUser, [id]: value });
   };
 
-  const handleNewUserSelectChange = (id: keyof Omit<User, 'id' | 'createdAt' | 'lastLogin'>, value: string) => {
+  const handleNewUserSelectChange = (id: string, value: string) => {
     setNewUser({ ...newUser, [id]: value });
   };
 
@@ -260,29 +291,38 @@ export default function DashboardUsers() {
       return;
     }
 
-    const newId = (parseInt(users[users.length - 1]?.id || '0') + 1).toString(); // Simple ID generation, handles empty users array
-    const now = new Date().toISOString().split('T')[0];
-    const userToAdd: User = {
-      id: newId,
-      name: newUser.name,
-      email: newUser.email,
-      role: newUser.role,
-      status: newUser.status,
-      createdAt: now,
-      lastLogin: now,
-    };
+    try {
+      const res = await createUser(newUser);
+      const u = res.data.user;
+      const userToAdd: User = {
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: u.role === 'SUPER_ADMIN' ? 'Super Admin' : (u.role === 'INSTITUTION_ADMIN' ? 'Inst. Admin' : 'User'),
+        institution_id: u.institution_id,
+        institution: organizations.find(o => o.id === u.institution_id),
+        status: 'Active',
+        createdAt: new Date().toISOString().split('T')[0],
+        lastLogin: 'Never',
+      };
 
-    setTimeout(() => {
       setUsers((prevUsers) => [...prevUsers, userToAdd]);
       setIsAddUserModalOpen(false);
-      setNewUser({ name: '', email: '', role: 'User', status: 'Active' });
+      setNewUser({ name: '', email: '', password: '', role: 'USER', institution_id: '' });
       toast({
         title: "User Added! 👍",
         description: `New user ${userToAdd.name} has been successfully created.`, 
         variant: "themed",
         icon: <CheckCircle className="h-5 w-5 text-white" />,
       });
-    }, 300);
+    } catch (error: any) {
+        console.error("Failed to create user", error);
+        toast({
+            title: "Creation Failed",
+            description: error.response?.data?.message || "Failed to create user",
+            variant: "destructive"
+        });
+    }
   };
 
 
@@ -374,6 +414,7 @@ export default function DashboardUsers() {
               <TableHead className="w-[40px] px-2 text-center"><input type="checkbox" className="form-checkbox h-4 w-4 text-blue-600 rounded" /></TableHead>
               <TableHead className="min-w-[200px] px-4 py-3 text-slate-500">User</TableHead>
               <TableHead className="min-w-[100px] px-4 py-3 text-slate-500">Role</TableHead>
+              <TableHead className="min-w-[150px] px-4 py-3 text-slate-500">Organization</TableHead>
               <TableHead className="min-w-[120px] px-4 py-3 text-slate-500">Status</TableHead>
               <TableHead className="min-w-[140px] px-4 py-3 text-slate-500">
                 <span className="flex items-center gap-1.5">
@@ -409,15 +450,20 @@ export default function DashboardUsers() {
                   <TableCell className="px-4 py-3">
                     <Badge 
                       className={
-                        user.role === "Admin"
+                        user.role.includes("Admin")
                           ? "bg-purple-100 text-purple-700 hover:bg-purple-100/80"
                           : "bg-slate-100 text-slate-600 hover:bg-slate-100/80"
                       }
                     >
-                      {user.role === "Admin" && <ShieldCheck className="w-3 h-3 mr-1" />}
+                      {user.role.includes("Admin") && <ShieldCheck className="w-3 h-3 mr-1" />}
                       {user.role === "User" && <UserIcon className="w-3 h-3 mr-1" />}
                       {user.role}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="px-4 py-3">
+                    <span className="text-sm font-medium text-slate-700">
+                        {user.institution?.name || (user.institution_id === null ? "Platform" : "Unknown")}
+                    </span>
                   </TableCell>
                   <TableCell className="px-4 py-3">
                     <Badge
@@ -525,7 +571,8 @@ export default function DashboardUsers() {
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Admin">Admin</SelectItem>
+                  <SelectItem value="Super Admin">Super Admin</SelectItem>
+                  <SelectItem value="Inst. Admin">Inst. Admin</SelectItem>
                   <SelectItem value="User">User</SelectItem>
                 </SelectContent>
               </Select>
@@ -598,11 +645,44 @@ export default function DashboardUsers() {
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Admin">Admin</SelectItem>
-                  <SelectItem value="User">User</SelectItem>
+                  <SelectItem value="INSTITUTION_ADMIN">Inst. Admin</SelectItem>
+                  <SelectItem value="USER">User</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+              <Label htmlFor="password" className="md:text-right">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={newUser.password}
+                onChange={handleNewUserChange}
+                className="col-span-1 md:col-span-3"
+              />
+            </div>
+            {isSuperAdmin && (
+                <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+                <Label htmlFor="institution_id" className="md:text-right">
+                    Organization
+                </Label>
+                <Select
+                    value={newUser.institution_id}
+                    onValueChange={(value) => handleNewUserSelectChange("institution_id", value)}
+                >
+                    <SelectTrigger className="col-span-1 md:col-span-3">
+                    <SelectValue placeholder="Select Organization" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    <SelectItem value="">Platform (None)</SelectItem>
+                    {organizations.map(org => (
+                        <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
+                    ))}
+                    </SelectContent>
+                </Select>
+                </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="status" className="md:text-right">
                 Status

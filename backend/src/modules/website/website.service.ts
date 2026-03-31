@@ -12,11 +12,11 @@ class WebsiteService {
         this.userDao = new UserDao();
     }
 
-    async createWebsite(userId: string, data: CreateWebsiteInput) {
-        return await this.websiteDao.createWebsite(userId, data);
-
-        // Create new Draft version
-        // Generate new subdomain
+    async createWebsite(userId: string, institutionId: string | null, data: CreateWebsiteInput) {
+        return await this.websiteDao.createWebsite(userId, { 
+            ...data, 
+            institution_id: institutionId || undefined 
+        } as any);
     }
 
     async listWebsites(userId: string, filters: ListWebsitesQuerySchema) {
@@ -27,8 +27,9 @@ class WebsiteService {
         return await this.websiteDao.listWebsites(filters);
     }
 
-    async getSingleWebsite(website: Website) {
-        const settingsPromise = this.websiteDao.getWebsiteSettings(website.settings_id!);
+    async getSingleWebsite(website: any) {
+        const settingsId = website.settings?.id || website.settings_id;
+        const settingsPromise = settingsId ? this.websiteDao.getWebsiteSettings(settingsId) : Promise.resolve(null);
         const ownerPromise = this.userDao.findUserById(website.owner_id);
 
         const [settings, owner] = await Promise.all([settingsPromise, ownerPromise]);
@@ -74,11 +75,12 @@ class WebsiteService {
         // generate new subdomain
     }
 
-    async updateWebsiteSettings(website: Website, data: UpdateWebsiteSettingsInput) {
+    async updateWebsiteSettings(website: any, data: UpdateWebsiteSettingsInput) {
         if (website.status === WebsiteStatus.DELETED) {
             throw Error("Website Deleted");
         }
-        const settingId = website.settings_id!;
+        const settingId = website.settings?.id || website.settings_id;
+        if (!settingId) throw Error("Settings not found");
         await this.websiteDao.updateWebsiteSettings(settingId, data);
     }
 

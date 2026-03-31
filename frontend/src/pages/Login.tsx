@@ -22,9 +22,9 @@ interface LoginFormProps {
   setLoginData: React.Dispatch<React.SetStateAction<{ email: string; password: string }>>;
   handleLogin: () => void;
   setIsSignup: (v: boolean) => void;
-  isLoadingLogin: boolean; 
-  showPassword: boolean;      
-  setShowPassword: (v: boolean) => void; 
+  isLoadingLogin: boolean;
+  showPassword: boolean;
+  setShowPassword: (v: boolean) => void;
 
 }
 
@@ -60,7 +60,7 @@ const LoginForm = ({
         <label className="text-xs font-bold text-slate-800 mb-2 block">Password</label>
         <div className="relative">
           <input
-              type={showPassword ? "text" : "password"}   // ✅ toggle
+            type={showPassword ? "text" : "password"}   // ✅ toggle
 
             placeholder="Input your password"
             value={loginData.password}
@@ -68,9 +68,9 @@ const LoginForm = ({
             className="w-full bg-white border border-slate-200 rounded-xl py-4 pl-4 pr-12 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all outline-none"
           />
           <Eye
-  onClick={() => setShowPassword(!showPassword)}   // ✅ toggle
-  className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 cursor-pointer hover:text-slate-600"
-/>
+            onClick={() => setShowPassword(!showPassword)}   // ✅ toggle
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 cursor-pointer hover:text-slate-600"
+          />
 
         </div>
       </div>
@@ -116,9 +116,9 @@ interface SignupFormProps {
   setSignupData: React.Dispatch<React.SetStateAction<{ name: string; email: string; password: string }>>;
   handleSignup: () => void;
   setIsSignup: (v: boolean) => void;
-  isLoadingSignup: boolean; 
+  isLoadingSignup: boolean;
   showSignupPassword: boolean;
-setShowSignupPassword: (v: boolean) => void;
+  setShowSignupPassword: (v: boolean) => void;
 
 }
 
@@ -162,16 +162,16 @@ const SignupForm = ({
         <label className="text-xs font-bold text-slate-800 mb-1 block">Password</label>
         <div className="relative">
           <input
-              type={showSignupPassword ? "text" : "password"}
+            type={showSignupPassword ? "text" : "password"}
 
             value={signupData.password}
             onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
             className="w-full bg-white border border-slate-200 rounded-xl py-4 pl-4 pr-12 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all outline-none"
           />
-         <Eye
-  onClick={() => setShowSignupPassword(!showSignupPassword)}
-  className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 cursor-pointer"
-/>
+          <Eye
+            onClick={() => setShowSignupPassword(!showSignupPassword)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 cursor-pointer"
+          />
 
         </div>
       </div>
@@ -215,7 +215,7 @@ export default function LoginSignup() {
   const [isLoadingLogin, setIsLoadingLogin] = useState(false);
   const [isLoadingSignup, setIsLoadingSignup] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
 
 
 
@@ -252,8 +252,9 @@ const [showSignupPassword, setShowSignupPassword] = useState(false);
   };
 
 
-  const loginProps = { loginData, setLoginData, handleLogin, setIsSignup, isLoadingLogin, showPassword, setShowPassword
- };
+  const loginProps = {
+    loginData, setLoginData, handleLogin, setIsSignup, isLoadingLogin, showPassword, setShowPassword
+  };
   const signupProps = { signupData, setSignupData, handleSignup, setIsSignup, isLoadingSignup, showSignupPassword, setShowSignupPassword };
 
 

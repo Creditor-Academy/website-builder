@@ -17,6 +17,35 @@ class UserService {
     this.authDao = new AuthDao();
   }
 
+  async createUser(currentUser: AuthUser, data: any) {
+    const { name, email, password, role, institution_id } = data;
+
+    // Check if user already exists
+    const existingUser = await this.userDao.findUserByEmail(email);
+    if (existingUser) {
+      throw new UnprocessableEntityError('User with this email already exists');
+    }
+
+    // Role and Institution scoping
+    let targetInstitutionId = institution_id || null;
+    if (currentUser.role !== UserRole.SUPER_ADMIN) {
+      // Non-super-admins can only create users in their own institution
+      targetInstitutionId = currentUser.institution_id;
+    }
+
+    const password_hash = await hashPassword(password);
+
+    return await this.userDao.createUser({
+      name,
+      email,
+      password_hash,
+      role: role || UserRole.USER,
+      institution_id: targetInstitutionId,
+      isVerified: true, // Admin-created users are pre-verified
+      isActive: true
+    } as any);
+  }
+
   async getProfile(userId: string) {
     const user = await this.userDao.findUserById(userId);
     if (!user) {

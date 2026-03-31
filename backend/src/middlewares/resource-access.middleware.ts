@@ -16,8 +16,13 @@ export const requireWebsiteOwnership = async (req: Request, res: Response, next:
         const website = await websiteDao.findWebsiteById(websiteId);
         if (!website) return res.status(404).json({ error: "Website not found" });
 
-        if (user.role !== UserRole.ADMIN && website.owner_id !== user.id) {
-            // User is neither ADMIN nor owner of the resource
+        const isAuthorized = user.role === UserRole.SUPER_ADMIN || 
+                             user.role === UserRole.ADMIN ||
+                             (user.role === UserRole.INSTITUTION_ADMIN && website.institution_id === user.institution_id) ||
+                             website.owner_id === user.id;
+
+        if (!isAuthorized) {
+            // User is neither ADMIN/SUPER_ADMIN nor owner of the resource
             return res.status(403).json({ error: "Access Denied" });
         }
 

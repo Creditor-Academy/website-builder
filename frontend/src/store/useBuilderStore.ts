@@ -81,14 +81,16 @@ export interface BuilderStore {
     historyIndex: number;
 
     setWebsites: (websites: Website[]) => void;
-    createWebsite: (name: string, template?: string) => string;
-    updateWebsite: (id: string, updates: Partial<Website>) => void;
+    fetchWebsites: (institutionId?: string, isAdmin?: boolean) => Promise<void>;
+    createWebsite: (name: string, template?: string, institutionId?: string) => Promise<string>;
+    updateWebsite: (id: string, updates: Partial<Website>) => Promise<void>;
     selectWebsite: (id: string) => void;
-    deleteWebsite: (id: string) => void;
+    deleteWebsite: (id: string) => Promise<void>;
     setActivePage: (pageId: string) => void;
     addPage: (pageData: Partial<Page>) => void;
     duplicatePage: (pageId: string) => void;
     deletePage: (pageId: string) => void;
+    saveActiveWebsite: () => Promise<void>;
     updatePageSEO: (pageId: string, seoUpdates: Partial<{ title: string; description: string }>) => void;
     updateWebsitePages: (newPages: Page[]) => void;
     addSection: (section: any, index?: number) => void;
@@ -148,41 +150,141 @@ const useBuilderStore = create<BuilderStore>()(
             // Actions
             setWebsites: (websites) => set({ websites }),
 
-            createWebsite: (name, template = 'blank') => {
-                const id = uuidv4();
-                const templateFn = TEMPLATE_MAP[template] || TEMPLATE_MAP.blank;
-                const homePage = templateFn();
-                const newWebsite: Website = {
-                    id,
-                    name,
-                    lastEdited: new Date().toISOString(),
-                    status: 'Draft',
-                    pages: [homePage],
-                    activePageId: homePage.id,
-                    templateId: template,
-                };
-
-                set((state) => ({
-                    websites: [...state.websites, newWebsite],
-                    activeWebsiteId: id,
-                    activePageId: homePage.id,
-                    history: [newWebsite.pages],
-                    historyIndex: 0,
-                    editor: {
-                        ...state.editor,
-                        tour: {
-                            isActive: true,
-                            step: 0,
-                            isFinished: false,
-                        }
+            fetchWebsites: async (institutionId?: string, isAdmin = false) => {
+                try {
+                    const { default: websiteApi } = await import('../api/website');
+                    let response;
+                    
+                    if (isAdmin) {
+                        response = await websiteApi.getWebsitesAll(institutionId ? { institution_id: institutionId } : undefined);
+                    } else {
+                        response = await websiteApi.getWebsites(institutionId ? { institution_id: institutionId } : undefined);
                     }
-                }));
-                return id;
+                    
+                    const rawWebsites = (response.data && response.data.websites) || [];
+                    const websitesFromBackend = Array.isArray(rawWebsites) ? rawWebsites : (rawWebsites.websites || []);
+                    
+                    const websites = websitesFromBackend.map((w: any) => ({
+                        id: w.id,
+                        name: w.name,
+                        status: w.status,
+                        lastEdited: w.updated_at || w.created_at,
+                        pages: w.content?.pages || [],
+                        activePageId: w.content?.activePageId || null,
+                        templateId: w.content?.templateId || 'blank',
+                        institution: w.institution,
+                        institution_id: w.institution_id,
+                        owner_id: w.owner_id,
+                        settings: w.settings
+                    }));
+                    
+                    set({ websites });
+                } catch (error) {
+                    console.error("Failed to fetch websites from backend:", error);
+                    set({ websites: [] });
+                }
             },
 
-            updateWebsite: (id, updates) => set((state) => ({
-                websites: state.websites.map(w => w.id === id ? { ...w, ...updates } : w)
-            })),
+            createWebsite: async (name, template = 'blank', institutionId?: string) => {
+                const templateFn = TEMPLATE_MAP[template] || TEMPLATE_MAP.blank;
+                const homePage = templateFn();
+                const initialContent = {
+                    pages: [homePage],
+                    activePageId: homePage.id,
+                    templateId: template
+                };
+
+                try {
+                    const { default: websiteApi } = await import('../api/website');
+                    const response = await websiteApi.createWebsite({ 
+                                name, 
+                                content: initialContent,
+                                ...(institutionId ? { institution_id: institutionId } : {})
+                            });
+                    
+                    const w = response.data.website;
+                    const newWebsite: Website = {
+                        id: w.id,
+                        name: w.name,
+                        lastEdited: w.updated_at || w.created_at,
+                        status: w.status,
+                        pages: initialContent.pages,
+                        activePageId: initialContent.activePageId,
+                        templateId: template
+                    };
+
+                    set((state) => ({
+                        websites: [...state.websites, newWebsite],
+                        activeWebsiteId: w.id,
+                        activePageId: homePage.id,
+                        history: [newWebsite.pages],
+                        historyIndex: 0,
+                        editor: {
+                            ...state.editor,
+                            tour: {
+                                isActive: true,
+                                step: 0,
+                                isFinished: false,
+                            }
+                        }
+                    }));
+                    return w.id;
+                } catch (error) {
+                    console.error("Failed to create website on backend:", error);
+                    throw error;
+                }
+            },
+
+            updateWebsite: async (id, updates) => {
+                set((state) => ({
+                    websites: state.websites.map(w => w.id === id ? { ...w, ...updates } : w)
+                }));
+                
+                // If the update includes content-affecting fields, sync to backend
+                if (updates.pages || updates.activePageId || updates.name || updates.status) {
+                    try {
+                        const { default: websiteApi } = await import('../api/website');
+                        const website = get().websites.find(w => w.id === id);
+                        if (website) {
+                            await websiteApi.updateWebsite(id, {
+                                name: website.name,
+                                status: website.status,
+                                content: {
+                                    pages: website.pages,
+                                    activePageId: website.activePageId,
+                                    templateId: website.templateId
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        console.error("Failed to update website on backend:", error);
+                    }
+                }
+            },
+
+            saveActiveWebsite: async () => {
+                const state = get();
+                const activeId = state.activeWebsiteId;
+                if (!activeId) return;
+                
+                const website = state.websites.find(w => w.id === activeId);
+                if (!website) return;
+                
+                try {
+                    const { default: websiteApi } = await import('../api/website');
+                    await websiteApi.updateWebsite(activeId, {
+                        name: website.name,
+                        status: website.status,
+                        content: {
+                            pages: website.pages,
+                            activePageId: website.activePageId,
+                            templateId: website.templateId
+                        }
+                    });
+                } catch (error) {
+                    console.error("Auto-save failed:", error);
+                }
+            },
 
             selectWebsite: (id) => {
                 const website = get().websites.find(w => w.id === id);
@@ -196,10 +298,18 @@ const useBuilderStore = create<BuilderStore>()(
                 }
             },
 
-            deleteWebsite: (id) => set((state) => ({
-                websites: state.websites.filter(w => w.id !== id),
-                activeWebsiteId: state.activeWebsiteId === id ? null : state.activeWebsiteId
-            })),
+            deleteWebsite: async (id: string) => {
+                try {
+                    const { default: websiteApi } = await import('../api/website');
+                    await websiteApi.deleteWebsite(id);
+                    set((state) => ({
+                        websites: state.websites.filter(w => w.id !== id),
+                        activeWebsiteId: state.activeWebsiteId === id ? null : state.activeWebsiteId
+                    }));
+                } catch (error) {
+                    console.error("Failed to delete website from backend:", error);
+                }
+            },
 
             setActivePage: (pageId) => set({ activePageId: pageId }),
 
@@ -227,6 +337,7 @@ const useBuilderStore = create<BuilderStore>()(
                 const newPages = [...website.pages, newPage];
                 get().updateWebsitePages(newPages);
                 set({ activePageId: newPage.id });
+                get().saveActiveWebsite();
             },
 
             duplicatePage: (pageId) => {
@@ -243,6 +354,7 @@ const useBuilderStore = create<BuilderStore>()(
                 };
 
                 get().updateWebsitePages([...website.pages, newPage]);
+                get().saveActiveWebsite();
             },
 
             deletePage: (pageId) => {
@@ -258,6 +370,7 @@ const useBuilderStore = create<BuilderStore>()(
                         w.id === state.activeWebsiteId ? { ...w, pages: newPages, activePageId: nextActiveId } : w
                     )
                 }));
+                get().saveActiveWebsite();
             },
 
             updatePageSEO: (pageId, seoUpdates) => {
@@ -267,6 +380,7 @@ const useBuilderStore = create<BuilderStore>()(
                     p.id === pageId ? { ...p, meta: { ...p.meta, ...seoUpdates } } : p
                 );
                 get().updateWebsitePages(newPages);
+                get().saveActiveWebsite();
             },
 
             updateWebsitePages: (newPages) => {
@@ -294,6 +408,7 @@ const useBuilderStore = create<BuilderStore>()(
                 newSections.splice(targetIndex, 0, section);
 
                 get().updateCurrentPage({ sections: newSections });
+                get().saveActiveWebsite();
             },
 
             updateSection: (sectionId, updates) => {
@@ -305,6 +420,7 @@ const useBuilderStore = create<BuilderStore>()(
                 );
 
                 get().updateCurrentPage({ sections: newSections });
+                get().saveActiveWebsite();
             },
 
             deleteSection: (sectionId) => {
@@ -313,6 +429,7 @@ const useBuilderStore = create<BuilderStore>()(
 
                 const newSections = page.sections.filter(s => s.id !== sectionId);
                 get().updateCurrentPage({ sections: newSections });
+                get().saveActiveWebsite();
             },
 
             reorderSections: (ids) => {
@@ -323,6 +440,7 @@ const useBuilderStore = create<BuilderStore>()(
                 const newSections = ids.map(id => sectionMap.get(id)).filter(Boolean);
 
                 get().updateCurrentPage({ sections: newSections });
+                get().saveActiveWebsite();
             },
 
             addComponent: (sectionId, component) => {
@@ -345,6 +463,7 @@ const useBuilderStore = create<BuilderStore>()(
                 });
 
                 get().updateCurrentPage({ sections: newSections });
+                get().saveActiveWebsite();
             },
 
             updateComponent: (sectionId, componentId, updates) => {
@@ -364,6 +483,7 @@ const useBuilderStore = create<BuilderStore>()(
                 });
 
                 get().updateCurrentPage({ sections: newSections });
+                get().saveActiveWebsite();
             },
 
             deleteComponent: (sectionId, componentId) => {
@@ -381,6 +501,7 @@ const useBuilderStore = create<BuilderStore>()(
                 });
 
                 get().updateCurrentPage({ sections: newSections });
+                get().saveActiveWebsite();
             },
 
             addAsset: (asset) => set((state) => ({
@@ -426,12 +547,14 @@ const useBuilderStore = create<BuilderStore>()(
                 const page = get().getActivePage();
                 if (!page) return;
                 get().updateCurrentPage({ navbar: { ...page.navbar, ...updates } });
+                get().saveActiveWebsite();
             },
 
             updateFooter: (updates) => {
                 const page = get().getActivePage();
                 if (!page) return;
                 get().updateCurrentPage({ footer: { ...page.footer, ...updates } });
+                get().saveActiveWebsite();
             },
 
             setEditorState: (updates) => set((state) => ({
@@ -464,6 +587,7 @@ const useBuilderStore = create<BuilderStore>()(
                         w.id === activeWebsiteId ? { ...w, pages: prevPages } : w
                     )
                 }));
+                get().saveActiveWebsite();
             },
 
             redo: () => {
