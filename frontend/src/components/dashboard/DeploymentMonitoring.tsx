@@ -214,9 +214,7 @@ export default function DeploymentMonitoring() {
           <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Deployment Monitoring</h2>
           <p className="text-slate-500 mt-1">Track and manage your website deployments.</p>
         </div>
-        <GradientButton className="w-full md:w-auto h-11" icon={<Activity className="w-5 h-5" />}>
-          New Deployment
-        </GradientButton>
+
       </div>
 
       {/* Search and Filters */}
@@ -356,11 +354,11 @@ export default function DeploymentMonitoring() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-slate-200 shadow-lg">
-                        <DropdownMenuItem onClick={() => handleRollback(deployment)} disabled={deployment.status === 'Pending' || deployment.status === 'Rolled Back'} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100">
+                        <DropdownMenuItem onClick={() => handleRollback(deployment)} disabled={deployment.status === 'Pending' || deployment.status === 'Rolled Back'} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100 focus:text-slate-900">
                           <RefreshCw className="w-4 h-4" /> <span>Rollback</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleViewLogs(deployment)} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100">
+                        <DropdownMenuItem onClick={() => handleViewLogs(deployment)} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100 focus:text-slate-900">
                           <FileText className="w-4 h-4" /> <span>View Logs</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>

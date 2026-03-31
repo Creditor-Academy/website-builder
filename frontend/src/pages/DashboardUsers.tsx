@@ -123,9 +123,10 @@ export default function DashboardUsers() {
       setEditingUser(null);
 
       toast({
-        title: "User Updated ✅",
-        description: `User ${editingUser.name} has been updated.`, 
-        icon: <CheckCircle className="h-5 w-5 text-emerald-500" />,
+        title: "User Updated! ✨",
+        description: `User ${editingUser.name} has been successfully updated.`, 
+        variant: "themed",
+        icon: <CheckCircle className="h-5 w-5 text-white" />,
       });
     } catch (error: any) {
       console.error("Failed to update user", error);
@@ -169,9 +170,10 @@ export default function DashboardUsers() {
       setIsDeactivateDialogOpen(false);
       setUserToDeactivate(null);
       toast({
-        title: "User Deactivated 🚫",
+        title: "User Deactivated! ⛔",
         description: `User ${userToDeactivate.name} has been deactivated.`, 
-        icon: <XCircle className="h-5 w-5 text-destructive" />,
+        variant: "themed",
+        icon: <XCircle className="h-5 w-5 text-white" />,
       });
     } catch (error: any) {
       console.error("Failed to deactivate user", error);
@@ -191,9 +193,10 @@ export default function DashboardUsers() {
         prevUsers.map((u) => (u.id === user.id ? { ...u, status: "Active" } : u))
       );
       toast({
-        title: "User Restored ✨",
+        title: "User Restored! 🟢",
         description: `User ${user.name} has been restored to active status.`, 
-        icon: <CheckCircle className="h-5 w-5 text-primary" />,
+        variant: "themed",
+        icon: <CheckCircle className="h-5 w-5 text-white" />,
       });
     } catch (error: any) {
       console.error("Failed to restore user", error);
@@ -249,7 +252,7 @@ export default function DashboardUsers() {
   const handleCreateNewUser = async () => {
     if (!newUser.name.trim() || !newUser.email.trim()) {
       toast({
-        title: "Validation Error ⚠️",
+        title: "Validation Error! 🚨",
         description: "Please fill in all required fields for the new user.", 
         icon: <AlertCircle className="h-5 w-5 text-amber-500" />,
         variant: "destructive"
@@ -274,9 +277,10 @@ export default function DashboardUsers() {
       setIsAddUserModalOpen(false);
       setNewUser({ name: '', email: '', role: 'User', status: 'Active' });
       toast({
-        title: "User Added Successfully 🎉",
-        description: `New user ${userToAdd.name} has been created.`, 
-        icon: <CheckCircle className="h-5 w-5 text-emerald-500" />,
+        title: "User Added! 👍",
+        description: `New user ${userToAdd.name} has been successfully created.`, 
+        variant: "themed",
+        icon: <CheckCircle className="h-5 w-5 text-white" />,
       });
     }, 300);
   };
@@ -442,10 +446,10 @@ export default function DashboardUsers() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-slate-200 shadow-lg">
-                        <DropdownMenuItem onClick={() => handleEditClick(user)} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100">
+                        <DropdownMenuItem onClick={() => handleEditClick(user)} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100 focus:text-slate-900">
                           <Edit className="w-4 h-4" /> Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100">
+                        <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100 focus:text-slate-900">
                           <UserIcon className="w-4 h-4" /> View Profile
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -458,7 +462,7 @@ export default function DashboardUsers() {
                                 <UserX className="w-4 h-4" /> Deactivate User
                             </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer text-destructive focus:bg-destructive/5">
+                        <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer text-destructive focus:bg-destructive/5 focus:text-rose-700">
                           <Trash2 className="w-4 h-4" /> Delete User
                         </DropdownMenuItem>
                       </DropdownMenuContent>

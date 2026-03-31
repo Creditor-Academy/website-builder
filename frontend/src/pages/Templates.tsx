@@ -116,21 +116,21 @@ const Templates = () => {
               : "bg-white/60 border-slate-200/50 shadow-[0_8px_32px_rgba(0,0,0,0.05)]"
           )}
         >
-          <Link to="/" className="flex items-center gap-3 cursor-pointer group pointer-events-auto">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-lg">B</div>
+          <Link to="/" className="flex items-center gap-3 cursor-pointer group/nav-logo pointer-events-auto">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black group-hover/nav-logo:scale-110 group-hover/nav-logo:rotate-3 transition-transform duration-300 shadow-lg">B</div>
             <span className={cn("text-xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Buildora</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-8 text-sm font-medium">
             {["Features", "Templates", "Resources"].map((item) => (
               <Link key={item} to={`/${item.toLowerCase()}`} className={cn(
-                "relative group transition-colors",
+                "relative group/nav-item transition-colors",
                 isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
               )}>
                 {item}
                 <span className={cn(
                   "absolute -bottom-1 left-0 h-[2px] bg-blue-500 transition-all rounded-full",
-                  item === "Templates" ? "w-full" : "w-0 group-hover:w-full"
+                  item === "Templates" ? "w-full" : "w-0 group-hover/nav-item:w-full"
                 )}></span>
               </Link>
             ))}
@@ -285,7 +285,7 @@ const Templates = () => {
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.4, delay: idx * 0.05 }}
                   className={cn(
-                    "group relative rounded-[2.5rem] overflow-hidden border transition-all duration-500 hover:shadow-[0_40px_80px_-20px_rgba(59,130,246,0.25)]",
+                    "group/card relative rounded-[2.5rem] overflow-hidden border transition-all duration-500 hover:shadow-[0_40px_80px_-20px_rgba(59,130,246,0.25)]",
                     isDark ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200 shadow-xl shadow-slate-200/50"
                   )}
                 >
@@ -299,12 +299,12 @@ const Templates = () => {
                     <img 
                       src={template.image} 
                       alt={template.title} 
-                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/card:scale-110"
                     />
-                    <div className="absolute inset-0 bg-slate-950/0 group-hover:bg-slate-950/40 backdrop-blur-0 group-hover:backdrop-blur-sm transition-all duration-500 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <div className="absolute inset-0 bg-slate-950/0 group-hover/card:bg-slate-950/40 backdrop-blur-0 group-hover/card:backdrop-blur-sm transition-all duration-500 flex items-center justify-center opacity-0 group-hover/card:opacity-100">
                       <button 
                          onClick={() => navigate('/login')}
-                         className="px-8 py-4 bg-white text-slate-950 rounded-full font-bold text-lg shadow-2xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-blue-50"
+                         className="px-8 py-4 bg-white text-slate-950 rounded-full font-bold text-lg shadow-2xl transform translate-y-4 group-hover/card:translate-y-0 transition-all duration-500 hover:bg-blue-50"
                       >
                         Start with This
                       </button>
@@ -348,24 +348,24 @@ const Templates = () => {
                     key={i} 
                     whileHover={{ x: 10 }}
                     className={cn(
-                      "flex gap-6 p-6 rounded-3xl border transition-all duration-300 group",
+                      "flex gap-6 p-6 rounded-3xl border transition-all duration-300 group/feature",
                       isDark ? "bg-slate-900/50 border-slate-800 hover:border-blue-500/50" : "bg-white border-slate-200 hover:border-blue-500/30 shadow-md hover:shadow-xl"
                     )}
                   >
-                    <div className={cn("shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110", isDark ? "bg-slate-800" : "bg-slate-50 shadow-inner")}>
+                    <div className={cn("shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center transition-transform group-hover/feature:scale-110", isDark ? "bg-slate-800" : "bg-slate-50 shadow-inner")}>
                       {item.icon}
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold mb-2 transition-colors group-hover:text-blue-500">{item.title}</h3>
+                      <h3 className="text-xl font-bold mb-2 transition-colors group-hover/feature:text-blue-500">{item.title}</h3>
                       <p className={cn("leading-relaxed", isDark ? "text-slate-400" : "text-slate-600")}>{item.desc}</p>
                     </div>
                   </motion.div>
                 ))}
               </div>
             </div>
-            <div className="relative group">
-              <div className={cn("absolute -inset-4 rounded-[3rem] blur-3xl opacity-20 transition-opacity group-hover:opacity-40", isDark ? "bg-blue-500" : "bg-blue-300")} />
-              <img src={templatesImg} alt="Editor" className="relative rounded-[2.5rem] shadow-2xl border border-white/10 transition-transform duration-700 group-hover:scale-[1.02]" />
+            <div className="relative group/image-tech">
+              <div className={cn("absolute -inset-4 rounded-[3rem] blur-3xl opacity-20 transition-opacity group-hover/image-tech:opacity-40", isDark ? "bg-blue-500" : "bg-blue-300")} />
+              <img src={templatesImg} alt="Editor" className="relative rounded-[2.5rem] shadow-2xl border border-white/10 transition-transform duration-700 group-hover/image-tech:scale-[1.02]" />
             </div>
           </div>
         </div>
@@ -412,20 +412,20 @@ const Templates = () => {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
                 className={cn(
-                  "p-10 rounded-[2.5rem] border text-center transition-all duration-500 group relative overflow-hidden",
+                  "p-10 rounded-[2.5rem] border text-center transition-all duration-500 group/transformation relative overflow-hidden",
                   hoveredFeature !== null && hoveredFeature !== i ? "opacity-30 scale-[0.98] blur-[2px]" : "opacity-100",
                   isDark 
                     ? "bg-slate-950 border-slate-800 hover:border-blue-500 shadow-2xl hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.4)]" 
                     : "bg-slate-50 border-slate-200 hover:border-blue-500 shadow-xl hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.2)]"
                 )}
               >
-                <div className="w-16 h-16 rounded-3xl bg-blue-500/10 text-blue-500 flex items-center justify-center mx-auto mb-8 transition-all duration-300 group-hover:scale-110 group-hover:bg-blue-500 group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-500/50">
+                <div className="w-16 h-16 rounded-3xl bg-blue-500/10 text-blue-500 flex items-center justify-center mx-auto mb-8 transition-all duration-300 group-hover/transformation:scale-110 group-hover/transformation:bg-blue-500 group-hover/transformation:text-white group-hover/transformation:shadow-lg group-hover/transformation:shadow-blue-500/50">
                   {feature.icon}
                 </div>
                 <h3 className="text-2xl font-bold mb-4">{feature.title}</h3>
-                <p className={cn("text-lg transition-all duration-300 group-hover:mb-6", isDark ? "text-slate-400" : "text-slate-600")}>{feature.desc}</p>
+                <p className={cn("text-lg transition-all duration-300 group-hover/transformation:mb-6", isDark ? "text-slate-400" : "text-slate-600")}>{feature.desc}</p>
                 
-                <div className="max-h-0 opacity-0 overflow-hidden transition-all duration-500 group-hover:max-h-40 group-hover:opacity-100">
+                <div className="max-h-0 opacity-0 overflow-hidden transition-all duration-500 group-hover/transformation:max-h-40 group-hover/transformation:opacity-100">
                   <div className={cn("pt-6 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
                     <p className={cn("text-sm leading-relaxed italic", isDark ? "text-slate-500" : "text-slate-500")}>
                       {feature.details}
@@ -447,7 +447,7 @@ const Templates = () => {
            whileInView={{ opacity: 1, scale: 1 }}
            viewport={{ once: true }}
            className={cn(
-             "max-w-5xl mx-auto p-12 md:p-32 rounded-[5rem] border relative overflow-hidden group shadow-[0_32px_120px_rgba(59,130,246,0.3)]",
+             "max-w-5xl mx-auto p-12 md:p-32 rounded-[5rem] border relative overflow-hidden group/cta shadow-[0_32px_120px_rgba(59,130,246,0.3)]",
              isDark 
                ? "bg-slate-900 border-white/10" 
                : "bg-white border-slate-200 shadow-2xl"

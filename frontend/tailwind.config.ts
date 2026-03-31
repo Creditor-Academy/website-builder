@@ -148,6 +148,7 @@ export default {
         "slide-in-left": "slide-in-left 0.3s ease-out forwards",
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
         shimmer: "shimmer 2s linear infinite",
+        "animate-blob": "blob 7s infinite cubic-bezier(0.6, 0.01, 0.5, 0.99)",
       },
     },
   },

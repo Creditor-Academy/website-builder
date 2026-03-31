@@ -331,7 +331,7 @@ export default function Contact() {
                   whileTap={{ scale: 0.98 }}
                   disabled={isSubmitting || isSent}
                   className={cn(
-                    "w-full h-20 rounded-3xl font-black text-xl flex items-center justify-center gap-3 transition-all relative overflow-hidden group shadow-2xl",
+                    "w-full h-20 rounded-3xl font-black text-xl flex items-center justify-center gap-3 transition-all relative overflow-hidden group/button-contact shadow-2xl",
                     isSent 
                       ? "bg-green-500 text-white" 
                       : (isDark ? "bg-white text-slate-950 hover:bg-blue-50" : "bg-slate-900 text-white hover:bg-blue-600")
@@ -351,7 +351,7 @@ export default function Contact() {
                       </motion.span>
                     ) : (
                       <motion.span key="default" className="flex items-center gap-2">
-                        Send Message <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                        Send Message <ArrowRight className="w-6 h-6 group-hover/button-contact:translate-x-1 transition-transform" />
                       </motion.span>
                     )}
                   </AnimatePresence>

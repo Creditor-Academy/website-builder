@@ -19,23 +19,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import GradientButton from '@/components/ui/GradientButton';
 
 const SettingsNavItem = ({ icon, label, isActive, onClick }) => {
   return (
     <Button
       variant="ghost"
-      className={`w-full justify-start gap-3 h-10 px-4 transition-all duration-200 ease-in-out ${
-        isActive 
-          ? 'bg-primary/5 text-primary font-semibold transform scale-[1.03]' 
-          : 'text-slate-700 font-medium hover:bg-slate-100 hover:text-slate-900' 
-      }`}
+      className={`w-full justify-start gap-3 h-11 px-6 text-base 
+        ${isActive 
+          ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 rounded-full' 
+          : 'bg-white text-slate-700 font-medium rounded-full border border-slate-300 shadow-sm hover:bg-slate-100 hover:text-indigo-700 hover:border-indigo-500 hover:border-2 transition-all duration-300 ease-in-out' 
+        } transition-all duration-300 ease-in-out`}
       onClick={onClick}
     >
-      <span className={`transition-all duration-200 ease-in-out ${
-        isActive ? 'text-primary' : 'text-slate-500 group-hover:text-slate-700' 
-      }`}>{icon}</span>
+      <span className={`transition-all duration-300 ease-in-out ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-indigo-700'}`}>{icon}</span>
       {label}
-      {isActive && <ChevronRight className="ml-auto h-4 w-4 text-primary" />}
+      {isActive && <ChevronRight className="ml-auto h-4 w-4 text-white" />}
     </Button>
   );
 };
@@ -62,9 +61,10 @@ export default function DashboardSettings() {
     console.log(`Saving changes for ${section} section`);
     setTimeout(() => {
       toast({
-        title: "Settings Updated ✅",
-        description: `Your ${section} settings have been saved.`, 
-        icon: <CheckCircle className="h-5 w-5 text-emerald-500" />,
+        title: "Settings Saved! ✨",
+        description: `Your ${section} settings have been successfully updated.`, 
+        variant: "themed",
+        icon: <CheckCircle className="h-5 w-5 text-white" />,
       });
     }, 500);
   };
@@ -77,20 +77,21 @@ export default function DashboardSettings() {
     const newKey = `sk_dummy_apikey_${Date.now()}`;
     setApiKey(newKey);
     setShowApiKeyConfirm(false);
-    toast({
-      title: "API Key Generated 🔑",
-      description: "A new API key has been generated and the old one invalidated.",
-      variant: "default",
-      icon: <Key className="h-5 w-5 text-indigo-500" />,
-    });
+      toast({
+        title: "API Key Generated! 🚀",
+        description: "A new API key has been generated and the old one invalidated.",
+        variant: "themed",
+        icon: <Key className="h-5 w-5 text-white" />,
+      });
   };
 
   const handleCopyApiKey = () => {
     navigator.clipboard.writeText(apiKey);
     toast({
-      title: "API Key Copied 📋",
-      description: "API Key copied to clipboard.",
-      icon: <ClipboardCheck className="h-5 w-5 text-blue-500" />,
+      title: "API Key Copied!  clipboard",
+      description: "The API Key has been copied to your clipboard. Keep it safe!",
+      variant: "themed",
+      icon: <ClipboardCheck className="h-5 w-5 text-white" />,
     });
   };
 
@@ -99,22 +100,22 @@ export default function DashboardSettings() {
       case 'profile':
         return (
           <div className="space-y-6">
-            <Card>
+            <Card className="rounded-xl border border-slate-200 shadow-md">
               <CardHeader>
-                <CardTitle className="text-xl font-bold flex items-center gap-2"><UserIcon className="w-5 h-5" /> Profile Information</CardTitle>
-                <CardDescription>Update your account's profile information and email address.</CardDescription>
+                <CardTitle className="text-2xl font-semibold text-slate-800 flex items-center gap-2"><UserIcon className="w-5 h-5 text-slate-600" /> Profile Information</CardTitle>
+                <CardDescription className="text-slate-500">Update your account's profile information and email address.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="name">Name</Label>
-                  <Input id="name" value={profileName} onChange={(e) => setProfileName(e.target.value)} className="mt-1" />
+                  <Label htmlFor="name" className="mb-1 font-medium text-slate-700">Name</Label>
+                  <Input id="name" value={profileName} onChange={(e) => setProfileName(e.target.value)} className="mt-1 pl-4 pr-4 w-full h-11 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-4 focus:ring-blue-500/50 focus:border-blue-600 focus:shadow-lg focus:shadow-blue-500/40 focus:outline-none transition-all duration-300" />
                 </div>
                 <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" value={profileEmail} onChange={(e) => setProfileEmail(e.target.value)} className="mt-1" />
+                  <Label htmlFor="email" className="mb-1 font-medium text-slate-700">Email</Label>
+                  <Input id="email" type="email" value={profileEmail} onChange={(e) => setProfileEmail(e.target.value)} className="mt-1 pl-4 pr-4 w-full h-11 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-4 focus:ring-blue-500/50 focus:border-blue-600 focus:shadow-lg focus:shadow-blue-500/40 focus:outline-none transition-all duration-300" />
                 </div>
                 <div className="flex justify-end">
-                  <Button onClick={() => handleSaveChanges('profile')}><Save className="w-4 h-4 mr-2" /> Save Profile</Button>
+                  <GradientButton onClick={() => handleSaveChanges('profile')}><Save className="w-4 h-4 mr-2" /> Save Profile</GradientButton>
                 </div>
               </CardContent>
             </Card>
@@ -123,34 +124,34 @@ export default function DashboardSettings() {
       case 'account':
         return (
           <div className="space-y-6">
-            <Card>
+            <Card className="rounded-xl border border-slate-200 shadow-md">
               <CardHeader>
-                <CardTitle className="text-xl font-bold flex items-center gap-2"><Lock className="w-5 h-5" /> Update Password</CardTitle>
-                <CardDescription>Ensure your account's using a long, random password to stay secure.</CardDescription>
+                <CardTitle className="text-2xl font-semibold text-slate-800 flex items-center gap-2"><Lock className="w-5 h-5 text-slate-600" /> Update Password</CardTitle>
+                <CardDescription className="text-slate-500">Ensure your account's using a long, random password to stay secure.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="currentPassword">Current Password</Label>
-                  <Input id="currentPassword" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="mt-1" />
+                  <Label htmlFor="currentPassword" className="mb-1 font-medium text-slate-700">Current Password</Label>
+                  <Input id="currentPassword" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="mt-1 pl-4 pr-4 w-full h-11 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-4 focus:ring-blue-500/50 focus:border-blue-600 focus:shadow-lg focus:shadow-blue-500/40 focus:outline-none transition-all duration-300" />
                 </div>
                 <div>
-                  <Label htmlFor="newPassword">New Password</Label>
-                  <Input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="mt-1" />
+                  <Label htmlFor="newPassword" className="mb-1 font-medium text-slate-700">New Password</Label>
+                  <Input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="mt-1 pl-4 pr-4 w-full h-11 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-4 focus:ring-blue-500/50 focus:border-blue-600 focus:shadow-lg focus:shadow-blue-500/40 focus:outline-none transition-all duration-300" />
                 </div>
                 <div>
-                  <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
-                  <Input id="confirmNewPassword" type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} className="mt-1" />
+                  <Label htmlFor="confirmNewPassword" className="mb-1 font-medium text-slate-700">Confirm New Password</Label>
+                  <Input id="confirmNewPassword" type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} className="mt-1 pl-4 pr-4 w-full h-11 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-4 focus:ring-blue-500/50 focus:border-blue-600 focus:shadow-lg focus:shadow-blue-500/40 focus:outline-none transition-all duration-300" />
                 </div>
                 <div className="flex justify-end">
-                  <Button onClick={() => handleSaveChanges('password')}><Save className="w-4 h-4 mr-2" /> Save Password</Button>
+                  <GradientButton onClick={() => handleSaveChanges('password')}><Save className="w-4 h-4 mr-2" /> Save Password</GradientButton>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="rounded-xl border border-slate-200 shadow-md">
               <CardHeader>
-                <CardTitle className="text-xl font-bold flex items-center gap-2"><Key className="w-5 h-5" /> Two-Factor Authentication</CardTitle>
-                <CardDescription>Add additional security to your account using two-factor authentication.</CardDescription>
+                <CardTitle className="text-2xl font-semibold text-slate-800 flex items-center gap-2"><Key className="w-5 h-5 text-slate-600" /> Two-Factor Authentication</CardTitle>
+                <CardDescription className="text-slate-500">Add additional security to your account using two-factor authentication.</CardDescription>
               </CardHeader>
               <CardContent className="flex items-center justify-between">
                 <div>
@@ -160,9 +161,10 @@ export default function DashboardSettings() {
                 <Switch checked={twoFactorEnabled} onCheckedChange={(checked) => {
                   setTwoFactorEnabled(checked);
                   toast({
-                    title: "Two-Factor Authentication 🔐",
+                    title: "2FA Status Updated! 🔒",
                     description: `Two-factor authentication has been ${checked ? 'enabled' : 'disabled'}.`,
-                    icon: <Lock className="h-5 w-5 text-slate-500" />,
+                    variant: "themed",
+                    icon: <Lock className="h-5 w-5 text-white" />,
                   });
                 }} />
               </CardContent>
@@ -172,10 +174,10 @@ export default function DashboardSettings() {
       case 'notifications':
         return (
           <div className="space-y-6">
-            <Card>
+            <Card className="rounded-xl border border-slate-200 shadow-md">
               <CardHeader>
-                <CardTitle className="text-xl font-bold flex items-center gap-2"><Bell className="w-5 h-5" /> Email Notifications</CardTitle>
-                <CardDescription>Manage your email notification preferences.</CardDescription>
+                <CardTitle className="text-2xl font-semibold text-slate-800 flex items-center gap-2"><Bell className="w-5 h-5 text-slate-600" /> Email Notifications</CardTitle>
+                <CardDescription className="text-slate-500">Manage your email notification preferences.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -193,7 +195,7 @@ export default function DashboardSettings() {
                   <Switch checked={smsNotifications} onCheckedChange={setSmsNotifications} />
                 </div>
                 <div className="flex justify-end">
-                  <Button onClick={() => handleSaveChanges('notifications')}><Save className="w-4 h-4 mr-2" /> Save Notifications</Button>
+                  <GradientButton onClick={() => handleSaveChanges('notifications')}><Save className="w-4 h-4 mr-2" /> Save Notifications</GradientButton>
                 </div>
               </CardContent>
             </Card>
@@ -202,22 +204,22 @@ export default function DashboardSettings() {
       case 'integrations':
         return (
           <div className="space-y-6">
-            <Card>
+            <Card className="rounded-xl border border-slate-200 shadow-md">
               <CardHeader>
-                <CardTitle className="text-xl font-bold flex items-center gap-2"><LayoutGrid className="w-5 h-5" /> API Integrations</CardTitle>
-                <CardDescription>Manage your API keys for third-party integrations.</CardDescription>
+                <CardTitle className="text-2xl font-semibold text-slate-800 flex items-center gap-2"><LayoutGrid className="w-5 h-5 text-slate-600" /> API Integrations</CardTitle>
+                <CardDescription className="text-slate-500">Manage your API keys for third-party integrations.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="apiKey">API Key</Label>
+                  <Label htmlFor="apiKey" className="mb-1 font-medium text-slate-700">API Key</Label>
                   <div className="flex gap-2 mt-1">
-                    <Input id="apiKey" type="text" value={apiKey} readOnly className="flex-1" />
-                    <Button variant="outline" onClick={handleCopyApiKey}>Copy</Button>
-                    <Button variant="secondary" onClick={handleGenerateApiKeyClick}>Generate New</Button>
+                    <Input id="apiKey" type="text" value={apiKey} readOnly className="flex-1 pl-4 pr-4 w-full h-11 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-4 focus:ring-blue-500/50 focus:border-blue-600 focus:shadow-lg focus:shadow-blue-500/40 focus:outline-none transition-all duration-300" />
+                    <Button variant="outline" onClick={handleCopyApiKey} className="rounded-full h-11 px-6 font-semibold bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-indigo-700 shadow-md shadow-slate-200/50 transition-all duration-200">Copy</Button>
+                    <GradientButton onClick={handleGenerateApiKeyClick}>Generate New</GradientButton>
                   </div>
                 </div>
                 <div className="flex justify-end">
-                  <Button onClick={() => handleSaveChanges('integrations')}><Save className="w-4 h-4 mr-2" /> Save Integrations</Button>
+                  <GradientButton onClick={() => handleSaveChanges('integrations')}><Save className="w-4 h-4 mr-2" /> Save Integrations</GradientButton>
                 </div>
               </CardContent>
             </Card>
@@ -229,35 +231,47 @@ export default function DashboardSettings() {
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 bg-white rounded-xl shadow-sm border border-slate-200 min-h-[calc(100vh-100px)]">
-      <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-        <SettingsIcon className="w-7 h-7 text-primary" /> Settings
-      </h2>
+    <div className="bg-slate-50 min-h-[calc(100vh-120px)] p-2 sm:p-4 lg:p-6">
+      <Card className="rounded-3xl shadow-xl shadow-slate-200/50 p-4 sm:p-6 lg:p-8">
+      {/* Breadcrumbs */}
+      <div className="mb-4 text-xs whitespace-nowrap flex items-center flex-shrink-0">
+        <span className="flex items-center whitespace-nowrap flex-shrink-0 min-w-[160px]">
+          <a href="/dashboard" className="hover:underline text-slate-500">Dashboard</a>&nbsp;/&nbsp;<span className="font-semibold text-slate-700 flex items-center gap-1"><SettingsIcon className="w-4 h-4" /> Settings</span>
+        </span>
+      </div>
+
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
+        <div>
+          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Settings</h2>
+          <p className="text-slate-500 mt-1">Manage your account settings, preferences and integrations.</p>
+        </div>
+      </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Settings Navigation Sidebar */}
         <aside className="lg:w-1/4 xl:w-1/5 space-y-2">
-          <SettingsNavItem 
-            icon={<UserIcon className="w-5 h-5" />} 
-            label="Profile" 
+          <SettingsNavItem
+            icon={<UserIcon className="w-5 h-5 text-slate-600" />}
+            label="Profile"
             isActive={activeSection === 'profile'}
             onClick={() => setActiveSection('profile')}
           />
-          <SettingsNavItem 
-            icon={<Lock className="w-5 h-5" />} 
-            label="Account" 
+          <SettingsNavItem
+            icon={<Lock className="w-5 h-5 text-slate-600" />}
+            label="Account"
             isActive={activeSection === 'account'}
             onClick={() => setActiveSection('account')}
           />
-          <SettingsNavItem 
-            icon={<Bell className="w-5 h-5" />} 
-            label="Notifications" 
+          <SettingsNavItem
+            icon={<Bell className="w-5 h-5 text-slate-600" />}
+            label="Notifications"
             isActive={activeSection === 'notifications'}
             onClick={() => setActiveSection('notifications')}
           />
-          <SettingsNavItem 
-            icon={<Key className="w-5 h-5" />} 
-            label="Integrations" 
+          <SettingsNavItem
+            icon={<Key className="w-5 h-5 text-slate-600" />}
+            label="Integrations"
             isActive={activeSection === 'integrations'}
             onClick={() => setActiveSection('integrations')}
           />
@@ -268,24 +282,25 @@ export default function DashboardSettings() {
           {renderSection()}
         </div>
       </div>
+    </Card>
 
-      {/* API Key Generation Confirmation Dialog */}
-      <AlertDialog open={showApiKeyConfirm} onOpenChange={setShowApiKeyConfirm}>
-        <AlertDialogContent className="w-[90%] rounded-lg sm:max-w-[425px]">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-amber-500" /> Confirm API Key Generation
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to generate a new API key? This will invalidate your current API key and cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmApiKeyGeneration}>Generate New Key</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+    {/* API Key Generation Confirmation Dialog */}
+    <AlertDialog open={showApiKeyConfirm} onOpenChange={setShowApiKeyConfirm}>
+      <AlertDialogContent className="w-[90%] rounded-lg sm:max-w-[425px]">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-amber-500" /> Confirm API Key Generation
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to generate a new API key? This will invalidate your current API key and cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={confirmApiKeyGeneration}>Generate New Key</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </div>
   );
 }
