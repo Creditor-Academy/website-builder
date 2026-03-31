@@ -5,6 +5,7 @@ class AuthDao {
   async findUserByEmail(email: string, { include_password_hash } = { include_password_hash: false }) {
     return await prismaClient.user.findUnique({
       where: { email },
+      include: { institution: true },
       omit: {
         password_hash: !include_password_hash
       }
@@ -14,6 +15,7 @@ class AuthDao {
   async findUserById(id: string) {
     return await prismaClient.user.findUnique({
       where: { id },
+      include: { institution: true },
       omit: { password_hash: true }
     });
   }

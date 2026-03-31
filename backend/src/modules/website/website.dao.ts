@@ -21,7 +21,8 @@ class WebsiteDao {
         const where: Prisma.WebsiteWhereInput = {};
 
         if (status) where.status = status;
-        if (ownerId) where.owner_id = ownerId;
+        if (ownerId && !filters.institution_id) where.owner_id = ownerId;
+        if (filters.institution_id) where.institution_id = filters.institution_id;
 
         if (created_after) {
             where.created_at = { gte: new Date(created_after) };
@@ -54,14 +55,20 @@ class WebsiteDao {
         };
     }
 
-    async createWebsite(userId: string, websiteData: { name: string }) {
-        return await prismaClient.website.create({
-            data: {
-                ...websiteData,
-                owner: { connect: { id: userId } },
-                settings: { create: {} } // Nested Settings relation creation (atomic)
-            }
-        });
+    async createWebsite(userId: string, websiteData: { name: string, institution_id?: string, content?: any }) {
+        const { name, institution_id, content } = websiteData;
+        const data: Prisma.WebsiteCreateInput = {
+            name,
+            owner: { connect: { id: userId } },
+            settings: { create: {} },
+            content: content || null
+        };
+
+        if (institution_id) {
+            data.institution = { connect: { id: institution_id } };
+        }
+
+        return await prismaClient.website.create({ data });
     }
 
     async updateWebsite(id: string, websiteData: any) {
@@ -77,7 +84,7 @@ class WebsiteDao {
         })
     }
 
-    async updateWebsiteSettings(id: string, data: UpdateWebsiteSettingsInput) {
+    async updateWebsiteSettings(id: string, data: any) {
         return await prismaClient.settings.update({
             where: { id },
             data: data

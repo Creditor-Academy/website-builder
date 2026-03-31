@@ -2,6 +2,7 @@ export type AuthUser = {
   id: string;
   role: string;
   refreshTokenId: string;
+  institution_id?: string;
 };
 
 export type JWTPayload = {
@@ -9,4 +10,5 @@ export type JWTPayload = {
   role: string;
   refreshTokenId: string;
   sessionId: string;
+  institution_id?: string;
 };

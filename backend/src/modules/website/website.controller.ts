@@ -13,7 +13,8 @@ class WebsiteController {
     createWebsite = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const userId = req.context.user.id;
-            const website = await this.websiteService.createWebsite(userId, req.validated.body);
+            const institutionId = req.validated.body.institution_id || req.context.user.institution_id;
+            const website = await this.websiteService.createWebsite(userId, institutionId, req.validated.body);
             res.status(201).json({ message: 'Website created successfully', website });
         } catch (error: any) {
             next(error);
