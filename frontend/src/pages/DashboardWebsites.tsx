@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Table,
@@ -40,34 +40,31 @@ import {
 import WebsiteShimmer from '@/components/dashboard/WebsiteShimmer';
 import GradientButton from '@/components/ui/GradientButton';
 import { useToast } from '@/components/ui/use-toast';
+import useBuilderStore from '@/store/useBuilderStore';
 
 interface Website {
   id: string;
   name: string;
   domain: string;
-  status: 'Draft' | 'Published' | 'Deleted';
+  status: string;
   lastUpdated: string;
+  institution?: { name: string };
+  updated_at?: string;
+  lastEdited?: string;
 }
-
-const dummyMyWebsites: Website[] = [
-  { id: "web1", name: "My Personal Blog", domain: "myblog.athenalms.com", status: "Published", lastUpdated: "2023-10-26" },
-  { id: "web2", name: "Portfolio Site", domain: "myporfolio.athenalms.com", status: "Draft", lastUpdated: "2023-11-15" },
-];
-
-const dummyAllWebsites: Website[] = [
-  { id: "web1", name: "My Personal Blog", domain: "myblog.athenalms.com", status: "Published", lastUpdated: "2023-10-26" },
-  { id: "web2", name: "Portfolio Site", domain: "myporfolio.athenalms.com", status: "Draft", lastUpdated: "2023-11-15" },
-  { id: "web3", name: "Client Project X", domain: "projectx.athenalms.com", status: "Published", lastUpdated: "2023-12-01" },
-  { id: "web4", name: "E-commerce Store", domain: "shop.athenalms.com", status: "Draft", lastUpdated: "2023-09-20" },
-  { id: "web5", name: "Old Portfolio", domain: "old.athenalms.com", status: "Deleted", lastUpdated: "2023-08-01" },
-];
 
 export default function DashboardWebsites() {
   const navigate = useNavigate();
+  const { search } = window.location;
+  const orgId = new URLSearchParams(search).get('org');
+  
   const { toast } = useToast();
-  const [websites, setWebsites] = useState<Website[]>([]);
+  const { websites, fetchWebsites } = useBuilderStore();
   const [isLoading, setIsLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false); // Simulate admin role toggle
+  
+  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const isSuperAdmin = currentUser.role === 'SUPER_ADMIN';
+  const [isAdminView, setIsAdminView] = useState(false);
 
   const [isEditStatusModalOpen, setIsEditStatusModalOpen] = useState(false);
   const [editingWebsite, setEditingWebsite] = useState<Website | null>(null);
@@ -77,70 +74,83 @@ export default function DashboardWebsites() {
   const [sortBy, setSortBy] = useState('recent');
 
   useEffect(() => {
-    setIsLoading(true);
-    setTimeout(() => {
-      const baseWebsites = isAdmin ? dummyAllWebsites : dummyMyWebsites;
+    const loadWebsites = async () => {
+        setIsLoading(true);
+        try {
+            await fetchWebsites(orgId || undefined, isAdminView && isSuperAdmin); 
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    loadWebsites();
+  }, [fetchWebsites, orgId, isAdminView, isSuperAdmin]);
 
-      const filtered = baseWebsites.filter(website => {
+  const filteredWebsites = useMemo(() => {
+    if (!websites) return [];
+    
+    let filtered = websites.filter((website: any) => {
         const matchesSearch = website.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                              website.domain.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = filterStatus === 'all' || website.status === filterStatus;
+                              (website.domain && website.domain.toLowerCase().includes(searchTerm.toLowerCase()));
+        
+        // Normalize status check
+        const status = website.status?.toLowerCase() || 'draft';
+        const matchesStatus = filterStatus === 'all' || 
+                             (filterStatus === 'Published' && (status === 'published' || status === 'active')) ||
+                             (filterStatus === 'Draft' && (status === 'draft')) ||
+                             (filterStatus === 'Deleted' && (status === 'deleted'));
+                             
         return matchesSearch && matchesStatus;
       });
 
-      const sorted = [...filtered].sort((a, b) => {
+      return [...filtered].sort((a: any, b: any) => {
         if (sortBy === 'name') {
           return a.name.localeCompare(b.name);
         }
         if (sortBy === 'status') {
-          return a.status.localeCompare(b.status);
+          return (a.status || '').localeCompare(b.status || '');
         }
-        // Default to 'recent' if sortBy is not 'name' or 'status'
-        return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime();
+        const dateA = new Date(a.lastEdited || 0).getTime();
+        const dateB = new Date(b.lastEdited || 0).getTime();
+        return dateB - dateA;
       });
-      setWebsites(sorted);
-      setIsLoading(false);
-    }, 500); // Simulate network delay
-  }, [isAdmin, searchTerm, filterStatus, sortBy]);
+  }, [websites, searchTerm, filterStatus, sortBy]);
 
-  const handleEdit = (website: Website) => {
-    setEditingWebsite(website);
+  const formatDate = (dateString: string | undefined): string => {
+    if (!dateString) return '---';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '---';
+      return date.toISOString().split('T')[0];
+    } catch (err) {
+      return '---';
+    }
+  };
+
+  const handleEdit = (website: any) => {
+    setEditingWebsite({
+        id: website.id,
+        name: website.name,
+        domain: website.domain || `${website.id.slice(0, 8)}.buildora.app`,
+        status: website.status || 'Draft',
+        lastUpdated: formatDate(website.lastEdited)
+    });
     setIsEditStatusModalOpen(true);
   };
 
-  const handleSaveStatus = (newStatus: 'Draft' | 'Published' | 'Deleted') => {
+  const handleSaveStatus = async (newStatus: string) => {
     if (editingWebsite) {
-      setWebsites(prevWebsites =>
-        prevWebsites.map(web =>
-          web.id === editingWebsite.id ? { ...web, status: newStatus } : web
-        )
-      );
+      toast({
+        title: "Feature Coming Soon! 🛠️",
+        description: `Backend update for website status is being implemented.`,
+        variant: "default",
+      });
       setIsEditStatusModalOpen(false);
       setEditingWebsite(null);
-      // Show toast notification
-      toast({
-        title: "Website Status Updated! ✨",
-        description: `Status for \"${editingWebsite.name}\" changed to ${newStatus}.`,
-        variant: "themed",
-        icon: <CheckCircle className="h-5 w-5 text-white" />,
-      });
     }
-    navigate(`/builder/${website.id}`);
   };
 
-  const handleDelete = (website: Website) => {
+  const handleDelete = (website: any) => {
     console.log("Delete website:", website);
-    // In a real application, this would trigger a deletion confirmation and API call
-  };
-
-  const handleDuplicate = (website: Website) => {
-    console.log("Duplicate website:", website);
-    // In a real application, this would create a copy of the website
-  };
-
-  const handlePreview = (website: Website) => {
-    console.log("Preview website:", website);
-    // In a real application, this would open the website in a new tab
   };
 
   return (
@@ -153,29 +163,50 @@ export default function DashboardWebsites() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
         <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Website Management</h2>
-          <p className="text-slate-500 mt-1">Manage your deployed and draft websites.</p>
+          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            {orgId ? `Organization Websites` : 'Website Management'}
+          </h2>
+          <p className="text-slate-500 mt-1">
+            {orgId ? `Managing websites for specific organization` : 'Manage your deployed and draft websites.'}
+          </p>
         </div>
         <div className="flex items-center gap-4">
-          <GradientButton
-            onClick={() => {
-              setIsAdmin(prev => {
-                const newAdminState = !prev;
+          {isSuperAdmin && (
+              <GradientButton
+                onClick={() => {
+                  setIsAdminView(prev => {
+                    const newAdminState = !prev;
+                    toast({
+                      title: newAdminState ? "Admin View Activated! 🛡️" : "User View Activated! 👤",
+                      description: newAdminState ? "You are now viewing all websites across the platform." : "You are now viewing your assigned websites.",
+                      variant: "themed",
+                      icon: newAdminState ? <ShieldCheck className="h-6 w-6 text-white stroke-2" /> : <UserIcon className="h-6 w-6 text-white stroke-2" />,
+                    });
+                    return newAdminState;
+                  });
+                }}
+                className="w-full md:w-auto"
+                icon={isAdminView ? <ShieldCheck className="w-4 h-4" /> : <UserIcon className="w-4 h-4" />}
+              >
+                Admin View ({isAdminView ? "ON" : "OFF"})
+              </GradientButton>
+          )}
+          <GradientButton 
+            className="w-full md:w-auto" 
+            icon={<Plus className="w-5 h-5" />} 
+            onClick={async () => {
+              try {
+                const id = await useBuilderStore.getState().createWebsite('My New Website', 'blank', orgId || undefined);
+                navigate(`/builder/${id}`);
+              } catch (err) {
                 toast({
-                  title: newAdminState ? "Admin View Activated! 🛡️" : "User View Activated! 👤",
-                  description: newAdminState ? "You are now viewing all websites as an administrator." : "You are now viewing only your own websites.",
-                  variant: "themed",
-                  icon: newAdminState ? <ShieldCheck className="h-6 w-6 text-white stroke-2" /> : <UserIcon className="h-6 w-6 text-white stroke-2" />,
+                   title: "Error",
+                   description: "Failed to create website",
+                   variant: "destructive"
                 });
-                return newAdminState;
-              });
+              }
             }}
-            className="w-full md:w-auto"
-            icon={isAdmin ? <ShieldCheck className="w-4 h-4" /> : <UserIcon className="w-4 h-4" />}
           >
-            Admin View ({isAdmin ? "ON" : "OFF"})
-          </GradientButton>
-          <GradientButton className="w-full md:w-auto" icon={<Plus className="w-5 h-5" />}>
             New Website
           </GradientButton>
         </div>
@@ -196,48 +227,24 @@ export default function DashboardWebsites() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant={filterStatus === 'all' ? 'default' : 'outline'}
-            className={`rounded-full h-10 px-4 text-sm font-semibold 
-                        ${filterStatus === 'all' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
-                        transition-all duration-200`}
-            onClick={() => setFilterStatus('all')}
-          >
-            All
-          </Button>
-          <Button
-            variant={filterStatus === 'Published' ? 'default' : 'outline'}
-            className={`rounded-full h-10 px-4 text-sm font-semibold 
-                        ${filterStatus === 'Published' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
-                        transition-all duration-200`}
-            onClick={() => setFilterStatus('Published')}
-          >
-            Published
-          </Button>
-          <Button
-            variant={filterStatus === 'Draft' ? 'default' : 'outline'}
-            className={`rounded-full h-10 px-4 text-sm font-semibold 
-                        ${filterStatus === 'Draft' ? 'bg-amber-600 text-white shadow-md shadow-amber-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
-                        transition-all duration-200`}
-            onClick={() => setFilterStatus('Draft')}
-          >
-            Draft
-          </Button>
-          <Button
-            variant={filterStatus === 'Deleted' ? 'default' : 'outline'}
-            className={`rounded-full h-10 px-4 text-sm font-semibold 
-                        ${filterStatus === 'Deleted' ? 'bg-rose-600 text-white shadow-md shadow-rose-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
-                        transition-all duration-200`}
-            onClick={() => setFilterStatus('Deleted')}
-          >
-            Deleted
-          </Button>
+          {['all', 'Published', 'Draft', 'Deleted'].map((status) => (
+            <Button
+              key={status}
+              variant={filterStatus === status ? 'default' : 'outline'}
+              className={`rounded-full h-10 px-4 text-sm font-semibold 
+                          ${filterStatus === status ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}
+                          transition-all duration-200`}
+              onClick={() => setFilterStatus(status as any)}
+            >
+              {status}
+            </Button>
+          ))}
         </div>
 
         <Select value={sortBy} onValueChange={setSortBy}>
           <SelectTrigger className="w-full md:w-[180px] h-11 rounded-full bg-white border-slate-200 
                                     shadow-md shadow-slate-200/50 focus:ring-2 focus:ring-blue-500/20 
-                                    focus:border-blue-500 transition-all duration-300 hover:bg-slate-100 hover:text-indigo-700">
+                                    focus:border-blue-500 transition-all duration-300 hover:bg-slate-100">
             <ListFilter className="h-4 w-4 text-slate-400 mr-2" />
             <SelectValue placeholder="Sort By" />
           </SelectTrigger>
@@ -267,54 +274,63 @@ export default function DashboardWebsites() {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              // Shimmer loading effect
               Array.from({ length: 5 }).map((_, i) => <WebsiteShimmer key={i} />)
-            ) : websites.length > 0 ? (
-              // Display sorted and filtered websites
-              websites.map((website) => (
+            ) : filteredWebsites.length > 0 ? (
+              filteredWebsites.map((website: any) => (
                 <TableRow key={website.id} className="group h-16 border-b border-slate-100 hover:bg-slate-50/70 transition-all duration-200">
                   <TableCell className="px-2 text-center"><input type="checkbox" className="form-checkbox h-4 w-4 text-blue-600 rounded" /></TableCell>
-                  <TableCell className="font-medium text-slate-600 px-4 py-3">#{website.id}</TableCell>
+                  <TableCell className="font-medium text-slate-600 px-4 py-3">#{website.id.slice(0, 8)}</TableCell>
                   <TableCell className="flex items-center gap-3 px-4 py-3">
-                    <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-semibold text-xs">
-                      {website.name.split(' ').map(n => n[0]).join('')}
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm border border-indigo-100/50">
+                      {website.id.slice(-4).toUpperCase()}
                     </div>
                     <div>
-                      <p className="font-semibold text-slate-800">{website.name}</p>
-                      <p className="text-sm text-slate-500">{website.domain}</p>
+                      <p className="font-bold text-slate-900 leading-none">{website.name}</p>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <Badge variant="outline" className="bg-slate-50 text-[10px] font-mono font-medium text-slate-500 py-0 px-2 h-5 border-slate-100">
+                          {website.id}
+                        </Badge>
+                      </div>
+                      {isSuperAdmin && website.institution && (
+                          <p className="text-[10px] text-indigo-500 font-bold uppercase mt-1 tracking-wider">{website.institution.name}</p>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="px-4 py-3">
                     <Badge
                       className={
-                        website.status === "Published"
+                        website.status?.toLowerCase() === "published" || website.status?.toLowerCase() === "active"
                           ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100/80"
-                          : website.status === "Draft"
+                          : website.status?.toLowerCase() === "draft"
                           ? "bg-amber-100 text-amber-700 hover:bg-amber-100/80"
                           : "bg-rose-100 text-rose-700 hover:bg-rose-100/80"
                       }
                     >
-                      {website.status === "Published" && <CheckCircle className="w-3 h-3 mr-1" />}
-                      {website.status === "Draft" && <CircleDotDashed className="w-3 h-3 mr-1" />}
-                      {website.status === "Deleted" && <Ban className="w-3 h-3 mr-1" />}
+                      {(website.status?.toLowerCase() === "published" || website.status?.toLowerCase() === "active") && <CheckCircle className="w-3 h-3 mr-1" />}
+                      {website.status?.toLowerCase() === "draft" && <CircleDotDashed className="w-3 h-3 mr-1" />}
+                      {(website.status?.toLowerCase() === "deleted" || website.status?.toLowerCase() === "inactive") && <Ban className="w-3 h-3 mr-1" />}
                       {website.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-slate-500 text-sm px-4 py-3">{website.lastUpdated}</TableCell>
+                  <TableCell className="text-slate-500 text-sm px-4 py-3">
+                      {formatDate(website.lastEdited)}
+                  </TableCell>
                   <TableCell className="text-right px-4 py-3">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0 data-[state=open]:bg-slate-100">
                           <MoreVertical className="h-4 w-4 text-slate-500" />
-                          <span className="sr-only">Open menu</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-slate-200 shadow-lg">
-                        <DropdownMenuItem onClick={() => handleEdit(website)} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100 focus:text-indigo-700">
-                          <Edit className="w-4 h-4" /> Edit
+                        <DropdownMenuItem onClick={() => handleEdit(website)} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100">
+                          <Edit className="w-4 h-4" /> Edit Status
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate(`/builder/${website.id}`)} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100">
+                          <LayoutGrid className="w-4 h-4" /> Open Editor
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleDelete(website)} className="rounded-lg gap-2 cursor-pointer text-destructive focus:bg-destructive/5 focus:text-rose-600">
+                        <DropdownMenuItem onClick={() => handleDelete(website)} className="rounded-lg gap-2 cursor-pointer text-destructive focus:bg-destructive/5">
                           <Trash2 className="w-4 h-4" /> Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -323,7 +339,6 @@ export default function DashboardWebsites() {
                 </TableRow>
               ))
             ) : (
-              // No websites found message
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center text-slate-500">
                   No websites found.
@@ -334,27 +349,19 @@ export default function DashboardWebsites() {
         </Table>
       </div>
 
-      {/* Edit Status Dialog */}
       <Dialog open={isEditStatusModalOpen} onOpenChange={setIsEditStatusModalOpen}>
         <DialogContent className="sm:max-w-[425px] w-[90%] rounded-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Edit className="w-5 h-5" /> Edit Website Status
             </DialogTitle>
-            <DialogDescription>
-              Make changes to the website status here. Click save when you're done.
-            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
-              <Label htmlFor="status" className="md:text-right">
-                Status
-              </Label>
+              <Label htmlFor="status" className="md:text-right">Status</Label>
               <Select
                 value={editingWebsite?.status || ''}
-                onValueChange={(value: 'Draft' | 'Published' | 'Deleted') =>
-                  setEditingWebsite(prev => prev ? { ...prev, status: value } : null)
-                }
+                onValueChange={(value) => setEditingWebsite(prev => prev ? { ...prev, status: value } : null)}
               >
                 <SelectTrigger className="col-span-1 md:col-span-3">
                   <SelectValue placeholder="Select a status" />
@@ -368,9 +375,7 @@ export default function DashboardWebsites() {
             </div>
           </div>
           <div className="flex justify-end">
-            <Button
-              onClick={() => editingWebsite && handleSaveStatus(editingWebsite.status)}
-            >
+            <Button onClick={() => editingWebsite && handleSaveStatus(editingWebsite.status)}>
               Save changes
             </Button>
           </div>

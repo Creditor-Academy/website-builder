@@ -23,6 +23,11 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import GradientButton from '@/components/ui/GradientButton';
 
 import { templatesList } from '@/lib/templates';
+import { loginUser,  logoutUser } from "../api/auth";
+import statsApi from "../api/stats";
+
+
+
 
 // OverviewCard component
 const OverviewCard = ({ title, value, icon, description, iconBgClass, iconColorClass }) => (
@@ -66,8 +71,12 @@ const NavItem = ({ icon, label, to, activeColor = 'text-white', hoverBg = 'hover
 const Dashboard = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { websites, createWebsite, deleteWebsite } = useBuilderStore();
+    const { websites, fetchWebsites, createWebsite, deleteWebsite } = useBuilderStore();
     const isMobile = useIsMobile();
+    const user = JSON.parse(localStorage.getItem("user"));
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+
 
     const [newSiteName, setNewSiteName] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -77,27 +86,68 @@ const Dashboard = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [sortBy, setSortBy] = useState('recent'); // 'recent' or 'name'
     const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'draft', 'published'
+    const [stats, setStats] = useState({
+        totalWebsites: 0,
+        totalUsers: 0,
+        activeDeployments: 0,
+        totalOrganizations: 0
+    });
+    const [isLoadingStats, setIsLoadingStats] = useState(true);
 
     const adminRoutes = [
         '/dashboard/users',
+        '/dashboard/organizations',
         '/dashboard/websites',
         '/dashboard/deployment',
         '/dashboard/settings',
     ];
 
     useEffect(() => {
+        if (!user) {
+            navigate('/');
+            return;
+        }
         if (!isAdmin && adminRoutes.includes(location.pathname)) {
             navigate('/dashboard');
         }
-    }, [isAdmin, location.pathname, navigate]);
+    }, [user, isAdmin, location.pathname, navigate]);
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('user');
-        navigate('/');
-    };
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                setIsLoadingStats(true);
+                const response = await statsApi.getDashboardStats();
+                if (response.data && response.data.data) {
+                    setStats(response.data.data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch dashboard stats:", err);
+            } finally {
+                setIsLoadingStats(false);
+            }
+        };
+
+        fetchStats();
+        fetchWebsites();
+    }, [isAdmin, fetchWebsites]);
+
+
+    const handleLogout = async () => {
+  try {
+    setIsLoggingOut(true);
+
+    await logoutUser();
+
+    localStorage.removeItem("user"); // ✅ clear user
+    navigate("/");
+  } catch (err) {
+    console.error(err);
+    alert("Logout failed");
+  } finally {
+    setIsLoggingOut(false);
+  }
+};
+
 
     const handleDialogClose = (open) => {
         setIsDialogOpen(open);
@@ -108,6 +158,7 @@ const Dashboard = () => {
     };
 
     const filteredWebsites = React.useMemo(() => {
+        if (!websites) return [];
         let tempWebsites = websites.filter(site =>
             site.name.toLowerCase().includes(searchQuery.toLowerCase())
         );
@@ -125,9 +176,9 @@ const Dashboard = () => {
         return tempWebsites;
     }, [websites, searchQuery, sortBy, filterStatus]);
 
-    const handleCreateSite = () => {
+    const handleCreateSite = async () => {
         if (newSiteName.trim()) {
-            const id = createWebsite(newSiteName, selectedTemplate);
+            const id = await createWebsite(newSiteName, selectedTemplate);
             setIsDialogOpen(false);
             setNewSiteName('');
             setSelectedTemplate('blank');
@@ -187,6 +238,9 @@ const Dashboard = () => {
                         <div className="pt-1">
                             <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest px-3 mb-1">System</p>
                             <NavItem icon={<Users className="w-4 h-4" />} label="Users" to="/dashboard/users" activeColor="text-white" />
+                            {user?.role === 'SUPER_ADMIN' && (
+                                <NavItem icon={<Building2 className="w-4 h-4" />} label="Organizations" to="/dashboard/organizations" activeColor="text-white" />
+                            )}
                             <NavItem icon={<Layout className="w-4 h-4" />} label="Websites" to="/dashboard/websites" activeColor="text-white" />
                             <NavItem icon={<Activity className="w-4 h-4" />} label="Deployment Monitoring" to="/dashboard/deployment" activeColor="text-white" />
                             <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" to="/dashboard/settings" activeColor="text-white" />
@@ -195,35 +249,43 @@ const Dashboard = () => {
                 </nav>
 
                 <div className="p-4 mt-auto space-y-3">
-                    <div className="bg-slate-700 rounded-2xl p-4 border border-slate-600">
+                    {/* <div className="bg-slate-700 rounded-2xl p-4 border border-slate-600">
                         <p className="text-xs font-semibold text-white mb-1">Free Plan</p>
                         <div className="w-full bg-slate-600 h-1.5 rounded-full mb-2">
                             <div className="bg-purple-500 h-full w-1/3 rounded-full" />
                         </div>
                         <p className="text-[10px] text-slate-400">3 of 10 projects used</p>
-                    </div>
+                    </div> */}
 
-                    <GradientButton
-                        className="w-full justify-start py-2 px-3 text-sm"
-                        onClick={() => setIsAdmin(!isAdmin)}
-                        icon={isAdmin
-                            ? <ShieldCheck className="w-4 h-4 text-purple-400" />
-                            : <Users className="w-4 h-4" />
-                        }
-                    >
-                        {isAdmin ? "Admin Mode On" : "Switch to Admin Mode"}
-                    </GradientButton>
+                    {(user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' || user?.role === 'INSTITUTION_ADMIN') && (
+                        <GradientButton
+                            className="w-full justify-start py-2 px-3 text-sm"
+                            onClick={() => setIsAdmin(!isAdmin)}
+                            icon={isAdmin
+                                ? <ShieldCheck className="w-4 h-4 text-purple-400" />
+                                : <Users className="w-4 h-4" />
+                            }
+                        >
+                            {isAdmin ? "Admin Mode On" : "Switch to Admin Mode"}
+                        </GradientButton>
+                    )}
 
-                    <div
-                        className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-slate-700"
-                        onClick={handleLogout}
-                    >
+                  <div
+  className={`flex items-center gap-3 p-2 rounded-xl transition-colors border border-transparent 
+    ${isLoggingOut ? "opacity-50 cursor-not-allowed" : "hover:bg-white/10 cursor-pointer hover:border-slate-700"}
+  `}
+  onClick={!isLoggingOut ? handleLogout : undefined}
+>
+
                         <div className="relative">
                             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-sm">JD</div>
                             <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-slate-800 rounded-full" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-white truncate">John Doe</p>
+                            <p className="text-sm font-semibold text-white truncate">
+  {isLoggingOut ? "Logging out..." : (user?.name || "User")}
+</p>
+
                             <p className="text-xs text-slate-400 truncate">Pro Plan</p>
                         </div>
                         <LogOut className="w-4 h-4 text-slate-400 hover:text-red-400 transition-colors" />
@@ -249,9 +311,14 @@ const Dashboard = () => {
                                     </Button>
                                 )}
                                 <div>
-                                    <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">Project Hub</h2>
+                                    <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+                                        {isAdmin ? (user?.institution?.name || "Buildora Master Hub") : "Project Hub"}
+                                    </h2>
                                     <p className="text-lg text-slate-600 flex items-center gap-2 mt-1">
-                                        Welcome back! You have <span className="text-indigo-600 font-medium">{websites.length} active projects</span>
+                                        {isAdmin 
+                                            ? "Global platform overview and tenant management"
+                                            : <>Welcome back! You have <span className="text-indigo-600 font-medium">{websites.length} active projects</span></>
+                                        }
                                     </p>
                                 </div>
                             </div>
@@ -370,8 +437,8 @@ const Dashboard = () => {
                         <section className="grid gap-6 mb-10 md:grid-cols-2 lg:grid-cols-4">
                             <OverviewCard
                                 title="Total Websites"
-                                value="1,234"
-                                description="+20.1% from last month"
+                                value={isLoadingStats ? "..." : stats.totalWebsites}
+                                description="Real-time project count"
                                 icon={<Globe className="w-5 h-5" />}
                                 iconBgClass="bg-gradient-to-br from-purple-600 to-indigo-600"
                                 iconColorClass="text-white"
@@ -379,8 +446,8 @@ const Dashboard = () => {
                             {isAdmin && (
                                 <OverviewCard
                                     title="Active Users"
-                                    value="250"
-                                    description="+15% from last month"
+                                    value={isLoadingStats ? "..." : stats.totalUsers}
+                                    description="Platform active accounts"
                                     icon={<Users className="w-5 h-5" />}
                                     iconBgClass="bg-blue-100"
                                     iconColorClass="text-blue-600"
@@ -388,17 +455,17 @@ const Dashboard = () => {
                             )}
                             <OverviewCard
                                 title="Templates Available"
-                                value="42"
-                                description="New templates added frequently"
+                                value={templatesList.length}
+                                description="Ready to use designs"
                                 icon={<Layout className="w-5 h-5" />}
                                 iconBgClass="bg-gradient-to-br from-emerald-600 to-teal-600"
                                 iconColorClass="text-white"
                             />
                             {isAdmin && (
                                 <OverviewCard
-                                    title="Deployments Today"
-                                    value="78"
-                                    description="Successfully deployed websites"
+                                    title="Active Deployments"
+                                    value={isLoadingStats ? "..." : stats.activeDeployments}
+                                    description="Total sites currently online"
                                     icon={<Activity className="w-5 h-5" />}
                                     iconBgClass="bg-rose-100"
                                     iconColorClass="text-rose-600"

@@ -68,11 +68,11 @@ export function DomainManager({ open, onOpenChange, websiteId }) {
 
   const handleAddDomain = async () => {
     if (!newDomain) return;
-
+    
     setIsAddingDomain(true);
     try {
       const domainConfig = await publishService.addDomain(websiteId, newDomain);
-
+      
       const domainEntry = {
         id: domainConfig.domain,
         domain: domainConfig.domain,
@@ -96,7 +96,7 @@ export function DomainManager({ open, onOpenChange, websiteId }) {
   const handleRemoveDomain = async (domainId) => {
     const domain = domains.find(d => d.id === domainId);
     if (!domain) return;
-
+    
     try {
       await publishService.removeDomain(websiteId, domain.domain);
       setDomains(domains.filter(d => d.id !== domainId));
@@ -116,15 +116,15 @@ export function DomainManager({ open, onOpenChange, websiteId }) {
     setVerifyingDomain(domain);
     try {
       const verification = await publishService.verifyDomain(domain);
-
+      
       // Update domain status based on verification
-      setDomains(domains.map(d =>
-        d.domain === domain
-          ? {
-            ...d,
-            status: verification.verified ? 'active' : 'pending',
-            dnsRecords: verification.dnsRecords
-          }
+      setDomains(domains.map(d => 
+        d.domain === domain 
+          ? { 
+              ...d, 
+              status: verification.verified ? 'active' : 'pending',
+              dnsRecords: verification.dnsRecords
+            }
           : d
       ));
     } catch (error) {
@@ -180,7 +180,7 @@ export function DomainManager({ open, onOpenChange, websiteId }) {
                   value={newDomain}
                   onChange={(e) => setNewDomain(e.target.value)}
                 />
-                <Button
+                <Button 
                   onClick={handleAddDomain}
                   disabled={!newDomain || isAddingDomain}
                 >
@@ -238,7 +238,7 @@ export function DomainManager({ open, onOpenChange, websiteId }) {
                           </div>
                         </div>
                       </div>
-
+                      
                       <div className="flex items-center gap-2">
                         {domain.status === 'active' && (
                           <Button

@@ -7,7 +7,9 @@ const WebsiteStatusValues = Object.values(WebsiteStatus);
 export const createWebsiteSchema = z.object({
     name: z.string()
         .min(2, 'Name must be at least 2 characters')
-        .max(100, 'Name must not exceed 100 characters')
+        .max(100, 'Name must not exceed 100 characters'),
+    content: z.any().optional(),
+    institution_id: z.string().optional(),
 });
 
 // Get websites schema
@@ -24,6 +26,7 @@ export const listWebsitesQuerySchema = z.object({
     created_after: z.string().refine(val => !isNaN(Date.parse(val)), {
         message: 'created_after must be a valid date string',
     }).optional(),
+    institution_id: z.string().optional(),
 });
 
 // Update website schema
@@ -32,6 +35,8 @@ export const updateWebsiteSchema = z.object({
         .min(2, 'Name must be at least 2 characters')
         .max(100, 'Name must not exceed 100 characters')
         .optional(),
+    status: z.enum(WebsiteStatusValues).optional(),
+    content: z.any().optional(),
 });
 
 // Update website settings schema

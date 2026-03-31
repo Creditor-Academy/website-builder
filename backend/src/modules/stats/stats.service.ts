@@ -1,0 +1,49 @@
+import prismaClient from '../../config/prisma.js';
+
+class StatsService {
+    async getPlatformStats() {
+        // Global stats for Super Admin
+        const [userCount, orgCount, webCount] = await Promise.all([
+            prismaClient.user.count(),
+            (prismaClient as any).institution.count(),
+            prismaClient.website.count()
+        ]);
+
+        return {
+            totalUsers: userCount,
+            totalOrganizations: orgCount,
+            totalWebsites: webCount,
+            activeDeployments: webCount // Simplified
+        };
+    }
+
+    async getTenantStats(institution_id: string) {
+        // Scoped stats for Institution Admin
+        const [userCount, webCount] = await Promise.all([
+            prismaClient.user.count({ where: { institution_id } }),
+            prismaClient.website.count({ where: { institution_id } })
+        ]);
+
+        return {
+            totalUsers: userCount,
+            totalWebsites: webCount,
+            activeDeployments: webCount
+        };
+    }
+
+    async getUserStats(userId: string) {
+        // Stats for individual user
+        const webCount = await prismaClient.website.count({ 
+            where: { owner_id: userId } 
+        });
+
+        return {
+            totalWebsites: webCount,
+            activeDeployments: webCount,
+            totalUsers: 1, // Just themselves
+            totalOrganizations: 0
+        };
+    }
+}
+
+export default new StatsService();

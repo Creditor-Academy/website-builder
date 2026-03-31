@@ -5,7 +5,21 @@ export const SELECT_WEBSITE_FIELDS = {
     name: true,
     status: true,
     thumbnail_url: true,
-    created_at: true
+    created_at: true,
+    updated_at: true,
+    owner_id: true,
+    institution_id: true,
+    content: true,
+    settings: {
+        select: {
+            id: true
+        }
+    },
+    institution: {
+        select: {
+            name: true
+        }
+    }
 } satisfies Prisma.WebsiteSelect;
 
 // 30 days in milliseconds

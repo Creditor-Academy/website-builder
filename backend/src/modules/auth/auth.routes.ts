@@ -8,7 +8,6 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   emailVerificationSchema,
-  googleLoginSchema,
 } from './auth.validation.js';
 import { authenticate } from '../../middlewares/auth.middleware.js';
 import { FORGOT_PW_LIMIT, LOGIN_LIMIT, REFRESH_LIMIT } from '../../constants/auth.constants.js';
@@ -29,14 +28,6 @@ router.post(
   validateRequest(loginSchema),
   rateLimiting('LOGIN', LOGIN_LIMIT),
   authController.login
-);
-
-// POST /auth/google - Google Login
-router.post(
-  '/google',
-  validateRequest(googleLoginSchema),
-  rateLimiting('LOGIN', LOGIN_LIMIT),
-  authController.googleLogin
 );
 
 // GET /auth/logout - Logout user

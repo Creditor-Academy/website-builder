@@ -31,6 +31,7 @@ export const listUsersQuerySchema = z.object({
 
   search: z.string().optional(),
   role: z.enum(UserRoleValues).optional(),
+  institution_id: z.string().optional(),
 
   isActive: z.enum(['true', 'false'], {
     message: 'isActive filter must be a boolean value',
@@ -63,11 +64,25 @@ export const updateUserStatusSchema = z.object({
     .transform(val => val === 'true')
 });
 
+// Create user schema
+export const createUserSchema = z.object({
+  name: z.string()
+    .min(2, 'Name must be at least 2 characters')
+    .max(100, 'Name must not exceed 100 characters'),
+  email: z.string().email('Invalid email address'),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(32, 'Password must not exceed 32 characters')
+    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .regex(/[0-9]/, 'Password must contain at least one number'),
+  role: z.enum(UserRoleValues).optional().default(UserRole.USER),
+  institution_id: z.string().optional(),
+});
+
 // User Id params schema
 export const userIdParamsSchema = z.object({
-  id: z.string().pipe(
-    z.cuid2('Invalid user ID format')
-  ),
+  id: z.string().uuid('Invalid user ID format')
 });
 
 export type UpdateOwnProfileInput = z.infer<typeof updateOwnProfileSchema>;

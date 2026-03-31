@@ -18,7 +18,7 @@ export const TOKEN_EXPIRY = {
 export const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
+  sameSite: 'lax' as const,
 };
 
 export const ACCESS_TOKEN_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
@@ -29,7 +29,7 @@ export const PASSWORD_RESET_TOKEN_EXPIRY_HOURS = 1;
 export const EMAIL_VERIFICATION_TOKEN_EXPIRY_HOURS = 24;
 
 export const LOGIN_LIMIT = {
-  LIMIT: 5,
+  LIMIT: 10,
   WINDOW_SEC: 10 * 60 // 10min
 }
 

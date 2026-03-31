@@ -4,6 +4,7 @@ export const generateJWTPayload = (user: any, sessionId: string) => {
         email: user.email,
         role: user.role,
         sessionId,
+        institution_id: user.institution_id || undefined
     };
 }
 
@@ -12,6 +13,7 @@ export const generateSessionPayload = (user: any, refreshTokenHash: string) => {
         userId: user.id,
         role: user.role,
         refreshTokenId: refreshTokenHash,
+        institution_id: user.institution_id || undefined,
         createdAt: new Date(),
     };
 }
