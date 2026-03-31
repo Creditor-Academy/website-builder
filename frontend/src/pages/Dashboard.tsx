@@ -27,9 +27,72 @@ import { loginUser, logoutUser } from "../api/auth";
 import statsApi from "../api/stats";
 
 
+const safeFormatDate = (dateStr: any) => {
+    if (!dateStr) return 'No date';
+    try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return '---';
+        return format(date, 'MMM d, p');
+    } catch (e) {
+        return '---';
+    }
+};
 
+interface Website {
+    id: string;
+    name: string;
+    templateId?: string;
+    lastEdited?: string;
+    status: 'Draft' | 'Published';
+}
 
-// OverviewCard component
+interface Asset {
+    id: string;
+    name: string;
+    url: string;
+    type: 'image' | 'video';
+    size: string;
+}
+
+interface OverviewCardProps {
+    title: string;
+    value: string | number;
+    icon: React.ReactNode;
+    description?: string;
+    iconBgClass: string;
+    iconColorClass: string;
+}
+
+interface NavItemProps {
+    icon: React.ReactNode;
+    label: string;
+    to: string;
+    activeColor?: string;
+    hoverBg?: string;
+    hoverText?: string;
+    defaultText?: string;
+}
+
+interface Template {
+    id: string;
+    name: string;
+    image: string;
+    desc: string;
+    icon: any;
+    category: string;
+}
+
+interface WebsiteCardProps {
+    site: Website;
+    index: number;
+    onDelete: () => void;
+    onEdit: () => void;
+}
+
+interface EmptyStateProps {
+    onAction: () => void;
+}
+
 const OverviewCard: React.FC<OverviewCardProps> = ({ title, value, icon, description, iconBgClass, iconColorClass }) => (
     <Card className="rounded-3xl bg-white/70 backdrop-blur-md border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-300 hover:-translate-y-1 group/overview-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 p-6 pb-4">
@@ -119,7 +182,7 @@ const WebsiteCard: React.FC<WebsiteCardProps> = ({ site, index, onDelete, onEdit
                         </CardTitle>
                         <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mt-1">
                             <Clock className="w-3 h-3 text-slate-400" />
-                            {format(new Date(site.lastEdited), 'MMM d, p')}
+                            {safeFormatDate(site.lastEdited)}
                         </div>
                     </div>
 
@@ -406,6 +469,7 @@ const Dashboard = () => {
     const location = useLocation();
     const { websites, fetchWebsites, createWebsite, deleteWebsite } = useBuilderStore();
     const isMobile = useIsMobile();
+    const { toast } = useToast();
     const user = JSON.parse(localStorage.getItem("user"));
     const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -428,6 +492,11 @@ const Dashboard = () => {
     });
     const [isLoadingStats, setIsLoadingStats] = useState(true);
 
+    const handleProfileSave = () => {
+        setIsUserProfileDialogOpen(false);
+        toast({ title: "Profile Updated", description: "Your changes have been saved." });
+    };
+
     const adminRoutes = [
         '/dashboard/users',
         '/dashboard/organizations',
@@ -436,6 +505,15 @@ const Dashboard = () => {
         '/dashboard/settings',
     ];
 
+    const userDashboardRoutes = ['/dashboard/templates', '/dashboard/assets'];
+
+    const getInitials = (name: string) => {
+        if (!name) return 'U';
+        const parts = name.split(' ').filter(Boolean);
+        if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
+        return parts[0][0].toUpperCase();
+    };
+
     useEffect(() => {
         if (!user) {
             navigate('/');
@@ -443,7 +521,7 @@ const Dashboard = () => {
         }
         if (!isAdmin && adminRoutes.includes(location.pathname)) {
             navigate('/dashboard');
-        } else if (isAdmin && userDashboardRoutes.includes(location.pathname)) {
+        } else if (isAdmin && userDashboardRoutes && userDashboardRoutes.includes(location.pathname)) {
             // If in admin mode and on a user-specific dashboard route, redirect to main admin dashboard
             navigate('/dashboard');
         }
@@ -615,7 +693,7 @@ const Dashboard = () => {
                     >
 
                         <div className="relative">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-sm">{getInitials(userName)}</div>
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-sm">{getInitials(user?.name || 'User')}</div>
                             <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-slate-800 rounded-full" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -702,9 +780,9 @@ const Dashboard = () => {
                                                     <Button
                                                         onClick={handleCreateSite}
                                                         disabled={!newSiteName.trim()}
-                                                        className="w-full h-14 font-bold text-lg flex items-center justify-center group/button-create-site active:scale-[0.98] rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/30 transition-all"
-                                                        icon={<ArrowRight className="w-5 h-5 group-hover/button-create-site:translate-x-1 transition-transform" />}>
+                                                        className="w-full h-14 font-bold text-lg flex items-center justify-center gap-2 group/button-create-site active:scale-[0.98] rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/30 transition-all">
                                                         Start Building
+                                                        <ArrowRight className="w-5 h-5 group-hover/button-create-site:translate-x-1 transition-transform" />
                                                     </Button>
                                                 </div>
                                             </div>
@@ -770,7 +848,7 @@ const Dashboard = () => {
                                 <Dialog open={isUserProfileDialogOpen} onOpenChange={setIsUserProfileDialogOpen}>
                                     <DialogTrigger asChild>
                                         <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-medium text-sm border-2 border-slate-300 shadow-sm cursor-pointer hover:bg-slate-100 transition-colors">
-                                            {getInitials(tempUserName)}
+                                            {getInitials(user?.name || 'U')}
                                         </div>
                                     </DialogTrigger>
                                     <DialogContent className="sm:max-w-[425px] rounded-[2rem] p-8 bg-white border-slate-200 shadow-xl">
@@ -780,22 +858,22 @@ const Dashboard = () => {
                                         </DialogHeader>
                                         <div className="flex flex-col items-center gap-4 py-4">
                                             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-4xl shadow-lg">
-                                                {getInitials(tempUserName)}
+                                                {getInitials(user?.name || 'U')}
                                             </div>
                                             <div className="grid gap-2 w-full">
                                                 <label htmlFor="name" className="text-sm font-medium text-slate-700">Name</label>
                                                 <Input
                                                     id="name"
-                                                    value={tempUserName}
-                                                    onChange={(e) => setTempUserName(e.target.value)}
-                                                    className="rounded-xl bg-slate-50 border-slate-200 px-4 h-12 text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                                    value={user?.name || ''}
+                                                    readOnly
+                                                    className="rounded-xl bg-slate-50 border-slate-200 px-4 h-12 text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                                                 />
                                             </div>
                                             <div className="grid gap-2 w-full">
                                                 <label htmlFor="email" className="text-sm font-medium text-slate-700">Email</label>
                                                 <Input
                                                     id="email"
-                                                    value={tempUserEmail}
+                                                    value={user?.email || ''}
                                                     disabled
                                                     className="rounded-xl bg-slate-100 border-slate-200 px-4 h-12 text-slate-500 cursor-not-allowed"
                                                 />
@@ -961,7 +1039,7 @@ const Dashboard = () => {
                                 }}
                                 className="flex items-center gap-4">
                                 <div className="flex flex-col">
-                                    <motion.p variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }} className="text-2xl font-semibold text-white/80 mb-1">Welcome back, {userName}!</motion.p>
+                                    <motion.p variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }} className="text-2xl font-semibold text-white/80 mb-1">Welcome back, {user?.name || 'Admin'}!</motion.p>
                                     <motion.h2 variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }} className="text-4xl font-extrabold text-white tracking-tight">Admin Dashboard</motion.h2>
                                     <motion.p variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }} className="text-lg text-white/80 mt-0.5">Platform overview and management at a glance.</motion.p>
                                 </div>
@@ -976,7 +1054,7 @@ const Dashboard = () => {
                                 <DropdownMenu open={isUserProfileDialogOpen} onOpenChange={setIsUserProfileDialogOpen}>
                                     <DropdownMenuTrigger asChild>
                                         <div className="w-12 h-12 rounded-full bg-purple-500 text-white flex items-center justify-center font-semibold text-base cursor-pointer shadow-md hover:shadow-lg transition-all">
-                                            {getInitials(userName)}
+                                            {getInitials(user?.name || 'A')}
                                         </div>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-slate-200 shadow-lg">
@@ -1010,7 +1088,7 @@ const Dashboard = () => {
                                         <p className="text-sm font-medium text-slate-600">Total Users</p>
                                     </div>
                                     <div className="flex items-end justify-between">
-                                        <span className="text-4xl font-extrabold text-slate-900">2,345</span>
+                                        <span className="text-4xl font-extrabold text-slate-900">{isLoadingStats ? "..." : stats.totalUsers}</span>
                                         <span className="text-sm font-semibold text-emerald-500 flex items-center">
                                             <ArrowUp className="w-4 h-4 mr-0.5" /> +12.5%
                                         </span>
@@ -1030,7 +1108,7 @@ const Dashboard = () => {
                                         <p className="text-sm font-medium text-slate-600">Active Websites</p>
                                     </div>
                                     <div className="flex items-end justify-between">
-                                        <span className="text-4xl font-extrabold text-slate-900">876</span>
+                                        <span className="text-4xl font-extrabold text-slate-900">{isLoadingStats ? "..." : stats.totalWebsites}</span>
                                         <span className="text-sm font-semibold text-rose-500 flex items-center">
                                             <ArrowDown className="w-4 h-4 mr-0.5" /> -3.2%
                                         </span>
@@ -1047,10 +1125,10 @@ const Dashboard = () => {
                                         <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
                                             <LayoutTemplate className="w-5 h-5" />
                                         </div>
-                                        <p className="text-sm font-medium text-slate-600">Total Templates</p>
+                                        <p className="text-sm font-medium text-slate-600">Active Deployments</p>
                                     </div>
                                     <div className="flex items-end justify-between">
-                                        <span className="text-4xl font-extrabold text-slate-900">48</span>
+                                        <span className="text-4xl font-extrabold text-slate-900">{isLoadingStats ? "..." : stats.activeDeployments}</span>
                                         <span className="text-sm font-semibold text-emerald-500 flex items-center">
                                             <ArrowUp className="w-4 h-4 mr-0.5" /> +2 Templates
                                         </span>
@@ -1067,10 +1145,10 @@ const Dashboard = () => {
                                         <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover/stat-card:scale-105 transition-transform">
                                             <Files className="w-6 h-6" />
                                         </div>
-                                        <p className="text-sm font-medium text-slate-600">Total Assets</p>
+                                        <p className="text-sm font-medium text-slate-600">Total Organizations</p>
                                     </div>
                                     <div className="flex items-end justify-between">
-                                        <span className="text-4xl font-extrabold text-slate-900">48</span>
+                                        <span className="text-4xl font-extrabold text-slate-900">{isLoadingStats ? "..." : stats.totalOrganizations}</span>
                                         <span className="text-sm font-semibold text-emerald-500 flex items-center">
                                             <ArrowUp className="w-4 h-4 mr-0.5" /> +8.1%
                                         </span>

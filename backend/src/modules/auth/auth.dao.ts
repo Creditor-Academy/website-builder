@@ -48,8 +48,6 @@ class AuthDao {
 
       email: userData.email,
 
-      auth_provider: userData.auth_provider || 'email'
-
     };
 
 

@@ -156,20 +156,13 @@ class AuthService {
 
 
 
-    // Compare passwords (only for email auth users)
-    const activeProvider = user.auth_provider || 'email';
-
-    if (activeProvider === 'email') {
-      if (!user.password_hash) {
-        throw new UnauthorizedError('No password associated with this account. Try OAuth.');
-      }
-      const isPasswordValid = await comparePassword(password, user.password_hash);
-      if (!isPasswordValid) {
-        throw new UnauthorizedError('Invalid email or password');
-      }
-    } else {
-      // For OAuth users, password shouldn't be used
-      throw new UnauthorizedError(`Please use ${activeProvider} login for this account`);
+    // Compare passwords
+    if (!user.password_hash) {
+      throw new UnauthorizedError('No password associated with this account.');
+    }
+    const isPasswordValid = await comparePassword(password, user.password_hash);
+    if (!isPasswordValid) {
+      throw new UnauthorizedError('Invalid email or password');
     }
 
 
@@ -566,149 +559,10 @@ class AuthService {
 
   }
 
-
-
-  async googleAuth(token: string) {
-
-    try {
-
-      // Verify Google OAuth token
-
-      const response = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${token}`);
-
-      if (!response.ok) {
-
-        throw new UnauthorizedError('Invalid Google token');
-
-      }
-
-      
-
-      const googleUser = await response.json();
-
-      
-
-      // Check if user exists with this email
-
-      let user = await this.authDao.findUserByEmail(googleUser.email);
-
-      
-
-      if (!user) {
-
-        // Create new user from Google data
-
-        const userData = {
-
-          name: googleUser.name,
-
-          email: googleUser.email,
-
-          password_hash: undefined, // No password for OAuth users
-
-          isVerified: true, // Google users are pre-verified
-
-          auth_provider: 'google'
-
-        };
-
-        
-
-        user = await this.authDao.createUser(userData);
-
-      } else if (user.auth_provider !== 'google') {
-
-        // User exists but registered with different provider
-
-        throw new ConflictError('Email already registered with different method');
-
-      }
-
-      
-
-      if (!user) {
-
-        throw new UnauthorizedError('User creation failed');
-
-      }
-
-      
-
-      // Generate session and tokens
-
-      const sessionId = this._generateRandomToken();
-
-      const sessionKey = generateAuthSessionKey(user.id, sessionId);
-
-      
-
-      const refreshToken = this._generateRandomToken();
-
-      const refreshTokenHash = this._hashToken(refreshToken);
-
-      const refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS);
-
-      
-
-      await this.authDao.createRefreshToken({
-
-        userId: user.id,
-
-        token_hash: refreshTokenHash,
-
-        sessionId,
-
-        expiresAt: refreshTokenExpiresAt,
-
-      });
-
-      
-
-      const sessionPayload = generateSessionPayload(user, refreshTokenHash);
-
-      await cacheService.set(sessionKey, sessionPayload, AUTH_REDIS_EXPIRY_SECONDS);
-
-      
-
-      const payload = generateJWTPayload(user, sessionId);
-
-      const accessToken = generateAccessToken(payload);
-
-      
-
-      return {
-
-        message: 'Google login successful',
-
-        accessToken,
-
-        refreshToken,
-
-        user: {
-
-          id: user.id,
-
-          name: user.name,
-
-          email: user.email,
-
-          isVerified: user.isVerified
-
-        }
-
-      };
-
-    } catch (error) {
-
-      throw new UnauthorizedError('Google authentication failed');
-
-    }
-
-  }
-
 }
 
-
-
 export default AuthService;
+
+
+
 
