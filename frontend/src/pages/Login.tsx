@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Eye, LayoutTemplate } from "lucide-react";
@@ -25,9 +25,11 @@ interface LoginFormProps {
   isLoadingLogin: boolean;
   showPassword: boolean;
   setShowPassword: (v: boolean) => void;
-
+  loginError: string;
+  setLoginError: (v: string) => void;
+  rememberMe: boolean;
+  setRememberMe: (v: boolean) => void;
 }
-
 
 const LoginForm = ({
   loginData,
@@ -36,80 +38,114 @@ const LoginForm = ({
   setIsSignup,
   isLoadingLogin,
   showPassword,
-  setShowPassword
-}: LoginFormProps) => (
+  setShowPassword,
+  loginError,
+  setLoginError,
+  rememberMe,
+  setRememberMe,
+}: LoginFormProps) => {
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleLogin();
+  };
 
-  <div className="w-full max-w-[400px] flex flex-col justify-center h-full mx-auto">
-    <div className="mb-10 text-left">
-      <h2 className="text-slate-950 text-[2.5rem] font-bold tracking-tight mb-2">Welcome Back!</h2>
-      <p className="text-slate-500 text-sm font-medium">Log in to start creating stunning websites with ease.</p>
-    </div>
-
-    <div className="space-y-5 mb-8">
-      <div className="relative group">
-        <label className="text-xs font-bold text-slate-800 mb-2 block">Email</label>
-        <input
-          type="email"
-          placeholder="Input your email"
-          value={loginData.email}
-          onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-          className="w-full bg-white border border-slate-200 rounded-xl py-4 px-4 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all outline-none"
-        />
+  return (
+    <div className="w-full max-w-[400px] flex flex-col justify-center h-full mx-auto">
+      <div className="mb-10 text-left">
+        <h2 className="text-slate-950 text-[2.5rem] font-bold tracking-tight mb-2">Welcome Back!</h2>
+        <p className="text-slate-500 text-sm font-medium">Log in to start creating stunning websites with ease.</p>
       </div>
-      <div className="relative group">
-        <label className="text-xs font-bold text-slate-800 mb-2 block">Password</label>
-        <div className="relative">
+
+      <div className="space-y-5 mb-8">
+        <div className="relative group">
+          <label className="text-xs font-bold text-slate-800 mb-2 block">Email</label>
           <input
-            type={showPassword ? "text" : "password"}   // ✅ toggle
-
-            placeholder="Input your password"
-            value={loginData.password}
-            onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-            className="w-full bg-white border border-slate-200 rounded-xl py-4 pl-4 pr-12 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all outline-none"
+            type="email"
+            placeholder="Input your email"
+            value={loginData.email}
+            onKeyDown={handleKey}
+            onChange={(e) => {
+              setLoginData({ ...loginData, email: e.target.value });
+              if (loginError) setLoginError("");
+            }}
+            className="w-full bg-white border border-slate-200 rounded-xl py-4 px-4 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all outline-none"
           />
-          <Eye
-            onClick={() => setShowPassword(!showPassword)}   // ✅ toggle
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 cursor-pointer hover:text-slate-600"
-          />
+        </div>
 
+        <div className="relative group">
+          <label className="text-xs font-bold text-slate-800 mb-2 block">Password</label>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Input your password"
+              value={loginData.password}
+              onKeyDown={handleKey}
+              onChange={(e) => {
+                setLoginData({ ...loginData, password: e.target.value });
+                if (loginError) setLoginError("");
+              }}
+              className={`w-full bg-white border rounded-xl py-4 pl-4 pr-12 text-slate-900 placeholder:text-slate-400 focus:ring-1 transition-all outline-none ${
+                loginError
+                  ? "border-red-400 focus:border-red-400 focus:ring-red-400"
+                  : "border-slate-200 focus:border-slate-400 focus:ring-slate-400"
+              }`}
+            />
+            <Eye
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 cursor-pointer hover:text-slate-600"
+            />
+          </div>
+
+          {loginError && (
+            <p className="text-red-500 text-xs font-medium mt-2 flex items-center gap-1">
+              <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 3.5a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4.5zm0 6.5a.875.875 0 1 1 0-1.75A.875.875 0 0 1 8 11z" />
+              </svg>
+              {loginError}
+            </p>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between pt-2">
+          <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-500 select-none">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="w-4 h-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 focus:ring-offset-0 cursor-pointer"
+            />
+            Remember Me
+          </label>
+          <a href="#" className="text-sm font-medium text-slate-400 hover:text-slate-800 transition-colors">Forgot Password?</a>
         </div>
       </div>
-      <div className="flex items-center justify-between pt-2">
-        <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-500 select-none">
-          <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 focus:ring-offset-0" />
-          Remember Me
-        </label>
-        <a href="#" className="text-sm font-medium text-slate-400 hover:text-slate-800 transition-colors">Forgot Password?</a>
-      </div>
-    </div>
 
-    <button
-      onClick={handleLogin}
-      disabled={isLoadingLogin}
-      className="w-full bg-slate-950 hover:bg-slate-800 text-white font-medium py-4 rounded-xl transition-all active:scale-[0.98] mb-8 disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      {isLoadingLogin ? "Logging in..." : "Login"}
-    </button>
-
-
-    <div className="relative flex items-center justify-center mb-8">
-      <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
-      <span className="relative px-4 bg-white text-xs text-slate-400">Or continue with</span>
-    </div>
-
-    <button className="flex items-center justify-center gap-3 py-4 w-full bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors font-medium text-slate-700 active:scale-[0.98]">
-      <GoogleSVG />
-      Continue with Google
-    </button>
-
-    <p className="text-slate-500 text-center text-sm mt-8 hidden md:block">
-      Don't have an account?{" "}
-      <button onClick={() => setIsSignup(true)} className="text-slate-950 font-bold hover:underline">
-        Sign up here
+      <button
+        onClick={handleLogin}
+        disabled={isLoadingLogin}
+        className="w-full bg-slate-950 hover:bg-slate-800 text-white font-medium py-4 rounded-xl transition-all active:scale-[0.98] mb-8 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isLoadingLogin ? "Logging in..." : "Login"}
       </button>
-    </p>
-  </div>
-);
+
+      <div className="relative flex items-center justify-center mb-8">
+        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
+        <span className="relative px-4 bg-white text-xs text-slate-400">Or continue with</span>
+      </div>
+
+      <button className="flex items-center justify-center gap-3 py-4 w-full bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors font-medium text-slate-700 active:scale-[0.98]">
+        <GoogleSVG />
+        Continue with Google
+      </button>
+
+      <p className="text-slate-500 text-center text-sm mt-8 hidden md:block">
+        Don't have an account?{" "}
+        <button onClick={() => setIsSignup(true)} className="text-slate-950 font-bold hover:underline">
+          Sign up here
+        </button>
+      </p>
+    </div>
+  );
+};
 
 interface SignupFormProps {
   signupData: { name: string; email: string; password: string };
@@ -119,9 +155,9 @@ interface SignupFormProps {
   isLoadingSignup: boolean;
   showSignupPassword: boolean;
   setShowSignupPassword: (v: boolean) => void;
-
+  signupError: string;
+  setSignupError: (v: string) => void;
 }
-
 
 const SignupForm = ({
   signupData,
@@ -130,80 +166,112 @@ const SignupForm = ({
   setIsSignup,
   isLoadingSignup,
   showSignupPassword,
-  setShowSignupPassword
-}: SignupFormProps) => (
-  <div className="w-full max-w-[400px] flex flex-col justify-center h-full mx-auto">
-    <div className="mb-10 text-left">
-      <h2 className="text-slate-950 text-[2.5rem] font-bold tracking-tight mb-2">Create Account</h2>
-      <p className="text-slate-500 text-sm font-medium">Start building your masterpiece today.</p>
-    </div>
+  setShowSignupPassword,
+  signupError,
+  setSignupError,
+}: SignupFormProps) => {
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleSignup();
+  };
 
-    <div className="space-y-4 mb-8">
-      <div className="relative group">
-        <label className="text-xs font-bold text-slate-800 mb-1 block">Full Name</label>
-        <input
-          type="text"
-          placeholder="John Doe"
-          value={signupData.name}
-          onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
-          className="w-full bg-white border border-slate-200 rounded-xl py-4 px-4 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all outline-none"
-        />
+  return (
+    <div className="w-full max-w-[400px] flex flex-col justify-center h-full mx-auto">
+      <div className="mb-10 text-left">
+        <h2 className="text-slate-950 text-[2.5rem] font-bold tracking-tight mb-2">Create Account</h2>
+        <p className="text-slate-500 text-sm font-medium">Start building your masterpiece today.</p>
       </div>
-      <div className="relative group">
-        <label className="text-xs font-bold text-slate-800 mb-1 block">Email</label>
-        <input
-          type="email"
-          value={signupData.email}
-          onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
-          className="w-full bg-white border border-slate-200 rounded-xl py-4 px-4 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all outline-none"
-        />
-      </div>
-      <div className="relative group">
-        <label className="text-xs font-bold text-slate-800 mb-1 block">Password</label>
-        <div className="relative">
+
+      <div className="space-y-4 mb-8">
+        <div className="relative group">
+          <label className="text-xs font-bold text-slate-800 mb-1 block">Full Name</label>
           <input
-            type={showSignupPassword ? "text" : "password"}
-
-            value={signupData.password}
-            onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-            className="w-full bg-white border border-slate-200 rounded-xl py-4 pl-4 pr-12 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all outline-none"
+            type="text"
+            placeholder="John Doe"
+            value={signupData.name}
+            onKeyDown={handleKey}
+            onChange={(e) => {
+              setSignupData({ ...signupData, name: e.target.value });
+              if (signupError) setSignupError("");
+            }}
+            className="w-full bg-white border border-slate-200 rounded-xl py-4 px-4 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all outline-none"
           />
-          <Eye
-            onClick={() => setShowSignupPassword(!showSignupPassword)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 cursor-pointer"
-          />
+        </div>
 
+        <div className="relative group">
+          <label className="text-xs font-bold text-slate-800 mb-1 block">Email</label>
+          <input
+            type="email"
+            value={signupData.email}
+            onKeyDown={handleKey}
+            onChange={(e) => {
+              setSignupData({ ...signupData, email: e.target.value });
+              if (signupError) setSignupError("");
+            }}
+            className="w-full bg-white border border-slate-200 rounded-xl py-4 px-4 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all outline-none"
+          />
+        </div>
+
+        <div className="relative group">
+          <label className="text-xs font-bold text-slate-800 mb-1 block">Password</label>
+          <div className="relative">
+            <input
+              type={showSignupPassword ? "text" : "password"}
+              value={signupData.password}
+              onKeyDown={handleKey}
+              onChange={(e) => {
+                setSignupData({ ...signupData, password: e.target.value });
+                if (signupError) setSignupError("");
+              }}
+              className={`w-full bg-white border rounded-xl py-4 pl-4 pr-12 text-slate-900 placeholder:text-slate-400 focus:ring-1 transition-all outline-none ${
+                signupError
+                  ? "border-red-400 focus:border-red-400 focus:ring-red-400"
+                  : "border-slate-200 focus:border-slate-400 focus:ring-slate-400"
+              }`}
+            />
+            <Eye
+              onClick={() => setShowSignupPassword(!showSignupPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 cursor-pointer"
+            />
+          </div>
+
+          {signupError && (
+            <p className="text-red-500 text-xs font-medium mt-2 flex items-center gap-1">
+              <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 3.5a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4.5zm0 6.5a.875.875 0 1 1 0-1.75A.875.875 0 0 1 8 11z" />
+              </svg>
+              {signupError}
+            </p>
+          )}
         </div>
       </div>
-    </div>
 
-    <button
-      onClick={handleSignup}
-      disabled={isLoadingSignup}
-      className="w-full bg-slate-950 hover:bg-slate-800 text-white font-medium py-4 rounded-xl transition-all active:scale-[0.98] mb-8 disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      {isLoadingSignup ? "Creating account..." : "Sign Up"}
-    </button>
-
-
-    <div className="relative flex items-center justify-center mb-8">
-      <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
-      <span className="relative px-4 bg-white text-xs text-slate-400">Or continue with</span>
-    </div>
-
-    <button className="flex items-center justify-center gap-3 py-4 w-full bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors font-medium text-slate-700 active:scale-[0.98]">
-      <GoogleSVG />
-      Continue with Google
-    </button>
-
-    <p className="text-slate-500 text-center text-sm mt-8 hidden md:block">
-      Joined us before?{" "}
-      <button onClick={() => setIsSignup(false)} className="text-slate-950 font-bold hover:underline">
-        Login here
+      <button
+        onClick={handleSignup}
+        disabled={isLoadingSignup}
+        className="w-full bg-slate-950 hover:bg-slate-800 text-white font-medium py-4 rounded-xl transition-all active:scale-[0.98] mb-8 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isLoadingSignup ? "Creating account..." : "Sign Up"}
       </button>
-    </p>
-  </div>
-);
+
+      <div className="relative flex items-center justify-center mb-8">
+        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
+        <span className="relative px-4 bg-white text-xs text-slate-400">Or continue with</span>
+      </div>
+
+      <button className="flex items-center justify-center gap-3 py-4 w-full bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors font-medium text-slate-700 active:scale-[0.98]">
+        <GoogleSVG />
+        Continue with Google
+      </button>
+
+      <p className="text-slate-500 text-center text-sm mt-8 hidden md:block">
+        Joined us before?{" "}
+        <button onClick={() => setIsSignup(false)} className="text-slate-950 font-bold hover:underline">
+          Login here
+        </button>
+      </p>
+    </div>
+  );
+};
 
 // ── Main component ─────────────────────────────────────────────────────────────
 
@@ -216,47 +284,95 @@ export default function LoginSignup() {
   const [isLoadingSignup, setIsLoadingSignup] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [loginError, setLoginError] = useState("");
+  const [signupError, setSignupError] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
 
+  // ── On mount: restore remembered email + skip login if session exists ────────
+  useEffect(() => {
+    // Auto-fill email if user previously checked Remember Me
+    const savedEmail = localStorage.getItem("rememberedEmail");
+    if (savedEmail) {
+      setLoginData((prev) => ({ ...prev, email: savedEmail }));
+      setRememberMe(true);
+    }
 
+    // If user is already logged in and chose Remember Me, go straight to dashboard
+    const savedUser = localStorage.getItem("user");
+    const wasRemembered = localStorage.getItem("rememberMe") === "true";
+    if (savedUser && wasRemembered) {
+      navigate("/dashboard");
+    }
+  }, [navigate]);
 
   const handleLogin = async () => {
+    setLoginError("");
     try {
       setIsLoadingLogin(true);
-
       const res = await loginUser(loginData);
+
+      // Always save the user session
       localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      if (rememberMe) {
+        // Save email for auto-fill + flag to skip login next visit
+        localStorage.setItem("rememberedEmail", loginData.email);
+        localStorage.setItem("rememberMe", "true");
+      } else {
+        // User didn't check Remember Me — clear any saved data
+        localStorage.removeItem("rememberedEmail");
+        localStorage.removeItem("rememberMe");
+      }
 
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Login failed");
+      setLoginError(err.response?.data?.message || "Incorrect email or password.");
     } finally {
       setIsLoadingLogin(false);
     }
   };
 
-
   const handleSignup = async () => {
+    setSignupError("");
     try {
       setIsLoadingSignup(true);
-
-      const res = await registerUser(signupData);
+      await registerUser(signupData);
       alert("Registered! Check your email.");
       setIsSignup(false);
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Signup failed");
+      setSignupError(err.response?.data?.message || "Signup failed. Please try again.");
     } finally {
       setIsLoadingSignup(false);
     }
   };
 
-
   const loginProps = {
-    loginData, setLoginData, handleLogin, setIsSignup, isLoadingLogin, showPassword, setShowPassword
+    loginData,
+    setLoginData,
+    handleLogin,
+    setIsSignup,
+    isLoadingLogin,
+    showPassword,
+    setShowPassword,
+    loginError,
+    setLoginError,
+    rememberMe,
+    setRememberMe,
   };
-  const signupProps = { signupData, setSignupData, handleSignup, setIsSignup, isLoadingSignup, showSignupPassword, setShowSignupPassword };
 
+  const signupProps = {
+    signupData,
+    setSignupData,
+    handleSignup,
+    setIsSignup,
+    isLoadingSignup,
+    showSignupPassword,
+    setShowSignupPassword,
+    signupError,
+    setSignupError,
+  };
 
   return (
     <div className="relative min-h-[100svh] w-full flex overflow-hidden bg-slate-950">

@@ -50,7 +50,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, to, activeColor = 'text-
     const isActive = location.pathname === to;
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault(); // Prevent default button behavior
+        e.preventDefault();
         navigate(to);
     };
 
@@ -264,7 +264,8 @@ const AssetsView: React.FC = () => {
                         </div>
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/asset-card:opacity-100 transition-opacity p-6 flex flex-col justify-end">
                             <p className="text-white text-sm font-bold truncate">{asset.name}</p>
-                            <p className="text-white/70 text-[10px] uppercase font-black tracking-widest mt-0.5">S{asset.size}</p>
+                            {/* FIX: removed stray "S" prefix before asset.size */}
+                            <p className="text-white/70 text-[10px] uppercase font-black tracking-widest mt-0.5">{asset.size}</p>
                         </div>
                     </div>
                 ))}
@@ -401,15 +402,36 @@ const SettingsView: React.FC = () => {
     );
 };
 
+const getInitials = (name: string) => {
+    if (!name) return '';
+    const parts = name.split(' ').filter(Boolean);
+    let initials = '';
+    if (parts.length > 1 && parts[1].length > 0) {
+        initials = parts[0][0] + parts[1][0];
+    } else if (parts[0] && parts[0].length > 0) {
+        initials = parts[0][0];
+    }
+    return initials.toUpperCase();
+};
+
+// Routes that are strictly for non-admin users only.
+// Templates and Assets are accessible by both roles, so they are NOT listed here.
+const userDashboardRoutes: string[] = [];
+
 const Dashboard = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { websites, fetchWebsites, createWebsite, deleteWebsite } = useBuilderStore();
     const isMobile = useIsMobile();
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(localStorage.getItem("user") || 'null');
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [userName, setUserName] = useState(user?.name || 'User');
 
+    // FIX: Added missing tempUserName, tempUserEmail state variables
+    const [tempUserName, setTempUserName] = useState(user?.name || 'User');
+    const [tempUserEmail] = useState(user?.email || '');
 
+    const { toast } = useToast();
 
     const [newSiteName, setNewSiteName] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -418,8 +440,8 @@ const Dashboard = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [isUserProfileDialogOpen, setIsUserProfileDialogOpen] = useState(false);
-    const [sortBy, setSortBy] = useState('recent'); // 'recent' or 'name'
-    const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'draft', 'published'
+    const [sortBy, setSortBy] = useState('recent');
+    const [filterStatus, setFilterStatus] = useState('all');
     const [stats, setStats] = useState({
         totalWebsites: 0,
         totalUsers: 0,
@@ -444,7 +466,6 @@ const Dashboard = () => {
         if (!isAdmin && adminRoutes.includes(location.pathname)) {
             navigate('/dashboard');
         } else if (isAdmin && userDashboardRoutes.includes(location.pathname)) {
-            // If in admin mode and on a user-specific dashboard route, redirect to main admin dashboard
             navigate('/dashboard');
         }
     }, [user, isAdmin, location.pathname, navigate]);
@@ -468,14 +489,11 @@ const Dashboard = () => {
         fetchWebsites();
     }, [isAdmin, fetchWebsites]);
 
-
     const handleLogout = async () => {
         try {
             setIsLoggingOut(true);
-
             await logoutUser();
-
-            localStorage.removeItem("user"); // ✅ clear user
+            localStorage.removeItem("user");
             navigate("/");
         } catch (err) {
             console.error(err);
@@ -485,6 +503,12 @@ const Dashboard = () => {
         }
     };
 
+    // FIX: Added missing handleProfileSave function
+    const handleProfileSave = () => {
+        setUserName(tempUserName);
+        setIsUserProfileDialogOpen(false);
+        toast({ title: "Profile updated", description: "Your name has been updated successfully." });
+    };
 
     const handleDialogClose = (open: boolean) => {
         setIsDialogOpen(open);
@@ -586,14 +610,6 @@ const Dashboard = () => {
                 </nav>
 
                 <div className="p-4 mt-auto space-y-3">
-                    {/* <div className="bg-slate-700 rounded-2xl p-4 border border-slate-600">
-                        <p className="text-xs font-semibold text-white mb-1">Free Plan</p>
-                        <div className="w-full bg-slate-600 h-1.5 rounded-full mb-2">
-                            <div className="bg-purple-500 h-full w-1/3 rounded-full" />
-                        </div>
-                        <p className="text-[10px] text-slate-400">3 of 10 projects used</p>
-                    </div> */}
-
                     {(user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' || user?.role === 'INSTITUTION_ADMIN') && (
                         <GradientButton
                             className="w-full justify-start py-2 px-3 text-sm"
@@ -613,7 +629,6 @@ const Dashboard = () => {
   `}
                         onClick={!isLoggingOut ? handleLogout : undefined}
                     >
-
                         <div className="relative">
                             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-sm">{getInitials(userName)}</div>
                             <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-slate-800 rounded-full" />
@@ -622,7 +637,6 @@ const Dashboard = () => {
                             <p className="text-sm font-semibold text-white truncate">
                                 {isLoggingOut ? "Logging out..." : (user?.name || "User")}
                             </p>
-
                             <p className="text-xs text-slate-400 truncate">Pro Plan</p>
                         </div>
                         <LogOut className="w-4 h-4 text-slate-400 hover:text-red-400 transition-colors" />
@@ -699,12 +713,13 @@ const Dashboard = () => {
                                                     </div>
                                                 </div>
                                                 <div className="mt-auto pt-8 border-t border-slate-100">
+                                                    {/* FIX: Removed invalid `icon` prop from shadcn Button; moved icon into children */}
                                                     <Button
                                                         onClick={handleCreateSite}
                                                         disabled={!newSiteName.trim()}
-                                                        className="w-full h-14 font-bold text-lg flex items-center justify-center group/button-create-site active:scale-[0.98] rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/30 transition-all"
-                                                        icon={<ArrowRight className="w-5 h-5 group-hover/button-create-site:translate-x-1 transition-transform" />}>
+                                                        className="w-full h-14 font-bold text-lg flex items-center justify-center gap-2 group/button-create-site active:scale-[0.98] rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/30 transition-all">
                                                         Start Building
+                                                        <ArrowRight className="w-5 h-5 group-hover/button-create-site:translate-x-1 transition-transform" />
                                                     </Button>
                                                 </div>
                                             </div>
@@ -757,7 +772,8 @@ const Dashboard = () => {
                                                                 </div>
                                                                 <div>
                                                                     <h4 className={cn("font-bold text-lg transition-colors leading-tight", selectedTemplate === tpl.id ? "text-slate-900" : "text-slate-700")}>{tpl.name}</h4>
-                                                                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">S{tpl.category}</p>
+                                                                    {/* FIX: removed stray "S" prefix before tpl.category */}
+                                                                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">{tpl.category}</p>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -967,12 +983,10 @@ const Dashboard = () => {
                                 </div>
                             </motion.div>
                             <div className="flex items-center gap-3">
-                                {/* Notification Icon */}
                                 <Button variant="ghost" size="icon" className="relative rounded-full h-12 w-12 text-white hover:bg-white/10 transition-colors">
                                     <Bell className="w-6 h-6" />
                                     <span className="absolute top-3 right-3 block w-2.5 h-2.5 rounded-full bg-white" />
                                 </Button>
-                                {/* Admin Profile Avatar */}
                                 <DropdownMenu open={isUserProfileDialogOpen} onOpenChange={setIsUserProfileDialogOpen}>
                                     <DropdownMenuTrigger asChild>
                                         <div className="w-12 h-12 rounded-full bg-purple-500 text-white flex items-center justify-center font-semibold text-base cursor-pointer shadow-md hover:shadow-lg transition-all">
@@ -992,10 +1006,8 @@ const Dashboard = () => {
                             </div>
                         </motion.header>
 
-                        {/* Main Content Wrapper for max-width and padding */}
                         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 md:py-10">
 
-                            {/* Platform Overview (Stats Cards) */}
                             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}
@@ -1022,7 +1034,6 @@ const Dashboard = () => {
                                     transition={{ duration: 0.5, delay: 0.2 }}
                                     className="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300"
                                 >
-
                                     <div className="flex items-center gap-3 mb-3">
                                         <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center">
                                             <Globe className="w-6 h-6" />
@@ -1042,7 +1053,6 @@ const Dashboard = () => {
                                     transition={{ duration: 0.5, delay: 0.3 }}
                                     className="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300"
                                 >
-
                                     <div className="flex items-center gap-3 mb-3">
                                         <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
                                             <LayoutTemplate className="w-5 h-5" />
@@ -1062,7 +1072,6 @@ const Dashboard = () => {
                                     transition={{ duration: 0.5, delay: 0.4 }}
                                     className="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 group/stat-card"
                                 >
-
                                     <div className="flex items-center gap-3 mb-3">
                                         <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover/stat-card:scale-105 transition-transform">
                                             <Files className="w-6 h-6" />
@@ -1076,12 +1085,9 @@ const Dashboard = () => {
                                         </span>
                                     </div>
                                 </motion.div>
-
                             </section>
 
-                            {/* Main Content Grid (Users, Websites, Templates | Deployments, Activity) */}
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                {/* Left Column: Manage Users, Websites, Templates */}
                                 <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <motion.div
                                         whileHover={{ scale: 1.02, boxShadow: "0 8px 25px rgba(0, 0, 0, 0.05)", borderColor: "#a78bfa" }}
@@ -1089,7 +1095,6 @@ const Dashboard = () => {
                                         onClick={() => navigate('/dashboard/users')}
                                         className="relative group/admin-action-card cursor-pointer bg-white rounded-2xl p-6 shadow-lg border border-slate-100 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-purple-300"
                                     >
-
                                         <div className="relative z-10 w-14 h-14 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover/admin-action-card:scale-105 transition-transform duration-300">
                                             <Users className="w-7 h-7" />
                                         </div>
@@ -1103,7 +1108,6 @@ const Dashboard = () => {
                                         onClick={() => navigate('/dashboard/websites')}
                                         className="relative group/admin-action-card cursor-pointer bg-white rounded-2xl p-6 shadow-lg border border-slate-100 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-indigo-300"
                                     >
-
                                         <div className="relative z-10 w-14 h-14 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover/admin-action-card:scale-105 transition-transform duration-300">
                                             <Layout className="w-7 h-7" />
                                         </div>
@@ -1119,7 +1123,6 @@ const Dashboard = () => {
                                         onClick={() => navigate('/dashboard/templates')}
                                         className="relative group/admin-action-card cursor-pointer bg-white rounded-2xl p-6 shadow-lg border border-slate-100 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300"
                                     >
-
                                         <div className="relative z-10 w-14 h-14 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover/admin-action-card:scale-105 transition-transform duration-300">
                                             <LayoutTemplate className="w-7 h-7" />
                                         </div>
@@ -1130,7 +1133,6 @@ const Dashboard = () => {
                                     </motion.div>
                                 </div>
 
-                                {/* Right Column: Monitor Deployments & Other Info */}
                                 <div className="lg:col-span-1 space-y-6">
                                     <motion.div
                                         whileHover={{ scale: 1.02, boxShadow: "0 8px 25px rgba(0, 0, 0, 0.05)", borderColor: "#fb7185" }}
@@ -1138,7 +1140,6 @@ const Dashboard = () => {
                                         onClick={() => navigate('/dashboard/deployment')}
                                         className="relative group/admin-action-card cursor-pointer bg-white rounded-2xl p-6 shadow-lg border border-slate-100 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-rose-300"
                                     >
-
                                         <div className="relative z-10 w-14 h-14 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover/admin-action-card:scale-105 transition-transform duration-300">
                                             <Activity className="w-7 h-7" />
                                         </div>
@@ -1148,7 +1149,6 @@ const Dashboard = () => {
                                         </p>
                                     </motion.div>
 
-                                    {/* Placeholder for other secondary info */}
                                     <Card className="rounded-2xl bg-white border border-slate-100 shadow-lg p-6 flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                                         <h3 className="text-xl font-bold text-slate-900 mb-4">Quick Insights</h3>
                                         <p className="text-sm text-slate-600">Additional admin information can go here. For example, recent logs, system health, or quick links.</p>
@@ -1158,10 +1158,6 @@ const Dashboard = () => {
                                     </Card>
                                 </div>
                             </div>
-
-
-
-
                         </div>
                     </div>
                 ) : (
