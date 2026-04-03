@@ -6,7 +6,8 @@ import {
     Layout, Settings, LogOut, Clock, CheckCircle,
     FileText, Search, Sparkles, Zap, Files, Building2, ShoppingBag, Users,
     ArrowRight, ChevronLeft, Palette, Layers, MonitorPlay, Move, LayoutTemplate,
-    Upload, Monitor, Link as LinkIcon, Activity, Menu, X, ShieldCheck, ListFilter, Bell, ArrowUp, ArrowDown
+    Upload, Monitor, Link as LinkIcon, Activity, Menu, X, ShieldCheck, ListFilter, Bell, ArrowUp, ArrowDown,
+    UserX, RefreshCw, Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,12 +26,20 @@ import GradientButton from '@/components/ui/GradientButton';
 import { templatesList } from '@/lib/templates';
 import { loginUser, logoutUser } from "../api/auth";
 import statsApi from "../api/stats";
-
-
+import {
+    updateUserProfile,
+    deactivateOwnAccount,
+    getUserById,
+    getUsers,
+    updateUserRole,
+    updateUserStatus,
+    restoreUser,
+    createUser,
+} from "../api/user";
 
 
 // OverviewCard component
-const OverviewCard: React.FC<OverviewCardProps> = ({ title, value, icon, description, iconBgClass, iconColorClass }) => (
+const OverviewCard = ({ title, value, icon, description, iconBgClass, iconColorClass }) => (
     <Card className="rounded-3xl bg-white/70 backdrop-blur-md border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-300 hover:-translate-y-1 group/overview-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 p-6 pb-4">
             <CardTitle className="text-base font-semibold text-slate-700">{title}</CardTitle>
@@ -44,12 +53,12 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ title, value, icon, descrip
 );
 
 // NavItem — supports router Link + active state
-const NavItem: React.FC<NavItemProps> = ({ icon, label, to, activeColor = 'text-white', hoverBg = 'hover:bg-slate-700', hoverText = 'hover:text-white', defaultText = 'text-slate-300' }) => {
+const NavItem = ({ icon, label, to, activeColor = 'text-white', hoverBg = 'hover:bg-slate-700', hoverText = 'hover:text-white', defaultText = 'text-slate-300' }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const isActive = location.pathname === to;
 
-    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleClick = (e) => {
         e.preventDefault();
         navigate(to);
     };
@@ -71,8 +80,8 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, to, activeColor = 'text-
     );
 };
 
-const WebsiteCard: React.FC<WebsiteCardProps> = ({ site, index, onDelete, onEdit }) => {
-    const template = templatesList.find((t: Template) => t.id === site.templateId);
+const WebsiteCard = ({ site, index, onDelete, onEdit }) => {
+    const template = templatesList.find((t) => t.id === site.templateId);
 
     return (
         <Card className="group/website-card border border-slate-200 bg-white rounded-3xl overflow-hidden flex flex-col shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 hover:-translate-y-1 transition-all duration-300">
@@ -103,7 +112,6 @@ const WebsiteCard: React.FC<WebsiteCardProps> = ({ site, index, onDelete, onEdit
                     </div>
                 )}
 
-                {/* Hover Actions Overlay */}
                 <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover/website-card:opacity-100 transition-all duration-300 z-10">
                     <Button size="sm" onClick={onEdit} className="bg-white text-slate-900 hover:bg-white/90 rounded-full shadow-lg">
                         <Edit2 className="w-4 h-4 mr-1" /> Edit
@@ -161,7 +169,7 @@ const WebsiteCard: React.FC<WebsiteCardProps> = ({ site, index, onDelete, onEdit
     );
 };
 
-const EmptyState: React.FC<EmptyStateProps> = ({ onAction }) => (
+const EmptyState = ({ onAction }) => (
     <div className="h-[400px] flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-[2rem] bg-white p-12 text-center transition-all hover:border-primary/20 hover:bg-slate-50/50">
         <div className="w-20 h-20 bg-primary/5 rounded-3xl flex items-center justify-center mb-6">
             <Globe className="w-10 h-10 text-primary" />
@@ -177,14 +185,14 @@ const EmptyState: React.FC<EmptyStateProps> = ({ onAction }) => (
 );
 
 
-const AssetsView: React.FC = () => {
+const AssetsView = () => {
     const { assets, addAsset, deleteAsset } = useBuilderStore();
     const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
     const [urlInput, setUrlInput] = useState('');
     const [urlName, setUrlName] = useState('');
-    const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const fileInputRef = React.useRef(null);
 
-    const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleUpload = (e) => {
         const file = e.target.files?.[0];
         if (file) {
             const url = URL.createObjectURL(file);
@@ -264,14 +272,12 @@ const AssetsView: React.FC = () => {
                         </div>
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/asset-card:opacity-100 transition-opacity p-6 flex flex-col justify-end">
                             <p className="text-white text-sm font-bold truncate">{asset.name}</p>
-                            {/* FIX: removed stray "S" prefix before asset.size */}
                             <p className="text-white/70 text-[10px] uppercase font-black tracking-widest mt-0.5">{asset.size}</p>
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* URL Upload Dialog */}
             <Dialog open={isUrlDialogOpen} onOpenChange={setIsUrlDialogOpen}>
                 <DialogContent className="sm:max-w-md rounded-[2rem]">
                     <DialogHeader>
@@ -309,10 +315,66 @@ const AssetsView: React.FC = () => {
     );
 };
 
-const SettingsView: React.FC = () => {
-    const [name, setName] = useState('John Doe');
-    const [email] = useState('john@example.com');
+// ─── SettingsView ─────────────────────────────────────────────────────────────
+// Integrated: updateUserProfile (PUT /users/me), deactivateOwnAccount (DELETE /users/me)
+const SettingsView = () => {
+    const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem("user") || 'null');
+    const [name, setName] = useState(user?.name || '');
+    const [email] = useState(user?.email || '');
     const { toast } = useToast();
+    const [loading, setLoading] = useState(false);
+    const [deactivating, setDeactivating] = useState(false);
+    const [confirmDeactivateOpen, setConfirmDeactivateOpen] = useState(false);
+
+    const handleUpdateProfile = async () => {
+        try {
+            setLoading(true);
+            await updateUserProfile(name);
+
+            if (user) {
+                localStorage.setItem("user", JSON.stringify({ ...user, name }));
+                window.dispatchEvent(new CustomEvent("userUpdated", { detail: { name } }));
+            }
+
+            toast({
+                title: "Profile updated",
+                description: "Name updated successfully.",
+            });
+        } catch (error) {
+            toast({
+                title: "Update failed",
+                description: typeof error === 'string'
+                    ? error
+                    : error?.message || "Something went wrong",
+                variant: "destructive",
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // ✅ NEW: Calls DELETE /users/me, clears localStorage, redirects to home
+    const handleDeactivateAccount = async () => {
+        try {
+            setDeactivating(true);
+            await deactivateOwnAccount();
+            localStorage.removeItem("user");
+            toast({ title: "Account deactivated", description: "Your account has been deactivated." });
+            navigate("/");
+        } catch (error) {
+            toast({
+                title: "Deactivation failed",
+                description: typeof error === 'string'
+                    ? error
+                    : error?.message || "Something went wrong",
+                variant: "destructive",
+            });
+        } finally {
+            setDeactivating(false);
+            setConfirmDeactivateOpen(false);
+        }
+    };
 
     return (
         <div className="max-w-4xl space-y-12 animate-in fade-in duration-500 pb-32">
@@ -342,8 +404,8 @@ const SettingsView: React.FC = () => {
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Email cannot be changed directly.</p>
                     </div>
                 </div>
-                <Button className="rounded-2xl px-10 h-14 font-bold text-white shadow-xl shadow-primary/20" onClick={() => toast({ title: "Profile updated", description: "Name updated successfully." })}>
-                    Save Changes
+                <Button onClick={handleUpdateProfile} disabled={loading}>
+                    {loading ? "Saving..." : "Save Changes"}
                 </Button>
             </section>
 
@@ -374,6 +436,7 @@ const SettingsView: React.FC = () => {
                 </div>
             </section>
 
+            {/* ✅ UPDATED: Danger Zone now uses deactivateOwnAccount API with confirmation dialog */}
             <section className="bg-rose-50 border border-rose-100 rounded-[3rem] p-8 md:p-12 space-y-8 shadow-sm">
                 <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center">
@@ -387,22 +450,48 @@ const SettingsView: React.FC = () => {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 p-8 bg-white/60 backdrop-blur-sm rounded-[2rem] border border-rose-100/50">
                     <div className="space-y-1">
                         <p className="font-black text-slate-900 text-lg">Deactivate Account</p>
-                        <p className="text-sm text-slate-500 max-w-md font-medium">Temporarily disable your profile and all websites.</p>
+                        <p className="text-sm text-slate-500 max-w-md font-medium">Temporarily disable your profile and all websites. This action will log you out immediately.</p>
                     </div>
-                    <Button variant="destructive" className="rounded-2xl font-black h-14 px-8 shadow-lg shadow-rose-200" onClick={() => {
-                        if (confirm("Are you sure you want to deactivate your account?")) {
-                            window.location.href = "/";
-                        }
-                    }}>
-                        Deactivate Profile
-                    </Button>
+                    <Dialog open={confirmDeactivateOpen} onOpenChange={setConfirmDeactivateOpen}>
+                        <DialogTrigger asChild>
+                            <Button
+                                variant="destructive"
+                                className="rounded-2xl font-black h-14 px-8 shadow-lg shadow-rose-200"
+                                disabled={deactivating}
+                            >
+                                <UserX className="w-4 h-4 mr-2" />
+                                {deactivating ? "Deactivating..." : "Deactivate Profile"}
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md rounded-[2rem]">
+                            <DialogHeader>
+                                <DialogTitle className="text-xl font-bold text-slate-900">Confirm Deactivation</DialogTitle>
+                                <DialogDescription className="text-slate-500 mt-2">
+                                    Are you sure you want to deactivate your account? You will be logged out immediately. This action can be reversed by an admin.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter className="gap-2 mt-4">
+                                <Button variant="outline" onClick={() => setConfirmDeactivateOpen(false)} className="rounded-xl">
+                                    Cancel
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    onClick={handleDeactivateAccount}
+                                    disabled={deactivating}
+                                    className="rounded-xl"
+                                >
+                                    {deactivating ? "Deactivating..." : "Yes, Deactivate"}
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </section>
         </div>
     );
 };
 
-const getInitials = (name: string) => {
+const getInitials = (name) => {
     if (!name) return '';
     const parts = name.split(' ').filter(Boolean);
     let initials = '';
@@ -414,10 +503,232 @@ const getInitials = (name: string) => {
     return initials.toUpperCase();
 };
 
-// Routes that are strictly for non-admin users only.
-// Templates and Assets are accessible by both roles, so they are NOT listed here.
-const userDashboardRoutes: string[] = [];
+const userDashboardRoutes = [];
 
+// ─── AddUserDialog ────────────────────────────────────────────────────────────
+// ✅ Calls POST /users to create a new user (Admin / Institution Admin only)
+const ROLE_OPTIONS = ['USER', 'ADMIN', 'INSTITUTION_ADMIN'];
+
+const AddUserDialog = ({ open, onOpenChange, onUserCreated }) => {
+    const { toast } = useToast();
+    const [form, setForm] = useState({ name: '', email: '', password: '', role: 'USER' });
+    const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState({});
+
+    const validate = () => {
+        const e = {};
+        if (!form.name.trim()) e.name = 'Name is required';
+        if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email)) e.email = 'Valid email is required';
+        if (!form.password || form.password.length < 6) e.password = 'Password must be at least 6 characters';
+        if (!form.role) e.role = 'Role is required';
+        return e;
+    };
+
+    const handleChange = (field, value) => {
+        setForm(prev => ({ ...prev, [field]: value }));
+        if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }));
+    };
+
+    const handleSubmit = async () => {
+        const e = validate();
+        if (Object.keys(e).length > 0) { setErrors(e); return; }
+
+        try {
+            setLoading(true);
+            const res = await createUser(form);
+            const newUser = res.data?.data || res.data;
+            toast({ title: 'User created', description: `${form.name} has been added successfully.` });
+            onUserCreated?.(newUser);
+            setForm({ name: '', email: '', password: '', role: 'USER' });
+            setErrors({});
+            onOpenChange(false);
+        } catch (err) {
+            const msg = err?.response?.data?.message || err?.message || 'Failed to create user';
+            toast({ title: 'Creation failed', description: msg, variant: 'destructive' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleClose = (val) => {
+        if (!loading) {
+            setForm({ name: '', email: '', password: '', role: 'USER' });
+            setErrors({});
+            onOpenChange(val);
+        }
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={handleClose}>
+            <DialogContent className="sm:max-w-lg rounded-[2rem] p-0 overflow-hidden bg-white border-slate-100 shadow-2xl">
+                <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-7">
+                    <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
+                        <Users className="w-6 h-6 text-white" />
+                    </div>
+                    <DialogTitle className="text-2xl font-black text-white">Add New User</DialogTitle>
+                    <DialogDescription className="text-white/70 mt-1 text-sm">
+                        Create a new user account on the platform.
+                    </DialogDescription>
+                </div>
+
+                <div className="px-8 py-6 space-y-5">
+                    {/* Name */}
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Full Name</label>
+                        <Input
+                            placeholder="e.g., Jane Smith"
+                            value={form.name}
+                            onChange={e => handleChange('name', e.target.value)}
+                            className={cn("h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all", errors.name && "border-rose-400 bg-rose-50 focus:bg-rose-50")}
+                        />
+                        {errors.name && <p className="text-xs text-rose-500 font-medium">{errors.name}</p>}
+                    </div>
+
+                    {/* Email */}
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Email Address</label>
+                        <Input
+                            type="email"
+                            placeholder="jane@example.com"
+                            value={form.email}
+                            onChange={e => handleChange('email', e.target.value)}
+                            className={cn("h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all", errors.email && "border-rose-400 bg-rose-50 focus:bg-rose-50")}
+                        />
+                        {errors.email && <p className="text-xs text-rose-500 font-medium">{errors.email}</p>}
+                    </div>
+
+                    {/* Password */}
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Password</label>
+                        <Input
+                            type="password"
+                            placeholder="Min. 6 characters"
+                            value={form.password}
+                            onChange={e => handleChange('password', e.target.value)}
+                            className={cn("h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all", errors.password && "border-rose-400 bg-rose-50 focus:bg-rose-50")}
+                        />
+                        {errors.password && <p className="text-xs text-rose-500 font-medium">{errors.password}</p>}
+                    </div>
+
+                    {/* Role */}
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Role</label>
+                        <Select value={form.role} onValueChange={val => handleChange('role', val)}>
+                            <SelectTrigger className={cn("h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all", errors.role && "border-rose-400")}>
+                                <SelectValue placeholder="Select role" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">
+                                {ROLE_OPTIONS.map(r => (
+                                    <SelectItem key={r} value={r} className="capitalize">
+                                        {r.replace('_', ' ')}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        {errors.role && <p className="text-xs text-rose-500 font-medium">{errors.role}</p>}
+                    </div>
+                </div>
+
+                <div className="px-8 pb-8 flex gap-3 justify-end">
+                    <Button
+                        variant="outline"
+                        onClick={() => handleClose(false)}
+                        disabled={loading}
+                        className="rounded-xl h-11 px-6 border-slate-200"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleSubmit}
+                        disabled={loading}
+                        className="rounded-xl h-11 px-8 bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-xl transition-all font-bold"
+                    >
+                        {loading ? (
+                            <span className="flex items-center gap-2"><RefreshCw className="w-4 h-4 animate-spin" /> Creating...</span>
+                        ) : (
+                            <span className="flex items-center gap-2"><Plus className="w-4 h-4" /> Create User</span>
+                        )}
+                    </Button>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+// ─── UserDetailDialog ─────────────────────────────────────────────────────────
+// ✅ Calls GET /users/:id to show detailed user info in a dialog
+const UserDetailDialog = ({ userId, open, onOpenChange }) => {
+    const [userDetail, setUserDetail] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        if (open && userId) {
+            setLoading(true);
+            getUserById(userId)
+                .then((res) => setUserDetail(res.data?.data || res.data))
+                .catch(() => toast({ title: "Failed to load user", variant: "destructive" }))
+                .finally(() => setLoading(false));
+        }
+    }, [open, userId]);
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-md rounded-[2rem] p-8">
+                <DialogHeader>
+                    <DialogTitle className="text-xl font-bold">User Details</DialogTitle>
+                </DialogHeader>
+                {loading ? (
+                    <div className="flex items-center justify-center py-12">
+                        <RefreshCw className="w-6 h-6 animate-spin text-slate-400" />
+                    </div>
+                ) : userDetail ? (
+                    <div className="space-y-4 py-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-2xl">
+                                {getInitials(userDetail.name)}
+                            </div>
+                            <div>
+                                <p className="text-lg font-bold text-slate-900">{userDetail.name}</p>
+                                <p className="text-sm text-slate-500">{userDetail.email}</p>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 pt-2">
+                            <div className="bg-slate-50 rounded-2xl p-4">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Role</p>
+                                <p className="text-sm font-semibold text-slate-800">{userDetail.role || '—'}</p>
+                            </div>
+                            <div className="bg-slate-50 rounded-2xl p-4">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Status</p>
+                                <span className={cn(
+                                    "text-sm font-semibold",
+                                    userDetail.active ? "text-emerald-600" : "text-rose-500"
+                                )}>
+                                    {userDetail.active ? "Active" : "Suspended"}
+                                </span>
+                            </div>
+                            {userDetail.createdAt && (
+                                <div className="bg-slate-50 rounded-2xl p-4 col-span-2">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Joined</p>
+                                    <p className="text-sm font-semibold text-slate-800">
+                                        {format(new Date(userDetail.createdAt), 'PPP')}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ) : (
+                    <p className="text-slate-500 py-8 text-center">No data found.</p>
+                )}
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl">Close</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
 const Dashboard = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -426,8 +737,6 @@ const Dashboard = () => {
     const user = JSON.parse(localStorage.getItem("user") || 'null');
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [userName, setUserName] = useState(user?.name || 'User');
-
-    // FIX: Added missing tempUserName, tempUserEmail state variables
     const [tempUserName, setTempUserName] = useState(user?.name || 'User');
     const [tempUserEmail] = useState(user?.email || '');
 
@@ -440,6 +749,7 @@ const Dashboard = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [isUserProfileDialogOpen, setIsUserProfileDialogOpen] = useState(false);
+    const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
     const [sortBy, setSortBy] = useState('recent');
     const [filterStatus, setFilterStatus] = useState('all');
     const [stats, setStats] = useState({
@@ -450,6 +760,13 @@ const Dashboard = () => {
     });
     const [isLoadingStats, setIsLoadingStats] = useState(true);
 
+    // ✅ NEW: state for admin user list + user detail dialog + add user dialog
+    const [adminUsers, setAdminUsers] = useState([]);
+    const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState(null);
+    const [userDetailOpen, setUserDetailOpen] = useState(false);
+    const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+
     const adminRoutes = [
         '/dashboard/users',
         '/dashboard/organizations',
@@ -457,6 +774,16 @@ const Dashboard = () => {
         '/dashboard/deployment',
         '/dashboard/settings',
     ];
+
+    // ✅ Listen for userUpdated event
+    useEffect(() => {
+        const handleUserUpdated = (e) => {
+            setUserName(e.detail.name);
+            setTempUserName(e.detail.name);
+        };
+        window.addEventListener("userUpdated", handleUserUpdated);
+        return () => window.removeEventListener("userUpdated", handleUserUpdated);
+    }, []);
 
     useEffect(() => {
         if (!user) {
@@ -489,6 +816,20 @@ const Dashboard = () => {
         fetchWebsites();
     }, [isAdmin, fetchWebsites]);
 
+    // ✅ NEW: Fetch users list when admin mode is active
+    useEffect(() => {
+        if (isAdmin) {
+            setIsLoadingUsers(true);
+            getUsers({ limit: 10, page: 1 })
+                .then((res) => {
+                    const data = res.data?.data?.users || res.data?.data || res.data || [];
+                    setAdminUsers(Array.isArray(data) ? data : []);
+                })
+                .catch((err) => console.error("Failed to fetch users:", err))
+                .finally(() => setIsLoadingUsers(false));
+        }
+    }, [isAdmin]);
+
     const handleLogout = async () => {
         try {
             setIsLoggingOut(true);
@@ -503,14 +844,66 @@ const Dashboard = () => {
         }
     };
 
-    // FIX: Added missing handleProfileSave function
-    const handleProfileSave = () => {
-        setUserName(tempUserName);
-        setIsUserProfileDialogOpen(false);
-        toast({ title: "Profile updated", description: "Your name has been updated successfully." });
+    const handleProfileSave = async () => {
+        try {
+            setIsUpdatingProfile(true);
+            await updateUserProfile(tempUserName);
+
+            const updatedUser = { ...user, name: tempUserName };
+            localStorage.setItem("user", JSON.stringify(updatedUser));
+            setUserName(tempUserName);
+
+            setIsUserProfileDialogOpen(false);
+            toast({ title: "Profile updated", description: "Your name has been updated successfully." });
+        } catch (error) {
+            console.error("Profile update failed:", error);
+            toast({
+                title: "Update failed",
+                description: error?.response?.data?.message || "Failed to update profile. Please try again.",
+                variant: "destructive"
+            });
+        } finally {
+            setIsUpdatingProfile(false);
+        }
     };
 
-    const handleDialogClose = (open: boolean) => {
+    // ✅ NEW: Toggle user active status via PATCH /users/:id/status
+    const handleToggleUserStatus = async (userId, currentActive) => {
+        try {
+            await updateUserStatus(userId, !currentActive);
+            setAdminUsers(prev =>
+                prev.map(u => u.id === userId ? { ...u, active: !currentActive } : u)
+            );
+            toast({
+                title: `User ${!currentActive ? "reactivated" : "suspended"}`,
+                description: `User status has been updated.`
+            });
+        } catch (err) {
+            toast({ title: "Status update failed", variant: "destructive" });
+        }
+    };
+
+    // ✅ NEW: Restore user via POST /users/:id/restore
+    const handleRestoreUser = async (userId) => {
+        try {
+            await restoreUser(userId);
+            setAdminUsers(prev =>
+                prev.map(u => u.id === userId ? { ...u, active: true, deletedAt: null } : u)
+            );
+            toast({ title: "User restored", description: "User account has been restored." });
+        } catch (err) {
+            toast({ title: "Restore failed", variant: "destructive" });
+        }
+    };
+
+    // ✅ NEW: Prepend newly created user to adminUsers list
+    const handleUserCreated = (newUser) => {
+        if (newUser && newUser.id) {
+            setAdminUsers(prev => [newUser, ...prev]);
+        }
+    };
+
+    const handleDialogClose = (open) => {
         setIsDialogOpen(open);
         if (!open) {
             setNewSiteName('');
@@ -553,7 +946,6 @@ const Dashboard = () => {
                 <title>Dashboard | Buildora</title>
             </Helmet>
 
-            {/* Mobile Sidebar Overlay */}
             {isMobile && isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
@@ -588,7 +980,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <nav className="flex-1 px-4 py-1 space-y-0.5 overflow-y-auto ">
+                <nav className="flex-1 px-4 py-1 space-y-0.5 overflow-y-auto">
                     <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest px-3 mb-1">Main Menu</p>
                     {!isAdmin && (
                         <NavItem icon={<Globe className="w-4 h-4" />} label="Dashboard" to="/dashboard" />
@@ -625,17 +1017,19 @@ const Dashboard = () => {
 
                     <div
                         className={`flex items-center gap-3 p-2 rounded-xl transition-colors border border-transparent 
-    ${isLoggingOut ? "opacity-50 cursor-not-allowed" : "hover:bg-white/10 cursor-pointer hover:border-slate-700"}
-  `}
+                            ${isLoggingOut ? "opacity-50 cursor-not-allowed" : "hover:bg-white/10 cursor-pointer hover:border-slate-700"}
+                        `}
                         onClick={!isLoggingOut ? handleLogout : undefined}
                     >
                         <div className="relative">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-sm">{getInitials(userName)}</div>
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-sm">
+                                {getInitials(userName)}
+                            </div>
                             <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-slate-800 rounded-full" />
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-white truncate">
-                                {isLoggingOut ? "Logging out..." : (user?.name || "User")}
+                                {isLoggingOut ? "Logging out..." : userName}
                             </p>
                             <p className="text-xs text-slate-400 truncate">Pro Plan</p>
                         </div>
@@ -662,14 +1056,9 @@ const Dashboard = () => {
                                     </Button>
                                 )}
                                 <div>
-                                    <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">
-                                        {isAdmin ? (user?.institution?.name || "Buildora Master Hub") : "Project Hub"}
-                                    </h2>
+                                    <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">Project Hub</h2>
                                     <p className="text-lg text-slate-600 flex items-center gap-2 mt-1">
-                                        {isAdmin
-                                            ? "Global platform overview and tenant management"
-                                            : <>Welcome back! You have <span className="text-indigo-600 font-medium">{websites.length} active projects</span></>
-                                        }
+                                        Welcome back! You have <span className="text-indigo-600 font-medium">{websites.length} active projects</span>
                                     </p>
                                 </div>
                             </div>
@@ -688,8 +1077,6 @@ const Dashboard = () => {
                                     <DialogContent className="sm:max-w-5xl rounded-[2rem] p-0 overflow-hidden bg-white border-slate-100 shadow-2xl">
                                         <DialogTitle className="sr-only">Create New Website</DialogTitle>
                                         <div className="flex flex-col md:flex-row h-[700px] w-full">
-
-                                            {/* Left: Form */}
                                             <div className="w-full md:w-1/3 bg-white p-10 flex flex-col pt-12 border-r border-slate-100 relative z-10 shadow-xl rounded-l-[2rem]">
                                                 <div>
                                                     <div className="w-14 h-14 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
@@ -713,7 +1100,6 @@ const Dashboard = () => {
                                                     </div>
                                                 </div>
                                                 <div className="mt-auto pt-8 border-t border-slate-100">
-                                                    {/* FIX: Removed invalid `icon` prop from shadcn Button; moved icon into children */}
                                                     <Button
                                                         onClick={handleCreateSite}
                                                         disabled={!newSiteName.trim()}
@@ -724,7 +1110,6 @@ const Dashboard = () => {
                                                 </div>
                                             </div>
 
-                                            {/* Right: Templates Gallery */}
                                             <div className="w-full md:w-2/3 bg-slate-50 p-10 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                                                 <div className="flex items-center justify-between mb-8">
                                                     <h3 className="text-xl font-bold text-slate-900 tracking-tight">Select a Template</h3>
@@ -772,7 +1157,6 @@ const Dashboard = () => {
                                                                 </div>
                                                                 <div>
                                                                     <h4 className={cn("font-bold text-lg transition-colors leading-tight", selectedTemplate === tpl.id ? "text-slate-900" : "text-slate-700")}>{tpl.name}</h4>
-                                                                    {/* FIX: removed stray "S" prefix before tpl.category */}
                                                                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">{tpl.category}</p>
                                                                 </div>
                                                             </div>
@@ -783,6 +1167,7 @@ const Dashboard = () => {
                                         </div>
                                     </DialogContent>
                                 </Dialog>
+
                                 <Dialog open={isUserProfileDialogOpen} onOpenChange={setIsUserProfileDialogOpen}>
                                     <DialogTrigger asChild>
                                         <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-medium text-sm border-2 border-slate-300 shadow-sm cursor-pointer hover:bg-slate-100 transition-colors">
@@ -821,8 +1206,8 @@ const Dashboard = () => {
                                             <Button variant="outline" onClick={() => setIsUserProfileDialogOpen(false)} className="rounded-xl h-12 px-6 text-base border-slate-200 text-slate-700 hover:bg-slate-100">
                                                 Cancel
                                             </Button>
-                                            <Button type="submit" onClick={handleProfileSave} className="rounded-xl h-12 px-6 text-base bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-600/30 transition-all">
-                                                Save Changes
+                                            <Button type="submit" onClick={handleProfileSave} disabled={isUpdatingProfile} className="rounded-xl h-12 px-6 text-base bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-600/30 transition-all">
+                                                {isUpdatingProfile ? "Saving..." : "Save Changes"}
                                             </Button>
                                         </DialogFooter>
                                     </DialogContent>
@@ -840,16 +1225,6 @@ const Dashboard = () => {
                                 iconBgClass="bg-gradient-to-br from-purple-600 to-indigo-600"
                                 iconColorClass="text-white"
                             />
-                            {isAdmin && (
-                                <OverviewCard
-                                    title="Active Users"
-                                    value={isLoadingStats ? "..." : stats.totalUsers}
-                                    description="Platform active accounts"
-                                    icon={<Users className="w-5 h-5" />}
-                                    iconBgClass="bg-blue-100"
-                                    iconColorClass="text-blue-600"
-                                />
-                            )}
                             <OverviewCard
                                 title="Templates Available"
                                 value={templatesList.length}
@@ -858,16 +1233,6 @@ const Dashboard = () => {
                                 iconBgClass="bg-gradient-to-br from-emerald-600 to-teal-600"
                                 iconColorClass="text-white"
                             />
-                            {isAdmin && (
-                                <OverviewCard
-                                    title="Active Deployments"
-                                    value={isLoadingStats ? "..." : stats.activeDeployments}
-                                    description="Total sites currently online"
-                                    icon={<Activity className="w-5 h-5" />}
-                                    iconBgClass="bg-rose-100"
-                                    iconColorClass="text-rose-600"
-                                />
-                            )}
                         </section>
 
                         {/* Search and Filters */}
@@ -894,49 +1259,25 @@ const Dashboard = () => {
                             </Select>
 
                             <div className="flex items-center gap-2">
-                                <Button
-                                    variant={filterStatus === 'all' ? 'default' : 'outline'}
-                                    className={cn(
-                                        "rounded-full h-10 px-4 text-sm font-semibold",
-                                        filterStatus === 'all'
-                                            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20"
-                                            : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700",
-                                        "transition-all duration-200"
-                                    )}
-                                    onClick={() => setFilterStatus('all')}
-                                >
-                                    All
-                                </Button>
-                                <Button
-                                    variant={filterStatus === 'draft' ? 'default' : 'outline'}
-                                    className={cn(
-                                        "rounded-full h-10 px-4 text-sm font-semibold",
-                                        filterStatus === 'draft'
-                                            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20"
-                                            : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700",
-                                        "transition-all duration-200"
-                                    )}
-                                    onClick={() => setFilterStatus('draft')}
-                                >
-                                    Draft
-                                </Button>
-                                <Button
-                                    variant={filterStatus === 'published' ? 'default' : 'outline'}
-                                    className={cn(
-                                        "rounded-full h-10 px-4 text-sm font-semibold",
-                                        filterStatus === 'published'
-                                            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20"
-                                            : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700",
-                                        "transition-all duration-200"
-                                    )}
-                                    onClick={() => setFilterStatus('published')}
-                                >
-                                    Published
-                                </Button>
+                                {['all', 'draft', 'published'].map((status) => (
+                                    <Button
+                                        key={status}
+                                        variant={filterStatus === status ? 'default' : 'outline'}
+                                        className={cn(
+                                            "rounded-full h-10 px-4 text-sm font-semibold capitalize",
+                                            filterStatus === status
+                                                ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20"
+                                                : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700",
+                                            "transition-all duration-200"
+                                        )}
+                                        onClick={() => setFilterStatus(status)}
+                                    >
+                                        {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
+                                    </Button>
+                                ))}
                             </div>
                         </div>
 
-                        {/* Website Cards */}
                         {websites.length === 0 ? (
                             <EmptyState onAction={() => setIsDialogOpen(true)} />
                         ) : (
@@ -967,13 +1308,7 @@ const Dashboard = () => {
                                 animate="visible"
                                 variants={{
                                     hidden: { opacity: 0 },
-                                    visible: {
-                                        opacity: 1,
-                                        transition: {
-                                            staggerChildren: 0.1,
-                                            delayChildren: 0.3
-                                        }
-                                    }
+                                    visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.3 } }
                                 }}
                                 className="flex items-center gap-4">
                                 <div className="flex flex-col">
@@ -1007,146 +1342,159 @@ const Dashboard = () => {
                         </motion.header>
 
                         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 md:py-10">
-
                             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: 0.1 }}
-                                    className="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300"
-                                >
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
-                                            <Users className="w-5 h-5" />
+                                {[
+                                    { label: "Total Users", value: isLoadingStats ? "..." : stats.totalUsers, icon: <Users className="w-5 h-5" />, bg: "bg-purple-100", color: "text-purple-600", trend: "+12.5%", up: true },
+                                    { label: "Active Websites", value: isLoadingStats ? "..." : stats.totalWebsites, icon: <Globe className="w-6 h-6" />, bg: "bg-indigo-100", color: "text-indigo-600", trend: "-3.2%", up: false },
+                                    { label: "Total Templates", value: templatesList.length, icon: <LayoutTemplate className="w-5 h-5" />, bg: "bg-emerald-100", color: "text-emerald-600", trend: "+2 Templates", up: true },
+                                    { label: "Active Deployments", value: isLoadingStats ? "..." : stats.activeDeployments, icon: <Activity className="w-5 h-5" />, bg: "bg-rose-100", color: "text-rose-600", trend: "+8.1%", up: true },
+                                ].map((stat, i) => (
+                                    <motion.div
+                                        key={stat.label}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.5, delay: i * 0.1 }}
+                                        className="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300"
+                                    >
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <div className={`w-10 h-10 ${stat.bg} ${stat.color} rounded-xl flex items-center justify-center`}>
+                                                {stat.icon}
+                                            </div>
+                                            <p className="text-sm font-medium text-slate-600">{stat.label}</p>
                                         </div>
-                                        <p className="text-sm font-medium text-slate-600">Total Users</p>
-                                    </div>
-                                    <div className="flex items-end justify-between">
-                                        <span className="text-4xl font-extrabold text-slate-900">2,345</span>
-                                        <span className="text-sm font-semibold text-emerald-500 flex items-center">
-                                            <ArrowUp className="w-4 h-4 mr-0.5" /> +12.5%
-                                        </span>
-                                    </div>
-                                </motion.div>
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: 0.2 }}
-                                    className="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300"
-                                >
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center">
-                                            <Globe className="w-6 h-6" />
+                                        <div className="flex items-end justify-between">
+                                            <span className="text-4xl font-extrabold text-slate-900">{stat.value}</span>
+                                            <span className={`text-sm font-semibold flex items-center ${stat.up ? "text-emerald-500" : "text-rose-500"}`}>
+                                                {stat.up ? <ArrowUp className="w-4 h-4 mr-0.5" /> : <ArrowDown className="w-4 h-4 mr-0.5" />}
+                                                {stat.trend}
+                                            </span>
                                         </div>
-                                        <p className="text-sm font-medium text-slate-600">Active Websites</p>
-                                    </div>
-                                    <div className="flex items-end justify-between">
-                                        <span className="text-4xl font-extrabold text-slate-900">876</span>
-                                        <span className="text-sm font-semibold text-rose-500 flex items-center">
-                                            <ArrowDown className="w-4 h-4 mr-0.5" /> -3.2%
-                                        </span>
-                                    </div>
-                                </motion.div>
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: 0.3 }}
-                                    className="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300"
-                                >
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
-                                            <LayoutTemplate className="w-5 h-5" />
-                                        </div>
-                                        <p className="text-sm font-medium text-slate-600">Total Templates</p>
-                                    </div>
-                                    <div className="flex items-end justify-between">
-                                        <span className="text-4xl font-extrabold text-slate-900">48</span>
-                                        <span className="text-sm font-semibold text-emerald-500 flex items-center">
-                                            <ArrowUp className="w-4 h-4 mr-0.5" /> +2 Templates
-                                        </span>
-                                    </div>
-                                </motion.div>
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: 0.4 }}
-                                    className="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 group/stat-card"
-                                >
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover/stat-card:scale-105 transition-transform">
-                                            <Files className="w-6 h-6" />
-                                        </div>
-                                        <p className="text-sm font-medium text-slate-600">Total Assets</p>
-                                    </div>
-                                    <div className="flex items-end justify-between">
-                                        <span className="text-4xl font-extrabold text-slate-900">48</span>
-                                        <span className="text-sm font-semibold text-emerald-500 flex items-center">
-                                            <ArrowUp className="w-4 h-4 mr-0.5" /> +8.1%
-                                        </span>
-                                    </div>
-                                </motion.div>
+                                    </motion.div>
+                                ))}
                             </section>
 
+                            {/* ✅ NEW: Admin Users Quick Panel — uses real getUsers data */}
+                            <div className="mb-8">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-xl font-bold text-slate-900">Recent Users</h3>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            size="sm"
+                                            className="rounded-full text-xs bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/20 hover:shadow-lg transition-all gap-1.5"
+                                            onClick={() => setIsAddUserOpen(true)}
+                                        >
+                                            <Plus className="w-3.5 h-3.5" /> Add User
+                                        </Button>
+                                        <Button variant="outline" size="sm" className="rounded-full text-xs" onClick={() => navigate('/dashboard/users')}>
+                                            View All <ArrowRight className="w-3 h-3 ml-1" />
+                                        </Button>
+                                    </div>
+                                </div>
+                                <div className="bg-white rounded-2xl border border-slate-100 shadow-lg overflow-hidden">
+                                    {isLoadingUsers ? (
+                                        <div className="flex items-center justify-center py-12">
+                                            <RefreshCw className="w-5 h-5 animate-spin text-slate-400" />
+                                        </div>
+                                    ) : adminUsers.length === 0 ? (
+                                        <p className="text-center text-slate-400 py-10 text-sm">No users found.</p>
+                                    ) : (
+                                        <div className="divide-y divide-slate-50">
+                                            {adminUsers.slice(0, 6).map((u) => (
+                                                <div key={u.id} className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                                                            {getInitials(u.name)}
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-semibold text-slate-800">{u.name}</p>
+                                                            <p className="text-xs text-slate-400">{u.email}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={cn(
+                                                            "text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full",
+                                                            u.active
+                                                                ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                                                                : "bg-rose-50 text-rose-500 border border-rose-100"
+                                                        )}>
+                                                            {u.active ? "Active" : "Suspended"}
+                                                        </span>
+                                                        {/* View detail */}
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 rounded-full hover:bg-slate-100"
+                                                            title="View user details"
+                                                            onClick={() => { setSelectedUserId(u.id); setUserDetailOpen(true); }}
+                                                        >
+                                                            <Eye className="w-4 h-4 text-slate-400" />
+                                                        </Button>
+                                                        {/* Suspend / Reactivate */}
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 rounded-full hover:bg-slate-100"
+                                                            title={u.active ? "Suspend user" : "Reactivate user"}
+                                                            onClick={() => handleToggleUserStatus(u.id, u.active)}
+                                                        >
+                                                            <UserX className={cn("w-4 h-4", u.active ? "text-rose-400" : "text-emerald-500")} />
+                                                        </Button>
+                                                        {/* Restore (only for deleted users) */}
+                                                        {u.deletedAt && (
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-8 w-8 rounded-full hover:bg-slate-100"
+                                                                title="Restore deleted user"
+                                                                onClick={() => handleRestoreUser(u.id)}
+                                                            >
+                                                                <RefreshCw className="w-4 h-4 text-blue-400" />
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Quick action cards */}
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                 <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                    <motion.div
-                                        whileHover={{ scale: 1.02, boxShadow: "0 8px 25px rgba(0, 0, 0, 0.05)", borderColor: "#a78bfa" }}
-                                        transition={{ duration: 0.3, ease: "easeOut" }}
-                                        onClick={() => navigate('/dashboard/users')}
-                                        className="relative group/admin-action-card cursor-pointer bg-white rounded-2xl p-6 shadow-lg border border-slate-100 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-purple-300"
-                                    >
-                                        <div className="relative z-10 w-14 h-14 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover/admin-action-card:scale-105 transition-transform duration-300">
-                                            <Users className="w-7 h-7" />
-                                        </div>
-                                        <h3 className="relative z-10 text-xl font-bold text-slate-900 mb-1">Manage Users</h3>
-                                        <p className="relative z-10 text-slate-600 text-sm">Overview and control of all user accounts.</p>
-                                    </motion.div>
-
-                                    <motion.div
-                                        whileHover={{ scale: 1.02, boxShadow: "0 8px 25px rgba(0, 0, 0, 0.05)", borderColor: "#818cf8" }}
-                                        transition={{ duration: 0.3, ease: "easeOut" }}
-                                        onClick={() => navigate('/dashboard/websites')}
-                                        className="relative group/admin-action-card cursor-pointer bg-white rounded-2xl p-6 shadow-lg border border-slate-100 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-indigo-300"
-                                    >
-                                        <div className="relative z-10 w-14 h-14 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover/admin-action-card:scale-105 transition-transform duration-300">
-                                            <Layout className="w-7 h-7" />
-                                        </div>
-                                        <h3 className="relative z-10 text-xl font-bold text-slate-900 mb-1">Manage Websites</h3>
-                                        <p className="relative z-10 text-slate-600 text-sm leading-relaxed">
-                                            Oversee all created websites, their status, and configurations.
-                                        </p>
-                                    </motion.div>
-
-                                    <motion.div
-                                        whileHover={{ scale: 1.02, boxShadow: "0 8px 25px rgba(0, 0, 0, 0.05)", borderColor: "#34d399" }}
-                                        transition={{ duration: 0.3, ease: "easeOut" }}
-                                        onClick={() => navigate('/dashboard/templates')}
-                                        className="relative group/admin-action-card cursor-pointer bg-white rounded-2xl p-6 shadow-lg border border-slate-100 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300"
-                                    >
-                                        <div className="relative z-10 w-14 h-14 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover/admin-action-card:scale-105 transition-transform duration-300">
-                                            <LayoutTemplate className="w-7 h-7" />
-                                        </div>
-                                        <h3 className="relative z-10 text-xl font-bold text-slate-900 mb-1">Manage Templates</h3>
-                                        <p className="relative z-10 text-slate-600 text-sm leading-relaxed">
-                                            Browse, add, and manage all available website templates.
-                                        </p>
-                                    </motion.div>
+                                    {[
+                                        { label: "Manage Users", desc: "Overview and control of all user accounts.", icon: <Users className="w-7 h-7" />, bg: "bg-purple-100", color: "text-purple-600", border: "hover:border-purple-300", to: '/dashboard/users' },
+                                        { label: "Manage Websites", desc: "Oversee all created websites, their status, and configurations.", icon: <Layout className="w-7 h-7" />, bg: "bg-indigo-100", color: "text-indigo-600", border: "hover:border-indigo-300", to: '/dashboard/websites' },
+                                        { label: "Manage Templates", desc: "Browse, add, and manage all available website templates.", icon: <LayoutTemplate className="w-7 h-7" />, bg: "bg-emerald-100", color: "text-emerald-600", border: "hover:border-emerald-300", to: '/dashboard/templates' },
+                                    ].map((card) => (
+                                        <motion.div
+                                            key={card.label}
+                                            whileHover={{ scale: 1.02 }}
+                                            transition={{ duration: 0.3 }}
+                                            onClick={() => navigate(card.to)}
+                                            className={`relative cursor-pointer bg-white rounded-2xl p-6 shadow-lg border border-slate-100 flex flex-col items-start transition-all duration-300 hover:-translate-y-1 ${card.border}`}
+                                        >
+                                            <div className={`w-14 h-14 ${card.bg} ${card.color} rounded-xl flex items-center justify-center mb-4 shadow-sm`}>
+                                                {card.icon}
+                                            </div>
+                                            <h3 className="text-xl font-bold text-slate-900 mb-1">{card.label}</h3>
+                                            <p className="text-slate-600 text-sm">{card.desc}</p>
+                                        </motion.div>
+                                    ))}
                                 </div>
 
                                 <div className="lg:col-span-1 space-y-6">
                                     <motion.div
-                                        whileHover={{ scale: 1.02, boxShadow: "0 8px 25px rgba(0, 0, 0, 0.05)", borderColor: "#fb7185" }}
-                                        transition={{ duration: 0.3, ease: "easeOut" }}
+                                        whileHover={{ scale: 1.02 }}
+                                        transition={{ duration: 0.3 }}
                                         onClick={() => navigate('/dashboard/deployment')}
-                                        className="relative group/admin-action-card cursor-pointer bg-white rounded-2xl p-6 shadow-lg border border-slate-100 flex flex-col items-start overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-rose-300"
+                                        className="relative cursor-pointer bg-white rounded-2xl p-6 shadow-lg border border-slate-100 flex flex-col items-start transition-all duration-300 hover:-translate-y-1 hover:border-rose-300"
                                     >
-                                        <div className="relative z-10 w-14 h-14 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover/admin-action-card:scale-105 transition-transform duration-300">
+                                        <div className="w-14 h-14 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center mb-4 shadow-sm">
                                             <Activity className="w-7 h-7" />
                                         </div>
-                                        <h3 className="relative z-10 text-xl font-bold text-slate-900 mb-1">Monitor Deployments</h3>
-                                        <p className="relative z-10 text-slate-600 text-sm leading-relaxed">
-                                            Track the status and history of all website deployments.
-                                        </p>
+                                        <h3 className="text-xl font-bold text-slate-900 mb-1">Monitor Deployments</h3>
+                                        <p className="text-slate-600 text-sm">Track the status and history of all website deployments.</p>
                                     </motion.div>
 
                                     <Card className="rounded-2xl bg-white border border-slate-100 shadow-lg p-6 flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
@@ -1164,8 +1512,23 @@ const Dashboard = () => {
                     <Outlet key={location.pathname} />
                 )}
             </main>
+
+            {/* ✅ Add User Dialog (POST /users) */}
+            <AddUserDialog
+                open={isAddUserOpen}
+                onOpenChange={setIsAddUserOpen}
+                onUserCreated={handleUserCreated}
+            />
+
+            {/* ✅ User Detail Dialog (GET /users/:id) */}
+            <UserDetailDialog
+                userId={selectedUserId}
+                open={userDetailOpen}
+                onOpenChange={setUserDetailOpen}
+            />
         </div>
     );
 };
 
+export { AssetsView, SettingsView };
 export default Dashboard;
