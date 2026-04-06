@@ -1,4 +1,6 @@
 import React from 'react';
+import { Editable } from '@/components/ui/Editable';
+
 
 export function GalleryMasonrySection({ section, isSelected, isEditing, onContentChange }) {
   const { content, styles } = section;
@@ -41,7 +43,7 @@ export function GalleryMasonrySection({ section, isSelected, isEditing, onConten
                   </div>
                 )}
                 <div className="p-3">
-                  <p className="font-medium" contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => editTitle(img.id, e.currentTarget.textContent || '')}>{img.title}</p>
+                  <Editable as="p" className="font-medium" isEditing={isEditing} value={img.title || ''} onSave={(val) => editTitle(img.id, val)} />
                 </div>
               </div>
             ))}

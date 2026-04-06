@@ -1,4 +1,5 @@
 import React from 'react';
+import { Editable } from '@/components/ui/Editable';
 
 export function StatsSection({ section, isEditing, onContentChange }) {
   const { content, styles } = section;
@@ -33,22 +34,18 @@ export function StatsSection({ section, isEditing, onContentChange }) {
                 className="group relative bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 transition-all hover:bg-white/10 hover:-translate-y-2 shadow-2xl"
               >
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-t-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div 
+                <Editable 
                   className="text-5xl font-black mb-2 text-white tracking-tight"
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => updateField(stat.id, 'value', e.currentTarget.textContent)}
-                >
-                  {stat.value}
-                </div>
-                <div 
+                  isEditing={isEditing}
+                  value={stat.value || ''}
+                  onSave={(val) => updateField(stat.id, 'value', val)}
+                />
+                <Editable 
                   className="text-xs font-bold text-blue-400 uppercase tracking-[0.2em]"
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => updateField(stat.id, 'label', e.currentTarget.textContent)}
-                >
-                  {stat.label}
-                </div>
+                  isEditing={isEditing}
+                  value={stat.label || ''}
+                  onSave={(val) => updateField(stat.id, 'label', val)}
+                />
               </div>
             ))}
           </div>
@@ -66,31 +63,26 @@ export function StatsSection({ section, isEditing, onContentChange }) {
             {stats.map((stat, index) => (
               <div key={stat.id || index} className="flex flex-col items-center">
                 <div className="relative">
-                  <span
+                  <Editable
                     className="text-7xl md:text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 leading-none"
-                    contentEditable={isEditing}
-                    suppressContentEditableWarning
-                    onBlur={(e) => updateField(stat.id, 'value', e.currentTarget.textContent)}
-                  >
-                    {stat.value}
-                  </span>
-                  <span 
+                    isEditing={isEditing}
+                    value={stat.value || ''}
+                    onSave={(val) => updateField(stat.id, 'value', val)}
+                  />
+                  <Editable 
+                    as="span"
                     className="text-3xl font-bold text-blue-500 absolute -top-2 -right-6"
-                    contentEditable={isEditing}
-                    suppressContentEditableWarning
-                    onBlur={(e) => updateField(stat.id, 'suffix', e.currentTarget.textContent)}
-                  >
-                    {stat.suffix || ''}
-                  </span>
+                    isEditing={isEditing}
+                    value={stat.suffix || ''}
+                    onSave={(val) => updateField(stat.id, 'suffix', val)}
+                  />
                 </div>
-                <div 
+                <Editable 
                   className="mt-4 text-slate-400 text-sm font-medium uppercase tracking-[0.3em] text-center"
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => updateField(stat.id, 'label', e.currentTarget.textContent)}
-                >
-                  {stat.label}
-                </div>
+                  isEditing={isEditing}
+                  value={stat.label || ''}
+                  onSave={(val) => updateField(stat.id, 'label', val)}
+                />
               </div>
             ))}
           </div>
@@ -108,31 +100,27 @@ export function StatsSection({ section, isEditing, onContentChange }) {
             <React.Fragment key={stat.id || index}>
               <div className="text-center px-8">
                 <div className="flex items-center justify-center gap-1">
-                  <span
+                  <Editable
+                    as="span"
                     className="text-6xl font-bold text-white tracking-tighter"
-                    contentEditable={isEditing}
-                    suppressContentEditableWarning
-                    onBlur={(e) => updateField(stat.id, 'value', e.currentTarget.textContent)}
-                  >
-                    {stat.value}
-                  </span>
-                  <span 
+                    isEditing={isEditing}
+                    value={stat.value || ''}
+                    onSave={(val) => updateField(stat.id, 'value', val)}
+                  />
+                  <Editable 
+                    as="span"
                     className="text-4xl font-light text-blue-400/80"
-                    contentEditable={isEditing}
-                    suppressContentEditableWarning
-                    onBlur={(e) => updateField(stat.id, 'suffix', e.currentTarget.textContent)}
-                  >
-                    {stat.suffix || ''}
-                  </span>
+                    isEditing={isEditing}
+                    value={stat.suffix || ''}
+                    onSave={(val) => updateField(stat.id, 'suffix', val)}
+                  />
                 </div>
-                <div 
+                <Editable 
                   className="mt-2 text-slate-500 text-xs font-black uppercase tracking-widest"
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning
-                  onBlur={(e) => updateField(stat.id, 'label', e.currentTarget.textContent)}
-                >
-                  {stat.label}
-                </div>
+                  isEditing={isEditing}
+                  value={stat.label || ''}
+                  onSave={(val) => updateField(stat.id, 'label', val)}
+                />
               </div>
               {index < stats.length - 1 && (
                 <div className="hidden lg:block h-12 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent" />

@@ -35,7 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Globe2, LayoutGrid, ShieldCheck, User as UserIcon, Hash, FileText, Link, Clock, Edit, Copy, Eye, Trash2, MoreVertical, CheckCircle, CircleDotDashed, Ban, Search, Plus, ListFilter
+  Globe2, LayoutGrid, ShieldCheck, User as UserIcon, Hash, FileText, Link, Clock, Edit, Copy, Eye, Trash2, MoreVertical, CheckCircle, CircleDotDashed, Ban, Search, ListFilter, Plus
 } from 'lucide-react';
 import WebsiteShimmer from '@/components/dashboard/WebsiteShimmer';
 import GradientButton from '@/components/ui/GradientButton';
@@ -57,11 +57,11 @@ export default function DashboardWebsites() {
   const navigate = useNavigate();
   const { search } = window.location;
   const orgId = new URLSearchParams(search).get('org');
-  
+
   const { toast } = useToast();
   const { websites, fetchWebsites } = useBuilderStore();
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
   const isSuperAdmin = currentUser.role === 'SUPER_ADMIN';
   const [isAdminView, setIsAdminView] = useState(false);
@@ -75,44 +75,44 @@ export default function DashboardWebsites() {
 
   useEffect(() => {
     const loadWebsites = async () => {
-        setIsLoading(true);
-        try {
-            await fetchWebsites(orgId || undefined, isAdminView && isSuperAdmin); 
-        } finally {
-            setIsLoading(false);
-        }
+      setIsLoading(true);
+      try {
+        await fetchWebsites(orgId || undefined, isAdminView && isSuperAdmin);
+      } finally {
+        setIsLoading(false);
+      }
     };
     loadWebsites();
   }, [fetchWebsites, orgId, isAdminView, isSuperAdmin]);
 
   const filteredWebsites = useMemo(() => {
     if (!websites) return [];
-    
-    let filtered = websites.filter((website: any) => {
-        const matchesSearch = website.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                              (website.domain && website.domain.toLowerCase().includes(searchTerm.toLowerCase()));
-        
-        // Normalize status check
-        const status = website.status?.toLowerCase() || 'draft';
-        const matchesStatus = filterStatus === 'all' || 
-                             (filterStatus === 'Published' && (status === 'published' || status === 'active')) ||
-                             (filterStatus === 'Draft' && (status === 'draft')) ||
-                             (filterStatus === 'Deleted' && (status === 'deleted'));
-                             
-        return matchesSearch && matchesStatus;
-      });
 
-      return [...filtered].sort((a: any, b: any) => {
-        if (sortBy === 'name') {
-          return a.name.localeCompare(b.name);
-        }
-        if (sortBy === 'status') {
-          return (a.status || '').localeCompare(b.status || '');
-        }
-        const dateA = new Date(a.lastEdited || 0).getTime();
-        const dateB = new Date(b.lastEdited || 0).getTime();
-        return dateB - dateA;
-      });
+    let filtered = websites.filter((website: any) => {
+      const matchesSearch = website.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (website.domain && website.domain.toLowerCase().includes(searchTerm.toLowerCase()));
+
+      // Normalize status check
+      const status = website.status?.toLowerCase() || 'draft';
+      const matchesStatus = filterStatus === 'all' ||
+        (filterStatus === 'Published' && (status === 'published' || status === 'active')) ||
+        (filterStatus === 'Draft' && (status === 'draft')) ||
+        (filterStatus === 'Deleted' && (status === 'deleted'));
+
+      return matchesSearch && matchesStatus;
+    });
+
+    return [...filtered].sort((a: any, b: any) => {
+      if (sortBy === 'name') {
+        return a.name.localeCompare(b.name);
+      }
+      if (sortBy === 'status') {
+        return (a.status || '').localeCompare(b.status || '');
+      }
+      const dateA = new Date(a.lastEdited || 0).getTime();
+      const dateB = new Date(b.lastEdited || 0).getTime();
+      return dateB - dateA;
+    });
   }, [websites, searchTerm, filterStatus, sortBy]);
 
   const formatDate = (dateString: string | undefined): string => {
@@ -128,11 +128,11 @@ export default function DashboardWebsites() {
 
   const handleEdit = (website: any) => {
     setEditingWebsite({
-        id: website.id,
-        name: website.name,
-        domain: website.domain || `${website.id.slice(0, 8)}.buildora.app`,
-        status: website.status || 'Draft',
-        lastUpdated: formatDate(website.lastEdited)
+      id: website.id,
+      name: website.name,
+      domain: website.domain || `${website.id.slice(0, 8)}.buildora.app`,
+      status: website.status || 'Draft',
+      lastUpdated: formatDate(website.lastEdited)
     });
     setIsEditStatusModalOpen(true);
   };
@@ -172,37 +172,37 @@ export default function DashboardWebsites() {
         </div>
         <div className="flex items-center gap-4">
           {isSuperAdmin && (
-              <GradientButton
-                onClick={() => {
-                  setIsAdminView(prev => {
-                    const newAdminState = !prev;
-                    toast({
-                      title: newAdminState ? "Admin View Activated! 🛡️" : "User View Activated! 👤",
-                      description: newAdminState ? "You are now viewing all websites across the platform." : "You are now viewing your assigned websites.",
-                      variant: "themed",
-                      icon: newAdminState ? <ShieldCheck className="h-6 w-6 text-white stroke-2" /> : <UserIcon className="h-6 w-6 text-white stroke-2" />,
-                    });
-                    return newAdminState;
+            <GradientButton
+              onClick={() => {
+                setIsAdminView(prev => {
+                  const newAdminState = !prev;
+                  toast({
+                    title: newAdminState ? "Admin View Activated! 🛡️" : "User View Activated! 👤",
+                    description: newAdminState ? "You are now viewing all websites across the platform." : "You are now viewing your assigned websites.",
+                    variant: "themed",
+                    icon: newAdminState ? <ShieldCheck className="h-6 w-6 text-white stroke-2" /> : <UserIcon className="h-6 w-6 text-white stroke-2" />,
                   });
-                }}
-                className="w-full md:w-auto"
-                icon={isAdminView ? <ShieldCheck className="w-4 h-4" /> : <UserIcon className="w-4 h-4" />}
-              >
-                Admin View ({isAdminView ? "ON" : "OFF"})
-              </GradientButton>
+                  return newAdminState;
+                });
+              }}
+              className="w-full md:w-auto"
+              icon={isAdminView ? <ShieldCheck className="w-4 h-4" /> : <UserIcon className="w-4 h-4" />}
+            >
+              Admin View ({isAdminView ? "ON" : "OFF"})
+            </GradientButton>
           )}
-          <GradientButton 
-            className="w-full md:w-auto" 
-            icon={<Plus className="w-5 h-5" />} 
+          <GradientButton
+            className="w-full md:w-auto"
+            icon={<Plus className="w-5 h-5" />}
             onClick={async () => {
               try {
                 const id = await useBuilderStore.getState().createWebsite('My New Website', 'blank', orgId || undefined);
                 navigate(`/builder/${id}`);
               } catch (err) {
                 toast({
-                   title: "Error",
-                   description: "Failed to create website",
-                   variant: "destructive"
+                  title: "Error",
+                  description: "Failed to create website",
+                  variant: "destructive"
                 });
               }
             }}
@@ -292,7 +292,7 @@ export default function DashboardWebsites() {
                         </Badge>
                       </div>
                       {isSuperAdmin && website.institution && (
-                          <p className="text-[10px] text-indigo-500 font-bold uppercase mt-1 tracking-wider">{website.institution.name}</p>
+                        <p className="text-[10px] text-indigo-500 font-bold uppercase mt-1 tracking-wider">{website.institution.name}</p>
                       )}
                     </div>
                   </TableCell>
@@ -302,8 +302,8 @@ export default function DashboardWebsites() {
                         website.status?.toLowerCase() === "published" || website.status?.toLowerCase() === "active"
                           ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100/80"
                           : website.status?.toLowerCase() === "draft"
-                          ? "bg-amber-100 text-amber-700 hover:bg-amber-100/80"
-                          : "bg-rose-100 text-rose-700 hover:bg-rose-100/80"
+                            ? "bg-amber-100 text-amber-700 hover:bg-amber-100/80"
+                            : "bg-rose-100 text-rose-700 hover:bg-rose-100/80"
                       }
                     >
                       {(website.status?.toLowerCase() === "published" || website.status?.toLowerCase() === "active") && <CheckCircle className="w-3 h-3 mr-1" />}
@@ -313,7 +313,7 @@ export default function DashboardWebsites() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-slate-500 text-sm px-4 py-3">
-                      {formatDate(website.lastEdited)}
+                    {formatDate(website.lastEdited)}
                   </TableCell>
                   <TableCell className="text-right px-4 py-3">
                     <DropdownMenu>

@@ -214,9 +214,7 @@ export default function DeploymentMonitoring() {
           <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Deployment Monitoring</h2>
           <p className="text-slate-500 mt-1">Track and manage your website deployments.</p>
         </div>
-        <GradientButton className="w-full md:w-auto h-11" icon={<Activity className="w-5 h-5" />}>
-          New Deployment
-        </GradientButton>
+
       </div>
 
       {/* Search and Filters */}

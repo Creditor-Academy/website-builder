@@ -3,7 +3,7 @@ import {
   Building2, Plus, Search, Edit, Trash2, 
   MoreVertical, CheckCircle, AlertCircle, 
   XCircle, Users, Globe, Mail, 
-  CalendarDays, ListFilter, FileText, BarChart3, TrendingUp, ShieldCheck
+  CalendarDays, ListFilter, FileText, BarChart3, TrendingUp, ShieldCheck, RefreshCw, Eye, EyeOff
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import useBuilderStore from '@/store/useBuilderStore';
@@ -45,6 +45,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { createUser } from '../../api/user';
 
 interface Institution {
   id: string;
@@ -60,6 +61,18 @@ interface Institution {
   };
 }
 
+interface NewOrgForm {
+  name: string;
+  email: string;
+  password: string;
+}
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+}
+
 const Organizations = () => {
   const navigate = useNavigate();
   const [institutions, setInstitutions] = useState<Institution[]>([]);
@@ -68,8 +81,10 @@ const Organizations = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedOrgForView, setSelectedOrgForView] = useState<Institution | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [newOrg, setNewOrg] = useState({ name: '', email: '' });
+  const [newOrg, setNewOrg] = useState<NewOrgForm>({ name: '', email: '', password: '' });
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -93,27 +108,120 @@ const Organizations = () => {
     }
   };
 
+  const validateForm = (): FormErrors => {
+    const errors: FormErrors = {};
+    if (!newOrg.name.trim()) errors.name = 'Organization name is required';
+    if (!newOrg.email.trim() || !/\S+@\S+\.\S+/.test(newOrg.email)) errors.email = 'Valid email is required';
+    if (!newOrg.password || newOrg.password.length < 6) errors.password = 'Password must be at least 6 characters';
+    return errors;
+  };
+
+  const setField = (field: keyof NewOrgForm, value: string) => {
+    setNewOrg(prev => ({ ...prev, [field]: value }));
+    setFormErrors(prev => ({ ...prev, [field]: undefined }));
+  };
+
   const handleCreateOrg = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
     try {
       setIsSubmitting(true);
-      await institutionApi.create(newOrg);
+
+      // ── Step 1: Create the institution (only name + email — no password field) ──
+      let createdOrg: any = null;
+      try {
+        const orgRes = await institutionApi.create({
+          name: newOrg.name.trim(),
+          email: newOrg.email.trim(),
+        });
+        // Handle any response shape: { data: { id } } / { data: { data: { id } } } / { id }
+        createdOrg =
+          orgRes.data?.data?.id ? orgRes.data.data :
+          orgRes.data?.id       ? orgRes.data      :
+          null;
+
+        console.log('[Org created]', createdOrg);
+      } catch (orgErr: any) {
+        const msg =
+          orgErr?.response?.data?.message ||
+          orgErr?.response?.data?.error ||
+          `Organization creation failed (${orgErr?.response?.status ?? 'network error'})`;
+        toast({ title: "Org creation failed", description: msg, variant: "destructive" });
+        return;
+      }
+
+      if (!createdOrg?.id) {
+        toast({
+          title: "Org creation failed",
+          description: "Server did not return an organization ID. Check your backend response shape.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // ── Step 2: Create the Institution Admin user linked to this org ──
+      try {
+        await createUser({
+          name: `${newOrg.name.trim()} Admin`,
+          email: newOrg.email.trim(),
+          password: newOrg.password,
+          role: 'INSTITUTION_ADMIN',
+          institution_id: createdOrg.id,
+        });
+        console.log('[Admin user created for org]', createdOrg.id);
+      } catch (userErr: any) {
+        // Org was created — warn but don't block success
+        const msg =
+          userErr?.response?.data?.message ||
+          userErr?.response?.data?.error ||
+          `Admin user creation failed (${userErr?.response?.status ?? 'network error'})`;
+        toast({
+          title: "Organization created, but admin user failed",
+          description: msg + " — you can add a user manually from the Users page.",
+          variant: "destructive",
+        });
+        fetchInstitutions();
+        setIsAddModalOpen(false);
+        setNewOrg({ name: '', email: '', password: '' });
+        setFormErrors({});
+        return;
+      }
+
       toast({
-        title: "Success",
-        description: "Organization created successfully",
+        title: "Organization created ✅",
+        description: `${newOrg.name} has been added and an Institution Admin account was created.`,
       });
+
       setIsAddModalOpen(false);
-      setNewOrg({ name: '', email: '' });
+      setNewOrg({ name: '', email: '', password: '' });
+      setFormErrors({});
       fetchInstitutions();
     } catch (err: any) {
-      console.error(err);
+      console.error('[handleCreateOrg unexpected error]', err);
       toast({
-        title: "Error",
-        description: err.response?.data?.message || err.response?.data?.error || "Failed to create organization",
+        title: "Unexpected error",
+        description: err?.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleModalClose = (open: boolean) => {
+    if (!isSubmitting) {
+      setIsAddModalOpen(open);
+      if (!open) {
+        setNewOrg({ name: '', email: '', password: '' });
+        setFormErrors({});
+        setShowPassword(false);
+      }
     }
   };
 
@@ -170,7 +278,7 @@ const Organizations = () => {
           <p className="text-slate-500 mt-1 font-medium">Manage platform tenants, branding, and global intelligence.</p>
         </div>
         
-        <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <Dialog open={isAddModalOpen} onOpenChange={handleModalClose}>
           <DialogTrigger asChild>
             <GradientButton 
               className="flex items-center gap-2 px-6 py-6 h-auto shadow-lg shadow-indigo-200"
@@ -179,41 +287,128 @@ const Organizations = () => {
               Add Organization
             </GradientButton>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] rounded-3xl border-none shadow-2xl">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-black text-slate-900 border-b pb-4">New Organization</DialogTitle>
-              <DialogDescription className="pt-2 text-slate-500 font-medium">
-                Create a new independent tenant on the platform.
+
+          {/* ─── Add Organization Dialog ─────────────────────────────────── */}
+          <DialogContent className="sm:max-w-lg rounded-[2rem] p-0 overflow-hidden bg-white border-slate-100 shadow-2xl">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-indigo-600 to-blue-600 px-8 py-7">
+              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
+                <Building2 className="w-6 h-6 text-white" />
+              </div>
+              <DialogTitle className="text-2xl font-black text-white">New Organization</DialogTitle>
+              <DialogDescription className="text-white/70 mt-1 text-sm">
+                Create a new tenant. An Institution Admin account will be created automatically.
               </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleCreateOrg} className="space-y-6 py-4">
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 ml-1">Organization Name</label>
-                <Input 
-                  placeholder="e.g. Buildora Global" 
-                  value={newOrg.name} 
-                  onChange={(e) => setNewOrg({...newOrg, name: e.target.value})}
-                  className="h-12 rounded-xl bg-slate-50 border-slate-100 focus:bg-white transition-all"
-                  required
-                />
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleCreateOrg}>
+              <div className="px-8 py-6 space-y-4">
+
+                {/* Organization Name */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    Organization Name *
+                  </label>
+                  <Input
+                    placeholder="e.g. Buildora Global"
+                    value={newOrg.name}
+                    onChange={e => setField('name', e.target.value)}
+                    disabled={isSubmitting}
+                    className={cn(
+                      "h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all",
+                      formErrors.name && "border-rose-400 bg-rose-50"
+                    )}
+                  />
+                  {formErrors.name && (
+                    <p className="text-xs text-rose-500 font-medium">{formErrors.name}</p>
+                  )}
+                </div>
+
+                {/* Admin Email */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    Admin Email *
+                  </label>
+                  <Input
+                    type="email"
+                    placeholder="admin@organization.com"
+                    value={newOrg.email}
+                    onChange={e => setField('email', e.target.value)}
+                    disabled={isSubmitting}
+                    className={cn(
+                      "h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all",
+                      formErrors.email && "border-rose-400 bg-rose-50"
+                    )}
+                  />
+                  {formErrors.email && (
+                    <p className="text-xs text-rose-500 font-medium">{formErrors.email}</p>
+                  )}
+                </div>
+
+                {/* Admin Password */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    Admin Password *
+                  </label>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Min. 6 characters"
+                      value={newOrg.password}
+                      onChange={e => setField('password', e.target.value)}
+                      disabled={isSubmitting}
+                      className={cn(
+                        "h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all pr-12",
+                        formErrors.password && "border-rose-400 bg-rose-50"
+                      )}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(v => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {formErrors.password && (
+                    <p className="text-xs text-rose-500 font-medium">{formErrors.password}</p>
+                  )}
+                  <p className="text-[11px] text-slate-400 font-medium">
+                    This password will be used for the Institution Admin account linked to this organization.
+                  </p>
+                </div>
+
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 ml-1">Admin Email</label>
-                <Input 
-                  type="email" 
-                  placeholder="admin@organization.com" 
-                  value={newOrg.email} 
-                  onChange={(e) => setNewOrg({...newOrg, email: e.target.value})}
-                  className="h-12 rounded-xl bg-slate-50 border-slate-100 focus:bg-white transition-all"
-                  required
-                />
+
+              {/* Footer */}
+              <div className="px-8 pb-8 flex gap-3 justify-end border-t border-slate-100 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleModalClose(false)}
+                  disabled={isSubmitting}
+                  className="rounded-xl h-11 px-6 border-slate-200"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="rounded-xl h-11 px-8 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all font-bold"
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <RefreshCw className="w-4 h-4 animate-spin" /> Creating...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <Plus className="w-4 h-4" /> Create Organization
+                    </span>
+                  )}
+                </Button>
               </div>
-              <DialogFooter className="pt-6 gap-2">
-                <Button type="button" variant="ghost" className="h-12 rounded-xl font-bold" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
-                <GradientButton type="submit" className="h-12 rounded-xl px-8" disabled={isSubmitting}>
-                  {isSubmitting ? "Initialising..." : "Create Organization"}
-                </GradientButton>
-              </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>

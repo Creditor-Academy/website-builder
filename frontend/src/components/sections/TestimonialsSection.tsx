@@ -1,16 +1,6 @@
-import React from 'react';
 import { Quote, Star } from 'lucide-react';
 import { useBuilder } from '@/contexts/BuilderContext';
-
-// ─── Cursor Position Utility ───────────────────────────────────────────────────
-function setCursorToEnd(element: HTMLElement) {
-  const range = document.createRange();
-  const selection = window.getSelection();
-  range.selectNodeContents(element);
-  range.collapse(false); // collapse to end
-  selection.removeAllRanges();
-  selection.addRange(range);
-}
+import { Editable } from '@/components/ui/Editable';
 
 // ─── Global styles injected once ──────────────────────────────────────────
 const STYLES = `
@@ -166,7 +156,8 @@ function CardsVariant({ testimonials, content, styles, isEditing, onContentChang
         {/* Header */}
         <div style={{ maxWidth: 600, marginBottom: 64 }}>
           <SectionLabel text="testimonials" />
-          <h2
+          <Editable
+            as="h2"
             className="t-ce"
             style={{
               fontFamily: "'Cormorant Garamond', serif",
@@ -175,16 +166,12 @@ function CardsVariant({ testimonials, content, styles, isEditing, onContentChang
               color: headingColor, marginBottom: 16,
               animation: 't-fade-up 0.6s ease both',
             }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            dangerouslySetInnerHTML={{ __html: content.headline || 'What Our Clients Say' }}
-            onInput={(e) => {
-              onContentChange?.('headline', e.currentTarget.innerHTML);
-              // Preserve cursor position
-              setTimeout(() => setCursorToEnd(e.currentTarget), 0);
-            }}
-          ></h2>
-          <p
+            isEditing={isEditing}
+            value={content.headline || 'What Our Clients Say'}
+            onSave={(val) => onContentChange?.('headline', val)}
+          />
+          <Editable
+            as="p"
             className="t-ce"
             style={{
               fontFamily: "'Syne', sans-serif",
@@ -192,15 +179,10 @@ function CardsVariant({ testimonials, content, styles, isEditing, onContentChang
               color: paragraphColor, opacity: 0.75,
               animation: 't-fade-up 0.6s ease 0.1s both',
             }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            dangerouslySetInnerHTML={{ __html: content.subheadline || 'Trusted by thousands of happy customers worldwide' }}
-            onInput={(e) => {
-              onContentChange?.('subheadline', e.currentTarget.innerHTML);
-              // Preserve cursor position
-              setTimeout(() => setCursorToEnd(e.currentTarget), 0);
-            }}
-          ></p>
+            isEditing={isEditing}
+            value={content.subheadline || 'Trusted by thousands of happy customers worldwide'}
+            onSave={(val) => onContentChange?.('subheadline', val)}
+          />
         </div>
 
         {/* Grid */}
@@ -236,7 +218,8 @@ function CardsVariant({ testimonials, content, styles, isEditing, onContentChang
               {starRow(t.rating || 5)}
 
               {/* quote text */}
-              <p
+              <Editable
+                as="p"
                 className="t-ce"
                 style={{
                   fontFamily: "'Cormorant Garamond', serif",
@@ -244,48 +227,35 @@ function CardsVariant({ testimonials, content, styles, isEditing, onContentChang
                   color: paragraphColor || '#374151',
                   marginBottom: 32, fontStyle: 'italic',
                 }}
-                contentEditable={isEditing}
-                suppressContentEditableWarning
-                dangerouslySetInnerHTML={{ __html: t.quote ? `"${t.quote}"` : '""' }}
-                onInput={(e) => {
-                  updateT(t, 'quote', e.currentTarget.innerHTML.replace(/^"|"$/g, ''));
-                  // Preserve cursor position
-                  setTimeout(() => setCursorToEnd(e.currentTarget), 0);
+                isEditing={isEditing}
+                value={t.quote ? `"${t.quote}"` : '""'}
+                onSave={(val) => {
+                  updateT(t, 'quote', val.replace(/^"|"$/g, ''));
                 }}
-              ></p>
+              />
 
               {/* author */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                 <img src={t.avatar} alt={t.name} style={avatarStyle(styles.borderRadius)} />
                 <div>
-                  <p
+                  <Editable
                     className="t-ce"
                     style={{
                       fontFamily: "'Syne', sans-serif",
                       fontWeight: 700, fontSize: 13,
                       color: headingColor || '#0f172a', letterSpacing: '0.05em',
                     }}
-                    contentEditable={isEditing}
-                    suppressContentEditableWarning
-                    dangerouslySetInnerHTML={{ __html: t.name || '' }}
-                    onInput={(e) => {
-                      updateT(t, 'name', e.currentTarget.innerHTML);
-                      // Preserve cursor position
-                      setTimeout(() => setCursorToEnd(e.currentTarget), 0);
-                    }}
-                  ></p>
-                  <p
+                    isEditing={isEditing}
+                    value={t.name || ''}
+                    onSave={(val) => updateT(t, 'name', val)}
+                  />
+                  <Editable
                     className="t-ce"
                     style={{ fontSize: 12, color: paragraphColor || '#64748b', marginTop: 2, letterSpacing: '0.04em' }}
-                    contentEditable={isEditing}
-                    suppressContentEditableWarning
-                    dangerouslySetInnerHTML={{ __html: t.role || '' }}
-                    onInput={(e) => {
-                      updateT(t, 'role', e.currentTarget.innerHTML);
-                      // Preserve cursor position
-                      setTimeout(() => setCursorToEnd(e.currentTarget), 0);
-                    }}
-                  ></p>
+                    isEditing={isEditing}
+                    value={t.role || ''}
+                    onSave={(val) => updateT(t, 'role', val)}
+                  />
                 </div>
               </div>
             </div>
@@ -330,7 +300,8 @@ function CarouselVariant({ testimonials, content, styles, isEditing, onContentCh
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 64 }}>
           <SectionLabel text="testimonials" />
-          <h2
+          <Editable
+            as="h2"
             className="t-ce t-ce-light"
             style={{
               fontFamily: "'Cormorant Garamond', serif",
@@ -338,21 +309,18 @@ function CarouselVariant({ testimonials, content, styles, isEditing, onContentCh
               fontWeight: 600, lineHeight: 1.1,
               color: headingColor || '#f8fafc', marginBottom: 16,
             }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            onBlur={(e) => onContentChange?.('headline', e.currentTarget.textContent)}
-          >
-            {content.headline || 'What Our Clients Say'}
-          </h2>
-          <p
+            isEditing={isEditing}
+            value={content.headline || 'What Our Clients Say'}
+            onSave={(val) => onContentChange?.('headline', val)}
+          />
+          <Editable
+            as="p"
             className="t-ce t-ce-light"
             style={{ fontSize: 15, color: paragraphColor || '#94a3b8', lineHeight: 1.7 }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.textContent)}
-          >
-            {content.subheadline || 'Trusted by thousands of happy customers worldwide'}
-          </p>
+            isEditing={isEditing}
+            value={content.subheadline || 'Trusted by thousands of happy customers worldwide'}
+            onSave={(val) => onContentChange?.('subheadline', val)}
+          />
         </div>
       </div>
 
@@ -388,40 +356,35 @@ function CarouselCard({ t, i, styles, isEditing, updateT, paragraphColor, headin
       flexShrink: 0,
     }}>
       <Quote size={22} style={{ color: 'rgba(255,255,255,0.15)', marginBottom: 16 }} />
-      <p
+      <Editable
+        as="p"
         className="t-ce t-ce-light"
         style={{
           fontFamily: "'Cormorant Garamond', serif",
           fontSize: 18, lineHeight: 1.65, fontStyle: 'italic',
           color: 'rgba(255,255,255,0.75)', marginBottom: 24,
         }}
-        contentEditable={isEditing}
-        suppressContentEditableWarning
-        onBlur={(e) => updateT(t, 'quote', e.currentTarget.textContent.replace(/^"|"$/g, ''))}
-      >
-        "{t.quote}"
-      </p>
+        isEditing={isEditing}
+        value={t.quote ? `"${t.quote}"` : '""'}
+        onSave={(val) => updateT(t, 'quote', val.replace(/^"|"$/g, ''))}
+      />
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <img src={t.avatar} alt={t.name} style={avatarStyle(styles.borderRadius, 38)} />
         <div>
-          <p
+          <Editable
             className="t-ce t-ce-light"
             style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 12, color: '#f1f5f9', letterSpacing: '0.06em' }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            onBlur={(e) => updateT(t, 'name', e.currentTarget.textContent)}
-          >
-            {t.name}
-          </p>
-          <p
+            isEditing={isEditing}
+            value={t.name || ''}
+            onSave={(val) => updateT(t, 'name', val)}
+          />
+          <Editable
             className="t-ce t-ce-light"
             style={{ fontSize: 11, color: 'rgba(255,255,255,0.38)', marginTop: 2, letterSpacing: '0.04em' }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            onBlur={(e) => updateT(t, 'role', e.currentTarget.textContent)}
-          >
-            {t.role}
-          </p>
+            isEditing={isEditing}
+            value={t.role || ''}
+            onSave={(val) => updateT(t, 'role', val)}
+          />
         </div>
       </div>
     </div>
@@ -469,7 +432,8 @@ function QuoteVariant({ testimonials, content, styles, isEditing, onContentChang
         </div>
 
         {/* Quote */}
-        <blockquote
+        <Editable
+          as="blockquote"
           className="t-ce t-ce-light"
           style={{
             fontFamily: "'Cormorant Garamond', serif",
@@ -480,12 +444,10 @@ function QuoteVariant({ testimonials, content, styles, isEditing, onContentChang
             marginBottom: 48,
             animation: 't-fade-up 0.7s ease both',
           }}
-          contentEditable={isEditing}
-          suppressContentEditableWarning
-          onBlur={(e) => updateT('quote', e.currentTarget.textContent.replace(/^"|"$/g, ''))}
-        >
-          "{t.quote || 'Great product!'}"
-        </blockquote>
+          isEditing={isEditing}
+          value={t.quote ? `"${t.quote}"` : '""'}
+          onSave={(val) => updateT('quote', val.replace(/^"|"$/g, ''))}
+        />
 
         {/* Divider */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, marginBottom: 28 }}>
@@ -495,24 +457,22 @@ function QuoteVariant({ testimonials, content, styles, isEditing, onContentChang
         </div>
 
         {/* Name & role */}
-        <p
+        <Editable
+          as="p"
           className="t-ce t-ce-light"
           style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: '0.12em', textTransform: 'uppercase', color: headingColor || '#f8fafc', marginBottom: 6 }}
-          contentEditable={isEditing}
-          suppressContentEditableWarning
-          onBlur={(e) => updateT('name', e.currentTarget.textContent)}
-        >
-          {t.name}
-        </p>
-        <p
+          isEditing={isEditing}
+          value={t.name || ''}
+          onSave={(val) => updateT('name', val)}
+        />
+        <Editable
+          as="p"
           className="t-ce t-ce-light"
           style={{ fontSize: 12, letterSpacing: '0.08em', color: paragraphColor || '#94a3b8' }}
-          contentEditable={isEditing}
-          suppressContentEditableWarning
-          onBlur={(e) => updateT('role', e.currentTarget.textContent)}
-        >
-          {t.role}
-        </p>
+          isEditing={isEditing}
+          value={t.role || ''}
+          onSave={(val) => updateT('role', val)}
+        />
       </div>
     </section>
   );
@@ -541,7 +501,8 @@ function MinimalVariant({ testimonials, content, styles, isEditing, onContentCha
         {/* Header — left aligned */}
         <div style={{ marginBottom: 72, maxWidth: 540 }}>
           <SectionLabel text="testimonials" />
-          <h2
+          <Editable
+            as="h2"
             className="t-ce"
             style={{
               fontFamily: "'Cormorant Garamond', serif",
@@ -550,21 +511,18 @@ function MinimalVariant({ testimonials, content, styles, isEditing, onContentCha
               color: headingColor, marginBottom: 14,
               animation: 't-fade-up 0.5s ease both',
             }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            onBlur={(e) => onContentChange?.('headline', e.currentTarget.textContent)}
-          >
-            {content.headline || 'What Our Clients Say'}
-          </h2>
-          <p
+            isEditing={isEditing}
+            value={content.headline || 'What Our Clients Say'}
+            onSave={(val) => onContentChange?.('headline', val)}
+          />
+          <Editable
+            as="p"
             className="t-ce"
             style={{ fontSize: 15, color: paragraphColor, lineHeight: 1.7, opacity: 0.75 }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.textContent)}
-          >
-            {content.subheadline || 'Trusted by thousands of happy customers worldwide'}
-          </p>
+            isEditing={isEditing}
+            value={content.subheadline || 'Trusted by thousands of happy customers worldwide'}
+            onSave={(val) => onContentChange?.('subheadline', val)}
+          />
         </div>
 
         {/* Testimonials — indexed list */}
@@ -592,7 +550,8 @@ function MinimalVariant({ testimonials, content, styles, isEditing, onContentCha
                 {/* Content */}
                 <div>
                   {starRow(t.rating || 5)}
-                  <p
+                  <Editable
+                    as="p"
                     className="t-ce"
                     style={{
                       fontFamily: "'Cormorant Garamond', serif",
@@ -601,35 +560,29 @@ function MinimalVariant({ testimonials, content, styles, isEditing, onContentCha
                       color: paragraphColor || '#374151',
                       marginBottom: 24,
                     }}
-                    contentEditable={isEditing}
-                    suppressContentEditableWarning
-                    onBlur={(e) => updateT(t, 'quote', e.currentTarget.textContent.replace(/^"|"$/g, ''))}
-                  >
-                    "{t.quote}"
-                  </p>
+                    isEditing={isEditing}
+                    value={t.quote ? `"${t.quote}"` : '""'}
+                    onSave={(val) => updateT(t, 'quote', val.replace(/^"|"$/g, ''))}
+                  />
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     {t.avatar && (
                       <img src={t.avatar} alt={t.name} style={avatarStyle(styles.borderRadius, 40)} />
                     )}
                     <div>
-                      <p
+                      <Editable
                         className="t-ce"
                         style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: headingColor || '#0f172a' }}
-                        contentEditable={isEditing}
-                        suppressContentEditableWarning
-                        onBlur={(e) => updateT(t, 'name', e.currentTarget.textContent)}
-                      >
-                        {t.name}
-                      </p>
-                      <p
+                        isEditing={isEditing}
+                        value={t.name || ''}
+                        onSave={(val) => updateT(t, 'name', val)}
+                      />
+                      <Editable
                         className="t-ce"
                         style={{ fontSize: 12, color: paragraphColor || '#64748b', marginTop: 3, letterSpacing: '0.04em' }}
-                        contentEditable={isEditing}
-                        suppressContentEditableWarning
-                        onBlur={(e) => updateT(t, 'role', e.currentTarget.textContent)}
-                      >
-                        {t.role}
-                      </p>
+                        isEditing={isEditing}
+                        value={t.role || ''}
+                        onSave={(val) => updateT(t, 'role', val)}
+                      />
                     </div>
                   </div>
                 </div>

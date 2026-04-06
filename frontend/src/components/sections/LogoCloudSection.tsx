@@ -1,4 +1,5 @@
 import React from 'react';
+import { Editable } from '@/components/ui/Editable';
 
 export function LogoCloudSection({ section, isEditing, onContentChange }) {
   const { content, styles } = section;
@@ -17,26 +18,24 @@ export function LogoCloudSection({ section, isEditing, onContentChange }) {
       <section className="relative" style={{ background, padding }}>
         <div className="container mx-auto px-6 max-w-7xl">
           {content.headline && (
-            <h3
+            <Editable
+              as="h3"
               className="text-center text-xl md:text-2xl font-semibold mb-3" 
               style={{ color: headingColor }}
-              contentEditable={isEditing} 
-              suppressContentEditableWarning 
-              onBlur={(e) => onContentChange?.('headline', e.currentTarget.textContent)}
-            >
-              {content.headline}
-            </h3>
+              isEditing={isEditing} 
+              value={content.headline || ''} 
+              onSave={(val) => onContentChange?.('headline', val)}
+            />
           )}
           {content.subheadline && (
-            <p 
+            <Editable
+              as="p"
               className="text-center text-sm uppercase tracking-wider mb-8 max-w-2xl mx-auto" 
               style={{ color: paragraphColor }}
-              contentEditable={isEditing} 
-              suppressContentEditableWarning 
-              onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.textContent)}
-            >
-              {content.subheadline}
-            </p>
+              isEditing={isEditing} 
+              value={content.subheadline || ''} 
+              onSave={(val) => onContentChange?.('subheadline', val)}
+            />
           )}
           <div className="overflow-x-auto whitespace-nowrap py-4 hide-scrollbar">
             {logos.map((logo, index) => (
@@ -52,9 +51,7 @@ export function LogoCloudSection({ section, isEditing, onContentChange }) {
                   className="w-auto object-contain inline-block"
                 />
                 {isEditing && (
-                  <div className="absolute -top-8 left-0 bg-slate-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                    {logo.name}
-                  </div>
+                  <div className="absolute -top-8 left-0 bg-slate-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10" dangerouslySetInnerHTML={{ __html: logo.name }} />
                 )}
               </span>
             ))}
@@ -69,26 +66,24 @@ export function LogoCloudSection({ section, isEditing, onContentChange }) {
       <section className="relative" style={{ background, padding }}>
         <div className="container mx-auto px-6 max-w-7xl">
           {content.headline && (
-            <h3
+            <Editable
+              as="h3"
               className="text-center text-xl md:text-2xl font-semibold mb-3" 
               style={{ color: headingColor }}
-              contentEditable={isEditing} 
-              suppressContentEditableWarning 
-              onBlur={(e) => onContentChange?.('headline', e.currentTarget.textContent)}
-            >
-              {content.headline}
-            </h3>
+              isEditing={isEditing} 
+              value={content.headline || ''} 
+              onSave={(val) => onContentChange?.('headline', val)}
+            />
           )}
           {content.subheadline && (
-            <p 
+            <Editable
+              as="p"
               className="text-center text-sm uppercase tracking-wider mb-12 max-w-2xl mx-auto" 
               style={{ color: paragraphColor }}
-              contentEditable={isEditing} 
-              suppressContentEditableWarning 
-              onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.textContent)}
-            >
-              {content.subheadline}
-            </p>
+              isEditing={isEditing} 
+              value={content.subheadline || ''} 
+              onSave={(val) => onContentChange?.('subheadline', val)}
+            />
           )}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center">
             {logos.map((logo, index) => (
@@ -104,9 +99,7 @@ export function LogoCloudSection({ section, isEditing, onContentChange }) {
                   className="w-auto object-contain mx-auto"
                 />
                 {isEditing && (
-                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                    {logo.name}
-                  </div>
+                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10" dangerouslySetInnerHTML={{ __html: logo.name }} />
                 )}
               </div>
             ))}
@@ -121,26 +114,24 @@ export function LogoCloudSection({ section, isEditing, onContentChange }) {
     <section className="relative" style={{ background, padding }}>
       <div className="container mx-auto px-6 max-w-7xl">
         {content.headline && (
-          <h3
+          <Editable
+            as="h3"
             className="text-center text-xl md:text-2xl font-semibold mb-3" 
             style={{ color: headingColor }}
-            contentEditable={isEditing} 
-            suppressContentEditableWarning 
-            onBlur={(e) => onContentChange?.('headline', e.currentTarget.textContent)}
-          >
-            {content.headline}
-          </h3>
+            isEditing={isEditing} 
+            value={content.headline || ''} 
+            onSave={(val) => onContentChange?.('headline', val)}
+          />
         )}
         {content.subheadline && (
-          <p 
+          <Editable
+            as="p"
             className="text-center text-sm uppercase tracking-wider mb-8 max-w-2xl mx-auto" 
             style={{ color: paragraphColor }}
-            contentEditable={isEditing} 
-            suppressContentEditableWarning 
-            onBlur={(e) => onContentChange?.('subheadline', e.currentTarget.textContent)}
-          >
-            {content.subheadline}
-          </p>
+            isEditing={isEditing} 
+            value={content.subheadline || ''} 
+            onSave={(val) => onContentChange?.('subheadline', val)}
+          />
         )}
         <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
           {logos.map((logo, index) => (
@@ -156,9 +147,7 @@ export function LogoCloudSection({ section, isEditing, onContentChange }) {
                 className="w-auto object-contain"
               />
               {isEditing && (
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                  {logo.name}
-                </div>
+                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10" dangerouslySetInnerHTML={{ __html: logo.name }} />
               )}
             </div>
           ))}

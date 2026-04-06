@@ -1,5 +1,6 @@
 import React from 'react';
 import { Target, Eye, Heart, Award, Users } from 'lucide-react';
+import { Editable } from '@/components/ui/Editable';
 import { useBuilder } from '@/contexts/BuilderContext';
 
 const iconMap = { Target, Eye, Heart, Award, Users };
@@ -57,11 +58,10 @@ function getIcon(name, size = 20) {
 function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '', inv = false }: any) {
   const editing = !!isEditing;
   return (
-    <Tag
+    <Editable
+      as={Tag}
       className={`ab-ce ${inv ? 'ab-inv' : ''} ${className}`}
-      data-editing={editing ? 'true' : 'false'}
-      contentEditable={editing ? 'true' : 'false'}
-      suppressContentEditableWarning
+      isEditing={editing}
       style={{
         ...style,
         pointerEvents: editing ? 'auto' : 'inherit',
@@ -69,9 +69,8 @@ function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, classNam
         WebkitUserSelect: editing ? 'text' : undefined,
         cursor: editing ? 'text' : undefined,
       }}
-      onBlur={editing && onSave ? (e) => onSave(e.currentTarget.innerHTML || '') : undefined}
-      onClick={editing ? (e) => e.stopPropagation() : undefined}
-      dangerouslySetInnerHTML={{ __html: value || '' }}
+      onSave={onSave}
+      value={value || ''}
     />
   );
 }

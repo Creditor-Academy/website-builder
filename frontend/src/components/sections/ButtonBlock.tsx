@@ -9,7 +9,7 @@ export function ButtonBlock({ section, isSelected, isEditing, onContentChange })
 
     const handleTextEdit = (field, e) => {
         if (onContentChange && isEditing) {
-            onContentChange(field, e.currentTarget.textContent || '');
+            onContentChange(field, e.currentTarget.innerHTML || '');
         }
     };
 
@@ -40,9 +40,7 @@ export function ButtonBlock({ section, isSelected, isEditing, onContentChange })
                             contentEditable={isEditing}
                             suppressContentEditableWarning
                             onBlur={(e) => handleTextEdit('text', e)}
-                        >
-                            {content.text || 'Click Me'}
-                        </span>
+                         dangerouslySetInnerHTML={{ __html: content.text || 'Click Me' }} />
                     </Button>
                 </div>
             </div>

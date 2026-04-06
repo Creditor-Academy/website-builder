@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowUpRight, ChevronRight, ArrowRight } from 'lucide-react';
+import { Editable } from '@/components/ui/Editable';
 import { useBuilder } from '@/contexts/BuilderContext';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
@@ -79,15 +80,13 @@ function InjectStyles() {
 // ─── CE helper ────────────────────────────────────────────────────────────
 function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '', inv = false }: any) {
   return (
-    <Tag
+    <Editable
+      as={Tag}
       className={`sv-ce ${inv ? 'sv-inv' : ''} ${className}`}
-      data-editing={isEditing ? 'true' : 'false'}
-      contentEditable={isEditing ? 'true' : 'false'}
-      suppressContentEditableWarning
+      isEditing={isEditing}
       style={{ ...style, pointerEvents: isEditing ? 'auto' : 'inherit' }}
-      onBlur={isEditing && onSave ? (e) => onSave(e.currentTarget.innerHTML || '') : undefined}
-      onClick={isEditing ? (e) => e.stopPropagation() : undefined}
-      dangerouslySetInnerHTML={{ __html: value || '' }}
+      onSave={onSave}
+      value={value || ''}
     />
   );
 }

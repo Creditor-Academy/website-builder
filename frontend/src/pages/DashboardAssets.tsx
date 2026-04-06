@@ -172,20 +172,20 @@ export default function DashboardAssets() {
                                 {filteredMedia.filter(m => tabType === 'all' || m.type === tabType.slice(0, -1)).map((item) => (
                                     <div
                                         key={item.id}
-                                        className="group relative flex flex-col rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer bg-white"
+                                        className="group/media relative flex flex-col rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer bg-white"
                                     >
                                         <div className="aspect-square relative overflow-hidden bg-slate-100 rounded-t-2xl">
                                            {item.type === 'image' ? (
-                                               <img src={item.url} alt={item.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                               <img src={item.url} alt={item.name} className="w-full h-full object-cover transition-transform duration-500 group-hover/media:scale-105" />
                                            ) : (
                                                <div className="w-full h-full bg-slate-900 flex items-center justify-center">
                                                    <Video className="w-10 h-10 text-white/40" />
                                                </div>
                                            )}
                                            {/* Gradient Overlay */}
-                                           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover/media:opacity-100 transition-opacity duration-300"></div>
                                            
-                                           <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-3 z-20 backdrop-blur-[4px]">
+                                           <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover/media:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-3 z-20 backdrop-blur-[4px]">
                                                <Button 
                                                   size="sm" 
                                                   className="bg-blue-600 text-white font-semibold rounded-full px-6 h-11 text-sm shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:scale-105 transition-all duration-200"
@@ -214,7 +214,7 @@ export default function DashboardAssets() {
                                             <p className="text-sm font-bold text-slate-900 truncate">{item.name}</p>
                                             <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-100">
                                                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">{item.size}</p>
-                                               <p className="text-xs text-slate-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                                               <p className="text-xs text-slate-500 font-medium opacity-0 group-hover/media:opacity-100 transition-opacity">
                                                   {new Date(item.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                                                </p>
                                             </div>

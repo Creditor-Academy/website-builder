@@ -156,14 +156,20 @@ class AuthService {
 
 
 
-    // Compare passwords
+    // Compare passwords (only for email auth users)
+    const activeProvider = user.auth_provider || 'email';
 
-    const isPasswordValid = await comparePassword(password, user.password_hash);
-
-    if (!isPasswordValid) {
-
-      throw new UnauthorizedError('Invalid email or password');
-
+    if (activeProvider === 'email') {
+      if (!user.password_hash) {
+        throw new UnauthorizedError('No password associated with this account. Try OAuth.');
+      }
+      const isPasswordValid = await comparePassword(password, user.password_hash);
+      if (!isPasswordValid) {
+        throw new UnauthorizedError('Invalid email or password');
+      }
+    } else {
+      // For OAuth users, password shouldn't be used
+      throw new UnauthorizedError(`Please use ${activeProvider} login for this account`);
     }
 
 

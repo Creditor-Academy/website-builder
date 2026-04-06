@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import * as Icons from 'lucide-react';
+import { Editable } from '@/components/ui/Editable';
 
 // ─── Shared Helpers ────────────────────────────────────────────────────────────
 
@@ -77,7 +78,8 @@ const renderGrid = ({ content, styles, isEditing, onContentChange, headingColor,
             </div>
           </div>
 
-          <h3
+          <Editable
+            as="h3"
             style={{
               margin: '0 0 0.5rem',
               fontSize: '1.05rem',
@@ -87,39 +89,28 @@ const renderGrid = ({ content, styles, isEditing, onContentChange, headingColor,
               letterSpacing: '-0.01em',
               lineHeight: 1.3,
             }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            dangerouslySetInnerHTML={{ __html: feature.title }}
-            onInput={(e) => {
+            isEditing={isEditing}
+            value={feature.title || ''}
+            onSave={(val) => {
               if (!isEditing || !onContentChange) return;
-              const updated = content.features.map(f => f.id === feature.id ? { ...f, title: e.currentTarget.innerHTML } : f);
-              onContentChange('features', updated);
-            }}
-            onBlur={(e) => {
-              if (!isEditing || !onContentChange) return;
-              const updated = content.features.map(f => f.id === feature.id ? { ...f, title: e.currentTarget.innerHTML } : f);
+              const updated = content.features.map(f => f.id === feature.id ? { ...f, title: val } : f);
               onContentChange('features', updated);
             }}
           />
 
-          <p
+          <Editable
+            as="p"
             style={{
               margin: '0 0 1.5rem',
               fontSize: '0.875rem',
               lineHeight: 1.75,
               color: paragraphColor,
             }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            dangerouslySetInnerHTML={{ __html: feature.description }}
-            onInput={(e) => {
+            isEditing={isEditing}
+            value={feature.description || ''}
+            onSave={(val) => {
               if (!isEditing || !onContentChange) return;
-              const updated = content.features.map(f => f.id === feature.id ? { ...f, description: e.currentTarget.innerHTML } : f);
-              onContentChange('features', updated);
-            }}
-            onBlur={(e) => {
-              if (!isEditing || !onContentChange) return;
-              const updated = content.features.map(f => f.id === feature.id ? { ...f, description: e.currentTarget.innerHTML } : f);
+              const updated = content.features.map(f => f.id === feature.id ? { ...f, description: val } : f);
               onContentChange('features', updated);
             }}
           />
@@ -172,9 +163,7 @@ const renderList = ({ content, styles, isEditing, onContentChange, headingColor,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: tag.text,
               flexShrink: 0,
-            }}>
-              {getIcon(feature.icon, 19)}
-            </div>
+            }} dangerouslySetInnerHTML={{ __html: getIcon(feature.icon, 19) }} />
             {index < content.features.length - 1 && (
               <div className="hidden sm:block w-px flex-1 mt-2.5 bg-gradient-to-b from-slate-200 to-transparent" />
             )}
@@ -189,7 +178,8 @@ const renderList = ({ content, styles, isEditing, onContentChange, headingColor,
               Step {String(index + 1).padStart(2, '0')}
             </div>
 
-            <h3
+            <Editable
+              as="h3"
               style={{
                 margin: '0 0 0.45rem',
                 fontSize: '1.05rem',
@@ -198,39 +188,28 @@ const renderList = ({ content, styles, isEditing, onContentChange, headingColor,
                 fontFamily: '"Playfair Display", Georgia, serif',
                 letterSpacing: '-0.01em',
               }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              dangerouslySetInnerHTML={{ __html: feature.title }}
-              onInput={(e) => {
+              isEditing={isEditing}
+              value={feature.title || ''}
+              onSave={(val) => {
                 if (!isEditing || !onContentChange) return;
-                const updated = content.features.map(f => f.id === feature.id ? { ...f, title: e.currentTarget.innerHTML } : f);
-                onContentChange('features', updated);
-              }}
-              onBlur={(e) => {
-                if (!isEditing || !onContentChange) return;
-                const updated = content.features.map(f => f.id === feature.id ? { ...f, title: e.currentTarget.innerHTML } : f);
+                const updated = content.features.map(f => f.id === feature.id ? { ...f, title: val } : f);
                 onContentChange('features', updated);
               }}
             />
 
-            <p
+            <Editable
+              as="p"
               style={{
                 margin: 0,
                 fontSize: '0.875rem',
                 lineHeight: 1.75,
                 color: paragraphColor,
               }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              dangerouslySetInnerHTML={{ __html: feature.description }}
-              onInput={(e) => {
+              isEditing={isEditing}
+              value={feature.description || ''}
+              onSave={(val) => {
                 if (!isEditing || !onContentChange) return;
-                const updated = content.features.map(f => f.id === feature.id ? { ...f, description: e.currentTarget.innerHTML } : f);
-                onContentChange('features', updated);
-              }}
-              onBlur={(e) => {
-                if (!isEditing || !onContentChange) return;
-                const updated = content.features.map(f => f.id === feature.id ? { ...f, description: e.currentTarget.innerHTML } : f);
+                const updated = content.features.map(f => f.id === feature.id ? { ...f, description: val } : f);
                 onContentChange('features', updated);
               }}
             />
@@ -281,9 +260,7 @@ const renderIcons = ({ content, styles, isEditing, onContentChange, headingColor
             position: 'absolute', bottom: '-12px', right: '-12px',
             opacity: 0.04, color: tag.dot,
             transform: 'rotate(-12deg)', pointerEvents: 'none',
-          }}>
-            {getIcon(feature.icon, 72)}
-          </div>
+          }} dangerouslySetInnerHTML={{ __html: getIcon(feature.icon, 72) }} />
 
           <div style={{
             width: '60px', height: '60px',
@@ -297,7 +274,8 @@ const renderIcons = ({ content, styles, isEditing, onContentChange, headingColor
             {getIcon(feature.icon, 24)}
           </div>
 
-          <h4
+          <Editable
+            as="h4"
             style={{
               margin: '0 0 0.5rem',
               fontSize: '0.95rem',
@@ -306,34 +284,31 @@ const renderIcons = ({ content, styles, isEditing, onContentChange, headingColor
               fontFamily: '"Playfair Display", Georgia, serif',
               lineHeight: 1.3,
             }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            onBlur={(e) => {
+            isEditing={isEditing}
+            value={feature.title || ''}
+            onSave={(val) => {
               if (!isEditing || !onContentChange) return;
-              const updated = content.features.map(f => f.id === feature.id ? { ...f, title: e.currentTarget.textContent } : f);
+              const updated = content.features.map(f => f.id === feature.id ? { ...f, title: val } : f);
               onContentChange('features', updated);
             }}
-          >
-            {feature.title}
-          </h4>
+          />
 
-          <p
+          <Editable
+            as="p"
             style={{
               margin: 0,
               fontSize: '0.78rem',
               lineHeight: 1.65,
               color: paragraphColor,
             }}
-            contentEditable={isEditing}
-            suppressContentEditableWarning
-            onBlur={(e) => {
+            isEditing={isEditing}
+            value={feature.description || ''}
+            onSave={(val) => {
               if (!isEditing || !onContentChange) return;
-              const updated = content.features.map(f => f.id === feature.id ? { ...f, description: e.currentTarget.textContent } : f);
+              const updated = content.features.map(f => f.id === feature.id ? { ...f, description: val } : f);
               onContentChange('features', updated);
             }}
-          >
-            {feature.description}
-          </p>
+          />
 
           <div style={{
             position: 'absolute', bottom: 0, left: '20%', right: '20%', height: '2.5px',
@@ -367,7 +342,7 @@ const renderCards = ({ content, styles, isEditing, onContentChange, headingColor
           }}
         >
             <div className={`w-full sm:w-[72px] flex-shrink-0 bg-slate-50 border-b sm:border-b-0 sm:border-r border-slate-200 flex flex-row sm:flex-col items-center justify-between sm:justify-center gap-2 p-4 sm:py-6`} style={{ background: tag.bg, borderColor: tag.border }}>
-            <div style={{ color: tag.text }}>{getIcon(feature.icon, 22)}</div>
+            <div style={{ color: tag.text }} dangerouslySetInnerHTML={{ __html: getIcon(feature.icon, 22) }} />
             <span className="text-[10px] font-extrabold tracking-widest sm:rotate-180 sm:[writing-mode:vertical-rl] opacity-70" style={{ color: tag.text }}>
               {String(index + 1).padStart(2, '0')}
             </span>
@@ -381,7 +356,8 @@ const renderCards = ({ content, styles, isEditing, onContentChange, headingColor
               </span>
             </div>
 
-            <h3
+            <Editable
+              as="h3"
               style={{
                 margin: '0 0 0.5rem',
                 fontSize: '1.05rem', fontWeight: 700,
@@ -389,29 +365,26 @@ const renderCards = ({ content, styles, isEditing, onContentChange, headingColor
                 fontFamily: '"Playfair Display", Georgia, serif',
                 letterSpacing: '-0.01em',
               }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => {
+              isEditing={isEditing}
+              value={feature.title || ''}
+              onSave={(val) => {
                 if (!isEditing || !onContentChange) return;
-                const updated = content.features.map(f => f.id === feature.id ? { ...f, title: e.currentTarget.textContent } : f);
+                const updated = content.features.map(f => f.id === feature.id ? { ...f, title: val } : f);
                 onContentChange('features', updated);
               }}
-            >
-              {feature.title}
-            </h3>
+            />
 
-            <p
+            <Editable
+              as="p"
               style={{ margin: 0, fontSize: '0.875rem', lineHeight: 1.72, color: paragraphColor }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => {
+              isEditing={isEditing}
+              value={feature.description || ''}
+              onSave={(val) => {
                 if (!isEditing || !onContentChange) return;
-                const updated = content.features.map(f => f.id === feature.id ? { ...f, description: e.currentTarget.textContent } : f);
+                const updated = content.features.map(f => f.id === feature.id ? { ...f, description: val } : f);
                 onContentChange('features', updated);
               }}
-            >
-              {feature.description}
-            </p>
+            />
           </div>
 
           <div className="hidden sm:flex w-12 flex-shrink-0 items-center justify-center text-slate-300 border-l border-slate-100">
@@ -431,7 +404,7 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
 
   const handleTextEdit = (field, e) => {
     if (onContentChange && isEditing) {
-      onContentChange(field, e.currentTarget.textContent || '');
+      onContentChange(field, e.currentTarget.innerHTML || '');
     }
   };
 
@@ -620,20 +593,17 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
 
           {/* ── Section Header ── */}
-          <div style={{ textAlign: 'center', maxWidth: '600px', margin: '0 auto 4rem' }}>
-
             <div className="fs-chip">
               <span className="fs-chip-dot" />
-              <span
-                contentEditable={isEditing}
-                suppressContentEditableWarning
-                onBlur={(e) => handleTextEdit('chipText', e)}
-              >
-                {content.chipText || 'Features'}
-              </span>
+              <Editable
+                isEditing={isEditing}
+                value={content.chipText || 'Features'}
+                onSave={(val) => onContentChange?.('chipText', val)}
+              />
             </div>
 
-            <h2
+            <Editable
+              as="h2"
               style={{
                 margin: '0 0 1rem',
                 fontSize: 'clamp(1.9rem, 4vw, 2.9rem)',
@@ -642,12 +612,10 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
                 lineHeight: 1.18,
                 letterSpacing: '-0.03em',
               }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => handleTextEdit('headline', e)}
-            >
-              {content.headline}
-            </h2>
+              isEditing={isEditing}
+              value={content.headline || ''}
+              onSave={(val) => onContentChange?.('headline', val)}
+            />
 
             <div style={{
               width: '40px', height: '3px',
@@ -656,15 +624,13 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
               margin: '0 auto 1.25rem',
             }} />
 
-            <p
+            <Editable
+              as="p"
               style={{ margin: 0, fontSize: '1rem', lineHeight: 1.75, color: paragraphColor }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => handleTextEdit('subheadline', e)}
-            >
-              {content.subheadline}
-            </p>
-          </div>
+              isEditing={isEditing}
+              value={content.subheadline || ''}
+              onSave={(val) => onContentChange?.('subheadline', val)}
+            />
 
           {/* ── Variant Renderer ── */}
           {variant === 'list'

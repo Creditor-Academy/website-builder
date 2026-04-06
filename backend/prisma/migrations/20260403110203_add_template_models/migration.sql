@@ -1,11 +1,8 @@
 -- CreateEnum
-CREATE TYPE "UserRole" AS ENUM ('STUDENT', 'INSTRUCTOR', 'INSTITUTION_ADMIN', 'SUPER_ADMIN');
+CREATE TYPE "UserRole" AS ENUM ('USER', 'ADMIN', 'STUDENT', 'INSTRUCTOR', 'INSTITUTION_ADMIN', 'SUPER_ADMIN');
 
 -- CreateEnum
-CREATE TYPE "InstitutionStatus" AS ENUM ('PENDING', 'APPROVED', 'BLOCKED');
-
--- CreateEnum
-CREATE TYPE "WebsiteStatus" AS ENUM ('ACTIVE', 'PUBLISHED', 'DELETED');
+CREATE TYPE "WebsiteStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'DELETED');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -13,12 +10,15 @@ CREATE TABLE "users" (
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password_hash" TEXT NOT NULL,
-    "role" "UserRole" NOT NULL DEFAULT 'STUDENT',
-    "isApproved" BOOLEAN NOT NULL DEFAULT false,
-    "isVerified" BOOLEAN NOT NULL DEFAULT false,
+    "role" "UserRole" NOT NULL DEFAULT 'USER',
     "institution_id" TEXT,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "isVerified" BOOLEAN NOT NULL DEFAULT false,
+    "lastLoginAt" TIMESTAMP(3),
+    "lastPasswordChangeAt" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "deleted_at" TIMESTAMP(3),
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
@@ -28,7 +28,7 @@ CREATE TABLE "institutions" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "status" "InstitutionStatus" NOT NULL DEFAULT 'PENDING',
+    "status" TEXT NOT NULL DEFAULT 'PENDING',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -59,16 +59,34 @@ CREATE TABLE "email_verification_tokens" (
 );
 
 -- CreateTable
+CREATE TABLE "refresh_tokens" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "token_hash" TEXT NOT NULL,
+    "sessionId" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "isRevoked" BOOLEAN NOT NULL DEFAULT false,
+    "replacedBy" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "refresh_tokens_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "websites" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "institution_id" TEXT NOT NULL,
     "owner_id" TEXT NOT NULL,
-    "subdomain" TEXT NOT NULL,
-    "status" "WebsiteStatus" NOT NULL DEFAULT 'ACTIVE',
-    "settings_id" TEXT,
+    "status" "WebsiteStatus" NOT NULL DEFAULT 'DRAFT',
+    "thumbnail_url" TEXT,
+    "currentDraftVersionId" TEXT,
+    "currentPublishedVersionId" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "deleted_at" TIMESTAMP(3),
+    "institution_id" TEXT,
+    "content" JSONB,
+    "settings_id" TEXT,
 
     CONSTRAINT "websites_pkey" PRIMARY KEY ("id")
 );
@@ -85,6 +103,37 @@ CREATE TABLE "settings" (
     CONSTRAINT "settings_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "WebsiteTemplate" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "category" TEXT NOT NULL,
+    "image" TEXT,
+    "global_styles" JSONB NOT NULL DEFAULT '{}',
+    "navbar" JSONB NOT NULL DEFAULT '{}',
+    "footer" JSONB NOT NULL DEFAULT '{}',
+    "home_layout" JSONB NOT NULL DEFAULT '{}',
+    "deletedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "WebsiteTemplate_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "SectionTemplate" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "category" TEXT NOT NULL,
+    "props" JSONB NOT NULL DEFAULT '{}',
+    "deletedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "SectionTemplate_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -92,19 +141,10 @@ CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 CREATE INDEX "users_email_idx" ON "users"("email");
 
 -- CreateIndex
-CREATE INDEX "users_institution_id_idx" ON "users"("institution_id");
-
--- CreateIndex
-CREATE INDEX "users_role_idx" ON "users"("role");
+CREATE INDEX "users_deleted_at_idx" ON "users"("deleted_at");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "institutions_email_key" ON "institutions"("email");
-
--- CreateIndex
-CREATE INDEX "institutions_email_idx" ON "institutions"("email");
-
--- CreateIndex
-CREATE INDEX "institutions_status_idx" ON "institutions"("status");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "password_reset_tokens_token_hash_key" ON "password_reset_tokens"("token_hash");
@@ -131,22 +171,28 @@ CREATE INDEX "email_verification_tokens_token_hash_idx" ON "email_verification_t
 CREATE INDEX "email_verification_tokens_expiresAt_idx" ON "email_verification_tokens"("expiresAt");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "websites_subdomain_key" ON "websites"("subdomain");
+CREATE UNIQUE INDEX "refresh_tokens_token_hash_key" ON "refresh_tokens"("token_hash");
+
+-- CreateIndex
+CREATE INDEX "refresh_tokens_userId_idx" ON "refresh_tokens"("userId");
+
+-- CreateIndex
+CREATE INDEX "refresh_tokens_token_hash_idx" ON "refresh_tokens"("token_hash");
+
+-- CreateIndex
+CREATE INDEX "refresh_tokens_expiresAt_idx" ON "refresh_tokens"("expiresAt");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "websites_settings_id_key" ON "websites"("settings_id");
 
 -- CreateIndex
-CREATE INDEX "websites_institution_id_idx" ON "websites"("institution_id");
-
--- CreateIndex
 CREATE INDEX "websites_owner_id_idx" ON "websites"("owner_id");
 
 -- CreateIndex
-CREATE INDEX "websites_subdomain_idx" ON "websites"("subdomain");
+CREATE INDEX "websites_status_idx" ON "websites"("status");
 
 -- CreateIndex
-CREATE INDEX "websites_status_idx" ON "websites"("status");
+CREATE INDEX "websites_deleted_at_idx" ON "websites"("deleted_at");
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_institution_id_fkey" FOREIGN KEY ("institution_id") REFERENCES "institutions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -158,10 +204,13 @@ ALTER TABLE "password_reset_tokens" ADD CONSTRAINT "password_reset_tokens_userId
 ALTER TABLE "email_verification_tokens" ADD CONSTRAINT "email_verification_tokens_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "websites" ADD CONSTRAINT "websites_institution_id_fkey" FOREIGN KEY ("institution_id") REFERENCES "institutions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "refresh_tokens" ADD CONSTRAINT "refresh_tokens_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "websites" ADD CONSTRAINT "websites_institution_id_fkey" FOREIGN KEY ("institution_id") REFERENCES "institutions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "websites" ADD CONSTRAINT "websites_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "websites" ADD CONSTRAINT "websites_settings_id_fkey" FOREIGN KEY ("settings_id") REFERENCES "settings"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "websites" ADD CONSTRAINT "websites_settings_id_fkey" FOREIGN KEY ("settings_id") REFERENCES "settings"("id") ON DELETE CASCADE ON UPDATE CASCADE;

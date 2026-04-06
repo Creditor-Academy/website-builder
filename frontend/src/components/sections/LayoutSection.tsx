@@ -1,6 +1,7 @@
 import React from 'react';
 import { useBuilder } from '@/contexts/BuilderContext';
 import { Edit, ArrowRight, Image as ImageIcon } from 'lucide-react';
+import { Editable } from '@/components/ui/Editable';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -94,18 +95,15 @@ function InjectStyles() {
 // ─── CE helper ────────────────────────────────────────────────────────────
 function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, className = '', inv = false }: any) {
   return (
-    <Tag
+    <Editable
+      as={Tag}
       className={`ly-ce ${className}`}
-      data-editing={isEditing ? 'true' : 'false'}
-      data-inv={inv ? 'true' : 'false'}
-      contentEditable={isEditing ? 'true' : 'false'}
-      suppressContentEditableWarning
+      isEditing={isEditing}
       style={{ ...style, pointerEvents: isEditing ? 'auto' : 'inherit' }}
-      onBlur={isEditing && onSave ? (e) => onSave(e.currentTarget.textContent || '') : undefined}
-      onClick={isEditing ? (e) => e.stopPropagation() : undefined}
-    >
-      {value}
-    </Tag>
+      onSave={onSave}
+      value={value || ''}
+      data-inv={inv ? 'true' : 'false'}
+    />
   );
 }
 
@@ -273,11 +271,11 @@ function TextButton({ content, isEditing, updateContent, styles }: any) { // Tex
             transition: 'opacity 0.2s ease, transform 0.2s ease'
           }}
         >
-          <span 
-            contentEditable={isEditing} 
-            suppressContentEditableWarning 
-            dangerouslySetInnerHTML={{ __html: content.buttonText || 'Get Started' }} 
-            onInput={(e) => handleTextEdit('buttonText', e)}
+          <Editable
+            as="span"
+            isEditing={isEditing} 
+            value={content.buttonText || 'Get Started'} 
+            onSave={(val) => handleTextEdit('buttonText', { currentTarget: { innerHTML: val } })}
             style={{ outline: 'none' }}
           />
           <ArrowRight width={16} height={16} />
@@ -339,11 +337,11 @@ function HeadingTextButton({ content, isEditing, updateContent, styles }: any) {
             transition: 'opacity 0.2s ease, transform 0.2s ease'
           }}
         >
-          <span 
-            contentEditable={isEditing} 
-            suppressContentEditableWarning 
-            dangerouslySetInnerHTML={{ __html: content.buttonText || 'Get Started' }} 
-            onInput={(e) => handleTextEdit('buttonText', e)}
+          <Editable
+            as="span"
+            isEditing={isEditing} 
+            value={content.buttonText || 'Get Started'} 
+            onSave={(val) => handleTextEdit('buttonText', { currentTarget: { innerHTML: val } })}
             style={{ outline: 'none' }}
           />
           <ArrowRight width={16} height={16} />
@@ -369,9 +367,7 @@ function TwoColumn({ content, isEditing, updateContent, styles }: any) { // Two-
               fontFamily: "'Geist', sans-serif",
               fontSize: 10, letterSpacing: '0.2em',
               color: '#E11D48', marginBottom: 16,
-            }}>
-              {col.label}
-            </div>
+            }} dangerouslySetInnerHTML={{ __html: col.label }} />
 
             <CE
               as="h3" value={content[col.key]?.heading || 'Click to edit heading…'} isEditing={isEditing}

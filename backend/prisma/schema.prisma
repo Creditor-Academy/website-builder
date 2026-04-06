@@ -140,3 +140,29 @@ enum WebsiteStatus {
   PUBLISHED
   DELETED
 }
+
+
+model WebsiteTemplate {
+  id           String    @id @default(cuid())
+  name         String
+  description  String
+  category     String
+  image        String?
+  global_styles Json     @default("{}")
+  navbar       Json      @default("{}")
+  footer       Json      @default("{}")
+  home_layout  Json      @default("{}")
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model SectionTemplate {
+  id        String    @id @default(cuid())
+  name      String
+  category  String
+  props     Json      @default("{}")
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}

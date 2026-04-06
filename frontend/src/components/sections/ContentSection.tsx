@@ -1,4 +1,5 @@
 import React from 'react';
+import { Editable } from '@/components/ui/Editable';
 
 export function ContentSection({ section, isSelected, isEditing, onContentChange }) {
     const { content, styles } = section;
@@ -15,7 +16,7 @@ export function ContentSection({ section, isSelected, isEditing, onContentChange
 
     const handleTextEdit = (field, e) => {
         if (onContentChange && isEditing) {
-            onContentChange(field, e.currentTarget.textContent || '');
+            onContentChange(field, e.currentTarget.innerHTML || '');
         }
     };
 
@@ -28,28 +29,26 @@ export function ContentSection({ section, isSelected, isEditing, onContentChange
             <div className="container mx-auto px-6 max-w-4xl">
                 {/* Title */}
                 {content.title && (
-                    <h1
+                    <Editable
+                        as="h1"
                         className="text-4xl md:text-5xl font-bold mb-8"
                         style={{ color: headingColor }}
-                        contentEditable={isEditing}
-                        suppressContentEditableWarning
-                        onBlur={(e) => handleTextEdit('title', e)}
-                    >
-                        {content.title}
-                    </h1>
+                        isEditing={isEditing}
+                        value={content.title || ''}
+                        onSave={(val) => onContentChange?.('title', val)}
+                    />
                 )}
 
                 {/* Last Updated */}
                 {content.lastUpdated && (
-                    <p
+                    <Editable
+                        as="p"
                         className="text-sm opacity-60 mb-8"
                         style={{ color: paragraphColor }}
-                        contentEditable={isEditing}
-                        suppressContentEditableWarning
-                        onBlur={(e) => handleTextEdit('lastUpdated', e)}
-                    >
-                        {content.lastUpdated}
-                    </p>
+                        isEditing={isEditing}
+                        value={content.lastUpdated || ''}
+                        onSave={(val) => onContentChange?.('lastUpdated', val)}
+                    />
                 )}
 
                 {/* Main Content */}
@@ -60,62 +59,58 @@ export function ContentSection({ section, isSelected, isEditing, onContentChange
                     {content.sections?.map((section, index) => (
                         <div key={section.id || index} className="mb-8">
                             {section.heading && (
-                                <h2
+                                <Editable
+                                    as="h2"
                                     className="text-2xl md:text-3xl font-bold mb-4 mt-8"
                                     style={{ color: headingColor }}
-                                    contentEditable={isEditing}
-                                    suppressContentEditableWarning
-                                    onBlur={(e) => {
+                                    isEditing={isEditing}
+                                    value={section.heading || ''}
+                                    onSave={(val) => {
                                         if (!isEditing || !onContentChange) return;
                                         const updated = content.sections.map((s, i) =>
-                                            i === index ? { ...s, heading: e.currentTarget.textContent } : s
+                                            i === index ? { ...s, heading: val } : s
                                         );
                                         onContentChange('sections', updated);
                                     }}
-                                >
-                                    {section.heading}
-                                </h2>
+                                />
                             )}
                             {section.content && (
-                                <div
+                                <Editable
                                     className="leading-relaxed mb-4"
                                     style={{ color: paragraphColor }}
-                                    contentEditable={isEditing}
-                                    suppressContentEditableWarning
-                                    onBlur={(e) => {
+                                    isEditing={isEditing}
+                                    value={section.content || ''}
+                                    onSave={(val) => {
                                         if (!isEditing || !onContentChange) return;
                                         const updated = content.sections.map((s, i) =>
-                                            i === index ? { ...s, content: e.currentTarget.textContent } : s
+                                            i === index ? { ...s, content: val } : s
                                         );
                                         onContentChange('sections', updated);
                                     }}
-                                >
-                                    {section.content}
-                                </div>
+                                />
                             )}
                             {section.listItems && section.listItems.length > 0 && (
                                 <ul className="list-disc list-inside space-y-2 mb-4 ml-4">
                                     {section.listItems.map((item, itemIndex) => (
-                                        <li
+                                        <Editable
+                                            as="li"
                                             key={itemIndex}
                                             style={{ color: paragraphColor }}
-                                            contentEditable={isEditing}
-                                            suppressContentEditableWarning
-                                            onBlur={(e) => {
+                                            isEditing={isEditing}
+                                            value={item || ''}
+                                            onSave={(val) => {
                                                 if (!isEditing || !onContentChange) return;
                                                 const updated = content.sections.map((s, i) =>
                                                     i === index ? {
                                                         ...s,
                                                         listItems: s.listItems.map((li, liIdx) =>
-                                                            liIdx === itemIndex ? e.currentTarget.textContent : li
+                                                            liIdx === itemIndex ? val : li
                                                         )
                                                     } : s
                                                 );
                                                 onContentChange('sections', updated);
                                             }}
-                                        >
-                                            {item}
-                                        </li>
+                                        />
                                     ))}
                                 </ul>
                             )}
@@ -124,15 +119,13 @@ export function ContentSection({ section, isSelected, isEditing, onContentChange
 
                     {/* If no sections, allow editing a single content block */}
                     {(!content.sections || content.sections.length === 0) && (
-                        <div
+                        <Editable
                             className="leading-relaxed whitespace-pre-wrap"
                             style={{ color: paragraphColor }}
-                            contentEditable={isEditing}
-                            suppressContentEditableWarning
-                            onBlur={(e) => handleTextEdit('content', e)}
-                        >
-                            {content.content || 'Click to edit content...'}
-                        </div>
+                            isEditing={isEditing}
+                            value={content.content || 'Click to edit content...'}
+                            onSave={(val) => onContentChange?.('content', val)}
+                        />
                     )}
                 </div>
             </div>

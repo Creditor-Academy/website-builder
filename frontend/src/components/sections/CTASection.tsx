@@ -1,6 +1,6 @@
-import React from 'react';
 import { ArrowRight, Sparkles, ChevronRight, Zap, Shield, Star } from 'lucide-react';
 import { useBuilder } from '@/contexts/BuilderContext';
+import { Editable } from '@/components/ui/Editable';
 
 // ─── Shared Tokens ─────────────────────────────────────────────────────────────
 const accentGrad = 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)';
@@ -80,50 +80,74 @@ const renderSimple = ({ content, styles, isEditing, onContentChange, headingColo
       {/* Chip */}
       <div className="cta-chip">
         <Sparkles width={10} height={10} />
-        <span contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.badgeText || 'Limited Time Offer' }} onInput={(e) => handleTextEdit('badgeText', e)}></span>
+        <Editable 
+          isEditing={isEditing} 
+          value={content.badgeText || 'Limited Time Offer'} 
+          onSave={(val) => onContentChange?.('badgeText', val)} 
+        />
       </div>
 
       {/* Headline */}
-      <h2
+      <Editable
+        as="h2"
         style={{ margin: '0 0 1.25rem', fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', fontWeight: 700, color: headingColor, lineHeight: 1.15, letterSpacing: '-0.03em' }}
-        contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.headline || '' }} onInput={(e) => handleTextEdit('headline', e)}
-      ></h2>
+        isEditing={isEditing} 
+        value={content.headline || ''} 
+        onSave={(val) => onContentChange?.('headline', val)}
+      />
 
       {/* Divider */}
       <div style={{ width: '56px', height: '3px', background: 'rgba(255,255,255,0.35)', borderRadius: '999px', margin: '0 auto 1.5rem' }} />
 
       {/* Subheadline */}
-      <p
+      <Editable
+        as="p"
         style={{ margin: '0 auto 2.5rem', maxWidth: '560px', fontSize: '1.05rem', lineHeight: 1.75, color: paragraphColor }}
-        contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.subheadline || '' }} onInput={(e) => handleTextEdit('subheadline', e)}
-      ></p>
+        isEditing={isEditing} 
+        value={content.subheadline || ''} 
+        onSave={(val) => onContentChange?.('subheadline', val)}
+      />
 
       {/* Buttons */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', marginBottom: '3rem' }}>
         <button className="cta-btn-primary" style={{ background: buttonPrimaryBg, color: buttonPrimaryText, borderRadius: styles.borderRadius || 'var(--radius, 16px)' }}>
-          <span contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.ctaText || '' }} onInput={(e) => handleTextEdit('ctaText', e)}></span>
+          <Editable 
+            isEditing={isEditing} 
+            value={content.ctaText || ''} 
+            onSave={(val) => onContentChange?.('ctaText', val)} 
+          />
           <ArrowRight width={16} height={16} />
         </button>
         <button className="cta-btn-secondary" style={{ background: buttonSecondaryBg, color: buttonSecondaryText, borderRadius: styles.borderRadius || 'var(--radius, 16px)' }}>
-          <span contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.ctaSecondaryText || '' }} onInput={(e) => handleTextEdit('ctaSecondaryText', e)}></span>
+          <Editable 
+            isEditing={isEditing} 
+            value={content.ctaSecondaryText || ''} 
+            onSave={(val) => onContentChange?.('ctaSecondaryText', val)} 
+          />
         </button>
       </div>
 
       {/* Trust row */}
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.12)', paddingTop: '2rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
-        <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}
-          contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('trustLabel', e)}>
-          {content.trustLabel || 'Trusted by:'}
-        </span>
+        <Editable 
+          style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}
+          isEditing={isEditing} 
+          value={content.trustLabel || 'Trusted by:'} 
+          onSave={(val) => onContentChange?.('trustLabel', val)} 
+        />
         {(content.trustCompanies || ['Google', 'Microsoft', 'Apple', 'Amazon']).map((company, i) => (
-          <span key={i} style={{ color: 'rgba(255,255,255,0.55)', fontWeight: 700, fontSize: '0.95rem', letterSpacing: '-0.01em' }}
-            contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: company || '' }}
-            onInput={(e) => {
+          <Editable 
+            key={i} 
+            style={{ color: 'rgba(255,255,255,0.55)', fontWeight: 700, fontSize: '0.95rem', letterSpacing: '-0.01em' }}
+            isEditing={isEditing} 
+            value={company || ''}
+            onSave={(val) => {
               if (!isEditing || !onContentChange) return;
               const updated = [...(content.trustCompanies || ['Google', 'Microsoft', 'Apple', 'Amazon'])];
-              updated[i] = e.currentTarget.innerHTML;
+              updated[i] = val;
               onContentChange('trustCompanies', updated);
-            }}></span>
+            }}
+          />
         ))}
       </div>
     </div>
@@ -142,12 +166,26 @@ const renderSplit = ({ content, styles, isEditing, onContentChange, headingColor
         <div>
           <div className="cta-chip" style={{ marginBottom: '1.25rem' }}>
             <Zap width={10} height={10} />
-            <span contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.chipLabel || 'Get Started' }} onInput={(e) => handleTextEdit('chipLabel', e)}></span>
+            <Editable 
+              isEditing={isEditing} 
+              value={content.chipLabel || 'Get Started'} 
+              onSave={(val) => onContentChange?.('chipLabel', val)} 
+            />
           </div>
-          <h2 style={{ margin: '0 0 1rem', fontSize: 'clamp(1.8rem, 3.5vw, 2.75rem)', fontWeight: 700, color: headingColor, lineHeight: 1.2, letterSpacing: '-0.025em' }}
-            contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.headline || '' }} onInput={(e) => handleTextEdit('headline', e)}></h2>
-          <p style={{ margin: '0 0 2rem', fontSize: '1rem', lineHeight: 1.75, color: paragraphColor }}
-            contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.subheadline || '' }} onInput={(e) => handleTextEdit('subheadline', e)}></p>
+          <Editable
+            as="h2"
+            style={{ margin: '0 0 1rem', fontSize: 'clamp(1.8rem, 3.5vw, 2.75rem)', fontWeight: 700, color: headingColor, lineHeight: 1.2, letterSpacing: '-0.025em' }}
+            isEditing={isEditing} 
+            value={content.headline || ''} 
+            onSave={(val) => onContentChange?.('headline', val)}
+          />
+          <Editable
+            as="p"
+            style={{ margin: '0 0 2rem', fontSize: '1rem', lineHeight: 1.75, color: paragraphColor }}
+            isEditing={isEditing} 
+            value={content.subheadline || ''} 
+            onSave={(val) => onContentChange?.('subheadline', val)}
+          />
 
           {/* Feature bullets */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '2rem' }}>
@@ -156,27 +194,35 @@ const renderSplit = ({ content, styles, isEditing, onContentChange, headingColor
                 <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Shield width={10} height={10} color="white" />
                 </div>
-                <span
-                  contentEditable={isEditing}
-                  suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: item || '' }}
-                  onInput={(e) => {
+                <Editable
+                  isEditing={isEditing}
+                  value={item || ''}
+                  onSave={(val) => {
                     if (!isEditing || !onContentChange) return;
                     const updated = [...(content.featureBullets || ['No credit card required', 'Cancel anytime', '24/7 Support'])];
-                    updated[i] = e.currentTarget.innerHTML;
+                    updated[i] = val;
                     onContentChange('featureBullets', updated);
                   }}
-                ></span>
+                />
               </div>
             ))}
           </div>
 
           <div style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap' }}>
             <button className="cta-btn-primary" style={{ background: buttonPrimaryBg, color: buttonPrimaryText, borderRadius: styles.borderRadius || 'var(--radius, 16px)' }}>
-              <span contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.ctaText || '' }} onInput={(e) => handleTextEdit('ctaText', e)}></span>
+              <Editable 
+                isEditing={isEditing} 
+                value={content.ctaText || ''} 
+                onSave={(val) => onContentChange?.('ctaText', val)} 
+              />
               <ChevronRight width={16} height={16} />
             </button>
             <button className="cta-btn-secondary" style={{ background: buttonSecondaryBg, color: buttonSecondaryText, borderRadius: styles.borderRadius || 'var(--radius, 16px)' }}>
-              <span contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.ctaSecondaryText || '' }} onInput={(e) => handleTextEdit('ctaSecondaryText', e)}></span>
+              <Editable 
+                isEditing={isEditing} 
+                value={content.ctaSecondaryText || ''} 
+                onSave={(val) => onContentChange?.('ctaSecondaryText', val)} 
+              />
             </button>
           </div>
         </div>
@@ -199,8 +245,12 @@ const renderSplit = ({ content, styles, isEditing, onContentChange, headingColor
                   <div style={{ width: '72px', height: '72px', background: 'rgba(255,255,255,0.1)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
                     <Star width={32} height={32} color="rgba(255,255,255,0.5)" />
                   </div>
-                  <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem' }}
-                    contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.imagePlaceholderText || 'Your image here' }} onInput={(e) => handleTextEdit('imagePlaceholderText', e)}></div>
+                  <Editable 
+                    style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem' }}
+                    isEditing={isEditing} 
+                    value={content.imagePlaceholderText || 'Your image here'} 
+                    onSave={(val) => onContentChange?.('imagePlaceholderText', val)} 
+                  />
                 </div>
             )
           }
@@ -214,7 +264,7 @@ const renderSplit = ({ content, styles, isEditing, onContentChange, headingColor
 );
 
 // ─── VARIANT: BANNER ──────────────────────────────────────────────────────────
-const renderBanner = ({ content, styles, isEditing, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText, buttonSecondaryBg, buttonSecondaryText, handleTextEdit }) => (
+const renderBanner = ({ content, styles, isEditing, onContentChange, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText, buttonSecondaryBg, buttonSecondaryText, handleTextEdit }) => (
   <div style={{ position: 'relative', overflow: 'hidden' }}>
     {/* Subtle diagonal stripe pattern */}
     <div style={{
@@ -232,19 +282,39 @@ const renderBanner = ({ content, styles, isEditing, headingColor, paragraphColor
             <Sparkles width={20} height={20} color="white" />
           </div>
           <div>
-            <h3 style={{ margin: '0 0 2px', fontSize: '1rem', fontWeight: 700, color: headingColor, letterSpacing: '-0.01em' }}
-              contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.headline || '' }} onInput={(e) => handleTextEdit('headline', e)}></h3>
-            <p style={{ margin: 0, fontSize: '0.82rem', color: paragraphColor, lineHeight: 1.4 }}
-              contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.subheadline || '' }} onInput={(e) => handleTextEdit('subheadline', e)}></p>
+            <Editable
+              as="h3"
+              style={{ margin: '0 0 2px', fontSize: '1rem', fontWeight: 700, color: headingColor, letterSpacing: '-0.01em' }}
+              isEditing={isEditing} 
+              value={content.headline || ''} 
+              onSave={(val) => onContentChange?.('headline', val)}
+            />
+            <Editable
+              as="p"
+              style={{ margin: 0, fontSize: '0.82rem', color: paragraphColor, lineHeight: 1.4 }}
+              isEditing={isEditing} 
+              value={content.subheadline || ''} 
+              onSave={(val) => onContentChange?.('subheadline', val)}
+            />
           </div>
         </div>
 
         {/* Right: buttons */}
         <div style={{ display: 'flex', gap: '0.75rem', flexShrink: 0 }}>
-          <button className="cta-btn-primary" style={{ background: buttonPrimaryBg, color: buttonPrimaryText, borderRadius: styles.borderRadius || 'var(--radius, 16px)', padding: '10px 22px', fontSize: '0.875rem' }}
-            contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.ctaText || '' }} onInput={(e) => handleTextEdit('ctaText', e)}></button>
-          <button className="cta-btn-secondary" style={{ background: buttonSecondaryBg, color: buttonSecondaryText, borderRadius: styles.borderRadius || 'var(--radius, 16px)', padding: '10px 22px', fontSize: '0.875rem' }}
-            contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.ctaSecondaryText || '' }} onInput={(e) => handleTextEdit('ctaSecondaryText', e)}></button>
+          <button className="cta-btn-primary" style={{ background: buttonPrimaryBg, color: buttonPrimaryText, borderRadius: styles.borderRadius || 'var(--radius, 16px)', padding: '10px 22px', fontSize: '0.875rem' }}>
+            <Editable 
+              isEditing={isEditing} 
+              value={content.ctaText || ''} 
+              onSave={(val) => onContentChange?.('ctaText', val)} 
+            />
+          </button>
+          <button className="cta-btn-secondary" style={{ background: buttonSecondaryBg, color: buttonSecondaryText, borderRadius: styles.borderRadius || 'var(--radius, 16px)', padding: '10px 22px', fontSize: '0.875rem' }}>
+            <Editable 
+              isEditing={isEditing} 
+              value={content.ctaSecondaryText || ''} 
+              onSave={(val) => onContentChange?.('ctaSecondaryText', val)} 
+            />
+          </button>
         </div>
       </div>
     </div>
@@ -252,7 +322,7 @@ const renderBanner = ({ content, styles, isEditing, headingColor, paragraphColor
 );
 
 // ─── VARIANT: FLOATING ────────────────────────────────────────────────────────
-const renderFloating = ({ content, styles, isEditing, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText, buttonSecondaryBg, buttonSecondaryText, handleTextEdit }) => (
+const renderFloating = ({ content, styles, isEditing, onContentChange, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText, buttonSecondaryBg, buttonSecondaryText, handleTextEdit }) => (
   <div style={{ position: 'relative', zIndex: 1 }}>
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '0 2rem' }}>
       <div style={{
@@ -270,7 +340,6 @@ const renderFloating = ({ content, styles, isEditing, headingColor, paragraphCol
         {/* Soft background blob */}
         <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '200px', height: '200px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
-        {/* Chip */}
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: '6px',
           padding: '5px 14px',
@@ -284,16 +353,30 @@ const renderFloating = ({ content, styles, isEditing, headingColor, paragraphCol
           fontFamily: 'Sora, sans-serif',
         }}>
           <Sparkles width={9} height={9} />
-          <span contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.floatingChipLabel || 'Special Offer' }} onInput={(e) => handleTextEdit('floatingChipLabel', e)}></span>
+          <Editable 
+            isEditing={isEditing} 
+            value={content.floatingChipLabel || 'Special Offer'} 
+            onSave={(val) => onContentChange?.('floatingChipLabel', val)} 
+          />
         </div>
 
-        <h2 style={{ margin: '0 0 0.75rem', fontSize: 'clamp(1.6rem, 3vw, 2.4rem)', fontWeight: 700, color: styles.headingColor || '#0f172a', letterSpacing: '-0.025em', lineHeight: 1.2 }}
-          contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.headline || '' }} onInput={(e) => handleTextEdit('headline', e)}></h2>
+        <Editable
+          as="h2"
+          style={{ margin: '0 0 0.75rem', fontSize: 'clamp(1.6rem, 3vw, 2.4rem)', fontWeight: 700, color: styles.headingColor || '#0f172a', letterSpacing: '-0.025em', lineHeight: 1.2 }}
+          isEditing={isEditing} 
+          value={content.headline || ''} 
+          onSave={(val) => onContentChange?.('headline', val)}
+        />
 
         <div style={{ width: '48px', height: '3px', background: accentGrad, borderRadius: '999px', margin: '0 auto 1.25rem' }} />
 
-        <p style={{ margin: '0 auto 2.25rem', maxWidth: '480px', fontSize: '0.95rem', lineHeight: 1.75, color: styles.paragraphColor || '#64748b' }}
-          contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.subheadline || '' }} onInput={(e) => handleTextEdit('subheadline', e)}></p>
+        <Editable
+          as="p"
+          style={{ margin: '0 auto 2.25rem', maxWidth: '480px', fontSize: '0.95rem', lineHeight: 1.75, color: styles.paragraphColor || '#64748b' }}
+          isEditing={isEditing} 
+          value={content.subheadline || ''} 
+          onSave={(val) => onContentChange?.('subheadline', val)}
+        />
 
         <div style={{ display: 'flex', gap: '0.85rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <button style={{
@@ -310,7 +393,11 @@ const renderFloating = ({ content, styles, isEditing, headingColor, paragraphCol
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--shadow, 0 16px 36px rgba(99,102,241,0.35))'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'var(--shadow, 0 8px 24px rgba(99,102,241,0.3))'; }}
           >
-            <span contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.ctaText || '' }} onInput={(e) => handleTextEdit('ctaText', e)}></span>
+            <Editable 
+              isEditing={isEditing} 
+              value={content.ctaText || ''} 
+              onSave={(val) => onContentChange?.('ctaText', val)} 
+            />
             <ArrowRight width={15} height={15} />
           </button>
 
@@ -327,7 +414,11 @@ const renderFloating = ({ content, styles, isEditing, headingColor, paragraphCol
             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.05)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; }}
             onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.25)'; }}
           >
-            <span contentEditable={isEditing} suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: content.ctaSecondaryText || '' }} onInput={(e) => handleTextEdit('ctaSecondaryText', e)}></span>
+            <Editable 
+              isEditing={isEditing} 
+              value={content.ctaSecondaryText || ''} 
+              onSave={(val) => onContentChange?.('ctaSecondaryText', val)} 
+            />
           </button>
         </div>
       </div>
