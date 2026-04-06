@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "UserRole" AS ENUM ('USER', 'ADMIN');
+CREATE TYPE "UserRole" AS ENUM ('USER', 'ADMIN', 'STUDENT', 'INSTRUCTOR', 'INSTITUTION_ADMIN', 'SUPER_ADMIN');
 
 -- CreateEnum
 CREATE TYPE "WebsiteStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'DELETED');
@@ -11,6 +11,7 @@ CREATE TABLE "users" (
     "email" TEXT NOT NULL,
     "password_hash" TEXT NOT NULL,
     "role" "UserRole" NOT NULL DEFAULT 'USER',
+    "institution_id" TEXT,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
     "lastLoginAt" TIMESTAMP(3),
@@ -20,6 +21,18 @@ CREATE TABLE "users" (
     "deleted_at" TIMESTAMP(3),
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "institutions" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'PENDING',
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "institutions_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -65,13 +78,15 @@ CREATE TABLE "websites" (
     "name" TEXT NOT NULL,
     "owner_id" TEXT NOT NULL,
     "status" "WebsiteStatus" NOT NULL DEFAULT 'DRAFT',
-    "settings_id" TEXT NOT NULL,
     "thumbnail_url" TEXT,
     "currentDraftVersionId" TEXT,
     "currentPublishedVersionId" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
+    "institution_id" TEXT,
+    "content" JSONB,
+    "settings_id" TEXT,
 
     CONSTRAINT "websites_pkey" PRIMARY KEY ("id")
 );
@@ -88,6 +103,37 @@ CREATE TABLE "settings" (
     CONSTRAINT "settings_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "WebsiteTemplate" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "category" TEXT NOT NULL,
+    "image" TEXT,
+    "global_styles" JSONB NOT NULL DEFAULT '{}',
+    "navbar" JSONB NOT NULL DEFAULT '{}',
+    "footer" JSONB NOT NULL DEFAULT '{}',
+    "home_layout" JSONB NOT NULL DEFAULT '{}',
+    "deletedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "WebsiteTemplate_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "SectionTemplate" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "category" TEXT NOT NULL,
+    "props" JSONB NOT NULL DEFAULT '{}',
+    "deletedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "SectionTemplate_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -96,6 +142,9 @@ CREATE INDEX "users_email_idx" ON "users"("email");
 
 -- CreateIndex
 CREATE INDEX "users_deleted_at_idx" ON "users"("deleted_at");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "institutions_email_key" ON "institutions"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "password_reset_tokens_token_hash_key" ON "password_reset_tokens"("token_hash");
@@ -146,6 +195,9 @@ CREATE INDEX "websites_status_idx" ON "websites"("status");
 CREATE INDEX "websites_deleted_at_idx" ON "websites"("deleted_at");
 
 -- AddForeignKey
+ALTER TABLE "users" ADD CONSTRAINT "users_institution_id_fkey" FOREIGN KEY ("institution_id") REFERENCES "institutions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "password_reset_tokens" ADD CONSTRAINT "password_reset_tokens_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -153,6 +205,9 @@ ALTER TABLE "email_verification_tokens" ADD CONSTRAINT "email_verification_token
 
 -- AddForeignKey
 ALTER TABLE "refresh_tokens" ADD CONSTRAINT "refresh_tokens_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "websites" ADD CONSTRAINT "websites_institution_id_fkey" FOREIGN KEY ("institution_id") REFERENCES "institutions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "websites" ADD CONSTRAINT "websites_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

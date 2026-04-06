@@ -513,10 +513,10 @@ const AddUserDialog = ({ open, onOpenChange, onUserCreated }) => {
     const { toast } = useToast();
     const [form, setForm] = useState({ name: '', email: '', password: '', role: 'USER' });
     const [loading, setLoading] = useState(false);
-    const [errors, setErrors] = useState({});
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     const validate = () => {
-        const e = {};
+        const e: Record<string, string> = {};
         if (!form.name.trim()) e.name = 'Name is required';
         if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email)) e.email = 'Valid email is required';
         if (!form.password || form.password.length < 6) e.password = 'Password must be at least 6 characters';
@@ -771,6 +771,7 @@ const Dashboard = () => {
         '/dashboard/users',
         '/dashboard/organizations',
         '/dashboard/websites',
+        '/dashboard/admin-templates',
         '/dashboard/deployment',
         '/dashboard/settings',
     ];
@@ -995,6 +996,7 @@ const Dashboard = () => {
                                 <NavItem icon={<Building2 className="w-4 h-4" />} label="Organizations" to="/dashboard/organizations" activeColor="text-white" />
                             )}
                             <NavItem icon={<Layout className="w-4 h-4" />} label="Websites" to="/dashboard/websites" activeColor="text-white" />
+                            <NavItem icon={<LayoutTemplate className="w-4 h-4" />} label="Templates" to="/dashboard/admin-templates" activeColor="text-white" />
                             <NavItem icon={<Activity className="w-4 h-4" />} label="Deployment Monitoring" to="/dashboard/deployment" activeColor="text-white" />
                             <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" to="/dashboard/settings" activeColor="text-white" />
                         </div>
@@ -1465,7 +1467,7 @@ const Dashboard = () => {
                                     {[
                                         { label: "Manage Users", desc: "Overview and control of all user accounts.", icon: <Users className="w-7 h-7" />, bg: "bg-purple-100", color: "text-purple-600", border: "hover:border-purple-300", to: '/dashboard/users' },
                                         { label: "Manage Websites", desc: "Oversee all created websites, their status, and configurations.", icon: <Layout className="w-7 h-7" />, bg: "bg-indigo-100", color: "text-indigo-600", border: "hover:border-indigo-300", to: '/dashboard/websites' },
-                                        { label: "Manage Templates", desc: "Browse, add, and manage all available website templates.", icon: <LayoutTemplate className="w-7 h-7" />, bg: "bg-emerald-100", color: "text-emerald-600", border: "hover:border-emerald-300", to: '/dashboard/templates' },
+                                        { label: "Manage Templates", desc: "Browse, add, and manage all available website templates.", icon: <LayoutTemplate className="w-7 h-7" />, bg: "bg-emerald-100", color: "text-emerald-600", border: "hover:border-emerald-300", to: '/dashboard/admin-templates' },
                                     ].map((card) => (
                                         <motion.div
                                             key={card.label}
