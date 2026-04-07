@@ -996,7 +996,7 @@ const Dashboard = () => {
                                 <NavItem icon={<Building2 className="w-4 h-4" />} label="Organizations" to="/dashboard/organizations" activeColor="text-white" />
                             )}
                             <NavItem icon={<Layout className="w-4 h-4" />} label="Websites" to="/dashboard/websites" activeColor="text-white" />
-                            <NavItem icon={<LayoutTemplate className="w-4 h-4" />} label="Templates" to="/dashboard/admin-templates" activeColor="text-white" />
+                            {/* <NavItem icon={<LayoutTemplate className="w-4 h-4" />} label="Templates" to="/dashboard/admin-templates" activeColor="text-white" /> */}
                             <NavItem icon={<Activity className="w-4 h-4" />} label="Deployment Monitoring" to="/dashboard/deployment" activeColor="text-white" />
                             <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" to="/dashboard/settings" activeColor="text-white" />
                         </div>
