@@ -24,6 +24,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import GradientButton from '@/components/ui/GradientButton';
 
 import { templatesList } from '@/lib/templates';
+import templateApi from '@/api/templates';
 import { loginUser, logoutUser } from "../api/auth";
 import statsApi from "../api/stats";
 import {
@@ -767,6 +768,9 @@ const Dashboard = () => {
     const [userDetailOpen, setUserDetailOpen] = useState(false);
     const [isAddUserOpen, setIsAddUserOpen] = useState(false);
 
+    // DB templates for New Project dialog
+    const [dbTemplates, setDbTemplates] = useState<any[]>([]);
+
     const adminRoutes = [
         '/dashboard/users',
         '/dashboard/organizations',
@@ -802,7 +806,7 @@ const Dashboard = () => {
         const fetchStats = async () => {
             try {
                 setIsLoadingStats(true);
-                const response = await statsApi.getDashboardStats();
+                const response = await statsApi.getDashboardStats({ adminView: isAdmin });
                 if (response.data && response.data.data) {
                     setStats(response.data.data);
                 }
@@ -830,6 +834,19 @@ const Dashboard = () => {
                 .finally(() => setIsLoadingUsers(false));
         }
     }, [isAdmin]);
+
+    // Fetch DB templates when New Project dialog opens
+    useEffect(() => {
+        if (isDialogOpen) {
+            templateApi.getWebsiteTemplates()
+                .then(res => {
+                    const raw = res.data?.data || res.data || [];
+                    const flat: any[] = Array.isArray(raw) ? raw : Object.values(raw).flat();
+                    setDbTemplates(flat.filter((t: any) => !t.deletedAt));
+                })
+                .catch(() => setDbTemplates([]));
+        }
+    }, [isDialogOpen]);
 
     const handleLogout = async () => {
         try {
@@ -1116,10 +1133,13 @@ const Dashboard = () => {
                                                 <div className="flex items-center justify-between mb-8">
                                                     <h3 className="text-xl font-bold text-slate-900 tracking-tight">Select a Template</h3>
                                                     <span className="text-xs font-bold text-slate-500 px-4 py-1.5 bg-white rounded-full border border-slate-200 shadow-sm uppercase tracking-wider">
-                                                        {templatesList.length} options
+                                                        {templatesList.length + dbTemplates.length} options
                                                     </span>
                                                 </div>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-20">
+
+                                                {/* Built-in Templates */}
+                                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Built-in Templates</p>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
                                                     {templatesList.map((tpl) => (
                                                         <div
                                                             key={tpl.id}
@@ -1165,6 +1185,66 @@ const Dashboard = () => {
                                                         </div>
                                                     ))}
                                                 </div>
+
+                                                {/* DB Templates */}
+                                                {dbTemplates.length > 0 && (
+                                                    <>
+                                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Custom Templates</p>
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-20">
+                                                            {dbTemplates.map((tpl) => (
+                                                                <div
+                                                                    key={tpl.id}
+                                                                    onClick={() => setSelectedTemplate(tpl.id)}
+                                                                    className={cn(
+                                                                        "group/template-dialog-card cursor-pointer rounded-[1.5rem] overflow-hidden transition-all duration-300 relative border-[3px] bg-white flex flex-col",
+                                                                        selectedTemplate === tpl.id
+                                                                            ? "border-blue-500 shadow-[0_10px_40px_rgba(59,130,246,0.15)] scale-[1.02]"
+                                                                            : "border-transparent border-slate-200 hover:border-blue-300 hover:shadow-xl opacity-80 hover:opacity-100"
+                                                                    )}
+                                                                >
+                                                                    <div className="aspect-[4/3] bg-slate-100 relative overflow-hidden">
+                                                                        {tpl.image ? (
+                                                                            <img
+                                                                                src={tpl.image}
+                                                                                alt={tpl.name}
+                                                                                className={cn("w-full h-full object-cover transition-transform duration-700", selectedTemplate === tpl.id ? "scale-105" : "group-hover/template-dialog-card:scale-105")}
+                                                                            />
+                                                                        ) : (
+                                                                            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50">
+                                                                                <LayoutTemplate className="w-12 h-12 text-indigo-200" />
+                                                                                <p className="text-xs text-indigo-300 font-medium mt-2">{tpl.category || 'Template'}</p>
+                                                                            </div>
+                                                                        )}
+                                                                        <AnimatePresence>
+                                                                            {selectedTemplate === tpl.id && (
+                                                                                <motion.div
+                                                                                    initial={{ scale: 0, opacity: 0 }}
+                                                                                    animate={{ scale: 1, opacity: 1 }}
+                                                                                    exit={{ scale: 0, opacity: 0 }}
+                                                                                    className="absolute top-4 right-4 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-lg"
+                                                                                >
+                                                                                    <CheckCircle className="w-5 h-5 text-white" />
+                                                                                </motion.div>
+                                                                            )}
+                                                                        </AnimatePresence>
+                                                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover/template-dialog-card:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                                                                            <p className="text-white font-semibold text-sm drop-shadow-md">{tpl.description || ''}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="p-6 flex items-center gap-4 bg-white relative z-10 border-t border-slate-100">
+                                                                        <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center transition-colors shadow-sm", selectedTemplate === tpl.id ? "bg-blue-100 text-blue-600" : "bg-slate-50 text-slate-500")}>
+                                                                            <LayoutTemplate className="w-6 h-6" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h4 className={cn("font-bold text-lg transition-colors leading-tight", selectedTemplate === tpl.id ? "text-slate-900" : "text-slate-700")}>{tpl.name}</h4>
+                                                                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">{tpl.category || 'Custom'}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </>
+                                                )}
                                             </div>
                                         </div>
                                     </DialogContent>

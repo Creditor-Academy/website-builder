@@ -1,10 +1,9 @@
 {
     "compilerOptions": {
-        "baseUrl": ".",
         "esModuleInterop": true,
         "paths": {
             "@/*": [
-                "frontend/src/*"
+                "./frontend/src/*"
             ]
         }
     },

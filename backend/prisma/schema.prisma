@@ -10,7 +10,8 @@ model User {
   id                      String                   @id @default(cuid())
   name                    String
   email                   String                   @unique
-  password_hash           String
+  password_hash           String?
+  auth_provider           String                   @default("email")
   role                    UserRole                 @default(USER)
   institution_id          String?
   isActive                Boolean                  @default(true)
@@ -27,6 +28,7 @@ model User {
   ownedWebsites           Website[]                @relation("WebsiteOwner")
 
   @@index([email])
+  @@index([auth_provider])
   @@index([deleted_at])
   @@map("users")
 }
@@ -40,6 +42,8 @@ model Institution {
   updated_at DateTime  @updatedAt
   users      User[]
   websites   Website[]
+  templates  WebsiteTemplate[]
+  sectionTemplates SectionTemplate[]
 
   @@map("institutions")
 }
@@ -94,6 +98,7 @@ model Website {
   id                        String        @id @default(cuid())
   name                      String
   owner_id                  String
+  source_template_id        String?
   status                    WebsiteStatus @default(DRAFT)
   thumbnail_url             String?
   currentDraftVersionId     String?
@@ -106,9 +111,11 @@ model Website {
   settings_id               String?       @unique
   institution               Institution?  @relation(fields: [institution_id], references: [id])
   owner                     User          @relation("WebsiteOwner", fields: [owner_id], references: [id], onDelete: Cascade)
+  sourceTemplate            WebsiteTemplate? @relation(fields: [source_template_id], references: [id], onDelete: SetNull)
   settings                  Settings?     @relation(fields: [settings_id], references: [id], onDelete: Cascade)
 
   @@index([owner_id])
+  @@index([source_template_id])
   @@index([status])
   @@index([deleted_at])
   @@map("websites")
@@ -141,28 +148,46 @@ enum WebsiteStatus {
   DELETED
 }
 
+enum TemplateScope {
+  GLOBAL
+  INSTITUTION
+}
+
 
 model WebsiteTemplate {
-  id           String    @id @default(cuid())
-  name         String
-  description  String
-  category     String
-  image        String?
-  global_styles Json     @default("{}")
-  navbar       Json      @default("{}")
-  footer       Json      @default("{}")
-  home_layout  Json      @default("{}")
-  deletedAt    DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  name          String
+  description   String
+  category      String
+  scope         TemplateScope @default(GLOBAL)
+  institution_id String?
+  image         String?
+  global_styles Json      @default("{}")
+  navbar        Json      @default("{}")
+  footer        Json      @default("{}")
+  home_layout   Json      @default("{}")
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  institution   Institution? @relation(fields: [institution_id], references: [id], onDelete: SetNull)
+  websites      Website[]
+
+  @@index([scope])
+  @@index([institution_id])
 }
 
 model SectionTemplate {
-  id        String    @id @default(cuid())
-  name      String
-  category  String
-  props     Json      @default("{}")
-  deletedAt DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id             String         @id @default(cuid())
+  name           String
+  category       String
+  scope          TemplateScope  @default(GLOBAL)
+  institution_id String?
+  props          Json           @default("{}")
+  deletedAt      DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  institution    Institution?   @relation(fields: [institution_id], references: [id], onDelete: SetNull)
+
+  @@index([scope])
+  @@index([institution_id])
 }

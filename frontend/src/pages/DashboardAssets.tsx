@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Search, Upload, X, Check, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Trash2, MoreVertical, Copy, MousePointer2 } from 'lucide-react';
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../components/ui/card";
@@ -14,7 +14,11 @@ import useBuilderStore from '../store/useBuilderStore';
 
 
 export default function DashboardAssets() {
-    const { assets, addAsset, deleteAsset } = useBuilderStore();
+    const { assets, deleteAsset, fetchAssets, uploadAsset, importAssetFromUrl } = useBuilderStore();
+        useEffect(() => {
+            void fetchAssets();
+        }, [fetchAssets]);
+
     const [search, setSearch] = useState('');
     const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
     const [urlInput, setUrlInput] = useState('');
@@ -26,28 +30,17 @@ export default function DashboardAssets() {
         item.name.toLowerCase().includes(search.toLowerCase())
     );
 
-    const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const url = URL.createObjectURL(file);
-            addAsset({
-                name: file.name,
-                url,
-                type: file.type.startsWith('video') ? 'video' : 'image',
-                size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`
-            });
+            await uploadAsset(file);
             if (e.target) e.target.value = '';
         }
     };
 
-    const handleUrlUpload = () => {
+    const handleUrlUpload = async () => {
         if (urlInput) {
-            addAsset({
-                name: urlName || 'Imported Asset',
-                url: urlInput,
-                type: urlInput.match(/\.(mp4|webm|ogg)$/i) ? 'video' : 'image',
-                size: 'External'
-            });
+            await importAssetFromUrl(urlName || 'Imported Asset', urlInput);
             setUrlInput('');
             setUrlName('');
             setIsUrlDialogOpen(false);
@@ -197,7 +190,7 @@ export default function DashboardAssets() {
                                                   size="sm" 
                                                   variant="destructive" 
                                                   className="h-11 px-6 text-sm font-semibold rounded-full shadow-lg shadow-rose-500/30 hover:bg-rose-600 hover:scale-105 transition-all duration-200" 
-                                                  onClick={() => deleteAsset(item.id)}
+                                                  onClick={() => void deleteAsset(item.id)}
                                                >
                                                   <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
                                                </Button>

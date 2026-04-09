@@ -80,13 +80,23 @@ function InjectStyles() {
   return null;
 }
 
-export function FooterPreview({ config, isEditing, onUpdate }) {
+export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
+  const config = {
+    ...rawConfig,
+    logo: rawConfig.logo && typeof rawConfig.logo === 'object' ? rawConfig.logo : { text: rawConfig.logo || 'Logo', imageUrl: '' },
+    columns: Array.isArray(rawConfig.columns) ? rawConfig.columns : [],
+    socialLinks: Array.isArray(rawConfig.socialLinks) ? rawConfig.socialLinks : [],
+    description: rawConfig.description || '',
+    copyright: rawConfig.copyright || rawConfig.text || '',
+    styles: rawConfig.styles || {},
+  };
   const navigate = useNavigate();
   const { updatePageName, pages, setActivePage, createPage, selectSection, state } = useBuilder();
   const { editor } = state;
 
-  const bg = config.styles.backgroundColor || 'var(--theme-bg, #0a0a0f)';
-  const tc = config.styles.textColor || 'var(--theme-text, #f8fafc)';
+  const styles = config.styles;
+  const bg = styles.backgroundColor || 'var(--theme-bg, #0a0a0f)';
+  const tc = styles.textColor || 'var(--theme-text, #f8fafc)';
 
   const handleFooterClick = (e) => {
     if (isEditing && e.target.closest('a, button') === null) {

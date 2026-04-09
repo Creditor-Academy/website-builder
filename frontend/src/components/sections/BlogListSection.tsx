@@ -142,7 +142,7 @@ export function BlogListSection({ section, isSelected, isEditing, onContentChang
       <div className="container mx-auto px-4 sm:px-6 relative">
 
         {/* ── Header ────────────────────────────────────────────── */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mdAlignItems: 'flex-end', marginBottom: 48, mdMarginBottom: 64, flexWrap: 'wrap', gap: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 48, flexWrap: 'wrap', gap: 24 }}>
           <div className="w-full md:max-w-xl">
             {/* micro label */}
             <div style={{
@@ -204,7 +204,6 @@ export function BlogListSection({ section, isSelected, isEditing, onContentChang
                     border: '1px solid rgba(0,0,0,0.07)',
                     position: 'relative',
                     gridColumn: 'span 1',
-                    className: isFeatured ? 'md:col-span-2 md:row-span-2' : '',
                     animation: `bl-in 0.5s ease ${index * 0.07}s both`,
                   }}
                 >

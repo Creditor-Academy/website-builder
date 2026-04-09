@@ -1,4 +1,5 @@
-// Mock Publishing Service - Replace with real API endpoints
+import websiteApi from '@/api/website';
+
 export interface PublishRequest {
   websiteId: string;
   subdomain?: string;
@@ -28,149 +29,56 @@ export interface DomainConfig {
 }
 
 class PublishService {
-  private baseUrl = process.env.NODE_ENV === 'production' 
-    ? 'https://api.buildora.app' 
-    : 'http://localhost:3001';
-
-  /**
-   * Publish website to Buildora hosting
-   */
   async publishWebsite(request: PublishRequest): Promise<PublishResponse> {
     try {
-      // Mock API call - replace with real endpoint
-      const response = await this.mockPublishCall(request);
-      return response;
+      const response = await websiteApi.publishWebsite(request.websiteId, {
+        subdomain: request.subdomain,
+        customDomain: request.customDomain,
+      });
+      return response.data;
     } catch (error) {
       console.error('Publishing failed:', error);
       throw new Error('Failed to publish website');
     }
   }
 
-  /**
-   * Get domain configurations for a website
-   */
   async getDomains(websiteId: string): Promise<DomainConfig[]> {
     try {
-      // Mock API call - replace with real endpoint
-      const response = await this.mockGetDomainsCall(websiteId);
-      return response;
+      const response = await websiteApi.getDomains(websiteId);
+      return response.data.domains;
     } catch (error) {
       console.error('Failed to fetch domains:', error);
       throw new Error('Failed to fetch domains');
     }
   }
 
-  /**
-   * Add new domain to website
-   */
   async addDomain(websiteId: string, domain: string): Promise<DomainConfig> {
     try {
-      // Mock API call - replace with real endpoint
-      const response = await this.mockAddDomainCall(websiteId, domain);
-      return response;
+      const response = await websiteApi.addDomain(websiteId, domain);
+      return response.data.domain;
     } catch (error) {
       console.error('Failed to add domain:', error);
       throw new Error('Failed to add domain');
     }
   }
 
-  /**
-   * Remove domain from website
-   */
   async removeDomain(websiteId: string, domain: string): Promise<void> {
     try {
-      // Mock API call - replace with real endpoint
-      await this.mockRemoveDomainCall(websiteId, domain);
+      await websiteApi.removeDomain(websiteId, domain);
     } catch (error) {
       console.error('Failed to remove domain:', error);
       throw new Error('Failed to remove domain');
     }
   }
 
-  /**
-   * Verify domain DNS configuration
-   */
-  async verifyDomain(domain: string): Promise<{ verified: boolean; dnsRecords: any }> {
+  async verifyDomain(websiteId: string, domain: string): Promise<{ verified: boolean; dnsRecords: any }> {
     try {
-      // Mock DNS verification - replace with real DNS check
-      const response = await this.mockVerifyDomainCall(domain);
-      return response;
+      const response = await websiteApi.verifyDomain(websiteId, domain);
+      return response.data;
     } catch (error) {
       console.error('Domain verification failed:', error);
       throw new Error('Failed to verify domain');
     }
-  }
-
-  // Mock implementations - Replace with real API calls
-  private async mockPublishCall(request: PublishRequest): Promise<PublishResponse> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    const url = request.customDomain 
-      ? `https://${request.customDomain}`
-      : `https://${request.subdomain || 'website'}.buildora.app`;
-
-    return {
-      success: true,
-      url,
-      publishedAt: new Date().toISOString(),
-      sslEnabled: true,
-      status: 'active'
-    };
-  }
-
-  private async mockGetDomainsCall(websiteId: string): Promise<DomainConfig[]> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    return [
-      {
-        domain: `${websiteId}.buildora.app`,
-        type: 'subdomain',
-        status: 'active',
-        sslEnabled: true,
-        addedAt: new Date().toISOString()
-      }
-    ];
-  }
-
-  private async mockAddDomainCall(websiteId: string, domain: string): Promise<DomainConfig> {
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    const isSubdomain = domain.includes('buildora.app');
-    
-    return {
-      domain,
-      type: isSubdomain ? 'subdomain' : 'custom',
-      status: 'pending',
-      sslEnabled: false,
-      dnsRecords: isSubdomain ? {} : {
-        A: '192.168.1.1',
-        CNAME: 'buildora.app',
-        TXT: ['buildora-site-verification=' + websiteId]
-      },
-      addedAt: new Date().toISOString()
-    };
-  }
-
-  private async mockRemoveDomainCall(websiteId: string, domain: string): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    // Mock successful removal
-  }
-
-  private async mockVerifyDomainCall(domain: string): Promise<{ verified: boolean; dnsRecords: any }> {
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Mock DNS verification - randomly succeed or fail for demo
-    const verified = Math.random() > 0.3;
-    
-    return {
-      verified,
-      dnsRecords: {
-        A: '192.168.1.1',
-        CNAME: 'buildora.app',
-        verified
-      }
-    };
   }
 
   /**

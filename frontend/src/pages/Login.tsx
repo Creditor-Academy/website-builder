@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Eye, LayoutTemplate } from "lucide-react";
 import loginbg from "../assets/login.png";
-import { loginUser, registerUser } from "../api/auth";
+import { loginUser, registerUser, forgotPassword } from "../api/auth";
 
 // ── Moved outside so React never sees a new component type on re-render ────────
 
@@ -29,6 +29,7 @@ interface LoginFormProps {
   setLoginError: (v: string) => void;
   rememberMe: boolean;
   setRememberMe: (v: boolean) => void;
+  onForgotPassword: () => void;
 }
 
 const LoginForm = ({
@@ -43,6 +44,7 @@ const LoginForm = ({
   setLoginError,
   rememberMe,
   setRememberMe,
+  onForgotPassword,
 }: LoginFormProps) => {
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleLogin();
@@ -115,7 +117,7 @@ const LoginForm = ({
             />
             Remember Me
           </label>
-          <a href="#" className="text-sm font-medium text-slate-400 hover:text-slate-800 transition-colors">Forgot Password?</a>
+          <button type="button" onClick={onForgotPassword} className="text-sm font-medium text-slate-400 hover:text-slate-800 transition-colors">Forgot Password?</button>
         </div>
       </div>
 
@@ -287,6 +289,11 @@ export default function LoginSignup() {
   const [loginError, setLoginError] = useState("");
   const [signupError, setSignupError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotMsg, setForgotMsg] = useState("");
+  const [forgotError, setForgotError] = useState("");
 
   // ── On mount: restore remembered email + skip login if session exists ────────
   useEffect(() => {
@@ -327,7 +334,7 @@ export default function LoginSignup() {
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
-      setLoginError(err.response?.data?.message || "Incorrect email or password.");
+      setLoginError(err.response?.data?.message || err.response?.data?.error || "Incorrect email or password.");
     } finally {
       setIsLoadingLogin(false);
     }
@@ -342,9 +349,27 @@ export default function LoginSignup() {
       setIsSignup(false);
     } catch (err) {
       console.error(err);
-      setSignupError(err.response?.data?.message || "Signup failed. Please try again.");
+      setSignupError(err.response?.data?.message || err.response?.data?.error || "Signup failed. Please try again.");
     } finally {
       setIsLoadingSignup(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    setForgotError("");
+    setForgotMsg("");
+    if (!forgotEmail.trim()) {
+      setForgotError("Please enter your email address.");
+      return;
+    }
+    try {
+      setForgotLoading(true);
+      await forgotPassword(forgotEmail.trim());
+      setForgotMsg("If an account with that email exists, a password reset link has been sent. Check your inbox.");
+    } catch (err: any) {
+      setForgotError(err.response?.data?.message || err.response?.data?.error || "Something went wrong. Try again.");
+    } finally {
+      setForgotLoading(false);
     }
   };
 
@@ -360,6 +385,12 @@ export default function LoginSignup() {
     setLoginError,
     rememberMe,
     setRememberMe,
+    onForgotPassword: () => {
+      setForgotEmail(loginData.email);
+      setForgotMsg("");
+      setForgotError("");
+      setShowForgot(true);
+    },
   };
 
   const signupProps = {
@@ -482,6 +513,69 @@ export default function LoginSignup() {
         </motion.div>
 
       </div>
+
+      {/* Forgot Password Modal */}
+      <AnimatePresence>
+        {showForgot && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={() => setShowForgot(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl"
+            >
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">Reset your password</h3>
+              <p className="text-slate-500 text-sm mb-6">Enter your email address and we'll send you a link to reset your password.</p>
+
+              <input
+                type="email"
+                placeholder="Email address"
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleForgotPassword()}
+                className="w-full bg-slate-100 rounded-xl px-5 py-4 text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 transition-all mb-4"
+              />
+
+              {forgotError && (
+                <p className="text-red-500 text-xs font-medium mb-4 flex items-center gap-1">
+                  <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 3.5a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4.5zm0 6.5a.875.875 0 1 1 0-1.75A.875.875 0 0 1 8 11z" />
+                  </svg>
+                  {forgotError}
+                </p>
+              )}
+
+              {forgotMsg && (
+                <p className="text-emerald-600 text-sm font-medium mb-4 bg-emerald-50 rounded-xl px-4 py-3">{forgotMsg}</p>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowForgot(false)}
+                  className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleForgotPassword}
+                  disabled={forgotLoading}
+                  className="flex-1 py-3 rounded-xl bg-slate-950 text-white font-medium hover:bg-slate-800 transition-colors disabled:opacity-50"
+                >
+                  {forgotLoading ? "Sending..." : "Send Reset Link"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

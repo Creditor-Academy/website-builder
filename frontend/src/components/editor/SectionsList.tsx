@@ -85,6 +85,30 @@ import {
 } from "@/lib/defaultPageData";
 import { Badge } from "@/components/ui/badge";
 
+const SECTION_ICON_MAP = {
+  hero: Sparkles,
+  features: Grid3X3,
+  services: Layout,
+  about: Info,
+  cta: MessageSquare,
+  pricing: DollarSign,
+  testimonials: Quote,
+  contact: Mail,
+  faq: HelpCircle,
+  gallery: ImageIcon,
+  blog: FileText,
+  logocloud: Building2,
+  stats: BarChart2,
+  team: Users,
+  layout: ColumnsIcon,
+  text: Type,
+  button: MousePointer2,
+  image: ImageIcon,
+  grid: Grid3X3,
+  social: Share2,
+  html: Code,
+} as const;
+
 const ELEMENT_CATEGORIES = [
   {
     name: "Sections",
@@ -204,20 +228,7 @@ const ELEMENT_CATEGORIES = [
 export function SectionsList({ view = "add" }) {
   const { state, selectSection, reorderSections, addSection, deleteSection, addComponent } = useBuilder();
   const { page, editor } = state;
-
-  if (!page) {
-    return (
-      <div className="h-full flex flex-col items-center justify-center p-8 text-center bg-white">
-        <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
-          <Globe className="w-8 h-8 text-slate-200" />
-        </div>
-        <p className="text-slate-400 text-sm font-medium">Please select a page to manage elements.</p>
-      </div>
-    );
-  }
-
   const [query, setQuery] = useState('');
-
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -248,6 +259,17 @@ export function SectionsList({ view = "add" }) {
       selectSection(newSection.id);
     }
   };
+
+  if (!page) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center p-8 text-center bg-white">
+        <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
+          <Globe className="w-8 h-8 text-slate-200" />
+        </div>
+        <p className="text-slate-400 text-sm font-medium">Please select a page to manage elements.</p>
+      </div>
+    );
+  }
 
   const filteredLayers = page.sections.filter((s) => {
     const q = query.trim().toLowerCase();
@@ -326,7 +348,6 @@ export function SectionsList({ view = "add" }) {
                        visible={section.visible}
                        isSelected={editor.selectedSectionId === section.id}
                        onClick={() => selectSection(section.id)}
-                       index={index}
                      />
                   )) : (
                     <div className="text-center py-16 border-2 border-dashed border-slate-200 rounded-2xl bg-gradient-to-br from-slate-50/50 to-white">
@@ -351,7 +372,7 @@ export function SectionsList({ view = "add" }) {
                 <div className="grid grid-cols-2 gap-2">
                   {ELEMENT_CATEGORIES[0].items.slice(0, 4).map((item, idx) => (
                     <button
-                      key={item.type}
+                      key={`${item.type}-${item.name}`}
                       onClick={() => handleAddElement(item)}
                       className="group relative bg-white border-2 border-slate-200 hover:border-primary hover:shadow-lg rounded-xl p-3 transition-all duration-300 hover:scale-105 active:scale-95"
                       style={{ animationDelay: `${idx * 50}ms` }}
@@ -400,7 +421,7 @@ export function SectionsList({ view = "add" }) {
                     <div className="grid grid-cols-2 gap-2">
                        {filteredItems.map((item, idx) => (
                         <button
-                          key={item.type}
+                          key={`${cat.name}-${item.type}-${item.name}`}
                           onClick={() => handleAddElement(item)}
                           className="group relative bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md rounded-xl p-3 transition-all duration-200 hover:scale-102 active:scale-98"
                           style={{ animationDelay: `${(catIndex * 100) + (idx * 30)}ms` }}

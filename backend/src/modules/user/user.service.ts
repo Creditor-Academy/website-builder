@@ -69,6 +69,9 @@ class UserService {
     if (!userWithPassword) {
       throw new NotFoundError('User not found');
     }
+    if (!userWithPassword.password_hash) {
+      throw new UnprocessableEntityError('This account does not have a password set');
+    }
 
     // Verify old password by fetching with password
     const isPasswordValid = await comparePassword(oldPassword, userWithPassword.password_hash);

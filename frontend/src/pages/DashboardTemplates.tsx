@@ -3,7 +3,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Plus, ArrowRight, LayoutTemplate, Search } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Plus, ArrowRight, LayoutTemplate, Search, Trash2, RotateCcw, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useBuilderStore from '@/store/useBuilderStore';
 import { cn } from '@/lib/utils';
@@ -12,6 +19,7 @@ import { useToast } from '@/components/ui/use-toast';
 import GradientButton from '@/components/ui/GradientButton';
 import TemplateFormDialog from '@/components/dashboard/TemplateFormDialog';
 
+
 export default function DashboardTemplates() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -19,7 +27,7 @@ export default function DashboardTemplates() {
 
   // ─── Auth check ───────────────────────────────────────────────────────────
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-  const isAdminUser = ['ADMIN', 'SUPER_ADMIN'].includes(currentUser?.role);
+  const isAdminUser = ['ADMIN', 'SUPER_ADMIN', 'INSTITUTION_ADMIN'].includes(currentUser?.role);
 
   // ─── State ────────────────────────────────────────────────────────────────
   const [templates, setTemplates] = useState<any[]>([]);
@@ -31,6 +39,27 @@ export default function DashboardTemplates() {
   // Admin create/edit dialog
   const [formOpen, setFormOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<any | null>(null);
+
+  // Trash toggle (admin only)
+  const [showTrash, setShowTrash] = useState(false);
+
+  // Scope filter (admin only)
+  const [scopeFilter, setScopeFilter] = useState<'all' | 'GLOBAL' | 'INSTITUTION'>('all');
+
+  // Institution filter (super admin only)
+  const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
+  const institutions = useMemo(() => {
+    const orgs: { id: string; name: string }[] = [];
+    const seen = new Set<string>();
+    templates.forEach((t: any) => {
+      if (t.institution?.id && !seen.has(t.institution.id)) {
+        seen.add(t.institution.id);
+        orgs.push({ id: t.institution.id, name: t.institution.name });
+      }
+    });
+    return orgs;
+  }, [templates]);
+  const [institutionFilter, setInstitutionFilter] = useState<string>('all');
 
   // ─── Fetch DB templates ───────────────────────────────────────────────────
   const fetchTemplates = async () => {
@@ -64,13 +93,28 @@ export default function DashboardTemplates() {
   // ─── Filter + search ──────────────────────────────────────────────────────
   const filtered = useMemo(() => {
     return templates.filter((t: any) => {
+      // Separate active vs trash
+      const inTrash = Boolean(t.deletedAt);
+      if (showTrash !== inTrash) return false;
+
       const matchCat = activeCategory === 'All' || t.category === activeCategory;
       const matchSearch = !searchTerm ||
         t.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         t.description?.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchCat && matchSearch;
+
+      // Scope filter
+      const matchScope = scopeFilter === 'all' || t.scope === scopeFilter;
+
+      // Institution filter (super admin)
+      const matchInstitution = institutionFilter === 'all' ||
+        (institutionFilter === 'none' && !t.institution_id) ||
+        t.institution_id === institutionFilter;
+
+      return matchCat && matchSearch && matchScope && matchInstitution;
     });
-  }, [templates, activeCategory, searchTerm]);
+  }, [templates, activeCategory, searchTerm, showTrash, scopeFilter, institutionFilter]);
+
+  const trashedCount = useMemo(() => templates.filter(t => t.deletedAt).length, [templates]);
 
   // ─── Use template: clones into new website, original template untouched ───
   const handleUseTemplate = async (template: any) => {
@@ -95,6 +139,8 @@ export default function DashboardTemplates() {
       if (result.category && !categories.includes(result.category)) {
         setCategories(prev => [...prev, result.category]);
       }
+
+      navigate(`/template-builder/${result.id}`);
     }
   };
 
@@ -104,8 +150,27 @@ export default function DashboardTemplates() {
   };
 
   const handleOpenEdit = (template: any) => {
-    setEditingTemplate(template);
-    setFormOpen(true);
+    navigate(`/template-builder/${template.id}`);
+  };
+
+  const handleDeleteTemplate = async (template: any) => {
+    try {
+      await templateApi.deleteWebsiteTemplate(template.id);
+      setTemplates(prev => prev.map(t => t.id === template.id ? { ...t, deletedAt: new Date().toISOString() } : t));
+      toast({ title: 'Template deleted' });
+    } catch (err: any) {
+      toast({ title: 'Failed to delete template', description: err?.response?.data?.message || err?.message, variant: 'destructive' });
+    }
+  };
+
+  const handleRestoreTemplate = async (template: any) => {
+    try {
+      await templateApi.restoreWebsiteTemplate(template.id);
+      setTemplates(prev => prev.map(t => t.id === template.id ? { ...t, deletedAt: null } : t));
+      toast({ title: 'Template restored' });
+    } catch (err: any) {
+      toast({ title: 'Failed to restore template', description: err?.response?.data?.message || err?.message, variant: 'destructive' });
+    }
   };
 
   return (
@@ -135,8 +200,56 @@ export default function DashboardTemplates() {
             />
           </div>
 
-          {/* ✅ ADMIN ONLY: New Template button — same style as "New Website" */}
+          {/* ADMIN ONLY: Trash toggle */}
           {isAdminUser && (
+            <Button
+              variant={showTrash ? 'default' : 'outline'}
+              onClick={() => setShowTrash(!showTrash)}
+              className={cn(
+                'rounded-full h-11 px-5 text-sm font-semibold gap-2 transition-all duration-200',
+                showTrash
+                  ? 'bg-rose-600 text-white hover:bg-rose-700 shadow-md shadow-rose-500/20'
+                  : 'bg-white text-slate-600 border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200'
+              )}
+            >
+              <Trash2 className="w-4 h-4" />
+              Trash{trashedCount > 0 && ` (${trashedCount})`}
+            </Button>
+          )}
+
+          {/* ADMIN ONLY: Scope filter */}
+          {isAdminUser && (
+            <Select value={scopeFilter} onValueChange={(v) => setScopeFilter(v as any)}>
+              <SelectTrigger className="w-[140px] h-11 rounded-full border-slate-200">
+                <SelectValue placeholder="All Scopes" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Scopes</SelectItem>
+                <SelectItem value="GLOBAL">Global</SelectItem>
+                <SelectItem value="INSTITUTION">Institution</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+
+          {/* SUPER ADMIN ONLY: Institution filter */}
+          {isSuperAdmin && institutions.length > 0 && (
+            <Select value={institutionFilter} onValueChange={setInstitutionFilter}>
+              <SelectTrigger className="w-[180px] h-11 rounded-full border-slate-200">
+                <Building2 className="w-4 h-4 mr-2 text-slate-400" />
+                <SelectValue placeholder="All Orgs" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Organizations</SelectItem>
+                <SelectItem value="none">No Organization</SelectItem>
+                {institutions.map((org) => (
+                  <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          {/* ADMIN ONLY: New Template button */}
+          {isAdminUser && !showTrash && (
             <GradientButton
               icon={<Plus className="w-5 h-5" />}
               onClick={handleOpenCreate}
@@ -147,6 +260,14 @@ export default function DashboardTemplates() {
           )}
         </div>
       </div>
+
+      {/* Trash banner */}
+      {showTrash && (
+        <div className="mb-6 flex items-center gap-3 px-5 py-3 rounded-2xl bg-rose-50 border border-rose-200">
+          <Trash2 className="w-5 h-5 text-rose-500" />
+          <p className="text-sm text-rose-700 font-medium">Viewing deleted templates. Restore them to make them available again.</p>
+        </div>
+      )}
 
       {/* Category pills */}
       <div className="flex items-center gap-2 flex-wrap mb-8">
@@ -186,13 +307,15 @@ export default function DashboardTemplates() {
         <div className="h-64 flex flex-col items-center justify-center gap-4 border-2 border-dashed border-slate-200 rounded-[2rem]">
           <LayoutTemplate className="w-12 h-12 text-slate-200" />
           <p className="text-slate-400 text-sm font-medium text-center px-8">
-            {templates.length === 0
-              ? isAdminUser
-                ? 'No templates yet. Click "New Template" to create your first one!'
-                : 'No templates have been created yet. Ask your admin to add some!'
-              : 'No templates match your search.'}
+            {showTrash
+              ? 'Trash is empty. No deleted templates.'
+              : templates.length === 0
+                ? isAdminUser
+                  ? 'No templates yet. Click "New Template" to create your first one!'
+                  : 'No templates have been created yet. Ask your admin to add some!'
+                : 'No templates match your search.'}
           </p>
-          {isAdminUser && templates.length === 0 && (
+          {isAdminUser && !showTrash && templates.filter(t => !t.deletedAt).length === 0 && (
             <Button
               onClick={handleOpenCreate}
               className="rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 h-10 text-sm font-semibold shadow-lg"
@@ -207,9 +330,21 @@ export default function DashboardTemplates() {
           {filtered.map((template: any) => (
             <Card
               key={template.id}
+              onClick={() => {
+                if (template.deletedAt) {
+                  return;
+                }
+
+                if (isAdminUser) {
+                  handleOpenEdit(template);
+                  return;
+                }
+
+                void handleUseTemplate(template);
+              }}
               className={cn(
                 "group/template-card overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer bg-white",
-                template.deletedAt && "opacity-60 grayscale"
+                showTrash && "opacity-75"
               )}
             >
               {/* Preview image */}
@@ -227,8 +362,8 @@ export default function DashboardTemplates() {
                   </div>
                 )}
 
-                {/* Deleted badge — admin only */}
-                {isAdminUser && template.deletedAt && (
+                {/* Deleted badge — trash view */}
+                {showTrash && (
                   <Badge className="absolute top-4 left-4 bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
                     Deleted
                   </Badge>
@@ -239,24 +374,42 @@ export default function DashboardTemplates() {
 
                 {/* Hover action buttons */}
                 <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover/template-card:opacity-100 transition-all duration-300 z-20">
-                  {/* Use — not available for deleted */}
-                  {!template.deletedAt && (
+                  {showTrash ? (
+                    /* Trash view: Restore only */
                     <Button
-                      className="bg-blue-600 text-white font-semibold rounded-full px-5 h-10 text-sm shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:scale-105 transition-all duration-200"
-                      onClick={e => { e.stopPropagation(); handleUseTemplate(template); }}
+                      className="bg-emerald-600 text-white font-semibold rounded-full px-5 h-10 text-sm shadow-lg shadow-emerald-500/30 hover:bg-emerald-700 hover:scale-105 transition-all duration-200"
+                      onClick={e => { e.stopPropagation(); handleRestoreTemplate(template); }}
                     >
-                      <Plus className="w-4 h-4 mr-1.5" /> Use
+                      <RotateCcw className="w-4 h-4 mr-1.5" /> Restore
                     </Button>
-                  )}
+                  ) : (
+                    /* Active view: Use + Design + Delete */
+                    <>
+                      <Button
+                        className="bg-blue-600 text-white font-semibold rounded-full px-5 h-10 text-sm shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:scale-105 transition-all duration-200"
+                        onClick={e => { e.stopPropagation(); handleUseTemplate(template); }}
+                      >
+                        <Plus className="w-4 h-4 mr-1.5" /> Use
+                      </Button>
 
-                  {/* Edit — admin only */}
-                  {isAdminUser && (
-                    <Button
-                      className="bg-white text-slate-800 font-semibold rounded-full px-5 h-10 text-sm shadow-lg hover:bg-slate-50 hover:scale-105 transition-all duration-200"
-                      onClick={e => { e.stopPropagation(); handleOpenEdit(template); }}
-                    >
-                      Edit
-                    </Button>
+                      {isAdminUser && (
+                        <Button
+                          className="bg-white text-slate-800 font-semibold rounded-full px-5 h-10 text-sm shadow-lg hover:bg-slate-50 hover:scale-105 transition-all duration-200"
+                          onClick={e => { e.stopPropagation(); handleOpenEdit(template); }}
+                        >
+                          Design
+                        </Button>
+                      )}
+
+                      {isAdminUser && (
+                        <Button
+                          className="bg-rose-600 text-white font-semibold rounded-full px-4 h-10 text-sm shadow-lg shadow-rose-500/30 hover:bg-rose-700 hover:scale-105 transition-all duration-200"
+                          onClick={e => { e.stopPropagation(); handleDeleteTemplate(template); }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -267,15 +420,34 @@ export default function DashboardTemplates() {
                   <Badge className="bg-blue-100 text-blue-700 font-medium px-3 py-1 rounded-full text-xs">
                     {template.category || 'General'}
                   </Badge>
+                  <div className="flex items-center gap-1.5">
+                    {template.scope === 'INSTITUTION' && template.institution?.name && (
+                      <Badge className="bg-slate-100 text-slate-600 font-medium px-2 py-0.5 rounded-full text-[10px]">
+                        <Building2 className="w-3 h-3 mr-1 inline" />
+                        {template.institution.name}
+                      </Badge>
+                    )}
+                    <Badge className={cn(
+                      'font-medium px-3 py-1 rounded-full text-[10px]',
+                      template.scope === 'INSTITUTION'
+                        ? 'bg-amber-100 text-amber-700'
+                        : 'bg-emerald-100 text-emerald-700'
+                    )}>
+                      {template.scope === 'INSTITUTION' ? 'Institution' : 'Global'}
+                    </Badge>
+                  </div>
                 </div>
                 <h4 className="font-bold text-xl text-slate-900 leading-tight mt-1">{template.name}</h4>
                 <p className="text-sm text-slate-500 leading-relaxed line-clamp-2 mt-1">
                   {template.description}
                 </p>
 
-                <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-blue-600 font-semibold text-xs uppercase tracking-wider group-hover/template-card:text-blue-700 transition-all">
-                  <span>{isAdminUser ? 'Edit or Use' : 'Use Template'}</span>
-                  <ArrowRight className="w-3 h-3" />
+                <div className={cn(
+                  "mt-4 pt-4 border-t border-slate-100 flex items-center justify-between font-semibold text-xs uppercase tracking-wider transition-all",
+                  showTrash ? 'text-rose-500 group-hover/template-card:text-rose-600' : 'text-blue-600 group-hover/template-card:text-blue-700'
+                )}>
+                  <span>{showTrash ? 'In Trash' : isAdminUser ? 'Design or Use' : 'Use Template'}</span>
+                  {showTrash ? <RotateCcw className="w-3 h-3" /> : <ArrowRight className="w-3 h-3" />}
                 </div>
               </div>
             </Card>
@@ -292,6 +464,7 @@ export default function DashboardTemplates() {
           onSuccess={handleFormSuccess}
         />
       )}
+
     </Card>
   );
 }

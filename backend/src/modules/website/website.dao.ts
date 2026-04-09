@@ -55,8 +55,8 @@ class WebsiteDao {
         };
     }
 
-    async createWebsite(userId: string, websiteData: { name: string, institution_id?: string, content?: any }) {
-        const { name, institution_id, content } = websiteData;
+    async createWebsite(userId: string, websiteData: { name: string, institution_id?: string, content?: any, source_template_id?: string }) {
+        const { name, institution_id, content, source_template_id } = websiteData;
         const data: Prisma.WebsiteCreateInput = {
             name,
             owner: { connect: { id: userId } },
@@ -66,6 +66,30 @@ class WebsiteDao {
 
         if (institution_id) {
             data.institution = { connect: { id: institution_id } };
+        }
+
+        if (source_template_id) {
+            (data as any).sourceTemplate = { connect: { id: source_template_id } };
+        }
+
+        return await prismaClient.website.create({ data });
+    }
+
+    async createWebsiteWithSettings(userId: string, websiteData: { name: string, institution_id?: string, content?: any, settings?: any, source_template_id?: string }) {
+        const { name, institution_id, content, settings, source_template_id } = websiteData;
+        const data: Prisma.WebsiteCreateInput = {
+            name,
+            owner: { connect: { id: userId } },
+            settings: { create: settings || {} },
+            content: content || null
+        };
+
+        if (institution_id) {
+            data.institution = { connect: { id: institution_id } };
+        }
+
+        if (source_template_id) {
+            (data as any).sourceTemplate = { connect: { id: source_template_id } };
         }
 
         return await prismaClient.website.create({ data });

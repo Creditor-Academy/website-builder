@@ -35,7 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Globe2, LayoutGrid, ShieldCheck, User as UserIcon, Hash, FileText, Link, Clock, Edit, Copy, Eye, Trash2, MoreVertical, CheckCircle, CircleDotDashed, Ban, Search, ListFilter, Plus
+  Globe2, LayoutGrid, ShieldCheck, User as UserIcon, Hash, FileText, Link, Clock, Edit, Copy, Eye, Trash2, MoreVertical, CheckCircle, CircleDotDashed, Ban, Search, ListFilter, Plus, Building2
 } from 'lucide-react';
 import WebsiteShimmer from '@/components/dashboard/WebsiteShimmer';
 import GradientButton from '@/components/ui/GradientButton';
@@ -64,7 +64,9 @@ export default function DashboardWebsites() {
 
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
   const isSuperAdmin = currentUser.role === 'SUPER_ADMIN';
-  const [isAdminView, setIsAdminView] = useState(false);
+  const isInstitutionAdmin = currentUser.role === 'INSTITUTION_ADMIN';
+  const isAdminRole = isSuperAdmin || currentUser.role === 'ADMIN' || isInstitutionAdmin;
+  const [isAdminView, setIsAdminView] = useState(isInstitutionAdmin); // INSTITUTION_ADMIN defaults to admin view
 
   const [isEditStatusModalOpen, setIsEditStatusModalOpen] = useState(false);
   const [editingWebsite, setEditingWebsite] = useState<Website | null>(null);
@@ -73,17 +75,31 @@ export default function DashboardWebsites() {
   const [filterStatus, setFilterStatus] = useState<'all' | 'Draft' | 'Published' | 'Deleted'>('all');
   const [sortBy, setSortBy] = useState('recent');
 
+  // Institution filter for super admin
+  const [institutionFilter, setInstitutionFilter] = useState<string>('all');
+  const availableInstitutions = useMemo(() => {
+    const orgs: { id: string; name: string }[] = [];
+    const seen = new Set<string>();
+    websites?.forEach((w: any) => {
+      if (w.institution?.name && w.institution_id && !seen.has(w.institution_id)) {
+        seen.add(w.institution_id);
+        orgs.push({ id: w.institution_id, name: w.institution.name });
+      }
+    });
+    return orgs;
+  }, [websites]);
+
   useEffect(() => {
     const loadWebsites = async () => {
       setIsLoading(true);
       try {
-        await fetchWebsites(orgId || undefined, isAdminView && isSuperAdmin);
+        await fetchWebsites(orgId || undefined, isAdminView && isAdminRole);
       } finally {
         setIsLoading(false);
       }
     };
     loadWebsites();
-  }, [fetchWebsites, orgId, isAdminView, isSuperAdmin]);
+  }, [fetchWebsites, orgId, isAdminView, isAdminRole]);
 
   const filteredWebsites = useMemo(() => {
     if (!websites) return [];
@@ -99,7 +115,12 @@ export default function DashboardWebsites() {
         (filterStatus === 'Draft' && (status === 'draft')) ||
         (filterStatus === 'Deleted' && (status === 'deleted'));
 
-      return matchesSearch && matchesStatus;
+      // Institution filter (super admin)
+      const matchesInstitution = institutionFilter === 'all' ||
+        (institutionFilter === 'none' && !website.institution_id) ||
+        website.institution_id === institutionFilter;
+
+      return matchesSearch && matchesStatus && matchesInstitution;
     });
 
     return [...filtered].sort((a: any, b: any) => {
@@ -171,14 +192,16 @@ export default function DashboardWebsites() {
           </p>
         </div>
         <div className="flex items-center gap-4">
-          {isSuperAdmin && (
+          {isAdminRole && (
             <GradientButton
               onClick={() => {
                 setIsAdminView(prev => {
                   const newAdminState = !prev;
                   toast({
                     title: newAdminState ? "Admin View Activated! 🛡️" : "User View Activated! 👤",
-                    description: newAdminState ? "You are now viewing all websites across the platform." : "You are now viewing your assigned websites.",
+                    description: newAdminState
+                      ? (isSuperAdmin ? "You are now viewing all websites across the platform." : "You are now viewing all websites in your organization.")
+                      : "You are now viewing your own websites.",
                     variant: "themed",
                     icon: newAdminState ? <ShieldCheck className="h-6 w-6 text-white stroke-2" /> : <UserIcon className="h-6 w-6 text-white stroke-2" />,
                   });
@@ -188,9 +211,27 @@ export default function DashboardWebsites() {
               className="w-full md:w-auto"
               icon={isAdminView ? <ShieldCheck className="w-4 h-4" /> : <UserIcon className="w-4 h-4" />}
             >
-              Admin View ({isAdminView ? "ON" : "OFF"})
+              {isInstitutionAdmin ? 'Org View' : 'Admin View'} ({isAdminView ? "ON" : "OFF"})
             </GradientButton>
           )}
+
+          {/* SUPER ADMIN: Institution filter */}
+          {isSuperAdmin && isAdminView && availableInstitutions.length > 0 && (
+            <Select value={institutionFilter} onValueChange={setInstitutionFilter}>
+              <SelectTrigger className="w-[180px] h-11 rounded-full border-slate-200">
+                <Building2 className="w-4 h-4 mr-2 text-slate-400" />
+                <SelectValue placeholder="All Orgs" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Organizations</SelectItem>
+                <SelectItem value="none">No Organization</SelectItem>
+                {availableInstitutions.map((org) => (
+                  <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
           <GradientButton
             className="w-full md:w-auto"
             icon={<Plus className="w-5 h-5" />}
@@ -291,8 +332,10 @@ export default function DashboardWebsites() {
                           {website.id}
                         </Badge>
                       </div>
-                      {isSuperAdmin && website.institution && (
-                        <p className="text-[10px] text-indigo-500 font-bold uppercase mt-1 tracking-wider">{website.institution.name}</p>
+                      {isAdminView && website.institution && (
+                        <p className="text-[10px] text-indigo-500 font-bold uppercase mt-1 tracking-wider">
+                          <Building2 className="w-3 h-3 inline mr-0.5" />{website.institution.name}
+                        </p>
                       )}
                     </div>
                   </TableCell>

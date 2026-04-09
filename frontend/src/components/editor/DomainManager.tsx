@@ -115,7 +115,7 @@ export function DomainManager({ open, onOpenChange, websiteId }) {
   const handleVerifyDomain = async (domain: string) => {
     setVerifyingDomain(domain);
     try {
-      const verification = await publishService.verifyDomain(domain);
+      const verification = await publishService.verifyDomain(websiteId, domain);
       
       // Update domain status based on verification
       setDomains(domains.map(d => 

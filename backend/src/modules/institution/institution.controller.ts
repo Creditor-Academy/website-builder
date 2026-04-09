@@ -22,7 +22,18 @@ class InstitutionController {
 
     async listDetailed(req: Request, res: Response, next: NextFunction) {
         try {
-            const result = await InstitutionService.getDetailedInstitutions();
+            const user = req.context.user;
+            let result: any[] = [];
+
+            if (user.role === 'SUPER_ADMIN') {
+                result = await InstitutionService.getDetailedInstitutions();
+            } else if (user.institution_id) {
+                // If not Super Admin, only return their own institution details
+                const org = await InstitutionService.getDetailedInstitutionById(user.institution_id);
+                // Return in an array to match expected shape
+                result = org ? [org] : [];
+            }
+
             res.status(200).json({ data: result });
         } catch (error) {
             next(error);
@@ -42,6 +53,13 @@ class InstitutionController {
     async update(req: Request, res: Response, next: NextFunction) {
         try {
             const id = req.params.id as string;
+            const user = req.context.user;
+
+            // Isolation: If not Super Admin, can only update their own organization
+            if (user.role !== 'SUPER_ADMIN' && user.institution_id !== id) {
+                return res.status(403).json({ error: "Access Denied: You can only update your own organization" });
+            }
+
             const result = await InstitutionService.updateInstitution(id, req.body);
             res.status(200).json({ message: 'Organization updated successfully', data: result });
         } catch (error) {

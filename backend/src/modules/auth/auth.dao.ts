@@ -1,3 +1,4 @@
+import type { Prisma, UserRole } from '@prisma/client';
 import prismaClient from '../../config/prisma.js';
 
 
@@ -38,36 +39,32 @@ class AuthDao {
 
 
 
-  async createUser(userData: { name: string; email: string; password_hash?: string; auth_provider?: string }) {
+  async createUser(userData: {
+    name: string;
+    email: string;
+    password_hash?: string;
+    auth_provider?: string;
+    isVerified?: boolean;
+    isActive?: boolean;
+    role?: UserRole;
+    institution_id?: string | null;
+  }) {
 
-    // Prepare data with proper handling of optional fields
-
-    const createData: any = {
-
+    const createData: Prisma.UserCreateInput = {
       name: userData.name,
-
       email: userData.email,
-
-      auth_provider: userData.auth_provider || 'email'
-
+      auth_provider: userData.auth_provider || 'email',
+      ...(userData.password_hash !== undefined ? { password_hash: userData.password_hash } : {}),
+      ...(userData.isVerified !== undefined ? { isVerified: userData.isVerified } : {}),
+      ...(userData.isActive !== undefined ? { isActive: userData.isActive } : {}),
+      ...(userData.role !== undefined ? { role: userData.role } : {}),
+      ...(userData.institution_id ? { institution: { connect: { id: userData.institution_id } } } : {}),
     };
-
-
-
-    // Only include password_hash if it's provided
-
-    if (userData.password_hash !== undefined) {
-
-      createData.password_hash = userData.password_hash;
-
-    }
-
-
 
     return await prismaClient.user.create({
 
       data: createData,
-
+      include: { institution: true },
       omit: { password_hash: true }
 
     });

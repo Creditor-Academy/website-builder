@@ -10,6 +10,7 @@ import {
     getAgenciesPage,
     getCoachPage
 } from '@/lib/defaultPageData';
+import { builderWebsiteToTemplatePayload, templateToBuilderWebsite } from '@/lib/templateBuilder';
 
 const TEMPLATE_MAP: Record<string, () => any> = {
     blank: getDefaultPage,
@@ -52,6 +53,8 @@ export interface Website {
     publishedUrl?: string;
     customDomain?: string;
     subdomain?: string;
+    builderMeta?: any;
+    sourceTemplateId?: string;
 }
 
 export interface EditorState {
@@ -71,6 +74,15 @@ export interface EditorState {
     };
 }
 
+export interface TemplateEditorState {
+    id: string;
+    name: string;
+    description: string;
+    category: string;
+    image?: string | null;
+    scope?: 'GLOBAL' | 'INSTITUTION';
+}
+
 export interface BuilderStore {
     websites: Website[];
     activeWebsiteId: string | null;
@@ -79,9 +91,13 @@ export interface BuilderStore {
     assets: Asset[];
     history: Page[][];
     historyIndex: number;
+    templateEditor: TemplateEditorState | null;
 
     setWebsites: (websites: Website[]) => void;
+    startTemplateEditing: (template: any) => void;
+    stopTemplateEditing: () => void;
     fetchWebsites: (institutionId?: string, isAdmin?: boolean) => Promise<void>;
+    fetchAssets: () => Promise<void>;
     createWebsite: (name: string, template?: string, institutionId?: string) => Promise<string>;
     updateWebsite: (id: string, updates: Partial<Website>) => Promise<void>;
     selectWebsite: (id: string) => void;
@@ -101,7 +117,9 @@ export interface BuilderStore {
     updateComponent: (sectionId: string, componentId: string, updates: any) => void;
     deleteComponent: (sectionId: string, componentId: string) => void;
     addAsset: (asset: Omit<Asset, 'id' | 'date'>) => void;
-    deleteAsset: (id: string) => void;
+    uploadAsset: (file: File) => Promise<void>;
+    importAssetFromUrl: (name: string, url: string) => Promise<void>;
+    deleteAsset: (id: string) => Promise<void>;
     getActiveWebsite: () => Website | undefined;
     getActivePage: () => Page | null;
     updateCurrentPage: (updates: Partial<Page>) => void;
@@ -138,17 +156,55 @@ const useBuilderStore = create<BuilderStore>()(
                     isFinished: false,
                 },
             },
-            assets: [
-                { id: '1', name: 'Coffee Shop', url: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80', type: 'image', size: '1.2 MB', date: new Date().toISOString() },
-                { id: '2', name: 'Modern Office', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80', type: 'image', size: '0.8 MB', date: new Date().toISOString() },
-                { id: '3', name: 'Team Meeting', url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&q=80', type: 'image', size: '0.5 MB', date: new Date().toISOString() },
-                { id: '4', name: 'Startup Laptop', url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&q=80', type: 'image', size: '1.1 MB', date: new Date().toISOString() },
-            ],
+            assets: [],
             history: [],
             historyIndex: -1,
+            templateEditor: null,
 
             // Actions
             setWebsites: (websites) => set({ websites }),
+
+            startTemplateEditing: (template) => {
+                const templateWebsite = templateToBuilderWebsite(template);
+                set((state) => ({
+                    websites: [
+                        ...state.websites.filter((website) => website.id !== templateWebsite.id),
+                        templateWebsite,
+                    ],
+                    activeWebsiteId: templateWebsite.id,
+                    activePageId: templateWebsite.activePageId,
+                    history: [templateWebsite.pages],
+                    historyIndex: 0,
+                    templateEditor: {
+                        id: template.id,
+                        name: template.name,
+                        description: template.description || '',
+                        category: template.category || 'General',
+                        image: template.image || null,
+                        scope: template.scope,
+                    },
+                    editor: {
+                        ...state.editor,
+                        selectedSectionId: null,
+                        selectedComponentId: null,
+                        showLeftPanel: true,
+                        showRightPanel: false,
+                        previewMode: false,
+                    }
+                }));
+            },
+
+            stopTemplateEditing: () => set({ templateEditor: null }),
+
+            fetchAssets: async () => {
+                try {
+                    const { default: assetApi } = await import('../api/assets');
+                    const response = await assetApi.listAssets();
+                    set({ assets: response.data.assets || [] });
+                } catch (error) {
+                    console.error('Failed to fetch assets from backend:', error);
+                }
+            },
 
             fetchWebsites: async (institutionId?: string, isAdmin = false) => {
                 try {
@@ -172,6 +228,9 @@ const useBuilderStore = create<BuilderStore>()(
                         pages: w.content?.pages || [],
                         activePageId: w.content?.activePageId || null,
                         templateId: w.content?.templateId || 'blank',
+                        publishedUrl: w.content?.builderMeta?.publishedUrl || undefined,
+                        builderMeta: w.content?.builderMeta || undefined,
+                        sourceTemplateId: w.source_template_id || w.content?.sourceTemplateId || undefined,
                         institution: w.institution,
                         institution_id: w.institution_id,
                         owner_id: w.owner_id,
@@ -186,6 +245,7 @@ const useBuilderStore = create<BuilderStore>()(
             },
 
             createWebsite: async (name, template = 'blank', institutionId?: string) => {
+                const isLocalTemplate = Boolean(TEMPLATE_MAP[template]);
                 const templateFn = TEMPLATE_MAP[template] || TEMPLATE_MAP.blank;
                 const homePage = templateFn();
                 const initialContent = {
@@ -193,30 +253,39 @@ const useBuilderStore = create<BuilderStore>()(
                     activePageId: homePage.id,
                     templateId: template
                 };
+                const createPayload: Record<string, unknown> = {
+                    name,
+                    ...(institutionId ? { institution_id: institutionId } : {})
+                };
+
+                if (isLocalTemplate) {
+                    createPayload.content = initialContent;
+                } else {
+                    createPayload.template_id = template;
+                }
 
                 try {
                     const { default: websiteApi } = await import('../api/website');
-                    const response = await websiteApi.createWebsite({ 
-                                name, 
-                                content: initialContent,
-                                ...(institutionId ? { institution_id: institutionId } : {})
-                            });
+                    const response = await websiteApi.createWebsite(createPayload);
                     
                     const w = response.data.website;
+                    const persistedContent = w.content || initialContent;
                     const newWebsite: Website = {
                         id: w.id,
                         name: w.name,
                         lastEdited: w.updated_at || w.created_at,
                         status: w.status,
-                        pages: initialContent.pages,
-                        activePageId: initialContent.activePageId,
-                        templateId: template
+                        pages: persistedContent.pages || initialContent.pages,
+                        activePageId: persistedContent.activePageId || initialContent.activePageId,
+                        templateId: persistedContent.templateId || template,
+                        builderMeta: persistedContent.builderMeta,
+                        sourceTemplateId: w.source_template_id || persistedContent.sourceTemplateId || undefined
                     };
 
                     set((state) => ({
                         websites: [...state.websites, newWebsite],
                         activeWebsiteId: w.id,
-                        activePageId: homePage.id,
+                        activePageId: newWebsite.activePageId,
                         history: [newWebsite.pages],
                         historyIndex: 0,
                         editor: {
@@ -252,7 +321,8 @@ const useBuilderStore = create<BuilderStore>()(
                                 content: {
                                     pages: website.pages,
                                     activePageId: website.activePageId,
-                                    templateId: website.templateId
+                                    templateId: website.templateId,
+                                    builderMeta: website.builderMeta
                                 }
                             });
                         }
@@ -271,6 +341,15 @@ const useBuilderStore = create<BuilderStore>()(
                 if (!website) return;
                 
                 try {
+                    if (state.templateEditor && state.templateEditor.id === activeId) {
+                        const { default: templateApi } = await import('../api/templates');
+                        await templateApi.updateWebsiteTemplate(
+                            state.templateEditor.id,
+                            builderWebsiteToTemplatePayload(website, state.templateEditor)
+                        );
+                        return;
+                    }
+
                     const { default: websiteApi } = await import('../api/website');
                     await websiteApi.updateWebsite(activeId, {
                         name: website.name,
@@ -278,7 +357,8 @@ const useBuilderStore = create<BuilderStore>()(
                         content: {
                             pages: website.pages,
                             activePageId: website.activePageId,
-                            templateId: website.templateId
+                            templateId: website.templateId,
+                            builderMeta: website.builderMeta
                         }
                     });
                 } catch (error) {
@@ -295,6 +375,8 @@ const useBuilderStore = create<BuilderStore>()(
                         history: [website.pages],
                         historyIndex: 0
                     });
+                } else {
+                    set({ templateEditor: null });
                 }
             },
 
@@ -516,9 +598,38 @@ const useBuilderStore = create<BuilderStore>()(
                 ]
             })),
 
-            deleteAsset: (id) => set((state) => ({
-                assets: state.assets.filter(a => a.id !== id)
-            })),
+            uploadAsset: async (file) => {
+                try {
+                    const { default: assetApi } = await import('../api/assets');
+                    const response = await assetApi.uploadAsset(file);
+                    set((state) => ({ assets: [response.data.asset, ...state.assets] }));
+                } catch (error) {
+                    console.error('Failed to upload asset:', error);
+                    throw error;
+                }
+            },
+
+            importAssetFromUrl: async (name, url) => {
+                try {
+                    const { default: assetApi } = await import('../api/assets');
+                    const response = await assetApi.importAssetFromUrl({ name, url });
+                    set((state) => ({ assets: [response.data.asset, ...state.assets] }));
+                } catch (error) {
+                    console.error('Failed to import asset from URL:', error);
+                    throw error;
+                }
+            },
+
+            deleteAsset: async (id) => {
+                try {
+                    const { default: assetApi } = await import('../api/assets');
+                    await assetApi.deleteAsset(id);
+                    set((state) => ({ assets: state.assets.filter(a => a.id !== id) }));
+                } catch (error) {
+                    console.error('Failed to delete asset:', error);
+                    throw error;
+                }
+            },
 
             getActiveWebsite: () => {
                 const { websites, activeWebsiteId } = get();

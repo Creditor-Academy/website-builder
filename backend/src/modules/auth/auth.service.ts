@@ -96,7 +96,7 @@ class AuthService {
 
 
 
-    let user = await this.authDao.createUser(userData);
+    let user = await this.authDao.createUser(userData as any);
 
 
 
@@ -157,7 +157,7 @@ class AuthService {
 
 
     // Compare passwords (only for email auth users)
-    const activeProvider = user.auth_provider || 'email';
+  const activeProvider = user.auth_provider || 'email';
 
     if (activeProvider === 'email') {
       if (!user.password_hash) {
@@ -590,41 +590,18 @@ class AuthService {
 
       // Check if user exists with this email
 
-      let user = await this.authDao.findUserByEmail(googleUser.email);
-
+      const existingUser = await this.authDao.findUserByEmail(googleUser.email);
       
-
-      if (!user) {
-
-        // Create new user from Google data
-
-        const userData = {
-
-          name: googleUser.name,
-
-          email: googleUser.email,
-
-          password_hash: undefined, // No password for OAuth users
-
-          isVerified: true, // Google users are pre-verified
-
-          auth_provider: 'google'
-
-        };
-
-        
-
-        user = await this.authDao.createUser(userData);
-
-      } else if (user.auth_provider !== 'google') {
-
-        // User exists but registered with different provider
-
+      if (existingUser && existingUser.auth_provider !== 'google') {
         throw new ConflictError('Email already registered with different method');
-
       }
 
-      
+      const user = existingUser ?? await this.authDao.createUser({
+        name: googleUser.name,
+        email: googleUser.email,
+        isVerified: true,
+        auth_provider: 'google'
+      });
 
       if (!user) {
 
@@ -691,6 +668,8 @@ class AuthService {
           name: user.name,
 
           email: user.email,
+
+          auth_provider: user.auth_provider,
 
           isVerified: user.isVerified
 

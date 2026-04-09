@@ -134,7 +134,7 @@ export default function AdminTemplates() {
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
         <div>
           <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Template Management</h2>
-          <p className="text-slate-500 mt-1">Create and manage website templates visible to all users.</p>
+          <p className="text-slate-500 mt-1">Create and manage global and institution-scoped templates.</p>
         </div>
         <GradientButton icon={<Plus className="w-5 h-5" />} onClick={handleCreate}>
           New Template
@@ -178,6 +178,7 @@ export default function AdminTemplates() {
             <TableRow className="hover:bg-transparent">
               <TableHead className="px-4 py-3 text-slate-500">Template</TableHead>
               <TableHead className="px-4 py-3 text-slate-500">Category</TableHead>
+              <TableHead className="px-4 py-3 text-slate-500">Scope</TableHead>
               <TableHead className="px-4 py-3 text-slate-500">Status</TableHead>
               <TableHead className="px-4 py-3 text-slate-500">Created</TableHead>
               <TableHead className="text-right px-4 py-3 text-slate-500">Actions</TableHead>
@@ -187,7 +188,7 @@ export default function AdminTemplates() {
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <TableRow key={i} className="border-b border-slate-100">
-                  {Array.from({ length: 5 }).map((__, j) => (
+                  {Array.from({ length: 6 }).map((__, j) => (
                     <TableCell key={j} className="px-4 py-4">
                       <div className="h-4 bg-slate-100 rounded-full animate-pulse w-3/4" />
                     </TableCell>
@@ -196,7 +197,7 @@ export default function AdminTemplates() {
               ))
             ) : filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-32 text-center text-slate-400">
+                <TableCell colSpan={6} className="h-32 text-center text-slate-400">
                   <div className="flex flex-col items-center gap-3">
                     <LayoutTemplate className="w-10 h-10 text-slate-200" />
                     <p className="text-sm">No templates found. Create your first one!</p>
@@ -231,6 +232,17 @@ export default function AdminTemplates() {
                   <TableCell className="px-4 py-3">
                     <Badge className="bg-blue-50 text-blue-700 border border-blue-100 font-medium text-xs">
                       {template.category || '—'}
+                    </Badge>
+                  </TableCell>
+
+                  <TableCell className="px-4 py-3">
+                    <Badge className={cn(
+                      'font-medium text-xs',
+                      template.scope === 'INSTITUTION'
+                        ? 'bg-amber-50 text-amber-700 border border-amber-100'
+                        : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    )}>
+                      {template.scope === 'INSTITUTION' ? 'Institution' : 'Global'}
                     </Badge>
                   </TableCell>
 

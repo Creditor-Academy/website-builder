@@ -1,10 +1,8 @@
-import axios from "axios";
+import apiClient from './client';
 
-const API = axios.create({
-  baseURL: "http://localhost:5000/api/v1", // backend
-  withCredentials: true
-});
-
-export const loginUser = (data) => API.post("/auth/login", data);
-export const registerUser = (data) => API.post("/auth/register", data);
-export const logoutUser = () => API.get("/auth/logout");
+export const loginUser = (data) => apiClient.post('/auth/login', data);
+export const registerUser = (data) => apiClient.post('/auth/register', data);
+export const logoutUser = () => apiClient.get('/auth/logout');
+export const forgotPassword = (email) => apiClient.post('/auth/forgot-password', { email });
+export const resetPassword = (token, password) => apiClient.post('/auth/reset-password', { token, password });
+export const verifyEmail = (token) => apiClient.get('/auth/email-verification', { params: { token } });

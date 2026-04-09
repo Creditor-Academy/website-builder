@@ -173,15 +173,15 @@ export default function DeploymentMonitoring() {
   const confirmRollback = () => {
     if (rollbackTarget) {
       const newDeployments = deployments.map((dep) =>
-        dep.id === rollbackTarget.id ? { ...dep, status: 'Rolled Back' } : dep
+        dep.id === rollbackTarget.id ? { ...dep, status: 'Rolled Back' as const } : dep
       );
       // Simulate a new successful deployment after rollback
       const newRolledBackDeployment: Deployment = {
         id: `dep_rollback_${Date.now()}`,
         version: `${rollbackTarget.version}-rollback`,
-        status: 'Success',
+        status: 'Success' as const,
         deployedAt: new Date().toLocaleString(),
-        deployedBy: 'Admin', // Or the user who performed rollback
+        deployedBy: 'Admin',
         websiteId: rollbackTarget.websiteId,
         websiteName: rollbackTarget.websiteName,
       };

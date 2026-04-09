@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Search, Upload, X, Check, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Trash2, MoreVertical } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import useBuilderStore from '@/store/useBuilderStore';
 
 export function AssetLibraryPanel() {
-    const { assets, addAsset, deleteAsset } = useBuilderStore();
+    const { assets, deleteAsset, fetchAssets, uploadAsset, importAssetFromUrl } = useBuilderStore();
     const [search, setSearch] = useState('');
     const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
     const [urlInput, setUrlInput] = useState('');
@@ -18,32 +18,25 @@ export function AssetLibraryPanel() {
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    useEffect(() => {
+        void fetchAssets();
+    }, [fetchAssets]);
+
     const filteredMedia = assets.filter(item =>
         item.name.toLowerCase().includes(search.toLowerCase())
     );
 
-    const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const url = URL.createObjectURL(file);
-            addAsset({
-                name: file.name,
-                url,
-                type: file.type.startsWith('video') ? 'video' : 'image',
-                size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`
-            });
+            await uploadAsset(file);
             if (e.target) e.target.value = '';
         }
     };
 
-    const handleUrlUpload = () => {
+    const handleUrlUpload = async () => {
         if (urlInput) {
-            addAsset({
-                name: urlName || 'Imported Asset',
-                url: urlInput,
-                type: urlInput.match(/\.(mp4|webm|ogg)$/i) ? 'video' : 'image',
-                size: 'External'
-            });
+            await importAssetFromUrl(urlName || 'Imported Asset', urlInput);
             setUrlInput('');
             setUrlName('');
             setIsUrlDialogOpen(false);
@@ -153,7 +146,7 @@ export function AssetLibraryPanel() {
                                                     size="sm" 
                                                     variant="destructive" 
                                                     className="h-7 text-[10px] w-full font-bold shadow-lg bg-red-500 hover:bg-red-600 border-none"
-                                                    onClick={() => deleteAsset(item.id)}
+                                                    onClick={() => void deleteAsset(item.id)}
                                                 >
                                                     Delete
                                                 </Button>
@@ -187,7 +180,7 @@ export function AssetLibraryPanel() {
                                                 <Button size="sm" variant="secondary" className="h-7 text-[10px] w-full font-bold shadow-lg" onClick={() => handleCopy(item.id, item.url)}>
                                                     {copiedId === item.id ? 'Copied!' : 'Copy Link'}
                                                 </Button>
-                                                <Button size="sm" variant="destructive" className="h-7 text-[10px] w-full font-bold shadow-lg bg-red-500 hover:bg-red-600 border-none" onClick={() => deleteAsset(item.id)}>Delete</Button>
+                                                <Button size="sm" variant="destructive" className="h-7 text-[10px] w-full font-bold shadow-lg bg-red-500 hover:bg-red-600 border-none" onClick={() => void deleteAsset(item.id)}>Delete</Button>
                                             </div>
                                             <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
                                                 <p className="text-[9px] text-white truncate font-medium">{item.name}</p>
@@ -220,7 +213,7 @@ export function AssetLibraryPanel() {
                                                 <Button size="sm" variant="secondary" className="h-7 text-[10px] w-full font-bold shadow-lg" onClick={() => handleCopy(item.id, item.url)}>
                                                     {copiedId === item.id ? 'Copied!' : 'Copy Link'}
                                                 </Button>
-                                                <Button size="sm" variant="destructive" className="h-7 text-[10px] w-full font-bold shadow-lg bg-red-500 hover:bg-red-600 border-none" onClick={() => deleteAsset(item.id)}>Delete</Button>
+                                                <Button size="sm" variant="destructive" className="h-7 text-[10px] w-full font-bold shadow-lg bg-red-500 hover:bg-red-600 border-none" onClick={() => void deleteAsset(item.id)}>Delete</Button>
                                             </div>
                                             <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
                                                 <p className="text-[9px] text-white truncate font-medium">{item.name}</p>

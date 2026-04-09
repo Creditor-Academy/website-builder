@@ -1,13 +1,41 @@
 import prisma from '../../config/prisma.js';
+import type { AuthUser } from '../../types/auth.types.js';
+import { TemplateScope, UserRole } from '@prisma/client';
 
 export class TemplateDao {
+    private buildScopeFilters(user: AuthUser) {
+        return [
+            { scope: TemplateScope.GLOBAL },
+            ...(user.institution_id ? [{ scope: TemplateScope.INSTITUTION, institution_id: user.institution_id }] : []),
+        ];
+    }
 
     // ─── Website Templates ────────────────────────────────────────────────────
 
-    /** Get all non-deleted website templates */
-    async getAllWebsiteTemplates() {
+    /** Get all website templates visible to the current user */
+    async getVisibleWebsiteTemplates(user: AuthUser) {
+        const includeDeleted = user.role === UserRole.ADMIN
+            || user.role === UserRole.SUPER_ADMIN
+            || user.role === UserRole.INSTITUTION_ADMIN;
+
+        const includeInstitution = { institution: { select: { id: true, name: true } } };
+
+        if (user.role === UserRole.SUPER_ADMIN || user.role === UserRole.ADMIN) {
+            return prisma.websiteTemplate.findMany({
+                where: includeDeleted ? {} : { deletedAt: null },
+                include: includeInstitution,
+                orderBy: { createdAt: 'desc' },
+            });
+        }
+
+        const scopeFilters = this.buildScopeFilters(user);
+
         return prisma.websiteTemplate.findMany({
-            where: { deletedAt: null },
+            where: {
+                ...(includeDeleted ? {} : { deletedAt: null }),
+                OR: scopeFilters,
+            },
+            include: includeInstitution,
             orderBy: { createdAt: 'desc' },
         });
     }
@@ -24,6 +52,8 @@ export class TemplateDao {
         name: string;
         description: string;
         category: string;
+        scope?: TemplateScope;
+        institution_id?: string | null;
         image?: string | null;
         global_styles?: object;
         navbar?: object;
@@ -35,6 +65,8 @@ export class TemplateDao {
                 name: data.name,
                 description: data.description,
                 category: data.category,
+                scope: data.scope ?? TemplateScope.GLOBAL,
+                institution_id: data.institution_id ?? null,
                 image: data.image ?? null,
                 global_styles: data.global_styles ?? {},
                 navbar: data.navbar ?? {},
@@ -49,6 +81,8 @@ export class TemplateDao {
         name: string;
         description: string;
         category: string;
+        scope: TemplateScope;
+        institution_id: string | null;
         image: string | null;
         global_styles: object;
         navbar: object;
@@ -77,65 +111,6 @@ export class TemplateDao {
         });
     }
 
-    // ─── Section Templates ────────────────────────────────────────────────────
-
-    /** Get all non-deleted section templates */
-    async getAllSectionTemplates() {
-        return prisma.sectionTemplate.findMany({
-            where: { deletedAt: null },
-            orderBy: { createdAt: 'desc' },
-        });
-    }
-
-    /** Get a single section template by ID */
-    async getSectionTemplateById(id: string) {
-        return prisma.sectionTemplate.findUnique({
-            where: { id },
-        });
-    }
-
-    /** Create a new section template */
-    async createSectionTemplate(data: {
-        name: string;
-        category: string;
-        props?: object;
-    }) {
-        return prisma.sectionTemplate.create({
-            data: {
-                name: data.name,
-                category: data.category,
-                props: data.props ?? {},
-            },
-        });
-    }
-
-    /** Update a section template */
-    async updateSectionTemplate(id: string, data: Partial<{
-        name: string;
-        category: string;
-        props: object;
-    }>) {
-        return prisma.sectionTemplate.update({
-            where: { id },
-            data,
-        });
-    }
-
-    /** Soft delete a section template */
-    async deleteSectionTemplate(id: string) {
-        return prisma.sectionTemplate.update({
-            where: { id },
-            data: { deletedAt: new Date() },
-        });
-    }
-
-    /** Restore a soft-deleted section template */
-    async restoreSectionTemplate(id: string) {
-        return prisma.sectionTemplate.update({
-            where: { id },
-            data: { deletedAt: null },
-        });
-    }
 }
 
 export default new TemplateDao();

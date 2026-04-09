@@ -18,7 +18,8 @@ class InstitutionDao {
                 _count: {
                     select: {
                         users: true,
-                        websites: true
+                        websites: true,
+                        templates: true
                     }
                 }
             },
@@ -47,10 +48,21 @@ class InstitutionDao {
                         owner_id: true
                     }
                 },
+                templates: {
+                    select: {
+                        id: true,
+                        name: true,
+                        category: true,
+                        scope: true,
+                        createdAt: true,
+                        deletedAt: true
+                    }
+                },
                 _count: {
                     select: {
                         users: true,
-                        websites: true
+                        websites: true,
+                        templates: true
                     }
                 }
             },
@@ -64,6 +76,49 @@ class InstitutionDao {
             include: {
                 users: {
                     select: { id: true, name: true, email: true, role: true }
+                }
+            }
+        });
+    }
+
+    async findDetailedById(id: string) {
+        return await prismaClient.institution.findUnique({
+            where: { id },
+            include: {
+                users: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        role: true,
+                        created_at: true
+                    }
+                },
+                websites: {
+                    select: {
+                        id: true,
+                        name: true,
+                        status: true,
+                        created_at: true,
+                        owner_id: true
+                    }
+                },
+                templates: {
+                    select: {
+                        id: true,
+                        name: true,
+                        category: true,
+                        scope: true,
+                        createdAt: true,
+                        deletedAt: true
+                    }
+                },
+                _count: {
+                    select: {
+                        users: true,
+                        websites: true,
+                        templates: true
+                    }
                 }
             }
         });

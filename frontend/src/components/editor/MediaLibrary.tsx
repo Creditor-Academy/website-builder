@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Search, Upload, X, Check, Image as ImageIcon, Video, File, Folder, MoreVertical, Trash2, Link as LinkIcon, Monitor } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,13 @@ interface MediaLibraryProps {
 }
 
 export function MediaLibrary({ open, onOpenChange, onSelect }: MediaLibraryProps) {
-    const { assets, addAsset } = useBuilderStore();
+    const { assets, fetchAssets, uploadAsset, importAssetFromUrl } = useBuilderStore();
+        useEffect(() => {
+            if (open) {
+                void fetchAssets();
+            }
+        }, [open, fetchAssets]);
+
     const [search, setSearch] = useState('');
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
@@ -47,28 +53,17 @@ export function MediaLibrary({ open, onOpenChange, onSelect }: MediaLibraryProps
         }
     };
 
-    const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const url = URL.createObjectURL(file);
-            addAsset({
-                name: file.name,
-                url,
-                type: file.type.startsWith('video') ? 'video' : 'image',
-                size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`
-            });
+            await uploadAsset(file);
             if (e.target) e.target.value = '';
         }
     };
 
-    const handleUrlUpload = () => {
+    const handleUrlUpload = async () => {
         if (urlInput) {
-            addAsset({
-                name: urlName || 'Imported Asset',
-                url: urlInput,
-                type: urlInput.match(/\.(mp4|webm|ogg)$/i) ? 'video' : 'image',
-                size: 'External'
-            });
+            await importAssetFromUrl(urlName || 'Imported Asset', urlInput);
             setUrlInput('');
             setUrlName('');
             setIsUrlDialogOpen(false);

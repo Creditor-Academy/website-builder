@@ -11,7 +11,8 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
   const { state, undo, redo, canUndo, canRedo, setPreviewMode, setLeftPanelVisible } = useBuilder();
   const { editor, page } = state;
   const store = useBuilderStore();
-  const { setTourState } = store;
+  const { setTourState, templateEditor } = store;
+  const isTemplateEditor = Boolean(templateEditor);
 
   const startTour = () => {
     setTourState({ isActive: true, step: 0, isFinished: false });
@@ -50,7 +51,7 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
               <span className="font-black text-[14px] text-slate-900 leading-none tracking-tight">Buildora</span>
               <div className="flex items-center gap-2 mt-1">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500/50" />
-                <span className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">Editing Mode</span>
+                <span className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">{isTemplateEditor ? 'Template Mode' : 'Editing Mode'}</span>
               </div>
             </div>
           </div>
@@ -62,7 +63,7 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => window.location.href = '/dashboard'}
+                onClick={() => window.location.href = isTemplateEditor ? '/dashboard/templates' : '/dashboard'}
                 className="w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition-all duration-200 border border-transparent hover:border-slate-200"
               >
                 <Home className="w-4.5 h-4.5" />
@@ -77,7 +78,7 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
 
           <div className="hidden md:flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 hover:border-primary/50 transition-all duration-200">
             <Globe className="w-4 h-4 text-slate-600" />
-            <span className="text-[11px] font-bold text-slate-700">{websiteId || store.activeWebsiteId || 'Project'}</span>
+            <span className="text-[11px] font-bold text-slate-700">{isTemplateEditor ? templateEditor?.name || 'Template' : websiteId || store.activeWebsiteId || 'Project'}</span>
             <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
             <span className="text-[11px] font-black text-slate-900">{page?.name || 'Page'}</span>
           </div>
@@ -206,10 +207,12 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
           <Separator orientation="vertical" className="hidden sm:block h-6 mx-2" />
 
           {/* PUBLISH */}
-          <Button id="tour-publish" className="h-10 gap-2 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white rounded-xl px-6 text-xs font-bold shadow-lg shadow-primary/25 transition-all duration-200 hover:shadow-xl hover:shadow-primary/30 active:scale-95">
-            <Play className="w-4 h-4 fill-current" />
-            <span className="hidden sm:inline font-medium">Publish Site</span>
-          </Button>
+          {!isTemplateEditor && (
+            <Button id="tour-publish" className="h-10 gap-2 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white rounded-xl px-6 text-xs font-bold shadow-lg shadow-primary/25 transition-all duration-200 hover:shadow-xl hover:shadow-primary/30 active:scale-95">
+              <Play className="w-4 h-4 fill-current" />
+              <span className="hidden sm:inline font-medium">Publish Site</span>
+            </Button>
+          )}
         </div>
       </TooltipProvider>
     </div>

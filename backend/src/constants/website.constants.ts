@@ -4,6 +4,7 @@ export const SELECT_WEBSITE_FIELDS = {
     id: true,
     name: true,
     status: true,
+    source_template_id: true,
     thumbnail_url: true,
     created_at: true,
     updated_at: true,

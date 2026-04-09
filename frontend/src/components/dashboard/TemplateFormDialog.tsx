@@ -27,6 +27,8 @@ export default function TemplateFormDialog({
 }: TemplateFormDialogProps) {
   const { toast } = useToast();
   const isEdit = !!editingTemplate;
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const isInstitutionAdmin = currentUser?.role === 'INSTITUTION_ADMIN';
 
   const [form, setForm] = useState({
     name: '',
@@ -126,8 +128,10 @@ export default function TemplateFormDialog({
           </DialogTitle>
           <DialogDescription className="text-white/70 mt-1 text-sm">
             {isEdit
-              ? 'Update the template details. Changes are visible to all users immediately.'
-              : 'Create a new website template that all users can use to build their sites.'}
+              ? 'Update the template details for the users who can access this scope.'
+              : isInstitutionAdmin
+                ? 'Create a reusable template for users inside your institution.'
+                : 'Create a new website template that all users can use to build their sites.'}
           </DialogDescription>
         </div>
 
@@ -189,6 +193,15 @@ export default function TemplateFormDialog({
               onChange={e => handleChange('image', e.target.value)}
               className="h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all"
             />
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="text-xs font-bold text-slate-700 uppercase tracking-wider">Template Scope</div>
+            <p className="text-sm text-slate-600 mt-1">
+              {isInstitutionAdmin
+                ? 'Institution templates are visible only to users in your institution.'
+                : 'Global templates are visible across the whole platform.'}
+            </p>
           </div>
         </div>
 

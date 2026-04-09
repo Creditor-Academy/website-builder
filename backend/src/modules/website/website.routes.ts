@@ -5,7 +5,9 @@ import { validateRequest } from '../../middlewares/validation.middleware.js';
 import { requireWebsiteOwnership } from '../../middlewares/resource-access.middleware.js';
 import {
     createWebsiteSchema,
+    domainSchema,
     listWebsitesQuerySchema,
+    publishWebsiteSchema,
     updateWebsiteSchema,
     websiteIdParamsSchema,
     updateWebsiteSettingsSchema,
@@ -35,10 +37,10 @@ router.get(
     websiteController.listWebsites
 );
 
-// GET /websites/all - List all websites (Admin only)
+// GET /websites/all - List all websites (Admin / Institution Admin)
 router.get(
     '/all',
-    authorize([UserRole.ADMIN]),
+    authorize([UserRole.ADMIN, UserRole.INSTITUTION_ADMIN]),
     validateRequest(listWebsitesQuerySchema, 'query'),
     websiteController.listAllWebsites
 );
@@ -92,6 +94,52 @@ router.patch(
     validateRequest(updateWebsiteSettingsSchema),
     requireWebsiteOwnership,
     websiteController.updateWebsiteSettings
+);
+
+router.get(
+    '/:id/versions',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    requireWebsiteOwnership,
+    websiteController.getWebsiteVersions
+);
+
+router.post(
+    '/:id/publish',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    validateRequest(publishWebsiteSchema),
+    requireWebsiteOwnership,
+    websiteController.publishWebsite
+);
+
+router.get(
+    '/:id/domains',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    requireWebsiteOwnership,
+    websiteController.getDomains
+);
+
+router.post(
+    '/:id/domains',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    validateRequest(domainSchema),
+    requireWebsiteOwnership,
+    websiteController.addDomain
+);
+
+router.delete(
+    '/:id/domains',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    validateRequest(domainSchema),
+    requireWebsiteOwnership,
+    websiteController.removeDomain
+);
+
+router.post(
+    '/:id/domains/verify',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    validateRequest(domainSchema),
+    requireWebsiteOwnership,
+    websiteController.verifyDomain
 );
 
 export default router;

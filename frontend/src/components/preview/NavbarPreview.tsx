@@ -146,18 +146,25 @@ function buildPage(slug, label) {
   }
 }
 
-export function NavbarPreview({ config, isEditing, onUpdate }) {
+export function NavbarPreview({ config: rawConfig, isEditing, onUpdate }) {
+  const config = {
+    ...rawConfig,
+    logo: rawConfig.logo && typeof rawConfig.logo === 'object' ? rawConfig.logo : { text: rawConfig.logo || 'Logo', imageUrl: '' },
+    links: Array.isArray(rawConfig.links) ? rawConfig.links : [],
+    styles: rawConfig.styles || {},
+  };
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { pages, setActivePage, updatePageName, createPage, selectSection, state } = useBuilder();
   const navigate = useNavigate();
   const { editor } = state;
 
+  const styles = config.styles;
   const navBg =
-    config.styles.backgroundColor && config.styles.backgroundColor !== 'transparent'
-      ? config.styles.backgroundColor
+    styles.backgroundColor && styles.backgroundColor !== 'transparent'
+      ? styles.backgroundColor
       : 'var(--theme-bg, #ffffff)';
 
-  const tc = config.styles.textColor || 'var(--theme-text, #0f172a)';
+  const tc = styles.textColor || 'var(--theme-text, #0f172a)';
 
   // ── Enhanced handleNavClick logic with preview mode support ──────────────────────────
   const handleNavClick = (e, link) => {
@@ -227,8 +234,8 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
       style={{
         backgroundColor: navBg,
         color: tc,
-        position: config.styles.sticky ? 'sticky' : 'relative',
-        top: config.styles.sticky ? 0 : undefined,
+        position: styles.sticky ? 'sticky' : 'relative',
+        top: styles.sticky ? 0 : undefined,
         zIndex: 50,
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
@@ -277,9 +284,9 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
                 className="nb-cta"
                 onClick={(e) => handleNavClick(e, link)}
                 style={{ 
-                  background: config.styles.buttonBg || '#0f172a', 
-                  color: config.styles.buttonText || '#fff',
-                  borderRadius: config.styles.buttonRadius || '2px'
+                  background: styles.buttonBg || '#0f172a', 
+                  color: styles.buttonText || '#fff',
+                  borderRadius: styles.buttonRadius || '2px'
                 }}
               >
                 {link.label}
@@ -345,10 +352,10 @@ export function NavbarPreview({ config, isEditing, onUpdate }) {
                 onClick={(e) => handleNavClick(e, link)}
                 style={{
                   display: 'block', marginTop: 16,
-                  background: config.styles.buttonBg || '#0f172a', 
-                  color: config.styles.buttonText || '#fff',
+                  background: styles.buttonBg || '#0f172a', 
+                  color: styles.buttonText || '#fff',
                   padding: '13px 20px', 
-                  borderRadius: config.styles.buttonRadius || '2px',
+                  borderRadius: styles.buttonRadius || '2px',
                   fontFamily: "'Geist', sans-serif",
                   fontSize: 11, fontWeight: 600,
                   letterSpacing: '0.14em', textTransform: 'uppercase',

@@ -17,6 +17,10 @@ class InstitutionService {
         return await InstitutionDao.getDetailedList();
     }
 
+    async getDetailedInstitutionById(id: string) {
+        return await InstitutionDao.findDetailedById(id);
+    }
+
     async updateInstitution(id: string, data: any) {
         return await InstitutionDao.update(id, data);
     }

@@ -13,9 +13,11 @@ import { MediaLibrary } from './MediaLibrary';
 import { Button } from '@/components/ui/button';
 import { NavbarSettings } from './NavbarSettings';
 import { FooterSettings } from './FooterSettings';
+import { useToast } from '@/components/ui/use-toast';
 
 export function PropertiesPanel() {
   const { state, selectedSection, selectedComponent, updateSection, updateSectionStyles, selectSection, updateNavbar, updateFooter, updatePageSEO, updateComponent, deleteComponent, deleteSection } = useBuilder();
+  const { toast } = useToast();
   const [contentOpen, setContentOpen] = useState(true);
   const [stylesOpen, setStylesOpen] = useState(true);
   const [layoutOpen, setLayoutOpen] = useState(true);
@@ -496,7 +498,7 @@ export function PropertiesPanel() {
                             social: x.social.map((soc, i) => i === idx ? { ...soc, platform: value } : soc)
                           } : x);
                           handleContentChange('members', updatedMembers);
-                        }} className="h-6 text-[8px]">
+                        }}>
                           <SelectTrigger className="w-16 h-6"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="linkedin" className="text-[8px]">LinkedIn</SelectItem>
@@ -1432,6 +1434,7 @@ export function PropertiesPanel() {
                   </Select>
                 </div>
               </div>
+
             )}
 
             {selectedComponent.type === 'text' && (

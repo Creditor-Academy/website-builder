@@ -12,9 +12,12 @@ import DashboardTemplates from "./pages/DashboardTemplates";
 import DashboardDeployment from "./pages/DashboardDeployment";
 import DashboardAssets from "./pages/DashboardAssets";
 import DashboardSettings from "./pages/DashboardSettings";
+import TemplateEditor from "./pages/TemplateEditor";
 import Organizations from "./pages/dashboard/Organizations";
 import { WebsiteEditor } from "./components/editor/WebsiteEditor";
 import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword";
+import VerifyEmail from "./pages/VerifyEmail";
 import Features from "./pages/Features";
 import Services from "./pages/Services";
 import Pricing from "./pages/Pricing";
@@ -48,6 +51,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard" element={<Dashboard />}>
               <Route index element={null} /> {/* This will be handled by Dashboard component's internal routing or default view */}
@@ -60,6 +65,7 @@ const App = () => (
               <Route path="settings" element={<DashboardSettings />} />
             </Route>
             <Route path="/builder/:id" element={<WebsiteEditor />} />
+            <Route path="/template-builder/:id" element={<TemplateEditor />} />
             <Route path="/features" element={<Features />} />
             <Route path="/services" element={<Services />} />
             <Route path="/resources" element={<Resources />} />

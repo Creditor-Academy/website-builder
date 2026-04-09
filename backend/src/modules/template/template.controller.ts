@@ -1,5 +1,42 @@
 import type { Request, Response } from 'express';
+import { TemplateScope, UserRole } from '@prisma/client';
 import templateDao from './template.dao.js';
+
+const canManageWebsiteTemplate = (template: any, user: Request['context']['user']) => {
+    if (user.role === UserRole.SUPER_ADMIN || user.role === UserRole.ADMIN) {
+        return true;
+    }
+
+    if (user.role === UserRole.INSTITUTION_ADMIN) {
+        return template.scope === TemplateScope.INSTITUTION
+            && !!template.institution_id
+            && template.institution_id === user.institution_id;
+    }
+
+    return false;
+};
+
+const getTemplatePayloadForUser = (req: Request) => {
+    const user = req.context.user;
+    const body = req.body;
+
+    if (user.role === UserRole.INSTITUTION_ADMIN) {
+        if (!user.institution_id) {
+            throw new Error('INSTITUTION_ADMIN must be assigned to an institution before managing templates');
+        }
+        return {
+            ...body,
+            scope: TemplateScope.INSTITUTION,
+            institution_id: user.institution_id,
+        };
+    }
+
+    return {
+        ...body,
+        scope: TemplateScope.GLOBAL,
+        institution_id: null,
+    };
+};
 
 class TemplateController {
 
@@ -9,11 +46,11 @@ class TemplateController {
 
     /**
      * GET /templates/websites
-     * Public — returns all active website templates grouped by category
+     * Auth required — returns templates visible to the current user, grouped by category
      */
     getAllWebsiteTemplates = async (req: Request, res: Response) => {
         try {
-            const templates = await templateDao.getAllWebsiteTemplates();
+            const templates = await templateDao.getVisibleWebsiteTemplates(req.context.user);
 
             // Group by category
             const grouped = templates.reduce((acc: Record<string, any[]>, t) => {
@@ -39,11 +76,15 @@ class TemplateController {
      */
     getWebsiteTemplateById = async (req: Request, res: Response) => {
         try {
-            const { id } = req.params;
+            const id = req.params.id as string;
             const template = await templateDao.getWebsiteTemplateById(id);
 
             if (!template) {
                 return res.status(404).json({ success: false, message: 'Template not found' });
+            }
+
+            if (!canManageWebsiteTemplate(template, req.context.user)) {
+                return res.status(403).json({ success: false, message: 'You do not have permission to manage this template' });
             }
 
             res.status(200).json({ success: true, data: template });
@@ -59,22 +100,15 @@ class TemplateController {
      */
     createWebsiteTemplate = async (req: Request, res: Response) => {
         try {
-            const { name, description, category, image, global_styles, navbar, footer, home_layout } = req.body;
-
-            const template = await templateDao.createWebsiteTemplate({
-                name,
-                description,
-                category,
-                image: image ?? null,
-                global_styles: global_styles ?? {},
-                navbar: navbar ?? {},
-                footer: footer ?? {},
-                home_layout: home_layout ?? {},
-            });
+            const payload = getTemplatePayloadForUser(req);
+            const template = await templateDao.createWebsiteTemplate(payload);
 
             res.status(201).json({ success: true, data: template });
-        } catch (error) {
+        } catch (error: any) {
             console.error('[TemplateController] createWebsiteTemplate:', error);
+            if (error?.message?.includes('must be assigned to an institution')) {
+                return res.status(403).json({ success: false, message: error.message });
+            }
             res.status(500).json({ success: false, message: 'Failed to create template' });
         }
     };
@@ -85,17 +119,24 @@ class TemplateController {
      */
     updateWebsiteTemplate = async (req: Request, res: Response) => {
         try {
-            const { id } = req.params;
+            const id = req.params.id as string;
 
             const existing = await templateDao.getWebsiteTemplateById(id);
             if (!existing) {
                 return res.status(404).json({ success: false, message: 'Template not found' });
             }
 
-            const updated = await templateDao.updateWebsiteTemplate(id, req.body);
+            if (!canManageWebsiteTemplate(existing, req.context.user)) {
+                return res.status(403).json({ success: false, message: 'You do not have permission to manage this template' });
+            }
+
+            const updated = await templateDao.updateWebsiteTemplate(id, getTemplatePayloadForUser(req));
             res.status(200).json({ success: true, data: updated });
-        } catch (error) {
+        } catch (error: any) {
             console.error('[TemplateController] updateWebsiteTemplate:', error);
+            if (error?.message?.includes('must be assigned to an institution')) {
+                return res.status(403).json({ success: false, message: error.message });
+            }
             res.status(500).json({ success: false, message: 'Failed to update template' });
         }
     };
@@ -106,11 +147,15 @@ class TemplateController {
      */
     deleteWebsiteTemplate = async (req: Request, res: Response) => {
         try {
-            const { id } = req.params;
+            const id = req.params.id as string;
 
             const existing = await templateDao.getWebsiteTemplateById(id);
             if (!existing) {
                 return res.status(404).json({ success: false, message: 'Template not found' });
+            }
+
+            if (!canManageWebsiteTemplate(existing, req.context.user)) {
+                return res.status(403).json({ success: false, message: 'You do not have permission to manage this template' });
             }
 
             await templateDao.deleteWebsiteTemplate(id);
@@ -127,11 +172,15 @@ class TemplateController {
      */
     restoreWebsiteTemplate = async (req: Request, res: Response) => {
         try {
-            const { id } = req.params;
+            const id = req.params.id as string;
 
             const existing = await templateDao.getWebsiteTemplateById(id);
             if (!existing) {
                 return res.status(404).json({ success: false, message: 'Template not found' });
+            }
+
+            if (!canManageWebsiteTemplate(existing, req.context.user)) {
+                return res.status(403).json({ success: false, message: 'You do not have permission to manage this template' });
             }
 
             const restored = await templateDao.restoreWebsiteTemplate(id);
@@ -142,129 +191,6 @@ class TemplateController {
         }
     };
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // SECTION TEMPLATES
-    // ═══════════════════════════════════════════════════════════════════════════
-
-    /**
-     * GET /templates/sections
-     * Public — all active section templates grouped by category
-     */
-    getAllSectionTemplates = async (req: Request, res: Response) => {
-        try {
-            const sections = await templateDao.getAllSectionTemplates();
-
-            const grouped = sections.reduce((acc: Record<string, any[]>, s) => {
-                const cat = s.category || 'General';
-                if (!acc[cat]) acc[cat] = [];
-                acc[cat].push(s);
-                return acc;
-            }, {});
-
-            res.status(200).json({ success: true, data: grouped });
-        } catch (error) {
-            console.error('[TemplateController] getAllSectionTemplates:', error);
-            res.status(500).json({ success: false, message: 'Failed to fetch section templates' });
-        }
-    };
-
-    /**
-     * GET /templates/sections/:id
-     * Auth required
-     */
-    getSectionTemplateById = async (req: Request, res: Response) => {
-        try {
-            const { id } = req.params;
-            const section = await templateDao.getSectionTemplateById(id);
-
-            if (!section) {
-                return res.status(404).json({ success: false, message: 'Section template not found' });
-            }
-
-            res.status(200).json({ success: true, data: section });
-        } catch (error) {
-            console.error('[TemplateController] getSectionTemplateById:', error);
-            res.status(500).json({ success: false, message: 'Failed to fetch section template' });
-        }
-    };
-
-    /**
-     * POST /templates/sections
-     * Admin only
-     */
-    createSectionTemplate = async (req: Request, res: Response) => {
-        try {
-            const { name, category, props } = req.body;
-            const section = await templateDao.createSectionTemplate({ name, category, props });
-            res.status(201).json({ success: true, data: section });
-        } catch (error) {
-            console.error('[TemplateController] createSectionTemplate:', error);
-            res.status(500).json({ success: false, message: 'Failed to create section template' });
-        }
-    };
-
-    /**
-     * PATCH /templates/sections/:id
-     * Admin only
-     */
-    updateSectionTemplate = async (req: Request, res: Response) => {
-        try {
-            const { id } = req.params;
-
-            const existing = await templateDao.getSectionTemplateById(id);
-            if (!existing) {
-                return res.status(404).json({ success: false, message: 'Section template not found' });
-            }
-
-            const updated = await templateDao.updateSectionTemplate(id, req.body);
-            res.status(200).json({ success: true, data: updated });
-        } catch (error) {
-            console.error('[TemplateController] updateSectionTemplate:', error);
-            res.status(500).json({ success: false, message: 'Failed to update section template' });
-        }
-    };
-
-    /**
-     * DELETE /templates/sections/:id
-     * Admin only — soft delete
-     */
-    deleteSectionTemplate = async (req: Request, res: Response) => {
-        try {
-            const { id } = req.params;
-
-            const existing = await templateDao.getSectionTemplateById(id);
-            if (!existing) {
-                return res.status(404).json({ success: false, message: 'Section template not found' });
-            }
-
-            await templateDao.deleteSectionTemplate(id);
-            res.status(200).json({ success: true, message: 'Section template deleted successfully' });
-        } catch (error) {
-            console.error('[TemplateController] deleteSectionTemplate:', error);
-            res.status(500).json({ success: false, message: 'Failed to delete section template' });
-        }
-    };
-
-    /**
-     * POST /templates/sections/:id/restore
-     * Admin only
-     */
-    restoreSectionTemplate = async (req: Request, res: Response) => {
-        try {
-            const { id } = req.params;
-
-            const existing = await templateDao.getSectionTemplateById(id);
-            if (!existing) {
-                return res.status(404).json({ success: false, message: 'Section template not found' });
-            }
-
-            const restored = await templateDao.restoreSectionTemplate(id);
-            res.status(200).json({ success: true, data: restored });
-        } catch (error) {
-            console.error('[TemplateController] restoreSectionTemplate:', error);
-            res.status(500).json({ success: false, message: 'Failed to restore section template' });
-        }
-    };
 }
 
 export default new TemplateController();

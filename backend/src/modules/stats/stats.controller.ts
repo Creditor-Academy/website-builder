@@ -5,10 +5,16 @@ class StatsController {
     async getDashboardStats(req: Request, res: Response, next: NextFunction) {
         try {
             const user = req.context.user;
+            const adminView = req.query.adminView === 'true';
             
             if (user.role === 'SUPER_ADMIN') {
-                const stats = await StatsService.getPlatformStats();
-                return res.status(200).json({ data: stats });
+                if (adminView) {
+                    const stats = await StatsService.getPlatformStats();
+                    return res.status(200).json({ data: stats });
+                } else {
+                    const stats = await StatsService.getUserStats(user.id);
+                    return res.status(200).json({ data: stats });
+                }
             } 
             
             if (user.role === 'INSTITUTION_ADMIN' || user.institution_id) {

@@ -1,17 +1,12 @@
-import axios from "axios";
-
-const API = axios.create({
-  baseURL: "http://localhost:5000/api/v1/organizations",
-  withCredentials: true
-});
+import apiClient from './client';
 
 const institutionApi = {
-  create: (data) => API.post("/", data),
-  list: () => API.get("/"),
-  getDetailedList: () => API.get("/detailed"),
-  getById: (id) => API.get(`/${id}`),
-  update: (id, data) => API.put(`/${id}`, data),
-  delete: (id) => API.delete(`/${id}`)
+  create: (data) => apiClient.post('/organizations', data),
+  list: () => apiClient.get('/organizations'),
+  getDetailedList: () => apiClient.get('/organizations/detailed'),
+  getById: (id) => apiClient.get(`/organizations/${id}`),
+  update: (id, data) => apiClient.put(`/organizations/${id}`, data),
+  delete: (id) => apiClient.delete(`/organizations/${id}`)
 };
 
 export default institutionApi;

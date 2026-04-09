@@ -1,12 +1,7 @@
-import axios from "axios";
-
-const API = axios.create({
-  baseURL: "http://localhost:5000/api/v1/stats",
-  withCredentials: true
-});
+import apiClient from './client';
 
 const statsApi = {
-  getDashboardStats: () => API.get("/dashboard")
+  getDashboardStats: () => apiClient.get('/stats/dashboard')
 };
 
 export default statsApi;

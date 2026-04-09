@@ -9,6 +9,7 @@ export const createWebsiteSchema = z.object({
         .min(2, 'Name must be at least 2 characters')
         .max(100, 'Name must not exceed 100 characters'),
     content: z.any().optional(),
+    template_id: z.string().min(1, 'Template ID is required').optional(),
     institution_id: z.string().optional(),
 });
 
@@ -41,16 +42,30 @@ export const updateWebsiteSchema = z.object({
 
 // Update website settings schema
 export const updateWebsiteSettingsSchema = z.object({
-    seo: z.json('seo should be valid JSON'),
-    contact: z.json('contact should be valid JSON'),
-    social_links: z.json('social_links should be valid JSON'),
+    seo: z.json('seo should be valid JSON').optional(),
+    contact: z.json('contact should be valid JSON').optional(),
+    social_links: z.json('social_links should be valid JSON').optional(),
 });
 
 // Website ID params schema
 export const websiteIdParamsSchema = z.object({
-    id: z.string().pipe(
-        z.cuid2('Invalid website ID format')
-    )
+    id: z.string().min(1, 'Website ID is required')
+});
+
+export const publishWebsiteSchema = z.object({
+    subdomain: z.string()
+        .trim()
+        .min(2)
+        .max(63)
+        .regex(/^[a-z0-9-]+$/, 'Subdomain can only contain lowercase letters, numbers, and hyphens')
+        .optional(),
+    customDomain: z.string().trim().min(3).optional(),
+}).refine((data) => Boolean(data.subdomain || data.customDomain), {
+    message: 'Either a subdomain or custom domain is required',
+});
+
+export const domainSchema = z.object({
+    domain: z.string().trim().min(3, 'Domain is required'),
 });
 
 export type CreateWebsiteInput = z.infer<typeof createWebsiteSchema>;
@@ -58,3 +73,5 @@ export type ListWebsitesQuerySchema = z.infer<typeof listWebsitesQuerySchema>;
 export type UpdateWebsiteInput = z.infer<typeof updateWebsiteSchema>;
 export type UpdateWebsiteSettingsInput = z.infer<typeof updateWebsiteSettingsSchema>;
 export type WebsiteIdParams = z.infer<typeof websiteIdParamsSchema>;
+export type PublishWebsiteInput = z.infer<typeof publishWebsiteSchema>;
+export type DomainInput = z.infer<typeof domainSchema>;

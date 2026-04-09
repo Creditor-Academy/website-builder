@@ -55,9 +55,11 @@ interface Institution {
   created_at: string;
   users?: any[];
   websites?: any[];
+  templates?: any[];
   _count?: {
     users: number;
     websites: number;
+    templates: number;
   };
 }
 
@@ -492,7 +494,7 @@ const Organizations = () => {
           </div>
           
           <div className="p-8 space-y-8 bg-slate-50 overflow-y-auto grow no-scrollbar">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 group hover:shadow-md transition-shadow">
                   <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors"><Users className="w-6 h-6" /></div>
                   <div>
@@ -505,6 +507,13 @@ const Organizations = () => {
                   <div>
                     <div className="text-sm font-bold text-slate-400 uppercase tracking-widest">Digital Assets</div>
                     <div className="text-2xl font-black text-slate-800 leading-none">{selectedOrgForView?.websites?.length || 0}</div>
+                  </div>
+               </div>
+               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 group hover:shadow-md transition-shadow">
+                  <div className="p-3 bg-amber-50 rounded-xl text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors"><FileText className="w-6 h-6" /></div>
+                  <div>
+                    <div className="text-sm font-bold text-slate-400 uppercase tracking-widest">Templates</div>
+                    <div className="text-2xl font-black text-slate-800 leading-none">{selectedOrgForView?.templates?.length || 0}</div>
                   </div>
                </div>
             </div>
@@ -576,6 +585,34 @@ const Organizations = () => {
                 )}
               </div>
             </section>
+
+            <section className="pb-4">
+              <h3 className="text-xl font-black text-slate-900 flex items-center gap-2 mb-4 px-1">
+                <FileText className="w-6 h-6 text-amber-600" />
+                Organization Templates
+              </h3>
+              <div className="grid grid-cols-1 gap-3">
+                {selectedOrgForView?.templates?.filter((t: any) => !t.deletedAt).map((tmpl: any) => (
+                  <div key={tmpl.id} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between group hover:border-amber-200 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                    <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 bg-amber-50 text-amber-600 flex items-center justify-center rounded-xl font-bold group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                          {tmpl.name.charAt(0).toUpperCase()}
+                       </div>
+                       <div>
+                          <p className="font-black text-slate-800 group-hover:text-amber-600 transition-colors">{tmpl.name}</p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{tmpl.category} • Created {new Date(tmpl.createdAt).toLocaleDateString()}</p>
+                       </div>
+                    </div>
+                    <Badge className="capitalize rounded-full font-bold text-[10px] py-1 px-3 border-none bg-amber-50 text-amber-700">
+                      {tmpl.scope?.toLowerCase() || 'institution'}
+                    </Badge>
+                  </div>
+                ))}
+                {(!selectedOrgForView?.templates || selectedOrgForView.templates.filter((t: any) => !t.deletedAt).length === 0) && (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200 text-slate-400 font-medium italic">No templates created for this organization</div>
+                )}
+              </div>
+            </section>
           </div>
           <DialogFooter className="bg-white p-6 border-t border-slate-100 shrink-0 gap-3 flex-row justify-end items-center">
             <Button variant="ghost" className="h-12 px-6 rounded-xl font-bold text-slate-500 hover:bg-slate-100" onClick={() => setIsViewModalOpen(false)}>Close Report</Button>
@@ -614,6 +651,7 @@ const Organizations = () => {
                 <TableHead className="font-semibold text-slate-700">Status</TableHead>
                 <TableHead className="font-semibold text-slate-700 text-center">Users</TableHead>
                 <TableHead className="font-semibold text-slate-700 text-center">Websites</TableHead>
+                <TableHead className="font-semibold text-slate-700 text-center">Templates</TableHead>
                 <TableHead className="font-semibold text-slate-700">Created</TableHead>
                 <TableHead className="text-right"></TableHead>
               </TableRow>
@@ -626,13 +664,14 @@ const Organizations = () => {
                     <TableCell><div className="h-6 w-20 bg-slate-100 rounded-full" /></TableCell>
                     <TableCell><div className="h-6 w-10 bg-slate-100 rounded mx-auto" /></TableCell>
                     <TableCell><div className="h-6 w-10 bg-slate-100 rounded mx-auto" /></TableCell>
+                    <TableCell><div className="h-6 w-10 bg-slate-100 rounded mx-auto" /></TableCell>
                     <TableCell><div className="h-6 w-32 bg-slate-100 rounded" /></TableCell>
                     <TableCell><div className="h-10 w-10 bg-slate-100 rounded ml-auto" /></TableCell>
                   </TableRow>
                 ))
               ) : filteredOrgs.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-64 text-center">
+                  <TableCell colSpan={7} className="h-64 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-400">
                       <Building2 className="w-12 h-12 mb-4 opacity-20" />
                       <p className="text-lg font-medium">No organizations found</p>
@@ -669,6 +708,9 @@ const Organizations = () => {
                     </TableCell>
                     <TableCell className="text-center font-semibold text-slate-700">
                       {org._count?.websites || 0}
+                    </TableCell>
+                    <TableCell className="text-center font-semibold text-slate-700">
+                      {org._count?.templates || 0}
                     </TableCell>
                     <TableCell className="text-slate-500 font-medium text-sm whitespace-nowrap">
                       {new Date(org.created_at).toLocaleDateString()}
