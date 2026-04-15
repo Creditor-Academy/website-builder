@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, ArrowRight, LayoutTemplate, Search, Trash2, RotateCcw, Building2 } from 'lucide-react';
+import { Plus, ArrowRight, ArrowLeft, LayoutTemplate, Search, Trash2, RotateCcw, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useBuilderStore from '@/store/useBuilderStore';
 import { cn } from '@/lib/utils';
@@ -178,14 +178,22 @@ export default function DashboardTemplates() {
       {/* Breadcrumbs */}
       <div className="mb-4 text-sm text-slate-500">
         <a href="/dashboard" className="hover:underline">Dashboard</a> /{' '}
-        <span className="font-semibold text-slate-700">Templates</span>
+        <span className="font-semibold text-slate-700">
+          Templates {showTrash && <span className="text-rose-500 font-black ml-1">/ Trash</span>}
+        </span>
       </div>
 
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
         <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Templates Library</h2>
-          <p className="text-slate-500 mt-1">Choose a professional starting point for your next digital venture.</p>
+          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            {showTrash ? 'Templates Trash' : 'Templates Library'}
+          </h2>
+          <p className="text-slate-500 mt-1">
+            {showTrash 
+              ? 'Manage and restore deleted templates.' 
+              : 'Choose a professional starting point for your next digital venture.'}
+          </p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -263,9 +271,25 @@ export default function DashboardTemplates() {
 
       {/* Trash banner */}
       {showTrash && (
-        <div className="mb-6 flex items-center gap-3 px-5 py-3 rounded-2xl bg-rose-50 border border-rose-200">
-          <Trash2 className="w-5 h-5 text-rose-500" />
-          <p className="text-sm text-rose-700 font-medium">Viewing deleted templates. Restore them to make them available again.</p>
+        <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 rounded-3xl bg-rose-50 border border-rose-100 shadow-sm animate-in slide-in-from-top-4 duration-300">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-2xl bg-rose-100 flex items-center justify-center text-rose-600 shadow-inner">
+              <Trash2 className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-base font-bold text-rose-900">Trash Management</p>
+              <p className="text-xs text-rose-600/80 font-medium">Viewing deleted templates. Restore items to make them public again.</p>
+            </div>
+          </div>
+         <Button 
+  variant="outline" 
+  className="rounded-2xl border-rose-200 bg-white text-rose-700 hover:text-black hover:bg-rose-100 hover:border-rose-300 transition-all font-bold px-6 shadow-sm group/back-btn"
+  onClick={() => setShowTrash(false)}
+>
+  <ArrowLeft className="w-4 h-4 mr-2 group-hover/back-btn:-translate-x-1 transition-transform" />
+  Back to Library
+</Button>
+
         </div>
       )}
 

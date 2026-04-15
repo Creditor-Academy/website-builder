@@ -775,7 +775,7 @@ const Dashboard = () => {
         '/dashboard/users',
         '/dashboard/organizations',
         '/dashboard/websites',
-        '/dashboard/admin-templates',
+        // '/dashboard/admin-templates',
         '/dashboard/deployment',
         '/dashboard/settings',
     ];
@@ -835,18 +835,16 @@ const Dashboard = () => {
         }
     }, [isAdmin]);
 
-    // Fetch DB templates when New Project dialog opens
+    // Fetch DB templates
     useEffect(() => {
-        if (isDialogOpen) {
-            templateApi.getWebsiteTemplates()
-                .then(res => {
-                    const raw = res.data?.data || res.data || [];
-                    const flat: any[] = Array.isArray(raw) ? raw : Object.values(raw).flat();
-                    setDbTemplates(flat.filter((t: any) => !t.deletedAt));
-                })
-                .catch(() => setDbTemplates([]));
-        }
-    }, [isDialogOpen]);
+        templateApi.getWebsiteTemplates()
+            .then(res => {
+                const raw = res.data?.data || res.data || [];
+                const flat: any[] = Array.isArray(raw) ? raw : Object.values(raw).flat();
+                setDbTemplates(flat.filter((t: any) => !t.deletedAt));
+            })
+            .catch(() => setDbTemplates([]));
+    }, []);
 
     const handleLogout = async () => {
         try {
@@ -935,8 +933,10 @@ const Dashboard = () => {
             site.name.toLowerCase().includes(searchQuery.toLowerCase())
         );
 
-        if (filterStatus !== 'all') {
-            tempWebsites = tempWebsites.filter(site => site.status.toLowerCase() === filterStatus);
+        if (filterStatus === 'all') {
+            tempWebsites = tempWebsites.filter(site => site.status?.toLowerCase() !== 'deleted');
+        } else {
+            tempWebsites = tempWebsites.filter(site => site.status?.toLowerCase() === filterStatus.toLowerCase());
         }
 
         if (sortBy === 'recent') {
@@ -1013,7 +1013,7 @@ const Dashboard = () => {
                                 <NavItem icon={<Building2 className="w-4 h-4" />} label="Organizations" to="/dashboard/organizations" activeColor="text-white" />
                             )}
                             <NavItem icon={<Layout className="w-4 h-4" />} label="Websites" to="/dashboard/websites" activeColor="text-white" />
-                            <NavItem icon={<LayoutTemplate className="w-4 h-4" />} label="Templates" to="/dashboard/admin-templates" activeColor="text-white" />
+                            {/* <NavItem icon={<LayoutTemplate className="w-4 h-4" />} label="Templates" to="/dashboard/admin-templates" activeColor="text-white" /> */}
                             <NavItem icon={<Activity className="w-4 h-4" />} label="Deployment Monitoring" to="/dashboard/deployment" activeColor="text-white" />
                             <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" to="/dashboard/settings" activeColor="text-white" />
                         </div>
@@ -1133,58 +1133,11 @@ const Dashboard = () => {
                                                 <div className="flex items-center justify-between mb-8">
                                                     <h3 className="text-xl font-bold text-slate-900 tracking-tight">Select a Template</h3>
                                                     <span className="text-xs font-bold text-slate-500 px-4 py-1.5 bg-white rounded-full border border-slate-200 shadow-sm uppercase tracking-wider">
-                                                        {templatesList.length + dbTemplates.length} options
+                                                        {dbTemplates.length} options
                                                     </span>
                                                 </div>
 
-                                                {/* Built-in Templates */}
-                                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Built-in Templates</p>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
-                                                    {templatesList.map((tpl) => (
-                                                        <div
-                                                            key={tpl.id}
-                                                            onClick={() => setSelectedTemplate(tpl.id)}
-                                                            className={cn(
-                                                                "group/template-dialog-card cursor-pointer rounded-[1.5rem] overflow-hidden transition-all duration-300 relative border-[3px] bg-white flex flex-col",
-                                                                selectedTemplate === tpl.id
-                                                                    ? "border-blue-500 shadow-[0_10px_40px_rgba(59,130,246,0.15)] scale-[1.02]"
-                                                                    : "border-transparent border-slate-200 hover:border-blue-300 hover:shadow-xl opacity-80 hover:opacity-100"
-                                                            )}
-                                                        >
-                                                            <div className="aspect-[4/3] bg-slate-100 relative overflow-hidden">
-                                                                <img
-                                                                    src={tpl.image}
-                                                                    alt={tpl.name}
-                                                                    className={cn("w-full h-full object-cover transition-transform duration-700", selectedTemplate === tpl.id ? "scale-105" : "group-hover/template-dialog-card:scale-105")}
-                                                                />
-                                                                <AnimatePresence>
-                                                                    {selectedTemplate === tpl.id && (
-                                                                        <motion.div
-                                                                            initial={{ scale: 0, opacity: 0 }}
-                                                                            animate={{ scale: 1, opacity: 1 }}
-                                                                            exit={{ scale: 0, opacity: 0 }}
-                                                                            className="absolute top-4 right-4 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-lg"
-                                                                        >
-                                                                            <CheckCircle className="w-5 h-5 text-white" />
-                                                                        </motion.div>
-                                                                    )}
-                                                                </AnimatePresence>
-                                                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover/template-dialog-card:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                                                                    <p className="text-white font-semibold text-sm drop-shadow-md">{tpl.desc}</p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="p-6 flex items-center gap-4 bg-white relative z-10 border-t border-slate-100">
-                                                                <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center transition-colors shadow-sm", selectedTemplate === tpl.id ? "bg-blue-100 text-blue-600" : "bg-slate-50 text-slate-500")}>
-                                                                    <tpl.icon className="w-6 h-6" />
-                                                                </div>
-                                                                <div>
-                                                                    <h4 className={cn("font-bold text-lg transition-colors leading-tight", selectedTemplate === tpl.id ? "text-slate-900" : "text-slate-700")}>{tpl.name}</h4>
-                                                                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">{tpl.category}</p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
+
 
                                                 {/* DB Templates */}
                                                 {dbTemplates.length > 0 && (
@@ -1309,7 +1262,7 @@ const Dashboard = () => {
                             />
                             <OverviewCard
                                 title="Templates Available"
-                                value={templatesList.length}
+                                value={dbTemplates.length}
                                 description="Ready to use designs"
                                 icon={<Layout className="w-5 h-5" />}
                                 iconBgClass="bg-gradient-to-br from-emerald-600 to-teal-600"
@@ -1341,7 +1294,7 @@ const Dashboard = () => {
                             </Select>
 
                             <div className="flex items-center gap-2">
-                                {['all', 'draft', 'published'].map((status) => (
+                                {['all', 'draft', 'published', 'deleted'].map((status) => (
                                     <Button
                                         key={status}
                                         variant={filterStatus === status ? 'default' : 'outline'}
@@ -1428,7 +1381,7 @@ const Dashboard = () => {
                                 {[
                                     { label: "Total Users", value: isLoadingStats ? "..." : stats.totalUsers, icon: <Users className="w-5 h-5" />, bg: "bg-purple-100", color: "text-purple-600", trend: "+12.5%", up: true },
                                     { label: "Active Websites", value: isLoadingStats ? "..." : stats.totalWebsites, icon: <Globe className="w-6 h-6" />, bg: "bg-indigo-100", color: "text-indigo-600", trend: "-3.2%", up: false },
-                                    { label: "Total Templates", value: templatesList.length, icon: <LayoutTemplate className="w-5 h-5" />, bg: "bg-emerald-100", color: "text-emerald-600", trend: "+2 Templates", up: true },
+                                    { label: "Total Templates", value: dbTemplates.length, icon: <LayoutTemplate className="w-5 h-5" />, bg: "bg-emerald-100", color: "text-emerald-600", trend: "+2 Templates", up: true },
                                     { label: "Active Deployments", value: isLoadingStats ? "..." : stats.activeDeployments, icon: <Activity className="w-5 h-5" />, bg: "bg-rose-100", color: "text-rose-600", trend: "+8.1%", up: true },
                                 ].map((stat, i) => (
                                     <motion.div
