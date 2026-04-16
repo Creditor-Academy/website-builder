@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send, ArrowUpRight, Users, MessageSquare, Clock } from 'lucide-react';
 import { Editable } from '@/components/ui/Editable';
+import contactApi from '@/api/contact';
+import useBuilderStore from '@/store/useBuilderStore';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -98,9 +100,56 @@ function CE({ as: Tag = 'span' as any, value, onSave, isEditing, style, classNam
 }
 
 // ─── Shared form ──────────────────────────────────────────────────────────
-function ContactForm({ content, isEditing, onContentChange, buttonPrimaryBg, buttonPrimaryText }) {
+function ContactForm({ content, isEditing, onContentChange, buttonPrimaryBg, buttonPrimaryText, websiteId }) {
+  const [formValues, setFormValues] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    message: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const handleChange = (field: 'firstName' | 'lastName' | 'email' | 'message', value: string) => {
+    setFormValues((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (isEditing) return;
+    if (!websiteId) return;
+
+    if (!formValues.firstName.trim() || !formValues.email.trim() || !formValues.message.trim()) {
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await contactApi.submitContactForm({
+        websiteId,
+        name: `${formValues.firstName} ${formValues.lastName}`.trim(),
+        email: formValues.email.trim(),
+        subject: content.headline || 'Contact Form Submission',
+        message: formValues.message.trim(),
+      });
+      setIsSubmitted(true);
+      setFormValues({
+        firstName: '',
+        lastName: '',
+        email: '',
+        message: '',
+      });
+      setTimeout(() => setIsSubmitted(false), 4000);
+    } catch (error) {
+      console.error('Failed to submit contact form:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Name row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
@@ -109,7 +158,15 @@ function ContactForm({ content, isEditing, onContentChange, buttonPrimaryBg, but
             onSave={(val) => onContentChange?.('labelFirstName', val)}
             className="ct-label"
           />
-          <input type="text" className="ct-input" placeholder="Jane" />
+          <input
+            type="text"
+            className="ct-input"
+            placeholder="Jane"
+            value={formValues.firstName}
+            onChange={(e) => handleChange('firstName', e.target.value)}
+            disabled={isSubmitting}
+            required
+          />
         </div>
         <div>
           <CE
@@ -117,7 +174,14 @@ function ContactForm({ content, isEditing, onContentChange, buttonPrimaryBg, but
             onSave={(val) => onContentChange?.('labelLastName', val)}
             className="ct-label"
           />
-          <input type="text" className="ct-input" placeholder="Doe" />
+          <input
+            type="text"
+            className="ct-input"
+            placeholder="Doe"
+            value={formValues.lastName}
+            onChange={(e) => handleChange('lastName', e.target.value)}
+            disabled={isSubmitting}
+          />
         </div>
       </div>
 
@@ -128,7 +192,15 @@ function ContactForm({ content, isEditing, onContentChange, buttonPrimaryBg, but
           onSave={(val) => onContentChange?.('labelEmail', val)}
           className="ct-label"
         />
-        <input type="email" className="ct-input" placeholder="jane@example.com" />
+        <input
+          type="email"
+          className="ct-input"
+          placeholder="jane@example.com"
+          value={formValues.email}
+          onChange={(e) => handleChange('email', e.target.value)}
+          disabled={isSubmitting}
+          required
+        />
       </div>
 
       {/* Message */}
@@ -138,7 +210,15 @@ function ContactForm({ content, isEditing, onContentChange, buttonPrimaryBg, but
           onSave={(val) => onContentChange?.('labelMessage', val)}
           className="ct-label"
         />
-        <textarea rows={5} className="ct-input" placeholder="Tell us what's on your mind…" />
+        <textarea
+          rows={5}
+          className="ct-input"
+          placeholder="Tell us what's on your mind..."
+          value={formValues.message}
+          onChange={(e) => handleChange('message', e.target.value)}
+          disabled={isSubmitting}
+          required
+        />
       </div>
 
       {/* Submit */}
@@ -146,15 +226,24 @@ function ContactForm({ content, isEditing, onContentChange, buttonPrimaryBg, but
         type="submit"
         className="ct-submit"
         style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
+        disabled={isSubmitting}
       >
-        <Send size={14} />
-        <CE
-          as="span" value={content.buttonText || 'Send Message'} isEditing={isEditing}
-          onSave={(val) => onContentChange?.('buttonText', val)}
-          inv={buttonPrimaryText === '#ffffff'}
-        />
+        {isSubmitting ? (
+          <span>Sending...</span>
+        ) : isSubmitted ? (
+          <span>Message Sent</span>
+        ) : (
+          <>
+            <Send size={14} />
+            <CE
+              as="span" value={content.buttonText || 'Send Message'} isEditing={isEditing}
+              onSave={(val) => onContentChange?.('buttonText', val)}
+              inv={buttonPrimaryText === '#ffffff'}
+            />
+          </>
+        )}
       </button>
-    </div>
+    </form>
   );
 }
 
@@ -300,7 +389,7 @@ function InfoItems({ content, isEditing, onContentChange, headingColor, paragrap
 }
 
 // ─── Form panel wrapper ───────────────────────────────────────────────────
-function FormPanel({ content, isEditing, onContentChange, buttonPrimaryBg, buttonPrimaryText, dark = false }) {
+function FormPanel({ content, isEditing, onContentChange, buttonPrimaryBg, buttonPrimaryText, dark = false, websiteId }) {
   return (
     <div
       style={{
@@ -324,6 +413,7 @@ function FormPanel({ content, isEditing, onContentChange, buttonPrimaryBg, butto
         onContentChange={onContentChange}
         buttonPrimaryBg={dark ? '#E11D48' : buttonPrimaryBg}
         buttonPrimaryText={buttonPrimaryText}
+        websiteId={websiteId}
       />
     </div>
   );
@@ -332,14 +422,14 @@ function FormPanel({ content, isEditing, onContentChange, buttonPrimaryBg, butto
 // ──────────────────────────────────────────────────────────────────────────
 // VARIANT: split  →  Info Left / Form Right
 // ──────────────────────────────────────────────────────────────────────────
-function SplitVariant({ content, isEditing, onContentChange, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText }) {
+function SplitVariant({ content, isEditing, onContentChange, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText, websiteId }) {
   return (
     <div>
       <ContactHeader content={content} isEditing={isEditing} onContentChange={onContentChange} headingColor={headingColor} paragraphColor={paragraphColor} centered={false} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-start">
         <InfoItems content={content} isEditing={isEditing} onContentChange={onContentChange} headingColor={headingColor} paragraphColor={paragraphColor} />
-        <FormPanel content={content} isEditing={isEditing} onContentChange={onContentChange} buttonPrimaryBg={buttonPrimaryBg} buttonPrimaryText={buttonPrimaryText} />
+        <FormPanel content={content} isEditing={isEditing} onContentChange={onContentChange} buttonPrimaryBg={buttonPrimaryBg} buttonPrimaryText={buttonPrimaryText} websiteId={websiteId} />
       </div>
     </div>
   );
@@ -348,13 +438,13 @@ function SplitVariant({ content, isEditing, onContentChange, headingColor, parag
 // ──────────────────────────────────────────────────────────────────────────
 // VARIANT: centered  →  Centered Header + Single Form Card
 // ──────────────────────────────────────────────────────────────────────────
-function CenteredVariant({ content, isEditing, onContentChange, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText }) {
+function CenteredVariant({ content, isEditing, onContentChange, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText, websiteId }) {
   return (
     <div>
       <ContactHeader content={content} isEditing={isEditing} onContentChange={onContentChange} headingColor={headingColor} paragraphColor={paragraphColor} centered />
 
       <div style={{ maxWidth: 640, margin: '0 auto' }}>
-        <FormPanel content={content} isEditing={isEditing} onContentChange={onContentChange} buttonPrimaryBg={buttonPrimaryBg} buttonPrimaryText={buttonPrimaryText} />
+        <FormPanel content={content} isEditing={isEditing} onContentChange={onContentChange} buttonPrimaryBg={buttonPrimaryBg} buttonPrimaryText={buttonPrimaryText} websiteId={websiteId} />
       </div>
     </div>
   );
@@ -363,7 +453,7 @@ function CenteredVariant({ content, isEditing, onContentChange, headingColor, pa
 // ──────────────────────────────────────────────────────────────────────────
 // VARIANT: map  →  Dark Form Left / Map Right
 // ──────────────────────────────────────────────────────────────────────────
-function MapVariant({ content, isEditing, onContentChange, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText }) {
+function MapVariant({ content, isEditing, onContentChange, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText, websiteId }) {
   return (
     <div>
       <ContactHeader content={content} isEditing={isEditing} onContentChange={onContentChange} headingColor={headingColor} paragraphColor={paragraphColor} centered={false} />
@@ -375,6 +465,7 @@ function MapVariant({ content, isEditing, onContentChange, headingColor, paragra
           onContentChange={onContentChange}
           buttonPrimaryBg={buttonPrimaryBg} buttonPrimaryText={buttonPrimaryText}
           dark
+          websiteId={websiteId}
         />
 
         {/* Map */}
@@ -420,6 +511,7 @@ function MapVariant({ content, isEditing, onContentChange, headingColor, paragra
 // Main export
 // ──────────────────────────────────────────────────────────────────────────
 export function ContactSection({ section, isSelected, isEditing, onContentChange }: any) {
+  const activeWebsiteId = useBuilderStore((state) => state.activeWebsiteId);
   const { content, styles } = section;
   const variant = section.variant || 'split';
   const background = styles.useGradient
@@ -432,7 +524,16 @@ export function ContactSection({ section, isSelected, isEditing, onContentChange
   const buttonPrimaryBg = styles.buttonPrimaryBg || '#0f172a';
   const buttonPrimaryText = styles.buttonPrimaryText || '#ffffff';
 
-  const shared = { content, isEditing, onContentChange, headingColor, paragraphColor, buttonPrimaryBg, buttonPrimaryText };
+  const shared = {
+    content,
+    isEditing,
+    onContentChange,
+    headingColor,
+    paragraphColor,
+    buttonPrimaryBg,
+    buttonPrimaryText,
+    websiteId: section.websiteId || activeWebsiteId,
+  };
 
   return (
     <section style={{

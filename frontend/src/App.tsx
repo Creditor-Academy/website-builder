@@ -12,6 +12,7 @@ import DashboardTemplates from "./pages/DashboardTemplates";
 import DashboardDeployment from "./pages/DashboardDeployment";
 import DashboardAssets from "./pages/DashboardAssets";
 import DashboardSettings from "./pages/DashboardSettings";
+import DashboardMessages from "./pages/DashboardMessages";
 import TemplateEditor from "./pages/TemplateEditor";
 import Organizations from "./pages/dashboard/Organizations";
 import { WebsiteEditor } from "./components/editor/WebsiteEditor";
@@ -62,6 +63,7 @@ const App = () => (
               <Route path="templates" element={<DashboardTemplates />} />
               <Route path="deployment" element={<DashboardDeployment />} />
               <Route path="assets" element={<DashboardAssets />} />
+              <Route path="messages" element={<DashboardMessages />} />
               <Route path="settings" element={<DashboardSettings />} />
             </Route>
             <Route path="/builder/:id" element={<WebsiteEditor />} />

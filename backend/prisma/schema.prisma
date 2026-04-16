@@ -113,6 +113,7 @@ model Website {
   owner                     User          @relation("WebsiteOwner", fields: [owner_id], references: [id], onDelete: Cascade)
   sourceTemplate            WebsiteTemplate? @relation(fields: [source_template_id], references: [id], onDelete: SetNull)
   settings                  Settings?     @relation(fields: [settings_id], references: [id], onDelete: Cascade)
+  contactSubmissions        ContactSubmission[]
 
   @@index([owner_id])
   @@index([source_template_id])
@@ -190,4 +191,22 @@ model SectionTemplate {
 
   @@index([scope])
   @@index([institution_id])
+}
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  websiteId String
+  name      String
+  email     String
+  subject   String?
+  message   String
+  status    String   @default("unread") // unread, read, replied
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  website Website @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@index([websiteId])
+  @@index([status])
+  @@index([createdAt])
 }

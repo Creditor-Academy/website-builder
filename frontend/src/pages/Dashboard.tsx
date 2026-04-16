@@ -7,7 +7,7 @@ import {
     FileText, Search, Sparkles, Zap, Files, Building2, ShoppingBag, Users,
     ArrowRight, ChevronLeft, Palette, Layers, MonitorPlay, Move, LayoutTemplate,
     Upload, Monitor, Link as LinkIcon, Activity, Menu, X, ShieldCheck, ListFilter, Bell, ArrowUp, ArrowDown,
-    UserX, RefreshCw, Eye
+    UserX, RefreshCw, Eye, MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -81,7 +81,7 @@ const NavItem = ({ icon, label, to, activeColor = 'text-white', hoverBg = 'hover
     );
 };
 
-const WebsiteCard = ({ site, index, onDelete, onEdit }) => {
+const WebsiteCard = ({ site, index, onDelete, onEdit, onViewMessages }) => {
     const template = templatesList.find((t) => t.id === site.templateId);
 
     return (
@@ -162,9 +162,14 @@ const WebsiteCard = ({ site, index, onDelete, onEdit }) => {
                     <div className={`w-1.5 h-1.5 rounded-full ${site.status === 'Published' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
                     {site.status}
                 </div>
-                <Button variant="link" className="text-indigo-600 p-0 h-auto text-sm font-bold group-hover/website-card:underline underline-offset-4" onClick={onEdit}>
-                    Open Editor →
-                </Button>
+                <div className="flex items-center gap-4">
+                    <Button variant="link" className="text-slate-500 p-0 h-auto text-sm font-semibold hover:text-indigo-600" onClick={onViewMessages}>
+                        Messages
+                    </Button>
+                    <Button variant="link" className="text-indigo-600 p-0 h-auto text-sm font-bold group-hover/website-card:underline underline-offset-4" onClick={onEdit}>
+                        Open Editor →
+                    </Button>
+                </div>
             </CardFooter>
         </Card>
     );
@@ -1005,6 +1010,7 @@ const Dashboard = () => {
                     )}
                     <NavItem icon={<Layout className="w-4 h-4" />} label="Templates" to="/dashboard/templates" />
                     <NavItem icon={<FileText className="w-4 h-4" />} label="Assets" to="/dashboard/assets" />
+                    <NavItem icon={<MessageSquare className="w-4 h-4" />} label="Messages" to="/dashboard/messages" />
                     {isAdmin && (
                         <div className="pt-1">
                             <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest px-3 mb-1">System</p>
@@ -1324,6 +1330,7 @@ const Dashboard = () => {
                                         index={index}
                                         onDelete={() => deleteWebsite(site.id)}
                                         onEdit={() => navigate(`/builder/${site.id}`)}
+                                        onViewMessages={() => navigate(`/dashboard/messages?websiteId=${site.id}`)}
                                     />
                                 ))}
                             </div>
