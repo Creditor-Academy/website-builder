@@ -121,6 +121,7 @@ model Website {
   deployments               Deployment[]
   domains                   Domain[]
   formSubmissions           FormSubmission[]
+  contactSubmissions        ContactSubmission[]
 
   @@index([owner_id])
   @@index([source_template_id])
@@ -359,4 +360,22 @@ model AuditLog {
   @@index([entity_type, entity_id])
   @@index([created_at])
   @@map("audit_logs")
+}
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  websiteId String
+  name      String
+  email     String
+  subject   String?
+  message   String
+  status    String   @default("unread") // unread, read, replied
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  website Website @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@index([websiteId])
+  @@index([status])
+  @@index([createdAt])
 }

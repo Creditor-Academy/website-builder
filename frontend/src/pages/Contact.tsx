@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Phone, 
@@ -19,26 +19,117 @@ import {
 import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
 import Footer from "./Footer";
+import contactApi from "@/api/contact";
+import websiteApi from "@/api/website";
 
 export default function Contact() {
+  const [searchParams] = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [websiteId, setWebsiteId] = useState<string>(searchParams.get("websiteId") || "");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "General Inquiry",
+    message: "",
+  });
   const isDark = theme === 'dark';
+
+  const getWebsiteIdFromBuilderStorage = () => {
+    try {
+      const raw = localStorage.getItem('website-builder-storage');
+      if (!raw) return '';
+      const parsed = JSON.parse(raw);
+      const activeId = parsed?.state?.activeWebsiteId;
+      return typeof activeId === 'string' ? activeId : '';
+    } catch {
+      return '';
+    }
+  };
 
   useEffect(() => {
     document.body.style.backgroundColor = isDark ? '#020617' : '#f8fafc';
   }, [isDark]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const paramWebsiteId = searchParams.get("websiteId");
+    if (paramWebsiteId) {
+      setWebsiteId(paramWebsiteId);
+      return;
+    }
+
+    const user = localStorage.getItem("user");
+    if (!user) return;
+
+    websiteApi
+      .getWebsites()
+      .then((res) => {
+        const websites = res?.data?.websites || [];
+        if (Array.isArray(websites) && websites.length > 0) {
+          setWebsiteId(websites[0].id);
+        }
+      })
+      .catch(() => {
+        // Keep form usable; validation on submit will explain if website is missing.
+      });
+  }, [searchParams]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
+
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+      setSubmitError("Please fill all required fields.");
+      return;
+    }
+
     setIsSubmitting(true);
-    setTimeout(() => {
+
+    try {
+      let resolvedWebsiteId = websiteId;
+
+      if (!resolvedWebsiteId) {
+        resolvedWebsiteId = getWebsiteIdFromBuilderStorage();
+      }
+
+      if (!resolvedWebsiteId) {
+        const websitesResponse = await websiteApi.getWebsites();
+        const websites = websitesResponse?.data?.websites || [];
+        resolvedWebsiteId = Array.isArray(websites) && websites[0]?.id ? websites[0].id : '';
+      }
+
+      if (!resolvedWebsiteId) {
+        throw new Error('Website ID not found. Open this page with ?websiteId=YOUR_WEBSITE_ID.');
+      }
+
+      if (resolvedWebsiteId !== websiteId) {
+        setWebsiteId(resolvedWebsiteId);
+      }
+
+      await contactApi.submitContactForm({
+        websiteId: resolvedWebsiteId,
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        subject: formData.subject,
+        message: formData.message.trim(),
+      });
+
+      setFormData({
+        name: "",
+        email: "",
+        subject: "General Inquiry",
+        message: "",
+      });
       setIsSubmitting(false);
       setIsSent(true);
       setTimeout(() => setIsSent(false), 5000);
-    }, 1500);
+    } catch (error: any) {
+      setIsSubmitting(false);
+      setSubmitError(error?.response?.data?.message || "Failed to send message. Please try again.");
+    }
   };
 
   const contactMethods = [
@@ -272,6 +363,10 @@ export default function Contact() {
                     <input 
                       type="text" 
                       placeholder="John Doe" 
+                      value={formData.name}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                      required
+                      disabled={isSubmitting}
                       className={cn(
                         "w-full h-16 px-8 rounded-2xl border-2 outline-none transition-all font-bold text-lg",
                         isDark 
@@ -285,6 +380,10 @@ export default function Contact() {
                     <input 
                       type="email" 
                       placeholder="john@example.com" 
+                      value={formData.email}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                      required
+                      disabled={isSubmitting}
                       className={cn(
                         "w-full h-16 px-8 rounded-2xl border-2 outline-none transition-all font-bold text-lg",
                         isDark 
@@ -298,6 +397,9 @@ export default function Contact() {
                 <div className="space-y-3">
                   <label className={cn("text-sm font-black uppercase tracking-widest ml-1", isDark ? "text-slate-500" : "text-slate-400")}>How can we help?</label>
                   <select 
+                    value={formData.subject}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, subject: e.target.value }))}
+                    disabled={isSubmitting}
                     className={cn(
                       "w-full h-16 px-8 rounded-2xl border-2 outline-none transition-all font-bold text-lg appearance-none",
                       isDark 
@@ -317,6 +419,10 @@ export default function Contact() {
                   <textarea 
                     rows={6}
                     placeholder="Tell us about your project..." 
+                    value={formData.message}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
+                    required
+                    disabled={isSubmitting}
                     className={cn(
                       "w-full p-8 rounded-3xl border-2 outline-none transition-all font-bold text-lg resize-none",
                       isDark 
@@ -326,7 +432,14 @@ export default function Contact() {
                   />
                 </div>
 
+                {submitError && (
+                  <p className={cn("text-sm font-semibold", isDark ? "text-rose-400" : "text-rose-600")}>
+                    {submitError}
+                  </p>
+                )}
+
                 <motion.button
+                  type="submit"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   disabled={isSubmitting || isSent}

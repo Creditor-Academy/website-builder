@@ -36,6 +36,36 @@ const PrivacyPolicy = React.lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = React.lazy(() => import("./pages/TermsOfService"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 const GoogleCallback = React.lazy(() => import("./pages/GoogleCallback"));
+import Index from "./pages/Index";
+import Dashboard from "./pages/Dashboard";
+import DashboardUsers from "./pages/DashboardUsers";
+import DashboardWebsites from "./pages/DashboardWebsites";
+import DashboardTemplates from "./pages/DashboardTemplates";
+import DashboardDeployment from "./pages/DashboardDeployment";
+import DashboardAssets from "./pages/DashboardAssets";
+import DashboardSettings from "./pages/DashboardSettings";
+import DashboardMessages from "./pages/DashboardMessages";
+import TemplateEditor from "./pages/TemplateEditor";
+import Organizations from "./pages/dashboard/Organizations";
+import { WebsiteEditor } from "./components/editor/WebsiteEditor";
+import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword";
+import VerifyEmail from "./pages/VerifyEmail";
+import Features from "./pages/Features";
+import Services from "./pages/Services";
+import Pricing from "./pages/Pricing";
+import Contact from "./pages/Contact";
+import Start from "./pages/Start";
+import Templates from "./pages/Templates";
+import Resources from "./pages/Resources";
+import About from "./pages/About";
+import Blog from "./pages/Blog";
+import Careers from "./pages/Careers";
+import Help from "./pages/Help";
+import Status from "./pages/Status";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import NotFound from "./pages/NotFound";
 
 import { ScrollToTop } from "./components/utils/ScrollToTop";
 import { JumpToTop } from "./components/ui/JumpToTop";
@@ -70,6 +100,7 @@ const App = () => (
                 <Route path="templates" element={<DashboardTemplates />} />
                 <Route path="deployment" element={<DashboardDeployment />} />
                 <Route path="assets" element={<DashboardAssets />} />
+              <Route path="messages" element={<DashboardMessages />} />
                 <Route path="settings" element={<DashboardSettings />} />
               </Route>
               <Route path="/builder/:id" element={<WebsiteEditor />} />
