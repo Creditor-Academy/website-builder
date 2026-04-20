@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { sanitizeHTML } from '@/utils/sanitize';
 
 export function ButtonBlock({ section, isSelected, isEditing, onContentChange }) {
     const { content, styles } = section;
@@ -40,7 +41,7 @@ export function ButtonBlock({ section, isSelected, isEditing, onContentChange })
                             contentEditable={isEditing}
                             suppressContentEditableWarning
                             onBlur={(e) => handleTextEdit('text', e)}
-                         dangerouslySetInnerHTML={{ __html: content.text || 'Click Me' }} />
+                         dangerouslySetInnerHTML={{ __html: sanitizeHTML(content.text || 'Click Me') }} />
                     </Button>
                 </div>
             </div>

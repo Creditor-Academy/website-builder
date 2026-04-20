@@ -7,8 +7,11 @@ import dotenv from "dotenv";
 
 dotenv.config({ quiet: true });
 
-const secretKey = process.env.JWT_SECRET || '';
-const expiresIn = TOKEN_EXPIRY.ACCESS_TOKEN || '15m'; // Default to 15 minutes if not set
+const secretKey = process.env.JWT_SECRET;
+if (!secretKey) {
+  throw new Error('FATAL: JWT_SECRET environment variable is not set. Refusing to start with an empty signing key.');
+}
+const expiresIn = TOKEN_EXPIRY.ACCESS_TOKEN || '15m';
 
 export const generateAccessToken = (payload: any) => {
   return jwt.sign(

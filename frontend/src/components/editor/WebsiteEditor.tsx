@@ -13,6 +13,7 @@ import { TextFormattingToolbar } from "./TextFormattingToolbar";
 import { GuidedTour } from "./GuidedTour";
 import { AssetLibraryPanel } from "./AssetLibraryPanel";
 import { DesignSystemPanel } from "./DesignSystemPanel";
+import { VersionHistoryPanel } from "./VersionHistoryPanel";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -30,7 +31,8 @@ import {
   AlertCircle,
   Image as ImageIcon,
   Wand2,
-  Edit
+  Edit,
+  History
 } from "lucide-react";
 import {
   Tooltip,
@@ -66,8 +68,7 @@ function EditorContent() {
     { id: "pages", icon: FileText, label: "Pages" },
     { id: "assets", icon: ImageIcon, label: "Assets" },
     { id: "design", icon: Wand2, label: "Design System" },
-    { id: "edit", icon: Edit, label: "Edit" },
-  ];
+    { id: "edit", icon: Edit, label: "Edit" },  { id: "history", icon: History, label: "Version History" },  ];
 
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden font-sans">
@@ -164,6 +165,7 @@ function EditorContent() {
                     {leftNavTab === "pages" && <PageManager />}
                     {leftNavTab === "edit" && <PropertiesPanel />}
                     {leftNavTab === "settings" && <SiteSettings />}
+                    {leftNavTab === "history" && <VersionHistoryPanel />}
                   </div>
                 </div>
               </ResizablePanel>
@@ -175,23 +177,9 @@ function EditorContent() {
             className="bg-slate-100/30 p-4 lg:p-6 overflow-hidden flex flex-col relative"
           >
             <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px] opacity-40 pointer-events-none"></div>
-            <CanvasPreview />
+              <CanvasPreview />
           </ResizablePanel>
-          {!editor.previewMode &&
-            editor.showRightPanel &&
-            false && (
-              <>
-                <ResizableHandle className="w-1 bg-slate-100 hover:bg-primary/30 transition-all border-l border-slate-200" />
-                <ResizablePanel
-                  defaultSize={25}
-                  minSize={20}
-                  maxSize={35}
-                  className="bg-white border-l border-slate-200 shadow-sm"
-                >
-                  <PropertiesPanel />
-                </ResizablePanel>
-              </>
-            )}
+          {/* Right panel disabled — PropertiesPanel is already available via the Edit tab in the left sidebar */}
         </ResizablePanelGroup>
       </div>
     </div>

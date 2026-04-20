@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { useBuilder } from '@/contexts/BuilderContext';
+import useBuilderStore from '@/store/useBuilderStore';
 import {
     Settings,
     Globe,
@@ -7,17 +8,43 @@ import {
     Zap,
     Smartphone,
     Palette,
-    CheckCircle2
+    CheckCircle2,
+    Loader2
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
 
 export function SiteSettings() {
     const { state } = useBuilder();
     const { activeWebsite } = state;
+    const store = useBuilderStore();
+    const { toast } = useToast();
+
+    const [projectName, setProjectName] = useState(activeWebsite?.name || '');
+    const [customDomain, setCustomDomain] = useState('');
+    const [lazyLoading, setLazyLoading] = useState(true);
+    const [assetOptimization, setAssetOptimization] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleSave = useCallback(async () => {
+        if (!activeWebsite) return;
+        setIsSaving(true);
+        try {
+            if (projectName && projectName !== activeWebsite.name) {
+                await store.updateWebsite(activeWebsite.id, { name: projectName });
+            }
+            toast({ title: 'Settings saved', description: 'Your site settings have been updated.' });
+        } catch (err) {
+            console.error('Failed to save settings:', err);
+            toast({ title: 'Error', description: 'Failed to save settings.', variant: 'destructive' });
+        } finally {
+            setIsSaving(false);
+        }
+    }, [activeWebsite, projectName, store, toast]);
 
     if (!activeWebsite) return null;
 
@@ -43,7 +70,8 @@ export function SiteSettings() {
                             <div className="space-y-2">
                                 <Label className="text-xs font-bold text-slate-700">Project Name</Label>
                                 <Input
-                                    defaultValue={activeWebsite.name}
+                                    value={projectName}
+                                    onChange={(e) => setProjectName(e.target.value)}
                                     className="h-10 text-xs bg-white border-slate-200 rounded-xl"
                                 />
                             </div>
@@ -52,6 +80,8 @@ export function SiteSettings() {
                                 <div className="flex gap-2">
                                     <Input
                                         placeholder="mysite.com"
+                                        value={customDomain}
+                                        onChange={(e) => setCustomDomain(e.target.value)}
                                         className="h-10 text-xs bg-white border-slate-200 rounded-xl flex-1"
                                     />
                                     <Button variant="outline" size="sm" className="h-10 rounded-xl text-xs font-bold px-4">Connect</Button>
@@ -74,14 +104,14 @@ export function SiteSettings() {
                                     <p className="text-xs font-bold text-slate-700">Lazy Loading</p>
                                     <p className="text-[10px] text-slate-400 min-w-0">Load images as they enter the viewport</p>
                                 </div>
-                                <Switch defaultChecked />
+                                <Switch checked={lazyLoading} onCheckedChange={setLazyLoading} />
                             </div>
                             <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 hover:border-primary/20 transition-colors cursor-pointer">
                                 <div className="space-y-1">
                                     <p className="text-xs font-bold text-slate-700">Asset Optimization</p>
                                     <p className="text-[10px] text-slate-400 min-w-0">Compress images and minify code</p>
                                 </div>
-                                <Switch defaultChecked />
+                                <Switch checked={assetOptimization} onCheckedChange={setAssetOptimization} />
                             </div>
                         </div>
                     </div>
@@ -109,8 +139,8 @@ export function SiteSettings() {
             </ScrollArea>
 
             <div className="p-4 border-t border-slate-100 bg-white">
-                <Button className="w-full h-11 rounded-2xl font-bold shadow-lg shadow-primary/20">
-                    Save Changes
+                <Button onClick={handleSave} disabled={isSaving} className="w-full h-11 rounded-2xl font-bold shadow-lg shadow-primary/20">
+                    {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</> : 'Save Changes'}
                 </Button>
             </div>
         </div>

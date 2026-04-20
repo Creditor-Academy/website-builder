@@ -41,11 +41,10 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
       institution_id: decoded.institution_id
     };
 
-    // verified check can be added here if needed in the future, as per business requirements
-
-    // // Check if user is verified
-    // if (!user.isVerified) {
-    //   return res.status(403).json({ error: 'Please verify your email before logging in' });
+    // Note: email verification is tracked in session but not enforced as a blocker.
+    // Uncomment the check below to require verified email for all actions.
+    // if (sessionData.isVerified === false) {
+    //   return res.status(403).json({ error: 'Please verify your email before continuing' });
     // }
 
     // Attach user to request context

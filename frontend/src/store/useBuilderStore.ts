@@ -12,6 +12,10 @@ import {
 } from '@/lib/defaultPageData';
 import { builderWebsiteToTemplatePayload, templateToBuilderWebsite } from '@/lib/templateBuilder';
 
+let _saveTimer: ReturnType<typeof setTimeout> | null = null;
+const SAVE_DEBOUNCE_MS = 800;
+const MAX_HISTORY = 50;
+
 const TEMPLATE_MAP: Record<string, () => any> = {
     blank: getDefaultPage,
     business: getBusinessPage,
@@ -29,7 +33,13 @@ export interface Asset {
     url: string;
     size?: string;
     date: string;
+    scope?: 'GLOBAL' | 'WEBSITE';
+    websiteId?: string;
 }
+
+type AssetScope = {
+    websiteId?: string;
+};
 
 export interface Page {
     id: string;
@@ -88,7 +98,8 @@ export interface BuilderStore {
     activeWebsiteId: string | null;
     activePageId: string | null;
     editor: EditorState;
-    assets: Asset[];
+    globalAssets: Asset[];
+    websiteAssetsByWebsiteId: Record<string, Asset[]>;
     history: Page[][];
     historyIndex: number;
     templateEditor: TemplateEditorState | null;
@@ -97,10 +108,10 @@ export interface BuilderStore {
     startTemplateEditing: (template: any) => void;
     stopTemplateEditing: () => void;
     fetchWebsites: (institutionId?: string, isAdmin?: boolean) => Promise<void>;
-    fetchAssets: () => Promise<void>;
+    fetchAssets: (scope?: AssetScope) => Promise<void>;
     createWebsite: (name: string, template?: string, institutionId?: string) => Promise<string>;
     updateWebsite: (id: string, updates: Partial<Website>) => Promise<void>;
-    selectWebsite: (id: string) => void;
+    selectWebsite: (id: string) => Promise<void>;
     deleteWebsite: (id: string) => Promise<void>;
     setActivePage: (pageId: string) => void;
     addPage: (pageData: Partial<Page>) => void;
@@ -117,9 +128,10 @@ export interface BuilderStore {
     updateComponent: (sectionId: string, componentId: string, updates: any) => void;
     deleteComponent: (sectionId: string, componentId: string) => void;
     addAsset: (asset: Omit<Asset, 'id' | 'date'>) => void;
-    uploadAsset: (file: File) => Promise<void>;
-    importAssetFromUrl: (name: string, url: string) => Promise<void>;
-    deleteAsset: (id: string) => Promise<void>;
+    uploadAsset: (file: File, scope?: AssetScope) => Promise<void>;
+    importAssetFromUrl: (name: string, url: string, scope?: AssetScope) => Promise<void>;
+    deleteAsset: (id: string, scope?: AssetScope) => Promise<void>;
+    getScopedAssets: (websiteId?: string) => Asset[];
     getActiveWebsite: () => Website | undefined;
     getActivePage: () => Page | null;
     updateCurrentPage: (updates: Partial<Page>) => void;
@@ -156,7 +168,8 @@ const useBuilderStore = create<BuilderStore>()(
                     isFinished: false,
                 },
             },
-            assets: [],
+            globalAssets: [],
+            websiteAssetsByWebsiteId: {},
             history: [],
             historyIndex: -1,
             templateEditor: null,
@@ -196,11 +209,23 @@ const useBuilderStore = create<BuilderStore>()(
 
             stopTemplateEditing: () => set({ templateEditor: null }),
 
-            fetchAssets: async () => {
+            fetchAssets: async (scope = {}) => {
                 try {
                     const { default: assetApi } = await import('../api/assets');
-                    const response = await assetApi.listAssets();
-                    set({ assets: response.data.assets || [] });
+                    const response = await assetApi.listAssets(scope);
+                    const assets = response.data.assets || [];
+
+                    if (scope.websiteId) {
+                        set((state) => ({
+                            websiteAssetsByWebsiteId: {
+                                ...state.websiteAssetsByWebsiteId,
+                                [scope.websiteId as string]: assets,
+                            }
+                        }));
+                        return;
+                    }
+
+                    set({ globalAssets: assets });
                 } catch (error) {
                     console.error('Failed to fetch assets from backend:', error);
                 }
@@ -333,6 +358,8 @@ const useBuilderStore = create<BuilderStore>()(
             },
 
             saveActiveWebsite: async () => {
+                if (_saveTimer) clearTimeout(_saveTimer);
+                _saveTimer = setTimeout(async () => {
                 const state = get();
                 const activeId = state.activeWebsiteId;
                 if (!activeId) return;
@@ -364,14 +391,44 @@ const useBuilderStore = create<BuilderStore>()(
                 } catch (error) {
                     console.error("Auto-save failed:", error);
                 }
+                }, SAVE_DEBOUNCE_MS);
             },
 
-            selectWebsite: (id) => {
-                const website = get().websites.find(w => w.id === id);
+            selectWebsite: async (id) => {
+                let website = get().websites.find(w => w.id === id);
+                if (!website) {
+                    // Fetch from backend if not in local store
+                    try {
+                        const { default: websiteApi } = await import('../api/website');
+                        const response = await websiteApi.getWebsiteById(id);
+                        const w = response.data?.website || response.data;
+                        if (w) {
+                            website = {
+                                id: w.id,
+                                name: w.name,
+                                status: w.status,
+                                lastEdited: w.updated_at || w.created_at,
+                                pages: w.content?.pages || [],
+                                activePageId: w.content?.activePageId || null,
+                                templateId: w.content?.templateId || 'blank',
+                                publishedUrl: w.content?.builderMeta?.publishedUrl || undefined,
+                                builderMeta: w.content?.builderMeta || undefined,
+                                sourceTemplateId: w.source_template_id || w.content?.sourceTemplateId || undefined,
+                                institution: w.institution,
+                                institution_id: w.institution_id,
+                                owner_id: w.owner_id,
+                                settings: w.settings
+                            };
+                            set((state) => ({ websites: [...state.websites, website!] }));
+                        }
+                    } catch (error) {
+                        console.error("Failed to fetch website:", error);
+                    }
+                }
                 if (website) {
                     set({
                         activeWebsiteId: id,
-                        activePageId: website.activePageId || website.pages[0].id,
+                        activePageId: website.activePageId || website.pages[0]?.id,
                         history: [website.pages],
                         historyIndex: 0
                     });
@@ -469,8 +526,11 @@ const useBuilderStore = create<BuilderStore>()(
                 const { activeWebsiteId, history, historyIndex } = get();
                 if (!activeWebsiteId) return;
 
-                const newHistory = history.slice(0, historyIndex + 1);
+                let newHistory = history.slice(0, historyIndex + 1);
                 newHistory.push(newPages);
+                if (newHistory.length > MAX_HISTORY) {
+                    newHistory = newHistory.slice(newHistory.length - MAX_HISTORY);
+                }
 
                 set((state) => ({
                     websites: state.websites.map(w =>
@@ -587,48 +647,94 @@ const useBuilderStore = create<BuilderStore>()(
             },
 
             addAsset: (asset) => set((state) => ({
-                assets: [
+                globalAssets: [
                     {
                         ...asset,
                         id: uuidv4(),
                         date: new Date().toISOString(),
                         size: asset.size || '0.5 MB'
                     },
-                    ...state.assets
+                    ...state.globalAssets
                 ]
             })),
 
-            uploadAsset: async (file) => {
+            uploadAsset: async (file, scope = {}) => {
                 try {
                     const { default: assetApi } = await import('../api/assets');
-                    const response = await assetApi.uploadAsset(file);
-                    set((state) => ({ assets: [response.data.asset, ...state.assets] }));
+                    const response = await assetApi.uploadAsset(file, scope);
+                    const asset = response.data.asset;
+
+                    if (scope.websiteId) {
+                        set((state) => ({
+                            websiteAssetsByWebsiteId: {
+                                ...state.websiteAssetsByWebsiteId,
+                                [scope.websiteId as string]: [
+                                    asset,
+                                    ...(state.websiteAssetsByWebsiteId[scope.websiteId as string] || []),
+                                ],
+                            }
+                        }));
+                        return;
+                    }
+
+                    set((state) => ({ globalAssets: [asset, ...state.globalAssets] }));
                 } catch (error) {
                     console.error('Failed to upload asset:', error);
                     throw error;
                 }
             },
 
-            importAssetFromUrl: async (name, url) => {
+            importAssetFromUrl: async (name, url, scope = {}) => {
                 try {
                     const { default: assetApi } = await import('../api/assets');
-                    const response = await assetApi.importAssetFromUrl({ name, url });
-                    set((state) => ({ assets: [response.data.asset, ...state.assets] }));
+                    const response = await assetApi.importAssetFromUrl({ name, url }, scope);
+                    const asset = response.data.asset;
+
+                    if (scope.websiteId) {
+                        set((state) => ({
+                            websiteAssetsByWebsiteId: {
+                                ...state.websiteAssetsByWebsiteId,
+                                [scope.websiteId as string]: [
+                                    asset,
+                                    ...(state.websiteAssetsByWebsiteId[scope.websiteId as string] || []),
+                                ],
+                            }
+                        }));
+                        return;
+                    }
+
+                    set((state) => ({ globalAssets: [asset, ...state.globalAssets] }));
                 } catch (error) {
                     console.error('Failed to import asset from URL:', error);
                     throw error;
                 }
             },
 
-            deleteAsset: async (id) => {
+            deleteAsset: async (id, scope = {}) => {
                 try {
                     const { default: assetApi } = await import('../api/assets');
-                    await assetApi.deleteAsset(id);
-                    set((state) => ({ assets: state.assets.filter(a => a.id !== id) }));
+                    await assetApi.deleteAsset(id, scope);
+
+                    if (scope.websiteId) {
+                        set((state) => ({
+                            websiteAssetsByWebsiteId: {
+                                ...state.websiteAssetsByWebsiteId,
+                                [scope.websiteId as string]: (state.websiteAssetsByWebsiteId[scope.websiteId as string] || []).filter(a => a.id !== id),
+                            }
+                        }));
+                        return;
+                    }
+
+                    set((state) => ({ globalAssets: state.globalAssets.filter(a => a.id !== id) }));
                 } catch (error) {
                     console.error('Failed to delete asset:', error);
                     throw error;
                 }
+            },
+
+            getScopedAssets: (websiteId) => {
+                const { globalAssets, websiteAssetsByWebsiteId } = get();
+                return websiteId ? (websiteAssetsByWebsiteId[websiteId] || []) : globalAssets;
             },
 
             getActiveWebsite: () => {
@@ -716,7 +822,11 @@ const useBuilderStore = create<BuilderStore>()(
         }),
         {
             name: 'website-builder-storage',
-            partialize: (state) => ({ websites: state.websites, assets: state.assets }),
+            partialize: (state) => ({
+                websites: state.websites,
+                globalAssets: state.globalAssets,
+                websiteAssetsByWebsiteId: state.websiteAssetsByWebsiteId,
+            }),
         }
     )
 );

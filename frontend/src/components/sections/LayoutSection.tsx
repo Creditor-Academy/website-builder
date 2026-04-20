@@ -2,6 +2,7 @@ import React from 'react';
 import { useBuilder } from '@/contexts/BuilderContext';
 import { Edit, ArrowRight, Image as ImageIcon } from 'lucide-react';
 import { Editable } from '@/components/ui/Editable';
+import { sanitizeHTML } from '@/utils/sanitize';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -367,7 +368,7 @@ function TwoColumn({ content, isEditing, updateContent, styles }: any) { // Two-
               fontFamily: "'Geist', sans-serif",
               fontSize: 10, letterSpacing: '0.2em',
               color: '#E11D48', marginBottom: 16,
-            }} dangerouslySetInnerHTML={{ __html: col.label }} />
+            }} dangerouslySetInnerHTML={{ __html: sanitizeHTML(col.label) }} />
 
             <CE
               as="h3" value={content[col.key]?.heading || 'Click to edit heading…'} isEditing={isEditing}

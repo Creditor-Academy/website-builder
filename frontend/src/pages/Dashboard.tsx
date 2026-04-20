@@ -7,7 +7,7 @@ import {
     FileText, Search, Sparkles, Zap, Files, Building2, ShoppingBag, Users,
     ArrowRight, ChevronLeft, Palette, Layers, MonitorPlay, Move, LayoutTemplate,
     Upload, Monitor, Link as LinkIcon, Activity, Menu, X, ShieldCheck, ListFilter, Bell, ArrowUp, ArrowDown,
-    UserX, RefreshCw, Eye
+    UserX, RefreshCw, Eye, Image as ImageIcon, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -185,136 +185,6 @@ const EmptyState = ({ onAction }) => (
     </div>
 );
 
-
-const AssetsView = () => {
-    const { assets, addAsset, deleteAsset } = useBuilderStore();
-    const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
-    const [urlInput, setUrlInput] = useState('');
-    const [urlName, setUrlName] = useState('');
-    const fileInputRef = React.useRef(null);
-
-    const handleUpload = (e) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const url = URL.createObjectURL(file);
-            addAsset({
-                name: file.name,
-                url,
-                type: file.type.startsWith('video') ? 'video' : 'image',
-                size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`
-            });
-            if (e.target) e.target.value = '';
-        }
-    };
-
-    const handleUrlUpload = () => {
-        if (urlInput) {
-            addAsset({
-                name: urlName || 'Imported Asset',
-                url: urlInput,
-                type: urlInput.match(/\.(mp4|webm|ogg)$/i) ? 'video' : 'image',
-                size: 'External'
-            });
-            setUrlInput('');
-            setUrlName('');
-            setIsUrlDialogOpen(false);
-        }
-    };
-
-    return (
-        <div className="space-y-8 animate-in fade-in duration-500 pb-20">
-            <div>
-                <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Assets Management</h2>
-                <p className="text-slate-500 mt-1">Manage your images, videos, and documents.</p>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <div className="aspect-square border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center gap-3 hover:border-primary/40 hover:bg-white cursor-pointer transition-all group/upload-button">
-                            <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 group-hover/upload-button:text-primary group-hover/upload-button:bg-primary/5 transition-colors">
-                                <Plus className="w-6 h-6" />
-                            </div>
-                            <span className="text-sm font-bold text-slate-500 group-hover/upload-button:text-primary">Upload</span>
-                        </div>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-48 rounded-xl p-2">
-                        <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer py-2.5" onSelect={() => fileInputRef.current?.click()}>
-                            <Monitor className="w-4 h-4" /> From Disk
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer py-2.5" onSelect={() => setIsUrlDialogOpen(true)}>
-                            <LinkIcon className="w-4 h-4" /> From URL
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    className="hidden"
-                    onChange={handleUpload}
-                    accept="image/*,video/*"
-                />
-
-                {assets.map(asset => (
-                    <div key={asset.id} className="group/asset-card relative aspect-square bg-white border border-slate-100 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all cursor-pointer">
-                        <img src={asset.url} alt={asset.name} className="w-full h-full object-cover opacity-80 group-hover/asset-card:opacity-100 transition-opacity" />
-                        <div className="absolute top-4 right-4 z-10 opacity-0 group-hover/asset-card:opacity-100 transition-opacity">
-                            <Button
-                                variant="destructive"
-                                size="icon"
-                                className="h-8 w-8 rounded-full shadow-lg"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    deleteAsset(asset.id);
-                                }}
-                            >
-                                <Trash2 className="w-4 h-4" />
-                            </Button>
-                        </div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/asset-card:opacity-100 transition-opacity p-6 flex flex-col justify-end">
-                            <p className="text-white text-sm font-bold truncate">{asset.name}</p>
-                            <p className="text-white/70 text-[10px] uppercase font-black tracking-widest mt-0.5">{asset.size}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            <Dialog open={isUrlDialogOpen} onOpenChange={setIsUrlDialogOpen}>
-                <DialogContent className="sm:max-w-md rounded-[2rem]">
-                    <DialogHeader>
-                        <DialogTitle>Import via URL</DialogTitle>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                            <label htmlFor="url-name" className="text-sm font-medium">Asset Name</label>
-                            <Input
-                                id="url-name"
-                                placeholder="E.g. Logo, Banner Image..."
-                                value={urlName}
-                                onChange={(e) => setUrlName(e.target.value)}
-                                className="rounded-xl bg-slate-50"
-                            />
-                        </div>
-                        <div className="grid gap-2">
-                            <label htmlFor="url" className="text-sm font-medium">Image or Video URL</label>
-                            <Input
-                                id="url"
-                                placeholder="https://example.com/image.png"
-                                value={urlInput}
-                                onChange={(e) => setUrlInput(e.target.value)}
-                                className="rounded-xl bg-slate-50"
-                            />
-                        </div>
-                    </div>
-                    <DialogFooter className="gap-2 sm:gap-0">
-                        <Button variant="outline" onClick={() => setIsUrlDialogOpen(false)} className="rounded-xl">Cancel</Button>
-                        <Button onClick={handleUrlUpload} disabled={!urlInput} className="rounded-xl">Import Asset</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </div>
-    );
-};
 
 // ─── SettingsView ─────────────────────────────────────────────────────────────
 // Integrated: updateUserProfile (PUT /users/me), deactivateOwnAccount (DELETE /users/me)
@@ -770,6 +640,7 @@ const Dashboard = () => {
 
     // DB templates for New Project dialog
     const [dbTemplates, setDbTemplates] = useState<any[]>([]);
+    const [isCreatingSite, setIsCreatingSite] = useState(false);
 
     const adminRoutes = [
         '/dashboard/users',
@@ -818,7 +689,7 @@ const Dashboard = () => {
         };
 
         fetchStats();
-        fetchWebsites();
+        fetchWebsites(undefined, isAdmin);
     }, [isAdmin, fetchWebsites]);
 
     // ✅ NEW: Fetch users list when admin mode is active
@@ -852,13 +723,15 @@ const Dashboard = () => {
         try {
             setIsLoggingOut(true);
             await logoutUser();
-            localStorage.removeItem("user");
-            navigate("/");
-        } catch (err) {
-            console.error(err);
-            alert("Logout failed");
+        } catch (err: any) {
+            // 401 means session already expired — treat as successful logout
+            if (err?.response?.status !== 401) {
+                console.error(err);
+            }
         } finally {
+            localStorage.removeItem("user");
             setIsLoggingOut(false);
+            navigate("/");
         }
     };
 
@@ -949,12 +822,22 @@ const Dashboard = () => {
     }, [websites, searchQuery, sortBy, filterStatus]);
 
     const handleCreateSite = async () => {
-        if (newSiteName.trim()) {
+        if (!newSiteName.trim() || isCreatingSite) return;
+        try {
+            setIsCreatingSite(true);
             const id = await createWebsite(newSiteName, selectedTemplate);
             setIsDialogOpen(false);
             setNewSiteName('');
             setSelectedTemplate('blank');
             navigate(`/builder/${id}`);
+        } catch (err: any) {
+            toast({
+                title: 'Could not create site',
+                description: err?.message || 'Please try again.',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsCreatingSite(false);
         }
     };
 
@@ -1004,7 +887,7 @@ const Dashboard = () => {
                         <NavItem icon={<Globe className="w-4 h-4" />} label="Dashboard" to="/dashboard" />
                     )}
                     <NavItem icon={<Layout className="w-4 h-4" />} label="Templates" to="/dashboard/templates" />
-                    <NavItem icon={<FileText className="w-4 h-4" />} label="Assets" to="/dashboard/assets" />
+                    <NavItem icon={<ImageIcon className="w-4 h-4" />} label="Assets" to="/dashboard/assets" />
                     {isAdmin && (
                         <div className="pt-1">
                             <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest px-3 mb-1">System</p>
@@ -1121,10 +1004,16 @@ const Dashboard = () => {
                                                 <div className="mt-auto pt-8 border-t border-slate-100">
                                                     <Button
                                                         onClick={handleCreateSite}
-                                                        disabled={!newSiteName.trim()}
+                                                        disabled={!newSiteName.trim() || isCreatingSite}
                                                         className="w-full h-14 font-bold text-lg flex items-center justify-center gap-2 group/button-create-site active:scale-[0.98] rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/30 transition-all">
-                                                        Start Building
-                                                        <ArrowRight className="w-5 h-5 group-hover/button-create-site:translate-x-1 transition-transform" />
+                                                        {isCreatingSite ? (
+                                                            <><Loader2 className="w-5 h-5 animate-spin" /> Creating...
+                                                            </>
+                                                        ) : (
+                                                            <>Start Building
+                                                            <ArrowRight className="w-5 h-5 group-hover/button-create-site:translate-x-1 transition-transform" />
+                                                            </>
+                                                        )}
                                                     </Button>
                                                 </div>
                                             </div>
@@ -1612,5 +1501,5 @@ const Dashboard = () => {
     );
 };
 
-export { AssetsView, SettingsView };
+export { SettingsView };
 export default Dashboard;

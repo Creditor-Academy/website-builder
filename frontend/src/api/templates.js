@@ -4,7 +4,7 @@ const templateApi = {
   // ─── Website Templates ────────────────────────────────────────────────────
 
   /** GET /templates/websites — public, grouped by category */
-  getWebsiteTemplates: (params) => apiClient.get('/templates/websites', { params }),
+  getWebsiteTemplates: (config) => apiClient.get('/templates/websites', config),
 
   /** GET /templates/websites/:id — admin only, full data */
   getWebsiteTemplateById: (id) => apiClient.get(`/templates/websites/${id}`),

@@ -68,6 +68,10 @@ export const domainSchema = z.object({
     domain: z.string().trim().min(3, 'Domain is required'),
 });
 
+export const rollbackDeploymentSchema = z.object({
+    deploymentId: z.string().min(1, 'Deployment ID is required'),
+});
+
 export type CreateWebsiteInput = z.infer<typeof createWebsiteSchema>;
 export type ListWebsitesQuerySchema = z.infer<typeof listWebsitesQuerySchema>;
 export type UpdateWebsiteInput = z.infer<typeof updateWebsiteSchema>;
@@ -75,3 +79,4 @@ export type UpdateWebsiteSettingsInput = z.infer<typeof updateWebsiteSettingsSch
 export type WebsiteIdParams = z.infer<typeof websiteIdParamsSchema>;
 export type PublishWebsiteInput = z.infer<typeof publishWebsiteSchema>;
 export type DomainInput = z.infer<typeof domainSchema>;
+export type RollbackDeploymentInput = z.infer<typeof rollbackDeploymentSchema>;

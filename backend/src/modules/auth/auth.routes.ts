@@ -66,4 +66,10 @@ router.post(
   authController.refreshToken
 );
 
+// POST /auth/google - Google OAuth login
+router.post(
+  '/google',
+  authController.googleAuth
+);
+
 export default router;

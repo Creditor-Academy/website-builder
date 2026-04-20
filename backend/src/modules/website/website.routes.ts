@@ -8,6 +8,7 @@ import {
     domainSchema,
     listWebsitesQuerySchema,
     publishWebsiteSchema,
+    rollbackDeploymentSchema,
     updateWebsiteSchema,
     websiteIdParamsSchema,
     updateWebsiteSettingsSchema,
@@ -112,6 +113,21 @@ router.post(
 );
 
 router.get(
+    '/:id/deployments',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    requireWebsiteOwnership,
+    websiteController.getDeployments
+);
+
+router.post(
+    '/:id/deployments/rollback',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    validateRequest(rollbackDeploymentSchema),
+    requireWebsiteOwnership,
+    websiteController.rollbackDeployment
+);
+
+router.get(
     '/:id/domains',
     validateRequest(websiteIdParamsSchema, 'params'),
     requireWebsiteOwnership,
@@ -140,6 +156,13 @@ router.post(
     validateRequest(domainSchema),
     requireWebsiteOwnership,
     websiteController.verifyDomain
+);
+
+router.get(
+    '/:id/export',
+    validateRequest(websiteIdParamsSchema, 'params'),
+    requireWebsiteOwnership,
+    websiteController.exportWebsite
 );
 
 export default router;

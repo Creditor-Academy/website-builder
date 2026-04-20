@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import * as Icons from 'lucide-react';
 import { Editable } from '@/components/ui/Editable';
+import { sanitizeHTML } from '@/utils/sanitize';
 
 // ─── Shared Helpers ────────────────────────────────────────────────────────────
 
@@ -163,7 +164,7 @@ const renderList = ({ content, styles, isEditing, onContentChange, headingColor,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: tag.text,
               flexShrink: 0,
-            }} dangerouslySetInnerHTML={{ __html: getIcon(feature.icon, 19) }} />
+            }} dangerouslySetInnerHTML={{ __html: sanitizeHTML(getIcon(feature.icon, 19)) }} />
             {index < content.features.length - 1 && (
               <div className="hidden sm:block w-px flex-1 mt-2.5 bg-gradient-to-b from-slate-200 to-transparent" />
             )}
@@ -260,7 +261,7 @@ const renderIcons = ({ content, styles, isEditing, onContentChange, headingColor
             position: 'absolute', bottom: '-12px', right: '-12px',
             opacity: 0.04, color: tag.dot,
             transform: 'rotate(-12deg)', pointerEvents: 'none',
-          }} dangerouslySetInnerHTML={{ __html: getIcon(feature.icon, 72) }} />
+          }} dangerouslySetInnerHTML={{ __html: sanitizeHTML(getIcon(feature.icon, 72)) }} />
 
           <div style={{
             width: '60px', height: '60px',
@@ -342,7 +343,7 @@ const renderCards = ({ content, styles, isEditing, onContentChange, headingColor
           }}
         >
             <div className={`w-full sm:w-[72px] flex-shrink-0 bg-slate-50 border-b sm:border-b-0 sm:border-r border-slate-200 flex flex-row sm:flex-col items-center justify-between sm:justify-center gap-2 p-4 sm:py-6`} style={{ background: tag.bg, borderColor: tag.border }}>
-            <div style={{ color: tag.text }} dangerouslySetInnerHTML={{ __html: getIcon(feature.icon, 22) }} />
+            <div style={{ color: tag.text }} dangerouslySetInnerHTML={{ __html: sanitizeHTML(getIcon(feature.icon, 22)) }} />
             <span className="text-[10px] font-extrabold tracking-widest sm:rotate-180 sm:[writing-mode:vertical-rl] opacity-70" style={{ color: tag.text }}>
               {String(index + 1).padStart(2, '0')}
             </span>

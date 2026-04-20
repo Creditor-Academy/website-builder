@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Check, Sparkles, Zap, ArrowRight } from 'lucide-react';
 import { useBuilder } from '@/contexts/BuilderContext';
 import { Editable } from '@/components/ui/Editable';
+import { sanitizeHTML } from '@/utils/sanitize';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -218,7 +219,7 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
         fontSize: 96, fontWeight: 700,
         color: isPopular ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
         lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
-      }} dangerouslySetInnerHTML={{ __html: String(index + 1).padStart(2, '0') }} />
+      }} dangerouslySetInnerHTML={{ __html: sanitizeHTML(String(index + 1).padStart(2, '0')) }} />
 
       <div style={{ padding: '36px 32px 32px' }}>
         {/* Plan name */}
@@ -393,7 +394,7 @@ function TableVariant({ content, isEditing, onContentChange, headingColor, parag
                           fontFamily: "'Instrument Serif', serif",
                           fontSize: 17, fontStyle: 'italic', fontWeight: 400,
                           color: '#0f172a',
-                        }} dangerouslySetInnerHTML={{ __html: p.name }} />
+                        }} dangerouslySetInnerHTML={{ __html: sanitizeHTML(p.name) }} />
                         {p.popular && (
                           <div style={{
                             fontFamily: "'Geist', sans-serif",

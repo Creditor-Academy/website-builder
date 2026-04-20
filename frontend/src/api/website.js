@@ -15,7 +15,10 @@ const websiteApi = {
   getDomains: (id) => apiClient.get(`/websites/${id}/domains`),
   addDomain: (id, domain) => apiClient.post(`/websites/${id}/domains`, { domain }),
   removeDomain: (id, domain) => apiClient.delete(`/websites/${id}/domains`, { data: { domain } }),
-  verifyDomain: (id, domain) => apiClient.post(`/websites/${id}/domains/verify`, { domain })
+  verifyDomain: (id, domain) => apiClient.post(`/websites/${id}/domains/verify`, { domain }),
+  getDeployments: (id) => apiClient.get(`/websites/${id}/deployments`),
+  rollbackDeployment: (id, deploymentId) => apiClient.post(`/websites/${id}/deployments/rollback`, { deploymentId }),
+  exportWebsite: (id) => apiClient.get(`/websites/${id}/export`, { responseType: 'blob' }),
 };
 
 export default websiteApi;

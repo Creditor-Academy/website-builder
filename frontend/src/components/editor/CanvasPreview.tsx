@@ -4,6 +4,7 @@ import { NavbarPreview } from '@/components/preview/NavbarPreview';
 import { FooterPreview } from '@/components/preview/FooterPreview';
 import { SectionRenderer } from '@/components/sections/SectionRenderer';
 import { JumpToTop } from '@/components/ui/JumpToTop';
+import { sanitizeHTML } from '@/utils/sanitize';
 
 export function CanvasPreview() {
   const { state, selectSection, updateSectionContent, updateNavbar, updateFooter } = useBuilder();
@@ -55,7 +56,7 @@ export function CanvasPreview() {
       className="h-full overflow-y-auto scrollbar-thin bg-[hsl(var(--builder-panel))] w-full max-w-full overflow-x-hidden relative"
       onClick={handleCanvasClick}
     >
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{ __html: sanitizeHTML(`
         #canvas-root {
           --theme-primary: ${globalStyles.primaryColor || '#3b82f6'};
           --theme-secondary: ${globalStyles.secondaryColor || '#8b5cf6'};
@@ -101,7 +102,7 @@ export function CanvasPreview() {
           border: 1px solid rgba(255, 255, 255, 0.4) !important;
         }
         ` : ''}
-      ` }} />
+      `) }} />
       <JumpToTop containerRef={canvasRef} className="absolute bottom-6 right-6" threshold={200} />
       {/* FIXED FULL-WIDTH CANVAS */}
       <div

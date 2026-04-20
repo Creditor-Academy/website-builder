@@ -1,4 +1,5 @@
 import React from 'react';
+import { sanitizeHTML } from '@/utils/sanitize';
 
 export function HTMLBlock({ section, isSelected }) {
     const { content, styles } = section;
@@ -17,7 +18,7 @@ export function HTMLBlock({ section, isSelected }) {
         >
             <div className="container mx-auto px-6">
                 <div
-                    dangerouslySetInnerHTML={{ __html: content.html || '<!-- Add custom HTML here -->' }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHTML(content.html || '<!-- Add custom HTML here -->') }}
                 />
             </div>
         </section>

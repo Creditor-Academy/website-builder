@@ -27,7 +27,7 @@ export const SELECT_WEBSITE_FIELDS = {
 export const DELETED_WEBSITE_RETENTION_TIME = 30 * 24 * 60 * 60 * 1000;
 
 export const CREATE_WEB_LIMIT = {
-    LIMIT: 5,
+    LIMIT: 20,
     WINDOW_SEC: 60 * 60 // 1hr
 }
 

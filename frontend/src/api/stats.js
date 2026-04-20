@@ -1,7 +1,7 @@
 import apiClient from './client';
 
 const statsApi = {
-  getDashboardStats: () => apiClient.get('/stats/dashboard')
+  getDashboardStats: (params) => apiClient.get('/stats/dashboard', { params })
 };
 
 export default statsApi;

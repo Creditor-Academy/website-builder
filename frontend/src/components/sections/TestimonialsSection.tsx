@@ -1,6 +1,7 @@
 import { Quote, Star } from 'lucide-react';
 import { useBuilder } from '@/contexts/BuilderContext';
 import { Editable } from '@/components/ui/Editable';
+import { sanitizeHTML } from '@/utils/sanitize';
 
 // ─── Global styles injected once ──────────────────────────────────────────
 const STYLES = `
@@ -81,7 +82,7 @@ function EditEl({ as: Tag = 'span', value, onBlur, isEditing, style, className, 
       contentEditable={isEditing}
       suppressContentEditableWarning
       onBlur={isEditing ? (e) => onBlur(e.currentTarget.innerHTML || '') : undefined}
-      dangerouslySetInnerHTML={{ __html: value || '' }}
+      dangerouslySetInnerHTML={{ __html: sanitizeHTML(value || '') }}
     />
   );
 }

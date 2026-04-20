@@ -1,4 +1,5 @@
 import React from 'react';
+import { sanitizeHTML } from '@/utils/sanitize';
 
 export function TextBlock({ section, isSelected, isEditing, onContentChange }) {
     const { content, styles } = section;
@@ -31,7 +32,7 @@ export function TextBlock({ section, isSelected, isEditing, onContentChange }) {
                     contentEditable={isEditing}
                     suppressContentEditableWarning
                     onBlur={(e) => handleTextEdit('text', e)}
-                 dangerouslySetInnerHTML={{ __html: content.text || 'Enter your text here...' }} />
+                 dangerouslySetInnerHTML={{ __html: sanitizeHTML(content.text || 'Enter your text here...') }} />
             </div>
         </section>
     );

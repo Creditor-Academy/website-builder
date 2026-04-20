@@ -9,7 +9,7 @@ export const TOKEN_TYPES = {
 };
 
 export const TOKEN_EXPIRY = {
-  ACCESS_TOKEN: '7d',
+  ACCESS_TOKEN: '15m',
   REFRESH_TOKEN: '15d',
   EMAIL_VERIFICATION: '24h',
   PASSWORD_RESET: '1h',
@@ -21,9 +21,9 @@ export const COOKIE_OPTIONS = {
   sameSite: 'lax' as const,
 };
 
-export const ACCESS_TOKEN_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+export const ACCESS_TOKEN_EXPIRY_MS = 15 * 60 * 1000; // 15 minutes in milliseconds
 export const REFRESH_TOKEN_EXPIRY_MS = 15 * 24 * 60 * 60 * 1000; // 15 days in milliseconds
-export const AUTH_REDIS_EXPIRY_SECONDS = 7 * 24 * 60 * 60; // 7 days in seconds
+export const AUTH_REDIS_EXPIRY_SECONDS = 15 * 60; // 15 minutes in seconds
 
 export const PASSWORD_RESET_TOKEN_EXPIRY_HOURS = 1;
 export const EMAIL_VERIFICATION_TOKEN_EXPIRY_HOURS = 24;

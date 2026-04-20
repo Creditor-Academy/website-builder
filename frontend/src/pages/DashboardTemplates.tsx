@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, ArrowRight, LayoutTemplate, Search, Trash2, RotateCcw, Building2 } from 'lucide-react';
+import { Plus, ArrowRight, LayoutTemplate, Search, Trash2, RotateCcw, Building2, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useBuilderStore from '@/store/useBuilderStore';
 import { cn } from '@/lib/utils';
@@ -43,6 +43,9 @@ export default function DashboardTemplates() {
   // Trash toggle (admin only)
   const [showTrash, setShowTrash] = useState(false);
 
+  // Creating state — tracks which template is being used
+  const [creatingId, setCreatingId] = useState<string | null>(null);
+
   // Scope filter (admin only)
   const [scopeFilter, setScopeFilter] = useState<'all' | 'GLOBAL' | 'INSTITUTION'>('all');
 
@@ -62,10 +65,10 @@ export default function DashboardTemplates() {
   const [institutionFilter, setInstitutionFilter] = useState<string>('all');
 
   // ─── Fetch DB templates ───────────────────────────────────────────────────
-  const fetchTemplates = async () => {
+  const fetchTemplates = async (signal?: AbortSignal) => {
     try {
       setIsLoading(true);
-      const res = await templateApi.getWebsiteTemplates();
+      const res = await templateApi.getWebsiteTemplates({ signal });
       const raw = res.data?.data || res.data || [];
 
       // Flatten if grouped by category (object) or already an array
@@ -82,13 +85,22 @@ export default function DashboardTemplates() {
       const cats = Array.from(new Set(flat.map((t: any) => t.category).filter(Boolean)));
       setCategories(['All', ...(cats as string[])]);
     } catch (err: any) {
-      toast({ title: 'Failed to load templates', variant: 'destructive' });
+      if (err?.name === 'CanceledError' || signal?.aborted) return;
+      toast({
+        title: 'Failed to load templates',
+        description: err?.response?.data?.message || err?.message || 'Please check your connection and try again.',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => { fetchTemplates(); }, []);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchTemplates(controller.signal);
+    return () => controller.abort();
+  }, []);
 
   // ─── Filter + search ──────────────────────────────────────────────────────
   const filtered = useMemo(() => {
@@ -118,7 +130,9 @@ export default function DashboardTemplates() {
 
   // ─── Use template: clones into new website, original template untouched ───
   const handleUseTemplate = async (template: any) => {
+    if (creatingId) return;
     try {
+      setCreatingId(template.id);
       const id = await createWebsite(`${template.name} Site`, template.id);
       navigate(`/builder/${id}`);
     } catch (err: any) {
@@ -127,6 +141,8 @@ export default function DashboardTemplates() {
         description: err?.message || 'Please try again.',
         variant: 'destructive',
       });
+    } finally {
+      setCreatingId(null);
     }
   };
 
@@ -174,7 +190,24 @@ export default function DashboardTemplates() {
   };
 
   return (
-    <Card className="rounded-3xl shadow-xl shadow-slate-200/50 p-8 min-h-[80vh]">
+    <Card className="rounded-3xl shadow-xl shadow-slate-200/50 p-8 min-h-[80vh] relative">
+      {/* Full-screen creating overlay */}
+      {creatingId && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm rounded-3xl">
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-xl shadow-purple-500/30">
+                <Loader2 className="w-8 h-8 text-white animate-spin" />
+              </div>
+            </div>
+            <div className="text-center">
+              <h3 className="text-xl font-bold text-slate-900">Creating your site...</h3>
+              <p className="text-sm text-slate-500 mt-1">Setting up your new project from the template</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Breadcrumbs */}
       <div className="mb-4 text-sm text-slate-500">
         <a href="/dashboard" className="hover:underline">Dashboard</a> /{' '}
@@ -387,9 +420,12 @@ export default function DashboardTemplates() {
                     <>
                       <Button
                         className="bg-blue-600 text-white font-semibold rounded-full px-5 h-10 text-sm shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:scale-105 transition-all duration-200"
+                        disabled={!!creatingId}
                         onClick={e => { e.stopPropagation(); handleUseTemplate(template); }}
                       >
-                        <Plus className="w-4 h-4 mr-1.5" /> Use
+                        {creatingId === template.id
+                          ? <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Creating...</>
+                          : <><Plus className="w-4 h-4 mr-1.5" /> Use</>}
                       </Button>
 
                       {isAdminUser && (

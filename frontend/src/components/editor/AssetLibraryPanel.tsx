@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Search, Upload, X, Check, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Trash2, MoreVertical } from 'lucide-react';
+import { Search, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import useBuilderStore from '@/store/useBuilderStore';
 
 export function AssetLibraryPanel() {
-    const { assets, deleteAsset, fetchAssets, uploadAsset, importAssetFromUrl } = useBuilderStore();
+    const { activeWebsiteId, deleteAsset, fetchAssets, getScopedAssets, uploadAsset, importAssetFromUrl } = useBuilderStore();
     const [search, setSearch] = useState('');
     const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
     const [urlInput, setUrlInput] = useState('');
@@ -19,8 +19,14 @@ export function AssetLibraryPanel() {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        void fetchAssets();
-    }, [fetchAssets]);
+        if (!activeWebsiteId) {
+            return;
+        }
+
+        void fetchAssets({ websiteId: activeWebsiteId });
+    }, [activeWebsiteId, fetchAssets]);
+
+    const assets = activeWebsiteId ? getScopedAssets(activeWebsiteId) : [];
 
     const filteredMedia = assets.filter(item =>
         item.name.toLowerCase().includes(search.toLowerCase())
@@ -28,15 +34,15 @@ export function AssetLibraryPanel() {
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            await uploadAsset(file);
+        if (file && activeWebsiteId) {
+            await uploadAsset(file, { websiteId: activeWebsiteId });
             if (e.target) e.target.value = '';
         }
     };
 
     const handleUrlUpload = async () => {
-        if (urlInput) {
-            await importAssetFromUrl(urlName || 'Imported Asset', urlInput);
+        if (urlInput && activeWebsiteId) {
+            await importAssetFromUrl(urlName || 'Imported Asset', urlInput, { websiteId: activeWebsiteId });
             setUrlInput('');
             setUrlName('');
             setIsUrlDialogOpen(false);
@@ -59,13 +65,13 @@ export function AssetLibraryPanel() {
             <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <div>
                     <h2 className="text-sm font-bold text-slate-900 tracking-tight">Asset Library</h2>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Manage your media</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Assets for this website only</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg hover:bg-white border border-transparent hover:border-slate-200 shadow-sm transition-all">
-                                <PlusIcon className="w-4 h-4 text-primary" />
+                                <Plus className="w-4 h-4 text-primary" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
@@ -146,7 +152,7 @@ export function AssetLibraryPanel() {
                                                     size="sm" 
                                                     variant="destructive" 
                                                     className="h-7 text-[10px] w-full font-bold shadow-lg bg-red-500 hover:bg-red-600 border-none"
-                                                    onClick={() => void deleteAsset(item.id)}
+                                                    onClick={() => activeWebsiteId ? void deleteAsset(item.id, { websiteId: activeWebsiteId }) : undefined}
                                                 >
                                                     Delete
                                                 </Button>
@@ -180,7 +186,7 @@ export function AssetLibraryPanel() {
                                                 <Button size="sm" variant="secondary" className="h-7 text-[10px] w-full font-bold shadow-lg" onClick={() => handleCopy(item.id, item.url)}>
                                                     {copiedId === item.id ? 'Copied!' : 'Copy Link'}
                                                 </Button>
-                                                <Button size="sm" variant="destructive" className="h-7 text-[10px] w-full font-bold shadow-lg bg-red-500 hover:bg-red-600 border-none" onClick={() => void deleteAsset(item.id)}>Delete</Button>
+                                                <Button size="sm" variant="destructive" className="h-7 text-[10px] w-full font-bold shadow-lg bg-red-500 hover:bg-red-600 border-none" onClick={() => activeWebsiteId ? void deleteAsset(item.id, { websiteId: activeWebsiteId }) : undefined}>Delete</Button>
                                             </div>
                                             <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
                                                 <p className="text-[9px] text-white truncate font-medium">{item.name}</p>
@@ -213,7 +219,7 @@ export function AssetLibraryPanel() {
                                                 <Button size="sm" variant="secondary" className="h-7 text-[10px] w-full font-bold shadow-lg" onClick={() => handleCopy(item.id, item.url)}>
                                                     {copiedId === item.id ? 'Copied!' : 'Copy Link'}
                                                 </Button>
-                                                <Button size="sm" variant="destructive" className="h-7 text-[10px] w-full font-bold shadow-lg bg-red-500 hover:bg-red-600 border-none" onClick={() => void deleteAsset(item.id)}>Delete</Button>
+                                                <Button size="sm" variant="destructive" className="h-7 text-[10px] w-full font-bold shadow-lg bg-red-500 hover:bg-red-600 border-none" onClick={() => activeWebsiteId ? void deleteAsset(item.id, { websiteId: activeWebsiteId }) : undefined}>Delete</Button>
                                             </div>
                                             <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
                                                 <p className="text-[9px] text-white truncate font-medium">{item.name}</p>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Search, Upload, X, Check, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Trash2, MoreVertical, Copy, MousePointer2 } from 'lucide-react';
+import { Search, Upload, Check, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Trash2, Copy } from 'lucide-react';
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../components/ui/card";
 import { Input } from "../components/ui/input";
@@ -14,10 +14,10 @@ import useBuilderStore from '../store/useBuilderStore';
 
 
 export default function DashboardAssets() {
-    const { assets, deleteAsset, fetchAssets, uploadAsset, importAssetFromUrl } = useBuilderStore();
-        useEffect(() => {
-            void fetchAssets();
-        }, [fetchAssets]);
+    const { deleteAsset, fetchAssets, getScopedAssets, uploadAsset, importAssetFromUrl } = useBuilderStore();
+    useEffect(() => {
+        void fetchAssets();
+    }, [fetchAssets]);
 
     const [search, setSearch] = useState('');
     const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
@@ -25,6 +25,7 @@ export default function DashboardAssets() {
     const [urlName, setUrlName] = useState('');
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const assets = getScopedAssets();
 
     const filteredMedia = assets.filter(item =>
         item.name.toLowerCase().includes(search.toLowerCase())
@@ -68,7 +69,7 @@ export default function DashboardAssets() {
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
         <div>
           <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Media Management</h2>
-          <p className="text-slate-500 mt-1">Manage your centralized asset library.</p>
+                    <p className="text-slate-500 mt-1">Manage the global asset library outside individual websites.</p>
         </div>
                 
         <div className="flex items-center gap-3">

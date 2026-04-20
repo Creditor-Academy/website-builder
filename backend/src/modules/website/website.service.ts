@@ -1,9 +1,12 @@
-import WebsiteDao from './website.dao.js';
+﻿import WebsiteDao from './website.dao.js';
 import UserDao from '../user/user.dao.js';
 import templateDao from '../template/template.dao.js';
 import type { CreateWebsiteInput, DomainInput, ListWebsitesQuerySchema, PublishWebsiteInput, UpdateWebsiteInput, UpdateWebsiteSettingsInput } from './website.validation.js';
 import { WebsiteStatus, type Website } from '@prisma/client';
 import { addWebsiteDomain, createWebsiteContentFromTemplate, duplicateWebsiteContent, getWebsiteDomains, getWebsiteVersions, normalizeWebsiteContent, publishWebsiteContent, removeWebsiteDomain, verifyWebsiteDomain } from './website-content.utils.js';
+import { deploy } from '../../services/deployment.service.js';
+import { NotFoundError, BadRequestError, ConflictError } from '../../utils/error.utils.js';
+import prismaClient from '../../config/prisma.js';
 
 class WebsiteService {
     private websiteDao: WebsiteDao;
@@ -22,7 +25,7 @@ class WebsiteService {
             const template = await templateDao.getWebsiteTemplateById(data.template_id);
 
             if (!template || template.deletedAt) {
-                throw Error('Template not found');
+                throw new NotFoundError('Template not found');
             }
 
             content = createWebsiteContentFromTemplate(template);
@@ -96,7 +99,7 @@ class WebsiteService {
 
     async updateWebsite(website: Website, data: UpdateWebsiteInput) {
         if (website.status === WebsiteStatus.DELETED) {
-            throw Error("Website not found")
+            throw new NotFoundError("Website not found")
         }
         const updateData = {
             ...data,
@@ -107,7 +110,7 @@ class WebsiteService {
 
     async deleteWebsite(website: Website) {
         if (website.status === WebsiteStatus.DELETED) {
-            throw Error("Website Already Deleted");
+            throw new ConflictError("Website Already Deleted");
         }
         await this.websiteDao.updateWebsite(website.id, {
             status: WebsiteStatus.DELETED,
@@ -119,7 +122,7 @@ class WebsiteService {
 
     async restoreWebsite(website: Website) {
         if (website.status !== WebsiteStatus.DELETED) {
-            throw Error("Website Already not Deleted");
+            throw new BadRequestError("Website Already not Deleted");
         }
         await this.websiteDao.updateWebsite(website.id, {
             status: WebsiteStatus.DRAFT,
@@ -130,7 +133,7 @@ class WebsiteService {
 
     async duplicateWebsite(website: Website) {
         if (website.status === WebsiteStatus.DELETED) {
-            throw Error("Website Deleted");
+            throw new BadRequestError("Website Deleted");
         }
         const duplicatedContent = duplicateWebsiteContent(website.content);
         const currentSettings = website.settings_id ? await this.websiteDao.getWebsiteSettings(website.settings_id) : null;
@@ -149,75 +152,221 @@ class WebsiteService {
 
     async updateWebsiteSettings(website: any, data: UpdateWebsiteSettingsInput) {
         if (website.status === WebsiteStatus.DELETED) {
-            throw Error("Website Deleted");
+            throw new BadRequestError("Website Deleted");
         }
         const settingId = website.settings?.id || website.settings_id;
-        if (!settingId) throw Error("Settings not found");
+        if (!settingId) throw new NotFoundError('Settings not found');
         return await this.websiteDao.updateWebsiteSettings(settingId, data);
     }
 
     async getWebsiteVersions(website: Website) {
         if (website.status === WebsiteStatus.DELETED) {
-            throw Error('Website Deleted');
+            throw new BadRequestError('Website Deleted');
         }
         return getWebsiteVersions(website.content);
     }
 
-    async publishWebsite(website: Website, data: PublishWebsiteInput) {
+    async publishWebsite(website: Website, data: PublishWebsiteInput, userId: string) {
         if (website.status === WebsiteStatus.DELETED) {
-            throw Error('Website Deleted');
+            throw new BadRequestError('Website Deleted');
         }
 
+        const siteHost = process.env.PUBLIC_SITE_HOST || 'buildora.app';
+        const hostname = data.customDomain || (data.subdomain ? `${data.subdomain}.${siteHost}` : `${website.id.slice(0, 8)}.${siteHost}`);
+
+        // Run the real deployment pipeline: generate HTML â†’ upload to S3
+        const normalized = normalizeWebsiteContent(website.content as Record<string, any>);
+        const deploymentResult = await deploy({
+            websiteId: website.id,
+            versionId: 'pending', // will be replaced below
+            domain: hostname,
+            content: normalized,
+            siteName: website.name,
+            deployedBy: userId,
+        });
+
+        // Build the published content with the real deployment record
         const published = publishWebsiteContent(website.content, {
             websiteId: website.id,
             ...(data.subdomain ? { subdomain: data.subdomain } : {}),
             ...(data.customDomain ? { customDomain: data.customDomain } : {}),
+            deploymentRecord: {
+                ...deploymentResult,
+                versionId: '', // will be set by publishWebsiteContent
+                sslEnabled: true,
+            },
         });
+
+        // Patch the versionId into the first deployment record
+        const firstDep = published.content.builderMeta.deployments[0];
+        if (firstDep && published.publishedVersionId) {
+            firstDep.versionId = published.publishedVersionId;
+        }
 
         await this.websiteDao.updateWebsite(website.id, {
             status: WebsiteStatus.PUBLISHED,
             content: published.content,
         });
 
-        return published.response;
+        return {
+            ...published.response,
+            deployment: {
+                id: deploymentResult.id,
+                status: deploymentResult.status,
+                url: deploymentResult.url,
+                fileCount: deploymentResult.fileCount,
+                totalSize: deploymentResult.totalSize,
+                logs: deploymentResult.logs,
+            },
+        };
+    }
+
+    async getDeployments(website: Website) {
+        if (website.status === WebsiteStatus.DELETED) {
+            throw new BadRequestError('Website Deleted');
+        }
+        const content = normalizeWebsiteContent(website.content as Record<string, any>);
+        return content.builderMeta.deployments;
+    }
+
+    async rollbackDeployment(website: Website, deploymentId: string, userId: string) {
+        if (website.status === WebsiteStatus.DELETED) {
+            throw new BadRequestError('Website Deleted');
+        }
+
+        const content = normalizeWebsiteContent(website.content as Record<string, any>);
+        const targetDeployment = content.builderMeta.deployments.find((d) => d.id === deploymentId);
+        if (!targetDeployment) {
+            throw new NotFoundError('Deployment not found');
+        }
+        if (targetDeployment.status !== 'active') {
+            throw new BadRequestError('Can only rollback active deployments');
+        }
+
+        // Find the version snapshot for the target deployment
+        const targetVersion = content.builderMeta.versions.find((v) => v.id === targetDeployment.versionId);
+        if (!targetVersion) {
+            throw new NotFoundError('Deployment version snapshot not found');
+        }
+
+        // Re-deploy the old version's content
+        const redeployContent = {
+            ...content,
+            pages: targetVersion.snapshot.pages,
+            activePageId: targetVersion.snapshot.activePageId,
+            templateId: targetVersion.snapshot.templateId,
+        };
+
+        const deploymentResult = await deploy({
+            websiteId: website.id,
+            versionId: targetDeployment.versionId,
+            domain: targetDeployment.domain,
+            content: redeployContent,
+            siteName: website.name,
+            deployedBy: userId,
+        });
+
+        // Mark old deployment as rolled back
+        content.builderMeta.deployments = content.builderMeta.deployments.map((d) =>
+            d.id === deploymentId ? { ...d, status: 'rolled_back' as const } : d
+        );
+
+        // Add new deployment record
+        content.builderMeta.deployments = [
+            {
+                ...deploymentResult,
+                sslEnabled: true,
+            },
+            ...content.builderMeta.deployments,
+        ];
+
+        if (deploymentResult.url) {
+            content.builderMeta.publishedUrl = deploymentResult.url;
+        }
+
+        await this.websiteDao.updateWebsite(website.id, { content });
+
+        return {
+            success: deploymentResult.status === 'active',
+            deployment: {
+                id: deploymentResult.id,
+                status: deploymentResult.status,
+                url: deploymentResult.url,
+            },
+        };
     }
 
     async getDomains(website: Website) {
         if (website.status === WebsiteStatus.DELETED) {
-            throw Error('Website Deleted');
+            throw new BadRequestError('Website Deleted');
         }
         return getWebsiteDomains(website.content);
     }
 
     async addDomain(website: Website, data: DomainInput) {
         if (website.status === WebsiteStatus.DELETED) {
-            throw Error('Website Deleted');
+            throw new BadRequestError('Website Deleted');
         }
 
         const result = addWebsiteDomain(website.content, data.domain);
         await this.websiteDao.updateWebsite(website.id, { content: result.content });
+
+        // Sync to Domain table for fast host-based lookups
+        const isSubdomain = result.domain.type === 'subdomain';
+        await prismaClient.domain.upsert({
+            where: { domain: data.domain },
+            update: {
+                website_id: website.id,
+                type: isSubdomain ? 'SUBDOMAIN' : 'CUSTOM',
+                status: isSubdomain ? 'ACTIVE' : 'PENDING',
+                is_primary: result.domain.primary || false,
+            },
+            create: {
+                website_id: website.id,
+                domain: data.domain,
+                type: isSubdomain ? 'SUBDOMAIN' : 'CUSTOM',
+                status: isSubdomain ? 'ACTIVE' : 'PENDING',
+                is_primary: result.domain.primary || false,
+            },
+        });
+
         return result.domain;
     }
 
     async removeDomain(website: Website, data: DomainInput) {
         if (website.status === WebsiteStatus.DELETED) {
-            throw Error('Website Deleted');
+            throw new BadRequestError('Website Deleted');
         }
 
         const content = removeWebsiteDomain(website.content, data.domain);
         await this.websiteDao.updateWebsite(website.id, { content });
+
+        // Remove from Domain table
+        await prismaClient.domain.deleteMany({ where: { domain: data.domain, website_id: website.id } });
     }
 
     async verifyDomain(website: Website, data: DomainInput) {
         if (website.status === WebsiteStatus.DELETED) {
-            throw Error('Website Deleted');
+            throw new BadRequestError('Website Deleted');
         }
 
-        const result = verifyWebsiteDomain(website.content, data.domain);
+        const result = await verifyWebsiteDomain(website.content, data.domain);
         await this.websiteDao.updateWebsite(website.id, { content: result.content });
 
+        // Sync verification status to Domain table
+        if (result.domain) {
+            await prismaClient.domain.updateMany({
+                where: { domain: data.domain, website_id: website.id },
+                data: {
+                    status: result.domain.status === 'active' ? 'ACTIVE' : 'PENDING',
+                    ssl_enabled: result.domain.sslEnabled || false,
+                    verified_at: result.domain.status === 'active' ? new Date() : null,
+                },
+            });
+        }
+
         return {
-            verified: Boolean(result.domain),
+            verified: Boolean(result.domain) && result.domain?.status === 'active',
             dnsRecords: result.domain?.dnsRecords || {},
         };
     }

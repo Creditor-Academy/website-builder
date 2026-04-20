@@ -8,6 +8,7 @@ import { PricingSection } from './PricingSection';
 import { GallerySection } from './GallerySection';
 import { GalleryMasonrySection } from './GalleryMasonrySection';
 import { BlogListSection } from './BlogListSection';
+import { sanitizeHTML } from '@/utils/sanitize';
 import { CaseStudiesSection } from './CaseStudiesSection';
 import { ContactSection } from './ContactSection';
 import { StatsSection } from './StatsSection';
@@ -143,7 +144,7 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
             fontStyle: component.style?.fontStyle || 'normal',
             letterSpacing: component.style?.letterSpacing || 'normal',
           }}
-          dangerouslySetInnerHTML={{ __html: component.content?.text || 'Edit text' }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHTML(component.content?.text || 'Edit text') }}
         />
       )}
       {component.type === 'image' && (
@@ -388,7 +389,7 @@ export function SectionRenderer({ section, idx, isAlternate, isSelected, isEditi
                     fontFamily: comp.style?.fontFamily || 'Inter',
                     fontStyle: comp.style?.fontStyle || 'normal',
                   }}
-                  dangerouslySetInnerHTML={{ __html: comp.content.text }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHTML(comp.content.text) }}
                 />
               )}
               {comp.type === 'image' && (
@@ -413,7 +414,7 @@ export function SectionRenderer({ section, idx, isAlternate, isSelected, isEditi
                     border: 'none',
                     cursor: 'pointer',
                   }}
-                 dangerouslySetInnerHTML={{ __html: comp.content.text }} />
+                 dangerouslySetInnerHTML={{ __html: sanitizeHTML(comp.content.text) }} />
               )}
             </div>
           ))}

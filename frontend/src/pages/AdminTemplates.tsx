@@ -42,10 +42,10 @@ export default function AdminTemplates() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   // ─── Fetch all website templates ─────────────────────────────────────────
-  const fetchTemplates = async () => {
+  const fetchTemplates = async (signal?: AbortSignal) => {
     try {
       setIsLoading(true);
-      const res = await templateApi.getWebsiteTemplates();
+      const res = await templateApi.getWebsiteTemplates({ signal });
       // Backend returns grouped by category — flatten them
       const raw = res.data?.data || res.data || [];
       const flat = Array.isArray(raw)
@@ -53,13 +53,22 @@ export default function AdminTemplates() {
         : Object.values(raw).flat();
       setTemplates(flat as any[]);
     } catch (err: any) {
-      toast({ title: 'Failed to load templates', variant: 'destructive' });
+      if (err?.name === 'CanceledError' || signal?.aborted) return;
+      toast({
+        title: 'Failed to load templates',
+        description: err?.response?.data?.message || err?.message || 'Please check your connection and try again.',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => { fetchTemplates(); }, []);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchTemplates(controller.signal);
+    return () => controller.abort();
+  }, []);
 
   // ─── Filtered list ────────────────────────────────────────────────────────
   const filtered = useMemo(() => {

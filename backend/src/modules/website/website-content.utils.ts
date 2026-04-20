@@ -1,6 +1,8 @@
 import crypto from 'crypto';
+import dns from 'dns/promises';
 
 const DEFAULT_SITE_HOST = process.env.PUBLIC_SITE_HOST || 'buildora.app';
+const SERVER_IP = process.env.SERVER_IP || '0.0.0.0';
 
 type VersionSnapshot = {
   pages: any[];
@@ -35,11 +37,20 @@ type WebsiteDomainRecord = {
 
 type WebsiteDeploymentRecord = {
   id: string;
-  status: 'active' | 'pending' | 'error';
+  versionId: string;
+  status: 'pending' | 'building' | 'uploading' | 'active' | 'failed' | 'rolled_back';
   url: string;
   domain: string;
+  artifactPrefix: string;
   publishedAt: string;
+  startedAt: string;
+  finishedAt: string | null;
+  deployedBy: string;
+  errorMessage: string | null;
+  fileCount: number;
+  totalSize: number;
   sslEnabled: boolean;
+  logs: string[];
 };
 
 type WebsiteBuilderMeta = {
@@ -275,7 +286,7 @@ export const addWebsiteDomain = (content: unknown, domain: string, siteHost = DE
     dnsRecords: isSubdomain
       ? {}
       : {
-          A: '192.168.1.1',
+          A: SERVER_IP,
           CNAME: siteHost,
           TXT: [`site-verification=${domain}`],
         },
@@ -302,9 +313,43 @@ export const removeWebsiteDomain = (content: unknown, domain: string) => {
   return normalized;
 };
 
-export const verifyWebsiteDomain = (content: unknown, domain: string): { content: WebsiteContent; domain: WebsiteDomainRecord | null } => {
+export const verifyWebsiteDomain = async (content: unknown, domain: string): Promise<{ content: WebsiteContent; domain: WebsiteDomainRecord | null }> => {
   const normalized = normalizeWebsiteContent(content);
   let verifiedDomain: WebsiteDomainRecord | null = null;
+
+  // Perform actual DNS verification
+  let dnsVerified = false;
+  try {
+    // Check A record or CNAME
+    try {
+      const addresses = await dns.resolve4(domain);
+      if (addresses.includes(SERVER_IP)) {
+        dnsVerified = true;
+      }
+    } catch {}
+
+    if (!dnsVerified) {
+      try {
+        const cnames = await dns.resolveCname(domain);
+        if (cnames.some(c => c.endsWith(DEFAULT_SITE_HOST))) {
+          dnsVerified = true;
+        }
+      } catch {}
+    }
+
+    // Check TXT verification record
+    if (!dnsVerified) {
+      try {
+        const txtRecords = await dns.resolveTxt(domain);
+        const flat = txtRecords.map(r => r.join(''));
+        if (flat.some(t => t.includes(`site-verification=${domain}`))) {
+          dnsVerified = true;
+        }
+      } catch {}
+    }
+  } catch {
+    // DNS resolution failed entirely
+  }
 
   normalized.builderMeta.domains = normalized.builderMeta.domains.map((item) => {
     if (item.domain !== domain) {
@@ -313,11 +358,11 @@ export const verifyWebsiteDomain = (content: unknown, domain: string): { content
 
     verifiedDomain = {
       ...item,
-      status: 'active',
-      sslEnabled: true,
+      status: dnsVerified ? 'active' : 'pending',
+      sslEnabled: dnsVerified,
       dnsRecords: {
         ...item.dnsRecords,
-        verified: true,
+        verified: dnsVerified,
       },
     };
 
@@ -337,11 +382,13 @@ export const publishWebsiteContent = (
     subdomain,
     customDomain,
     siteHost = DEFAULT_SITE_HOST,
+    deploymentRecord,
   }: {
     websiteId: string;
     subdomain?: string;
     customDomain?: string;
     siteHost?: string;
+    deploymentRecord?: WebsiteDeploymentRecord;
   },
 ) => {
   const normalized = normalizeWebsiteContent(content);
@@ -363,28 +410,46 @@ export const publishWebsiteContent = (
 
   domainResult.content.builderMeta.domains = upsertDomain(domainResult.content.builderMeta.domains, primaryDomain);
 
-  const url = `https://${hostname}`;
+  const url = deploymentRecord?.url || `https://${hostname}`;
   domainResult.content.builderMeta.publishedUrl = url;
-  domainResult.content.builderMeta.deployments = [
-    {
-      id: crypto.randomUUID(),
-      status: 'active',
-      url,
-      domain: hostname,
-      publishedAt,
-      sslEnabled: true,
-    },
-    ...domainResult.content.builderMeta.deployments,
-  ];
+
+  if (deploymentRecord) {
+    domainResult.content.builderMeta.deployments = [
+      deploymentRecord,
+      ...domainResult.content.builderMeta.deployments,
+    ];
+  } else {
+    domainResult.content.builderMeta.deployments = [
+      {
+        id: crypto.randomUUID(),
+        versionId: publishedVersion.id,
+        status: 'active',
+        url,
+        domain: hostname,
+        artifactPrefix: '',
+        publishedAt,
+        startedAt: publishedAt,
+        finishedAt: publishedAt,
+        deployedBy: 'system',
+        errorMessage: null,
+        fileCount: 0,
+        totalSize: 0,
+        sslEnabled: true,
+        logs: [],
+      },
+      ...domainResult.content.builderMeta.deployments,
+    ];
+  }
 
   return {
     content: domainResult.content,
+    publishedVersionId: publishedVersion.id,
     response: {
       success: true,
       url,
       publishedAt,
       sslEnabled: true,
-      status: 'active' as const,
+      status: (deploymentRecord?.status || 'active') as 'active' | 'pending' | 'failed',
     },
   };
 };

@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Eye, LayoutTemplate } from "lucide-react";
 import loginbg from "../assets/login.png";
-import { loginUser, registerUser, forgotPassword } from "../api/auth";
+import { loginUser, registerUser, forgotPassword, googleLogin } from "../api/auth";
 
 // ── Moved outside so React never sees a new component type on re-render ────────
 
@@ -30,6 +30,7 @@ interface LoginFormProps {
   rememberMe: boolean;
   setRememberMe: (v: boolean) => void;
   onForgotPassword: () => void;
+  onGoogleLogin: () => void;
 }
 
 const LoginForm = ({
@@ -45,6 +46,7 @@ const LoginForm = ({
   rememberMe,
   setRememberMe,
   onForgotPassword,
+  onGoogleLogin,
 }: LoginFormProps) => {
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleLogin();
@@ -134,7 +136,7 @@ const LoginForm = ({
         <span className="relative px-4 bg-white text-xs text-slate-400">Or continue with</span>
       </div>
 
-      <button className="flex items-center justify-center gap-3 py-4 w-full bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors font-medium text-slate-700 active:scale-[0.98]">
+      <button onClick={onGoogleLogin} className="flex items-center justify-center gap-3 py-4 w-full bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors font-medium text-slate-700 active:scale-[0.98]">
         <GoogleSVG />
         Continue with Google
       </button>
@@ -159,6 +161,7 @@ interface SignupFormProps {
   setShowSignupPassword: (v: boolean) => void;
   signupError: string;
   setSignupError: (v: string) => void;
+  onGoogleLogin: () => void;
 }
 
 const SignupForm = ({
@@ -171,6 +174,7 @@ const SignupForm = ({
   setShowSignupPassword,
   signupError,
   setSignupError,
+  onGoogleLogin,
 }: SignupFormProps) => {
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleSignup();
@@ -260,7 +264,7 @@ const SignupForm = ({
         <span className="relative px-4 bg-white text-xs text-slate-400">Or continue with</span>
       </div>
 
-      <button className="flex items-center justify-center gap-3 py-4 w-full bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors font-medium text-slate-700 active:scale-[0.98]">
+      <button onClick={onGoogleLogin} className="flex items-center justify-center gap-3 py-4 w-full bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors font-medium text-slate-700 active:scale-[0.98]">
         <GoogleSVG />
         Continue with Google
       </button>
@@ -355,6 +359,18 @@ export default function LoginSignup() {
     }
   };
 
+  const handleGoogleLogin = () => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) {
+      setLoginError("Google login is not configured.");
+      return;
+    }
+    const redirectUri = window.location.origin + '/auth/google/callback';
+    const scope = 'openid email profile';
+    const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${encodeURIComponent(scope)}&prompt=select_account`;
+    window.location.href = url;
+  };
+
   const handleForgotPassword = async () => {
     setForgotError("");
     setForgotMsg("");
@@ -391,6 +407,7 @@ export default function LoginSignup() {
       setForgotError("");
       setShowForgot(true);
     },
+    onGoogleLogin: handleGoogleLogin,
   };
 
   const signupProps = {
@@ -403,6 +420,7 @@ export default function LoginSignup() {
     setShowSignupPassword,
     signupError,
     setSignupError,
+    onGoogleLogin: handleGoogleLogin,
   };
 
   return (

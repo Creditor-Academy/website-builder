@@ -26,6 +26,7 @@ model User {
   refreshTokens           RefreshToken[]
   institution             Institution?             @relation(fields: [institution_id], references: [id])
   ownedWebsites           Website[]                @relation("WebsiteOwner")
+  assets                  Asset[]
 
   @@index([email])
   @@index([auth_provider])
@@ -44,6 +45,7 @@ model Institution {
   websites   Website[]
   templates  WebsiteTemplate[]
   sectionTemplates SectionTemplate[]
+  assets     Asset[]
 
   @@map("institutions")
 }
@@ -103,6 +105,7 @@ model Website {
   thumbnail_url             String?
   currentDraftVersionId     String?
   currentPublishedVersionId String?
+  published_url             String?
   created_at                DateTime      @default(now())
   updated_at                DateTime      @updatedAt
   deleted_at                DateTime?
@@ -113,6 +116,11 @@ model Website {
   owner                     User          @relation("WebsiteOwner", fields: [owner_id], references: [id], onDelete: Cascade)
   sourceTemplate            WebsiteTemplate? @relation(fields: [source_template_id], references: [id], onDelete: SetNull)
   settings                  Settings?     @relation(fields: [settings_id], references: [id], onDelete: Cascade)
+  assets                    Asset[]
+  versions                  WebsiteVersion[]
+  deployments               Deployment[]
+  domains                   Domain[]
+  formSubmissions           FormSubmission[]
 
   @@index([owner_id])
   @@index([source_template_id])
@@ -153,6 +161,42 @@ enum TemplateScope {
   INSTITUTION
 }
 
+enum AssetScope {
+  GLOBAL
+  WEBSITE
+}
+
+enum AssetType {
+  image
+  video
+  file
+}
+
+model Asset {
+  id             String     @id @default(cuid())
+  name           String
+  type           AssetType  @default(image)
+  url            String
+  size           String?
+  scope          AssetScope @default(GLOBAL)
+  objectKey      String?
+  owner_id       String
+  institution_id String?
+  website_id     String?
+  created_at     DateTime   @default(now())
+  updated_at     DateTime   @updatedAt
+
+  owner       User         @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  institution Institution? @relation(fields: [institution_id], references: [id], onDelete: SetNull)
+  website     Website?     @relation(fields: [website_id], references: [id], onDelete: Cascade)
+
+  @@index([owner_id])
+  @@index([website_id])
+  @@index([scope])
+  @@index([institution_id])
+  @@map("assets")
+}
+
 
 model WebsiteTemplate {
   id            String    @id @default(cuid())
@@ -190,4 +234,129 @@ model SectionTemplate {
 
   @@index([scope])
   @@index([institution_id])
+}
+
+// ─── New Production Models ───────────────────────────────────────────
+
+enum DeploymentStatus {
+  PENDING
+  BUILDING
+  UPLOADING
+  ACTIVE
+  FAILED
+  ROLLED_BACK
+}
+
+enum DomainType {
+  SUBDOMAIN
+  CUSTOM
+}
+
+enum DomainStatus {
+  PENDING
+  ACTIVE
+  ERROR
+  DELETED
+}
+
+model WebsiteVersion {
+  id          String   @id @default(cuid())
+  website_id  String
+  kind        String   // 'draft' | 'published'
+  label       String
+  snapshot    Json     // { pages, activePageId, templateId }
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  website     Website  @relation(fields: [website_id], references: [id], onDelete: Cascade)
+
+  @@index([website_id])
+  @@index([kind])
+  @@map("website_versions")
+}
+
+model Deployment {
+  id              String           @id @default(cuid())
+  website_id      String
+  version_id      String?
+  status          DeploymentStatus @default(PENDING)
+  url             String?
+  domain          String
+  artifact_prefix String?
+  deployed_by     String
+  error_message   String?
+  file_count      Int              @default(0)
+  total_size      BigInt           @default(0)
+  ssl_enabled     Boolean          @default(false)
+  logs            Json?            // string[]
+  started_at      DateTime         @default(now())
+  finished_at     DateTime?
+  created_at      DateTime         @default(now())
+
+  website         Website          @relation(fields: [website_id], references: [id], onDelete: Cascade)
+
+  @@index([website_id])
+  @@index([status])
+  @@index([domain])
+  @@index([created_at])
+  @@map("deployments")
+}
+
+model Domain {
+  id          String       @id @default(cuid())
+  website_id  String
+  domain      String       @unique
+  type        DomainType   @default(SUBDOMAIN)
+  status      DomainStatus @default(PENDING)
+  ssl_enabled Boolean      @default(false)
+  is_primary  Boolean      @default(false)
+  dns_records Json?        // { A?, CNAME?, TXT?, verified? }
+  added_at    DateTime     @default(now())
+  verified_at DateTime?
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+
+  website     Website      @relation(fields: [website_id], references: [id], onDelete: Cascade)
+
+  @@index([website_id])
+  @@index([status])
+  @@map("domains")
+}
+
+model FormSubmission {
+  id          String   @id @default(cuid())
+  website_id  String
+  page_slug   String?
+  form_name   String?
+  data        Json     // the submitted form fields
+  ip_address  String?
+  user_agent  String?
+  is_spam     Boolean  @default(false)
+  is_read     Boolean  @default(false)
+  created_at  DateTime @default(now())
+
+  website     Website  @relation(fields: [website_id], references: [id], onDelete: Cascade)
+
+  @@index([website_id])
+  @@index([is_spam])
+  @@index([is_read])
+  @@index([created_at])
+  @@map("form_submissions")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  user_id     String?
+  action      String   // 'website.publish', 'website.delete', 'user.role_change', etc.
+  entity_type String   // 'website', 'user', 'domain', etc.
+  entity_id   String?
+  metadata    Json?    // extra context about the action
+  ip_address  String?
+  created_at  DateTime @default(now())
+
+  @@index([user_id])
+  @@index([action])
+  @@index([entity_type, entity_id])
+  @@index([created_at])
+  @@map("audit_logs")
 }

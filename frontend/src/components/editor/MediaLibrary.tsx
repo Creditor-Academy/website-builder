@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Search, Upload, X, Check, Image as ImageIcon, Video, File, Folder, MoreVertical, Trash2, Link as LinkIcon, Monitor } from 'lucide-react';
+import { Search, Upload, Check, Image as ImageIcon, Video, Link as LinkIcon, Monitor } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -15,12 +15,12 @@ interface MediaLibraryProps {
 }
 
 export function MediaLibrary({ open, onOpenChange, onSelect }: MediaLibraryProps) {
-    const { assets, fetchAssets, uploadAsset, importAssetFromUrl } = useBuilderStore();
-        useEffect(() => {
-            if (open) {
-                void fetchAssets();
-            }
-        }, [open, fetchAssets]);
+    const { activeWebsiteId, fetchAssets, getScopedAssets, uploadAsset, importAssetFromUrl } = useBuilderStore();
+    useEffect(() => {
+        if (open && activeWebsiteId) {
+            void fetchAssets({ websiteId: activeWebsiteId });
+        }
+    }, [activeWebsiteId, open, fetchAssets]);
 
     const [search, setSearch] = useState('');
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -28,6 +28,7 @@ export function MediaLibrary({ open, onOpenChange, onSelect }: MediaLibraryProps
     const [urlInput, setUrlInput] = useState('');
     const [urlName, setUrlName] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const assets = activeWebsiteId ? getScopedAssets(activeWebsiteId) : [];
 
     const filteredMedia = assets.filter(item =>
         item.name.toLowerCase().includes(search.toLowerCase())
@@ -55,15 +56,15 @@ export function MediaLibrary({ open, onOpenChange, onSelect }: MediaLibraryProps
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            await uploadAsset(file);
+        if (file && activeWebsiteId) {
+            await uploadAsset(file, { websiteId: activeWebsiteId });
             if (e.target) e.target.value = '';
         }
     };
 
     const handleUrlUpload = async () => {
-        if (urlInput) {
-            await importAssetFromUrl(urlName || 'Imported Asset', urlInput);
+        if (urlInput && activeWebsiteId) {
+            await importAssetFromUrl(urlName || 'Imported Asset', urlInput, { websiteId: activeWebsiteId });
             setUrlInput('');
             setUrlName('');
             setIsUrlDialogOpen(false);

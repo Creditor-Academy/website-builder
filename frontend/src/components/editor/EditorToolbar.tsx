@@ -5,6 +5,7 @@ import { Undo2, Redo2, Eye, Download, Play, Share2, ChevronRight, Globe, Home, H
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import { PublishDialog } from './PublishDialog';
 
 export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websiteId = '', onTabChange = (tab: string) => {} }: any) {
   const [showPublishDialog, setShowPublishDialog] = useState(false);
@@ -208,13 +209,19 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
 
           {/* PUBLISH */}
           {!isTemplateEditor && (
-            <Button id="tour-publish" className="h-10 gap-2 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white rounded-xl px-6 text-xs font-bold shadow-lg shadow-primary/25 transition-all duration-200 hover:shadow-xl hover:shadow-primary/30 active:scale-95">
+            <Button id="tour-publish" onClick={() => setShowPublishDialog(true)} className="h-10 gap-2 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white rounded-xl px-6 text-xs font-bold shadow-lg shadow-primary/25 transition-all duration-200 hover:shadow-xl hover:shadow-primary/30 active:scale-95">
               <Play className="w-4 h-4 fill-current" />
               <span className="hidden sm:inline font-medium">Publish Site</span>
             </Button>
           )}
         </div>
       </TooltipProvider>
+
+      <PublishDialog
+        open={showPublishDialog}
+        onOpenChange={setShowPublishDialog}
+        websiteId={websiteId}
+      />
     </div>
   );
 }

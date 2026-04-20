@@ -66,7 +66,7 @@ export default function DashboardWebsites() {
   const isSuperAdmin = currentUser.role === 'SUPER_ADMIN';
   const isInstitutionAdmin = currentUser.role === 'INSTITUTION_ADMIN';
   const isAdminRole = isSuperAdmin || currentUser.role === 'ADMIN' || isInstitutionAdmin;
-  const [isAdminView, setIsAdminView] = useState(isInstitutionAdmin); // INSTITUTION_ADMIN defaults to admin view
+  const [isAdminView, setIsAdminView] = useState(isSuperAdmin || isInstitutionAdmin); // SUPER_ADMIN and INSTITUTION_ADMIN default to admin view
 
   const [isEditStatusModalOpen, setIsEditStatusModalOpen] = useState(false);
   const [editingWebsite, setEditingWebsite] = useState<Website | null>(null);

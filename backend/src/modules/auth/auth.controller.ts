@@ -113,6 +113,33 @@ class AuthController {
       next(error);
     }
   };
+
+  googleAuth = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { token } = req.body;
+      if (!token) {
+        return res.status(400).json({ error: 'Google access token is required' });
+      }
+      const result = await this.authService.googleAuth(token);
+
+      res.cookie('accessToken', result.accessToken, {
+        ...COOKIE_OPTIONS,
+        maxAge: ACCESS_TOKEN_EXPIRY_MS
+      });
+
+      res.cookie('refreshToken', result.refreshToken, {
+        ...COOKIE_OPTIONS,
+        maxAge: REFRESH_TOKEN_EXPIRY_MS
+      });
+
+      res.status(200).json({
+        message: result.message,
+        user: result.user,
+      });
+    } catch (error: any) {
+      next(error);
+    }
+  };
 }
 
 export default AuthController;

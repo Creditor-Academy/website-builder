@@ -6,6 +6,7 @@ import institutionRoutes from "./institution/institution.routes.js";
 import statsRoutes from "./stats/stats.routes.js";
 import templateRoutes from "./template/template.routes.js";  // ← ADD THIS
 import assetsRoutes from './assets/assets.routes.js';
+import formsRoutes from './forms/forms.routes.js';
 
 const router = Router();
 
@@ -17,5 +18,6 @@ router.use('/organizations', institutionRoutes);
 router.use('/stats', statsRoutes);
 router.use('/templates', templateRoutes);  // ← ADD THIS
 router.use('/assets', assetsRoutes);
+router.use('/forms', formsRoutes);
 
 export default router;

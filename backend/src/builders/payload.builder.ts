@@ -14,6 +14,7 @@ export const generateSessionPayload = (user: any, refreshTokenHash: string) => {
         role: user.role,
         refreshTokenId: refreshTokenHash,
         institution_id: user.institution_id || undefined,
+        isVerified: user.isVerified ?? false,
         createdAt: new Date(),
     };
 }

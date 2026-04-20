@@ -4,42 +4,48 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import Index from "./pages/Index";
-import Dashboard from "./pages/Dashboard";
-import DashboardUsers from "./pages/DashboardUsers";
-import DashboardWebsites from "./pages/DashboardWebsites";
-import DashboardTemplates from "./pages/DashboardTemplates";
-import DashboardDeployment from "./pages/DashboardDeployment";
-import DashboardAssets from "./pages/DashboardAssets";
-import DashboardSettings from "./pages/DashboardSettings";
-import TemplateEditor from "./pages/TemplateEditor";
-import Organizations from "./pages/dashboard/Organizations";
-import { WebsiteEditor } from "./components/editor/WebsiteEditor";
-import Login from "./pages/Login";
-import ResetPassword from "./pages/ResetPassword";
-import VerifyEmail from "./pages/VerifyEmail";
-import Features from "./pages/Features";
-import Services from "./pages/Services";
-import Pricing from "./pages/Pricing";
-import Contact from "./pages/Contact";
-import Start from "./pages/Start";
-import Templates from "./pages/Templates";
-import Resources from "./pages/Resources";
-import About from "./pages/About";
-import Blog from "./pages/Blog";
-import Careers from "./pages/Careers";
-import Help from "./pages/Help";
-import Status from "./pages/Status";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsOfService from "./pages/TermsOfService";
-import NotFound from "./pages/NotFound";
+import React, { Suspense } from "react";
+
+const Index = React.lazy(() => import("./pages/Index"));
+const Dashboard = React.lazy(() => import("./pages/Dashboard"));
+const DashboardUsers = React.lazy(() => import("./pages/DashboardUsers"));
+const DashboardWebsites = React.lazy(() => import("./pages/DashboardWebsites"));
+const DashboardTemplates = React.lazy(() => import("./pages/DashboardTemplates"));
+const DashboardDeployment = React.lazy(() => import("./pages/DashboardDeployment"));
+const DashboardAssets = React.lazy(() => import("./pages/DashboardAssets"));
+const DashboardSettings = React.lazy(() => import("./pages/DashboardSettings"));
+const TemplateEditor = React.lazy(() => import("./pages/TemplateEditor"));
+const Organizations = React.lazy(() => import("./pages/dashboard/Organizations"));
+const WebsiteEditor = React.lazy(() => import("./components/editor/WebsiteEditor").then(m => ({ default: m.WebsiteEditor })));
+const Login = React.lazy(() => import("./pages/Login"));
+const ResetPassword = React.lazy(() => import("./pages/ResetPassword"));
+const VerifyEmail = React.lazy(() => import("./pages/VerifyEmail"));
+const Features = React.lazy(() => import("./pages/Features"));
+const Services = React.lazy(() => import("./pages/Services"));
+const Pricing = React.lazy(() => import("./pages/Pricing"));
+const Contact = React.lazy(() => import("./pages/Contact"));
+const Start = React.lazy(() => import("./pages/Start"));
+const Templates = React.lazy(() => import("./pages/Templates"));
+const Resources = React.lazy(() => import("./pages/Resources"));
+const About = React.lazy(() => import("./pages/About"));
+const Blog = React.lazy(() => import("./pages/Blog"));
+const Careers = React.lazy(() => import("./pages/Careers"));
+const Help = React.lazy(() => import("./pages/Help"));
+const Status = React.lazy(() => import("./pages/Status"));
+const PrivacyPolicy = React.lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = React.lazy(() => import("./pages/TermsOfService"));
+const NotFound = React.lazy(() => import("./pages/NotFound"));
+const GoogleCallback = React.lazy(() => import("./pages/GoogleCallback"));
 
 import { ScrollToTop } from "./components/utils/ScrollToTop";
 import { JumpToTop } from "./components/ui/JumpToTop";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
 const App = () => (
+  <ErrorBoundary>
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -48,24 +54,27 @@ const App = () => (
         <BrowserRouter>
           <ScrollToTop />
           <JumpToTop />
+          <Suspense fallback={<div className="flex h-screen w-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/auth/google/callback" element={<GoogleCallback />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard" element={<Dashboard />}>
-              <Route index element={null} /> {/* This will be handled by Dashboard component's internal routing or default view */}
-              <Route path="users" element={<DashboardUsers />} />
-              <Route path="organizations" element={<Organizations />} />
-              <Route path="websites" element={<DashboardWebsites />} />
-              <Route path="templates" element={<DashboardTemplates />} />
-              <Route path="deployment" element={<DashboardDeployment />} />
-              <Route path="assets" element={<DashboardAssets />} />
-              <Route path="settings" element={<DashboardSettings />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard" element={<Dashboard />}>
+                <Route index element={null} />
+                <Route path="users" element={<DashboardUsers />} />
+                <Route path="organizations" element={<Organizations />} />
+                <Route path="websites" element={<DashboardWebsites />} />
+                <Route path="templates" element={<DashboardTemplates />} />
+                <Route path="deployment" element={<DashboardDeployment />} />
+                <Route path="assets" element={<DashboardAssets />} />
+                <Route path="settings" element={<DashboardSettings />} />
+              </Route>
+              <Route path="/builder/:id" element={<WebsiteEditor />} />
+              <Route path="/template-builder/:id" element={<TemplateEditor />} />
             </Route>
-            <Route path="/builder/:id" element={<WebsiteEditor />} />
-            <Route path="/template-builder/:id" element={<TemplateEditor />} />
             <Route path="/features" element={<Features />} />
             <Route path="/services" element={<Services />} />
             <Route path="/resources" element={<Resources />} />
@@ -82,10 +91,12 @@ const App = () => (
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
   </HelmetProvider>
+  </ErrorBoundary>
 );
 
 export default App;

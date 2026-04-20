@@ -1,5 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import WebsiteService from './website.service.js';
+import archiver from 'archiver';
+import { generateStaticSite } from '../../services/static-site-generator.js';
 
 class WebsiteController {
     private websiteService: WebsiteService;
@@ -119,7 +121,30 @@ class WebsiteController {
     publishWebsite = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const website = req.context.website!;
-            const result = await this.websiteService.publishWebsite(website, req.validated.body);
+            const userId = req.context.user.id;
+            const result = await this.websiteService.publishWebsite(website, req.validated.body, userId);
+            return res.status(200).json(result);
+        } catch (error: any) {
+            next(error);
+        }
+    }
+
+    getDeployments = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const website = req.context.website!;
+            const deployments = await this.websiteService.getDeployments(website);
+            return res.status(200).json({ deployments });
+        } catch (error: any) {
+            next(error);
+        }
+    }
+
+    rollbackDeployment = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const website = req.context.website!;
+            const userId = req.context.user.id;
+            const { deploymentId } = req.validated.body;
+            const result = await this.websiteService.rollbackDeployment(website, deploymentId, userId);
             return res.status(200).json(result);
         } catch (error: any) {
             next(error);
@@ -161,6 +186,31 @@ class WebsiteController {
             const website = req.context.website!;
             const verification = await this.websiteService.verifyDomain(website, req.validated.body);
             return res.status(200).json(verification);
+        } catch (error: any) {
+            next(error);
+        }
+    }
+
+    exportWebsite = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const website = req.context.website!;
+            const content = website.content as Record<string, any> || {};
+            const siteName = (website as any).name || 'website';
+            const files = generateStaticSite(content, siteName, website.id);
+
+            const safeName = siteName.replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 50);
+            res.setHeader('Content-Type', 'application/zip');
+            res.setHeader('Content-Disposition', `attachment; filename="${safeName}.zip"`);
+
+            const archive = archiver('zip', { zlib: { level: 9 } });
+            archive.on('error', (err) => next(err));
+            archive.pipe(res);
+
+            for (const file of files) {
+                archive.append(file.html, { name: file.filename });
+            }
+
+            await archive.finalize();
         } catch (error: any) {
             next(error);
         }
