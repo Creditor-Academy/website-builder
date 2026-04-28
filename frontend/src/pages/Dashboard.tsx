@@ -27,6 +27,7 @@ import { templatesList } from '@/lib/templates';
 import templateApi from '@/api/templates';
 import { loginUser, logoutUser } from "../api/auth";
 import statsApi from "../api/stats";
+import contactApi from "../api/contact";
 import {
     updateUserProfile,
     deactivateOwnAccount,
@@ -53,8 +54,8 @@ const OverviewCard = ({ title, value, icon, description, iconBgClass, iconColorC
     </Card>
 );
 
-// NavItem — supports router Link + active state
-const NavItem = ({ icon, label, to, activeColor = 'text-white', hoverBg = 'hover:bg-slate-700', hoverText = 'hover:text-white', defaultText = 'text-slate-300' }) => {
+// NavItem — supports router Link + active state + badge
+const NavItem = ({ icon, label, to, activeColor = 'text-white', hoverBg = 'hover:bg-slate-700', hoverText = 'hover:text-white', defaultText = 'text-slate-300', badge }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const isActive = location.pathname === to;
@@ -76,7 +77,12 @@ const NavItem = ({ icon, label, to, activeColor = 'text-white', hoverBg = 'hover
             onClick={handleClick}
         >
             <span className={cn("transition-colors duration-300", isActive ? activeColor : `${defaultText} ${hoverText}`)}>{icon}</span>
-            {label}
+            <span className="flex-1 text-left">{label}</span>
+            {badge && badge > 0 && (
+                <span className="w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                    {badge > 99 ? '99+' : badge}
+                </span>
+            )}
         </Button>
     );
 };
@@ -773,6 +779,9 @@ const Dashboard = () => {
     const [userDetailOpen, setUserDetailOpen] = useState(false);
     const [isAddUserOpen, setIsAddUserOpen] = useState(false);
 
+    // Contact messages state
+    const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+
     // DB templates for New Project dialog
     const [dbTemplates, setDbTemplates] = useState<any[]>([]);
 
@@ -849,6 +858,36 @@ const Dashboard = () => {
                 setDbTemplates(flat.filter((t: any) => !t.deletedAt));
             })
             .catch(() => setDbTemplates([]));
+    }, []);
+
+    // Fetch unread message count
+    const fetchUnreadMessageCount = async () => {
+        try {
+            const response = await contactApi.getContactStats();
+            setUnreadMessageCount(response.data?.data?.unread || 0);
+        } catch (error) {
+            console.error("Failed to fetch message stats:", error);
+        }
+    };
+
+    // Fetch unread message count on component mount and periodically
+    useEffect(() => {
+        fetchUnreadMessageCount();
+        
+        // Set up polling to check for new messages every 30 seconds
+        const interval = setInterval(fetchUnreadMessageCount, 30000);
+        
+        return () => clearInterval(interval);
+    }, []);
+
+    // Listen for new message events (could be triggered by WebSocket in the future)
+    useEffect(() => {
+        const handleMessageUpdate = () => {
+            fetchUnreadMessageCount();
+        };
+        
+        window.addEventListener('messageUpdate', handleMessageUpdate);
+        return () => window.removeEventListener('messageUpdate', handleMessageUpdate);
     }, []);
 
     const handleLogout = async () => {
@@ -1010,7 +1049,7 @@ const Dashboard = () => {
                     )}
                     <NavItem icon={<Layout className="w-4 h-4" />} label="Templates" to="/dashboard/templates" />
                     <NavItem icon={<FileText className="w-4 h-4" />} label="Assets" to="/dashboard/assets" />
-                    <NavItem icon={<MessageSquare className="w-4 h-4" />} label="Messages" to="/dashboard/messages" />
+                    <NavItem icon={<MessageSquare className="w-4 h-4" />} label="Messages" to="/dashboard/messages" badge={unreadMessageCount} />
                     {isAdmin && (
                         <div className="pt-1">
                             <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest px-3 mb-1">System</p>

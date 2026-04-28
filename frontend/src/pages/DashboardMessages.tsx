@@ -106,6 +106,9 @@ export default function DashboardMessages() {
                 read: prev.read + 1
             }));
             toast({ title: 'Message marked as read' });
+            
+            // Trigger message update event to refresh dashboard badge
+            window.dispatchEvent(new CustomEvent('messageUpdate'));
         } catch (error) {
             toast({ 
                 title: 'Failed to update message', 
@@ -127,6 +130,7 @@ export default function DashboardMessages() {
                 }));
             }
             toast({ title: 'Message deleted' });
+            window.dispatchEvent(new CustomEvent('messageUpdate'));
         } catch (error) {
             toast({ 
                 title: 'Failed to delete message', 
@@ -491,3 +495,4 @@ export default function DashboardMessages() {
         </div>
     );
 }
+

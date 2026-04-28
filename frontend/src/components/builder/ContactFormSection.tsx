@@ -68,6 +68,9 @@ export default function ContactFormSection({
         onSuccess?.('Message sent successfully!');
         setFormData({ name: '', email: '', subject: '', message: '' });
         
+        // Trigger message update event to refresh dashboard badge
+        window.dispatchEvent(new CustomEvent('messageUpdate'));
+        
         // Reset success state after 5 seconds
         setTimeout(() => setIsSubmitted(false), 5000);
       } else {
