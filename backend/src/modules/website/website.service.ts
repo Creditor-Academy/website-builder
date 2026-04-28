@@ -7,6 +7,7 @@ import { addWebsiteDomain, createWebsiteContentFromTemplate, duplicateWebsiteCon
 import { deploy } from '../../services/deployment.service.js';
 import { NotFoundError, BadRequestError, ConflictError } from '../../utils/error.utils.js';
 import prismaClient from '../../config/prisma.js';
+import cacheService from '../../services/cache.service.js';
 
 class WebsiteService {
     private websiteDao: WebsiteDao;
@@ -116,8 +117,18 @@ class WebsiteService {
             status: WebsiteStatus.DELETED,
             deleted_at: new Date()
         });
-        // Remove domain mapping from cache  and invalidate cache
-        // mark all domains.status = deleted
+
+        // Mark all domains as DELETED and invalidate cache
+        const domains = await prismaClient.domain.findMany({ where: { website_id: website.id } });
+        if (domains.length > 0) {
+            await prismaClient.domain.updateMany({
+                where: { website_id: website.id },
+                data: { status: 'DELETED' },
+            });
+            for (const d of domains) {
+                await cacheService.del(`domain:${d.domain}`);
+            }
+        }
     }
 
     async restoreWebsite(website: Website) {
@@ -128,7 +139,16 @@ class WebsiteService {
             status: WebsiteStatus.DRAFT,
             deleted_at: null
         });
-        // mark all domains.status = inactive
+
+        // Reactivate domains — subdomains go ACTIVE, custom domains go PENDING (need re-verify)
+        const domains = await prismaClient.domain.findMany({ where: { website_id: website.id, status: 'DELETED' } });
+        for (const d of domains) {
+            await prismaClient.domain.update({
+                where: { id: d.id },
+                data: { status: d.type === 'SUBDOMAIN' ? 'ACTIVE' : 'PENDING' },
+            });
+            await cacheService.del(`domain:${d.domain}`);
+        }
     }
 
     async duplicateWebsite(website: Website) {
@@ -206,6 +226,27 @@ class WebsiteService {
         await this.websiteDao.updateWebsite(website.id, {
             status: WebsiteStatus.PUBLISHED,
             content: published.content,
+        });
+
+        // Sync domain to Domain table so domain-router can serve it
+        const isSubdomain = hostname.endsWith(`.${siteHost}`);
+        await prismaClient.domain.upsert({
+            where: { domain: hostname },
+            update: {
+                website_id: website.id,
+                type: isSubdomain ? 'SUBDOMAIN' : 'CUSTOM',
+                status: isSubdomain ? 'ACTIVE' : 'PENDING',
+                is_primary: true,
+                ssl_enabled: isSubdomain,
+            },
+            create: {
+                website_id: website.id,
+                domain: hostname,
+                type: isSubdomain ? 'SUBDOMAIN' : 'CUSTOM',
+                status: isSubdomain ? 'ACTIVE' : 'PENDING',
+                is_primary: true,
+                ssl_enabled: isSubdomain,
+            },
         });
 
         return {

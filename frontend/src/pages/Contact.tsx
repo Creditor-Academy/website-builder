@@ -20,7 +20,8 @@ import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
 import Footer from "./Footer";
 import contactApi from "@/api/contact";
-import websiteApi from "@/api/website";
+import { API_BASE_URL } from "@/api/client";
+import axios from "axios";
 
 export default function Contact() {
   const [searchParams] = useSearchParams();
@@ -64,8 +65,8 @@ export default function Contact() {
     const user = localStorage.getItem("user");
     if (!user) return;
 
-    websiteApi
-      .getWebsites()
+    // Use raw axios to avoid the shared interceptor redirecting to /login on 401
+    axios.get(`${API_BASE_URL}/websites`, { withCredentials: true })
       .then((res) => {
         const websites = res?.data?.websites || [];
         if (Array.isArray(websites) && websites.length > 0) {
@@ -96,17 +97,7 @@ export default function Contact() {
       }
 
       if (!resolvedWebsiteId) {
-        const websitesResponse = await websiteApi.getWebsites();
-        const websites = websitesResponse?.data?.websites || [];
-        resolvedWebsiteId = Array.isArray(websites) && websites[0]?.id ? websites[0].id : '';
-      }
-
-      if (!resolvedWebsiteId) {
-        throw new Error('Website ID not found. Open this page with ?websiteId=YOUR_WEBSITE_ID.');
-      }
-
-      if (resolvedWebsiteId !== websiteId) {
-        setWebsiteId(resolvedWebsiteId);
+        throw new Error('Unable to submit. Please try again from your website or pass ?websiteId= in the URL.');
       }
 
       await contactApi.submitContactForm({
@@ -128,7 +119,7 @@ export default function Contact() {
       setTimeout(() => setIsSent(false), 5000);
     } catch (error: any) {
       setIsSubmitting(false);
-      setSubmitError(error?.response?.data?.message || "Failed to send message. Please try again.");
+      setSubmitError(error?.response?.data?.message || error?.message || "Failed to send message. Please try again.");
     }
   };
 

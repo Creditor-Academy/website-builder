@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import * as Icons from 'lucide-react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { Editable } from '@/components/ui/Editable';
 import { sanitizeHTML } from '@/utils/sanitize';
 
 // ─── Shared Helpers ────────────────────────────────────────────────────────────
 
-const getIcon = (iconName, size = 22) => {
-  const IconComponent = Icons[iconName];
-  return IconComponent ? <IconComponent width={size} height={size} strokeWidth={1.7} /> : null;
+const getIcon = (iconName: string, size = 22): string => {
+  const IconComponent = (Icons as any)[iconName];
+  return IconComponent ? renderToStaticMarkup(<IconComponent width={size} height={size} strokeWidth={1.7} />) : '';
 };
 
 // Clean, professional accent palette — works on white
@@ -74,9 +75,7 @@ const renderGrid = ({ content, styles, isEditing, onContentChange, headingColor,
               borderRadius: '12px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: tag.text,
-            }}>
-              {getIcon(feature.icon, 20)}
-            </div>
+              }} dangerouslySetInnerHTML={{ __html: sanitizeHTML(getIcon(feature.icon, 20)) }} />
           </div>
 
           <Editable
@@ -271,9 +270,7 @@ const renderIcons = ({ content, styles, isEditing, onContentChange, headingColor
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: tag.text,
             marginBottom: '1.1rem',
-          }}>
-            {getIcon(feature.icon, 24)}
-          </div>
+          }} dangerouslySetInnerHTML={{ __html: sanitizeHTML(getIcon(feature.icon, 24)) }} />
 
           <Editable
             as="h4"

@@ -8,6 +8,8 @@ import templateRoutes from "./template/template.routes.js";
 import contactRoutes from "./contact/contact.routes.js";  
 import assetsRoutes from './assets/assets.routes.js';
 import formsRoutes from './forms/forms.routes.js';
+import analyticsRoutes from './analytics/analytics.routes.js';
+import deploymentsRoutes from './deployments/deployments.routes.js';
 
 const router = Router();
 
@@ -21,5 +23,7 @@ router.use('/templates', templateRoutes);
 router.use('/contact', contactRoutes);
 router.use('/assets', assetsRoutes);
 router.use('/forms', formsRoutes);
+router.use('/analytics', analyticsRoutes);
+router.use('/deployments', deploymentsRoutes);
 
 export default router;

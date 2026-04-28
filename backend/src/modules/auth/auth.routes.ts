@@ -18,6 +18,7 @@ const authController = new AuthController();
 // POST /auth/register - Register a new user
 router.post(
   '/register',
+  rateLimiting('REGISTER', { LIMIT: 5, WINDOW_SEC: 900 }),
   validateRequest(registerSchema),
   authController.register
 );
@@ -69,6 +70,7 @@ router.post(
 // POST /auth/google - Google OAuth login
 router.post(
   '/google',
+  rateLimiting('GOOGLE-AUTH', { LIMIT: 10, WINDOW_SEC: 900 }),
   authController.googleAuth
 );
 

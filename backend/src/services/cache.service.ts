@@ -60,11 +60,15 @@ class CacheService {
      */
     async clear(pattern: string) {
         try {
-            const keys = await this.client.keys(pattern);
-            if (keys.length > 0) {
-                // Delete all matching keys in parallel
-                await Promise.all(keys.map((key) => this.client.del(key)));
-            }
+            let cursor: number = 0;
+            do {
+                const result = await this.client.scan(cursor, { match: pattern, count: 100 });
+                cursor = Number(result[0]);
+                const keys = result[1] as string[];
+                if (keys.length > 0) {
+                    await Promise.all(keys.map((key) => this.client.del(key)));
+                }
+            } while (cursor !== 0);
         }
         catch (error) {
             console.error(`Error clearing cache with pattern ${pattern}:`, error);

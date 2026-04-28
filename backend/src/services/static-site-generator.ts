@@ -31,6 +31,16 @@ interface GeneratedFile {
 
 /* ─── Utility helpers ──────────────────────────────────────────────── */
 
+/** Rewrite localhost asset URLs to S3 URLs for production */
+const rewriteAssetUrls = (html: string): string => {
+  const bucket = (process.env.S3_BUCKET || '').trim();
+  const region = (process.env.S3_REGION || 'us-east-1').trim();
+  if (!bucket) return html;
+  const s3Base = `https://${bucket}.s3.${region}.amazonaws.com`;
+  // Replace http://localhost:XXXX/uploads/ with S3 base URL
+  return html.replace(/http:\/\/localhost:\d+\/uploads\//g, `${s3Base}/`);
+};
+
 const esc = (text: unknown): string => {
   if (text == null) return '';
   return String(text)
@@ -348,7 +358,7 @@ const sectionRenderers: Record<string, (c: SectionContent, s?: SectionStyles, id
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px">
           ${items.map((f: any, i: number) => {
-            const tc = TAG_COLORS[i % TAG_COLORS.length];
+            const tc = TAG_COLORS[i % TAG_COLORS.length]!;
             const accent = ACCENTS[i % ACCENTS.length];
             return `
             <div class="fs-card" style="background:${cardBg};border-radius:${radius}">
@@ -954,11 +964,11 @@ const sectionRenderers: Record<string, (c: SectionContent, s?: SectionStyles, id
 };
 
 // Aliases: frontend uses these type names
-sectionRenderers['blog'] = sectionRenderers['bloglist'];
-sectionRenderers['gallery-masonry'] = sectionRenderers['masonry'];
-sectionRenderers['text'] = sectionRenderers['textblock'];
-sectionRenderers['button'] = sectionRenderers['buttonblock'];
-sectionRenderers['html'] = sectionRenderers['htmlblock'];
+sectionRenderers['blog'] = sectionRenderers['bloglist']!;
+sectionRenderers['gallery-masonry'] = sectionRenderers['masonry']!;
+sectionRenderers['text'] = sectionRenderers['textblock']!;
+sectionRenderers['button'] = sectionRenderers['buttonblock']!;
+sectionRenderers['html'] = sectionRenderers['htmlblock']!;
 
 /* ─── Section wrapper ────────────────────────────────────────────── */
 
@@ -1096,14 +1106,15 @@ document.querySelectorAll('.contact-form').forEach(function(form){
     e.preventDefault();
     var btn=form.querySelector('button[type=submit]');
     var status=form.querySelector('.form-status');
-    var data={};
-    new FormData(form).forEach(function(v,k){data[k]=v});
+    var fd={};
+    new FormData(form).forEach(function(v,k){fd[k]=v});
+    var fullName=((fd.firstName||'')+(fd.lastName?' '+fd.lastName:'')).trim()||fd.name||'Anonymous';
     btn.disabled=true;btn.textContent='Sending...';
     if(status){status.style.display='none';}
-    fetch('${formApiUrl}/forms/submit',{
+    fetch('${formApiUrl}/contact/submit',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({website_id:'${websiteId || ''}',page_slug:'${esc(page.slug || '/')}',form_name:form.dataset.formName||'contact',data:data})
+      body:JSON.stringify({websiteId:'${websiteId || ''}',name:fullName,email:fd.email||'',subject:fd.subject||'',message:fd.message||''})
     }).then(function(r){
       if(!r.ok)throw new Error('Failed');
       form.reset();
@@ -1157,6 +1168,10 @@ ${sections.map((sec, idx) => renderSection(sec, idx)).join('\n')}
 ${renderFooter(page.footer, pageSlugs, currentSlug)}
 ${hasContactForm ? formScript : ''}
 ${hasFaq ? faqScript : ''}
+${websiteId ? `<script>
+(function(){var d={websiteId:"${websiteId}",path:location.pathname,referrer:document.referrer};
+fetch("${formApiUrl}/analytics/track",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d),keepalive:true}).catch(function(){});})();
+</script>` : ''}
 </body>
 </html>`;
 };
@@ -1170,6 +1185,12 @@ export const generateStaticSite = (content: Record<string, any>, siteName: strin
     return [{ filename: 'index.html', html: buildPageHtml({ id: 'default', name: siteName, slug: '/', sections: [], navbar: content.navbar, footer: content.footer, globalStyles: content.globalStyles }, siteName, websiteId) }];
   }
 
+  // Use first page's globalStyles as a site-wide fallback for pages that don't have them
+  const siteGlobalStyles = pages[0]?.globalStyles || content.globalStyles || {};
+  // Use first page's navbar/footer as fallback for pages missing them
+  const siteNavbar = pages[0]?.navbar || content.navbar;
+  const siteFooter = pages[0]?.footer || content.footer;
+
   const pageSlugs = new Set<string>();
   for (const page of pages) {
     const slug = (page.slug || '/').replace(/^\/+/, '').replace(/\/+$/, '');
@@ -1179,10 +1200,17 @@ export const generateStaticSite = (content: Record<string, any>, siteName: strin
   const files: GeneratedFile[] = pages.map((page) => {
     const slug = (page.slug || '/').replace(/^\/+/, '').replace(/\/+$/, '');
     const filename = slug === '' || slug === '/' ? 'index.html' : `${slug}/index.html`;
-    return { filename, html: buildPageHtml(page, siteName, websiteId, undefined, pageSlugs) };
+    // Merge page-level overrides on top of site-wide defaults
+    const mergedPage: PageData = {
+      ...page,
+      globalStyles: { ...siteGlobalStyles, ...(page.globalStyles || {}) },
+      navbar: page.navbar || siteNavbar,
+      footer: page.footer || siteFooter,
+    };
+    return { filename, html: buildPageHtml(mergedPage, siteName, websiteId, undefined, pageSlugs) };
   });
 
-  const baseUrl = (process.env.PUBLISHED_SITES_BASE_URL || 'http://localhost:5000/sites') + '/' + (websiteId || 'site') + '/latest';
+  const baseUrl = (process.env.PUBLISHED_SITES_BASE_URL || 'http://localhost:5000/sites') + '/sites/' + (websiteId || 'site') + '/latest';
   const sitemapEntries = pages.map((page) => {
     const slug = (page.slug || '/').replace(/^\/+/, '').replace(/\/+$/, '');
     const loc = slug === '' || slug === '/' ? baseUrl + '/' : `${baseUrl}/${slug}/`;
@@ -1197,5 +1225,9 @@ export const generateStaticSite = (content: Record<string, any>, siteName: strin
     html: `User-agent: *\nAllow: /\nSitemap: ${baseUrl}/sitemap.xml\n`,
   });
 
-  return files;
+  // Rewrite any localhost asset URLs to S3 in the final HTML
+  return files.map(f => ({
+    ...f,
+    html: f.filename.endsWith('.html') ? rewriteAssetUrls(f.html) : f.html,
+  }));
 };

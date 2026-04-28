@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Settings as SettingsIcon, User as UserIcon, Bell, Lock, Key, Mail, Save, XCircle, ChevronRight, LayoutGrid, AlertCircle, CheckCircle, ClipboardCheck
+  Settings as SettingsIcon, User as UserIcon, Bell, Lock, Key, Mail, Save, XCircle, ChevronRight, LayoutGrid, AlertCircle, CheckCircle, ClipboardCheck, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +20,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import GradientButton from '@/components/ui/GradientButton';
+import { getProfile, updateUserProfile, changePassword } from '@/api/user';
 
 const SettingsNavItem = ({ icon, label, isActive, onClick }) => {
   return (
@@ -44,54 +45,102 @@ export default function DashboardSettings() {
   const isMobile = useIsMobile();
   const { toast } = useToast();
 
-  // Dummy State for Settings
-  const [profileName, setProfileName] = useState('John Doe');
-  const [profileEmail, setProfileEmail] = useState('john.doe@example.com');
+  // Profile state — loaded from API
+  const [profileName, setProfileName] = useState('');
+  const [profileEmail, setProfileEmail] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Password state
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [smsNotifications, setSmsNotifications] = useState(false);
-  const [apiKey, setApiKey] = useState('sk_dummy_apikey_12345');
 
-  const [showApiKeyConfirm, setShowApiKeyConfirm] = useState(false);
+  // Notification preferences (stored in localStorage until backend supports it)
+  const [emailNotifications, setEmailNotifications] = useState(() => {
+    const saved = localStorage.getItem('pref_emailNotifications');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [smsNotifications, setSmsNotifications] = useState(() => {
+    const saved = localStorage.getItem('pref_smsNotifications');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
 
-  const handleSaveChanges = (section: string) => {
-    console.log(`Saving changes for ${section} section`);
-    setTimeout(() => {
+  // Load profile on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getProfile();
+        setProfileName(data.user?.name || '');
+        setProfileEmail(data.user?.email || '');
+      } catch {
+        toast({ title: 'Failed to load profile', variant: 'destructive' });
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const handleSaveProfile = async () => {
+    if (!profileName.trim() || profileName.trim().length < 2) {
+      toast({ title: 'Name must be at least 2 characters', variant: 'destructive' });
+      return;
+    }
+    setSaving(true);
+    try {
+      await updateUserProfile(profileName.trim());
       toast({
-        title: "Settings Saved! ✨",
-        description: `Your ${section} settings have been successfully updated.`, 
-        variant: "themed",
+        title: 'Profile Updated',
+        description: 'Your profile has been saved.',
+        variant: 'themed',
         icon: <CheckCircle className="h-5 w-5 text-white" />,
       });
-    }, 500);
+    } catch (err: any) {
+      toast({ title: err?.message || 'Failed to update profile', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleGenerateApiKeyClick = () => {
-    setShowApiKeyConfirm(true);
-  };
-
-  const confirmApiKeyGeneration = () => {
-    const newKey = `sk_dummy_apikey_${Date.now()}`;
-    setApiKey(newKey);
-    setShowApiKeyConfirm(false);
+  const handleChangePassword = async () => {
+    if (!currentPassword) {
+      toast({ title: 'Current password is required', variant: 'destructive' });
+      return;
+    }
+    if (newPassword.length < 8) {
+      toast({ title: 'New password must be at least 8 characters', variant: 'destructive' });
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      toast({ title: 'Passwords do not match', variant: 'destructive' });
+      return;
+    }
+    setSaving(true);
+    try {
+      await changePassword(currentPassword, newPassword);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
       toast({
-        title: "API Key Generated! 🚀",
-        description: "A new API key has been generated and the old one invalidated.",
-        variant: "themed",
-        icon: <Key className="h-5 w-5 text-white" />,
+        title: 'Password Changed',
+        description: 'Your password has been updated successfully.',
+        variant: 'themed',
+        icon: <Lock className="h-5 w-5 text-white" />,
       });
+    } catch (err: any) {
+      toast({ title: err?.message || 'Failed to change password', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleCopyApiKey = () => {
-    navigator.clipboard.writeText(apiKey);
+  const handleSaveNotifications = () => {
+    localStorage.setItem('pref_emailNotifications', JSON.stringify(emailNotifications));
+    localStorage.setItem('pref_smsNotifications', JSON.stringify(smsNotifications));
     toast({
-      title: "API Key Copied!  clipboard",
-      description: "The API Key has been copied to your clipboard. Keep it safe!",
-      variant: "themed",
-      icon: <ClipboardCheck className="h-5 w-5 text-white" />,
+      title: 'Notification Preferences Saved',
+      variant: 'themed',
+      icon: <CheckCircle className="h-5 w-5 text-white" />,
     });
   };
 
@@ -103,20 +152,29 @@ export default function DashboardSettings() {
             <Card className="rounded-xl border border-slate-200 shadow-md">
               <CardHeader>
                 <CardTitle className="text-2xl font-semibold text-slate-800 flex items-center gap-2"><UserIcon className="w-5 h-5 text-slate-600" /> Profile Information</CardTitle>
-                <CardDescription className="text-slate-500">Update your account's profile information and email address.</CardDescription>
+                <CardDescription className="text-slate-500">Update your account's profile information.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {loading ? (
+                  <div className="flex items-center justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>
+                ) : (
+                  <>
                 <div>
                   <Label htmlFor="name" className="mb-1 font-medium text-slate-700">Name</Label>
                   <Input id="name" value={profileName} onChange={(e) => setProfileName(e.target.value)} className="mt-1 pl-4 pr-4 w-full h-11 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-4 focus:ring-blue-500/50 focus:border-blue-600 focus:shadow-lg focus:shadow-blue-500/40 focus:outline-none transition-all duration-300" />
                 </div>
                 <div>
                   <Label htmlFor="email" className="mb-1 font-medium text-slate-700">Email</Label>
-                  <Input id="email" type="email" value={profileEmail} onChange={(e) => setProfileEmail(e.target.value)} className="mt-1 pl-4 pr-4 w-full h-11 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-4 focus:ring-blue-500/50 focus:border-blue-600 focus:shadow-lg focus:shadow-blue-500/40 focus:outline-none transition-all duration-300" />
+                  <Input id="email" type="email" value={profileEmail} disabled className="mt-1 pl-4 pr-4 w-full h-11 rounded-full bg-slate-50 border-slate-200 shadow-md shadow-slate-200/50 text-slate-500 cursor-not-allowed" />
+                  <p className="text-xs text-slate-400 mt-1 ml-1">Email cannot be changed.</p>
                 </div>
                 <div className="flex justify-end">
-                  <GradientButton onClick={() => handleSaveChanges('profile')}><Save className="w-4 h-4 mr-2" /> Save Profile</GradientButton>
+                  <GradientButton onClick={handleSaveProfile} disabled={saving}>
+                    {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />} Save Profile
+                  </GradientButton>
                 </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -143,30 +201,10 @@ export default function DashboardSettings() {
                   <Input id="confirmNewPassword" type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} className="mt-1 pl-4 pr-4 w-full h-11 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-4 focus:ring-blue-500/50 focus:border-blue-600 focus:shadow-lg focus:shadow-blue-500/40 focus:outline-none transition-all duration-300" />
                 </div>
                 <div className="flex justify-end">
-                  <GradientButton onClick={() => handleSaveChanges('password')}><Save className="w-4 h-4 mr-2" /> Save Password</GradientButton>
+                  <GradientButton onClick={handleChangePassword} disabled={saving}>
+                    {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />} Save Password
+                  </GradientButton>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-xl border border-slate-200 shadow-md">
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold text-slate-800 flex items-center gap-2"><Key className="w-5 h-5 text-slate-600" /> Two-Factor Authentication</CardTitle>
-                <CardDescription className="text-slate-500">Add additional security to your account using two-factor authentication.</CardDescription>
-              </CardHeader>
-              <CardContent className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Status</p>
-                  <p className="text-sm text-slate-500">{twoFactorEnabled ? 'Enabled' : 'Disabled'}</p>
-                </div>
-                <Switch checked={twoFactorEnabled} onCheckedChange={(checked) => {
-                  setTwoFactorEnabled(checked);
-                  toast({
-                    title: "2FA Status Updated! 🔒",
-                    description: `Two-factor authentication has been ${checked ? 'enabled' : 'disabled'}.`,
-                    variant: "themed",
-                    icon: <Lock className="h-5 w-5 text-white" />,
-                  });
-                }} />
               </CardContent>
             </Card>
           </div>
@@ -195,7 +233,7 @@ export default function DashboardSettings() {
                   <Switch checked={smsNotifications} onCheckedChange={setSmsNotifications} />
                 </div>
                 <div className="flex justify-end">
-                  <GradientButton onClick={() => handleSaveChanges('notifications')}><Save className="w-4 h-4 mr-2" /> Save Notifications</GradientButton>
+                  <GradientButton onClick={handleSaveNotifications}><Save className="w-4 h-4 mr-2" /> Save Notifications</GradientButton>
                 </div>
               </CardContent>
             </Card>
@@ -207,19 +245,12 @@ export default function DashboardSettings() {
             <Card className="rounded-xl border border-slate-200 shadow-md">
               <CardHeader>
                 <CardTitle className="text-2xl font-semibold text-slate-800 flex items-center gap-2"><LayoutGrid className="w-5 h-5 text-slate-600" /> API Integrations</CardTitle>
-                <CardDescription className="text-slate-500">Manage your API keys for third-party integrations.</CardDescription>
+                <CardDescription className="text-slate-500">API key management and third-party integrations coming soon.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="apiKey" className="mb-1 font-medium text-slate-700">API Key</Label>
-                  <div className="flex gap-2 mt-1">
-                    <Input id="apiKey" type="text" value={apiKey} readOnly className="flex-1 pl-4 pr-4 w-full h-11 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-4 focus:ring-blue-500/50 focus:border-blue-600 focus:shadow-lg focus:shadow-blue-500/40 focus:outline-none transition-all duration-300" />
-                    <Button variant="outline" onClick={handleCopyApiKey} className="rounded-full h-11 px-6 font-semibold bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-indigo-700 shadow-md shadow-slate-200/50 transition-all duration-200">Copy</Button>
-                    <GradientButton onClick={handleGenerateApiKeyClick}>Generate New</GradientButton>
-                  </div>
-                </div>
-                <div className="flex justify-end">
-                  <GradientButton onClick={() => handleSaveChanges('integrations')}><Save className="w-4 h-4 mr-2" /> Save Integrations</GradientButton>
+              <CardContent>
+                <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
+                  <Key className="w-12 h-12 opacity-30" />
+                  <p className="text-sm font-medium">API keys and integrations will be available in a future update.</p>
                 </div>
               </CardContent>
             </Card>
@@ -283,24 +314,6 @@ export default function DashboardSettings() {
         </div>
       </div>
     </Card>
-
-    {/* API Key Generation Confirmation Dialog */}
-    <AlertDialog open={showApiKeyConfirm} onOpenChange={setShowApiKeyConfirm}>
-      <AlertDialogContent className="w-[90%] rounded-lg sm:max-w-[425px]">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-amber-500" /> Confirm API Key Generation
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to generate a new API key? This will invalidate your current API key and cannot be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={confirmApiKeyGeneration}>Generate New Key</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
   </div>
   );
 }

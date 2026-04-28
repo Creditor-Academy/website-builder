@@ -53,12 +53,34 @@ export const restoreUser = (id) => apiClient.post(`/users/${id}/restore`);
 // ─── Own Profile ─────────────────────────────────────────────────────────────
 
 /**
+ * GET /users/me — Get own profile
+ */
+export const getProfile = async () => {
+  const res = await apiClient.get('/users/me');
+  return res.data;
+};
+
+/**
  * PUT /users/me — Update own profile name
  * @param {string} name - New display name
  */
 export const updateUserProfile = async (name) => {
   try {
     const res = await apiClient.put('/users/me', { name });
+    return res.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+/**
+ * POST /users/me/change-password — Change own password
+ * @param {string} oldPassword
+ * @param {string} newPassword
+ */
+export const changePassword = async (oldPassword, newPassword) => {
+  try {
+    const res = await apiClient.post('/users/me/change-password', { oldPassword, newPassword });
     return res.data;
   } catch (error) {
     throw error.response?.data || error.message;

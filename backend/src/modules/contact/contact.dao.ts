@@ -15,7 +15,7 @@ export class ContactDao {
                 websiteId: data.websiteId,
                 name: data.name,
                 email: data.email,
-                subject: data.subject,
+                subject: data.subject ?? null,
                 message: data.message,
             },
             include: {
@@ -57,7 +57,7 @@ export class ContactDao {
             where.status = options.status;
         }
 
-        return prisma.contactSubmission.findMany({
+        const query: any = {
             where,
             include: {
                 website: {
@@ -68,11 +68,13 @@ export class ContactDao {
                 }
             },
             orderBy: {
-                createdAt: 'desc'
+                createdAt: 'desc' as const
             },
-            take: options?.limit,
-            skip: options?.offset,
-        });
+        };
+        if (options?.limit != null) query.take = options.limit;
+        if (options?.offset != null) query.skip = options.offset;
+
+        return prisma.contactSubmission.findMany(query);
     }
 
     /** Get a single contact submission by ID */

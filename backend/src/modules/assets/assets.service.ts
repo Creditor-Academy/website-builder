@@ -157,12 +157,25 @@ class AssetsService {
   ) {
     const scopedWebsiteId = websiteId ? await this.assertWebsiteAccess(user, websiteId) : undefined;
 
-    const where: Prisma.AssetWhereInput = {
-      owner_id: user.id,
-      ...(scopedWebsiteId
-        ? { scope: AssetScope.WEBSITE, website_id: scopedWebsiteId }
-        : { scope: AssetScope.GLOBAL }),
-    };
+    const where: Prisma.AssetWhereInput = scopedWebsiteId
+      ? {
+          // Website-scoped: only the user's own assets for that website
+          owner_id: user.id,
+          scope: AssetScope.WEBSITE,
+          website_id: scopedWebsiteId,
+        }
+      : {
+          // Global scope: user's own assets + admin/super-admin uploaded assets
+          scope: AssetScope.GLOBAL,
+          OR: [
+            { owner_id: user.id },
+            {
+              owner: {
+                role: { in: [UserRole.ADMIN, UserRole.SUPER_ADMIN] },
+              },
+            },
+          ],
+        };
 
     const [assets, total] = await Promise.all([
       prisma.asset.findMany({
@@ -170,6 +183,7 @@ class AssetsService {
         orderBy: { created_at: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
+        include: { owner: { select: { role: true, name: true } } },
       }),
       prisma.asset.count({ where }),
     ]);
@@ -186,6 +200,8 @@ class AssetsService {
         institutionId: a.institution_id,
         scope: a.scope,
         websiteId: a.website_id,
+        isGlobal: a.owner.role === UserRole.ADMIN || a.owner.role === UserRole.SUPER_ADMIN,
+        ownerName: a.owner.name,
       })),
       pagination: {
         page,
@@ -292,17 +308,22 @@ class AssetsService {
   async deleteAsset(user: AuthUser, assetId: string, websiteId?: string) {
     const scopedWebsiteId = websiteId ? await this.assertWebsiteAccess(user, websiteId) : undefined;
 
-    const where: Prisma.AssetWhereInput = {
-      id: assetId,
-      owner_id: user.id,
-      ...(scopedWebsiteId
-        ? { scope: AssetScope.WEBSITE, website_id: scopedWebsiteId }
-        : {}),
-    };
-
-    const target = await prisma.asset.findFirst({ where });
+    const target = await prisma.asset.findFirst({
+      where: { id: assetId },
+    });
 
     if (!target) {
+      return false;
+    }
+
+    // Only the owner or an admin/super-admin can delete
+    const isAdmin = user.role === UserRole.ADMIN || user.role === UserRole.SUPER_ADMIN;
+    if (target.owner_id !== user.id && !isAdmin) {
+      throw new ForbiddenError('You can only delete your own assets');
+    }
+
+    // If website-scoped, verify the scope matches
+    if (scopedWebsiteId && (target.scope !== AssetScope.WEBSITE || target.website_id !== scopedWebsiteId)) {
       return false;
     }
 

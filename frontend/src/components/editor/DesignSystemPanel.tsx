@@ -80,7 +80,7 @@ const FX_PRESETS = [
 ];
 
 export function DesignSystemPanel() {
-    const { state, updateCurrentPage } = useBuilder();
+    const { state, updateAllPagesGlobalStyles, applyPaletteToAllPages, applyFXToAllPages } = useBuilder();
     const { page } = state;
     const DEFAULTS = {
         primaryColor: '#3b82f6',
@@ -97,72 +97,15 @@ export function DesignSystemPanel() {
     const globalStyles = { ...DEFAULTS, ...(page?.globalStyles || {}) };
 
     const handleStyleUpdate = (updates: any) => {
-        updateCurrentPage({
-            globalStyles: { ...globalStyles, ...updates }
-        });
+        updateAllPagesGlobalStyles({ ...globalStyles, ...updates });
     };
 
     const applyPalette = (palette: any) => {
-        const updatedSections = page.sections.map((s: any) => ({
-            ...s,
-            styles: {
-                ...s.styles,
-                backgroundColor: undefined,
-                backgroundGradient: undefined,
-                headingColor: undefined,
-                paragraphColor: undefined,
-                buttonPrimaryBg: undefined,
-                buttonPrimaryText: undefined,
-                buttonSecondaryBg: undefined,
-                buttonSecondaryText: undefined,
-                useGradient: false
-            }
-        }));
-
-        updateCurrentPage({
-            globalStyles: { 
-                ...globalStyles,
-                primaryColor: palette.primary,
-                secondaryColor: palette.secondary,
-                accentColor: palette.accent,
-                backgroundColor: palette.background,
-                textColor: palette.text,
-                alternateBackground: palette.alternate,
-                alternateTextColor: palette.alternateText,
-                selectedPalette: palette.name
-            },
-            sections: updatedSections,
-            navbar: {
-                ...page.navbar,
-                styles: { ...page.navbar.styles, backgroundColor: undefined, textColor: undefined }
-            },
-            footer: {
-                ...page.footer,
-                styles: { ...page.footer.styles, backgroundColor: undefined, textColor: undefined }
-            }
-        });
+        applyPaletteToAllPages(palette);
     };
 
     const applyFX = (fx: any) => {
-        const updatedSections = page.sections.map((s: any) => ({
-            ...s,
-            styles: {
-                ...s.styles,
-                borderRadius: undefined,
-                shadows: undefined
-            }
-        }));
-
-        updateCurrentPage({
-            globalStyles: {
-                ...globalStyles,
-                borderRadius: fx.radius,
-                shadows: fx.shadow,
-                animations: fx.animation,
-                glassmorphism: fx.glass || false
-            },
-            sections: updatedSections
-        });
+        applyFXToAllPages(fx);
     };
 
     return (

@@ -74,6 +74,9 @@ export function BuilderProvider({ children, initialPage }: any) {
     deletePage: store.deletePage,
     updatePageName: (slug, name) => store.updateCurrentPage({ name }),
     updateCurrentPage: store.updateCurrentPage,
+    updateAllPagesGlobalStyles: store.updateAllPagesGlobalStyles,
+    applyPaletteToAllPages: store.applyPaletteToAllPages,
+    applyFXToAllPages: store.applyFXToAllPages,
   }), [store, activePage, activeWebsite, selectedSection, selectedComponent]);
 
   return <BuilderContext.Provider value={value}>{children}</BuilderContext.Provider>;

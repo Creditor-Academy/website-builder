@@ -35,6 +35,8 @@ export interface Asset {
     date: string;
     scope?: 'GLOBAL' | 'WEBSITE';
     websiteId?: string;
+    isGlobal?: boolean;
+    ownerName?: string;
 }
 
 type AssetScope = {
@@ -65,6 +67,10 @@ export interface Website {
     subdomain?: string;
     builderMeta?: any;
     sourceTemplateId?: string;
+    institution?: any;
+    institution_id?: string;
+    owner_id?: string;
+    settings?: any;
 }
 
 export interface EditorState {
@@ -135,6 +141,9 @@ export interface BuilderStore {
     getActiveWebsite: () => Website | undefined;
     getActivePage: () => Page | null;
     updateCurrentPage: (updates: Partial<Page>) => void;
+    updateAllPagesGlobalStyles: (globalStyles: Record<string, any>) => void;
+    applyPaletteToAllPages: (palette: { primary: string; secondary: string; accent: string; background: string; text: string; alternate: string; alternateText: string; name: string }) => void;
+    applyFXToAllPages: (fx: { radius: string; shadow: string; animation: string; glass?: boolean }) => void;
     updateNavbar: (updates: any) => void;
     updateFooter: (updates: any) => void;
     setEditorState: (updates: Partial<EditorState>) => void;
@@ -760,17 +769,93 @@ const useBuilderStore = create<BuilderStore>()(
                 get().updateWebsitePages(newPages);
             },
 
+            updateAllPagesGlobalStyles: (globalStyles) => {
+                const website = get().getActiveWebsite();
+                if (!website) return;
+                const newPages = website.pages.map(p => ({ ...p, globalStyles: { ...(p.globalStyles || {}), ...globalStyles } }));
+                get().updateWebsitePages(newPages);
+            },
+
+            applyPaletteToAllPages: (palette) => {
+                const website = get().getActiveWebsite();
+                if (!website) return;
+                const clearSectionColors = (s: any) => ({
+                    ...s,
+                    styles: {
+                        ...s.styles,
+                        backgroundColor: undefined,
+                        backgroundGradient: undefined,
+                        headingColor: undefined,
+                        paragraphColor: undefined,
+                        buttonPrimaryBg: undefined,
+                        buttonPrimaryText: undefined,
+                        buttonSecondaryBg: undefined,
+                        buttonSecondaryText: undefined,
+                        useGradient: false
+                    }
+                });
+                const newPages = website.pages.map(p => ({
+                    ...p,
+                    globalStyles: {
+                        ...(p.globalStyles || {}),
+                        primaryColor: palette.primary,
+                        secondaryColor: palette.secondary,
+                        accentColor: palette.accent,
+                        backgroundColor: palette.background,
+                        textColor: palette.text,
+                        alternateBackground: palette.alternate,
+                        alternateTextColor: palette.alternateText,
+                        selectedPalette: palette.name
+                    },
+                    sections: (p.sections || []).map(clearSectionColors),
+                    navbar: { ...(p.navbar || {}), styles: { ...((p.navbar as any)?.styles || {}), backgroundColor: undefined, textColor: undefined } },
+                    footer: { ...(p.footer || {}), styles: { ...((p.footer as any)?.styles || {}), backgroundColor: undefined, textColor: undefined } }
+                }));
+                get().updateWebsitePages(newPages);
+                get().saveActiveWebsite();
+            },
+
+            applyFXToAllPages: (fx) => {
+                const website = get().getActiveWebsite();
+                if (!website) return;
+                const clearSectionFX = (s: any) => ({
+                    ...s,
+                    styles: { ...s.styles, borderRadius: undefined, shadows: undefined }
+                });
+                const newPages = website.pages.map(p => ({
+                    ...p,
+                    globalStyles: {
+                        ...(p.globalStyles || {}),
+                        borderRadius: fx.radius,
+                        shadows: fx.shadow,
+                        animations: fx.animation,
+                        glassmorphism: fx.glass || false
+                    },
+                    sections: (p.sections || []).map(clearSectionFX)
+                }));
+                get().updateWebsitePages(newPages);
+                get().saveActiveWebsite();
+            },
+
             updateNavbar: (updates) => {
-                const page = get().getActivePage();
-                if (!page) return;
-                get().updateCurrentPage({ navbar: { ...page.navbar, ...updates } });
+                const website = get().getActiveWebsite();
+                if (!website) return;
+                const newPages = website.pages.map(p => ({
+                    ...p,
+                    navbar: { ...(p.navbar || {}), ...updates }
+                }));
+                get().updateWebsitePages(newPages);
                 get().saveActiveWebsite();
             },
 
             updateFooter: (updates) => {
-                const page = get().getActivePage();
-                if (!page) return;
-                get().updateCurrentPage({ footer: { ...page.footer, ...updates } });
+                const website = get().getActiveWebsite();
+                if (!website) return;
+                const newPages = website.pages.map(p => ({
+                    ...p,
+                    footer: { ...(p.footer || {}), ...updates }
+                }));
+                get().updateWebsitePages(newPages);
                 get().saveActiveWebsite();
             },
 

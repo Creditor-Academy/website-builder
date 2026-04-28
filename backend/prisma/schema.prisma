@@ -122,6 +122,7 @@ model Website {
   domains                   Domain[]
   formSubmissions           FormSubmission[]
   contactSubmissions        ContactSubmission[]
+  pageViews                 PageView[]
 
   @@index([owner_id])
   @@index([source_template_id])
@@ -378,4 +379,21 @@ model ContactSubmission {
   @@index([websiteId])
   @@index([status])
   @@index([createdAt])
+}
+
+model PageView {
+  id         String   @id @default(cuid())
+  website_id String
+  path       String   @default("/")
+  referrer   String?
+  user_agent String?
+  country    String?
+  created_at DateTime @default(now())
+
+  website    Website  @relation(fields: [website_id], references: [id], onDelete: Cascade)
+
+  @@index([website_id])
+  @@index([created_at])
+  @@index([website_id, created_at])
+  @@map("page_views")
 }

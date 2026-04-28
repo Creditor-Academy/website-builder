@@ -30,4 +30,5 @@ RUN mkdir -p storage/sites storage/assets/files
 
 EXPOSE 5000
 
-CMD ["node", "dist/main.js"]
+# Run migrations then start server
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]

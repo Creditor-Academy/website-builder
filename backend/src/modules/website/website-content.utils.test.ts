@@ -54,9 +54,9 @@ test('duplicateWebsiteContent resets publish metadata and keeps pages', () => {
   assert.equal(duplicate.builderMeta.deployments.length, 0);
 });
 
-test('custom domain verification activates the pending domain', () => {
+test('custom domain verification activates the pending domain', async () => {
   const withDomain = addWebsiteDomain({ pages: [] }, 'example.com', 'buildora.app');
-  const verified = verifyWebsiteDomain(withDomain.content, 'example.com');
+  const verified = await verifyWebsiteDomain(withDomain.content, 'example.com');
 
   assert.equal(verified.domain?.status, 'active');
   assert.equal(verified.domain?.sslEnabled, true);

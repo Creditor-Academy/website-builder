@@ -18,7 +18,7 @@ const SITE_HOST = process.env.PUBLIC_SITE_HOST || 'buildora.app';
  */
 export const domainRouter = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const host = (req.hostname || req.headers.host || '').split(':')[0].toLowerCase().trim();
+    const host = (req.hostname || req.headers.host || '').split(':')[0]!.toLowerCase().trim();
 
     // Skip if this is the main app domain, localhost, or an API/assets path
     if (!host || host === 'localhost' || host === '127.0.0.1' || host === SITE_HOST) {

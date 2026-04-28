@@ -39,11 +39,12 @@ import {
 import DeploymentLogViewer from './DeploymentLogViewer';
 import { useToast } from '@/components/ui/use-toast';
 import websiteApi from '@/api/website';
+import deploymentsApi from '@/api/deployments';
 
 interface DeploymentRecord {
   id: string;
   versionId: string;
-  status: 'pending' | 'building' | 'uploading' | 'active' | 'failed' | 'rolled_back';
+  status: 'pending' | 'building' | 'uploading' | 'active' | 'failed' | 'rolled_back' | 'PENDING' | 'BUILDING' | 'UPLOADING' | 'ACTIVE' | 'FAILED' | 'ROLLED_BACK';
   url: string;
   domain: string;
   artifactPrefix: string;
@@ -65,12 +66,12 @@ interface DeploymentRow {
 }
 
 const statusMap: Record<string, string> = {
-  active: 'Success',
-  failed: 'Failed',
-  pending: 'Pending',
-  building: 'Pending',
-  uploading: 'Pending',
-  rolled_back: 'Rolled Back',
+  active: 'Success', ACTIVE: 'Success',
+  failed: 'Failed', FAILED: 'Failed',
+  pending: 'Pending', PENDING: 'Pending',
+  building: 'Pending', BUILDING: 'Pending',
+  uploading: 'Pending', UPLOADING: 'Pending',
+  rolled_back: 'Rolled Back', ROLLED_BACK: 'Rolled Back',
 };
 
 const statusDisplay = (status: string) => statusMap[status] || status;
@@ -93,6 +94,41 @@ export default function DeploymentMonitoring() {
   const fetchDeployments = async () => {
     try {
       setLoading(true);
+
+      // Try the dedicated deployments API first (real-time DB data)
+      try {
+        const res = await deploymentsApi.getAll({ limit: 100 });
+        const deployments = res.data.deployments || [];
+        if (deployments.length > 0) {
+          const allRows: DeploymentRow[] = deployments.map((d: any) => ({
+            deployment: {
+              id: d.id,
+              versionId: d.versionId || '',
+              status: d.status?.toLowerCase() || 'pending',
+              url: d.url || '',
+              domain: d.domain || '',
+              artifactPrefix: d.artifactPrefix || '',
+              publishedAt: d.publishedAt || d.startedAt,
+              startedAt: d.startedAt,
+              finishedAt: d.finishedAt,
+              deployedBy: d.deployedBy || 'System',
+              errorMessage: d.errorMessage,
+              fileCount: d.fileCount || 0,
+              totalSize: d.totalSize || 0,
+              sslEnabled: d.sslEnabled || false,
+              logs: Array.isArray(d.logs) ? d.logs : [],
+            },
+            websiteId: d.websiteId,
+            websiteName: d.websiteName || 'Unknown',
+          }));
+          setRows(allRows);
+          return;
+        }
+      } catch {
+        // Fallback to legacy JSON-based approach
+      }
+
+      // Fallback: read from website content JSON
       const res = await websiteApi.getWebsitesAll({ limit: 500 });
       const websites = res.data.websites || res.data?.data?.websites || [];
       const allRows: DeploymentRow[] = [];

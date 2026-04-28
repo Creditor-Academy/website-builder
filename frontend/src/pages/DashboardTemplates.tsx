@@ -10,8 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, ArrowRight, LayoutTemplate, Search, Trash2, RotateCcw, Building2, Loader2 } from 'lucide-react';
-import { Plus, ArrowRight, ArrowLeft, LayoutTemplate, Search, Trash2, RotateCcw, Building2 } from 'lucide-react';
+import { Plus, ArrowRight, ArrowLeft, LayoutTemplate, Search, Trash2, RotateCcw, Building2, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useBuilderStore from '@/store/useBuilderStore';
 import { cn } from '@/lib/utils';
