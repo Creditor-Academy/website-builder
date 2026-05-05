@@ -1,4 +1,4 @@
-import prismaClient from './src/config/prisma.js';
+import prismaClient from '../config/prisma.js';
 
 async function check() {
     try {

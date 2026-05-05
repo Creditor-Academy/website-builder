@@ -116,10 +116,7 @@ class AuthController {
 
   googleAuth = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { token } = req.body;
-      if (!token) {
-        return res.status(400).json({ error: 'Google access token is required' });
-      }
+      const { token } = req.validated.body;
       const result = await this.authService.googleAuth(token);
 
       res.cookie('accessToken', result.accessToken, {

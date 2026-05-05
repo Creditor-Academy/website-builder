@@ -586,7 +586,9 @@ class AuthService {
 
       const googleUser = await response.json();
 
-      
+      if (!googleUser.email) {
+        throw new BadRequestError('Email not provided by Google');
+      }
 
       // Check if user exists with this email
 
@@ -613,7 +615,7 @@ class AuthService {
 
       // Generate session and tokens
 
-      const sessionId = this._generateRandomToken();
+      const sessionId = crypto.randomUUID();
 
       const sessionKey = generateAuthSessionKey(user.id, sessionId);
 

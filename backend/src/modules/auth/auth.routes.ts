@@ -8,6 +8,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   emailVerificationSchema,
+  googleAuthSchema,
 } from './auth.validation.js';
 import { authenticate } from '../../middlewares/auth.middleware.js';
 import { FORGOT_PW_LIMIT, LOGIN_LIMIT, REFRESH_LIMIT } from '../../constants/auth.constants.js';
@@ -71,6 +72,7 @@ router.post(
 router.post(
   '/google',
   rateLimiting('GOOGLE-AUTH', { LIMIT: 10, WINDOW_SEC: 900 }),
+  validateRequest(googleAuthSchema),
   authController.googleAuth
 );
 
