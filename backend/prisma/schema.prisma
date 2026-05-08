@@ -313,6 +313,9 @@ model Domain {
   ssl_enabled Boolean      @default(false)
   is_primary  Boolean      @default(false)
   dns_records Json?        // { A?, CNAME?, TXT?, verified? }
+  acm_certificate_arn         String?
+  cloudfront_distribution_id  String?
+  cloudfront_domain_name      String?
   added_at    DateTime     @default(now())
   verified_at DateTime?
   created_at  DateTime     @default(now())

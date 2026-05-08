@@ -10,6 +10,7 @@ import assetsRoutes from './assets/assets.routes.js';
 import formsRoutes from './forms/forms.routes.js';
 import analyticsRoutes from './analytics/analytics.routes.js';
 import deploymentsRoutes from './deployments/deployments.routes.js';
+import domainRoutes from './domain/domain.routes.js';
 
 const router = Router();
 
@@ -25,5 +26,6 @@ router.use('/assets', assetsRoutes);
 router.use('/forms', formsRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/deployments', deploymentsRoutes);
+router.use('/domains', domainRoutes);
 
 export default router;
