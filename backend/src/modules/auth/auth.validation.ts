@@ -17,11 +17,6 @@ export const registerSchema = z.object({
     .regex(/[0-9]/, 'Password must contain at least one number'),
 });
 
-// Google Login schema
-export const googleLoginSchema = z.object({
-  idToken: z.string().min(1, 'ID Token is required'),
-});
-
 // Login schema
 export const loginSchema = z.object({
   email: z.string()
@@ -55,8 +50,14 @@ export const emailVerificationSchema = z.object({
   token: z.string().min(1, 'Token is required'),
 });
 
+// Google auth schema
+export const googleAuthSchema = z.object({
+  token: z.string().min(1, 'Google access token is required'),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export type EmailVerificationInput = z.infer<typeof emailVerificationSchema>;
+export type GoogleAuthInput = z.infer<typeof googleAuthSchema>;

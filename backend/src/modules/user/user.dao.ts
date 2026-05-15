@@ -24,6 +24,7 @@ class UserDao {
     const {
       page = 1, limit = 10,
       role, isActive, isVerified,
+      institution_id,
       search, created_after
     } = filters;
 
@@ -32,6 +33,7 @@ class UserDao {
     const where: Prisma.UserWhereInput = {};
 
     if (role) where.role = role;
+    if (institution_id) where.institution_id = institution_id;
     if (typeof isActive === 'boolean') where.isActive = isActive;
     if (typeof isVerified === 'boolean') where.isVerified = isVerified;
 
@@ -65,6 +67,13 @@ class UserDao {
         totalPages: Math.ceil(total / limit),
       },
     };
+  }
+
+  async createUser(data: Prisma.UserCreateInput) {
+    return await prismaClient.user.create({
+      data,
+      omit: { password_hash: true }
+    });
   }
 
   async updateUser(userId: string, data: any) {

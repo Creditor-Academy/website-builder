@@ -17,7 +17,6 @@
     "jsx": "react-jsx",
 
     /* Paths mapping must be here too */
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
@@ -25,7 +24,8 @@
     /* Specific preferences */
     "strict": false,
     "noImplicitAny": false,
-    "strictNullChecks": false
+    "strictNullChecks": false,
+    "types": ["vite/client"]
   },
   "include": ["src/**/*", "declarations.d.ts"] 
 }

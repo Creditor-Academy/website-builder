@@ -22,10 +22,3 @@ declare module "*.svg" {
   const src: string;
   export default src;
 }
-
-interface ImportMeta {
-  readonly env: {
-    readonly [key: string]: string | boolean | undefined;
-    readonly VITE_GOOGLE_CLIENT_ID: string;
-  };
-}

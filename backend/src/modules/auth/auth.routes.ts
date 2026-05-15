@@ -8,7 +8,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   emailVerificationSchema,
-  googleLoginSchema,
+  googleAuthSchema,
 } from './auth.validation.js';
 import { authenticate } from '../../middlewares/auth.middleware.js';
 import { FORGOT_PW_LIMIT, LOGIN_LIMIT, REFRESH_LIMIT } from '../../constants/auth.constants.js';
@@ -19,6 +19,7 @@ const authController = new AuthController();
 // POST /auth/register - Register a new user
 router.post(
   '/register',
+  rateLimiting('REGISTER', { LIMIT: 5, WINDOW_SEC: 900 }),
   validateRequest(registerSchema),
   authController.register
 );
@@ -29,14 +30,6 @@ router.post(
   validateRequest(loginSchema),
   rateLimiting('LOGIN', LOGIN_LIMIT),
   authController.login
-);
-
-// POST /auth/google - Google Login
-router.post(
-  '/google',
-  validateRequest(googleLoginSchema),
-  rateLimiting('LOGIN', LOGIN_LIMIT),
-  authController.googleLogin
 );
 
 // GET /auth/logout - Logout user
@@ -73,6 +66,14 @@ router.post(
   '/refresh-token',
   rateLimiting('REFRESH', REFRESH_LIMIT),
   authController.refreshToken
+);
+
+// POST /auth/google - Google OAuth login
+router.post(
+  '/google',
+  rateLimiting('GOOGLE-AUTH', { LIMIT: 10, WINDOW_SEC: 900 }),
+  validateRequest(googleAuthSchema),
+  authController.googleAuth
 );
 
 export default router;

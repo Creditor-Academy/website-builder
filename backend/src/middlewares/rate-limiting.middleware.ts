@@ -11,6 +11,11 @@ import cacheService from "../services/cache.service.js";
 export const rateLimiting = (prefix: string, rate_limit: { LIMIT: number, WINDOW_SEC: number }) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
+            // Skip rate limiting for SUPER_ADMIN
+            if (req.context?.user?.role === 'SUPER_ADMIN') {
+                return next();
+            }
+
             const id = req.context?.sessionId || req.validated?.body?.email || req.ip;
             const key = `rate:${prefix}:${id}`;
 
@@ -23,6 +28,7 @@ export const rateLimiting = (prefix: string, rate_limit: { LIMIT: number, WINDOW
 
             if (count > limit) {
                 res.status(429).json({ error: "Too Many Requests" });
+                return;
             }
             next();
 

@@ -1,0 +1,50 @@
+﻿src/modules/assets/routes/websiteAssets.routes.ts(2,30): error TS2307: Cannot find module '../core/assets.controller.js' or its corresponding type declarations.
+src/modules/assets/routes/websiteAssets.routes.ts(3,24): error TS2307: Cannot find module '../../../middlewares/assets.middleware.js' or its corresponding type declarations.
+src/modules/assets/routes/websiteAssets.routes.ts(13,8): error TS2307: Cannot find module '../core/assets.validation.js' or its corresponding type declarations.
+src/modules/assets/routes/websiteAssets.routes.ts(23,39): error TS2345: Argument of type '"file"' is not assignable to parameter of type '"query" | "body" | "params" | undefined'.
+src/modules/assets/routes/websiteAssets.routes.ts(33,42): error TS2345: Argument of type '"files"' is not assignable to parameter of type '"query" | "body" | "params" | undefined'.
+src/modules/auth/auth.service.ts(160,33): error TS2339: Property 'auth_provider' does not exist on type '{ institution: { id: string; email: string; name: string; created_at: Date; updated_at: Date; status: string; } | null; } & { id: string; email: string; name: string; password_hash: string; ... 8 more ...; deleted_at: Date | null; }'.
+src/modules/auth/auth.service.ts(617,9): error TS2322: Type '{ id: string; email: string; name: string; role: UserRole; institution_id: string | null; isActive: boolean; isVerified: boolean; lastLoginAt: Date | null; lastPasswordChangeAt: Date | null; created_at: Date; updated_at: Date; deleted_at: Date | null; }' is not assignable to type '{ institution: { id: string; email: string; name: string; created_at: Date; updated_at: Date; status: string; } | null; } & { id: string; email: string; name: string; password_hash: string; ... 8 more ...; deleted_at: Date | null; }'.
+  Property 'institution' is missing in type '{ id: string; email: string; name: string; role: UserRole; institution_id: string | null; isActive: boolean; isVerified: boolean; lastLoginAt: Date | null; lastPasswordChangeAt: Date | null; created_at: Date; updated_at: Date; deleted_at: Date | null; }' but required in type '{ institution: { id: string; email: string; name: string; created_at: Date; updated_at: Date; status: string; } | null; }'.
+src/modules/auth/auth.service.ts(617,46): error TS2379: Argument of type '{ name: any; email: any; password_hash: undefined; isVerified: boolean; auth_provider: string; }' is not assignable to parameter of type '{ name: string; email: string; password_hash?: string; auth_provider?: string; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'password_hash' are incompatible.
+    Type 'undefined' is not assignable to type 'string'.
+src/modules/auth/auth.service.ts(619,23): error TS2339: Property 'auth_provider' does not exist on type '{ institution: { id: string; email: string; name: string; created_at: Date; updated_at: Date; status: string; } | null; } & { id: string; email: string; name: string; password_hash: string; ... 8 more ...; deleted_at: Date | null; }'.
+src/modules/template/template.controller.ts(43,71): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/modules/template/template.controller.ts(90,71): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/modules/template/template.controller.ts(95,69): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/modules/template/template.controller.ts(111,71): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/modules/template/template.controller.ts(116,53): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/modules/template/template.controller.ts(132,71): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/modules/template/template.controller.ts(137,71): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/modules/template/template.controller.ts(178,70): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/modules/template/template.controller.ts(214,71): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/modules/template/template.controller.ts(219,69): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/modules/template/template.controller.ts(235,71): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/modules/template/template.controller.ts(240,53): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/modules/template/template.controller.ts(256,71): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/modules/template/template.controller.ts(261,71): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/modules/template/template.validation.ts(10,22): error TS2554: Expected 2-3 arguments, but got 1.
+src/modules/template/template.validation.ts(11,15): error TS2554: Expected 2-3 arguments, but got 1.
+src/modules/template/template.validation.ts(12,15): error TS2554: Expected 2-3 arguments, but got 1.
+src/modules/template/template.validation.ts(13,20): error TS2554: Expected 2-3 arguments, but got 1.
+src/modules/template/template.validation.ts(21,22): error TS2554: Expected 2-3 arguments, but got 1.
+src/modules/template/template.validation.ts(22,15): error TS2554: Expected 2-3 arguments, but got 1.
+src/modules/template/template.validation.ts(23,15): error TS2554: Expected 2-3 arguments, but got 1.
+src/modules/template/template.validation.ts(24,20): error TS2554: Expected 2-3 arguments, but got 1.
+src/modules/template/template.validation.ts(36,14): error TS2554: Expected 2-3 arguments, but got 1.
+src/modules/template/template.validation.ts(42,14): error TS2554: Expected 2-3 arguments, but got 1.

@@ -1,11 +1,18 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { sanitizeHTML } from '@/utils/sanitize';
 
-export function ButtonBlock({ section, isSelected }) {
+export function ButtonBlock({ section, isSelected, isEditing, onContentChange }) {
     const { content, styles } = section;
     const background = styles.useGradient
         ? styles.backgroundGradient
         : styles.backgroundColor;
+
+    const handleTextEdit = (field, e) => {
+        if (onContentChange && isEditing) {
+            onContentChange(field, e.currentTarget.innerHTML || '');
+        }
+    };
 
     return (
         <section
@@ -24,14 +31,17 @@ export function ButtonBlock({ section, isSelected }) {
                         style={{
                             background: styles.buttonPrimaryBg,
                             color: styles.buttonPrimaryText,
-                            borderRadius: styles.borderRadius || '8px',
+                            borderRadius: styles.borderRadius || 'var(--radius, 16px)',
+                            minHeight: 'auto',
                             padding: '12px 32px',
-                            fontSize: '16px',
-                            fontWeight: '600'
                         }}
-                        className="shadow-sm hover:scale-105 transition-transform"
+                        className="shadow-sm hover:scale-105 transition-transform font-semibold text-base"
                     >
-                        {content.text || 'Click Me'}
+                        <span
+                            contentEditable={isEditing}
+                            suppressContentEditableWarning
+                            onBlur={(e) => handleTextEdit('text', e)}
+                         dangerouslySetInnerHTML={{ __html: sanitizeHTML(content.text || 'Click Me') }} />
                     </Button>
                 </div>
             </div>

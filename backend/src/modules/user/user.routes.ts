@@ -9,6 +9,7 @@ import {
   updateUserRoleSchema,
   updateUserStatusSchema,
   userIdParamsSchema,
+  createUserSchema,
 } from './user.validation.js';
 import { UserRole } from '@prisma/client';
 
@@ -41,23 +42,31 @@ router.delete(
   userController.deactivateAccount
 );
 
-// GET /users - List users (Admin only)
+// POST / - Create new user (Admin/Institution Admin only)
+router.post(
+  '/',
+  authorize([UserRole.ADMIN, UserRole.INSTITUTION_ADMIN]),
+  validateRequest(createUserSchema),
+  userController.createUser
+);
+
+// GET /users - List users (Admin/Institution Admin only)
 router.get(
   '/',
-  authorize([UserRole.ADMIN]),
+  authorize([UserRole.ADMIN, UserRole.INSTITUTION_ADMIN]),
   validateRequest(listUsersQuerySchema, 'query'),
   userController.listUsers
 );
 
-// GET /users/:id - Get user by ID
+// GET /users/:id - Get user by ID (Admin/Institution Admin only)
 router.get(
   '/:id',
-  authorize([UserRole.ADMIN]),
+  authorize([UserRole.ADMIN, UserRole.INSTITUTION_ADMIN]),
   validateRequest(userIdParamsSchema, 'params'),
   userController.getUserById
 );
 
-// PUT /users/:id/role - Update user role (Admin only)
+// PATCH /users/:id/role - Update user role (Admin only - Platform level)
 router.patch(
   '/:id/role',
   authorize([UserRole.ADMIN]),
@@ -66,19 +75,19 @@ router.patch(
   userController.updateUserRole
 );
 
-// PATCH /users/:id/status - Suspend/Reactivate user (Admin only)
+// PATCH /users/:id/status - Suspend/Reactivate user (Admin/Institution Admin only)
 router.patch(
   '/:id/status',
-  authorize([UserRole.ADMIN]),
+  authorize([UserRole.ADMIN, UserRole.INSTITUTION_ADMIN]),
   validateRequest(userIdParamsSchema, 'params'),
   validateRequest(updateUserStatusSchema),
   userController.updateUserStatus
 );
 
-// DELETE /users/:id - Restore User (Admin only)
+// DELETE /users/:id - Restore User (Admin/Institution Admin only)
 router.post(
   '/:id/restore',
-  authorize([UserRole.ADMIN]),
+  authorize([UserRole.ADMIN, UserRole.INSTITUTION_ADMIN]),
   validateRequest(userIdParamsSchema, 'params'),
   userController.restoreUser
 );

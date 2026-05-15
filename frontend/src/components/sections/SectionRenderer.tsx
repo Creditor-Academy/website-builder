@@ -8,6 +8,8 @@ import { PricingSection } from './PricingSection';
 import { GallerySection } from './GallerySection';
 import { GalleryMasonrySection } from './GalleryMasonrySection';
 import { BlogListSection } from './BlogListSection';
+import { sanitizeHTML } from '@/utils/sanitize';
+import { CaseStudiesSection } from './CaseStudiesSection';
 import { ContactSection } from './ContactSection';
 import { StatsSection } from './StatsSection';
 import { TeamSection } from './TeamSection';
@@ -15,7 +17,7 @@ import { FAQSection } from './FAQSection';
 import { LogoCloudSection } from './LogoCloudSection';
 import { ContentSection } from './ContentSection';
 import { AboutSection } from './AboutSection';
-import { CaseStudiesSection } from './CaseStudiesSection';
+import { LayoutSection } from './LayoutSection';
 import { TextBlock } from './TextBlock';
 import { ButtonBlock } from './ButtonBlock';
 import { HTMLBlock } from './HTMLBlock';
@@ -130,6 +132,8 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
             });
           }}
           onMouseDown={(e) => {
+            selectSection(section.id);
+            selectComponent(component.id);
             if (isEditingText) e.stopPropagation();
           }}
           style={{
@@ -140,7 +144,7 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
             fontStyle: component.style?.fontStyle || 'normal',
             letterSpacing: component.style?.letterSpacing || 'normal',
           }}
-          dangerouslySetInnerHTML={{ __html: component.content?.text || 'Edit text' }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHTML(component.content?.text || 'Edit text') }}
         />
       )}
       {component.type === 'image' && (
@@ -172,7 +176,7 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
                 onBlur={(e) => {
                   setIsEditingText(false);
                   updateComponent(section.id, component.id, {
-                    content: { ...component.content, text: e.currentTarget.textContent }
+                    content: { ...component.content, text: e.currentTarget.innerHTML }
                   });
                 }}
               >
@@ -309,11 +313,11 @@ const FloatingComponent = ({ component, section, isSelected, isEditing, editor, 
   );
 };
 
-export function SectionRenderer({ section, isSelected, isEditing, onContentChange }) {
+export function SectionRenderer({ section, idx, isAlternate, isSelected, isEditing, onContentChange }) {
   const { updateComponent, deleteComponent, selectComponent, selectSection, state } = useBuilder();
   const { editor } = state;
 
-  const commonProps = { section, isSelected, isEditing, onContentChange };
+  const commonProps = { section, isSelected, isEditing, onContentChange, isAlternate };
 
   const renderBaseSection = () => {
     switch (section.type) {
@@ -334,6 +338,7 @@ export function SectionRenderer({ section, isSelected, isEditing, onContentChang
       case 'logocloud': return <LogoCloudSection {...commonProps} />;
       case 'content': return <ContentSection {...commonProps} />;
       case 'about': return <AboutSection {...commonProps} />;
+      case 'layout': return <LayoutSection {...commonProps} />;
       case 'text': return <TextBlock {...commonProps} />;
       case 'button': return <ButtonBlock {...commonProps} />;
       case 'html': return <HTMLBlock {...commonProps} />;
@@ -384,7 +389,7 @@ export function SectionRenderer({ section, isSelected, isEditing, onContentChang
                     fontFamily: comp.style?.fontFamily || 'Inter',
                     fontStyle: comp.style?.fontStyle || 'normal',
                   }}
-                  dangerouslySetInnerHTML={{ __html: comp.content.text }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHTML(comp.content.text) }}
                 />
               )}
               {comp.type === 'image' && (
@@ -409,9 +414,7 @@ export function SectionRenderer({ section, isSelected, isEditing, onContentChang
                     border: 'none',
                     cursor: 'pointer',
                   }}
-                >
-                  {comp.content.text}
-                </button>
+                 dangerouslySetInnerHTML={{ __html: sanitizeHTML(comp.content.text) }} />
               )}
             </div>
           ))}

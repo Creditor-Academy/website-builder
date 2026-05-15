@@ -38,13 +38,13 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
       id: decoded.userId,
       role: decoded.role,
       refreshTokenId: decoded.refreshTokenId,
+      institution_id: decoded.institution_id
     };
 
-    // verified check can be added here if needed in the future, as per business requirements
-
-    // // Check if user is verified
-    // if (!user.isVerified) {
-    //   return res.status(403).json({ error: 'Please verify your email before logging in' });
+    // Note: email verification is tracked in session but not enforced as a blocker.
+    // Uncomment the check below to require verified email for all actions.
+    // if (sessionData.isVerified === false) {
+    //   return res.status(403).json({ error: 'Please verify your email before continuing' });
     // }
 
     // Attach user to request context
@@ -67,8 +67,13 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
  */
 export const authorize = (roles: string[] = []) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.context.user) {
+    if (!req.context || !req.context.user) {
       return res.status(401).json({ error: 'Unauthorized. Please login to continue' });
+    }
+
+    // SUPER_ADMIN has access to everything
+    if (req.context.user.role === 'SUPER_ADMIN') {
+      return next();
     }
 
     if (!roles.includes(req.context.user.role)) {

@@ -51,7 +51,7 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
         setPublishStatus('success');
         setPublishedUrl(response.url);
         updateWebsite(websiteId, { 
-          status: 'published', 
+          status: 'Published', 
           publishedUrl: response.url,
           customDomain: customDomain,
           subdomain: subdomain 
@@ -114,7 +114,7 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
                   </p>
                 </div>
               </div>
-              {website?.status === 'published' && (
+              {website?.status === 'Published' && (
                 <Badge variant="secondary" className="bg-green-100 text-green-800">
                   Published
                 </Badge>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { ArrowRight, Play, ChevronRight } from 'lucide-react';
+import { Editable } from '@/components/ui/Editable';
 
-export function HeroSection({ section, isSelected, isEditing, onContentChange }) {
+export function HeroSection({ section, isSelected, isEditing, onContentChange, isAlternate }) {
   const { content, styles, variant = 'split' } = section;
   const [showBgPicker, setShowBgPicker] = useState(false);
 
@@ -32,21 +33,21 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
 
   const handleTextEdit = (field, e) => {
     if (onContentChange && isEditing) {
-      onContentChange(field, e.currentTarget.textContent || '');
+      onContentChange(field, e.currentTarget.innerHTML || '');
     }
   };
 
-  // White by default — always respect styles if set
+  // Use CSS variables for global styling
   const background = (styles.backgroundColor && styles.backgroundColor !== 'transparent')
     ? styles.backgroundColor
-    : '#ffffff';
+    : isAlternate ? 'var(--theme-bg-alt, #f8fafc)' : 'var(--theme-bg, #ffffff)';
 
-  const headingColor = styles.headingColor || '#0f172a';
-  const paragraphColor = styles.paragraphColor || '#475569';
-  const buttonPrimaryBg = styles.buttonPrimaryBg || '#0f172a';
-  const buttonPrimaryText = styles.buttonPrimaryText || '#ffffff';
+  const headingColor = styles.headingColor || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
+  const paragraphColor = styles.paragraphColor || (isAlternate ? 'var(--theme-text-alt, #475569)' : 'var(--theme-text, #475569)');
+  const buttonPrimaryBg = styles.buttonPrimaryBg || 'var(--theme-primary, #0f172a)';
+  const buttonPrimaryText = styles.buttonPrimaryText || (isAlternate ? 'var(--theme-bg-alt, #ffffff)' : 'var(--theme-bg, #ffffff)');
   const buttonSecondaryBg = styles.buttonSecondaryBg || 'transparent';
-  const buttonSecondaryText = styles.buttonSecondaryText || '#0f172a';
+  const buttonSecondaryText = styles.buttonSecondaryText || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
 
   const sectionStyle = {
     background,
@@ -56,6 +57,7 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
   };
 
   const selectionRing = isSelected ? 'ring-2 ring-slate-900 ring-offset-2 ring-offset-white' : '';
+  const globalClasses = "global-radius global-shadow global-transition";
 
   /* ─────────────────────────────────────────────
      CENTERED VARIANT
@@ -77,72 +79,76 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
           background: 'radial-gradient(ellipse 70% 50% at 50% 0%, #f1f5f9 0%, transparent 80%)',
         }} />
 
-        <div className="container mx-auto px-6 relative z-10 flex flex-col items-center justify-center min-h-[75vh] text-center">
+        <div className="container mx-auto px-4 sm:px-6 relative z-10 flex flex-col items-center justify-center min-h-[60vh] md:min-h-[75vh] text-center pt-24 pb-16 md:py-0">
           {/* Eyebrow tag */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-slate-200 bg-slate-50 mb-8 shadow-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
-            <span
+            <Editable
               className="text-xs font-semibold tracking-widest uppercase"
               style={{ color: '#475569' }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => handleTextEdit('eyebrowText', e)}
-            >
-              {content.eyebrowText || 'New Release'}
-            </span>
+              isEditing={isEditing}
+              value={content.eyebrowText || 'New Release'}
+              onSave={(val) => onContentChange?.('eyebrowText', val)}
+            />
           </div>
 
           <div className="max-w-4xl space-y-6">
-            <h1
-              className="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.05] tracking-tight"
+            <Editable
+              as="h1"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.05] tracking-tight"
               style={{ color: headingColor, letterSpacing: '-0.03em' }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => handleTextEdit('headline', e)}
-            >
-              {content.headline}
-            </h1>
+              isEditing={isEditing}
+              value={content.headline}
+              onSave={(val) => onContentChange?.('headline', val)}
+            />
 
-            <p
+            <Editable
+              as="p"
               className="text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
               style={{ color: paragraphColor }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => handleTextEdit('subheadline', e)}
-            >
-              {content.subheadline}
-            </p>
+              isEditing={isEditing}
+              value={content.subheadline || ''}
+              onSave={(val) => onContentChange?.('subheadline', val)}
+            />
 
-            <div className="flex flex-wrap justify-center gap-3 pt-4">
-              <button
-                className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:shadow-slate-900/20 hover:-translate-y-0.5 active:translate-y-0"
-                style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
-                onClick={() => handleButtonClick(content.primaryRouteType, content.primaryRouteUrl)}
-              >
-                <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaText', e)}>
-                  {content.ctaText}
-                </span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </button>
+            <div className={`flex flex-wrap justify-center gap-3 pt-4 ${globalClasses}`}>
+              {content.ctaText && (
+                <button
+                  className={`group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:shadow-slate-900/20 hover:-translate-y-0.5 active:translate-y-0 ${globalClasses}`}
+                  style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
+                  onClick={() => handleButtonClick(content.primaryRouteType, content.primaryRouteUrl)}
+                >
+                  <Editable
+                    isEditing={isEditing}
+                    value={content.ctaText || ''}
+                    onSave={(val) => onContentChange?.('ctaText', val)}
+                  />
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              )}
 
-              <button
-                className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 bg-white transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
-                style={{ color: buttonSecondaryText }}
-                onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
-              >
-                <Play className="w-4 h-4 fill-current opacity-70" />
-                <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}>
-                  {content.ctaSecondaryText}
-                </span>
-              </button>
+              {content.ctaSecondaryText && (
+                <button
+                  className={`group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 ${globalClasses} glass-effect`}
+                  style={{ color: buttonSecondaryText, background: buttonSecondaryBg }}
+                  onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
+                >
+                  <Play className="w-4 h-4 fill-current opacity-70" />
+                  <Editable
+                    isEditing={isEditing}
+                    value={content.ctaSecondaryText || ''}
+                    onSave={(val) => onContentChange?.('ctaSecondaryText', val)}
+                  />
+                </button>
+              )}
             </div>
           </div>
 
           {/* Hero image with elegant frame */}
-          <div className="pt-16 w-full max-w-4xl mx-auto">
-            <div className="relative group">
+          <div className={`pt-12 md:pt-16 w-full max-w-4xl mx-auto ${globalClasses}`}>
+            <div className={`relative group ${globalClasses}`}>
               <div className="absolute -inset-1 rounded-2xl bg-gradient-to-b from-slate-200 to-slate-100 blur-sm" />
-              <div className="relative rounded-2xl overflow-hidden border border-slate-200 shadow-2xl shadow-slate-200/80">
+              <div className={`relative rounded-2xl overflow-hidden border border-slate-200 shadow-2xl shadow-slate-200/80 ${globalClasses} glass-effect`}>
                 {/* Browser chrome bar */}
                 <div className="flex items-center gap-1.5 px-4 py-3 bg-slate-50 border-b border-slate-200">
                   <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
@@ -174,58 +180,58 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
           opacity: 0.35,
         }} />
 
-        <div className="container mx-auto px-6 relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12 min-h-[70vh] py-20">
+        <div className="container mx-auto px-4 sm:px-6 relative z-10 flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-12 min-h-[60vh] md:min-h-[70vh] py-16 md:py-20">
           {/* Left: Text */}
           <div className="max-w-xl space-y-6 flex-1">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-slate-100 border border-slate-200">
-              <span
+              <Editable
                 className="text-xs font-bold tracking-widest uppercase"
                 style={{ color: '#475569' }}
-                contentEditable={isEditing}
-                suppressContentEditableWarning
-                onBlur={(e) => handleTextEdit('eyebrowText', e)}
-              >
-                {content.eyebrowText || 'Video Story'}
-              </span>
+                isEditing={isEditing}
+                value={content.eyebrowText || 'Video Story'}
+                onSave={(val) => onContentChange?.('eyebrowText', val)}
+              />
             </div>
-            <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight"
+            <Editable
+              as="h1"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight"
               style={{ color: headingColor, letterSpacing: '-0.03em' }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => handleTextEdit('headline', e)}
-            >
-              {content.headline}
-            </h1>
-            <p
+              isEditing={isEditing}
+              value={content.headline || ''}
+              onSave={(val) => onContentChange?.('headline', val)}
+            />
+            <Editable
+              as="p"
               className="text-lg leading-relaxed"
               style={{ color: paragraphColor }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => handleTextEdit('subheadline', e)}
-            >
-              {content.subheadline}
-            </p>
+              isEditing={isEditing}
+              value={content.subheadline || ''}
+              onSave={(val) => onContentChange?.('subheadline', val)}
+            />
             <div className="flex flex-wrap gap-3 pt-2">
               <button
                 className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:shadow-slate-900/20 hover:-translate-y-0.5"
                 style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
                 onClick={() => handleButtonClick(content.primaryRouteType, content.primaryRouteUrl)}
               >
-                <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaText', e)}>
-                  {content.ctaText}
-                </span>
+                <Editable
+                  isEditing={isEditing}
+                  value={content.ctaText || ''}
+                  onSave={(val) => onContentChange?.('ctaText', val)}
+                />
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </button>
               <button
-                className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 bg-white transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
-                style={{ color: buttonSecondaryText }}
+                className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
+                style={{ color: buttonSecondaryText, background: buttonSecondaryBg }}
                 onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
               >
                 <Play className="w-4 h-4 fill-current opacity-70" />
-                <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}>
-                  {content.ctaSecondaryText}
-                </span>
+                <Editable
+                  isEditing={isEditing}
+                  value={content.ctaSecondaryText || ''}
+                  onSave={(val) => onContentChange?.('ctaSecondaryText', val)}
+                />
               </button>
             </div>
           </div>
@@ -264,62 +270,67 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
         {/* Left accent bar */}
         <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-900" />
 
-        <div className="container mx-auto px-10 py-24">
+        <div className="container mx-auto px-6 sm:px-10 py-16 md:py-24">
           <div className="max-w-3xl space-y-7">
-            <p
+            <Editable
+              as="p"
               className="text-xs font-bold tracking-[0.2em] uppercase"
               style={{ color: '#94a3b8' }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => handleTextEdit('eyebrowText', e)}
-            >
-              {content.eyebrowText || '— Professional · Minimal · Clean'}
-            </p>
+              isEditing={isEditing}
+              value={content.eyebrowText || '— Professional · Minimal · Clean'}
+              onSave={(val) => onContentChange?.('eyebrowText', val)}
+            />
 
-            <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-black leading-[1.08]"
+            <Editable
+              as="h1"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-[1.08]"
               style={{ color: headingColor, letterSpacing: '-0.03em' }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => handleTextEdit('headline', e)}
-            >
-              {content.headline}
-            </h1>
+              isEditing={isEditing}
+              value={content.headline || ''}
+              onSave={(val) => onContentChange?.('headline', val)}
+            />
 
             <div className="w-12 h-0.5 bg-slate-900 rounded-full" />
 
-            <p
+            <Editable
+              as="p"
               className="text-base md:text-lg leading-relaxed max-w-xl"
               style={{ color: paragraphColor }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => handleTextEdit('subheadline', e)}
-            >
-              {content.subheadline}
-            </p>
+              isEditing={isEditing}
+              value={content.subheadline || ''}
+              onSave={(val) => onContentChange?.('subheadline', val)}
+            />
 
             <div className="flex flex-wrap gap-3 pt-2">
-              <button
-                className="group inline-flex items-center gap-2.5 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:shadow-slate-900/15 hover:-translate-y-0.5"
-                style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
-                onClick={() => handleButtonClick(content.primaryRouteType, content.primaryRouteUrl)}
-              >
-                <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaText', e)}>
-                  {content.ctaText}
-                </span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </button>
+              {content.ctaText && (
+                <button
+                  className="group inline-flex items-center gap-2.5 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:shadow-slate-900/15 hover:-translate-y-0.5"
+                  style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
+                  onClick={() => handleButtonClick(content.primaryRouteType, content.primaryRouteUrl)}
+                >
+                  <Editable
+                    isEditing={isEditing}
+                    value={content.ctaText || ''}
+                    onSave={(val) => onContentChange?.('ctaText', val)}
+                  />
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              )}
 
-              <button
-                className="group inline-flex items-center gap-2.5 px-6 py-3 rounded-lg font-semibold text-sm border border-slate-200 transition-all duration-200 hover:bg-slate-50 hover:border-slate-300 hover:-translate-y-0.5"
-                style={{ color: buttonSecondaryText, background: buttonSecondaryBg }}
-                onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
-              >
-                <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}>
-                  {content.ctaSecondaryText}
-                </span>
-                <ChevronRight className="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
-              </button>
+              {content.ctaSecondaryText && (
+                <button
+                  className="group inline-flex items-center gap-2.5 px-6 py-3 rounded-lg font-semibold text-sm border border-slate-200 transition-all duration-200 hover:bg-slate-50 hover:border-slate-300 hover:-translate-y-0.5"
+                  style={{ color: buttonSecondaryText, background: buttonSecondaryBg }}
+                  onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
+                >
+                  <Editable
+                    isEditing={isEditing}
+                    value={content.ctaSecondaryText || ''}
+                    onSave={(val) => onContentChange?.('ctaSecondaryText', val)}
+                  />
+                  <ChevronRight className="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -351,7 +362,7 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
           opacity: 0.4,
         }} />
 
-        <div className="container mx-auto px-6 relative z-10 flex flex-col items-center justify-center min-h-[80vh] text-center py-24">
+        <div className="container mx-auto px-4 sm:px-6 relative z-10 flex flex-col items-center justify-center min-h-[70vh] md:min-h-[80vh] text-center py-16 md:py-24">
           <div className="max-w-5xl space-y-8">
             {/* Pill badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 border border-slate-200 shadow-sm">
@@ -360,59 +371,63 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
                 <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               </span>
-              <span
+              <Editable
                 className="text-xs font-bold tracking-widest uppercase"
                 style={{ color: '#475569' }}
-                contentEditable={isEditing}
-                suppressContentEditableWarning
-                onBlur={(e) => handleTextEdit('eyebrowText', e)}
-              >
-                {content.eyebrowText || 'Introducing v2.0'}
-              </span>
+                isEditing={isEditing}
+                value={content.eyebrowText || 'Introducing v2.0'}
+                onSave={(val) => onContentChange?.('eyebrowText', val)}
+              />
             </div>
 
-            <h1
-              className="text-5xl md:text-6xl lg:text-8xl font-black leading-none"
+            <Editable
+              as="h1"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black leading-none"
               style={{ color: headingColor, letterSpacing: '-0.04em', lineHeight: 1.0 }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => handleTextEdit('headline', e)}
-            >
-              {content.headline}
-            </h1>
+              isEditing={isEditing}
+              value={content.headline || ''}
+              onSave={(val) => onContentChange?.('headline', val)}
+            />
 
-            <p
+            <Editable
+              as="p"
               className="text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
               style={{ color: paragraphColor }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => handleTextEdit('subheadline', e)}
-            >
-              {content.subheadline}
-            </p>
+              isEditing={isEditing}
+              value={content.subheadline || ''}
+              onSave={(val) => onContentChange?.('subheadline', val)}
+            />
 
             <div className="flex flex-wrap justify-center gap-3 pt-4">
-              <button
-                className="group inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base transition-all duration-200 hover:opacity-90 hover:shadow-xl hover:shadow-slate-900/20 hover:-translate-y-1"
-                style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
-                onClick={() => handleButtonClick(content.primaryRouteType, content.primaryRouteUrl)}
-              >
-                <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaText', e)}>
-                  {content.ctaText}
-                </span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
-              </button>
+              {content.ctaText && (
+                <button
+                  className="group inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base transition-all duration-200 hover:opacity-90 hover:shadow-xl hover:shadow-slate-900/20 hover:-translate-y-1"
+                  style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
+                  onClick={() => handleButtonClick(content.primaryRouteType, content.primaryRouteUrl)}
+                >
+                  <Editable
+                    isEditing={isEditing}
+                    value={content.ctaText || ''}
+                    onSave={(val) => onContentChange?.('ctaText', val)}
+                  />
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              )}
 
-              <button
-                className="group inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base border border-slate-200 bg-white/70 backdrop-blur-sm transition-all duration-200 hover:border-slate-300 hover:shadow-lg hover:-translate-y-1"
-                style={{ color: buttonSecondaryText }}
-                onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
-              >
-                <Play className="w-5 h-5 fill-current opacity-60" />
-                <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}>
-                  {content.ctaSecondaryText}
-                </span>
-              </button>
+              {content.ctaSecondaryText && (
+                <button
+                  className="group inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base border border-slate-200 backdrop-blur-sm transition-all duration-200 hover:border-slate-300 hover:shadow-lg hover:-translate-y-1"
+                  style={{ color: buttonSecondaryText, background: buttonSecondaryBg }}
+                  onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
+                >
+                  <Play className="w-5 h-5 fill-current opacity-60" />
+                  <Editable
+                    isEditing={isEditing}
+                    value={content.ctaSecondaryText}
+                    onSave={(val) => onContentChange?.('ctaSecondaryText', val)}
+                  />
+                </button>
+              )}
             </div>
 
             {/* Social proof row */}
@@ -420,18 +435,16 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
               {(content.socialProof || ['Trusted by 10K+ teams', '4.9★ rating', 'SOC 2 certified']).map((item, i) => (
                 <div key={i} className="flex items-center gap-2 text-sm" style={{ color: '#64748b' }}>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" />
-                  <span
-                    contentEditable={isEditing}
-                    suppressContentEditableWarning
-                    onBlur={(e) => {
+                  <Editable
+                    isEditing={isEditing}
+                    value={item}
+                    onSave={(val) => {
                       if (!isEditing || !onContentChange) return;
                       const updated = [...(content.socialProof || ['Trusted by 10K+ teams', '4.9★ rating', 'SOC 2 certified'])];
-                      updated[i] = e.currentTarget.textContent;
+                      updated[i] = val;
                       onContentChange('socialProof', updated);
                     }}
-                  >
-                    {item}
-                  </span>
+                  />
                 </div>
               ))}
             </div>
@@ -461,66 +474,70 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
           style={{ background: 'radial-gradient(circle, #f1f5f9 0%, transparent 65%)' }} />
       </div>
 
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-16 items-center min-h-[75vh] py-16">
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center min-h-[60vh] md:min-h-[75vh] py-12 md:py-16">
           {/* ── Left: Text content ── */}
           <div className="space-y-8">
             {/* Eyebrow */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
-              <span
-                className="text-xs font-bold tracking-widest uppercase"
-                style={{ color: '#475569' }}
-                contentEditable={isEditing}
-                suppressContentEditableWarning
-                onBlur={(e) => handleTextEdit('eyebrowText', e)}
-              >
-                {content.eyebrowText || 'Now Available'}
-              </span>
-            </div>
+            <Editable
+              className="text-xs font-bold tracking-widest uppercase"
+              style={{ color: '#475569' }}
+              isEditing={isEditing}
+              value={content.eyebrowText || 'Now Available'}
+              onSave={(val) => onContentChange?.('eyebrowText', val)}
+            />
+          </div>
 
-            <h1
-              className="text-4xl md:text-5xl lg:text-[3.5rem] font-black leading-tight"
-              style={{ color: headingColor, letterSpacing: '-0.03em' }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => handleTextEdit('headline', e)}
-            >
-              {content.headline}
-            </h1>
+          <Editable
+            as="h1"
+            className="text-4xl md:text-5xl lg:text-[3.5rem] font-black leading-tight"
+            style={{ color: headingColor, letterSpacing: '-0.03em' }}
+            isEditing={isEditing}
+            value={content.headline || ''}
+            onSave={(val) => onContentChange?.('headline', val)}
+          />
 
-            <p
-              className="text-base md:text-lg leading-relaxed max-w-md"
-              style={{ color: paragraphColor }}
-              contentEditable={isEditing}
-              suppressContentEditableWarning
-              onBlur={(e) => handleTextEdit('subheadline', e)}
-            >
-              {content.subheadline}
-            </p>
+          <Editable
+            as="p"
+            className="text-base md:text-lg leading-relaxed max-w-md"
+            style={{ color: paragraphColor }}
+            isEditing={isEditing}
+            value={content.subheadline || ''}
+            onSave={(val) => onContentChange?.('subheadline', val)}
+          />
 
             <div className="flex flex-wrap gap-3">
-              <button
-                className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base transition-all duration-200 hover:opacity-90 hover:shadow-xl hover:shadow-slate-900/15 hover:-translate-y-0.5"
-                style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
-                onClick={() => handleButtonClick(content.primaryRouteType, content.primaryRouteUrl)}
-              >
-                <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaText', e)}>
-                  {content.ctaText}
-                </span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </button>
+              {content.ctaText && (
+                <button
+                  className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base transition-all duration-200 hover:opacity-90 hover:shadow-xl hover:shadow-slate-900/15 hover:-translate-y-0.5"
+                  style={{ background: buttonPrimaryBg, color: buttonPrimaryText }}
+                  onClick={() => handleButtonClick(content.primaryRouteType, content.primaryRouteUrl)}
+                >
+                  <Editable
+                    isEditing={isEditing}
+                    value={content.ctaText || ''}
+                    onSave={(val) => onContentChange?.('ctaText', val)}
+                  />
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              )}
 
-              <button
-                className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 bg-white transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
-                style={{ color: buttonSecondaryText }}
-                onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
-              >
-                <Play className="w-4 h-4 fill-current opacity-60" />
-                <span contentEditable={isEditing} suppressContentEditableWarning onBlur={(e) => handleTextEdit('ctaSecondaryText', e)}>
-                  {content.ctaSecondaryText}
-                </span>
-              </button>
+              {content.ctaSecondaryText && (
+                <button
+                  className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base border border-slate-200 transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
+                  style={{ color: buttonSecondaryText, background: buttonSecondaryBg }}
+                  onClick={() => handleButtonClick(content.secondaryRouteType, content.secondaryRouteUrl)}
+                >
+                  <Play className="w-4 h-4 fill-current opacity-60" />
+                  <Editable
+                    isEditing={isEditing}
+                    value={content.ctaSecondaryText || ''}
+                    onSave={(val) => onContentChange?.('ctaSecondaryText', val)}
+                  />
+                </button>
+              )}
             </div>
 
             {/* Stats row */}
@@ -531,42 +548,38 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange })
                 { value: '99%', label: 'Uptime' },
               ]).map((stat, i) => (
                 <div key={i}>
-                  <div
+                  <Editable
                     className="text-2xl font-black"
                     style={{ color: headingColor }}
-                    contentEditable={isEditing}
-                    suppressContentEditableWarning
-                    onBlur={(e) => {
+                    isEditing={isEditing}
+                    value={stat.value}
+                    onSave={(val) => {
                       if (!isEditing || !onContentChange) return;
                       const updated = [...(content.stats || [
                         { value: '10K+', label: 'Users' },
                         { value: '50K+', label: 'Websites' },
                         { value: '99%', label: 'Uptime' },
                       ])];
-                      updated[i] = { ...updated[i], value: e.currentTarget.textContent };
-                      handleTextEdit('stats', updated);
+                      updated[i] = { ...updated[i], value: val };
+                      onContentChange('stats', updated);
                     }}
-                  >
-                    {stat.value}
-                  </div>
-                  <div
+                  />
+                  <Editable
                     className="text-xs font-semibold tracking-wide uppercase mt-0.5"
                     style={{ color: '#94a3b8' }}
-                    contentEditable={isEditing}
-                    suppressContentEditableWarning
-                    onBlur={(e) => {
+                    isEditing={isEditing}
+                    value={stat.label}
+                    onSave={(val) => {
                       if (!isEditing || !onContentChange) return;
                       const updated = [...(content.stats || [
                         { value: '10K+', label: 'Users' },
                         { value: '50K+', label: 'Websites' },
                         { value: '99%', label: 'Uptime' },
                       ])];
-                      updated[i] = { ...updated[i], label: e.currentTarget.textContent };
-                      handleTextEdit('stats', updated);
+                      updated[i] = { ...updated[i], label: val };
+                      onContentChange('stats', updated);
                     }}
-                  >
-                    {stat.label}
-                  </div>
+                  />
                 </div>
               ))}
             </div>

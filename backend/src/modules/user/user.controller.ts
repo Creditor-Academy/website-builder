@@ -9,6 +9,16 @@ class UserController {
     this.userService = new UserService();
   }
 
+  // POST /users - Create new user
+  createUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = await this.userService.createUser(req.context.user, req.validated.body);
+      res.status(201).json({ message: 'User created successfully', user });
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
   // GET /users/me - Get current user profile
   getProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -57,8 +67,15 @@ class UserController {
   // GET /users - List users
   listUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      console.log('List users filters:', req.validated.query);
-      const result = await this.userService.listUsers(req.validated.query);
+      const filters = { ...req.validated.query };
+      
+      // If not Super Admin, force search within their own institution
+      if (req.context.user.role !== 'SUPER_ADMIN') {
+        filters.institution_id = req.context.user.institution_id;
+      }
+
+      console.log('List users filters (processed):', filters);
+      const result = await this.userService.listUsers(filters);
       res.status(200).json(result);
     } catch (error: any) {
       next(error);

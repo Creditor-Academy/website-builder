@@ -1,232 +1,472 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Phone, Mail, MapPin, Search, ShoppingBag, Home, Send, CheckCircle2 } from "lucide-react";
+import { 
+  Phone, 
+  Mail, 
+  MapPin, 
+  Send, 
+  CheckCircle2, 
+  Sun, 
+  Moon, 
+  Menu, 
+  X,
+  ArrowRight,
+  MessageSquare,
+  Clock,
+  Globe
+} from "lucide-react";
+import { Helmet } from "react-helmet-async";
+import { cn } from "@/lib/utils";
 import Footer from "./Footer";
-import contact from "../assets/contact.jpg";
+import contactApi from "@/api/contact";
+import { API_BASE_URL } from "@/api/client";
+import axios from "axios";
 
-export default function ContactSection() {
+export default function Contact() {
+  const [searchParams] = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [websiteId, setWebsiteId] = useState<string>(searchParams.get("websiteId") || "");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "General Inquiry",
+    message: "",
+  });
+  const isDark = theme === 'dark';
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const getWebsiteIdFromBuilderStorage = () => {
+    try {
+      const raw = localStorage.getItem('website-builder-storage');
+      if (!raw) return '';
+      const parsed = JSON.parse(raw);
+      const activeId = parsed?.state?.activeWebsiteId;
+      return typeof activeId === 'string' ? activeId : '';
+    } catch {
+      return '';
+    }
+  };
+
+  useEffect(() => {
+    document.body.style.backgroundColor = isDark ? '#020617' : '#f8fafc';
+  }, [isDark]);
+
+  useEffect(() => {
+    const paramWebsiteId = searchParams.get("websiteId");
+    if (paramWebsiteId) {
+      setWebsiteId(paramWebsiteId);
+      return;
+    }
+
+    const user = localStorage.getItem("user");
+    if (!user) return;
+
+    // Use raw axios to avoid the shared interceptor redirecting to /login on 401
+    axios.get(`${API_BASE_URL}/websites`, { withCredentials: true })
+      .then((res) => {
+        const websites = res?.data?.websites || [];
+        if (Array.isArray(websites) && websites.length > 0) {
+          setWebsiteId(websites[0].id);
+        }
+      })
+      .catch(() => {
+        // Keep form usable; validation on submit will explain if website is missing.
+      });
+  }, [searchParams]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
+
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+      setSubmitError("Please fill all required fields.");
+      return;
+    }
+
     setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
+
+    try {
+      let resolvedWebsiteId = websiteId;
+
+      if (!resolvedWebsiteId) {
+        resolvedWebsiteId = getWebsiteIdFromBuilderStorage();
+      }
+
+      if (!resolvedWebsiteId) {
+        throw new Error('Unable to submit. Please try again from your website or pass ?websiteId= in the URL.');
+      }
+
+      await contactApi.submitContactForm({
+        websiteId: resolvedWebsiteId,
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        subject: formData.subject,
+        message: formData.message.trim(),
+      });
+
+      setFormData({
+        name: "",
+        email: "",
+        subject: "General Inquiry",
+        message: "",
+      });
       setIsSubmitting(false);
       setIsSent(true);
       setTimeout(() => setIsSent(false), 5000);
-    }, 1500);
+    } catch (error: any) {
+      setIsSubmitting(false);
+      setSubmitError(error?.response?.data?.message || error?.message || "Failed to send message. Please try again.");
+    }
   };
 
+  const contactMethods = [
+    { 
+      icon: <Phone className="w-6 h-6" />, 
+      title: "Call Us", 
+      value: "+1 (123) 456 7890",
+      description: "Mon-Fri from 8am to 5pm.",
+      color: "blue"
+    },
+    { 
+      icon: <Mail className="w-6 h-6" />, 
+      title: "Email Us", 
+      value: "hello@buildora.com",
+      description: "Our friendly team is here to help.",
+      color: "indigo"
+    },
+    { 
+      icon: <MapPin className="w-6 h-6" />, 
+      title: "Visit Us", 
+      value: "San Francisco, CA",
+      description: "Come say hello at our HQ.",
+      color: "purple"
+    }
+  ];
+
   return (
-    <section className="w-full flex flex-col min-h-screen bg-[#F8FAFC] selection:bg-blue-100">
-      
-      {/* NAVBAR - Sticky with Blur */}
-      <nav className="sticky top-0 w-full h-20 flex items-center px-8 bg-white/80 backdrop-blur-md text-black z-50 border-b border-gray-100">
-        <div className="flex items-center gap-2 mr-12 group cursor-pointer">
-          <motion.div 
-            whileHover={{ rotate: 10 }}
-            className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-lg shadow-blue-200"
-          >
-            B
-          </motion.div>
-          <span className="text-xl font-black tracking-tighter">BUILDORA</span>
-        </div>
+    <main className={cn(
+      "w-full min-h-screen transition-colors duration-1000 selection:bg-blue-500/30 relative overflow-hidden",
+      isDark ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-800"
+    )}>
+      <Helmet>
+        <title>Contact Us - Buildora</title>
+        <meta name="description" content="Get in touch with the Buildora team for support, partnerships, or any questions." />
+      </Helmet>
 
-        <div className="hidden lg:flex items-center gap-8 text-[14px] font-bold text-gray-500">
-          {["Home", "Pages", "Services"].map((item) => (
-            <Link key={item} to="/" className="hover:text-blue-600 transition-all flex items-center gap-1 group">
-              {item} 
-              <span className="text-[10px] group-hover:translate-y-0.5 transition-transform">▼</span>
-            </Link>
-          ))}
-        </div>
+      {/* BACKGROUND IMAGE OVERLAY */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className={cn("absolute inset-0 bg-gradient-to-b opacity-40", isDark ? "from-slate-950 via-slate-950/20 to-slate-950" : "from-slate-50 via-slate-50/20 to-slate-50")} />
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)]" />
+      </div>
 
-        <div className="ml-auto flex items-center gap-6">
-          <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-full border border-gray-100 text-sm font-bold text-gray-700">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            +1 (123) 456 7890
+      {/* ================= NAVBAR ================= */}
+      <nav className="fixed top-0 w-full z-[100] px-6 py-6 flex justify-center pointer-events-none">
+        <motion.div
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className={cn(
+            "w-full max-w-6xl pointer-events-auto backdrop-blur-2xl rounded-full px-6 py-3 flex items-center justify-between border transition-all duration-500",
+            isDark
+              ? "bg-slate-900/60 border-slate-700/50 shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+              : "bg-white/60 border-slate-200/50 shadow-[0_8px_32px_rgba(0,0,0,0.05)]"
+          )}
+        >
+          <Link to="/" className="flex items-center gap-3 cursor-pointer group">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black group-hover:scale-110 transition-transform duration-300 shadow-lg">B</div>
+            <span className={cn("text-xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Buildora</span>
+          </Link>
+
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium">
+            {["Features", "Templates", "Resources"].map((item) => (
+              <Link key={item} to={`/${item.toLowerCase()}`} className={cn(
+                "relative group transition-colors",
+                isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
+              )}>
+                {item}
+                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-blue-500 transition-all group-hover:w-full rounded-full"></span>
+              </Link>
+            ))}
+            <div className={cn("h-4 w-px", isDark ? "bg-slate-600/50" : "bg-slate-300")} />
+
+            <button onClick={() => setTheme(isDark ? 'light' : 'dark')} className={cn("p-2 rounded-full transition-colors", isDark ? "hover:bg-slate-800 text-slate-300" : "hover:bg-slate-200 text-slate-600")}>
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+
+            <Link to="/login" className={isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"}>Log in</Link>
           </div>
-          <div className="flex items-center gap-4">
-            <Search className="w-5 h-5 text-gray-400 hover:text-blue-600 cursor-pointer transition-colors" />
-            <div className="relative group cursor-pointer">
-              <ShoppingBag className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
-              <span className="absolute -top-2 -right-2 w-5 h-5 bg-blue-600 rounded-full text-white text-[10px] flex items-center justify-center font-bold border-2 border-white">0</span>
-            </div>
-          </div>
-        </div>
+
+          <button className="md:hidden p-2 pointer-events-auto" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </motion.div>
+
+
+        {/* Mobile Menu Overlay */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className={cn(
+                "absolute top-24 left-6 right-6 p-6 rounded-3xl border backdrop-blur-3xl md:hidden pointer-events-auto",
+                isDark ? "bg-slate-900/90 border-slate-700 shadow-2xl" : "bg-white/90 border-slate-200 shadow-xl"
+              )}
+            >
+              <div className="flex flex-col gap-4">
+                {["Features", "Templates", "Resources"].map((item) => (
+                  <Link
+                    key={item}
+                    to={`/${item.toLowerCase()}`}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={cn(
+                      "text-lg font-semibold p-2 rounded-xl transition-colors",
+                      isDark ? "text-slate-300 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                    )}
+                  >
+                    {item}
+                  </Link>
+                ))}
+                <div className={cn("h-px w-full my-2", isDark ? "bg-slate-800" : "bg-slate-100")} />
+                <Link
+                  to="/login"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={cn("text-lg font-semibold p-2", isDark ? "text-slate-300" : "text-slate-600")}
+                >Log in</Link>
+                <button
+                  onClick={() => setTheme(isDark ? 'light' : 'dark')}
+                  className={cn("mt-2 py-4 rounded-2xl text-center font-bold text-lg border",
+                    isDark ? "border-slate-700 text-white hover:bg-slate-800" : "border-slate-200 text-slate-900 hover:bg-slate-50"
+                  )}
+                >
+                  {isDark ? 'Light Mode' : 'Dark Mode'}
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
-      {/* HERO - Parallax Effect */}
-      <div className="w-full h-[400px] relative flex flex-col items-center justify-center overflow-hidden">
-        <motion.div 
-          initial={{ scale: 1.1 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 1.5 }}
-          className="absolute inset-0 z-0"
-          style={{
-            backgroundImage: `url(${contact})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-transparent"></div>
-
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative z-10 text-center text-white px-6"
-        >
-          <h1 className="text-6xl font-black mb-6 tracking-tight drop-shadow-2xl">
-            Let's Build <span className="text-blue-400">Together</span>
-          </h1>
-          <div className="flex items-center justify-center gap-3 bg-white/10 backdrop-blur-md px-6 py-2 rounded-full border border-white/20 w-fit mx-auto">
-            <Home className="w-4 h-4 text-blue-300" />
-            <span className="text-blue-200 font-medium">Home</span>
-            <span className="text-white/30">/</span>
-            <span className="font-medium">Contact Us</span>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* MAIN CONTENT */}
-      <div className="relative flex-1 flex flex-col pt-24 pb-24 items-center overflow-hidden">
-        {/* Background Decor */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-100/50 rounded-full blur-[120px] -z-10" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-100/50 rounded-full blur-[120px] -z-10" />
-
-        <div className="max-w-[1240px] w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12">
-          
-          {/* LEFT: INFO CARD */}
-          <motion.div 
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="lg:col-span-5 bg-[#0F172A] rounded-[2rem] p-10 lg:p-14 text-white shadow-2xl relative overflow-hidden group"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 blur-3xl rounded-full group-hover:bg-blue-500/40 transition-colors duration-700" />
-            
-            <div className="relative z-10">
-              <span className="bg-blue-500/10 text-blue-400 text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-lg border border-blue-500/20">
-                Contact Info
-              </span>
-              <h2 className="text-4xl font-bold mt-8 mb-6 leading-tight">
-                Ready to elevate your <span className="text-blue-400">digital presence?</span>
-              </h2>
-              <p className="text-gray-400 leading-relaxed mb-12">
-                We don't just answer emails. We start partnerships. Drop us a line and let's create something extraordinary.
-              </p>
-
-              <div className="space-y-8">
-                {[
-                  { icon: Phone, label: "Call Us", val: "+1 (123) 456 7890" },
-                  { icon: Mail, label: "Email Us", val: "hello@buildora.com" },
-                  { icon: MapPin, label: "Visit Us", val: "7164 Barton Terrace, North Penelope, VT" }
-                ].map((item, i) => (
-                  <motion.div 
-                    key={i}
-                    whileHover={{ x: 10 }}
-                    className="flex items-start gap-5 group/item"
-                  >
-                    <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover/item:bg-blue-600 transition-colors">
-                      <item.icon className="w-5 h-5 text-blue-400 group-hover/item:text-white" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{item.label}</p>
-                      <p className="text-lg font-medium text-gray-200">{item.val}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-
-          {/* RIGHT: FORM */}
-          <motion.div 
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="lg:col-span-7 bg-white rounded-[2rem] p-10 lg:p-14 shadow-xl shadow-gray-200/50 border border-gray-100"
-          >
-            <div className="mb-10">
-              <h3 className="text-3xl font-bold text-gray-900 mb-2">Send a Message</h3>
-              <p className="text-gray-500">Response time: Usually within 2 hours.</p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InputField label="First Name" type="text" placeholder="John" />
-                <InputField label="Last Name" type="text" placeholder="Doe" />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InputField label="Email Address" type="email" placeholder="john@example.com" />
-                <InputField label="Phone Number" type="tel" placeholder="+1..." />
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700 ml-1">Your Message</label>
-                <textarea
-                  rows={4}
-                  placeholder="Tell us about your project..."
-                  className="w-full border-2 border-gray-50 rounded-2xl px-6 py-4 text-sm outline-none focus:border-blue-400 focus:bg-white transition-all bg-gray-50/50 resize-none"
-                />
-              </div>
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                disabled={isSubmitting || isSent}
-                className={`w-full py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg ${
-                  isSent 
-                    ? "bg-green-500 text-white" 
-                    : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200"
-                }`}
-              >
-                <AnimatePresence mode="wait">
-                  {isSubmitting ? (
-                    <motion.div
-                      key="loader"
-                      animate={{ rotate: 360 }}
-                      transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                      className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-                    />
-                  ) : isSent ? (
-                    <motion.div key="sent" initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-2">
-                      <CheckCircle2 className="w-5 h-5" /> Message Sent!
-                    </motion.div>
-                  ) : (
-                    <motion.div key="default" className="flex items-center gap-2">
-                      <Send className="w-4 h-4" /> Send Message
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.button>
-            </form>
-          </motion.div>
-
+      <section className="relative pt-32 md:pt-48 pb-32 px-6 overflow-hidden">
+        {/* Animated Background Orbs */}
+        <div className="absolute inset-0 pointer-events-none">
+          <motion.div
+            animate={{ 
+              scale: [1, 1.2, 1],
+              opacity: [0.1, 0.2, 0.1],
+              x: [0, 50, 0],
+              y: [0, -30, 0]
+            }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            className={cn("absolute -top-20 -right-20 w-[600px] h-[600px] rounded-full blur-[120px]", isDark ? "bg-blue-600/20" : "bg-blue-400/20")}
+          />
         </div>
-      </div>
 
-      <Footer />
-    </section>
-  );
-}
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center mb-20">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-blue-500 font-bold text-5xl md:text-7xl tracking-tighter uppercase mb-6"
+            >
+              Get in touch
+            </motion.div>
+            
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className={cn("text-xl md:text-2xl max-w-2xl mx-auto leading-relaxed", isDark ? "text-slate-400" : "text-slate-600")}
+            >
+              Have a question or a project in mind? Our team is ready to help you turn your vision into reality.
+            </motion.p>
+          </div>
 
-interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
-}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+            {/* LEFT: INFO & CONTACT CARDS */}
+            <div className="lg:col-span-5 space-y-8">
+              {contactMethods.map((method, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ x: 10 }}
+                  className={cn(
+                    "p-8 rounded-[2.5rem] border transition-all duration-300",
+                    isDark 
+                      ? "bg-slate-900/50 border-white/5 hover:border-blue-500/30 hover:bg-slate-900/80 shadow-2xl shadow-black/20" 
+                      : "bg-white border-slate-200 hover:border-blue-500/30 hover:shadow-xl shadow-lg shadow-slate-200/50"
+                  )}
+                >
+                  <div className={cn(
+                    "w-14 h-14 rounded-2xl flex items-center justify-center mb-6",
+                    isDark ? "bg-blue-500/10 text-blue-400" : "bg-blue-50 text-blue-600"
+                  )}>
+                    {method.icon}
+                  </div>
+                  <h3 className={cn("text-2xl font-black mb-2", isDark ? "text-white" : "text-slate-900")}>{method.title}</h3>
+                  <p className={cn("text-lg font-bold mb-2", isDark ? "text-blue-400" : "text-blue-600")}>{method.value}</p>
+                  <p className={cn("font-medium", isDark ? "text-slate-400" : "text-slate-500")}>{method.description}</p>
+                </motion.div>
+              ))}
 
-// Reusable Input Component for cleaner code
-function InputField({ label, ...props }: InputFieldProps) {
-  return (
-    <div className="space-y-2">
-      <label className="text-sm font-bold text-gray-700 ml-1">{label}</label>
-      <input
-        {...props}
-        className="w-full border-2 border-gray-50 rounded-2xl px-6 py-4 text-sm outline-none focus:border-blue-400 focus:bg-white transition-all bg-gray-50/50"
-      />
-    </div>
+
+            </div>
+
+            {/* RIGHT: CONTACT FORM */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className={cn(
+                "lg:col-span-7 p-10 md:p-16 rounded-[4rem] border relative overflow-hidden",
+                isDark 
+                  ? "bg-slate-900/40 border-white/5 backdrop-blur-3xl shadow-2xl" 
+                  : "bg-white border-slate-200 shadow-2xl"
+              )}
+            >
+              <div className="absolute top-0 right-0 p-12 opacity-5">
+                <MessageSquare className="w-64 h-64 text-blue-500" />
+              </div>
+
+              <div className="relative z-10 mb-12">
+                <h2 className={cn("text-4xl md:text-5xl font-black mb-4", isDark ? "text-white" : "text-slate-900")}>Send a Message</h2>
+                <div className="flex items-center gap-4 text-sm font-bold">
+                  <div className="flex items-center gap-1.5 text-green-500">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    Fast Response
+                  </div>
+                  <div className={cn("h-4 w-px", isDark ? "bg-slate-700" : "bg-slate-200")} />
+                  <div className={isDark ? "text-slate-400" : "text-slate-500"}>Typically responds in 2 hours</div>
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmit} className="relative z-10 space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-3">
+                    <label className={cn("text-sm font-black uppercase tracking-widest ml-1", isDark ? "text-slate-500" : "text-slate-400")}>Full Name</label>
+                    <input 
+                      type="text" 
+                      placeholder="John Doe" 
+                      value={formData.name}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                      required
+                      disabled={isSubmitting}
+                      className={cn(
+                        "w-full h-16 px-8 rounded-2xl border-2 outline-none transition-all font-bold text-lg",
+                        isDark 
+                          ? "bg-slate-950/50 border-white/5 focus:border-blue-500/50 text-white placeholder:text-slate-700" 
+                          : "bg-slate-50 border-transparent focus:border-blue-500 text-slate-900 placeholder:text-slate-300"
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <label className={cn("text-sm font-black uppercase tracking-widest ml-1", isDark ? "text-slate-500" : "text-slate-400")}>Email Address</label>
+                    <input 
+                      type="email" 
+                      placeholder="john@example.com" 
+                      value={formData.email}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                      required
+                      disabled={isSubmitting}
+                      className={cn(
+                        "w-full h-16 px-8 rounded-2xl border-2 outline-none transition-all font-bold text-lg",
+                        isDark 
+                          ? "bg-slate-950/50 border-white/5 focus:border-blue-500/50 text-white placeholder:text-slate-700" 
+                          : "bg-slate-50 border-transparent focus:border-blue-500 text-slate-900 placeholder:text-slate-300"
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className={cn("text-sm font-black uppercase tracking-widest ml-1", isDark ? "text-slate-500" : "text-slate-400")}>How can we help?</label>
+                  <select 
+                    value={formData.subject}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, subject: e.target.value }))}
+                    disabled={isSubmitting}
+                    className={cn(
+                      "w-full h-16 px-8 rounded-2xl border-2 outline-none transition-all font-bold text-lg appearance-none",
+                      isDark 
+                        ? "bg-slate-950/50 border-white/5 focus:border-blue-500/50 text-white" 
+                        : "bg-slate-50 border-transparent focus:border-blue-500 text-slate-900"
+                    )}
+                  >
+                    <option>General Inquiry</option>
+                    <option>Technical Support</option>
+                    <option>Partnership</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+
+                <div className="space-y-3">
+                  <label className={cn("text-sm font-black uppercase tracking-widest ml-1", isDark ? "text-slate-500" : "text-slate-400")}>Message</label>
+                  <textarea 
+                    rows={6}
+                    placeholder="Tell us about your project..." 
+                    value={formData.message}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
+                    required
+                    disabled={isSubmitting}
+                    className={cn(
+                      "w-full p-8 rounded-3xl border-2 outline-none transition-all font-bold text-lg resize-none",
+                      isDark 
+                        ? "bg-slate-950/50 border-white/5 focus:border-blue-500/50 text-white placeholder:text-slate-700" 
+                        : "bg-slate-50 border-transparent focus:border-blue-500 text-slate-900 placeholder:text-slate-300"
+                    )}
+                  />
+                </div>
+
+                {submitError && (
+                  <p className={cn("text-sm font-semibold", isDark ? "text-rose-400" : "text-rose-600")}>
+                    {submitError}
+                  </p>
+                )}
+
+                <motion.button
+                  type="submit"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  disabled={isSubmitting || isSent}
+                  className={cn(
+                    "w-full h-20 rounded-3xl font-black text-xl flex items-center justify-center gap-3 transition-all relative overflow-hidden group/button-contact shadow-2xl",
+                    isSent 
+                      ? "bg-green-500 text-white" 
+                      : (isDark ? "bg-white text-slate-950 hover:bg-blue-50" : "bg-slate-900 text-white hover:bg-blue-600")
+                  )}
+                >
+                  <AnimatePresence mode="wait">
+                    {isSubmitting ? (
+                      <motion.div
+                        key="submitting"
+                        animate={{ rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                        className="w-6 h-6 border-4 border-slate-950/20 border-t-slate-950 rounded-full"
+                      />
+                    ) : isSent ? (
+                      <motion.span key="sent" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex items-center gap-2">
+                        <CheckCircle2 className="w-6 h-6" /> Message Sent
+                      </motion.span>
+                    ) : (
+                      <motion.span key="default" className="flex items-center gap-2">
+                        Send Message <ArrowRight className="w-6 h-6 group-hover/button-contact:translate-x-1 transition-transform" />
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+              </form>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      <Footer isDark={isDark} />
+    </main>
   );
 }

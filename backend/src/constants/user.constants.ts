@@ -6,6 +6,17 @@ export const SELECT_USER_FIELDS = {
     name: true,
     role: true,
     isVerified: true,
+    isActive: true,
+    deleted_at: true,
+    created_at: true,
+    lastLoginAt: true,
+    institution_id: true,
+    institution: {
+        select: {
+            id: true,
+            name: true
+        }
+    }
 } satisfies Prisma.UserSelect;
 
 // 30 days in milliseconds

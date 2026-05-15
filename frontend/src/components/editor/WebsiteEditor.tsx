@@ -1,35 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { BuilderProvider } from "@/contexts/BuilderContext";
+import { useParams } from "react-router-dom";
+import { BuilderProvider, useBuilder } from "@/contexts/BuilderContext";
+import useBuilderStore from '@/store/useBuilderStore';
+import { useIsMobile } from "@/hooks/use-mobile";
 import { EditorToolbar } from "./EditorToolbar";
 import { SectionsList } from "./SectionsList";
 import { PageManager } from "./PageManager";
 import { SiteSettings } from "./SiteSettings";
 import { CanvasPreview } from "./CanvasPreview";
 import { PropertiesPanel } from "./PropertiesPanel";
-import { TextColorPicker } from "./TextColorPicker";
+import { TextFormattingToolbar } from "./TextFormattingToolbar";
+import { GuidedTour } from "./GuidedTour";
+import { AssetLibraryPanel } from "./AssetLibraryPanel";
+import { DesignSystemPanel } from "./DesignSystemPanel";
+import { VersionHistoryPanel } from "./VersionHistoryPanel";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import {
   Layers,
   FileText,
-  Globe,
   Plus,
   Settings,
-  Palette,
-  Search,
   Sliders,
   Rocket,
   Link,
   Download,
   AlertCircle,
+  Image as ImageIcon,
+  Wand2,
+  Edit,
+  History
 } from "lucide-react";
-import useBuilderStore from "@/store/useBuilderStore";
 import {
   Tooltip,
   TooltipContent,
@@ -38,19 +42,18 @@ import {
 } from "@/components/ui/tooltip";
 
 function EditorContent() {
-  const [theme, setTheme] = useState("light");
   const [leftNavTab, setLeftNavTab] = useState("add"); // 'add', 'layers', 'pages', 'settings', 'edit'
-  const { editor, activeWebsiteId } = useBuilderStore();
+  const store = useBuilderStore();
+  const { editor, setTourState, activeWebsiteId } = store;
   const { id } = useParams();
+  const isMobile = useIsMobile();
 
+  // On mobile, collapse the left panel by default
   useEffect(() => {
-    const root = document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
+    if (isMobile) {
+      store.setEditorState({ showLeftPanel: false });
     }
-  }, [theme]);
+  }, [isMobile]);
 
   // Auto-switch to edit tab when a section or component is selected
   useEffect(() => {
@@ -59,23 +62,36 @@ function EditorContent() {
     }
   }, [editor.selectedSectionId, editor.selectedComponentId]);
 
-  const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
-
   const navItems = [
-    { id: "add", icon: Plus, label: "Add Elements" },
+    { id: "add", icon: Plus, label: "Sections" },
     { id: "layers", icon: Layers, label: "Layers" },
     { id: "pages", icon: FileText, label: "Pages" },
-    { id: "edit", icon: Sliders, label: "Edit Properties" },
-    // { id: 'settings', icon: Settings, label: 'Site Settings' },
-  ];
+    { id: "assets", icon: ImageIcon, label: "Assets" },
+    { id: "design", icon: Wand2, label: "Design System" },
+    { id: "edit", icon: Edit, label: "Edit" },  { id: "history", icon: History, label: "Version History" },  ];
 
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden font-sans">
-      <EditorToolbar theme={theme} onToggleTheme={toggleTheme} websiteId={activeWebsiteId || id} />
-      <TextColorPicker />
-      <div className="flex-1 min-h-0">
+      <EditorToolbar 
+        websiteId={activeWebsiteId || id} 
+        onTabChange={setLeftNavTab}
+      />
+      <TextFormattingToolbar />
+      <GuidedTour />
+
+      {/* Debug: Test Tour Button */}
+      {!editor.tour.isActive && (
+        <button
+          onClick={() => setTourState({ isActive: true, step: 0, isFinished: false })}
+          className="fixed bottom-4 right-4 z-50 w-12 h-12 flex items-center justify-center bg-sky-400 text-white rounded-full shadow-lg hover:bg-sky-500 transition-colors"
+        >
+          ?
+        </button>
+      )}
+
+      <div className={`flex-1 min-h-0 transition-all duration-500 ${editor.tour.isActive ? 'pointer-events-none opacity-90' : ''}`}>
         <ResizablePanelGroup direction="horizontal" className="h-full">
-          {editor.showLeftPanel && (
+          {!editor.previewMode && editor.showLeftPanel && (
             <>
               <ResizablePanel
                 defaultSize={22}
@@ -90,11 +106,13 @@ function EditorContent() {
                       <Tooltip key={item.id}>
                         <TooltipTrigger asChild>
                           <button
+                            id={`tour-nav-${item.id}`}
                             onClick={() => setLeftNavTab(item.id)}
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${leftNavTab === item.id
-                              ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105"
-                              : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/50"
-                              }`}
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${
+                              leftNavTab === item.id
+                                ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105"
+                                : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/50"
+                            }`}
                           >
                             <item.icon className="w-5 h-5" />
                           </button>
@@ -116,12 +134,13 @@ function EditorContent() {
                           <button
                             onClick={() => setLeftNavTab("settings")}
                             className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all
-                                          ${leftNavTab === "settings"
-                                ? "bg-blue-500 text-white shadow-md"
-                                : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/50"
-                              }
+                                          ${
+                                            leftNavTab === "settings"
+                                              ? "bg-blue-500 text-white shadow-md"
+                                              : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/50"
+                                          }
                                         `}
-                          >
+                                                          >
                             <Settings className="w-5 h-5" />
                           </button>
                         </TooltipTrigger>
@@ -141,9 +160,12 @@ function EditorContent() {
                   <div className="h-full overflow-hidden">
                     {leftNavTab === "add" && <SectionsList view="add" />}
                     {leftNavTab === "layers" && <SectionsList view="layers" />}
+                    {leftNavTab === "assets" && <AssetLibraryPanel />}
+                    {leftNavTab === "design" && <DesignSystemPanel />}
                     {leftNavTab === "pages" && <PageManager />}
                     {leftNavTab === "edit" && <PropertiesPanel />}
                     {leftNavTab === "settings" && <SiteSettings />}
+                    {leftNavTab === "history" && <VersionHistoryPanel />}
                   </div>
                 </div>
               </ResizablePanel>
@@ -155,21 +177,9 @@ function EditorContent() {
             className="bg-slate-100/30 p-4 lg:p-6 overflow-hidden flex flex-col relative"
           >
             <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px] opacity-40 pointer-events-none"></div>
-            <CanvasPreview />
+              <CanvasPreview />
           </ResizablePanel>
-          {!editor.previewMode && editor.showRightPanel && (
-            <>
-              <ResizableHandle className="w-1 bg-slate-100 hover:bg-primary/30 transition-all border-l border-slate-200" />
-              <ResizablePanel
-                defaultSize={25}
-                minSize={20}
-                maxSize={35}
-                className="bg-white border-l border-slate-200 shadow-sm"
-              >
-                <PropertiesPanel />
-              </ResizablePanel>
-            </>
-          )}
+          {/* Right panel disabled — PropertiesPanel is already available via the Edit tab in the left sidebar */}
         </ResizablePanelGroup>
       </div>
     </div>
@@ -178,28 +188,16 @@ function EditorContent() {
 
 export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const { selectWebsite, activeWebsiteId, createWebsite, websites } = useBuilderStore();
+  const store = useBuilderStore();
+  const { selectWebsite, activeWebsiteId } = store;
 
   useEffect(() => {
     if (id) {
-      // Check if website exists before trying to select it
-      const websiteExists = websites.some(w => w.id === id);
-      if (!websiteExists) {
-        // Redirect to dashboard if website doesn't exist
-        navigate('/dashboard');
-        return;
-      }
       selectWebsite(id);
-    } else if (initialPage) {
-      // If we're on a static demo page, create/select the initial data
-      const newId = createWebsite(initialPage.name || "Preview", initialPage.id);
-      selectWebsite(newId);
     }
-  }, [id, initialPage, selectWebsite, createWebsite, websites, navigate]);
+  }, [id, selectWebsite]);
 
-  // Show loading state only if we're actively loading a valid website
-  if (!activeWebsiteId && id && websites.some(w => w.id === id)) {
+  if (!activeWebsiteId && id) {
     return (
       <div className="h-screen flex items-center justify-center bg-slate-50">
         <div className="flex flex-col items-center gap-4">
@@ -210,25 +208,8 @@ export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
     );
   }
 
-  // Show error state if website doesn't exist
-  if (!activeWebsiteId && id) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-slate-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-            <AlertCircle className="w-6 h-6 text-red-600" />
-          </div>
-          <p className="text-slate-600 font-medium">Website not found</p>
-          <Button onClick={() => navigate('/dashboard')}>
-            Go to Dashboard
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <BuilderProvider>
+    <BuilderProvider initialPage={initialPage}>
       <EditorContent />
     </BuilderProvider>
   );

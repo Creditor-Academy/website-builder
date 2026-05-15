@@ -2,7 +2,7 @@ import React from 'react';
 import { useBuilder } from '@/contexts/BuilderContext';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Eye, EyeOff, Copy, Trash2, Layout, Sparkles, Grid3X3, Image, MessageSquare, BarChart2, Users, HelpCircle, Building2, DollarSign, Mail, Quote, MoreVertical, Info } from 'lucide-react';
+import { GripVertical, Eye, EyeOff, Copy, Trash2, Layout, Sparkles, Grid3X3, Image, MessageSquare, BarChart2, Users, HelpCircle, Building2, DollarSign, Mail, Quote, MoreVertical, Info, FileText, Columns } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 

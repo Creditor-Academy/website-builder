@@ -1,53 +1,81 @@
-import React, { useState } from 'react';
-import { Search, Upload, X, Check, Image as ImageIcon, Video, File, Folder, MoreVertical, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useEffect, useState, useRef } from 'react';
+import { Search, Upload, Check, Image as ImageIcon, Video, Link as LinkIcon, Monitor } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import useBuilderStore from '@/store/useBuilderStore';
 
-const INITIAL_MEDIA = [
-    { id: '1', name: 'Coffee Shop', url: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80', type: 'image' },
-    { id: '2', name: 'Modern Office', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80', type: 'image' },
-    { id: '3', name: 'Team Meeting', url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&q=80', type: 'image' },
-    { id: '4', name: 'Startup Laptop', url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&q=80', type: 'image' },
-    { id: '5', name: 'Abstract Art', url: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=400&q=80', type: 'image' },
-    { id: '6', name: 'Nature Background', url: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&q=80', type: 'image' },
-];
+interface MediaLibraryProps {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    onSelect: (urls: string[]) => void;
+}
 
-export function MediaLibrary({ open, onOpenChange, onSelect }) {
+export function MediaLibrary({ open, onOpenChange, onSelect }: MediaLibraryProps) {
+    const { activeWebsiteId, fetchAssets, getScopedAssets, uploadAsset, importAssetFromUrl } = useBuilderStore();
+    useEffect(() => {
+        if (open && activeWebsiteId) {
+            void fetchAssets({ websiteId: activeWebsiteId });
+        }
+    }, [activeWebsiteId, open, fetchAssets]);
+
     const [search, setSearch] = useState('');
-    const [selectedId, setSelectedId] = useState(null);
-    const [media, setMedia] = useState(INITIAL_MEDIA);
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
+    const [urlInput, setUrlInput] = useState('');
+    const [urlName, setUrlName] = useState('');
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const assets = activeWebsiteId ? getScopedAssets(activeWebsiteId) : [];
 
-    const filteredMedia = media.filter(item =>
+    const filteredMedia = assets.filter(item =>
         item.name.toLowerCase().includes(search.toLowerCase())
     );
 
-    const handleSelect = (item) => {
-        setSelectedId(item.id);
-        if (onSelect) onSelect(item.url);
-        onOpenChange(false);
+    const handleSelect = (itemId: string) => {
+        setSelectedIds(prev => 
+            prev.includes(itemId) 
+                ? prev.filter(id => id !== itemId) 
+                : [...prev, itemId]
+        );
     };
 
-    const handleUpload = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            // In a real app, you'd upload to S3/Cloudinary here
-            // For now, we'll just create a local URL
-            const url = URL.createObjectURL(file);
-            const newItem = {
-                id: Math.random().toString(36).substr(2, 9),
-                name: file.name,
-                url,
-                type: file.type.startsWith('video') ? 'video' : 'image'
-            };
-            setMedia([newItem, ...media]);
+    const handleConfirmSelect = () => {
+        const selectedUrls = assets
+            .filter(asset => selectedIds.includes(asset.id))
+            .map(asset => asset.url);
+        
+        if (selectedUrls.length > 0) {
+            onSelect(selectedUrls);
+            onOpenChange(false);
+            setSelectedIds([]); // Reset selection for next time
+        }
+    };
+
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file && activeWebsiteId) {
+            await uploadAsset(file, { websiteId: activeWebsiteId });
+            if (e.target) e.target.value = '';
+        }
+    };
+
+    const handleUrlUpload = async () => {
+        if (urlInput && activeWebsiteId) {
+            await importAssetFromUrl(urlName || 'Imported Asset', urlInput, { websiteId: activeWebsiteId });
+            setUrlInput('');
+            setUrlName('');
+            setIsUrlDialogOpen(false);
         }
     };
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={open} onOpenChange={(val) => {
+            onOpenChange(val);
+            if (!val) setSelectedIds([]); // Reset on close
+        }}>
             <DialogContent className="max-w-4xl h-[80vh] flex flex-col p-0 gap-0 overflow-hidden">
                 <DialogHeader className="p-6 border-b">
                     <div className="flex justify-between items-center">
@@ -67,12 +95,28 @@ export function MediaLibrary({ open, onOpenChange, onSelect }) {
                             />
                         </div>
                         <div className="flex items-center gap-2">
-                            <label className="cursor-pointer">
-                                <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary/90 transition-colors">
-                                    <Upload className="w-4 h-4" /> Upload
-                                </span>
-                                <input type="file" className="hidden" onChange={handleUpload} accept="image/*,video/*" />
-                            </label>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button className="gap-2">
+                                        <Upload className="w-4 h-4" /> Upload
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                    <DropdownMenuItem className="cursor-pointer gap-2" onSelect={() => fileInputRef.current?.click()}>
+                                        <Monitor className="w-4 h-4" /> From Disk
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="cursor-pointer gap-2" onSelect={() => setIsUrlDialogOpen(true)}>
+                                        <LinkIcon className="w-4 h-4" /> From URL
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                             <input
+                                ref={fileInputRef}
+                                type="file"
+                                className="hidden"
+                                onChange={handleUpload}
+                                accept="image/*,video/*"
+                            />
                         </div>
                     </div>
 
@@ -94,33 +138,116 @@ export function MediaLibrary({ open, onOpenChange, onSelect }) {
                                     </div>
                                 ) : (
                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                        {filteredMedia.map((item) => (
-                                            <div
-                                                key={item.id}
-                                                className={`group relative aspect-square rounded-lg border-2 overflow-hidden cursor-pointer transition-all ${selectedId === item.id ? 'border-primary shadow-md' : 'border-transparent hover:border-slate-200'
-                                                    }`}
-                                                onClick={() => handleSelect(item)}
-                                            >
-                                                {item.type === 'image' ? (
+                                        {filteredMedia.map((item) => {
+                                            const isSelected = selectedIds.includes(item.id);
+                                            return (
+                                                <div
+                                                    key={item.id}
+                                                    className={`group relative aspect-square rounded-lg border-2 overflow-hidden cursor-pointer transition-all ${isSelected ? 'border-primary shadow-md' : 'border-transparent hover:border-slate-200'
+                                                        }`}
+                                                    onClick={() => handleSelect(item.id)}
+                                                >
+                                                    {item.type === 'image' ? (
+                                                        <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-slate-900 flex items-center justify-center">
+                                                            <Video className="w-8 h-8 text-white/50" />
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                        <span className="text-white text-xs font-medium px-2 py-1 bg-black/60 rounded">
+                                                            {isSelected ? 'Deselect' : 'Select'}
+                                                        </span>
+                                                    </div>
+                                                    {isSelected && (
+                                                        <div className="absolute top-2 right-2 w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center shadow-lg transform scale-110">
+                                                            <Check className="w-3 h-3" />
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
+                                                        <p className="text-[10px] text-white truncate font-medium">{item.name}</p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </TabsContent>
+
+                            <TabsContent value="images" className="mt-0 outline-none">
+                                {filteredMedia.filter(m => m.type === 'image').length === 0 ? (
+                                    <div className="h-64 flex flex-col items-center justify-center text-slate-400">
+                                        <ImageIcon className="w-12 h-12 mb-4 opacity-20" />
+                                        <p>No images found</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                        {filteredMedia.filter(m => m.type === 'image').map((item) => {
+                                            const isSelected = selectedIds.includes(item.id);
+                                            return (
+                                                <div
+                                                    key={item.id}
+                                                    className={`group relative aspect-square rounded-lg border-2 overflow-hidden cursor-pointer transition-all ${isSelected ? 'border-primary shadow-md' : 'border-transparent hover:border-slate-200'
+                                                        }`}
+                                                    onClick={() => handleSelect(item.id)}
+                                                >
                                                     <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
-                                                ) : (
+                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                        <span className="text-white text-xs font-medium px-2 py-1 bg-black/60 rounded">
+                                                            {isSelected ? 'Deselect' : 'Select'}
+                                                        </span>
+                                                    </div>
+                                                    {isSelected && (
+                                                        <div className="absolute top-2 right-2 w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center shadow-lg transform scale-110">
+                                                            <Check className="w-3 h-3" />
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
+                                                        <p className="text-[10px] text-white truncate font-medium">{item.name}</p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </TabsContent>
+
+                            <TabsContent value="videos" className="mt-0 outline-none">
+                                {filteredMedia.filter(m => m.type === 'video').length === 0 ? (
+                                    <div className="h-64 flex flex-col items-center justify-center text-slate-400">
+                                        <Video className="w-12 h-12 mb-4 opacity-20" />
+                                        <p>No videos found</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                        {filteredMedia.filter(m => m.type === 'video').map((item) => {
+                                            const isSelected = selectedIds.includes(item.id);
+                                            return (
+                                                <div
+                                                    key={item.id}
+                                                    className={`group relative aspect-square rounded-lg border-2 overflow-hidden cursor-pointer transition-all ${isSelected ? 'border-primary shadow-md' : 'border-transparent hover:border-slate-200'
+                                                        }`}
+                                                    onClick={() => handleSelect(item.id)}
+                                                >
                                                     <div className="w-full h-full bg-slate-900 flex items-center justify-center">
                                                         <Video className="w-8 h-8 text-white/50" />
                                                     </div>
-                                                )}
-                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                    <span className="text-white text-xs font-medium px-2 py-1 bg-black/60 rounded">Select</span>
-                                                </div>
-                                                {selectedId === item.id && (
-                                                    <div className="absolute top-2 right-2 w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center">
-                                                        <Check className="w-3 h-3" />
+                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                        <span className="text-white text-xs font-medium px-2 py-1 bg-black/60 rounded">
+                                                            {isSelected ? 'Deselect' : 'Select'}
+                                                        </span>
                                                     </div>
-                                                )}
-                                                <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
-                                                    <p className="text-[10px] text-white truncate font-medium">{item.name}</p>
+                                                    {isSelected && (
+                                                        <div className="absolute top-2 right-2 w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center shadow-lg transform scale-110">
+                                                            <Check className="w-3 h-3" />
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
+                                                        <p className="text-[10px] text-white truncate font-medium">{item.name}</p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </TabsContent>
@@ -130,9 +257,48 @@ export function MediaLibrary({ open, onOpenChange, onSelect }) {
 
                 <div className="p-4 border-t bg-white flex justify-end gap-3">
                     <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-                    <Button disabled={!selectedId} onClick={() => onOpenChange(false)}>Insert into site</Button>
+                    <Button 
+                        disabled={selectedIds.length === 0} 
+                        onClick={handleConfirmSelect}
+                        className="bg-primary hover:bg-primary/90 text-white px-8"
+                    >
+                        Insert into site ({selectedIds.length})
+                    </Button>
                 </div>
             </DialogContent>
+
+            {/* URL Upload Dialog */}
+            <Dialog open={isUrlDialogOpen} onOpenChange={setIsUrlDialogOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Import via URL</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                            <label htmlFor="url-name" className="text-sm font-medium">Asset Name</label>
+                            <Input
+                                id="url-name"
+                                placeholder="E.g. Logo, Banner Image..."
+                                value={urlName}
+                                onChange={(e) => setUrlName(e.target.value)}
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <label htmlFor="url" className="text-sm font-medium">Image or Video URL</label>
+                            <Input
+                                id="url"
+                                placeholder="https://example.com/image.png"
+                                value={urlInput}
+                                onChange={(e) => setUrlInput(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsUrlDialogOpen(false)}>Cancel</Button>
+                        <Button onClick={handleUrlUpload} disabled={!urlInput}>Import Asset</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </Dialog>
     );
 }
