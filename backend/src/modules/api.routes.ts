@@ -11,8 +11,34 @@ import formsRoutes from './forms/forms.routes.js';
 import analyticsRoutes from './analytics/analytics.routes.js';
 import deploymentsRoutes from './deployments/deployments.routes.js';
 import domainRoutes from './domain/domain.routes.js';
+import { doubleCsrfProtection, generateToken, invalidCsrfTokenError } from '../middlewares/csrf.middleware.js';
 
 const router = Router();
+
+// Provide CSRF token to frontend
+router.get('/csrf-token', (req, res) => {
+    return res.json({ token: generateToken(req, res) });
+});
+
+// Conditionally apply CSRF protection
+router.use((req, res, next) => {
+    // Endpoints called by published websites bypass CSRF
+    const bypassPaths = ['/analytics/track', '/forms/submit'];
+    if (bypassPaths.some(p => req.path.startsWith(p))) {
+        return next();
+    }
+    
+    // Apply CSRF protection for all other API paths
+    doubleCsrfProtection(req, res, (err) => {
+        if (err) {
+            if (err === invalidCsrfTokenError) {
+                return res.status(403).json({ error: 'invalid csrf token' });
+            }
+            return next(err);
+        }
+        next();
+    });
+});
 
 // Register all module routes here
 router.use('/auth', authRoutes);

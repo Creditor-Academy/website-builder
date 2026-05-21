@@ -8,6 +8,36 @@ const apiClient = axios.create({
   withCredentials: true,
 });
 
+let csrfToken = null;
+let csrfTokenPromise = null;
+
+export const fetchCsrfToken = async () => {
+  if (csrfToken) return csrfToken;
+  if (!csrfTokenPromise) {
+    csrfTokenPromise = axios.get(`${API_BASE_URL}/csrf-token`, { withCredentials: true })
+      .then(res => {
+        csrfToken = res.data.token;
+        return csrfToken;
+      })
+      .catch(err => {
+        console.error('Failed to fetch CSRF token', err);
+        return null;
+      });
+  }
+  return csrfTokenPromise;
+};
+
+apiClient.interceptors.request.use(async (config) => {
+  const method = config.method?.toLowerCase();
+  if (method && ['post', 'put', 'patch', 'delete'].includes(method)) {
+    const token = await fetchCsrfToken();
+    if (token) {
+      config.headers['x-csrf-token'] = token;
+    }
+  }
+  return config;
+});
+
 let isRefreshing = false;
 let failedQueue = [];
 

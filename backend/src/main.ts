@@ -43,7 +43,7 @@ app.use(requestId);
 app.use(metricsMiddleware);
 app.use(pinoHttp({
   logger,
-  autoLogging: { ignore: (req: any) => req.url === '/api/v1/health' },
+  autoLogging: false,
   genReqId: (req: any) => req.id,
 }));
 
