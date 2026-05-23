@@ -1,13 +1,11 @@
 import type { Request, Response, NextFunction } from 'express';
 import path from 'path';
-import fs from 'fs/promises';
 import prismaClient from '../config/prisma.js';
 import cacheService from '../services/cache.service.js';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { getS3Client } from '../config/s3-client.js';
 import { Readable } from 'stream';
 
-const SITES_ROOT = path.resolve(process.cwd(), 'storage', 'sites');
 const SITE_HOST = process.env.PUBLIC_SITE_HOST || 'buildora.app';
 
 /**
@@ -64,7 +62,7 @@ export const domainRouter = async (req: Request, res: Response, next: NextFuncti
         if (host.endsWith(`.${SITE_HOST}`)) {
           const subdomain = host.replace(`.${SITE_HOST}`, '');
           const subdomainRecord = await prismaClient.domain.findUnique({
-            where: { domain: host },
+            where: { domain: subdomain },
             select: { website_id: true, status: true },
           });
           if (subdomainRecord && subdomainRecord.status === 'ACTIVE') {
@@ -86,10 +84,12 @@ export const domainRouter = async (req: Request, res: Response, next: NextFuncti
     let s3Key = `sites/${websiteId}/latest${reqPath}`;
     
     // Normalize path based on extension
+    let fallbackS3Key: string | null = null;
     if (reqPath.endsWith('/')) {
       s3Key = `sites/${websiteId}/latest${reqPath}index.html`;
     } else if (!path.extname(reqPath)) {
-      s3Key = `sites/${websiteId}/latest${reqPath}/index.html`;
+      s3Key = `sites/${websiteId}/latest${reqPath}.html`;
+      fallbackS3Key = `sites/${websiteId}/latest${reqPath}/index.html`;
     }
 
     const s3 = getS3Client();
@@ -100,10 +100,23 @@ export const domainRouter = async (req: Request, res: Response, next: NextFuncti
     }
 
     try {
-      const s3Object = await s3.send(new GetObjectCommand({
-        Bucket: bucket,
-        Key: s3Key,
-      }));
+      let s3Object;
+      try {
+        s3Object = await s3.send(new GetObjectCommand({
+          Bucket: bucket,
+          Key: s3Key,
+        }));
+      } catch (err: any) {
+        if (fallbackS3Key && (err.name === 'NoSuchKey' || err.$metadata?.httpStatusCode === 404)) {
+          s3Key = fallbackS3Key;
+          s3Object = await s3.send(new GetObjectCommand({
+            Bucket: bucket,
+            Key: s3Key,
+          }));
+        } else {
+          throw err;
+        }
+      }
 
       const contentType = s3Object.ContentType || getContentType(s3Key);
       res.setHeader('Content-Type', contentType);
@@ -119,7 +132,12 @@ export const domainRouter = async (req: Request, res: Response, next: NextFuncti
 
       // Stream the body directly to Express response
       if (s3Object.Body) {
-        return (s3Object.Body as Readable).pipe(res);
+        const stream = s3Object.Body as Readable;
+        stream.on('error', (err) => {
+          console.error('[domain-router] S3 Stream Error:', err);
+          if (!res.headersSent) res.status(500).end();
+        });
+        return stream.pipe(res);
       }
       return res.status(404).send('Page not found');
     } catch (err: any) {
@@ -134,7 +152,12 @@ export const domainRouter = async (req: Request, res: Response, next: NextFuncti
           res.setHeader('Content-Type', 'text/html; charset=utf-8');
           
           if (s3NotFound.Body) {
-            return (s3NotFound.Body as Readable).pipe(res);
+            const stream404 = s3NotFound.Body as Readable;
+            stream404.on('error', (err) => {
+              console.error('[domain-router] S3 404 Stream Error:', err);
+              if (!res.headersSent) res.status(500).end();
+            });
+            return stream404.pipe(res);
           }
         } catch {
           return res.status(404).send('Page not found');
