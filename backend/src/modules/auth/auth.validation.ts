@@ -52,7 +52,7 @@ export const emailVerificationSchema = z.object({
 
 // Google auth schema
 export const googleAuthSchema = z.object({
-  token: z.string().min(1, 'Google access token is required'),
+  idToken: z.string().min(1, 'Google ID token is required'),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
