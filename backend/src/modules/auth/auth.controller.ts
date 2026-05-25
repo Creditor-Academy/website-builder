@@ -116,8 +116,8 @@ class AuthController {
 
   googleAuth = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { idToken } = req.validated.body;
-      const result = await this.authService.googleAuth(idToken);
+      const { token } = req.validated.body;
+      const result = await this.authService.googleAuth(token);
 
       res.cookie('accessToken', result.accessToken, {
         ...COOKIE_OPTIONS,

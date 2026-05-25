@@ -20,13 +20,17 @@ router.post('/submit',
   controller.submitForm
 );
 
-// GET /forms/websites/:id — List submissions for a website
-router.get('/websites/:id',
+// GET /forms/submissions — List all submissions for a user (can filter by websiteId)
+router.get('/submissions',
   authenticate,
-  validateRequest(websiteIdParamsSchema, 'params'),
   validateRequest(getSubmissionsQuerySchema, 'query'),
-  requireWebsiteOwnership,
-  controller.getWebsiteSubmissions
+  controller.getUserSubmissions
+);
+
+// GET /forms/stats — Get submission stats
+router.get('/stats',
+  authenticate,
+  controller.getUserStats
 );
 
 // PATCH /forms/:id/read — Mark submission as read

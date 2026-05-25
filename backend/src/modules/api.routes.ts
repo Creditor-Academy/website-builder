@@ -22,8 +22,8 @@ router.get('/csrf-token', (req, res) => {
 
 // Conditionally apply CSRF protection
 router.use((req, res, next) => {
-    // Endpoints called by published websites bypass CSRF
-    const bypassPaths = ['/analytics/track', '/forms/submit'];
+    // Endpoints called by published websites and auth endpoints bypass CSRF
+    const bypassPaths = ['/analytics/track', '/forms/submit', '/auth/login', '/auth/register', '/auth/google', '/auth/forgot-password', '/auth/reset-password'];
     if (bypassPaths.some(p => req.path.startsWith(p))) {
         return next();
     }
@@ -32,6 +32,9 @@ router.use((req, res, next) => {
     doubleCsrfProtection(req, res, (err) => {
         if (err) {
             if (err === invalidCsrfTokenError) {
+                console.error('[CSRF Error] Path:', req.path);
+                console.error('[CSRF Error] Headers x-csrf-token:', req.headers['x-csrf-token']);
+                console.error('[CSRF Error] Cookies:', req.cookies);
                 return res.status(403).json({ error: 'invalid csrf token' });
             }
             return next(err);

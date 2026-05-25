@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Eye, LayoutTemplate } from "lucide-react";
 import loginbg from "../assets/login.png";
+import { useGoogleLogin } from "@react-oauth/google";
 import { loginUser, registerUser, forgotPassword, googleLogin } from "../api/auth";
 
 // ── Moved outside so React never sees a new component type on re-render ────────
@@ -359,17 +360,29 @@ export default function LoginSignup() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    if (!clientId) {
-      setLoginError("Google login is not configured.");
-      return;
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setLoginError("");
+      try {
+        setIsLoadingLogin(true);
+        const res = await googleLogin(tokenResponse.access_token);
+        
+        // Save user session
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+        
+        // Google auth doesn't have a "Remember me" option technically, 
+        // but we can just set it to skip login next time
+        localStorage.setItem("rememberMe", "true");
+        
+        navigate("/dashboard");
+      } catch (err: any) {
+        console.error(err);
+        setLoginError(err.response?.data?.message || err.response?.data?.error || "Google login failed.");
+      } finally {
+        setIsLoadingLogin(false);
+      }
     }
-    const redirectUri = window.location.origin + '/auth/google/callback';
-    const scope = 'openid email profile';
-    const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${encodeURIComponent(scope)}&prompt=select_account`;
-    window.location.href = url;
-  };
+  });
 
   const handleForgotPassword = async () => {
     setForgotError("");

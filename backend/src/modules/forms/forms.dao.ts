@@ -20,10 +20,11 @@ export class FormsDao {
     return prismaClient.formSubmission.create({ data });
   }
 
-  async getSubmissions(websiteId: string, options: { skip: number; take: number; is_read?: boolean; is_spam?: boolean }) {
-    const where: any = { website_id: websiteId };
+  async getUserSubmissions(userId: string, options: { skip: number; take: number; is_read?: boolean; is_spam?: boolean; websiteId?: string }) {
+    const where: any = { website: { owner_id: userId } };
     if (options.is_read !== undefined) where.is_read = options.is_read;
     if (options.is_spam !== undefined) where.is_spam = options.is_spam;
+    if (options.websiteId) where.website_id = options.websiteId;
 
     const [submissions, total] = await Promise.all([
       prismaClient.formSubmission.findMany({
@@ -31,11 +32,22 @@ export class FormsDao {
         orderBy: { created_at: 'desc' },
         skip: options.skip,
         take: options.take,
+        include: { website: { select: { id: true, name: true } } },
       }),
       prismaClient.formSubmission.count({ where }),
     ]);
 
     return { submissions, total };
+  }
+
+  async getUserStats(userId: string, websiteId?: string) {
+    const where: any = { website: { owner_id: userId } };
+    if (websiteId) where.website_id = websiteId;
+
+    const total = await prismaClient.formSubmission.count({ where });
+    const unread = await prismaClient.formSubmission.count({ where: { ...where, is_read: false } });
+    const read = await prismaClient.formSubmission.count({ where: { ...where, is_read: true } });
+    return { total, unread, read };
   }
 
   async markAsRead(submissionId: string) {

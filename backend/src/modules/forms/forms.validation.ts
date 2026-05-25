@@ -12,6 +12,7 @@ export const getSubmissionsQuerySchema = z.object({
   limit: z.string().optional(),
   is_read: z.enum(['true', 'false']).optional(),
   is_spam: z.enum(['true', 'false']).optional(),
+  websiteId: z.string().optional(),
 });
 
 export const formIdParamsSchema = z.object({

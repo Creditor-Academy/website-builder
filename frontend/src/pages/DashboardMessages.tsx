@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from "@/components/ui/use-toast";
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import contactApi from '@/api/contact';
+import formsApi from '@/api/forms';
 import websiteApi from '@/api/website';
 
 export default function DashboardMessages() {
@@ -51,8 +51,8 @@ export default function DashboardMessages() {
                 limit: 50
             };
             const [messagesRes, statsRes] = await Promise.all([
-                contactApi.getContactSubmissions(params),
-                contactApi.getContactStats({ websiteId: params.websiteId })
+                formsApi.getUserSubmissions(params),
+                formsApi.getStats({ websiteId: params.websiteId })
             ]);
 
             setMessages(messagesRes.data?.data || []);
@@ -94,7 +94,7 @@ export default function DashboardMessages() {
 
     const handleMarkAsRead = async (messageId: string) => {
         try {
-            await contactApi.updateContactSubmission(messageId, { status: 'read' });
+            await formsApi.markAsRead(messageId);
             setMessages(prev => 
                 prev.map(msg => 
                     msg.id === messageId ? { ...msg, status: 'read' } : msg
@@ -116,7 +116,7 @@ export default function DashboardMessages() {
 
     const handleDelete = async (messageId: string) => {
         try {
-            await contactApi.deleteContactSubmission(messageId);
+            await formsApi.deleteSubmission(messageId);
             setMessages(prev => prev.filter(msg => msg.id !== messageId));
             const deletedMessage = messages.find(msg => msg.id === messageId);
             if (deletedMessage) {

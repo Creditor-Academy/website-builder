@@ -568,19 +568,22 @@ class AuthService {
 
 
 
-  async googleAuth(idToken: string) {
+  async googleAuth(token: string) {
     try {
-      // Securely verify Google OAuth ID token using Google's tokeninfo endpoint
-      const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
+      // Securely verify Google OAuth token using Google's tokeninfo endpoint
+      const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?access_token=${token}`);
       
       if (!response.ok) {
-        throw new UnauthorizedError('Invalid Google ID token');
+        throw new UnauthorizedError('Invalid Google token');
       }
       
       const googlePayload = await response.json();
+      console.log("Google Payload:", googlePayload);
+      console.log("Backend expected client ID:", process.env.GOOGLE_CLIENT_ID);
 
       // Verify audience matches your app's Client ID to prevent Cross-App impersonation attacks
       if (googlePayload.aud !== process.env.GOOGLE_CLIENT_ID) {
+        console.error("Audience mismatch:", googlePayload.aud, "!==", process.env.GOOGLE_CLIENT_ID);
         throw new UnauthorizedError('Token was not issued for this application');
       }
 
@@ -685,10 +688,12 @@ class AuthService {
 
       };
 
-    } catch (error) {
-
+    } catch (error: any) {
+      console.error("Google Auth Catch Error:", error);
+      if (error.statusCode) {
+        throw error;
+      }
       throw new UnauthorizedError('Google authentication failed');
-
     }
 
   }

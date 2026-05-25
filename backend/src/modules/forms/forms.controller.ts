@@ -21,13 +21,13 @@ export class FormsController {
     }
   };
 
-  getWebsiteSubmissions = async (req: Request, res: Response, next: NextFunction) => {
+  getUserSubmissions = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.context.user.id;
-      const websiteId = req.validated.params.id;
+      const websiteId = req.validated.query.websiteId as string | undefined;
       
       const page = Math.max(1, parseInt(req.validated.query.page as string) || 1);
-      const limit = Math.min(100, Math.max(1, parseInt(req.validated.query.limit as string) || 20));
+      const limit = Math.min(100, Math.max(1, parseInt(req.validated.query.limit as string) || 50));
       
       let isRead: boolean | undefined = undefined;
       if (req.validated.query.is_read === 'true') isRead = true;
@@ -37,8 +37,20 @@ export class FormsController {
       if (req.validated.query.is_spam === 'true') isSpam = true;
       if (req.validated.query.is_spam === 'false') isSpam = false;
 
-      const result = await this.formsService.getWebsiteSubmissions(userId, websiteId, page, limit, isRead, isSpam);
+      const result = await this.formsService.getUserSubmissions(userId, page, limit, isRead, isSpam, websiteId);
       res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getUserStats = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.context.user.id;
+      const websiteId = req.query.websiteId as string | undefined;
+
+      const stats = await this.formsService.getUserStats(userId, websiteId);
+      res.json({ data: stats });
     } catch (error) {
       next(error);
     }

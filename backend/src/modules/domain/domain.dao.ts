@@ -54,17 +54,19 @@ class DomainDao {
         dns_records?: Prisma.InputJsonValue;
         acm_certificate_arn?: string;
     }) {
+        const createPayload: Prisma.DomainUncheckedCreateInput = {
+            website_id: data.website_id,
+            domain: data.domain,
+            type: data.type,
+            status: data.status ?? 'PENDING',
+            is_primary: data.is_primary ?? false,
+            ssl_enabled: data.ssl_enabled ?? false,
+        };
+        if (data.dns_records !== undefined) createPayload.dns_records = data.dns_records;
+        if (data.acm_certificate_arn !== undefined) createPayload.acm_certificate_arn = data.acm_certificate_arn;
+
         return prismaClient.domain.create({
-            data: stripUndefined({
-                website_id: data.website_id,
-                domain: data.domain,
-                type: data.type,
-                status: data.status ?? 'PENDING',
-                is_primary: data.is_primary ?? false,
-                ssl_enabled: data.ssl_enabled ?? false,
-                dns_records: data.dns_records,
-                acm_certificate_arn: data.acm_certificate_arn,
-            }),
+            data: createPayload,
         });
     }
 

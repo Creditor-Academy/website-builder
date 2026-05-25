@@ -55,19 +55,33 @@ export class FormsService {
     return submission;
   }
 
-  async getWebsiteSubmissions(userId: string, websiteId: string, page: number, limit: number, isRead?: boolean, isSpam?: boolean) {
-    // We could use the website ownership middleware in the routes to ensure the user owns the site.
-    // For safety, let's also check here or assume the controller passed the right data.
-    // Since we just need the submissions, let's fetch them:
+  async getUserSubmissions(userId: string, page: number, limit: number, isRead?: boolean, isSpam?: boolean, websiteId?: string) {
     const skip = (page - 1) * limit;
-    const options: { skip: number, take: number, is_read?: boolean, is_spam?: boolean } = { skip, take: limit };
+    const options: { skip: number, take: number, is_read?: boolean, is_spam?: boolean, websiteId?: string } = { skip, take: limit };
     if (isRead !== undefined) options.is_read = isRead;
     if (isSpam !== undefined) options.is_spam = isSpam;
+    if (websiteId) options.websiteId = websiteId;
 
-    const { submissions, total } = await this.formsDao.getSubmissions(websiteId, options);
+    const { submissions, total } = await this.formsDao.getUserSubmissions(userId, options);
 
     return {
-      submissions,
+      data: submissions.map(sub => {
+        // Map the submission fields to match what DashboardMessages expects (name, email, subject, message from JSON data)
+        const d: any = sub.data || {};
+        return {
+          id: sub.id,
+          website_id: sub.website_id,
+          website: sub.website,
+          form_name: sub.form_name,
+          name: d.name || d.firstName || 'Anonymous',
+          email: d.email || '',
+          subject: d.subject || '',
+          message: d.message || '',
+          status: sub.is_read ? 'read' : 'unread',
+          createdAt: sub.created_at,
+          ...d
+        };
+      }),
       pagination: {
         page,
         limit,
@@ -75,6 +89,10 @@ export class FormsService {
         totalPages: Math.ceil(total / limit)
       }
     };
+  }
+
+  async getUserStats(userId: string, websiteId?: string) {
+    return this.formsDao.getUserStats(userId, websiteId);
   }
 
   async markAsRead(userId: string, submissionId: string) {
