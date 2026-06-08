@@ -611,34 +611,32 @@ docker compose up --build -d
 
 ### ✅ Implemented
 
-- Full auth flow (register, login, logout, password reset, email verification, refresh tokens)
+- Full auth flow (register, login, logout, password reset, email verification, refresh tokens, Google OAuth integration)
 - Website CRUD with multi-tenant scoping
 - Website publishing pipeline (static site generation → S3 upload)
 - Template management (website + section templates)
-- Asset upload to S3
+- Unified asset management API (upload to S3, gallery fetch)
 - Deployment tracking with rollback
-- Domain management (add, remove, verify)
+- Domain management (custom domain verification, subdomain routing via AWS CloudFront/ACM)
 - Basic analytics tracking (page views)
-- Contact form submissions
+- Dynamic Form submission handling (published websites → backend → dashboard inbox)
 - Dashboard statistics
 - Rate limiting (Redis-based)
 - Structured logging (Pino)
 - Health check endpoint
 - Docker deployment
+- CSRF protection (double submit cookie pattern)
+- Image optimization pipeline (Sharp integration for S3 uploads)
 
 ### 🚧 Partially Implemented
 
-- Email service (Resend SDK installed, basic integration)
-- Google OAuth (started, incomplete)
+- Email service (Resend SDK installed, welcome emails and basic transactional emails integrated)
 - Audit logging (model exists, no service layer)
-- Form submission handling (routes exist, needs completion)
 
 ### ❌ Not Yet Implemented
 
 - CI/CD pipeline (GitHub Actions file exists but not tested)
 - Automated test suite (placeholder only)
-- CSRF protection
-- Image optimization pipeline
 - Webhook/integration support
 - Blog post management
 - Real-time collaboration

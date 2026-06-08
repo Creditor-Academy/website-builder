@@ -80,9 +80,12 @@ app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ limit: '5mb', extended: true }))
 app.use(cookieParser());
 
-// Allow any origin for the analytics tracking endpoint (called from published sites)
+// Allow any origin for endpoints called from published sites (analytics, forms)
 app.options('/api/v1/analytics/track', cors());
 app.use('/api/v1/analytics/track', cors());
+
+app.options('/api/v1/forms/submit', cors());
+app.use('/api/v1/forms/submit', cors());
 
 // ─── Domain Routing (custom domains & subdomains → published sites) ──────────
 app.use(domainRouter);
