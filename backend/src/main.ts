@@ -13,6 +13,7 @@ import { metricsMiddleware, metricsHandler } from './middlewares/metrics.middlew
 import { domainRouter } from './middlewares/domain-router.middleware.js';
 import prismaClient from './config/prisma.js';
 import path from 'path';
+import { initCron } from './modules/cron.js';
 
 // ─── Environment Validation ─────────────────────────────────────────────────
 const requiredEnvVars = ['JWT_SECRET', 'POSTGRESQL_URL'] as const;
@@ -34,6 +35,7 @@ export const logger = pino({
 const app = express();
 
 await initRedis();
+initCron();
 
 // ─── Security & Performance Middleware ───────────────────────────────────────
 app.set('trust proxy', 1);

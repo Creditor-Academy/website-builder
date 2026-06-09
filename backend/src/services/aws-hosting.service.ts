@@ -324,6 +324,19 @@ export const deleteDistribution = async (distributionId: string): Promise<void> 
             logger.info({ distributionId }, 'CloudFront distribution disabled — deletion will be completed by cleanup cron');
             // Note: Actual deletion requires waiting for the distribution to be fully disabled (Deployed status)
             // which can take 10-20 minutes. The cleanup cron should handle the actual DeleteDistributionCommand.
+            return;
+        }
+
+        // Step 3: If already disabled, check status and delete
+        const status = getResult.Distribution?.Status;
+        if (!config.Enabled && status === 'Deployed') {
+            await cf.send(new DeleteDistributionCommand({
+                Id: distributionId,
+                IfMatch: etag,
+            }));
+            logger.info({ distributionId }, 'CloudFront distribution permanently deleted');
+        } else {
+            logger.info({ distributionId, status }, 'CloudFront distribution is disabling. Waiting for Deployed status to delete.');
         }
     } catch (err: any) {
         if (err.name === 'NoSuchDistribution') {

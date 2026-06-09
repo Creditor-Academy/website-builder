@@ -667,6 +667,10 @@ docker compose up --build -d
 
 10. **Class-based controllers**: Controllers are classes (not plain functions). Methods use arrow functions to preserve `this` binding.
 
+11. **Local Development CORS & CSRF**: When developing locally, Chrome treats `localhost:8080` (frontend) and `localhost:5000` (backend) as cross-origin, which blocks `SameSite=Lax` cookies on POST requests. To fix this, `frontend/vite.config.ts` proxies `/api` to `localhost:5000`, and `VITE_API_BASE_URL` is set to `/api/v1` so the browser treats it as same-origin.
+
+12. **S3 Static Website Hosting & CORS**: Published sites (hosted on S3) make requests back to the API. Endpoints like `/api/v1/forms/submit` must have global CORS enabled (`app.use(cors())` for that specific route) to accept submissions from any published domain. Additionally, to avoid S3 `AccessDenied` XML errors on missing pages or subpaths without `.html`, always configure S3 buckets for **Static Website Hosting** and use the website endpoint (`s3-website-us-east-1.amazonaws.com`) instead of the REST API endpoint.
+
 ---
 
 ## Testing
