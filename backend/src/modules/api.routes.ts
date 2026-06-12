@@ -16,6 +16,10 @@ import { doubleCsrfProtection, generateToken, invalidCsrfTokenError } from '../m
 
 const router = Router();
 
+// Apply a baseline global rate limit to all API routes
+import { rateLimiting } from '../middlewares/rate-limiting.middleware.js';
+router.use(rateLimiting('GLOBAL', { LIMIT: 150, WINDOW_SEC: 60 }));
+
 // Provide CSRF token to frontend
 router.get('/csrf-token', (req, res) => {
     return res.json({ token: generateToken(req, res) });
