@@ -17,9 +17,9 @@ app.use(cookieParser());
 // We import the real routes so validation, controllers, services are all exercised.
 // If the DB / Redis are not available the tests will fail — that's intentional:
 // these are integration tests.
-import apiRoutes from '../modules/api.routes.js';
-import { errorHandler } from '../middlewares/error.middleware.js';
-import { initRedis } from '../config/redis-client.js';
+import apiRoutes from '../../modules/api.routes.js';
+import { errorHandler } from '../../middlewares/error.middleware.js';
+import { initRedis } from '../../config/redis-client.js';
 
 app.use('/api/v1', apiRoutes);
 app.use(errorHandler);

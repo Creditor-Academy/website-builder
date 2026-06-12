@@ -5,7 +5,6 @@ import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getS3Client } from '../config/s3-client.js';
 import { generateStaticSite } from './static-site-generator.js';
 import prisma from '../config/prisma.js';
-import { logger } from '../main.js';
 
 export type DeploymentStatus = 'pending' | 'building' | 'uploading' | 'active' | 'failed' | 'rolled_back';
 
@@ -92,9 +91,9 @@ export const deploy = async (input: DeployInput): Promise<DeploymentRecord> => {
   const addLog = (message: string, isError = false) => {
     logs.push(`[${new Date().toISOString()}] [${isError ? 'ERROR' : 'INFO'}] ${message}`);
     if (isError) {
-      logger.error({ deploymentId, websiteId: input.websiteId }, message);
+      console.error(JSON.stringify({ deploymentId, websiteId: input.websiteId, message }));
     } else {
-      logger.info({ deploymentId, websiteId: input.websiteId }, message);
+      console.log(JSON.stringify({ deploymentId, websiteId: input.websiteId, message }));
     }
   };
 

@@ -4,9 +4,9 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import { randomUUID } from 'node:crypto';
 
-import apiRoutes from '../modules/api.routes.js';
-import { errorHandler } from '../middlewares/error.middleware.js';
-import { initRedis } from '../config/redis-client.js';
+import apiRoutes from '../../modules/api.routes.js';
+import { errorHandler } from '../../middlewares/error.middleware.js';
+import { initRedis } from '../../config/redis-client.js';
 
 const BASE = 'http://127.0.0.1';
 let baseUrl = '';
@@ -25,6 +25,7 @@ const TEST_USER = {
 };
 
 let cookies: string[] = [];
+let csrfToken: string = '';
 let websiteId = '';
 
 before(async () => {
@@ -48,7 +49,14 @@ before(async () => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: TEST_USER.email, password: TEST_USER.password }),
   });
-  cookies = loginRes.headers.getSetCookie();
+  cookies = loginRes.headers.getSetCookie().map(c => c.split(';')[0]!);
+
+  const csrfRes = await fetch(`${baseUrl}/api/v1/csrf-token`, {
+    headers: { Cookie: cookies.join('; ') },
+  });
+  const csrfBody = await csrfRes.json() as any;
+  csrfToken = csrfBody.token;
+  cookies.push(...csrfRes.headers.getSetCookie().map(c => c.split(';')[0]!));
 });
 
 after(async () => {
@@ -57,6 +65,7 @@ after(async () => {
 
 const authed = (extra?: Record<string, string>) => ({
   Cookie: cookies.join('; '),
+  'x-csrf-token': csrfToken,
   'Content-Type': 'application/json',
   ...extra,
 });
@@ -89,7 +98,8 @@ describe('Website API', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: 'Nope' }),
     });
-    assert.equal(res.status, 401);
+    // It returns 403 Forbidden because CSRF token is missing (CSRF runs before auth)
+    assert.equal(res.status, 403);
   });
 
   it('GET /websites — lists my websites', async () => {
