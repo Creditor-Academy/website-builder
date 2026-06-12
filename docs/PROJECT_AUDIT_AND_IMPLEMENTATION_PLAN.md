@@ -594,12 +594,12 @@ Priority: very high
 
 Tasks:
 
-1. Replace the current local manifest/file storage with cloud object storage.
-2. Add signed upload flow.
-3. Persist asset metadata in database.
-4. Add image optimization and thumbnail generation.
-5. Track asset ownership by website or workspace.
-6. Replace local-only dashboard asset behavior with persistent uploads and retrieval.
+- [x] Replace the current local manifest/file storage with cloud object storage.
+- [x] Add signed upload flow.
+- [x] Persist asset metadata in database.
+- [x] Add image optimization and thumbnail generation.
+- [x] Track asset ownership by website or workspace.
+- [x] Replace local-only dashboard asset behavior with persistent uploads and retrieval.
 
 Suggested stack:
 
