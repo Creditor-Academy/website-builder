@@ -703,3 +703,20 @@ import assert from 'node:assert';
 6. **Routes**: Create `modules/<name>/<name>.routes.ts` with route definitions
 7. **Register**: Add to `modules/api.routes.ts`
 8. **Test**: Add tests in the module or `__tests__/` directory
+9. **Graphify**: Update the codebase knowledge graph by running `graphify update .`
+
+---
+
+## Graphify Context & Maintenance
+
+This project uses **Graphify** to maintain a queryable AST-based codebase knowledge graph at `graphify-out/`.
+
+### Commands for AI Assistants & Developers
+- **Check Graph:** Before answering complex architectural questions, consult `graphify-out/GRAPH_REPORT.md` or query the graph using `graphify query "<question>"`.
+- **Shortest Path:** Find connections between components using `graphify path "<A>" "<B>"`.
+- **Explain Symbol:** Get a structural summary of a module using `graphify explain "<concept>"`.
+- **Incremental Update:** After modifying or creating files, you **MUST** run:
+  ```bash
+  graphify update .
+  ```
+  to keep `graphify-out/graph.json`, `graph.html`, and `GRAPH_REPORT.md` in sync.
