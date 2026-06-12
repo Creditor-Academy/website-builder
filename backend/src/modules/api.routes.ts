@@ -11,6 +11,7 @@ import formsRoutes from './forms/forms.routes.js';
 import analyticsRoutes from './analytics/analytics.routes.js';
 import deploymentsRoutes from './deployments/deployments.routes.js';
 import domainRoutes from './domain/domain.routes.js';
+import auditRoutes from './audit/audit.routes.js';
 import { doubleCsrfProtection, generateToken, invalidCsrfTokenError } from '../middlewares/csrf.middleware.js';
 
 const router = Router();
@@ -56,5 +57,6 @@ router.use('/forms', formsRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/deployments', deploymentsRoutes);
 router.use('/domains', domainRoutes);
+router.use('/audit', auditRoutes);
 
 export default router;

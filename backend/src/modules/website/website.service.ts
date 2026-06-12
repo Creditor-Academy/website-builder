@@ -1,4 +1,4 @@
-﻿import WebsiteDao from './website.dao.js';
+import WebsiteDao from './website.dao.js';
 import UserDao from '../user/user.dao.js';
 import templateDao from '../template/template.dao.js';
 import type { CreateWebsiteInput, DomainInput, ListWebsitesQuerySchema, PublishWebsiteInput, UpdateWebsiteInput, UpdateWebsiteSettingsInput } from './website.validation.js';
@@ -8,14 +8,17 @@ import { deploy } from '../../services/deployment.service.js';
 import { NotFoundError, BadRequestError, ConflictError } from '../../utils/error.utils.js';
 import prismaClient from '../../config/prisma.js';
 import cacheService from '../../services/cache.service.js';
+import AuditService from '../audit/audit.service.js';
 
 class WebsiteService {
     private websiteDao: WebsiteDao;
     private userDao: UserDao;
+    private auditService: AuditService;
 
     constructor() {
         this.websiteDao = new WebsiteDao();
         this.userDao = new UserDao();
+        this.auditService = new AuditService();
     }
 
     async createWebsite(userId: string, institutionId: string | null, data: CreateWebsiteInput) {
@@ -35,12 +38,22 @@ class WebsiteService {
             content = normalizeWebsiteContent(data.content);
         }
 
-        return await this.websiteDao.createWebsite(userId, { 
+        const createdWebsite = await this.websiteDao.createWebsite(userId, { 
             ...data,
             content,
             ...(sourceTemplateId ? { source_template_id: sourceTemplateId } : {}),
             institution_id: institutionId || undefined 
         } as any);
+
+        await this.auditService.logAction({
+            user_id: userId,
+            action: 'website.create',
+            entity_type: 'website',
+            entity_id: createdWebsite.id,
+            metadata: { name: createdWebsite.name, template_id: sourceTemplateId },
+        });
+
+        return createdWebsite;
     }
 
     async listWebsites(user: any, filters: ListWebsitesQuerySchema) {
@@ -109,7 +122,7 @@ class WebsiteService {
         return await this.websiteDao.updateWebsite(website.id, updateData);
     }
 
-    async deleteWebsite(website: Website) {
+    async deleteWebsite(website: Website, userId?: string) {
         if (website.status === WebsiteStatus.DELETED) {
             throw new ConflictError("Website Already Deleted");
         }
@@ -129,6 +142,13 @@ class WebsiteService {
                 await cacheService.del(`domain:${d.domain}`);
             }
         }
+
+        await this.auditService.logAction({
+            user_id: userId || null,
+            action: 'website.delete',
+            entity_type: 'website',
+            entity_id: website.id,
+        });
     }
 
     async restoreWebsite(website: Website) {
@@ -247,6 +267,14 @@ class WebsiteService {
                 is_primary: true,
                 ssl_enabled: isSubdomain,
             },
+        });
+
+        await this.auditService.logAction({
+            user_id: userId,
+            action: 'website.publish',
+            entity_type: 'website',
+            entity_id: website.id,
+            metadata: { domain: hostname },
         });
 
         return {

@@ -68,7 +68,8 @@ class WebsiteController {
     deleteWebsite = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const website = req.context.website!;
-            await this.websiteService.deleteWebsite(website);
+            const userId = req.context.user.id;
+            await this.websiteService.deleteWebsite(website, userId);
             return res.status(200).json({ message: 'Website deleted successfully' });
         } catch (error: any) {
             next(error);
