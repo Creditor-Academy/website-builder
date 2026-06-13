@@ -186,160 +186,26 @@ Assessment:
 - The dashboard looks broad, but not all panels are backed by real platform services.
 - Deployment and asset management are especially UI-heavy compared to backend reality.
 
-## 4. What Is Not Really Implemented Yet
+## 4. What Is Not Really Implemented Yet (Updated for current state)
 
-This section is the most important part of the audit.
+Most of the critical infrastructure missing in the original audit has now been implemented. The following subsystems have been successfully built:
 
-### 4.1 Real Publishing and Deployment
+- **Publishing and Deployment**: Static Site Generation (SSG), S3 upload pipelines, and Custom Domain integrations (ACM/CloudFront) are actively running.
+- **Asset Storage**: Persistent backend `Assets` module with `sharp` image optimization and S3 upload functionality.
+- **Forms & Contact**: Dynamic form and contact submission endpoints are wired, validated, and functioning.
+- **Analytics**: Basic `PageView` tracking is implemented with APIs serving daily views and top referrers.
 
-Not really implemented.
+### 4.1 Website Versioning and Rollbacks
 
-Evidence:
+Only partially implemented. The backend UI offers rollbacks, but `WebsiteVersion` table persistence is missing. Draft snapshots, diffing, and true lock strategies are planned but not executed.
 
-- The entire publish/domain service is explicitly mock-based in [frontend/src/services/publishService.ts](frontend/src/services/publishService.ts).
-- Deployment monitoring uses `initialDummyDeployments`, generated logs, and simulated rollback state in [frontend/src/components/dashboard/DeploymentMonitoring.tsx](frontend/src/components/dashboard/DeploymentMonitoring.tsx).
+### 4.2 Email Delivery
 
-What is missing:
+Resend is integrated and theoretically working. However, domain verification is required before transactional emails can be sent in production.
 
-- Public site renderer
-- Deployment job orchestration
-- Build pipeline for exported sites
-- Static asset hosting
-- CDN integration
-- Domain verification
-- SSL provisioning
-- Deployment history backed by database
-- Rollback backed by real versions
+### 4.3 Collaboration, Audit Logs, and Team Workflows
 
-Conclusion:
-
-- The product currently markets deployment features more than it actually delivers them.
-
-### 4.2 Real Asset Storage
-
-Not really implemented.
-
-Evidence:
-
-- Assets are stored in frontend Zustand state in [frontend/src/store/useBuilderStore.ts](frontend/src/store/useBuilderStore.ts).
-- The asset manager imports files into browser object URLs or external URLs in [frontend/src/pages/DashboardAssets.tsx](frontend/src/pages/DashboardAssets.tsx).
-- No backend asset module is registered in [backend/src/modules/api.routes.ts](backend/src/modules/api.routes.ts).
-
-What is missing:
-
-- Persistent upload API
-- S3, Cloudinary, R2, or equivalent storage
-- Image optimization pipeline
-- File metadata persistence
-- Access control for assets
-- Asset usage tracking
-
-Conclusion:
-
-- Current media management is a frontend convenience, not a real media platform.
-
-### 4.3 Website Versioning and Rollbacks
-
-Only partially implemented in naming, not in data architecture.
-
-Evidence:
-
-- The architecture document promises drafts, published versions, and rollback, but the Prisma schema has only `currentDraftVersionId` and `currentPublishedVersionId` fields on `Website` without an actual version model in [frontend/architecture.md](frontend/architecture.md) and [backend/prisma/schema.prisma](backend/prisma/schema.prisma).
-- No version entity or deployment entity exists in Prisma.
-
-What is missing:
-
-- `WebsiteVersion` table
-- Draft snapshots
-- Publish snapshots
-- Diffing
-- Rollback workflow
-- Editor lock strategy
-
-Conclusion:
-
-- Versioning is currently a planned concept, not a finished subsystem.
-
-### 4.4 Email Delivery
-
-Not really implemented.
-
-Evidence:
-
-- Email sending currently just logs to the console in [backend/src/services/email.service.ts](backend/src/services/email.service.ts).
-
-What is missing:
-
-- SMTP or transactional email provider integration
-- Delivery retries
-- bounce/error logging
-- email templates with tracking and localization
-
-Conclusion:
-
-- Password reset and verification flows exist logically, but not operationally.
-
-### 4.5 Forms, Leads, and Contact Submission Handling
-
-Not implemented.
-
-Evidence:
-
-- There is no meaningful backend form submission or lead capture path discovered in the backend module set.
-- Contact in website settings exists as JSON only in [backend/src/modules/website/website.validation.ts](backend/src/modules/website/website.validation.ts).
-
-What is missing:
-
-- Form submission API
-- spam prevention
-- storage for submissions
-- notifications
-- dashboard inbox or export
-- webhook forwarding
-
-Conclusion:
-
-- Sites can visually contain forms, but the platform does not yet behave like a site builder with lead collection.
-
-### 4.6 Real Analytics
-
-Only simplified counts are implemented.
-
-Evidence:
-
-- Stats only count users, organizations, and websites in [backend/src/modules/stats/stats.service.ts](backend/src/modules/stats/stats.service.ts).
-
-What is missing:
-
-- page views
-- unique visitors
-- referrers
-- device breakdown
-- conversion metrics
-- per-site analytics
-- uptime and incident monitoring
-
-Conclusion:
-
-- Current stats are admin counts, not website analytics.
-
-### 4.7 Collaboration, Audit Logs, and Team Workflows
-
-Not implemented.
-
-What is missing:
-
-- editor presence
-- locking or conflict handling
-- comments
-- mentions
-- activity stream
-- publish approvals
-- audit trail
-
-Conclusion:
-
-- This is still a single-editor product from a data model standpoint.
+Not implemented. The `AuditLog` table exists, but editor presence, locking, comments, and team activity streams are missing.
 
 ## 5. What Is Wrong in the Current Structure
 

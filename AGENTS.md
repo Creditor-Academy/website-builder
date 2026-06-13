@@ -632,14 +632,14 @@ docker compose up --build -d
 
 - Email service (Resend SDK installed, welcome emails and basic transactional emails integrated)
 - Audit logging (model exists, no service layer)
+- Website versioning (rollback UI exists, but snapshot DB models are missing)
 
 ### ❌ Not Yet Implemented
 
 - CI/CD pipeline (GitHub Actions file exists but not tested)
-- Automated test suite (placeholder only)
+- Real-time collaboration
 - Webhook/integration support
 - Blog post management
-- Real-time collaboration
 - E-commerce features
 - Accessibility checker
 
