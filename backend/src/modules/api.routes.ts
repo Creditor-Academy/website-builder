@@ -28,7 +28,7 @@ router.get('/csrf-token', (req, res) => {
 // Conditionally apply CSRF protection
 router.use((req, res, next) => {
     // Endpoints called by published websites and auth endpoints bypass CSRF
-    const bypassPaths = ['/analytics/track', '/forms/submit', '/auth/login', '/auth/register', '/auth/google', '/auth/forgot-password', '/auth/reset-password'];
+    const bypassPaths = ['/analytics/track', '/forms/submit', '/contact/submit', '/auth/login', '/auth/register', '/auth/google', '/auth/forgot-password', '/auth/reset-password'];
     if (bypassPaths.some(p => req.path.startsWith(p))) {
         return next();
     }
