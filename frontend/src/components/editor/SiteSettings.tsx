@@ -80,11 +80,20 @@ export function SiteSettings() {
         try {
             const res = await websiteApi.verifyDomain(domainId);
             const result = res.data;
-            setDomains(prev => prev.map((d: any) =>
-                d.id === domainId
-                    ? { ...d, status: result.verified ? 'active' : 'pending', dnsRecords: { ...d.dnsRecords, verified: result.verified } }
-                    : d
-            ));
+            setDomains(prev => prev.map((d: any) => {
+                if (d.id !== domainId) return d;
+                if (result.verified) {
+                    return result.domain || { ...d, status: 'ACTIVE', dns_records: { ...d.dns_records, verified: true } };
+                }
+                return { 
+                    ...d, 
+                    status: 'PENDING', 
+                    dns_records: { 
+                        ...d.dns_records, 
+                        validation: result.dnsValidationRecords || d.dns_records?.validation 
+                    } 
+                };
+            }));
             toast({
                 title: result.verified ? 'Domain verified!' : 'DNS not ready yet',
                 description: result.verified ? 'Your custom domain is now active.' : 'DNS records haven\'t propagated yet. This can take up to 48 hours.',
