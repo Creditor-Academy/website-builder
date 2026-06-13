@@ -55,7 +55,11 @@ export function SiteSettings() {
         }
         setIsConnecting(true);
         try {
-            const res = await websiteApi.addDomain(activeWebsite.id, domain);
+            const isSubdomain = domain.endsWith('.buildora.app');
+            const res = isSubdomain 
+                ? await websiteApi.addSubdomain(activeWebsite.id, domain.replace('.buildora.app', ''))
+                : await websiteApi.addDomain(activeWebsite.id, domain);
+            
             const newDomain = res.data?.domain || res.data;
             setDomains(prev => {
                 const filtered = prev.filter((d: any) => d.domain !== domain);
@@ -70,14 +74,14 @@ export function SiteSettings() {
         }
     }, [activeWebsite, customDomain, toast]);
 
-    const handleVerifyDomain = useCallback(async (domain: string) => {
+    const handleVerifyDomain = useCallback(async (domainId: string, domainName: string) => {
         if (!activeWebsite) return;
-        setIsVerifying(domain);
+        setIsVerifying(domainName);
         try {
-            const res = await websiteApi.verifyDomain(activeWebsite.id, domain);
+            const res = await websiteApi.verifyDomain(domainId);
             const result = res.data;
             setDomains(prev => prev.map((d: any) =>
-                d.domain === domain
+                d.id === domainId
                     ? { ...d, status: result.verified ? 'active' : 'pending', dnsRecords: { ...d.dnsRecords, verified: result.verified } }
                     : d
             ));
@@ -93,11 +97,11 @@ export function SiteSettings() {
         }
     }, [activeWebsite, toast]);
 
-    const handleRemoveDomain = useCallback(async (domain: string) => {
+    const handleRemoveDomain = useCallback(async (domainId: string) => {
         if (!activeWebsite) return;
         try {
-            await websiteApi.removeDomain(activeWebsite.id, domain);
-            setDomains(prev => prev.filter((d: any) => d.domain !== domain));
+            await websiteApi.removeDomain(domainId);
+            setDomains(prev => prev.filter((d: any) => d.id !== domainId));
             toast({ title: 'Domain removed' });
         } catch {
             toast({ title: 'Error', description: 'Failed to remove domain', variant: 'destructive' });
@@ -180,25 +184,25 @@ export function SiteSettings() {
                                         <div key={d.domain} className="p-3 bg-white rounded-xl border border-slate-200 space-y-2">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-2">
-                                                    {d.status === 'active' ? (
+                                                    {d.status === 'ACTIVE' ? (
                                                         <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
                                                     ) : (
                                                         <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
                                                     )}
                                                     <span className="text-xs font-semibold text-slate-800">{d.domain}</span>
                                                     <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                                                        d.status === 'active' ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'
+                                                        d.status === 'ACTIVE' ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'
                                                     }`}>
                                                         {d.status}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-1">
-                                                    {d.type === 'custom' && d.status !== 'active' && (
+                                                    {d.type === 'CUSTOM' && d.status !== 'ACTIVE' && (
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
                                                             className="h-7 w-7 p-0"
-                                                            onClick={() => handleVerifyDomain(d.domain)}
+                                                            onClick={() => handleVerifyDomain(d.id, d.domain)}
                                                             disabled={isVerifying === d.domain}
                                                         >
                                                             {isVerifying === d.domain ? (
@@ -212,7 +216,7 @@ export function SiteSettings() {
                                                         variant="ghost"
                                                         size="sm"
                                                         className="h-7 w-7 p-0 text-red-400 hover:text-red-600"
-                                                        onClick={() => handleRemoveDomain(d.domain)}
+                                                        onClick={() => handleRemoveDomain(d.id)}
                                                     >
                                                         <Trash2 className="w-3 h-3" />
                                                     </Button>
@@ -220,45 +224,40 @@ export function SiteSettings() {
                                             </div>
 
                                             {/* DNS Instructions for pending custom domains */}
-                                            {d.type === 'custom' && d.status !== 'active' && d.dnsRecords && (
+                                            {d.type === 'CUSTOM' && d.status !== 'ACTIVE' && d.dns_records?.validation && d.dns_records.validation.length > 0 && (
                                                 <div className="mt-2 p-2.5 bg-slate-50 rounded-lg border border-slate-100">
                                                     <p className="text-[10px] font-bold text-slate-600 mb-2">
                                                         Go to your domain registrar's DNS settings and add these records:
                                                     </p>
                                                     <div className="space-y-1.5">
-                                                        {d.dnsRecords.A && (
-                                                            <div className="flex items-center justify-between text-[10px]">
-                                                                <span className="text-slate-500">
-                                                                    <strong>A Record</strong> → <code className="bg-white px-1 py-0.5 rounded border text-slate-700">{d.dnsRecords.A}</code>
-                                                                </span>
-                                                                <Button variant="ghost" size="sm" className="h-5 w-5 p-0"
-                                                                    onClick={() => { navigator.clipboard.writeText(d.dnsRecords.A); toast({ title: 'Copied!' }); }}>
-                                                                    <Copy className="w-2.5 h-2.5" />
-                                                                </Button>
+                                                        {d.dns_records.validation.map((record: any, index: number) => (
+                                                            <div key={index} className="flex flex-col gap-1 text-[10px] border-b border-slate-200 pb-2 mb-2 last:border-0 last:pb-0 last:mb-0">
+                                                                <div className="flex items-center justify-between">
+                                                                    <span className="text-slate-500 w-12 flex-shrink-0"><strong>Type</strong></span>
+                                                                    <code className="bg-white px-1 py-0.5 rounded border text-slate-700 font-bold">{record.type}</code>
+                                                                </div>
+                                                                <div className="flex items-center justify-between group">
+                                                                    <span className="text-slate-500 w-12 flex-shrink-0"><strong>Name</strong></span>
+                                                                    <div className="flex items-center justify-end overflow-hidden">
+                                                                        <code className="bg-white px-1 py-0.5 rounded border text-slate-700 truncate mr-1 max-w-[150px]" title={record.name}>{record.name}</code>
+                                                                        <Button variant="ghost" size="sm" className="h-5 w-5 p-0 shrink-0"
+                                                                            onClick={() => { navigator.clipboard.writeText(record.name); toast({ title: 'Name Copied!' }); }}>
+                                                                            <Copy className="w-2.5 h-2.5" />
+                                                                        </Button>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex items-center justify-between group">
+                                                                    <span className="text-slate-500 w-12 flex-shrink-0"><strong>Value</strong></span>
+                                                                    <div className="flex items-center justify-end overflow-hidden">
+                                                                        <code className="bg-white px-1 py-0.5 rounded border text-slate-700 truncate mr-1 max-w-[150px]" title={record.value}>{record.value}</code>
+                                                                        <Button variant="ghost" size="sm" className="h-5 w-5 p-0 shrink-0"
+                                                                            onClick={() => { navigator.clipboard.writeText(record.value); toast({ title: 'Value Copied!' }); }}>
+                                                                            <Copy className="w-2.5 h-2.5" />
+                                                                        </Button>
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                        )}
-                                                        {d.dnsRecords.CNAME && (
-                                                            <div className="flex items-center justify-between text-[10px]">
-                                                                <span className="text-slate-500">
-                                                                    <strong>CNAME</strong> → <code className="bg-white px-1 py-0.5 rounded border text-slate-700">{d.dnsRecords.CNAME}</code>
-                                                                </span>
-                                                                <Button variant="ghost" size="sm" className="h-5 w-5 p-0"
-                                                                    onClick={() => { navigator.clipboard.writeText(d.dnsRecords.CNAME); toast({ title: 'Copied!' }); }}>
-                                                                    <Copy className="w-2.5 h-2.5" />
-                                                                </Button>
-                                                            </div>
-                                                        )}
-                                                        {d.dnsRecords.TXT?.[0] && (
-                                                            <div className="flex items-center justify-between text-[10px]">
-                                                                <span className="text-slate-500">
-                                                                    <strong>TXT</strong> → <code className="bg-white px-1 py-0.5 rounded border text-slate-700">{d.dnsRecords.TXT[0]}</code>
-                                                                </span>
-                                                                <Button variant="ghost" size="sm" className="h-5 w-5 p-0"
-                                                                    onClick={() => { navigator.clipboard.writeText(d.dnsRecords.TXT[0]); toast({ title: 'Copied!' }); }}>
-                                                                    <Copy className="w-2.5 h-2.5" />
-                                                                </Button>
-                                                            </div>
-                                                        )}
+                                                        ))}
                                                     </div>
                                                     <p className="text-[9px] text-slate-400 mt-2">
                                                         DNS propagation can take up to 48 hours. Click the refresh button above to check.

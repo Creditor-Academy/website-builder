@@ -6,8 +6,6 @@ import {
     createDistribution,
     deleteDistribution,
     deleteAcmCertificate,
-    updateKeyValueStore,
-    deleteKeyValueStoreEntry,
     createCacheInvalidation,
     isHostingConfigured,
 } from '../../services/aws-hosting.service.js';
@@ -66,12 +64,6 @@ class DomainService {
             ssl_enabled: true, // Covered by the wildcard *.buildora.app cert
         });
 
-        // Update CloudFront KeyValueStore for subdomain routing
-        try {
-            await updateKeyValueStore(data.slug, websiteId);
-        } catch (err) {
-            logger.error({ err, slug: data.slug, websiteId }, 'Failed to update CloudFront KVS — domain is saved but routing may not work');
-        }
 
         // Invalidate domain cache
         await cacheService.del(`domain:${hostname}`).catch(() => {});
@@ -227,16 +219,12 @@ class DomainService {
         if (domain.website_id !== websiteId) throw new NotFoundError('Domain not found');
 
         if (domain.type === 'SUBDOMAIN') {
-            // Remove KVS mapping
-            const slug = domain.domain.replace(`.${SITE_HOST()}`, '');
-            await deleteKeyValueStoreEntry(slug).catch(err => {
-                logger.error({ err, slug }, 'Failed to delete KVS entry');
-            });
             // Invalidate domain cache
             await cacheService.del(`domain:${domain.domain}`).catch(() => {});
             // Delete from database
             await this.domainDao.delete(domain.id);
-            logger.info({ domain: domain.domain, type: domain.type }, 'Domain removed');
+            logger.info({ websiteId, domain: domain.domain }, 'Subdomain removed');
+            return;
         } else if (domain.type === 'CUSTOM') {
             // Tear down CloudFront distribution (async — disabling takes time)
             if (domain.cloudfront_distribution_id) {

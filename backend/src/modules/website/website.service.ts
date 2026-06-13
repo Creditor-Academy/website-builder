@@ -3,7 +3,7 @@ import UserDao from '../user/user.dao.js';
 import templateDao from '../template/template.dao.js';
 import type { CreateWebsiteInput, DomainInput, ListWebsitesQuerySchema, PublishWebsiteInput, UpdateWebsiteInput, UpdateWebsiteSettingsInput } from './website.validation.js';
 import { WebsiteStatus, type Website } from '@prisma/client';
-import { addWebsiteDomain, createWebsiteContentFromTemplate, duplicateWebsiteContent, getWebsiteDomains, getWebsiteVersions, normalizeWebsiteContent, publishWebsiteContent, removeWebsiteDomain, verifyWebsiteDomain } from './website-content.utils.js';
+import { addWebsiteDomain, createWebsiteContentFromTemplate, duplicateWebsiteContent, getWebsiteDomains, getWebsiteVersions, normalizeWebsiteContent, publishWebsiteContent, removeWebsiteDomain } from './website-content.utils.js';
 import { deploy } from '../../services/deployment.service.js';
 import { NotFoundError, BadRequestError, ConflictError } from '../../utils/error.utils.js';
 import prismaClient from '../../config/prisma.js';
@@ -365,80 +365,7 @@ class WebsiteService {
         };
     }
 
-    async getDomains(website: Website) {
-        if (website.status === WebsiteStatus.DELETED) {
-            throw new BadRequestError('Website Deleted');
-        }
-        return getWebsiteDomains(website.content);
-    }
 
-    async addDomain(website: Website, data: DomainInput) {
-        if (website.status === WebsiteStatus.DELETED) {
-            throw new BadRequestError('Website Deleted');
-        }
-
-        const result = addWebsiteDomain(website.content, data.domain);
-        await this.websiteDao.updateWebsite(website.id, { content: result.content });
-
-        // Sync to Domain table for fast host-based lookups
-        const isSubdomain = result.domain.type === 'subdomain';
-        await prismaClient.domain.upsert({
-            where: { domain: data.domain },
-            update: {
-                website_id: website.id,
-                type: isSubdomain ? 'SUBDOMAIN' : 'CUSTOM',
-                status: isSubdomain ? 'ACTIVE' : 'PENDING',
-                is_primary: result.domain.primary || false,
-            },
-            create: {
-                website_id: website.id,
-                domain: data.domain,
-                type: isSubdomain ? 'SUBDOMAIN' : 'CUSTOM',
-                status: isSubdomain ? 'ACTIVE' : 'PENDING',
-                is_primary: result.domain.primary || false,
-            },
-        });
-
-        return result.domain;
-    }
-
-    async removeDomain(website: Website, data: DomainInput) {
-        if (website.status === WebsiteStatus.DELETED) {
-            throw new BadRequestError('Website Deleted');
-        }
-
-        const content = removeWebsiteDomain(website.content, data.domain);
-        await this.websiteDao.updateWebsite(website.id, { content });
-
-        // Remove from Domain table
-        await prismaClient.domain.deleteMany({ where: { domain: data.domain, website_id: website.id } });
-    }
-
-    async verifyDomain(website: Website, data: DomainInput) {
-        if (website.status === WebsiteStatus.DELETED) {
-            throw new BadRequestError('Website Deleted');
-        }
-
-        const result = await verifyWebsiteDomain(website.content, data.domain);
-        await this.websiteDao.updateWebsite(website.id, { content: result.content });
-
-        // Sync verification status to Domain table
-        if (result.domain) {
-            await prismaClient.domain.updateMany({
-                where: { domain: data.domain, website_id: website.id },
-                data: {
-                    status: result.domain.status === 'active' ? 'ACTIVE' : 'PENDING',
-                    ssl_enabled: result.domain.sslEnabled || false,
-                    verified_at: result.domain.status === 'active' ? new Date() : null,
-                },
-            });
-        }
-
-        return {
-            verified: Boolean(result.domain) && result.domain?.status === 'active',
-            dnsRecords: result.domain?.dnsRecords || {},
-        };
-    }
 
     async cleanupDeletedWebsites() {
         // Hard delete websites that were soft deleted more than 30 days ago
