@@ -132,7 +132,7 @@ export function AssetLibraryPanel() {
                                             className="group relative aspect-square rounded-xl border border-slate-100 overflow-hidden bg-slate-50 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
                                         >
                                             {item.type === 'image' ? (
-                                                <img src={item.url} alt={item.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                                <img src={item.url} alt={item.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                                             ) : (
                                                 <div className="w-full h-full bg-slate-900 flex items-center justify-center">
                                                     <Video className="w-6 h-6 text-white/50" />
@@ -181,7 +181,7 @@ export function AssetLibraryPanel() {
                                             key={item.id}
                                             className="group relative aspect-square rounded-xl border border-slate-100 overflow-hidden bg-slate-50 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
                                         >
-                                            <img src={item.url} alt={item.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                            <img src={item.url} alt={item.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-2">
                                                 <Button size="sm" variant="secondary" className="h-7 text-[10px] w-full font-bold shadow-lg" onClick={() => handleCopy(item.id, item.url)}>
                                                     {copiedId === item.id ? 'Copied!' : 'Copy Link'}

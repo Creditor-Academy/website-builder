@@ -72,26 +72,29 @@ class PublishService {
 
   async addDomain(websiteId: string, domain: string): Promise<DomainConfig> {
     try {
-      const response = await websiteApi.addDomain(websiteId, domain);
-      return response.data.domain;
+      const isSubdomain = domain.endsWith('.buildora.app');
+      const response = isSubdomain 
+        ? await websiteApi.addSubdomain(websiteId, domain.replace('.buildora.app', ''))
+        : await websiteApi.addDomain(websiteId, domain);
+      return response.data.domain || response.data;
     } catch (error) {
       console.error('Failed to add domain:', error);
       throw new Error('Failed to add domain');
     }
   }
 
-  async removeDomain(websiteId: string, domain: string): Promise<void> {
+  async removeDomain(domainId: string): Promise<void> {
     try {
-      await websiteApi.removeDomain(websiteId, domain);
+      await websiteApi.removeDomain(domainId);
     } catch (error) {
       console.error('Failed to remove domain:', error);
       throw new Error('Failed to remove domain');
     }
   }
 
-  async verifyDomain(websiteId: string, domain: string): Promise<{ verified: boolean; dnsRecords: any }> {
+  async verifyDomain(domainId: string): Promise<{ verified: boolean; dnsRecords: any }> {
     try {
-      const response = await websiteApi.verifyDomain(websiteId, domain);
+      const response = await websiteApi.verifyDomain(domainId);
       return response.data;
     } catch (error) {
       console.error('Domain verification failed:', error);

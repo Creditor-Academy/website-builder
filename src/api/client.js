@@ -8,6 +8,41 @@ const apiClient = axios.create({
   withCredentials: true,
 });
 
+let csrfToken = null;
+let csrfTokenPromise = null;
+
+export const fetchCsrfToken = async () => {
+  if (csrfToken) return csrfToken;
+  if (!csrfTokenPromise) {
+    csrfTokenPromise = axios.get(`${API_BASE_URL}/csrf-token`, { withCredentials: true })
+      .then(res => {
+        csrfToken = res.data.token;
+        return csrfToken;
+      })
+      .catch(err => {
+        console.error('Failed to fetch CSRF token', err);
+        return null;
+      });
+  }
+  return csrfTokenPromise;
+};
+
+export const clearCsrfToken = () => {
+  csrfToken = null;
+  csrfTokenPromise = null;
+};
+
+apiClient.interceptors.request.use(async (config) => {
+  const method = config.method?.toLowerCase();
+  if (method && ['post', 'put', 'patch', 'delete'].includes(method)) {
+    const token = await fetchCsrfToken();
+    if (token) {
+      config.headers['x-csrf-token'] = token;
+    }
+  }
+  return config;
+});
+
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -20,13 +55,19 @@ const processQueue = (error) => {
 };
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // If we just logged in or registered, clear the CSRF token so the next request fetches a new one bound to the new session
+    if (response.config.url?.includes('/auth/login') || response.config.url?.includes('/auth/register') || response.config.url?.includes('/auth/google')) {
+      clearCsrfToken();
+    }
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       // Don't retry refresh or login requests
-      if (originalRequest.url?.includes('/auth/refresh-token') || originalRequest.url?.includes('/auth/login')) {
+      if (originalRequest.url?.includes('/auth/refresh-token') || originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/google')) {
         localStorage.removeItem('user');
         const { pathname } = window.location;
         if (pathname !== '/login') {

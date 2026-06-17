@@ -37,6 +37,7 @@ const TermsOfService = React.lazy(() => import("./pages/TermsOfService"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 const GoogleCallback = React.lazy(() => import("./pages/GoogleCallback"));
 const DashboardMessages = React.lazy(() => import("./pages/DashboardMessages"));
+const DashboardAuditLogs = React.lazy(() => import("./pages/DashboardAuditLogs"));
 
 import { ScrollToTop } from "./components/utils/ScrollToTop";
 import { JumpToTop } from "./components/ui/JumpToTop";
@@ -72,6 +73,7 @@ const App = () => (
                 <Route path="deployment" element={<DashboardDeployment />} />
                 <Route path="assets" element={<DashboardAssets />} />
                 <Route path="messages" element={<DashboardMessages />} />
+                <Route path="audit" element={<DashboardAuditLogs />} />
                 <Route path="settings" element={<DashboardSettings />} />
               </Route>
               <Route path="/builder/:id" element={<WebsiteEditor />} />

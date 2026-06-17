@@ -148,7 +148,7 @@ export function MediaLibrary({ open, onOpenChange, onSelect }: MediaLibraryProps
                                                     onClick={() => handleSelect(item.id)}
                                                 >
                                                     {item.type === 'image' ? (
-                                                        <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
+                                                        <img src={item.url} alt={item.name} loading="lazy" className="w-full h-full object-cover" />
                                                     ) : (
                                                         <div className="w-full h-full bg-slate-900 flex items-center justify-center">
                                                             <Video className="w-8 h-8 text-white/50" />
@@ -191,7 +191,7 @@ export function MediaLibrary({ open, onOpenChange, onSelect }: MediaLibraryProps
                                                         }`}
                                                     onClick={() => handleSelect(item.id)}
                                                 >
-                                                    <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
+                                                    <img src={item.url} alt={item.name} loading="lazy" className="w-full h-full object-cover" />
                                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                                         <span className="text-white text-xs font-medium px-2 py-1 bg-black/60 rounded">
                                                             {isSelected ? 'Deselect' : 'Select'}

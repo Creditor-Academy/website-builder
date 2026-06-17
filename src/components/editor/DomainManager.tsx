@@ -98,7 +98,7 @@ export function DomainManager({ open, onOpenChange, websiteId }) {
     if (!domain) return;
     
     try {
-      await publishService.removeDomain(websiteId, domain.domain);
+      await publishService.removeDomain(domainId);
       setDomains(domains.filter(d => d.id !== domainId));
     } catch (error) {
       console.error('Failed to remove domain:', error);
@@ -112,14 +112,14 @@ export function DomainManager({ open, onOpenChange, websiteId }) {
     })));
   };
 
-  const handleVerifyDomain = async (domain: string) => {
-    setVerifyingDomain(domain);
+  const handleVerifyDomain = async (domainId: string, domainName: string) => {
+    setVerifyingDomain(domainName);
     try {
-      const verification = await publishService.verifyDomain(websiteId, domain);
+      const verification = await publishService.verifyDomain(domainId);
       
       // Update domain status based on verification
       setDomains(domains.map(d => 
-        d.domain === domain 
+        d.id === domainId 
           ? { 
               ...d, 
               status: verification.verified ? 'active' : 'pending',
@@ -270,7 +270,7 @@ export function DomainManager({ open, onOpenChange, websiteId }) {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleVerifyDomain(domain.domain)}
+                            onClick={() => handleVerifyDomain(domain.id, domain.domain)}
                             disabled={verifyingDomain === domain.domain}
                           >
                             {verifyingDomain === domain.domain ? (

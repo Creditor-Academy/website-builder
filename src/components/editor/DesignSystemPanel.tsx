@@ -80,7 +80,7 @@ const FX_PRESETS = [
 ];
 
 export function DesignSystemPanel() {
-    const { state, updateAllPagesGlobalStyles, applyPaletteToAllPages, applyFXToAllPages } = useBuilder();
+    const { state, updateAllPagesGlobalStyles, applyPaletteToAllPages, applyFXToAllPages, updateCurrentPage } = useBuilder();
     const { page } = state;
     const DEFAULTS = {
         primaryColor: '#3b82f6',
