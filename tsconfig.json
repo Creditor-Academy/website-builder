@@ -1,14 +1,31 @@
 {
-    "compilerOptions": {
-        "esModuleInterop": true,
-        "paths": {
-            "@/*": [
-                "./frontend/src/*"
-            ]
-        }
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.dotcache/tsconfig.app.tsbuildinfo",
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Paths mapping must be here too */
+    "paths": {
+      "@/*": ["./src/*"]
     },
-    "exclude": [
-        "node_modules",
-        "frontend/node_modules"
-    ]
+
+    /* Specific preferences */
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "types": ["vite/client"]
+  },
+  "include": ["src/**/*", "declarations.d.ts"] 
 }
