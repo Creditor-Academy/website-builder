@@ -44,12 +44,13 @@ export function RouteableButton({
           window.location.href = route.url.startsWith('tel:') ? route.url : `tel:${route.url}`;
           break;
           
-        case 'anchor':
+        case 'anchor': {
           const element = document.querySelector(route.url);
           if (element) {
             element.scrollIntoView({ behavior: 'smooth' });
           }
           break;
+        }
           
         default:
           if (route.url) {
@@ -114,12 +115,13 @@ export function RouteableLink({
           window.location.href = route.url.startsWith('tel:') ? route.url : `tel:${route.url}`;
           break;
           
-        case 'anchor':
+        case 'anchor': {
           const element = document.querySelector(route.url);
           if (element) {
             element.scrollIntoView({ behavior: 'smooth' });
           }
           break;
+        }
           
         default:
           if (route.url) {

@@ -104,7 +104,7 @@ export default function DashboardWebsites() {
   const filteredWebsites = useMemo(() => {
     if (!websites) return [];
 
-    let filtered = websites.filter((website: any) => {
+    const filtered = websites.filter((website: any) => {
       const matchesSearch = website.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (website.domain && website.domain.toLowerCase().includes(searchTerm.toLowerCase()));
 

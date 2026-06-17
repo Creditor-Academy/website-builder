@@ -153,7 +153,7 @@ export default function DeploymentMonitoring() {
   useEffect(() => { fetchDeployments(); }, []);
 
   const filteredAndSortedDeployments = React.useMemo(() => {
-    let temp = rows.filter(row => {
+    const temp = rows.filter(row => {
       const display = statusDisplay(row.deployment.status);
       const matchesSearch = 
         row.websiteName.toLowerCase().includes(searchTerm.toLowerCase()) ||

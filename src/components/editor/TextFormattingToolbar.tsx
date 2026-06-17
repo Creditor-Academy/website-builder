@@ -76,7 +76,7 @@ export function TextFormattingToolbar() {
           setFormats(currentFormats);
 
           // Get font name and normalize it
-          let font = document.queryCommandValue('fontName');
+          const font = document.queryCommandValue('fontName');
           if (font) {
             const normalizedFont = font.replace(/['"]/g, '').split(',')[0].trim();
             const matchedFont = FONTS.find(f => f.toLowerCase() === normalizedFont.toLowerCase());
