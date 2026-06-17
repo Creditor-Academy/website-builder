@@ -322,7 +322,7 @@ export function DomainManager({ open, onOpenChange, websiteId }) {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-slate-600">CNAME (www):</span>
-                        <span className="bg-white px-2 py-1 rounded border">buildora.app</span>
+                        <span className="bg-white px-2 py-1 rounded border">buildora.lmsathena.com</span>
                       </div>
                     </div>
                   </div>

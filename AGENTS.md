@@ -69,7 +69,7 @@ website-builder/ (Frontend Root)
 Environment variables must be prefixed with `VITE_` to be exposed to the React application.
 ```env
 VITE_API_BASE_URL=/api/v1
-VITE_SITE_HOST=https://app.buildora.app
+VITE_SITE_HOST=https://buildora.lmsathena.com
 VITE_GOOGLE_CLIENT_ID=your-google-client-id
 ```
 

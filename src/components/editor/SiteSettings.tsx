@@ -55,9 +55,9 @@ export function SiteSettings() {
         }
         setIsConnecting(true);
         try {
-            const isSubdomain = domain.endsWith('.buildora.app');
+            const isSubdomain = domain.endsWith('.buildora.lmsathena.com');
             const res = isSubdomain 
-                ? await websiteApi.addSubdomain(activeWebsite.id, domain.replace('.buildora.app', ''))
+                ? await websiteApi.addSubdomain(activeWebsite.id, domain.replace('.buildora.lmsathena.com', ''))
                 : await websiteApi.addDomain(activeWebsite.id, domain);
             
             const newDomain = res.data?.domain || res.data;

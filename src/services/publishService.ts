@@ -72,9 +72,9 @@ class PublishService {
 
   async addDomain(websiteId: string, domain: string): Promise<DomainConfig> {
     try {
-      const isSubdomain = domain.endsWith('.buildora.app');
+      const isSubdomain = domain.endsWith('.buildora.lmsathena.com');
       const response = isSubdomain 
-        ? await websiteApi.addSubdomain(websiteId, domain.replace('.buildora.app', ''))
+        ? await websiteApi.addSubdomain(websiteId, domain.replace('.buildora.lmsathena.com', ''))
         : await websiteApi.addDomain(websiteId, domain);
       return response.data.domain || response.data;
     } catch (error) {

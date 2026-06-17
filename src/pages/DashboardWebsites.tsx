@@ -151,7 +151,7 @@ export default function DashboardWebsites() {
     setEditingWebsite({
       id: website.id,
       name: website.name,
-      domain: website.domain || `${website.id.slice(0, 8)}.buildora.app`,
+      domain: website.domain || `${website.id.slice(0, 8)}.buildora.lmsathena.com`,
       status: website.status || 'Draft',
       lastUpdated: formatDate(website.lastEdited)
     });

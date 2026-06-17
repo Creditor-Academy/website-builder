@@ -165,11 +165,11 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
                     className="rounded-r-none border-r-0"
                   />
                   <div className="flex items-center px-3 bg-slate-100 border border-l-0 border-slate-300 rounded-r-md">
-                    <span className="text-sm text-slate-600">.buildora.app</span>
+                    <span className="text-sm text-slate-600">.buildora.lmsathena.com</span>
                   </div>
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
-                  Get instant free hosting with SSL certificate. Your site will be live at <span className="font-mono text-blue-600">{subdomain || 'your-site'}.buildora.app</span>
+                  Get instant free hosting with SSL certificate. Your site will be live at <span className="font-mono text-blue-600">{subdomain || 'your-site'}.buildora.lmsathena.com</span>
                 </p>
               </div>
 
@@ -216,7 +216,7 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
                       </p>
                       <div className="mt-2 p-2 bg-amber-100 rounded text-xs font-mono">
                         A Record: 192.168.1.1<br />
-                        CNAME: www.buildora.app
+                        CNAME: www.buildora.lmsathena.com
                       </div>
                     </div>
                   </div>
