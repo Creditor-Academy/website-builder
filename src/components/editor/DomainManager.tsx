@@ -39,32 +39,32 @@ export function DomainManager({ open, onOpenChange, websiteId }) {
 
   // Load domains when dialog opens
   useEffect(() => {
+    const loadDomains = async () => {
+      setLoading(true);
+      try {
+        const domainConfigs = await publishService.getDomains(websiteId);
+        const domainsWithIds = domainConfigs.map((config, index) => ({
+          id: config.domain || `domain-${index}`,
+          domain: config.domain,
+          type: config.type,
+          status: config.status,
+          ssl: config.sslEnabled,
+          addedAt: config.addedAt,
+          primary: index === 0, // First domain is primary by default
+          dnsRecords: config.dnsRecords
+        }));
+        setDomains(domainsWithIds);
+      } catch (error) {
+        console.error('Failed to load domains:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (open && websiteId) {
       loadDomains();
     }
   }, [open, websiteId]);
-
-  const loadDomains = async () => {
-    setLoading(true);
-    try {
-      const domainConfigs = await publishService.getDomains(websiteId);
-      const domainsWithIds = domainConfigs.map((config, index) => ({
-        id: config.domain || `domain-${index}`,
-        domain: config.domain,
-        type: config.type,
-        status: config.status,
-        ssl: config.sslEnabled,
-        addedAt: config.addedAt,
-        primary: index === 0, // First domain is primary by default
-        dnsRecords: config.dnsRecords
-      }));
-      setDomains(domainsWithIds);
-    } catch (error) {
-      console.error('Failed to load domains:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleAddDomain = async () => {
     if (!newDomain) return;

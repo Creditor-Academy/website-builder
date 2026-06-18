@@ -44,16 +44,16 @@ import {
 function EditorContent() {
   const [leftNavTab, setLeftNavTab] = useState("add"); // 'add', 'layers', 'pages', 'settings', 'edit'
   const store = useBuilderStore();
-  const { editor, setTourState, activeWebsiteId } = store;
+  const { editor, setTourState, activeWebsiteId, setEditorState } = store;
   const { id } = useParams();
   const isMobile = useIsMobile();
 
   // On mobile, collapse the left panel by default
   useEffect(() => {
     if (isMobile) {
-      store.setEditorState({ showLeftPanel: false });
+      setEditorState({ showLeftPanel: false });
     }
-  }, [isMobile]);
+  }, [isMobile, setEditorState]);
 
   // Auto-switch to edit tab when a section or component is selected
   useEffect(() => {
