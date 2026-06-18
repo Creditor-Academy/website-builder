@@ -15,18 +15,24 @@ export interface PublishResponse {
   message?: string;
 }
 
+export interface AcmValidationRecord {
+  name: string;
+  value: string;
+  type: string;
+}
+
 export interface DomainConfig {
   domain: string;
   type: 'subdomain' | 'custom';
   status: 'active' | 'pending' | 'error';
   sslEnabled: boolean;
   dnsRecords?: {
-    A?: string;
-    CNAME?: string;
-    TXT?: string[];
+    validation?: AcmValidationRecord[];  // ACM CNAME records shown when status=pending
+    cloudfront_domain?: string;          // CloudFront CNAME shown when status=active
   };
   addedAt: string;
 }
+
 
 export interface DeploymentRecord {
   id: string;
