@@ -59,7 +59,7 @@ export default function DashboardWebsites() {
   const orgId = new URLSearchParams(search).get('org');
 
   const { toast } = useToast();
-  const { websites, fetchWebsites } = useBuilderStore();
+  const { websites, fetchWebsites, deleteWebsite } = useBuilderStore();
   const [isLoading, setIsLoading] = useState(true);
 
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -160,18 +160,44 @@ export default function DashboardWebsites() {
 
   const handleSaveStatus = async (newStatus: string) => {
     if (editingWebsite) {
-      toast({
-        title: "Feature Coming Soon! 🛠️",
-        description: `Backend update for website status is being implemented.`,
-        variant: "default",
-      });
+      try {
+        await useBuilderStore.getState().updateWebsite(editingWebsite.id, { status: newStatus.toUpperCase() as any });
+        toast({
+          title: "Status Updated",
+          description: `Website status successfully changed to ${newStatus}.`,
+          variant: "default",
+        });
+        await fetchWebsites(orgId || undefined, isAdminView && isAdminRole);
+      } catch (error) {
+        toast({
+          title: "Update Failed",
+          description: "Could not update the website status.",
+          variant: "destructive",
+        });
+      }
       setIsEditStatusModalOpen(false);
       setEditingWebsite(null);
     }
   };
 
-  const handleDelete = (website: any) => {
-    console.log("Delete website:", website);
+  const handleDelete = async (website: any) => {
+    if (window.confirm(`Are you sure you want to delete the website "${website.name}"? This action cannot be undone.`)) {
+      try {
+        await deleteWebsite(website.id);
+        toast({
+          title: "Website Deleted",
+          description: `${website.name} has been successfully deleted.`,
+          variant: "default",
+        });
+        await fetchWebsites(orgId || undefined, isAdminView && isAdminRole);
+      } catch (error) {
+        toast({
+          title: "Delete Failed",
+          description: "Could not delete the website.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   return (
