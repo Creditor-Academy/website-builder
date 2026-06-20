@@ -1441,7 +1441,7 @@ const Dashboard = () => {
                         </div>
                     </div>
                 ) : (
-                    <Outlet key={location.pathname} />
+                    <Outlet key={location.pathname} context={{ isAdmin }} />
                 )}
             </main>
 

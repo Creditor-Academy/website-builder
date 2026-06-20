@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useOutletContext } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
     MessageSquare, Bell, CheckCircle, ArrowRight, Search, X, Mail, User, Calendar,
@@ -29,10 +29,14 @@ export default function DashboardMessages() {
     const [selectedWebsiteId, setSelectedWebsiteId] = useState<string>(searchParams.get('websiteId') || 'all');
     const [searchTerm, setSearchTerm] = useState('');
 
+    const { isAdmin } = useOutletContext<{ isAdmin: boolean }>() || { isAdmin: false };
+
     const fetchWebsites = async () => {
         try {
             setIsLoadingWebsites(true);
-            const res = await websiteApi.getWebsites();
+            const res = isAdmin 
+                ? await websiteApi.getWebsitesAll() 
+                : await websiteApi.getWebsites();
             const fetchedWebsites = res?.data?.websites || [];
             setWebsites(Array.isArray(fetchedWebsites) ? fetchedWebsites : []);
         } catch (error) {
@@ -70,7 +74,7 @@ export default function DashboardMessages() {
 
     useEffect(() => {
         fetchWebsites();
-    }, []);
+    }, [isAdmin]);
 
     useEffect(() => {
         fetchMessages();

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import DeploymentMonitoring from '../components/dashboard/DeploymentMonitoring';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -24,11 +25,14 @@ export default function DashboardDeployment() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
   const [loadingWebsites, setLoadingWebsites] = useState(true);
+  const { isAdmin } = useOutletContext<{ isAdmin: boolean }>() || { isAdmin: false };
 
   useEffect(() => {
     (async () => {
       try {
-        const res = await websiteApi.getWebsitesAll({ limit: 500 });
+        const res = isAdmin
+          ? await websiteApi.getWebsitesAll({ limit: 100, status: 'PUBLISHED' })
+          : await websiteApi.getWebsites({ limit: 100, status: 'PUBLISHED' });
         const list = res.data.websites || res.data?.data?.websites || [];
         const published = list.filter((w: any) => w.status?.toUpperCase() === 'PUBLISHED' || w.content?.builderMeta?.deployments?.length > 0);
         setWebsites(published.map((w: any) => ({ id: w.id, name: w.name })));
@@ -36,7 +40,7 @@ export default function DashboardDeployment() {
       } catch { /* ignore */ }
       finally { setLoadingWebsites(false); }
     })();
-  }, []);
+  }, [isAdmin]);
 
   useEffect(() => {
     if (!selectedWebsite) return;
