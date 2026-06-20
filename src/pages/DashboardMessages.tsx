@@ -37,8 +37,9 @@ export default function DashboardMessages() {
             const res = isAdmin 
                 ? await websiteApi.getWebsitesAll() 
                 : await websiteApi.getWebsites();
-            const fetchedWebsites = res?.data?.websites || [];
-            setWebsites(Array.isArray(fetchedWebsites) ? fetchedWebsites : []);
+            const rawWebsites = res?.data?.websites || [];
+            const fetchedWebsites = Array.isArray(rawWebsites) ? rawWebsites : (rawWebsites.websites || []);
+            setWebsites(fetchedWebsites);
         } catch (error) {
             console.error('Failed to fetch websites:', error);
         } finally {

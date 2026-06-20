@@ -130,7 +130,8 @@ export default function DeploymentMonitoring() {
 
       // Fallback: read from website content JSON
       const res = await websiteApi.getWebsitesAll({ limit: 100 });
-      const websites = res.data.websites || res.data?.data?.websites || [];
+      const rawWebsites = res.data?.websites || res.data?.data?.websites || [];
+      const websites = Array.isArray(rawWebsites) ? rawWebsites : (rawWebsites.websites || []);
       const allRows: DeploymentRow[] = [];
 
       for (const website of websites) {

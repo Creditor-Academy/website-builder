@@ -33,7 +33,8 @@ export default function DashboardDeployment() {
         const res = isAdmin
           ? await websiteApi.getWebsitesAll({ limit: 100, status: 'PUBLISHED' })
           : await websiteApi.getWebsites({ limit: 100, status: 'PUBLISHED' });
-        const list = res.data.websites || res.data?.data?.websites || [];
+        const rawWebsites = res.data?.websites || res.data?.data?.websites || [];
+        const list = Array.isArray(rawWebsites) ? rawWebsites : (rawWebsites.websites || []);
         const published = list.filter((w: any) => w.status?.toUpperCase() === 'PUBLISHED' || w.content?.builderMeta?.deployments?.length > 0);
         setWebsites(published.map((w: any) => ({ id: w.id, name: w.name })));
         if (published.length > 0) setSelectedWebsite(published[0].id);
@@ -151,9 +152,9 @@ export default function DashboardDeployment() {
               {analytics.daily.length > 0 && (
                 <div>
                   <h3 className="text-sm font-semibold text-slate-700 mb-3">Daily Page Views</h3>
-                  <div className="flex items-end gap-[2px] h-40 bg-slate-50 rounded-xl p-3 border border-slate-100">
+                  <div className="flex items-end justify-center gap-[2px] h-40 bg-slate-50 rounded-xl p-3 border border-slate-100 overflow-hidden">
                     {analytics.daily.map((d) => (
-                      <div key={d.date} className="flex-1 flex flex-col items-center justify-end h-full group relative">
+                      <div key={d.date} className="flex-1 max-w-[40px] flex flex-col items-center justify-end h-full group relative">
                         <div className="absolute -top-8 bg-slate-800 text-white text-xs px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                           {d.date}: {d.views} views
                         </div>
