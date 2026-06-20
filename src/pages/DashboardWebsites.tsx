@@ -59,7 +59,7 @@ export default function DashboardWebsites() {
   const orgId = new URLSearchParams(search).get('org');
 
   const { toast } = useToast();
-  const { websites, fetchWebsites } = useBuilderStore();
+  const { websites, fetchWebsites, updateWebsite, deleteWebsite } = useBuilderStore();
   const [isLoading, setIsLoading] = useState(true);
 
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -160,18 +160,41 @@ export default function DashboardWebsites() {
 
   const handleSaveStatus = async (newStatus: string) => {
     if (editingWebsite) {
-      toast({
-        title: "Feature Coming Soon! 🛠️",
-        description: `Backend update for website status is being implemented.`,
-        variant: "default",
-      });
-      setIsEditStatusModalOpen(false);
-      setEditingWebsite(null);
+      try {
+        await updateWebsite(editingWebsite.id, { status: newStatus as any });
+        toast({
+          title: "Status Updated ✅",
+          description: `Website status changed to ${newStatus}.`,
+        });
+      } catch (error: any) {
+        toast({
+          title: "Update Failed",
+          description: error?.response?.data?.message || "Could not update status.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsEditStatusModalOpen(false);
+        setEditingWebsite(null);
+      }
     }
   };
 
-  const handleDelete = (website: any) => {
-    console.log("Delete website:", website);
+  const handleDelete = async (website: any) => {
+    if (window.confirm(`Are you sure you want to delete ${website.name}? This action cannot be undone.`)) {
+      try {
+        await deleteWebsite(website.id);
+        toast({
+          title: "Website Deleted 🗑️",
+          description: `${website.name} has been permanently deleted.`,
+        });
+      } catch (error: any) {
+        toast({
+          title: "Deletion Failed",
+          description: error?.response?.data?.message || "Could not delete website.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   return (
