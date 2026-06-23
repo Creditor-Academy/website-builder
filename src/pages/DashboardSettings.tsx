@@ -79,7 +79,7 @@ export default function DashboardSettings() {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [toast]);
 
   const handleSaveProfile = async () => {
     if (!profileName.trim() || profileName.trim().length < 2) {

@@ -59,7 +59,7 @@ export default function DashboardWebsites() {
   const orgId = new URLSearchParams(search).get('org');
 
   const { toast } = useToast();
-  const { websites, fetchWebsites, updateWebsite, deleteWebsite } = useBuilderStore();
+  const { websites, fetchWebsites, deleteWebsite } = useBuilderStore();
   const [isLoading, setIsLoading] = useState(true);
 
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -161,36 +161,39 @@ export default function DashboardWebsites() {
   const handleSaveStatus = async (newStatus: string) => {
     if (editingWebsite) {
       try {
-        await updateWebsite(editingWebsite.id, { status: newStatus as any });
+        await useBuilderStore.getState().updateWebsite(editingWebsite.id, { status: newStatus.toUpperCase() as any });
         toast({
-          title: "Status Updated ✅",
-          description: `Website status changed to ${newStatus}.`,
+          title: "Status Updated",
+          description: `Website status successfully changed to ${newStatus}.`,
+          variant: "default",
         });
-      } catch (error: any) {
+        await fetchWebsites(orgId || undefined, isAdminView && isAdminRole);
+      } catch (error) {
         toast({
           title: "Update Failed",
-          description: error?.response?.data?.message || "Could not update status.",
+          description: "Could not update the website status.",
           variant: "destructive",
         });
-      } finally {
-        setIsEditStatusModalOpen(false);
-        setEditingWebsite(null);
       }
+      setIsEditStatusModalOpen(false);
+      setEditingWebsite(null);
     }
   };
 
   const handleDelete = async (website: any) => {
-    if (window.confirm(`Are you sure you want to delete ${website.name}? This action cannot be undone.`)) {
+    if (window.confirm(`Are you sure you want to delete the website "${website.name}"? This action cannot be undone.`)) {
       try {
         await deleteWebsite(website.id);
         toast({
-          title: "Website Deleted 🗑️",
-          description: `${website.name} has been permanently deleted.`,
+          title: "Website Deleted",
+          description: `${website.name} has been successfully deleted.`,
+          variant: "default",
         });
-      } catch (error: any) {
+        await fetchWebsites(orgId || undefined, isAdminView && isAdminRole);
+      } catch (error) {
         toast({
-          title: "Deletion Failed",
-          description: error?.response?.data?.message || "Could not delete website.",
+          title: "Delete Failed",
+          description: "Could not delete the website.",
           variant: "destructive",
         });
       }

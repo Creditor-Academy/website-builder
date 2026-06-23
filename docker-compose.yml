@@ -1,5 +1,6 @@
 services:
   frontend:
+    image: buildora-frontend:latest
     build:
       context: .
       dockerfile: Dockerfile

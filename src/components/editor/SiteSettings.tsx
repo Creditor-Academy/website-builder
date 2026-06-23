@@ -44,7 +44,7 @@ export function SiteSettings() {
         websiteApi.getDomains(activeWebsite.id)
             .then((res: any) => setDomains(res.data?.domains || res.data || []))
             .catch(() => {});
-    }, [activeWebsite?.id]);
+    }, [activeWebsite]);
 
     const handleConnectDomain = useCallback(async () => {
         if (!activeWebsite || !customDomain.trim()) return;

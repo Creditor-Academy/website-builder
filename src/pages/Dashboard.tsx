@@ -546,7 +546,7 @@ const UserDetailDialog = ({ userId, open, onOpenChange }) => {
                 .catch(() => toast({ title: "Failed to load user", variant: "destructive" }))
                 .finally(() => setLoading(false));
         }
-    }, [open, userId]);
+    }, [open, userId, toast]);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -605,6 +605,16 @@ const UserDetailDialog = ({ userId, open, onOpenChange }) => {
 };
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
+
+const adminRoutes = [
+    '/dashboard/users',
+    '/dashboard/organizations',
+    '/dashboard/websites',
+    // '/dashboard/admin-templates',
+    '/dashboard/deployment',
+    '/dashboard/settings',
+];
+
 const Dashboard = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -646,15 +656,6 @@ const Dashboard = () => {
     // DB templates for New Project dialog
     const [dbTemplates, setDbTemplates] = useState<any[]>([]);
     const [isCreatingSite, setIsCreatingSite] = useState(false);
-
-    const adminRoutes = [
-        '/dashboard/users',
-        '/dashboard/organizations',
-        '/dashboard/websites',
-        // '/dashboard/admin-templates',
-        '/dashboard/deployment',
-        '/dashboard/settings',
-    ];
 
     // ✅ Listen for userUpdated event
     useEffect(() => {
