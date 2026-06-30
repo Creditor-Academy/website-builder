@@ -154,7 +154,7 @@ const WebsiteCard = ({ site, index, onDelete, onEdit, onViewMessages }) => {
                 </div>
             </CardHeader>
 
-            <CardFooter className="p-6 pt-3 mt-auto flex justify-between items-center">
+            <CardFooter className="p-6 pt-3 mt-auto flex flex-wrap justify-between items-center gap-3">
                 <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${site.status === 'Published'
                     ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
                     : 'bg-amber-50 text-amber-600 border border-amber-100'
