@@ -7,7 +7,7 @@ import {
     FileText, Search, Sparkles, Zap, Files, Building2, ShoppingBag, Users,
     ArrowRight, ChevronLeft, Palette, Layers, MonitorPlay, Move, LayoutTemplate,
     Upload, Monitor, Link as LinkIcon, Activity, Menu, X, ShieldCheck, ListFilter, Bell, ArrowUp, ArrowDown,
-    UserX, RefreshCw, Eye, Image as ImageIcon, Loader2, MessageSquare
+    UserX, RefreshCw, Eye, Image as ImageIcon, Loader2, MessageSquare, ExternalLink
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -81,9 +81,13 @@ const NavItem = ({ icon, label, to, activeColor = 'text-white', hoverBg = 'hover
     );
 };
 
-const WebsiteCard = ({ site, index, onDelete, onEdit, onViewMessages }) => {
-    const template = templatesList.find((t) => t.id === site.templateId);
+const WebsiteCard = ({ site, index, onDelete, onEdit, onViewMessages }: any) => {
+    const activeTemplateId = site.templateId || 'blank';
+    const template = templatesList.find((t) => t.id === activeTemplateId);
 
+    const deployments = site.builderMeta?.deployments || [];
+    const latestDeployment = deployments.length > 0 ? deployments[deployments.length - 1] : null;
+    const publishedUrl = latestDeployment?.url || site.publishedUrl || (site.subdomain ? `https://${site.subdomain}.buildora.lmsathena.com` : null);
     return (
         <Card className="group/website-card border border-slate-200 bg-white rounded-3xl overflow-hidden flex flex-col shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 hover:-translate-y-1 transition-all duration-300">
             <div className="aspect-[16/10] bg-slate-50 relative overflow-hidden">
@@ -110,9 +114,10 @@ const WebsiteCard = ({ site, index, onDelete, onEdit, onViewMessages }) => {
                             </div>
                         </div>
                         <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover/website-card:opacity-100 transition-opacity duration-300" />
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover/website-card:opacity-100 transition-opacity duration-300" />
                     </div>
                 )}
-
+                
                 <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover/website-card:opacity-100 transition-all duration-300 z-10">
                     <Button size="sm" onClick={onEdit} className="bg-white text-slate-900 hover:bg-white/90 rounded-full shadow-lg">
                         <Edit2 className="w-4 h-4 mr-1" /> Edit
@@ -126,8 +131,14 @@ const WebsiteCard = ({ site, index, onDelete, onEdit, onViewMessages }) => {
                         <CardTitle className="text-xl font-bold text-slate-800 group-hover/website-card:text-indigo-600 transition-colors leading-tight">
                             {site.name}
                         </CardTitle>
+                        {publishedUrl && site.status === 'Published' && (
+                            <a href={publishedUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs text-blue-600 font-medium hover:underline break-all mt-1 w-full max-w-[200px] truncate" title={publishedUrl}>
+                                <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                                <span className="truncate">{publishedUrl.replace('https://', '')}</span>
+                            </a>
+                        )}
                         <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mt-1">
-                            <Clock className="w-3 h-3 text-slate-400" />
+                            <Clock className="w-3 h-3 text-slate-400 flex-shrink-0" />
                             {format(new Date(site.lastEdited), 'MMM d, p')}
                         </div>
                     </div>

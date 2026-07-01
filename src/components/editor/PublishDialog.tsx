@@ -28,13 +28,40 @@ import { publishService } from '@/services/publishService';
 
 export function PublishDialog({ open, onOpenChange, websiteId }) {
   const { websites, updateWebsite } = useBuilderStore();
+  const website = websites.find(w => w.id === websiteId);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishStatus, setPublishStatus] = useState('idle'); // idle, publishing, success, error
   const [publishedUrl, setPublishedUrl] = useState('');
   const [customDomain, setCustomDomain] = useState('');
   const [subdomain, setSubdomain] = useState('');
-  
-  const website = websites.find(w => w.id === websiteId);
+
+  React.useEffect(() => {
+    if (open && website) {
+      let initialSubdomain = website.subdomain;
+      let initialCustomDomain = website.customDomain;
+
+      // Fallback for older websites that only have publishedUrl
+      if (!initialSubdomain && !initialCustomDomain && website.publishedUrl) {
+        try {
+          const urlObj = new URL(website.publishedUrl);
+          if (urlObj.hostname.includes('.buildora.lmsathena.com')) {
+            initialSubdomain = urlObj.hostname.split('.')[0];
+          } else {
+            initialCustomDomain = urlObj.hostname;
+          }
+        } catch (e) {
+          // ignore invalid URLs
+        }
+      }
+
+      if (initialSubdomain) setSubdomain(initialSubdomain);
+      if (initialCustomDomain) setCustomDomain(initialCustomDomain);
+      if (website.publishedUrl) setPublishedUrl(website.publishedUrl);
+      
+      if (website.status === 'Published') setPublishStatus('success');
+      else setPublishStatus('idle');
+    }
+  }, [open, website]);
 
   const handlePublish = async () => {
     setIsPublishing(true);
