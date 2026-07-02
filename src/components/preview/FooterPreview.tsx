@@ -307,7 +307,7 @@ export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
             {/* Social icons */}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {config.socialLinks.map((social) => {
-                const Icon = socialIcons[social.platform];
+                const Icon = socialIcons[social.platform] || Globe;
                 const isContact = ['email', 'phone', 'location'].includes(social.platform);
                 return (
                   <a
