@@ -48,10 +48,12 @@ function EditorContent() {
   const { id } = useParams();
   const isMobile = useIsMobile();
 
-  // On mobile, collapse the left panel by default
+  // Auto-collapse left panel on mobile, auto-expand on desktop
   useEffect(() => {
     if (isMobile) {
       setEditorState({ showLeftPanel: false });
+    } else {
+      setEditorState({ showLeftPanel: true });
     }
   }, [isMobile, setEditorState]);
 
