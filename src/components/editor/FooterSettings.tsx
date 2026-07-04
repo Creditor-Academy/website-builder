@@ -14,7 +14,7 @@ interface FooterSettingsProps {
   isExpanded?: boolean;
 }
 
-export function FooterSettings({ footer, pages, onUpdate, isExpanded = true }: FooterSettingsProps) {
+export function FooterSettings({ footer, pages = [], onUpdate, isExpanded = true }: FooterSettingsProps) {
   const [expanded, setExpanded] = useState(isExpanded);
   const [editingLink, setEditingLink] = useState<string | null>(null);
 
@@ -244,7 +244,7 @@ export function FooterSettings({ footer, pages, onUpdate, isExpanded = true }: F
                             className="flex-1 text-xs h-7 bg-white border-slate-200"
                           />
                           <Select
-                            value={link.href}
+                            value={pages.some((p: any) => p.slug === link.href) ? link.href : '/custom'}
                             onValueChange={(value) => handleUpdateLink(column.id, link.id, { href: value })}
                           >
                             <SelectTrigger className="w-32 h-7 text-xs">
@@ -256,14 +256,14 @@ export function FooterSettings({ footer, pages, onUpdate, isExpanded = true }: F
                                   {page.name}
                                 </SelectItem>
                               ))}
-                              <SelectItem value="/custom">Custom URL</SelectItem>
+                              <SelectItem value="/custom">Custom URL or Anchor</SelectItem>
                             </SelectContent>
                           </Select>
                           {link.href === '/custom' && (
                             <Input
                               value={link.customHref || ''}
                               onChange={(e) => handleUpdateLink(column.id, link.id, { customHref: e.target.value })}
-                              placeholder="Enter URL"
+                              placeholder="https://example.com or #section"
                               className="w-32 text-xs h-7"
                             />
                           )}

@@ -14,7 +14,7 @@ interface NavbarSettingsProps {
   isExpanded?: boolean;
 }
 
-export function NavbarSettings({ navbar, pages, onUpdate, isExpanded = true }: NavbarSettingsProps) {
+export function NavbarSettings({ navbar, pages = [], onUpdate, isExpanded = true }: NavbarSettingsProps) {
   const [expanded, setExpanded] = useState(isExpanded);
   const [editingLink, setEditingLink] = useState<string | null>(null);
 
@@ -216,7 +216,7 @@ export function NavbarSettings({ navbar, pages, onUpdate, isExpanded = true }: N
                         <Label className="text-[9px] font-semibold text-slate-500 uppercase">Route / URL</Label>
                         <div className="flex gap-2 items-center">
                           <Select
-                            value={link.href || ''}
+                            value={pages.some((p: any) => p.slug === link.href) ? link.href : 'custom'}
                             onValueChange={(value) => {
                               if (value === 'custom') {
                                 handleUpdateLink(link.id, { href: '', isCustom: true });
@@ -231,27 +231,21 @@ export function NavbarSettings({ navbar, pages, onUpdate, isExpanded = true }: N
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="/">Home</SelectItem>
-                              <SelectItem value="/about">About</SelectItem>
-                              <SelectItem value="/services">Services</SelectItem>
-                              <SelectItem value="/pricing">Pricing</SelectItem>
-                              <SelectItem value="/contact">Contact</SelectItem>
-                              <SelectItem value="/start">Get Started</SelectItem>
-                              <SelectItem value="/features">Features</SelectItem>
-                              <SelectItem value="/blog">Blog</SelectItem>
-                              <SelectItem value="/templates">Templates</SelectItem>
-                              <SelectItem value="/careers">Careers</SelectItem>
-                              <SelectItem value="/help">Help</SelectItem>
-                              <SelectItem value="custom">Custom URL</SelectItem>
+                              {pages.map((p: any) => (
+                                <SelectItem key={p.id} value={p.slug}>
+                                  {p.name}
+                                </SelectItem>
+                              ))}
+                              <SelectItem value="custom">Custom URL or Anchor</SelectItem>
                             </SelectContent>
                           </Select>
 
-                          {link.isCustom || !link.href.startsWith('/') ? (
+                          {(link.isCustom || !pages.some((p: any) => p.slug === link.href)) ? (
                             <Input
                               value={link.href || ''}
                               onChange={(e) => handleUpdateLink(link.id, { href: e.target.value })}
                               className="bg-white border-slate-200 text-xs h-7 flex-1"
-                              placeholder="https://example.com or /custom-page"
+                              placeholder="https://example.com or #section"
                             />
                           ) : null}
                         </div>

@@ -16,7 +16,7 @@ import { FooterSettings } from './FooterSettings';
 import { useToast } from '@/components/ui/use-toast';
 
 export function PropertiesPanel() {
-  const { state, selectedSection, selectedComponent, updateSection, updateSectionStyles, selectSection, updateNavbar, updateFooter, updatePageSEO, updateComponent, deleteComponent, deleteSection } = useBuilder();
+  const { state, selectedSection, selectedComponent, updateSection, updateSectionStyles, selectSection, updateNavbar, updateFooter, updatePageSEO, updateComponent, deleteComponent, deleteSection, pages } = useBuilder();
   const { toast } = useToast();
   const [contentOpen, setContentOpen] = useState(true);
   const [stylesOpen, setStylesOpen] = useState(true);
@@ -157,7 +157,7 @@ export function PropertiesPanel() {
             <CollapsibleContent className="p-0">
               <NavbarSettings
                 navbar={page.navbar}
-                pages={page ? [page] : []}
+                pages={pages}
                 onUpdate={(updates) => updateNavbar(updates)}
                 isExpanded={true}
               />
@@ -166,7 +166,7 @@ export function PropertiesPanel() {
 
           <FooterSettings 
             footer={page.footer} 
-            pages={page ? [page] : []}
+            pages={pages}
             onUpdate={updateFooter}
             isExpanded={footerOpen}
           />
