@@ -132,7 +132,7 @@ const LoginForm = ({
         {isLoadingLogin ? "Logging in..." : "Login"}
       </button>
 
-      <div className="relative flex items-center justify-center mb-8">
+      {/* <div className="relative flex items-center justify-center mb-8">
         <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
         <span className="relative px-4 bg-white text-xs text-slate-400">Or continue with</span>
       </div>
@@ -140,7 +140,7 @@ const LoginForm = ({
       <button onClick={onGoogleLogin} className="flex items-center justify-center gap-3 py-4 w-full bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors font-medium text-slate-700 active:scale-[0.98]">
         <GoogleSVG />
         Continue with Google
-      </button>
+      </button> */}
 
       <p className="text-slate-500 text-center text-sm mt-8 hidden md:block">
         Don't have an account?{" "}
@@ -260,7 +260,7 @@ const SignupForm = ({
         {isLoadingSignup ? "Creating account..." : "Sign Up"}
       </button>
 
-      <div className="relative flex items-center justify-center mb-8">
+      {/* <div className="relative flex items-center justify-center mb-8">
         <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
         <span className="relative px-4 bg-white text-xs text-slate-400">Or continue with</span>
       </div>
@@ -268,7 +268,7 @@ const SignupForm = ({
       <button onClick={onGoogleLogin} className="flex items-center justify-center gap-3 py-4 w-full bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors font-medium text-slate-700 active:scale-[0.98]">
         <GoogleSVG />
         Continue with Google
-      </button>
+      </button> */}
 
       <p className="text-slate-500 text-center text-sm mt-8 hidden md:block">
         Joined us before?{" "}
