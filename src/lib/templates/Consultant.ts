@@ -7,9 +7,10 @@ export const createConsultantNavbar = () => ({
   visible: true,
   logo: { text: 'Thomse Consulting', imageUrl: '', font: 'Playfair Display' },
   links: [
-    { id: uuidv4(), label: 'About', href: '#about' },
-    { id: uuidv4(), label: 'Services', href: '#services' },
-    { id: uuidv4(), label: 'Book a Call', href: '#contact' },
+    { id: uuidv4(), label: 'Home', href: '/' },
+    { id: uuidv4(), label: 'Executive Strategy', href: '/executive-strategy' },
+    { id: uuidv4(), label: 'Revenue Growth', href: '/revenue-growth' },
+    { id: uuidv4(), label: 'Book a Call', href: '/contact', isButton: true },
   ],
   styles: {
     backgroundColor: 'var(--background, #0f172a)',
@@ -449,23 +450,49 @@ export const createMarketExpansionPage = () => ({
 });
 
 export const getConsultantPage = () => ({
-  id: uuidv4(),
-  name: 'Home',
-  slug: '/',
-  meta: {
-    title: 'Executive Consulting - Strategic Excellence',
-    description: 'Bespoke strategic intelligence for high-performance leaders and organizational transformation.'
-  },
-  navbar: createConsultantNavbar(),
-  sections: [
-    createConsultantHeroSection(),
-    createConsultantAboutSection(),
-    createConsultantServicesSection(),
-    createConsultantCaseStudiesSection(),
-    createConsultantTestimonialsSection(),
-    createConsultantCTASection(),
-    createConsultantContactSection(),
+  pages: [
+    {
+      id: uuidv4(),
+      name: 'Home',
+      slug: '/',
+      meta: {
+        title: 'Executive Consulting - Strategic Excellence',
+        description: 'Bespoke strategic intelligence for high-performance leaders and organizational transformation.'
+      },
+      sections: [
+        createConsultantHeroSection(),
+        createConsultantAboutSection(),
+        createConsultantServicesSection(),
+        createConsultantCaseStudiesSection(),
+        createConsultantTestimonialsSection(),
+        createConsultantCTASection(),
+        createConsultantContactSection(),
+      ],
+    },
+    {
+      ...createExecutiveStrategyPage(),
+      navbar: undefined,
+      footer: undefined
+    },
+    {
+      ...createRevenueGrowthPage(),
+      navbar: undefined,
+      footer: undefined
+    },
+    {
+      ...createMarketExpansionPage(),
+      navbar: undefined,
+      footer: undefined
+    },
+    {
+      id: uuidv4(),
+      name: 'Contact',
+      slug: '/contact',
+      meta: { title: 'Contact Us', description: 'Get in touch with Thompson Consulting' },
+      sections: [createConsultantContactSection()],
+    }
   ],
+  navbar: createConsultantNavbar(),
   footer: createConsultantFooter(),
   globalStyles: {
     fontFamily: 'Inter',

@@ -8,6 +8,8 @@ import school from "../assets/School.jpg";
 import learning from "../assets/Learning.jpg";
 import cta from "../assets/CTA.png";
 import placeholder from "../assets/ui_showcase_1.png";
+import restaurant from "../assets/Hospital.jpg"; // Reusing an existing asset as placeholder
+import blog from "../assets/templates_showcase.png"; // Reusing an existing asset as placeholder
 
 export const templatesList = [
     { 
@@ -82,4 +84,25 @@ export const templatesList = [
         tag: 'New',
         features: ['Curriculum overview', 'Student success', 'Enrollment flow', 'Mentor profile'] 
     },
+    {
+        id: 'restaurant',
+        name: 'Lumière Cafe & Bistro',
+        desc: 'Modern French Cuisine',
+        icon: Layout,
+        color: 'bg-orange-100 text-orange-600',
+        image: restaurant,
+        category: 'Food & Hospitality',
+        tag: 'New',
+        features: ['Multi-page structure', 'Menu section', 'Reservations', 'Gallery']
+    },
+    {
+        id: 'blog',
+        name: 'Chronicle Blog & Newsletter',
+        desc: 'Ideas that shape the future',
+        icon: FileText,
+        color: 'bg-slate-100 text-slate-800',
+        image: blog,
+        category: 'Blog & Publishing',
+        features: ['Multi-page structure', 'Articles list', 'Newsletter subscribe']
+    }
 ];
