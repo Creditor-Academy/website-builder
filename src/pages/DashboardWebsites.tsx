@@ -110,7 +110,7 @@ export default function DashboardWebsites() {
 
       // Normalize status check
       const status = website.status?.toLowerCase() || 'draft';
-      const matchesStatus = filterStatus === 'all' ||
+      const matchesStatus = (filterStatus === 'all' && status !== 'deleted') ||
         (filterStatus === 'Published' && (status === 'published' || status === 'active')) ||
         (filterStatus === 'Draft' && (status === 'draft')) ||
         (filterStatus === 'Deleted' && (status === 'deleted'));

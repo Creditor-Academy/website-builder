@@ -454,10 +454,20 @@ const useBuilderStore = create<BuilderStore>()(
                 try {
                     const { default: websiteApi } = await import('../api/website');
                     await websiteApi.deleteWebsite(id);
-                    set((state) => ({
-                        websites: state.websites.filter(w => w.id !== id),
-                        activeWebsiteId: state.activeWebsiteId === id ? null : state.activeWebsiteId
-                    }));
+                    set((state) => {
+                        const website = state.websites.find(w => w.id === id);
+                        if (website && website.status !== 'DELETED') {
+                            return {
+                                websites: state.websites.map(w => w.id === id ? { ...w, status: 'DELETED' } : w),
+                                activeWebsiteId: state.activeWebsiteId === id ? null : state.activeWebsiteId
+                            };
+                        }
+                        // If it's already DELETED, it means we are hard-deleting it
+                        return {
+                            websites: state.websites.filter(w => w.id !== id),
+                            activeWebsiteId: state.activeWebsiteId === id ? null : state.activeWebsiteId
+                        };
+                    });
                 } catch (error) {
                     console.error("Failed to delete website from backend:", error);
                 }
