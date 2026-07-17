@@ -56,7 +56,7 @@ import UserShimmer from '@/components/dashboard/UserShimmer';
 import institutionApi from '@/api/institution';
 import GradientButton from '@/components/ui/GradientButton';
 import { useSearchParams } from 'react-router-dom';
-import { getUsers, updateUserRole, updateUserStatus, restoreUser, createUser } from '../api/user';
+import { getUsers, updateUser, updateUserRole, updateUserStatus, restoreUser, createUser } from '../api/user';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface UserRow {
@@ -458,6 +458,10 @@ export default function DashboardUsers() {
         };
         const backendRole = roleMap[editingUser.role] ?? editingUser.role;
         await updateUserRole(editingUser.id, backendRole);
+      }
+
+      if (original.name !== editingUser.name || original.email !== editingUser.email) {
+        await updateUser(editingUser.id, { name: editingUser.name, email: editingUser.email });
       }
 
       setUsers(prev => prev.map(u => u.id === editingUser.id ? editingUser : u));

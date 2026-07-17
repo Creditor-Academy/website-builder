@@ -31,6 +31,13 @@ export const getUserById = (id) => apiClient.get(`/users/${id}`);
 export const createUser = (data) => apiClient.post('/users', data);
 
 /**
+ * PATCH /users/:id — Update a user's basic details (Admin / Institution Admin only)
+ * @param {string} id - User ID
+ * @param {Object} data - { name, email }
+ */
+export const updateUser = (id, data) => apiClient.patch(`/users/${id}`, data);
+
+/**
  * PATCH /users/:id/role — Update a user's role (Admin only)
  * @param {string} id - User ID
  * @param {string} role - New role value
