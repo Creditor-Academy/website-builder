@@ -346,8 +346,10 @@ export function SectionRenderer({ section, idx, isAlternate, isSelected, isEditi
     }
   };
 
+  const slugId = (section.name || section.type).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
   return (
-    <div id={section.id} className="relative group/section">
+    <div id={slugId} data-section-id={section.id} className="relative group/section">
       {renderBaseSection()}
 
       {/* Absolute components overlay */}

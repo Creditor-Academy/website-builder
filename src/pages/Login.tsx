@@ -354,7 +354,12 @@ export default function LoginSignup() {
       setIsSignup(false);
     } catch (err) {
       console.error(err);
-      setSignupError(err.response?.data?.message || err.response?.data?.error || "Signup failed. Please try again.");
+      const responseData = err.response?.data;
+      if (responseData?.errors && Array.isArray(responseData.errors) && responseData.errors.length > 0) {
+        setSignupError(responseData.errors[0]);
+      } else {
+        setSignupError(responseData?.message || responseData?.error || "Signup failed. Please try again.");
+      }
     } finally {
       setIsLoadingSignup(false);
     }

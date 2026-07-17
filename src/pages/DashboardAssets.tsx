@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "../components/ui/label";
 import { Badge } from "../components/ui/badge";
 
+import { useToast } from "../hooks/use-toast";
 import useBuilderStore from '../store/useBuilderStore';
 
 
@@ -31,20 +32,41 @@ export default function DashboardAssets() {
         item.name.toLowerCase().includes(search.toLowerCase())
     );
 
+    const { toast } = useToast();
+
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            await uploadAsset(file);
-            if (e.target) e.target.value = '';
+            try {
+                await uploadAsset(file);
+                toast({ title: "Asset Uploaded", description: "Your asset has been successfully uploaded." });
+            } catch (error: any) {
+                toast({ 
+                    variant: "destructive", 
+                    title: "Upload Failed", 
+                    description: error.response?.data?.message || error.response?.data?.error || "Failed to upload asset." 
+                });
+            } finally {
+                if (e.target) e.target.value = '';
+            }
         }
     };
 
     const handleUrlUpload = async () => {
         if (urlInput) {
-            await importAssetFromUrl(urlName || 'Imported Asset', urlInput);
-            setUrlInput('');
-            setUrlName('');
-            setIsUrlDialogOpen(false);
+            try {
+                await importAssetFromUrl(urlName || 'Imported Asset', urlInput);
+                toast({ title: "Asset Imported", description: "Your asset has been successfully imported." });
+                setUrlInput('');
+                setUrlName('');
+                setIsUrlDialogOpen(false);
+            } catch (error: any) {
+                toast({ 
+                    variant: "destructive", 
+                    title: "Import Failed", 
+                    description: error.response?.data?.message || error.response?.data?.error || "Failed to import asset." 
+                });
+            }
         }
     };
 

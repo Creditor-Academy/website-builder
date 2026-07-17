@@ -457,7 +457,7 @@ export default function DashboardTemplates() {
                           className="bg-white text-slate-800 font-semibold rounded-full px-5 h-10 text-sm shadow-lg hover:bg-slate-50 hover:scale-105 transition-all duration-200"
                           onClick={e => { e.stopPropagation(); handleOpenEdit(template); }}
                         >
-                          Design
+                          Edit Template
                         </Button>
                       )}
 
