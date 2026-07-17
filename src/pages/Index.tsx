@@ -6,6 +6,8 @@ import useBuilderStore, { type BuilderStore } from "@/store/useBuilderStore";
 import Footer from "./Footer";
 import { cn } from "@/lib/utils";
 
+import { useTheme } from "@/hooks/useTheme";
+
 // Assets
 import brand from "../assets/brand.mp4";
 import business from "../assets/Bussiness.jpg";
@@ -63,8 +65,7 @@ export default function LandingPage() {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const isDark = theme === 'dark';
+  const { theme, setTheme, isDark } = useTheme();
 
   // Toggle Body Background based on Theme
   useEffect(() => {

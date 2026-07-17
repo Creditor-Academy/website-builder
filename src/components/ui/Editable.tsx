@@ -50,6 +50,12 @@ export const Editable = forwardRef<HTMLElement, EditableProps>(({
 
   // Prevent parent events but allow typing
   const handleClick = (e: React.MouseEvent<any>) => {
+    // If we clicked on an anchor tag inside Editable, prevent navigation
+    const target = e.target as HTMLElement;
+    if (target.closest('a')) {
+      e.preventDefault();
+    }
+
     if (isEditing) {
       e.stopPropagation();
     }

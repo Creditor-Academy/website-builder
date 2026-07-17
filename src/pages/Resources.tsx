@@ -26,6 +26,7 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
 import Footer from "./Footer";
+import { useTheme } from "@/hooks/useTheme";
 
 const ResourceCard = ({ icon, title, description, isDark }: { icon: React.ReactNode, title: string, description: string, isDark: boolean }) => (
   <motion.div
@@ -52,8 +53,7 @@ const ResourceCard = ({ icon, title, description, isDark }: { icon: React.ReactN
 
 const Resources = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const isDark = theme === 'dark';
+  const { theme, setTheme, isDark } = useTheme();
 
   useEffect(() => {
     document.body.style.backgroundColor = isDark ? '#020617' : '#f8fafc';

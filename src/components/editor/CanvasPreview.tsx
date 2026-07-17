@@ -26,14 +26,17 @@ export function CanvasPreview() {
     );
   }
 
-  const handleSectionClick = (sectionId, e) => {
+  const handleSectionClick = (sectionId: string, e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('a')) {
+      e.preventDefault();
+    }
     if (!editor.previewMode) {
       e.stopPropagation();
       selectSection(sectionId);
     }
   };
 
-  const handleContentChange = (sectionId, field, value) => {
+  const handleContentChange = (sectionId: string, field: string, value: any) => {
     const section = page.sections.find(s => s.id === sectionId);
     if (section) {
       updateSectionContent(sectionId, {
@@ -43,8 +46,13 @@ export function CanvasPreview() {
     }
   };
 
-  const handleCanvasClick = () => {
-    if (!editor.previewMode) selectSection(null);
+  const handleCanvasClick = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('a')) {
+      e.preventDefault();
+    }
+    if (!editor.previewMode) {
+      selectSection(null);
+    }
   };
 
   const globalStyles = page?.globalStyles || {};

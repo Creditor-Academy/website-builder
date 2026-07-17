@@ -19,6 +19,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
 import Footer from "./Footer";
+import { useTheme } from "@/hooks/useTheme";
 
 // Assets
 import Ecommerce from "../assets/Ecomm.jpg";
@@ -33,10 +34,9 @@ import templatesImg from "../assets/templates_showcase.png";
 const Templates = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const { theme, setTheme, isDark } = useTheme();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
-  const isDark = theme === 'dark';
 
   useEffect(() => {
     document.body.style.backgroundColor = isDark ? '#020617' : '#f8fafc';

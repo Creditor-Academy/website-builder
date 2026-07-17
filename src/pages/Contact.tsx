@@ -22,6 +22,7 @@ import Footer from "./Footer";
 import contactApi from "@/api/contact";
 import { API_BASE_URL } from "@/api/client";
 import axios from "axios";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function Contact() {
   const [searchParams] = useSearchParams();
@@ -29,7 +30,7 @@ export default function Contact() {
   const [isSent, setIsSent] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const { theme, setTheme, isDark } = useTheme();
   const [websiteId, setWebsiteId] = useState<string>(searchParams.get("websiteId") || "");
   const [formData, setFormData] = useState({
     name: "",
@@ -37,7 +38,6 @@ export default function Contact() {
     subject: "General Inquiry",
     message: "",
   });
-  const isDark = theme === 'dark';
 
   const getWebsiteIdFromBuilderStorage = () => {
     try {

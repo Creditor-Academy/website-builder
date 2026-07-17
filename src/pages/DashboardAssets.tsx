@@ -187,7 +187,6 @@ export default function DashboardAssets() {
                                                >
                                                   {copiedId === item.id ? <div className="flex items-center gap-2"><Check className="w-3.5 h-3.5" /> Copied</div> : <div className="flex items-center gap-2"><Copy className="w-3.5 h-3.5" /> Copy Link</div>}
                                                </Button>
-                                               {!item.isGlobal && (
                                                <Button 
                                                   size="sm" 
                                                   variant="destructive" 
@@ -196,12 +195,11 @@ export default function DashboardAssets() {
                                                >
                                                   <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
                                                </Button>
-                                               )}
                                            </div>
 
                                            <div className="absolute top-4 left-4 flex gap-2">
-                                              <Badge className="bg-blue-100 text-blue-700 font-medium px-3 py-1 rounded-full text-xs">
-                                                 {item.type === 'image' ? 'Image' : 'Video'}
+                                              <Badge className="bg-blue-100 text-blue-700 font-medium px-3 py-1 rounded-full text-xs capitalize">
+                                                 {item.type || 'File'}
                                               </Badge>
                                               {item.isGlobal && (
                                               <Badge className="bg-amber-100 text-amber-700 font-medium px-3 py-1 rounded-full text-xs">

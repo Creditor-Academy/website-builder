@@ -23,6 +23,7 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
 import Footer from "./Footer";
+import { useTheme } from "@/hooks/useTheme";
 
 // Assets
 import dragDropImg from "../assets/drag_drop.png";
@@ -33,8 +34,7 @@ import uiShowcase2 from "../assets/ui_showcase_1.png";
 
 const FeaturesPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const isDark = theme === 'dark';
+  const { theme, setTheme, isDark } = useTheme();
 
   useEffect(() => {
     document.body.style.backgroundColor = isDark ? '#020617' : '#f8fafc';

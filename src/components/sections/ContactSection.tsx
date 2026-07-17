@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send, ArrowUpRight, Users, MessageSquare, Clock } from 'lucide-react';
 import { Editable } from '@/components/ui/Editable';
-import contactApi from '@/api/contact';
+import formsApi from '@/api/forms';
 import useBuilderStore from '@/store/useBuilderStore';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
@@ -126,12 +126,15 @@ function ContactForm({ content, isEditing, onContentChange, buttonPrimaryBg, but
 
     try {
       setIsSubmitting(true);
-      await contactApi.submitContactForm({
-        websiteId,
-        name: `${formValues.firstName} ${formValues.lastName}`.trim(),
-        email: formValues.email.trim(),
-        subject: content.headline || 'Contact Form Submission',
-        message: formValues.message.trim(),
+      await formsApi.submitForm({
+        website_id: websiteId,
+        form_name: 'contact',
+        data: {
+          name: `${formValues.firstName} ${formValues.lastName}`.trim(),
+          email: formValues.email.trim(),
+          subject: content.headline || 'Contact Form Submission',
+          message: formValues.message.trim(),
+        }
       });
       setIsSubmitted(true);
       setFormValues({
