@@ -816,6 +816,7 @@ const Dashboard = () => {
             }
         } finally {
             localStorage.removeItem("user");
+            localStorage.removeItem("dashboard_admin_mode");
             setIsLoggingOut(false);
             navigate("/");
         }
