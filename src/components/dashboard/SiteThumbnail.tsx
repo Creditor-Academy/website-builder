@@ -14,8 +14,8 @@ import { CaseStudiesSection } from '@/components/sections/CaseStudiesSection';
 class PreviewErrorBoundary extends Component<{ children: ReactNode }, { crashed: boolean }> {
     state = { crashed: false };
     static getDerivedStateFromError() { return { crashed: true }; }
-    componentDidCatch(err: Error, info: ErrorInfo) {
-        console.warn('[SiteThumbnail] section render error:', err.message);
+    componentDidCatch() {
+        // Silently catch section render errors — no console output in dev
     }
     render() {
         if (this.state.crashed) return null;
