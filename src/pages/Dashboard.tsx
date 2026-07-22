@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation, Outlet } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
@@ -7,7 +7,8 @@ import {
     FileText, Search, Sparkles, Zap, Files, Building2, ShoppingBag, Users,
     ArrowRight, ChevronLeft, Palette, Layers, MonitorPlay, Move, LayoutTemplate,
     Upload, Monitor, Link as LinkIcon, Activity, Menu, X, ShieldCheck, ListFilter, Bell, ArrowUp, ArrowDown,
-    UserX, RefreshCw, Eye, Image as ImageIcon, Loader2, MessageSquare, ExternalLink
+    UserX, RefreshCw, Eye, Image as ImageIcon, Loader2, MessageSquare, ExternalLink,
+    CheckCheck, Info, AlertTriangle, Trash, Globe2, User as UserIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,11 +23,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import GradientButton from '@/components/ui/GradientButton';
-
+import { SiteThumbnail } from '@/components/dashboard/SiteThumbnail';
 import { templatesList } from '@/lib/templates';
 import templateApi from '@/api/templates';
 import { loginUser, logoutUser } from "../api/auth";
 import statsApi from "../api/stats";
+import { getAuditLogs } from "../api/audit";
 import {
     updateUserProfile,
     deactivateOwnAccount,
@@ -81,43 +83,63 @@ const NavItem = ({ icon, label, to, activeColor = 'text-white', hoverBg = 'hover
     );
 };
 
-const WebsiteCard = ({ site, index, onDelete, onEdit, onViewMessages }: any) => {
-    const activeTemplateId = site.templateId || 'blank';
-    const template = templatesList.find((t) => t.id === activeTemplateId);
+const WebsiteCard = ({ site, index, onDelete, onEdit, onViewMessages, dbTemplates = [] }: any) => {
+    // templateId might be a local key ('business') or a DB UUID; sourceTemplateId is always a DB UUID
+    const activeTemplateId = site.templateId || site.sourceTemplateId || 'blank';
+    const localTemplate = templatesList.find((t) => t.id === activeTemplateId);
+    // Also check sourceTemplateId in DB templates
+    const dbTemplate = dbTemplates.find(
+        (t: any) => t.id === activeTemplateId || t.id === site.sourceTemplateId
+    ) || null;
+    const thumbnailImage = localTemplate?.image || dbTemplate?.image || null;
 
     const deployments = site.builderMeta?.deployments || [];
     const latestDeployment = deployments.length > 0 ? deployments[deployments.length - 1] : null;
     const publishedUrl = latestDeployment?.url || site.publishedUrl || (site.subdomain ? `https://${site.subdomain}.buildora.lmsathena.com` : null);
     return (
         <Card className="group/website-card border border-slate-200 bg-white rounded-3xl overflow-hidden flex flex-col shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 hover:-translate-y-1 transition-all duration-300">
-            <div className="aspect-[16/10] bg-slate-50 relative overflow-hidden">
-                {template && template.id !== 'blank' ? (
-                    <div className="absolute inset-0 transition-transform duration-500 group-hover/website-card:scale-105 p-4">
-                        <img src={template.image} alt={site.name} className="w-full h-full object-cover rounded-2xl border border-slate-200 shadow-sm" />
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-0 group-hover/website-card:opacity-100 transition-opacity duration-300" />
-                    </div>
+            <div className="aspect-[16/10] bg-slate-50 relative overflow-hidden rounded-t-3xl">
+                {/* Live preview — scaled real section render */}
+                {site?.pages?.[0]?.sections?.length > 0 ? (
+                    <>
+                        <SiteThumbnail site={site} className="absolute inset-0 w-full h-full" />
+                        {/* hover overlay with Edit button */}
+                        <div className="absolute inset-0 bg-slate-900/0 group-hover/website-card:bg-slate-900/30 transition-all duration-300" />
+                    </>
+                ) : thumbnailImage ? (
+                    <>
+                        <img
+                            src={thumbnailImage}
+                            alt={site.name}
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover/website-card:scale-105"
+                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                        />
+                        <div className="absolute inset-0 bg-slate-900/0 group-hover/website-card:bg-slate-900/30 transition-all duration-300" />
+                    </>
                 ) : (
-                    <div className="absolute inset-0 transition-transform duration-500 group-hover/website-card:scale-105 p-4">
-                        <div className="w-full h-full border border-slate-200 rounded-2xl bg-white shadow-sm flex flex-col overflow-hidden">
-                            <div className="h-6 bg-slate-50 border-b border-slate-100 flex items-center px-3 gap-1.5">
-                                <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
-                                <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
-                                <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
+                    /* Blank canvas — nice branded placeholder */
+                    <div className="absolute inset-0 flex flex-col"
+                        style={{ background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)' }}>
+                        <div className="h-7 bg-white/60 border-b border-slate-200/60 flex items-center px-4 gap-1.5 shrink-0">
+                            <div className="w-2.5 h-2.5 rounded-full bg-rose-300" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-amber-300" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-300" />
+                        </div>
+                        <div className="flex-1 flex flex-col items-center justify-center gap-3">
+                            <div className="w-14 h-14 rounded-2xl bg-white shadow-lg flex items-center justify-center border border-slate-100">
+                                <svg className="w-7 h-7 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
                             </div>
-                            <div className="p-4 space-y-3">
-                                <div className="h-3 w-3/4 bg-slate-100 rounded-full animate-pulse" />
-                                <div className="h-3 w-1/2 bg-slate-100 rounded-full" />
-                                <div className="flex gap-2 pt-2">
-                                    <div className="h-8 w-8 rounded-lg bg-slate-50" />
-                                    <div className="h-8 w-8 rounded-lg bg-slate-50" />
-                                </div>
+                            <div className="space-y-2 w-3/4">
+                                <div className="h-2.5 w-full bg-slate-200/80 rounded-full" />
+                                <div className="h-2 w-2/3 mx-auto bg-slate-200/60 rounded-full" />
                             </div>
                         </div>
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover/website-card:opacity-100 transition-opacity duration-300" />
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover/website-card:opacity-100 transition-opacity duration-300" />
+                        <div className="absolute inset-0 bg-slate-900/0 group-hover/website-card:bg-slate-900/20 transition-all duration-300" />
                     </div>
                 )}
-                
+
                 <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover/website-card:opacity-100 transition-all duration-300 z-10">
                     <Button size="sm" onClick={onEdit} className="bg-white text-slate-900 hover:bg-white/90 rounded-full shadow-lg">
                         <Edit2 className="w-4 h-4 mr-1" /> Edit
@@ -637,6 +659,18 @@ const Dashboard = () => {
     const [tempUserName, setTempUserName] = useState(user?.name || 'User');
     const [tempUserEmail] = useState(user?.email || '');
 
+    // Dashboard always uses light mode — strip dark class so landing page theme doesn't bleed in
+    useEffect(() => {
+        document.documentElement.classList.remove('dark');
+        document.body.style.backgroundColor = '';
+        return () => {
+            // Restore saved theme when leaving dashboard
+            try {
+                const saved = localStorage.getItem('buildora-theme');
+                if (saved === 'dark') document.documentElement.classList.add('dark');
+            } catch {}
+        };
+    }, []);
     const { toast } = useToast();
 
     const [newSiteName, setNewSiteName] = useState('');
@@ -644,7 +678,23 @@ const Dashboard = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTemplate, setSelectedTemplate] = useState('blank');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [isAdmin, setIsAdmin] = useState(false);
+    const [isAdmin, setIsAdminState] = useState(() => {
+        const savedUser = JSON.parse(localStorage.getItem("user") || 'null');
+        const isAdminRole = savedUser?.role === 'SUPER_ADMIN' || savedUser?.role === 'ADMIN' || savedUser?.role === 'INSTITUTION_ADMIN';
+        if (!isAdminRole) return false;
+        // Restore the last mode the user was in (defaults to false = user mode)
+        const saved = localStorage.getItem('dashboard_admin_mode');
+        return saved === 'true';
+    });
+
+    // Wrapper that persists mode so refresh keeps you where you were
+    const setIsAdmin = (val: boolean | ((prev: boolean) => boolean)) => {
+        setIsAdminState(prev => {
+            const next = typeof val === 'function' ? val(prev) : val;
+            localStorage.setItem('dashboard_admin_mode', String(next));
+            return next;
+        });
+    };
     const [isUserProfileDialogOpen, setIsUserProfileDialogOpen] = useState(false);
     const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
     const [sortBy, setSortBy] = useState('recent');
@@ -663,6 +713,17 @@ const Dashboard = () => {
     const [selectedUserId, setSelectedUserId] = useState(null);
     const [userDetailOpen, setUserDetailOpen] = useState(false);
     const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+
+    // ── Notification panel state ────────────────────────────────────────────
+    const [notifOpen, setNotifOpen] = useState(false);
+    const [notifications, setNotifications] = useState<any[]>([]);
+    const [notifLoading, setNotifLoading] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [readIds, setReadIds] = useState<Set<string>>(() => {
+        try { return new Set(JSON.parse(localStorage.getItem('readNotifIds') || '[]')); }
+        catch { return new Set(); }
+    });
+    const notifRef = useRef<HTMLDivElement>(null);
 
     // DB templates for New Project dialog
     const [dbTemplates, setDbTemplates] = useState<any[]>([]);
@@ -695,8 +756,10 @@ const Dashboard = () => {
             try {
                 setIsLoadingStats(true);
                 const response = await statsApi.getDashboardStats({ adminView: isAdmin });
-                if (response.data && response.data.data) {
-                    setStats(response.data.data);
+                // Handle both { data: { data: {...} } } and { data: {...} }
+                const statsData = response.data?.data || response.data;
+                if (statsData && typeof statsData === 'object') {
+                    setStats(prev => ({ ...prev, ...statsData }));
                 }
             } catch (err) {
                 console.error("Failed to fetch dashboard stats:", err);
@@ -711,16 +774,24 @@ const Dashboard = () => {
 
     // ✅ NEW: Fetch users list when admin mode is active
     useEffect(() => {
-        if (isAdmin) {
-            setIsLoadingUsers(true);
-            getUsers({ limit: 10, page: 1 })
-                .then((res) => {
-                    const data = res.data?.data?.users || res.data?.data || res.data || [];
-                    setAdminUsers(Array.isArray(data) ? data : []);
-                })
-                .catch((err) => console.error("Failed to fetch users:", err))
-                .finally(() => setIsLoadingUsers(false));
-        }
+        if (!isAdmin) return;
+        setIsLoadingUsers(true);
+        getUsers({ limit: 10, page: 1 })
+            .then((res) => {
+                // Handle every possible response shape the backend may return
+                const raw = res.data;
+                let users: any[] = [];
+                if (Array.isArray(raw?.data?.users)) users = raw.data.users;
+                else if (Array.isArray(raw?.data))   users = raw.data;
+                else if (Array.isArray(raw?.users))  users = raw.users;
+                else if (Array.isArray(raw))         users = raw;
+                setAdminUsers(users);
+            })
+            .catch((err) => {
+                console.error("Failed to fetch users:", err?.response?.data || err?.message);
+                setAdminUsers([]);
+            })
+            .finally(() => setIsLoadingUsers(false));
     }, [isAdmin]);
 
     // Fetch DB templates
@@ -817,6 +888,68 @@ const Dashboard = () => {
         }
     };
 
+    // ── Notification logic ──────────────────────────────────────────────────
+    const fetchNotifications = async () => {
+        setNotifLoading(true);
+        try {
+            const data = await getAuditLogs({ limit: 15, page: 1 });
+            const logs = data?.logs || data?.data?.logs || data?.data || [];
+            setNotifications(Array.isArray(logs) ? logs : []);
+            const unread = Array.isArray(logs)
+                ? logs.filter((l: any) => !readIds.has(l.id)).length
+                : 0;
+            setUnreadCount(unread);
+        } catch {
+            setNotifications([]);
+        } finally {
+            setNotifLoading(false);
+        }
+    };
+
+    // Open panel → fetch + close on outside click
+    useEffect(() => {
+        if (notifOpen) fetchNotifications();
+    }, [notifOpen]);
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+                setNotifOpen(false);
+            }
+        };
+        if (notifOpen) document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [notifOpen]);
+
+    const markAllRead = () => {
+        const allIds = new Set(notifications.map((n: any) => n.id));
+        setReadIds(allIds);
+        setUnreadCount(0);
+        try { localStorage.setItem('readNotifIds', JSON.stringify([...allIds])); } catch {}
+    };
+
+    const getNotifIcon = (action: string) => {
+        const a = (action || '').toLowerCase();
+        if (a.includes('delete') || a.includes('purge')) return <Trash className="w-3.5 h-3.5 text-rose-500" />;
+        if (a.includes('create') || a.includes('register')) return <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />;
+        if (a.includes('login') || a.includes('auth')) return <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />;
+        if (a.includes('update') || a.includes('edit')) return <Info className="w-3.5 h-3.5 text-indigo-500" />;
+        if (a.includes('publish') || a.includes('deploy')) return <Globe2 className="w-3.5 h-3.5 text-purple-500" />;
+        return <Activity className="w-3.5 h-3.5 text-slate-400" />;
+    };
+
+    const formatNotifTime = (dateStr: string) => {
+        try {
+            const diff = Date.now() - new Date(dateStr).getTime();
+            const mins = Math.floor(diff / 60000);
+            if (mins < 1) return 'just now';
+            if (mins < 60) return `${mins}m ago`;
+            const hrs = Math.floor(mins / 60);
+            if (hrs < 24) return `${hrs}h ago`;
+            return `${Math.floor(hrs / 24)}d ago`;
+        } catch { return ''; }
+    };
+
     const filteredWebsites = React.useMemo(() => {
         if (!websites) return [];
         let tempWebsites = websites.filter(site =>
@@ -906,6 +1039,7 @@ const Dashboard = () => {
                     <NavItem icon={<Layout className="w-4 h-4" />} label="Templates" to="/dashboard/templates" />
                     <NavItem icon={<ImageIcon className="w-4 h-4" />} label="Assets" to="/dashboard/assets" />
                     <NavItem icon={<MessageSquare className="w-4 h-4" />} label="Messages" to="/dashboard/messages" />
+                    <NavItem icon={<UserIcon className="w-4 h-4" />} label="Profile" to="/dashboard/profile" />
                     {isAdmin && (
                         <div className="pt-1">
                             <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest px-3 mb-1">System</p>
@@ -917,84 +1051,108 @@ const Dashboard = () => {
                             {/* <NavItem icon={<LayoutTemplate className="w-4 h-4" />} label="Templates" to="/dashboard/admin-templates" activeColor="text-white" /> */}
                             <NavItem icon={<Activity className="w-4 h-4" />} label="Deployment Monitoring" to="/dashboard/deployment" activeColor="text-white" />
                             <NavItem icon={<ShieldCheck className="w-4 h-4" />} label="Audit Logs" to="/dashboard/audit" activeColor="text-white" />
-                            <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" to="/dashboard/settings" activeColor="text-white" />
+                            {/* <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" to="/dashboard/settings" activeColor="text-white" /> */}
                         </div>
                     )}
                 </nav>
 
                 <div className="p-4 mt-auto space-y-3">
-                    {(user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' || user?.role === 'INSTITUTION_ADMIN') && (
-                        <GradientButton
-                            className="w-full justify-start py-2 px-3 text-sm"
-                            onClick={() => setIsAdmin(!isAdmin)}
-                            icon={isAdmin
-                                ? <ShieldCheck className="w-4 h-4 text-purple-400" />
-                                : <Users className="w-4 h-4" />
-                            }
-                        >
-                            {isAdmin ? "Admin Mode On" : "Switch to Admin Mode"}
-                        </GradientButton>
+                    {/* ── Admin access card (only when NOT in admin mode) ── */}
+                    {!isAdmin && (user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' || user?.role === 'INSTITUTION_ADMIN') && (
+                        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 p-4 shadow-lg">
+                            <div className="absolute -top-4 -right-4 w-20 h-20 bg-white/10 rounded-full pointer-events-none" />
+                            <div className="absolute -bottom-2 -left-2 w-14 h-14 bg-white/10 rounded-full pointer-events-none" />
+                            <div className="relative z-10">
+                                <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center mb-2">
+                                    <ShieldCheck className="w-4 h-4 text-white" />
+                                </div>
+                                <p className="text-white font-bold text-sm leading-tight">Admin Access</p>
+                                <p className="text-white/70 text-[11px] mt-0.5 mb-3">Switch to manage your platform.</p>
+                                <button
+                                    onClick={() => setIsAdmin(true)}
+                                    className="w-full bg-white text-indigo-700 font-bold text-xs py-2 rounded-xl hover:bg-indigo-50 transition-all active:scale-[0.98]"
+                                >
+                                    Go to Admin →
+                                </button>
+                            </div>
+                        </div>
                     )}
 
-                    <div
-                        className={`flex items-center gap-3 p-2 rounded-xl transition-colors border border-transparent 
-                            ${isLoggingOut ? "opacity-50 cursor-not-allowed" : "hover:bg-white/10 cursor-pointer hover:border-slate-700"}
-                        `}
-                        onClick={!isLoggingOut ? handleLogout : undefined}
-                    >
-                        <div className="relative">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-sm">
-                                {getInitials(userName)}
+                    {/* ── Exit admin mode (only when IN admin mode) ── */}
+                    {isAdmin && (user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' || user?.role === 'INSTITUTION_ADMIN') && (
+                        <button
+                            onClick={() => setIsAdmin(false)}
+                            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-sm font-semibold transition-all border border-white/10"
+                        >
+                            <ShieldCheck className="w-4 h-4 text-purple-300" />
+                            Exit Admin Mode
+                        </button>
+                    )}
+
+                    <div className="flex items-center gap-2 p-2 rounded-xl border border-transparent hover:bg-white/5 transition-colors">
+                        {/* Avatar → Profile page */}
+                        <div
+                            className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer group/profile"
+                            onClick={() => navigate('/dashboard/profile')}
+                        >
+                            <div className="relative shrink-0">
+                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-sm group-hover/profile:ring-2 group-hover/profile:ring-purple-400 transition-all">
+                                    {getInitials(userName)}
+                                </div>
+                                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-slate-800 rounded-full" />
                             </div>
-                            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-slate-800 rounded-full" />
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-white truncate group-hover/profile:text-purple-200 transition-colors">
+                                    {userName}
+                                </p>
+                                <p className="text-xs text-slate-400 truncate">View Profile</p>
+                            </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-white truncate">
-                                {isLoggingOut ? "Logging out..." : userName}
-                            </p>
-                            <p className="text-xs text-slate-400 truncate">Pro Plan</p>
-                        </div>
-                        <LogOut className="w-4 h-4 text-slate-400 hover:text-red-400 transition-colors" />
+                        {/* Logout button */}
+                        <button
+                            onClick={!isLoggingOut ? handleLogout : undefined}
+                            disabled={isLoggingOut}
+                            title="Log out"
+                            className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-white/10 transition-all disabled:opacity-50"
+                        >
+                            <LogOut className="w-4 h-4" />
+                        </button>
                     </div>
                 </div>
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
+            <main className={cn("flex-1 overflow-y-auto", isAdmin && location.pathname === '/dashboard' ? "" : "p-6 lg:p-10")}>
 
                 {location.pathname === '/dashboard' && !isAdmin ? (
                     <>
-                        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-                            <div className="flex items-center gap-4">
+                        {/* ── User dashboard header ── */}
+                        <div className="flex items-center justify-between gap-4 mb-8">
+                            <div className="flex items-center gap-3">
                                 {isMobile && (
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="lg:hidden"
-                                        onClick={() => setIsSidebarOpen(true)}
-                                    >
-                                        <Menu className="w-6 h-6" />
+                                    <Button variant="ghost" size="icon" className="lg:hidden -ml-2"
+                                        onClick={() => setIsSidebarOpen(true)}>
+                                        <Menu className="w-5 h-5" />
                                     </Button>
                                 )}
                                 <div>
-                                    <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">Project Hub</h2>
-                                    <p className="text-lg text-slate-600 flex items-center gap-2 mt-1">
-                                        Welcome back! You have <span className="text-indigo-600 font-medium">{websites.length} active projects</span>
+                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+                                        Good day, {userName.split(' ')[0]} 👋
+                                    </h2>
+                                    <p className="text-slate-400 text-sm mt-0.5">
+                                        {websites.filter(w => w.status?.toLowerCase() !== 'deleted').length} active projects
                                     </p>
                                 </div>
                             </div>
-
-                            <div className="flex items-center gap-4">
-                                <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-                                    <DialogTrigger asChild>
-                                        <GradientButton
-                                            onClick={() => setIsDialogOpen(true)}
-                                            className="h-11 px-6 text-base w-auto rounded-full"
-                                            icon={<Plus className="w-5 h-5 text-purple-600 group-hover:text-indigo-600 transition-colors" />}
-                                        >
-                                            New Project
-                                        </GradientButton>
-                                    </DialogTrigger>
+                            <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+                                <DialogTrigger asChild>
+                                    <button
+                                        onClick={() => setIsDialogOpen(true)}
+                                        className="flex items-center gap-2 bg-slate-900 hover:bg-slate-700 text-white font-semibold text-sm px-4 py-2.5 rounded-xl shadow-sm active:scale-[0.98] transition-all shrink-0"
+                                    >
+                                        <Plus className="w-4 h-4" /> New Project
+                                    </button>
+                                </DialogTrigger>
                                     <DialogContent className="sm:max-w-5xl rounded-[2rem] p-0 overflow-hidden bg-white border-slate-100 shadow-2xl">
                                         <DialogTitle className="sr-only">Create New Website</DialogTitle>
                                         <div className="flex flex-col md:flex-row h-[700px] w-full">
@@ -1110,73 +1268,7 @@ const Dashboard = () => {
                                         </div>
                                     </DialogContent>
                                 </Dialog>
-
-                                <Dialog open={isUserProfileDialogOpen} onOpenChange={setIsUserProfileDialogOpen}>
-                                    <DialogTrigger asChild>
-                                        <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-medium text-sm border-2 border-slate-300 shadow-sm cursor-pointer hover:bg-slate-100 transition-colors">
-                                            {getInitials(tempUserName)}
-                                        </div>
-                                    </DialogTrigger>
-                                    <DialogContent className="sm:max-w-[425px] rounded-[2rem] p-8 bg-white border-slate-200 shadow-xl">
-                                        <DialogHeader>
-                                            <DialogTitle className="text-2xl font-bold text-slate-900">User Profile</DialogTitle>
-                                            <DialogDescription className="text-slate-500">View and update your profile information.</DialogDescription>
-                                        </DialogHeader>
-                                        <div className="flex flex-col items-center gap-4 py-4">
-                                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-4xl shadow-lg">
-                                                {getInitials(tempUserName)}
-                                            </div>
-                                            <div className="grid gap-2 w-full">
-                                                <label htmlFor="name" className="text-sm font-medium text-slate-700">Name</label>
-                                                <Input
-                                                    id="name"
-                                                    value={tempUserName}
-                                                    onChange={(e) => setTempUserName(e.target.value)}
-                                                    className="rounded-xl bg-slate-50 border-slate-200 px-4 h-12 text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                                                />
-                                            </div>
-                                            <div className="grid gap-2 w-full">
-                                                <label htmlFor="email" className="text-sm font-medium text-slate-700">Email</label>
-                                                <Input
-                                                    id="email"
-                                                    value={tempUserEmail}
-                                                    disabled
-                                                    className="rounded-xl bg-slate-100 border-slate-200 px-4 h-12 text-slate-500 cursor-not-allowed"
-                                                />
-                                            </div>
-                                        </div>
-                                        <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-3">
-                                            <Button variant="outline" onClick={() => setIsUserProfileDialogOpen(false)} className="rounded-xl h-12 px-6 text-base border-slate-200 text-slate-700 hover:bg-slate-100">
-                                                Cancel
-                                            </Button>
-                                            <Button type="submit" onClick={handleProfileSave} disabled={isUpdatingProfile} className="rounded-xl h-12 px-6 text-base bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-600/30 transition-all">
-                                                {isUpdatingProfile ? "Saving..." : "Save Changes"}
-                                            </Button>
-                                        </DialogFooter>
-                                    </DialogContent>
-                                </Dialog>
                             </div>
-                        </header>
-
-                        {/* Overview Cards */}
-                        <section className="grid gap-6 mb-10 md:grid-cols-2 lg:grid-cols-4">
-                            <OverviewCard
-                                title="Total Websites"
-                                value={isLoadingStats ? "..." : stats.totalWebsites}
-                                description="Real-time project count"
-                                icon={<Globe className="w-5 h-5" />}
-                                iconBgClass="bg-gradient-to-br from-purple-600 to-indigo-600"
-                                iconColorClass="text-white"
-                            />
-                            <OverviewCard
-                                title="Templates Available"
-                                value={dbTemplates.length}
-                                description="Ready to use designs"
-                                icon={<Layout className="w-5 h-5" />}
-                                iconBgClass="bg-gradient-to-br from-emerald-600 to-teal-600"
-                                iconColorClass="text-white"
-                            />
-                        </section>
 
                         {/* Search and Filters */}
                         <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
@@ -1221,7 +1313,7 @@ const Dashboard = () => {
                             </div>
                         </div>
 
-                        {websites.length === 0 ? (
+                        {websites.filter(w => w.status?.toLowerCase() !== 'deleted').length === 0 ? (
                             <EmptyState onAction={() => setIsDialogOpen(true)} />
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -1230,6 +1322,7 @@ const Dashboard = () => {
                                         key={site.id}
                                         site={site}
                                         index={index}
+                                        dbTemplates={dbTemplates}
                                         onDelete={() => deleteWebsite(site.id)}
                                         onEdit={() => navigate(`/builder/${site.id}`)}
                                         onViewMessages={() => navigate(`/dashboard/messages?websiteId=${site.id}`)}
@@ -1239,215 +1332,226 @@ const Dashboard = () => {
                         )}
                     </>
                 ) : location.pathname === '/dashboard' && isAdmin ? (
-                    <div className="relative min-h-screen py-0 px-0 overflow-hidden">
-                        {/* Admin Dashboard Header */}
-                        <motion.header
-                            initial={{ opacity: 0, y: -20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
-                            className="sticky top-0 z-30 flex items-center justify-between min-h-[180px] px-6 lg:px-8 bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-xl shadow-purple-500/30 shrink-0 rounded-b-[2rem]"
-                        >
-                            <motion.div
-                                initial="hidden"
-                                animate="visible"
-                                variants={{
-                                    hidden: { opacity: 0 },
-                                    visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.3 } }
-                                }}
-                                className="flex items-center gap-4">
-                                <div className="flex flex-col">
-                                    <motion.p variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }} className="text-2xl font-semibold text-white/80 mb-1">Welcome back, {userName}!</motion.p>
-                                    <motion.h2 variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }} className="text-4xl font-extrabold text-white tracking-tight">Admin Dashboard</motion.h2>
-                                    <motion.p variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }} className="text-lg text-white/80 mt-0.5">Platform overview and management at a glance.</motion.p>
-                                </div>
-                            </motion.div>
-                            <div className="flex items-center gap-3">
-                                <Button variant="ghost" size="icon" className="relative rounded-full h-12 w-12 text-white hover:bg-white/10 transition-colors">
-                                    <Bell className="w-6 h-6" />
-                                    <span className="absolute top-3 right-3 block w-2.5 h-2.5 rounded-full bg-white" />
-                                </Button>
-                                <DropdownMenu open={isUserProfileDialogOpen} onOpenChange={setIsUserProfileDialogOpen}>
-                                    <DropdownMenuTrigger asChild>
-                                        <div className="w-12 h-12 rounded-full bg-purple-500 text-white flex items-center justify-center font-semibold text-base cursor-pointer shadow-md hover:shadow-lg transition-all">
-                                            {getInitials(userName)}
-                                        </div>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-slate-200 shadow-lg">
-                                        <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100" onClick={() => navigate('/dashboard/settings')}>
-                                            <Settings className="w-4 h-4" /> Settings
-                                        </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem onClick={handleLogout} className="rounded-lg gap-2 cursor-pointer text-rose-500 focus:bg-rose-50 focus:text-rose-600">
-                                            <LogOut className="w-4 h-4" /> Log Out
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </div>
-                        </motion.header>
+                    <div className="min-h-screen bg-[#f7f7fb]">
 
-                        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 md:py-10">
-                            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                                {[
-                                    { label: "Total Users", value: isLoadingStats ? "..." : stats.totalUsers, icon: <Users className="w-5 h-5" />, bg: "bg-purple-100", color: "text-purple-600", trend: "+12.5%", up: true },
-                                    { label: "Active Websites", value: isLoadingStats ? "..." : stats.totalWebsites, icon: <Globe className="w-6 h-6" />, bg: "bg-indigo-100", color: "text-indigo-600", trend: "-3.2%", up: false },
-                                    { label: "Total Templates", value: dbTemplates.length, icon: <LayoutTemplate className="w-5 h-5" />, bg: "bg-emerald-100", color: "text-emerald-600", trend: "+2 Templates", up: true },
-                                    { label: "Active Deployments", value: isLoadingStats ? "..." : stats.activeDeployments, icon: <Activity className="w-5 h-5" />, bg: "bg-rose-100", color: "text-rose-600", trend: "+8.1%", up: true },
-                                ].map((stat, i) => (
-                                    <motion.div
-                                        key={stat.label}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.5, delay: i * 0.1 }}
-                                        className="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300"
-                                    >
-                                        <div className="flex items-center gap-3 mb-3">
-                                            <div className={`w-10 h-10 ${stat.bg} ${stat.color} rounded-xl flex items-center justify-center`}>
-                                                {stat.icon}
-                                            </div>
-                                            <p className="text-sm font-medium text-slate-600">{stat.label}</p>
-                                        </div>
-                                        <div className="flex items-end justify-between">
-                                            <span className="text-4xl font-extrabold text-slate-900">{stat.value}</span>
-                                            <span className={`text-sm font-semibold flex items-center ${stat.up ? "text-emerald-500" : "text-rose-500"}`}>
-                                                {stat.up ? <ArrowUp className="w-4 h-4 mr-0.5" /> : <ArrowDown className="w-4 h-4 mr-0.5" />}
-                                                {stat.trend}
+                        {/* ── Admin top strip ── */}
+                        <div className="bg-white border-b border-slate-100 px-6 lg:px-8 py-4 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                {isMobile && (
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 -ml-1" onClick={() => setIsSidebarOpen(true)}>
+                                        <Menu className="w-5 h-5" />
+                                    </Button>
+                                )}
+                                <div>
+                                    <h1 className="text-lg font-bold text-slate-900 leading-tight">Admin Dashboard</h1>
+                                    <p className="text-xs text-slate-400 mt-0.5">Platform overview · {new Date().toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                {/* Notification Bell */}
+                                <div ref={notifRef} className="relative">
+                                    <Button variant="ghost" size="icon"
+                                        onClick={() => setNotifOpen(v => !v)}
+                                        className="relative rounded-lg h-9 w-9 text-slate-500 hover:bg-slate-100 transition-colors">
+                                        <Bell className="w-4 h-4" />
+                                        {unreadCount > 0 && (
+                                            <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full bg-rose-500 text-white text-[8px] font-black flex items-center justify-center">
+                                                {unreadCount > 9 ? '9+' : unreadCount}
                                             </span>
+                                        )}
+                                    </Button>
+                                    <AnimatePresence>
+                                        {notifOpen && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                                                transition={{ duration: 0.18 }}
+                                                className="absolute right-0 top-11 w-[340px] bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden"
+                                            >
+                                                <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100">
+                                                    <span className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                                                        <Bell className="w-4 h-4" /> Notifications
+                                                        {unreadCount > 0 && <span className="bg-rose-100 text-rose-600 text-[10px] font-black px-2 py-0.5 rounded-full">{unreadCount} new</span>}
+                                                    </span>
+                                                    {unreadCount > 0 && <button onClick={markAllRead} className="text-[11px] text-indigo-600 font-bold hover:underline flex items-center gap-1"><CheckCheck className="w-3.5 h-3.5" /> Mark all read</button>}
+                                                </div>
+                                                <div className="overflow-y-auto max-h-[320px]">
+                                                    {notifLoading ? (
+                                                        <div className="flex flex-col gap-3 p-4">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="flex items-start gap-3 animate-pulse"><div className="w-7 h-7 rounded-full bg-slate-100 shrink-0" /><div className="flex-1 space-y-1.5"><div className="h-3 bg-slate-100 rounded-full w-3/4" /><div className="h-2.5 bg-slate-100 rounded-full w-1/2" /></div></div>)}</div>
+                                                    ) : notifications.length === 0 ? (
+                                                        <div className="flex flex-col items-center justify-center py-10 gap-2 text-slate-400"><Bell className="w-8 h-8 opacity-20" /><p className="text-sm font-medium">No notifications yet</p></div>
+                                                    ) : notifications.map((n: any) => {
+                                                        const isUnread = !readIds.has(n.id);
+                                                        return (
+                                                            <div key={n.id} className={cn("flex items-start gap-3 px-5 py-3.5 border-b border-slate-50 hover:bg-slate-50 transition-colors", isUnread && "bg-indigo-50/40")}>
+                                                                <div className={cn("w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5", isUnread ? "bg-white shadow-sm border border-slate-100" : "bg-slate-100")}>{getNotifIcon(n.action)}</div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className={cn("text-[13px] leading-snug truncate", isUnread ? "font-semibold text-slate-900" : "font-medium text-slate-600")}>{n.action || n.type || 'System event'}</p>
+                                                                    <p className="text-[11px] text-slate-400 mt-0.5">{formatNotifTime(n.createdAt || n.created_at)}</p>
+                                                                </div>
+                                                                {isUnread && <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0 mt-2" />}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                                {notifications.length > 0 && (
+                                                    <div className="px-5 py-3 bg-slate-50 border-t border-slate-100">
+                                                        <button onClick={() => { setNotifOpen(false); navigate('/dashboard/audit'); }} className="text-[12px] font-bold text-indigo-600 hover:underline w-full text-center">View all in Audit Logs →</button>
+                                                    </div>
+                                                )}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                                <button
+                                    onClick={() => setIsAdmin(false)}
+                                    className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg transition-all"
+                                >
+                                    <ShieldCheck className="w-3.5 h-3.5" /> Exit Admin
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* ── Content ── */}
+                        <div className="px-6 lg:px-8 py-6 space-y-5">
+
+                            {/* Greeting banner */}
+                            <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-700 rounded-2xl px-7 py-5 flex items-center justify-between shadow-md shadow-indigo-200/40">
+                                <div className="absolute right-0 top-0 w-48 h-full bg-white/5 skew-x-[-15deg] translate-x-8 pointer-events-none" />
+                                <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-white/5 rounded-full pointer-events-none" />
+                                <div className="relative z-10">
+                                    <p className="text-indigo-200 text-sm font-medium">Good day, {userName} 👋</p>
+                                    <h2 className="text-xl font-black text-white mt-0.5 tracking-tight">Admin Dashboard</h2>
+                                    <p className="text-indigo-200/70 text-xs mt-1">Here's what's happening on the platform today.</p>
+                                </div>
+                            </div>
+
+                            {/* Stats */}
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                {[
+                                    { label: "Total Users",        value: isLoadingStats ? "…" : stats.totalUsers,        icon: <Users className="w-4 h-4" />,        iconBg: "bg-purple-100 text-purple-600", trend: "+12.5%", up: true  },
+                                    { label: "Active Websites",    value: isLoadingStats ? "…" : stats.totalWebsites,     icon: <Globe className="w-4 h-4" />,         iconBg: "bg-indigo-100 text-indigo-600", trend: "+3.2%",  up: true  },
+                                    { label: "Total Templates",    value: dbTemplates.length,                              icon: <LayoutTemplate className="w-4 h-4" />, iconBg: "bg-emerald-100 text-emerald-600",trend: "+2",     up: true  },
+                                    { label: "Active Deployments", value: isLoadingStats ? "…" : stats.activeDeployments, icon: <Activity className="w-4 h-4" />,      iconBg: "bg-rose-100 text-rose-600",    trend: "+8.1%",  up: true  },
+                                ].map((s, i) => (
+                                    <motion.div key={s.label}
+                                        initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: i * 0.07 }}
+                                        className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-all">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <p className="text-xs font-semibold text-slate-500">{s.label}</p>
+                                            <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center", s.iconBg)}>{s.icon}</div>
                                         </div>
+                                        <p className="text-3xl font-black text-slate-900">{s.value}</p>
+                                        <p className={cn("text-xs font-semibold mt-1 flex items-center gap-0.5", s.up ? "text-emerald-500" : "text-rose-500")}>
+                                            {s.up ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}{s.trend}
+                                        </p>
                                     </motion.div>
                                 ))}
-                            </section>
+                            </div>
 
-                            {/* ✅ NEW: Admin Users Quick Panel — uses real getUsers data */}
-                            <div className="mb-8">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-xl font-bold text-slate-900">Recent Users</h3>
-                                    <div className="flex items-center gap-2">
-                                        <Button
-                                            size="sm"
-                                            className="rounded-full text-xs bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/20 hover:shadow-lg transition-all gap-1.5"
-                                            onClick={() => setIsAddUserOpen(true)}
-                                        >
-                                            <Plus className="w-3.5 h-3.5" /> Add User
-                                        </Button>
-                                        <Button variant="outline" size="sm" className="rounded-full text-xs" onClick={() => navigate('/dashboard/users')}>
-                                            View All <ArrowRight className="w-3 h-3 ml-1" />
-                                        </Button>
-                                    </div>
-                                </div>
-                                <div className="bg-white rounded-2xl border border-slate-100 shadow-lg overflow-hidden">
-                                    {isLoadingUsers ? (
-                                        <div className="flex items-center justify-center py-12">
-                                            <RefreshCw className="w-5 h-5 animate-spin text-slate-400" />
+                            {/* Main grid */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+                                {/* Recent Users — 2/3 */}
+                                <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                                    <div className="flex items-center justify-between px-6 py-4 border-b border-slate-50">
+                                        <div>
+                                            <h3 className="text-sm font-bold text-slate-900">Recent Users</h3>
+                                            <p className="text-[11px] text-slate-400 mt-0.5">Latest registered accounts</p>
                                         </div>
-                                    ) : adminUsers.length === 0 ? (
-                                        <p className="text-center text-slate-400 py-10 text-sm">No users found.</p>
-                                    ) : (
-                                        <div className="divide-y divide-slate-50">
-                                            {adminUsers.slice(0, 6).map((u) => (
-                                                <div key={u.id} className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-sm shrink-0">
-                                                            {getInitials(u.name)}
+                                        <div className="flex gap-2">
+                                            <Button size="sm" className="h-8 rounded-xl text-xs bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 shadow-sm" onClick={() => setIsAddUserOpen(true)}>
+                                                <Plus className="w-3.5 h-3.5" /> Add User
+                                            </Button>
+                                            <Button variant="outline" size="sm" className="h-8 rounded-xl text-xs border-slate-200 text-slate-600 hover:bg-slate-50" onClick={() => navigate('/dashboard/users')}>
+                                                View All
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        {isLoadingUsers ? (
+                                            <div className="flex justify-center py-10"><RefreshCw className="w-5 h-5 animate-spin text-slate-300" /></div>
+                                        ) : adminUsers.length === 0 ? (
+                                            <p className="text-center text-slate-400 py-10 text-sm">No users found.</p>
+                                        ) : (
+                                            <div className="divide-y divide-slate-50">
+                                                {adminUsers.slice(0, 6).map((u) => (
+                                                    <div key={u.id} className="flex items-center justify-between px-6 py-3 hover:bg-slate-50/60 transition-colors">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                                                                {getInitials(u.name)}
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-semibold text-slate-800 leading-tight">{u.name}</p>
+                                                                <p className="text-[11px] text-slate-400">{u.email}</p>
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <p className="text-sm font-semibold text-slate-800">{u.name}</p>
-                                                            <p className="text-xs text-slate-400">{u.email}</p>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className={cn("text-[10px] font-bold px-2.5 py-1 rounded-full",
+                                                                u.active ? "bg-emerald-50 text-emerald-600 border border-emerald-100" : "bg-rose-50 text-rose-500 border border-rose-100")}>
+                                                                {u.active ? "Active" : "Suspended"}
+                                                            </span>
+                                                            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg hover:bg-slate-100" onClick={() => { setSelectedUserId(u.id); setUserDetailOpen(true); }}>
+                                                                <Eye className="w-3.5 h-3.5 text-slate-400" />
+                                                            </Button>
+                                                            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg hover:bg-slate-100" onClick={() => handleToggleUserStatus(u.id, u.active)}>
+                                                                <UserX className={cn("w-3.5 h-3.5", u.active ? "text-rose-400" : "text-emerald-500")} />
+                                                            </Button>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className={cn(
-                                                            "text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full",
-                                                            u.active
-                                                                ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                                                                : "bg-rose-50 text-rose-500 border border-rose-100"
-                                                        )}>
-                                                            {u.active ? "Active" : "Suspended"}
-                                                        </span>
-                                                        {/* View detail */}
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8 rounded-full hover:bg-slate-100"
-                                                            title="View user details"
-                                                            onClick={() => { setSelectedUserId(u.id); setUserDetailOpen(true); }}
-                                                        >
-                                                            <Eye className="w-4 h-4 text-slate-400" />
-                                                        </Button>
-                                                        {/* Suspend / Reactivate */}
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8 rounded-full hover:bg-slate-100"
-                                                            title={u.active ? "Suspend user" : "Reactivate user"}
-                                                            onClick={() => handleToggleUserStatus(u.id, u.active)}
-                                                        >
-                                                            <UserX className={cn("w-4 h-4", u.active ? "text-rose-400" : "text-emerald-500")} />
-                                                        </Button>
-                                                        {/* Restore (only for deleted users) */}
-                                                        {u.deletedAt && (
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="h-8 w-8 rounded-full hover:bg-slate-100"
-                                                                title="Restore deleted user"
-                                                                onClick={() => handleRestoreUser(u.id)}
-                                                            >
-                                                                <RefreshCw className="w-4 h-4 text-blue-400" />
-                                                            </Button>
-                                                        )}
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Right column: Quick Actions + Recent Activity */}
+                                <div className="flex flex-col gap-4">
+                                    {/* Quick Actions */}
+                                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                                        <h3 className="text-sm font-bold text-slate-900 mb-3">Quick Actions</h3>
+                                        <div className="space-y-1.5">
+                                            {[
+                                                { label: "Manage Users",        icon: <Users className="w-3.5 h-3.5" />,       bg: "bg-purple-100 text-purple-600", to: '/dashboard/users' },
+                                                { label: "Manage Websites",     icon: <Globe className="w-3.5 h-3.5" />,        bg: "bg-indigo-100 text-indigo-600", to: '/dashboard/websites' },
+                                                { label: "Manage Templates",    icon: <LayoutTemplate className="w-3.5 h-3.5" />,bg: "bg-emerald-100 text-emerald-600", to: '/dashboard/admin-templates' },
+                                                { label: "Monitor Deployments", icon: <Activity className="w-3.5 h-3.5" />,     bg: "bg-rose-100 text-rose-600", to: '/dashboard/deployment' },
+                                                { label: "Audit Logs",          icon: <ShieldCheck className="w-3.5 h-3.5" />,  bg: "bg-slate-100 text-slate-500", to: '/dashboard/audit' },
+                                            ].map((a) => (
+                                                <button key={a.label} onClick={() => navigate(a.to)}
+                                                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors group text-left">
+                                                    <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", a.bg)}>{a.icon}</div>
+                                                    <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">{a.label}</span>
+                                                    <ArrowRight className="w-3.5 h-3.5 text-slate-300 ml-auto group-hover:text-slate-500 transition-colors" />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Recent Activity */}
+                                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex-1">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h3 className="text-sm font-bold text-slate-900">Recent Activity</h3>
+                                            <button onClick={() => navigate('/dashboard/audit')} className="text-[11px] text-indigo-600 font-bold hover:underline">View All</button>
+                                        </div>
+                                        <div className="space-y-3">
+                                            {notifications.length === 0 && !notifLoading && (
+                                                <p className="text-xs text-slate-400 text-center py-3">No recent activity</p>
+                                            )}
+                                            {notifications.slice(0, 5).map((n: any) => (
+                                                <div key={n.id} className="flex items-start gap-2.5">
+                                                    <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center shrink-0 mt-0.5">
+                                                        {getNotifIcon(n.action)}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-xs font-medium text-slate-700 truncate">{n.action || 'System event'}</p>
+                                                        <p className="text-[10px] text-slate-400">{formatNotifTime(n.createdAt || n.created_at)}</p>
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Quick action cards */}
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                    {[
-                                        { label: "Manage Users", desc: "Overview and control of all user accounts.", icon: <Users className="w-7 h-7" />, bg: "bg-purple-100", color: "text-purple-600", border: "hover:border-purple-300", to: '/dashboard/users' },
-                                        { label: "Manage Websites", desc: "Oversee all created websites, their status, and configurations.", icon: <Layout className="w-7 h-7" />, bg: "bg-indigo-100", color: "text-indigo-600", border: "hover:border-indigo-300", to: '/dashboard/websites' },
-                                        { label: "Manage Templates", desc: "Browse, add, and manage all available website templates.", icon: <LayoutTemplate className="w-7 h-7" />, bg: "bg-emerald-100", color: "text-emerald-600", border: "hover:border-emerald-300", to: '/dashboard/admin-templates' },
-                                    ].map((card) => (
-                                        <motion.div
-                                            key={card.label}
-                                            whileHover={{ scale: 1.02 }}
-                                            transition={{ duration: 0.3 }}
-                                            onClick={() => navigate(card.to)}
-                                            className={`relative cursor-pointer bg-white rounded-2xl p-6 shadow-lg border border-slate-100 flex flex-col items-start transition-all duration-300 hover:-translate-y-1 ${card.border}`}
-                                        >
-                                            <div className={`w-14 h-14 ${card.bg} ${card.color} rounded-xl flex items-center justify-center mb-4 shadow-sm`}>
-                                                {card.icon}
-                                            </div>
-                                            <h3 className="text-xl font-bold text-slate-900 mb-1">{card.label}</h3>
-                                            <p className="text-slate-600 text-sm">{card.desc}</p>
-                                        </motion.div>
-                                    ))}
-                                </div>
-
-                                <div className="lg:col-span-1 space-y-6">
-                                    <motion.div
-                                        whileHover={{ scale: 1.02 }}
-                                        transition={{ duration: 0.3 }}
-                                        onClick={() => navigate('/dashboard/deployment')}
-                                        className="relative cursor-pointer bg-white rounded-2xl p-6 shadow-lg border border-slate-100 flex flex-col items-start transition-all duration-300 hover:-translate-y-1 hover:border-rose-300"
-                                    >
-                                        <div className="w-14 h-14 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center mb-4 shadow-sm">
-                                            <Activity className="w-7 h-7" />
-                                        </div>
-                                        <h3 className="text-xl font-bold text-slate-900 mb-1">Monitor Deployments</h3>
-                                        <p className="text-slate-600 text-sm">Track the status and history of all website deployments.</p>
-                                    </motion.div>
-
-                                    <Card className="rounded-2xl bg-white border border-slate-100 shadow-lg p-6 flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                                        <h3 className="text-xl font-bold text-slate-900 mb-4">Quick Insights</h3>
-                                        <p className="text-sm text-slate-600">Additional admin information can go here. For example, recent logs, system health, or quick links.</p>
-                                        <Button variant="link" className="mt-4 self-start text-purple-600 p-0 h-auto text-sm font-bold">
-                                            View Details →
-                                        </Button>
-                                    </Card>
+                                    </div>
                                 </div>
                             </div>
                         </div>

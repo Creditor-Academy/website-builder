@@ -140,12 +140,11 @@ const Templates = () => {
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
-            <Link to="/login" className={isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"}>Log in</Link>
-            <Link to="/contact" className={cn(
+            <Link to="/login" className={cn(
               "px-5 py-2.5 rounded-full font-semibold transition-all active:scale-95",
               isDark ? "bg-white text-slate-950 hover:bg-blue-50" : "bg-slate-900 text-white hover:bg-blue-600"
             )}>
-              Get started
+              Login
             </Link>
           </div>
 
@@ -181,16 +180,8 @@ const Templates = () => {
                   </Link>
                 ))}
                 <div className={cn("h-px w-full my-2", isDark ? "bg-slate-800" : "bg-slate-100")} />
-                <Link to="/login" onClick={() => setIsMenuOpen(false)} className={cn("text-lg font-semibold p-2", isDark ? "text-slate-300" : "text-slate-600")}>Log in</Link>
-                <Link
-                  to="/contact"
-                  onClick={() => setIsMenuOpen(false)}
-                  className={cn(
-                    "mt-2 py-4 rounded-2xl text-center font-bold text-lg",
-                    isDark ? "bg-white text-slate-950" : "bg-slate-900 text-white"
-                  )}
-                >
-                  Get started
+                <Link to="/login" onClick={() => setIsMenuOpen(false)} className={cn("mt-2 py-4 rounded-2xl text-center font-bold text-lg", isDark ? "bg-white text-slate-950" : "bg-slate-900 text-white")}>
+                  Login
                 </Link>
               </div>
             </motion.div>
@@ -459,11 +450,11 @@ const Templates = () => {
             Start with a blank canvas and build something completely unique with our drag-and-drop tools.
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center relative z-10">
-            <Link to="/contact" className={cn(
+            <Link to="/login" className={cn(
               "h-20 px-12 rounded-full font-black text-xl flex items-center justify-center gap-3 transition-all",
               isDark ? "bg-white text-slate-950 hover:bg-blue-50 shadow-blue-500/50 shadow-2xl" : "bg-slate-900 text-white hover:bg-blue-600 shadow-2xl"
             )}>
-              Start Blank Canvas <ArrowRight className="w-6 h-6" />
+              Start with Blank Canvas <ArrowRight className="w-6 h-6" />
             </Link>
           </div>
         </motion.div>

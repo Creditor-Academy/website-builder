@@ -193,6 +193,18 @@ export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
   const store = useBuilderStore();
   const { selectWebsite, activeWebsiteId } = store;
 
+  // Editor always uses light mode
+  useEffect(() => {
+    document.documentElement.classList.remove('dark');
+    document.body.style.backgroundColor = '';
+    return () => {
+      try {
+        const saved = localStorage.getItem('buildora-theme');
+        if (saved === 'dark') document.documentElement.classList.add('dark');
+      } catch {}
+    };
+  }, []);
+
   useEffect(() => {
     if (id) {
       selectWebsite(id);

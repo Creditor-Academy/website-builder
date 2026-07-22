@@ -35,7 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Globe2, LayoutGrid, ShieldCheck, User as UserIcon, Hash, FileText, Link, Clock, Edit, Copy, Eye, Trash2, MoreVertical, CheckCircle, CircleDotDashed, Ban, Search, ListFilter, Plus, Building2
+  Globe2, LayoutGrid, ShieldCheck, User as UserIcon, Hash, FileText, Link, Clock, Edit, Copy, Eye, Trash2, MoreVertical, CheckCircle, CircleDotDashed, Ban, Search, ListFilter, Plus, Building2, RotateCcw
 } from 'lucide-react';
 import WebsiteShimmer from '@/components/dashboard/WebsiteShimmer';
 import GradientButton from '@/components/ui/GradientButton';
@@ -59,7 +59,7 @@ export default function DashboardWebsites() {
   const orgId = new URLSearchParams(search).get('org');
 
   const { toast } = useToast();
-  const { websites, fetchWebsites, deleteWebsite } = useBuilderStore();
+  const { websites, fetchWebsites, deleteWebsite, restoreWebsite } = useBuilderStore();
   const [isLoading, setIsLoading] = useState(true);
 
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -186,10 +186,12 @@ export default function DashboardWebsites() {
         await deleteWebsite(website.id);
         toast({
           title: "Website Deleted",
-          description: `${website.name} has been successfully deleted.`,
+          description: `${website.name} has been moved to Deleted.`,
           variant: "default",
         });
-        await fetchWebsites(orgId || undefined, isAdminView && isAdminRole);
+        // No re-fetch needed — store already marks it as DELETED optimistically.
+        // Switch to Deleted tab so the user can see it there.
+        setFilterStatus('Deleted');
       } catch (error) {
         toast({
           title: "Delete Failed",
@@ -197,6 +199,24 @@ export default function DashboardWebsites() {
           variant: "destructive",
         });
       }
+    }
+  };
+
+  const handleRestore = async (website: any) => {
+    try {
+      await restoreWebsite(website.id);
+      toast({
+        title: "Website Restored",
+        description: `${website.name} has been restored to Draft.`,
+        variant: "default",
+      });
+      setFilterStatus('all');
+    } catch (error) {
+      toast({
+        title: "Restore Failed",
+        description: "Could not restore the website.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -385,6 +405,34 @@ export default function DashboardWebsites() {
                     {formatDate(website.lastEdited)}
                   </TableCell>
                   <TableCell className="text-right px-4 py-3">
+                    {website.status?.toLowerCase() === 'deleted' ? (
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleRestore(website)}
+                          className="h-8 px-3 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-semibold text-xs gap-1.5 shadow-none"
+                          variant="ghost"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" /> Restore
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0 data-[state=open]:bg-slate-100">
+                              <MoreVertical className="h-4 w-4 text-slate-500" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-slate-200 shadow-lg">
+                            <DropdownMenuItem onClick={() => handleRestore(website)} className="rounded-lg gap-2 cursor-pointer focus:bg-emerald-50 text-emerald-700">
+                              <RotateCcw className="w-4 h-4" /> Restore
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleDelete(website)} className="rounded-lg gap-2 cursor-pointer text-destructive focus:bg-destructive/5">
+                              <Trash2 className="w-4 h-4" /> Delete Permanently
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    ) : (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0 data-[state=open]:bg-slate-100">
@@ -404,6 +452,7 @@ export default function DashboardWebsites() {
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

@@ -38,6 +38,7 @@ const NotFound = React.lazy(() => import("./pages/NotFound"));
 const GoogleCallback = React.lazy(() => import("./pages/GoogleCallback"));
 const DashboardMessages = React.lazy(() => import("./pages/DashboardMessages"));
 const DashboardAuditLogs = React.lazy(() => import("./pages/DashboardAuditLogs"));
+const DashboardProfile = React.lazy(() => import("./pages/DashboardProfile"));
 
 import { ScrollToTop } from "./components/utils/ScrollToTop";
 import { JumpToTop } from "./components/ui/JumpToTop";
@@ -74,7 +75,8 @@ const App = () => (
                 <Route path="assets" element={<DashboardAssets />} />
                 <Route path="messages" element={<DashboardMessages />} />
                 <Route path="audit" element={<DashboardAuditLogs />} />
-                <Route path="settings" element={<DashboardSettings />} />
+                {/* <Route path="settings" element={<DashboardSettings />} /> */}
+                <Route path="profile" element={<DashboardProfile />} />
               </Route>
               <Route path="/builder/:id" element={<WebsiteEditor />} />
               <Route path="/template-builder/:id" element={<TemplateEditor />} />

@@ -8,18 +8,34 @@
   <meta name="description" content="Buildora — Build professional websites without code" />
   <meta name="author" content="Buildora" />
 
+  <!-- Favicon -->
+  <link rel="icon" type="image/webp" href="/buildora.webp" />
+  <link rel="shortcut icon" href="/buildora.webp" />
+  <link rel="apple-touch-icon" href="/buildora.webp" />
+
   <meta property="og:title" content="Buildora | Website Builder" />
   <meta property="og:description" content="Build professional websites without code" />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="/images/og-image.png" />
+  <meta property="og:image" content="/buildora.webp" />
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@Buildora" />
-  <meta name="twitter:image" content="/images/og-image.png" />
+  <meta name="twitter:image" content="/buildora.webp" />
+
+  <!-- Apply saved theme before first paint to prevent flash -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('buildora-theme');
+        if (t === 'dark') document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+      } catch (e) {}
+    })();
+  </script>
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root"></div>1  X 
   <script type="module" src="/src/main.tsx"></script>
 </body>
 
