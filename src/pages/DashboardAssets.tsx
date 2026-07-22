@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Search, Upload, Check, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Trash2, Copy } from 'lucide-react';
+import { Search, Upload, Check, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Trash2, Copy, Loader2 } from 'lucide-react';
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../components/ui/card";
 import { Input } from "../components/ui/input";
@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../components/ui/dialog";
 import { Label } from "../components/ui/label";
 import { Badge } from "../components/ui/badge";
+import { DuplicateAssetDialog } from "../components/ui/DuplicateAssetDialog";
 
 import { useToast } from "../hooks/use-toast";
 import useBuilderStore from '../store/useBuilderStore';
@@ -16,8 +17,17 @@ import useBuilderStore from '../store/useBuilderStore';
 
 export default function DashboardAssets() {
     const { deleteAsset, fetchAssets, getScopedAssets, uploadAsset, importAssetFromUrl } = useBuilderStore();
+
+    const [isFetching, setIsFetching] = useState(true);
+    const [uploadingCount, setUploadingCount] = useState(0);
+    const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+    // duplicate-name conflict state
+    const [dupFile, setDupFile] = useState<File | null>(null);
+    const [dupConflictName, setDupConflictName] = useState('');
+
     useEffect(() => {
-        void fetchAssets();
+        setIsFetching(true);
+        void fetchAssets().finally(() => setIsFetching(false));
     }, [fetchAssets]);
 
     const [search, setSearch] = useState('');
@@ -36,24 +46,65 @@ export default function DashboardAssets() {
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            try {
-                await uploadAsset(file);
-                toast({ title: "Asset Uploaded", description: "Your asset has been successfully uploaded." });
-            } catch (error: any) {
-                toast({ 
-                    variant: "destructive", 
-                    title: "Upload Failed", 
-                    description: error.response?.data?.message || error.response?.data?.error || "Failed to upload asset." 
-                });
-            } finally {
-                if (e.target) e.target.value = '';
-            }
+        if (!file) return;
+
+        if (e.target) e.target.value = ''; // reset input immediately so the same file can be re-picked
+
+        // Size guard
+        if (file.size > 100 * 1024 * 1024) {
+            toast({
+                variant: "destructive",
+                title: "File too large",
+                description: `"${file.name}" is ${(file.size / (1024 * 1024)).toFixed(1)} MB. Maximum allowed size is 100 MB.`,
+            });
+            return;
+        }
+
+        // Duplicate name check (compare base names, case-insensitive)
+        const incomingBase = file.name.replace(/\.[^/.]+$/, '').toLowerCase();
+        const conflict = assets.find(a => a.name.replace(/\.[^/.]+$/, '').toLowerCase() === incomingBase);
+        if (conflict) {
+            setDupConflictName(conflict.name);
+            setDupFile(file);
+            return; // wait for user decision in the dialog
+        }
+
+        await doUpload(file);
+    };
+
+    /** Performs the actual upload with an optional renamed File object */
+    const doUpload = async (file: File) => {
+        setUploadingCount(c => c + 1);
+        try {
+            await uploadAsset(file);
+            toast({ title: "Asset Uploaded", description: "Your asset has been successfully uploaded." });
+        } catch (error: any) {
+            toast({
+                variant: "destructive",
+                title: "Upload Failed",
+                description: error.response?.data?.message || error.response?.data?.error || "Failed to upload asset.",
+            });
+        } finally {
+            setUploadingCount(c => c - 1);
         }
     };
 
+    const handleDupReplace = async (file: File) => {
+        setDupFile(null);
+        await doUpload(file);
+    };
+
+    const handleDupRename = async (file: File, newName: string) => {
+        setDupFile(null);
+        const renamed = new File([file], newName, { type: file.type });
+        await doUpload(renamed);
+    };
+
+    const handleDupCancel = () => setDupFile(null);
+
     const handleUrlUpload = async () => {
         if (urlInput) {
+            setUploadingCount(c => c + 1);
             try {
                 await importAssetFromUrl(urlName || 'Imported Asset', urlInput);
                 toast({ title: "Asset Imported", description: "Your asset has been successfully imported." });
@@ -66,6 +117,8 @@ export default function DashboardAssets() {
                     title: "Import Failed", 
                     description: error.response?.data?.message || error.response?.data?.error || "Failed to import asset." 
                 });
+            } finally {
+                setUploadingCount(c => c - 1);
             }
         }
     };
@@ -78,6 +131,26 @@ export default function DashboardAssets() {
         copyToClipboard(url);
         setCopiedId(id);
         setTimeout(() => setCopiedId(null), 2000);
+    };
+
+    const handleDelete = async (id: string) => {
+        setDeletingIds(prev => new Set(prev).add(id));
+        try {
+            await deleteAsset(id);
+            toast({ title: "Asset Deleted", description: "The asset has been removed." });
+        } catch (error: any) {
+            toast({
+                variant: "destructive",
+                title: "Delete Failed",
+                description: error.response?.data?.message || error.response?.data?.error || "Failed to delete asset.",
+            });
+        } finally {
+            setDeletingIds(prev => {
+                const next = new Set(prev);
+                next.delete(id);
+                return next;
+            });
+        }
     };
 
     return (
@@ -110,9 +183,13 @@ export default function DashboardAssets() {
                    <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button 
-                          className="w-full md:w-auto h-11 bg-blue-600 text-white font-semibold rounded-full shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all duration-200"
+                          disabled={uploadingCount > 0}
+                          className="w-full md:w-auto h-11 bg-blue-600 text-white font-semibold rounded-full shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                          <Upload className="w-5 h-5 mr-2" />Add Assets
+                          {uploadingCount > 0
+                            ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Uploading…</>
+                            : <><Upload className="w-5 h-5 mr-2" />Add Assets</>
+                          }
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl border-slate-200 shadow-xl mt-2">
@@ -171,9 +248,23 @@ export default function DashboardAssets() {
                 </div>
 
                 <div className="min-h-[400px]">
-                   {['all', 'images', 'videos'].map(tabType => (
+                   {isFetching ? (
+                      /* ── Initial fetch skeleton ── */
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+                         {Array.from({ length: 12 }).map((_, i) => (
+                            <div key={i} className="flex flex-col rounded-2xl shadow-md bg-white overflow-hidden animate-pulse">
+                               <div className="aspect-square bg-slate-200" />
+                               <div className="p-4 space-y-2">
+                                  <div className="h-3 bg-slate-200 rounded-full w-3/4" />
+                                  <div className="h-2.5 bg-slate-100 rounded-full w-1/2" />
+                               </div>
+                            </div>
+                         ))}
+                      </div>
+                   ) : (
+                   ['all', 'images', 'videos'].map(tabType => (
                       <TabsContent key={tabType} value={tabType} className="mt-0 outline-none">
-                         {filteredMedia.filter(m => tabType === 'all' || m.type === tabType.slice(0, -1)).length === 0 ? (
+                         {filteredMedia.filter(m => tabType === 'all' || m.type === tabType.slice(0, -1)).length === 0 && uploadingCount === 0 ? (
                             <div className="h-[400px] flex flex-col items-center justify-center text-slate-300 gap-4 border-2 border-dashed border-slate-50 rounded-3xl bg-slate-50/20">
                                 <div className="w-20 h-20 rounded-3xl bg-slate-50 flex items-center justify-center border-2 border-white shadow-sm">
                                    {tabType === 'videos' ? <Video className="w-8 h-8 opacity-20" /> : <ImageIcon className="w-8 h-8 opacity-20" />}
@@ -185,10 +276,29 @@ export default function DashboardAssets() {
                             </div>
                          ) : (
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+
+                                {/* ── Upload skeleton placeholders ── */}
+                                {uploadingCount > 0 && Array.from({ length: uploadingCount }).map((_, i) => (
+                                   <div key={`uploading-${i}`} className="flex flex-col rounded-2xl shadow-md bg-white overflow-hidden animate-pulse">
+                                      <div className="aspect-square bg-slate-200 flex flex-col items-center justify-center gap-2">
+                                         <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
+                                         <span className="text-[11px] font-semibold text-slate-400">Uploading…</span>
+                                      </div>
+                                      <div className="p-4 space-y-2">
+                                         <div className="h-3 bg-slate-200 rounded-full w-3/4" />
+                                         <div className="h-2.5 bg-slate-100 rounded-full w-1/2" />
+                                      </div>
+                                   </div>
+                                ))}
+
                                 {filteredMedia.filter(m => tabType === 'all' || m.type === tabType.slice(0, -1)).map((item) => (
                                     <div
                                         key={item.id}
-                                        className="group/media relative flex flex-col rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer bg-white"
+                                        className={`group/media relative flex flex-col rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer bg-white ${
+                                            deletingIds.has(item.id)
+                                                ? 'opacity-60 scale-[0.97] pointer-events-none'
+                                                : 'hover:scale-[1.02]'
+                                        }`}
                                     >
                                         <div className="aspect-square relative overflow-hidden bg-slate-100 rounded-t-2xl">
                                            {item.type === 'image' ? (
@@ -200,7 +310,14 @@ export default function DashboardAssets() {
                                            )}
                                            {/* Gradient Overlay */}
                                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover/media:opacity-100 transition-opacity duration-300"></div>
-                                           
+
+                                           {/* Delete loading overlay */}
+                                           {deletingIds.has(item.id) ? (
+                                               <div className="absolute inset-0 bg-rose-900/70 flex flex-col items-center justify-center gap-2 z-30 backdrop-blur-[3px]">
+                                                   <Loader2 className="w-8 h-8 text-white animate-spin" />
+                                                   <span className="text-[11px] font-semibold text-white/80">Deleting…</span>
+                                               </div>
+                                           ) : (
                                            <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover/media:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-3 z-20 backdrop-blur-[4px]">
                                                <Button 
                                                   size="sm" 
@@ -213,11 +330,12 @@ export default function DashboardAssets() {
                                                   size="sm" 
                                                   variant="destructive" 
                                                   className="h-11 px-6 text-sm font-semibold rounded-full shadow-lg shadow-rose-500/30 hover:bg-rose-600 hover:scale-105 transition-all duration-200" 
-                                                  onClick={() => void deleteAsset(item.id)}
+                                                  onClick={() => void handleDelete(item.id)}
                                                >
                                                   <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
                                                </Button>
                                            </div>
+                                           )}
 
                                            <div className="absolute top-4 left-4 flex gap-2">
                                               <Badge className="bg-blue-100 text-blue-700 font-medium px-3 py-1 rounded-full text-xs capitalize">
@@ -245,7 +363,8 @@ export default function DashboardAssets() {
                             </div>
                          )}
                       </TabsContent>
-                   ))}
+                   ))
+                   )}
                 </div>
             </Tabs>
 
@@ -291,6 +410,15 @@ export default function DashboardAssets() {
                     </div>
                 </DialogContent>
             </Dialog>
+
+            {/* Duplicate name conflict dialog */}
+            <DuplicateAssetDialog
+                file={dupFile}
+                conflictingName={dupConflictName}
+                onReplace={handleDupReplace}
+                onRename={handleDupRename}
+                onCancel={handleDupCancel}
+            />
     </Card>
   );
 }

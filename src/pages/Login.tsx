@@ -165,6 +165,26 @@ interface SignupFormProps {
   onGoogleLogin: () => void;
 }
 
+// ── Password strength helper ────────────────────────────────────────────────
+type PasswordStrength = { level: 0 | 1 | 2 | 3; label: string; color: string; bars: string; textColor: string };
+
+function getPasswordStrength(password: string): PasswordStrength {
+  if (!password) return { level: 0, label: "", color: "", bars: "", textColor: "" };
+
+  // Count digits in the password
+  const digitCount = (password.match(/[0-9]/g) || []).length;
+  // Effective length: actual chars + extra credit for digits
+  const effectiveLength = password.length + digitCount;
+
+  if (effectiveLength < 8) {
+    return { level: 1, label: "Weak",   color: "bg-red-400",    bars: "w-1/3", textColor: "text-red-400" };
+  } else if (effectiveLength < 12) {
+    return { level: 2, label: "Good",   color: "bg-yellow-400", bars: "w-2/3", textColor: "text-yellow-500" };
+  } else {
+    return { level: 3, label: "Strong", color: "bg-green-500",  bars: "w-full", textColor: "text-green-500" };
+  }
+}
+
 const SignupForm = ({
   signupData,
   setSignupData,
@@ -180,6 +200,8 @@ const SignupForm = ({
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleSignup();
   };
+
+  const passwordStrength = getPasswordStrength(signupData.password);
 
   return (
     <div className="w-full max-w-[400px] flex flex-col justify-center h-full mx-auto">
@@ -240,6 +262,20 @@ const SignupForm = ({
               className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 cursor-pointer"
             />
           </div>
+
+          {/* Password strength indicator */}
+          {signupData.password && (
+            <div className="mt-2 space-y-1">
+              <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${passwordStrength.color} ${passwordStrength.bars}`}
+                />
+              </div>
+              <p className={`text-xs font-medium ${passwordStrength.textColor}`}>
+                {passwordStrength.label} password
+              </p>
+            </div>
+          )}
 
           {signupError && (
             <p className="text-red-500 text-xs font-medium mt-2 flex items-center gap-1">

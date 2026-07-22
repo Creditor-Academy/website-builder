@@ -119,6 +119,7 @@ export interface BuilderStore {
     updateWebsite: (id: string, updates: Partial<Website>) => Promise<void>;
     selectWebsite: (id: string) => Promise<void>;
     deleteWebsite: (id: string) => Promise<void>;
+    restoreWebsite: (id: string) => Promise<void>;
     setActivePage: (pageId: string) => void;
     addPage: (pageData: Partial<Page>) => void;
     duplicatePage: (pageId: string) => void;
@@ -254,7 +255,7 @@ const useBuilderStore = create<BuilderStore>()(
                     const rawWebsites = (response.data && response.data.websites) || [];
                     const websitesFromBackend = Array.isArray(rawWebsites) ? rawWebsites : (rawWebsites.websites || []);
                     
-                    const websites = websitesFromBackend.map((w: any) => ({
+                    const mapWebsite = (w: any) => ({
                         id: w.id,
                         name: w.name,
                         status: w.status,
@@ -271,9 +272,34 @@ const useBuilderStore = create<BuilderStore>()(
                         institution_id: w.institution_id,
                         owner_id: w.owner_id,
                         settings: w.settings
-                    }));
-                    
-                    set({ websites });
+                    });
+
+                    const activeWebsites = websitesFromBackend.map(mapWebsite);
+
+                    // Also fetch deleted websites so the Deleted tab stays populated
+                    let deletedWebsites: any[] = [];
+                    try {
+                        const deletedResponse = await websiteApi.getWebsites(
+                            Object.assign(
+                                institutionId ? { institution_id: institutionId } : {},
+                                { status: 'DELETED' }
+                            )
+                        );
+                        const rawDeleted = (deletedResponse.data && deletedResponse.data.websites) || [];
+                        const deletedFromBackend = Array.isArray(rawDeleted) ? rawDeleted : (rawDeleted.websites || []);
+                        deletedWebsites = deletedFromBackend.map(mapWebsite);
+                    } catch {
+                        // If the backend doesn't support status filter, just continue without deleted
+                    }
+
+                    // Merge: active + deleted, deduplicated by id
+                    const deletedIds = new Set(deletedWebsites.map((w: any) => w.id));
+                    const merged = [
+                        ...activeWebsites.filter((w: any) => !deletedIds.has(w.id)),
+                        ...deletedWebsites,
+                    ];
+
+                    set({ websites: merged });
                 } catch (error) {
                     console.error("Failed to fetch websites from backend:", error);
                     set({ websites: [] });
@@ -470,6 +496,19 @@ const useBuilderStore = create<BuilderStore>()(
                     });
                 } catch (error) {
                     console.error("Failed to delete website from backend:", error);
+                }
+            },
+
+            restoreWebsite: async (id: string) => {
+                try {
+                    const { default: websiteApi } = await import('../api/website');
+                    await websiteApi.restoreWebsite(id);
+                    set((state) => ({
+                        websites: state.websites.map(w => w.id === id ? { ...w, status: 'Draft' } : w),
+                    }));
+                } catch (error) {
+                    console.error("Failed to restore website from backend:", error);
+                    throw error;
                 }
             },
 
@@ -757,7 +796,14 @@ const useBuilderStore = create<BuilderStore>()(
 
             getScopedAssets: (websiteId) => {
                 const { globalAssets, websiteAssetsByWebsiteId } = get();
-                return websiteId ? (websiteAssetsByWebsiteId[websiteId] || []) : globalAssets;
+                if (websiteId) {
+                    const websiteAssets = websiteAssetsByWebsiteId[websiteId] || [];
+                    // Merge global assets in, deduplicating by id (website-scoped take priority)
+                    const websiteIds = new Set(websiteAssets.map((a) => a.id));
+                    const merged = [...websiteAssets, ...globalAssets.filter((a) => !websiteIds.has(a.id))];
+                    return merged;
+                }
+                return globalAssets;
             },
 
             getActiveWebsite: () => {

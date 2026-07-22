@@ -56,7 +56,7 @@ import UserShimmer from '@/components/dashboard/UserShimmer';
 import institutionApi from '@/api/institution';
 import GradientButton from '@/components/ui/GradientButton';
 import { useSearchParams } from 'react-router-dom';
-import { getUsers, updateUser, updateUserRole, updateUserStatus, restoreUser, createUser } from '../api/user';
+import { getUsers, updateUser, updateUserRole, updateUserStatus, restoreUser, createUser, deleteUser } from '../api/user';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface UserRow {
@@ -237,8 +237,11 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({
       onUserCreated(newRow);
       onOpenChange(false);
     } catch (err: any) {
+      console.error('[CreateUser] 400 payload:', err?.response?.data);
       const msg =
         err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        (Array.isArray(err?.response?.data?.errors) ? err.response.data.errors[0] : null) ||
         err?.message ||
         'Failed to create user. Please try again.';
       toast({ title: 'Creation failed', description: msg, variant: 'destructive' });
@@ -401,6 +404,10 @@ export default function DashboardUsers() {
   const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
   const [userToDeactivate, setUserToDeactivate] = useState<UserRow | null>(null);
 
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<UserRow | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'Active' | 'Inactive' | 'Suspended'>('all');
   const [sortBy, setSortBy] = useState('recent');
@@ -518,6 +525,41 @@ export default function DashboardUsers() {
         description: error?.response?.data?.message || "Failed to restore user",
         variant: "destructive",
       });
+    }
+  };
+
+  // ─── Delete user ────────────────────────────────────────────────────────────
+  const handleDeleteClick = (user: UserRow) => {
+    setUserToDelete(user);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return;
+    setIsDeleting(true);
+    try {
+      // Backend uses soft-delete via status — no hard DELETE endpoint exists
+      await updateUserStatus(userToDelete.id, false);
+      setUsers(prev => prev.filter(u => u.id !== userToDelete.id));
+      setIsDeleteDialogOpen(false);
+      setUserToDelete(null);
+      toast({
+        title: 'User deleted',
+        description: `${userToDelete.name} has been removed successfully.`,
+      });
+    } catch (error: any) {
+      console.error('[Delete User] Error:', {
+        status: error?.response?.status,
+        data: error?.response?.data,
+        message: error?.message,
+      });
+      toast({
+        title: 'Delete failed',
+        description: error?.response?.data?.message || error?.response?.data?.error || 'Failed to delete user. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -699,20 +741,20 @@ export default function DashboardUsers() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-slate-200 shadow-lg">
-                        <DropdownMenuItem onClick={() => handleEditClick(user)} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100">
+                        <DropdownMenuItem onClick={() => handleEditClick(user)} className="rounded-lg gap-2 cursor-pointer text-slate-700 hover:text-slate-900 focus:bg-slate-100 focus:text-slate-900">
                           <Edit className="w-4 h-4" /> Edit
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         {user.status !== 'Active' ? (
-                          <DropdownMenuItem onClick={() => handleRestoreClick(user)} className="rounded-lg gap-2 cursor-pointer focus:bg-emerald-50 focus:text-emerald-600">
+                          <DropdownMenuItem onClick={() => handleRestoreClick(user)} className="rounded-lg gap-2 cursor-pointer text-emerald-600 hover:text-emerald-700 focus:bg-emerald-50 focus:text-emerald-700">
                             <UserCheck className="w-4 h-4" /> Restore User
                           </DropdownMenuItem>
                         ) : (
-                          <DropdownMenuItem onClick={() => handleDeactivateClick(user)} className="rounded-lg gap-2 cursor-pointer text-rose-500 focus:bg-rose-50 focus:text-rose-600">
+                          <DropdownMenuItem onClick={() => handleDeactivateClick(user)} className="rounded-lg gap-2 cursor-pointer text-rose-500 hover:text-rose-600 focus:bg-rose-50 focus:text-rose-600">
                             <UserX className="w-4 h-4" /> Deactivate
                           </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer text-destructive focus:bg-destructive/5 focus:text-rose-700">
+                        <DropdownMenuItem onClick={() => handleDeleteClick(user)} className="rounded-lg gap-2 cursor-pointer text-rose-600 hover:text-rose-700 focus:bg-rose-50 focus:text-rose-700">
                           <Trash2 className="w-4 h-4" /> Delete User
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -828,6 +870,39 @@ export default function DashboardUsers() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeactivateConfirm}>Deactivate</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* ─── Delete Confirm Dialog ───────────────────────────────────────────── */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={(open) => { if (!isDeleting) setIsDeleteDialogOpen(open); }}>
+        <AlertDialogContent className="w-[90%] rounded-xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-rose-500" /> Remove User?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove <span className="font-semibold">{userToDelete?.name}</span> ({userToDelete?.email}) from the platform.
+              Their account will be deactivated and they will lose access immediately.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+              className="bg-rose-600 hover:bg-rose-700 text-white focus:ring-rose-500"
+            >
+              {isDeleting ? (
+                <span className="flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4 animate-spin" /> Deleting...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Trash2 className="w-4 h-4" /> Yes, Delete
+                </span>
+              )}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

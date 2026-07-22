@@ -80,6 +80,7 @@ const Organizations = () => {
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState<'ALL' | 'APPROVED' | 'PENDING' | 'BLOCKED'>('ALL');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedOrgForView, setSelectedOrgForView] = useState<Institution | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -87,11 +88,56 @@ const Organizations = () => {
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // ── Edit Configuration state ───────────────────────────────────────────────
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedOrgForEdit, setSelectedOrgForEdit] = useState<Institution | null>(null);
+  const [editForm, setEditForm] = useState({ name: '', email: '', status: '' });
+  const [editErrors, setEditErrors] = useState<{ name?: string; email?: string }>({});
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [totalUsers, setTotalUsers] = useState<number | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchInstitutions();
+    fetchTotalUsers();
   }, []);
+
+  const fetchTotalUsers = async () => {
+    try {
+      // Use the stats API — it returns accurate platform-wide counts
+      const { default: statsApi } = await import('../../api/stats');
+      const res = await statsApi.getDashboardStats({ adminView: true });
+      const data = res.data?.data || res.data;
+      const total = data?.totalUsers ?? data?.total_users ?? null;
+      if (total !== null) {
+        setTotalUsers(Number(total));
+        return;
+      }
+    } catch {
+      // stats API failed — fall back to users API
+    }
+
+    // Fallback: GET /users and count the array
+    try {
+      const { getUsers } = await import('../../api/user');
+      const res = await getUsers({ limit: 1000, page: 1 });
+      const arr =
+        res.data?.data?.users ||
+        res.data?.data ||
+        res.data?.users ||
+        (Array.isArray(res.data) ? res.data : []);
+      const paginationTotal =
+        res.data?.data?.total ??
+        res.data?.total ??
+        res.data?.meta?.total ??
+        res.data?.pagination?.total ?? null;
+      setTotalUsers(paginationTotal !== null ? Number(paginationTotal) : arr.length);
+    } catch (err) {
+      console.error('Failed to fetch total users count:', err);
+      setTotalUsers(null);
+    }
+  };
 
   const fetchInstitutions = async () => {
     try {
@@ -227,6 +273,56 @@ const Organizations = () => {
     }
   };
 
+  // ── Open edit modal pre-filled with org data ───────────────────────────────
+  const handleEditClick = (org: Institution) => {
+    setSelectedOrgForEdit(org);
+    setEditForm({ name: org.name, email: org.email, status: org.status });
+    setEditErrors({});
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditField = (field: 'name' | 'email' | 'status', value: string) => {
+    setEditForm(prev => ({ ...prev, [field]: value }));
+    setEditErrors(prev => ({ ...prev, [field]: undefined }));
+  };
+
+  const validateEditForm = () => {
+    const errors: { name?: string; email?: string } = {};
+    if (!editForm.name.trim()) errors.name = 'Organization name is required';
+    if (!editForm.email.trim() || !/\S+@\S+\.\S+/.test(editForm.email)) errors.email = 'Valid email is required';
+    return errors;
+  };
+
+  const handleSaveEdit = async () => {
+    if (!selectedOrgForEdit) return;
+    const errors = validateEditForm();
+    if (Object.keys(errors).length > 0) { setEditErrors(errors); return; }
+
+    setIsSavingEdit(true);
+    try {
+      await institutionApi.update(selectedOrgForEdit.id, {
+        name: editForm.name.trim(),
+        email: editForm.email.trim(),
+        status: editForm.status,
+      });
+      setInstitutions(prev =>
+        prev.map(o =>
+          o.id === selectedOrgForEdit.id
+            ? { ...o, name: editForm.name.trim(), email: editForm.email.trim(), status: editForm.status }
+            : o
+        )
+      );
+      setIsEditModalOpen(false);
+      setSelectedOrgForEdit(null);
+      toast({ title: 'Organization updated ✅', description: `${editForm.name} has been updated successfully.` });
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.response?.data?.error || 'Failed to update organization.';
+      toast({ title: 'Update failed', description: msg, variant: 'destructive' });
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
   const handleStatusUpdate = async (id: string, status: string) => {
     try {
       await institutionApi.update(id, { status });
@@ -264,10 +360,13 @@ const Organizations = () => {
     }
   };
 
-  const filteredOrgs = institutions.filter(org => 
-    org.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    org.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredOrgs = institutions.filter(org => {
+    const matchesSearch =
+      org.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      org.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = filterStatus === 'ALL' || org.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <div className="p-6 space-y-8 animate-in fade-in duration-500">
@@ -285,7 +384,7 @@ const Organizations = () => {
             <GradientButton 
               className="flex items-center gap-2 px-6 py-6 h-auto shadow-lg shadow-indigo-200"
             >
-              <Plus className="w-5 h-5" />
+              {/* <Plus className="w-5 h-5" /> */}
               Add Organization
             </GradientButton>
           </DialogTrigger>
@@ -436,7 +535,9 @@ const Organizations = () => {
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-black text-slate-900 mb-1">
-              {institutions.reduce((acc, org) => acc + (org._count?.users || 0), 0)}
+              {totalUsers !== null
+                ? totalUsers
+                : institutions.reduce((acc, org) => acc + Math.max(org._count?.users || 0, org.users?.length || 0), 0)}
             </div>
             <p className="text-indigo-500 text-xs font-black flex items-center gap-1">
               Platform Users
@@ -635,11 +736,37 @@ const Organizations = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="h-10 rounded-xl gap-2 text-slate-600 border-slate-200">
-                <ListFilter className="w-4 h-4" />
-                Filter
-              </Button>
+            <div className="flex items-center gap-2 flex-wrap">
+              {(['ALL', 'APPROVED', 'PENDING', 'BLOCKED'] as const).map(status => (
+                <Button
+                  key={status}
+                  variant={filterStatus === status ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilterStatus(status)}
+                  className={cn(
+                    "group h-9 rounded-full px-4 text-xs font-bold transition-all duration-200",
+                    filterStatus === status
+                      ? status === 'ALL'
+                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20 hover:bg-indigo-700'
+                        : status === 'APPROVED'
+                        ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20 hover:bg-emerald-700'
+                        : status === 'PENDING'
+                        ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20 hover:bg-amber-600'
+                        : 'bg-rose-600 text-white shadow-md shadow-rose-500/20 hover:bg-rose-700'
+                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-700'
+                  )}
+                >
+                  {status === 'ALL' ? 'All' : status.charAt(0) + status.slice(1).toLowerCase()}
+                  {status !== 'ALL' && (
+                    <span className={cn(
+                      "ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-black",
+                      filterStatus === status ? 'bg-white/20' : 'bg-slate-100 text-slate-500 group-hover:text-slate-600'
+                    )}>
+                      {institutions.filter(o => o.status === status).length}
+                    </span>
+                  )}
+                </Button>
+              ))}
             </div>
           </div>
         </CardHeader>
@@ -704,7 +831,7 @@ const Organizations = () => {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center font-semibold text-slate-700">
-                      {org._count?.users || 0}
+                      {Math.max(org._count?.users || 0, org.users?.length || 0)}
                     </TableCell>
                     <TableCell className="text-center font-semibold text-slate-700">
                       {org._count?.websites || 0}
@@ -751,7 +878,10 @@ const Organizations = () => {
                               Manage Users
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="gap-2 py-3 rounded-xl cursor-pointer font-medium text-slate-600">
+                            <DropdownMenuItem
+                              className="gap-2 py-3 rounded-xl cursor-pointer font-medium text-slate-600"
+                              onClick={() => handleEditClick(org)}
+                            >
                               <Edit className="w-4 h-4" /> Edit Configuration
                             </DropdownMenuItem>
                             {org.status !== 'APPROVED' && (
@@ -788,6 +918,102 @@ const Organizations = () => {
           </Table>
         </CardContent>
       </Card>
+      {/* ─── Edit Configuration Dialog ──────────────────────────────────────── */}
+      <Dialog open={isEditModalOpen} onOpenChange={(open) => { if (!isSavingEdit) setIsEditModalOpen(open); }}>
+        <DialogContent className="sm:max-w-lg rounded-[2rem] p-0 overflow-hidden bg-white border-slate-100 shadow-2xl">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-indigo-600 to-blue-600 px-8 py-7">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
+              <Edit className="w-6 h-6 text-white" />
+            </div>
+            <DialogTitle className="text-2xl font-black text-white">Edit Configuration</DialogTitle>
+            <DialogDescription className="text-white/70 mt-1 text-sm">
+              Update the details and status for <span className="font-bold text-white">{selectedOrgForEdit?.name}</span>.
+            </DialogDescription>
+          </div>
+
+          {/* Form */}
+          <div className="px-8 py-6 space-y-4">
+
+            {/* Organization Name */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Organization Name *</label>
+              <Input
+                placeholder="e.g. Buildora Global"
+                value={editForm.name}
+                onChange={e => handleEditField('name', e.target.value)}
+                disabled={isSavingEdit}
+                className={cn(
+                  "h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all",
+                  editErrors.name && "border-rose-400 bg-rose-50"
+                )}
+              />
+              {editErrors.name && <p className="text-xs text-rose-500 font-medium">{editErrors.name}</p>}
+            </div>
+
+            {/* Admin Email */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Admin Email *</label>
+              <Input
+                type="email"
+                placeholder="admin@organization.com"
+                value={editForm.email}
+                onChange={e => handleEditField('email', e.target.value)}
+                disabled={isSavingEdit}
+                className={cn(
+                  "h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all",
+                  editErrors.email && "border-rose-400 bg-rose-50"
+                )}
+              />
+              {editErrors.email && <p className="text-xs text-rose-500 font-medium">{editErrors.email}</p>}
+            </div>
+
+            {/* Status */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Status</label>
+              <select
+                value={editForm.status}
+                onChange={e => handleEditField('status', e.target.value)}
+                disabled={isSavingEdit}
+                className="w-full h-12 rounded-xl bg-slate-50 border border-slate-200 px-3 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all"
+              >
+                <option value="APPROVED">Approved</option>
+                <option value="PENDING">Pending</option>
+                <option value="BLOCKED">Blocked</option>
+              </select>
+            </div>
+
+          </div>
+
+          {/* Footer */}
+          <div className="px-8 pb-8 flex gap-3 justify-end border-t border-slate-100 pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setIsEditModalOpen(false)}
+              disabled={isSavingEdit}
+              className="rounded-xl h-11 px-6 border-slate-200"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveEdit}
+              disabled={isSavingEdit}
+              className="rounded-xl h-11 px-8 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all font-bold"
+            >
+              {isSavingEdit ? (
+                <span className="flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4 animate-spin" /> Saving...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4" /> Save Changes
+                </span>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 };
