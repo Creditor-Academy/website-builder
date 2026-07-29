@@ -71,6 +71,12 @@ class LoginPage {
     async togglePassword() {
         await this.eyeIcon.click();
     }
+    // Login with password containing leading and trailing spaces
+async loginWithPasswordSpaces(email, password) {
+    await this.enterEmail(email);
+    await this.enterPassword(`   ${password}   `);
+    await this.clickLogin();
+}
 
 }
 

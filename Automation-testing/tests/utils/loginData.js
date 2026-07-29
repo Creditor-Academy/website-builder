@@ -25,6 +25,12 @@ const loginData = {
     password: "User@123"
   },
 
+  // Password with leading and trailing spaces
+  passwordSpaces: {
+    email: "user@gmail.com",
+    password: "   User@123   "
+  },
+
   emptyUser: {
     email: "",
     password: ""

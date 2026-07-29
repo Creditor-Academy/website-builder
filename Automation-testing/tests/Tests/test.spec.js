@@ -1,42 +1,30 @@
-const { test, expect, chromium } = require('@playwright/test');
+const { test } = require('@playwright/test');
 const LoginPage = require('../pages/LoginPage');
-const DashboardPage = require('../pages/DashboardPage');
-const testData = require('../utils/testData');
+const TemplatePage = require('../pages/TemplatePage');
+const data = require('../utils/testData');
 
-let browser;
-let context;
-let page;
-let dashboard;
+test.describe('Template Module', () => {
 
-test.describe('Dashboard Module', () => {
-
-    test.beforeAll(async () => {
-        browser = await chromium.launch({ headless: false });
-
-        context = await browser.newContext();
-        page = await context.newPage();
+    test.beforeEach(async ({ page }) => {
 
         const login = new LoginPage(page);
 
         await login.navigate();
+
         await login.login(
-            testData.validUser.email,
-            testData.validUser.password
+            data.validUser.email,
+            data.validUser.password
         );
 
-        dashboard = new DashboardPage(page);
     });
 
-    test.afterAll(async () => {
-        await browser.close();
-    });
-    
+   test('TC-TMPL-022 Verify Template Keyboard Accessibility', async ({ page }) => {
 
-test('TC_DASH_031 - Verify user can create a new project', async () => {
+    const template = new TemplatePage(page);
 
-    await dashboard.openDashboard();
+    await template.openTemplates();
 
-    await dashboard.createNewProject('Project');
+    await template.verifyKeyboardAccessibility();
 
 });
-});
+}); 

@@ -708,7 +708,355 @@ async createNewProject(projectName) {
         name: '120px'
     }).fill('19px 0');
 }
+async editHeroSection() {
 
+    // Open Add Section
+    await this.page.locator('#tour-nav-add').click();
+
+    await this.page.getByRole('button', {
+        name: 'Hero Full-screen hero section'
+    }).first().click();
+
+    // Layout
+    await this.page.getByRole('combobox')
+        .filter({ hasText: 'Split Layout' }).click();
+    await this.page.getByRole('option', { name: 'Split Layout' }).click();
+
+    // Alignment
+    await this.page.getByRole('combobox')
+        .filter({ hasText: 'Split Layout' }).click();
+    await this.page.getByRole('option', { name: 'Centered' }).click();
+
+    // Background
+    await this.page.getByRole('combobox')
+        .filter({ hasText: 'Centered' }).click();
+    await this.page.getByText('Video Background').click();
+
+    // Style
+    await this.page.getByRole('combobox')
+        .filter({ hasText: 'Video Background' }).click();
+    await this.page.getByRole('option', { name: 'Minimal' }).click();
+
+    await this.page.getByRole('textbox').first()
+        .fill('Build websites for web application');
+
+    await this.page.locator('textarea').first()
+        .fill('Maintained all website modules.');
+
+    await this.page.getByRole('textbox').nth(2)
+        .fill('Start Free');
+
+    await this.page.locator('input[type="color"]')
+        .first()
+        .fill('#1445b8');
+}
+async openDashboard() {
+        await expect(
+            this.page.getByRole('button', { name: 'New Project' })
+        ).toBeVisible();
+    }
+
+    async createNewProject(projectName) {
+
+        // Create Project
+        await this.page.getByRole('button', { name: 'New Project' }).click();
+
+        await this.page.getByRole('textbox', {
+            name: 'e.g., My Awesome Site'
+        }).fill(projectName);
+
+        await this.page.getByRole('button', {
+            name: 'Start Building'
+        }).click();
+
+        // Close onboarding popup
+        await this.page.locator('.absolute.top-10').click();
+
+        // Open Add Section
+        await this.page.locator('#tour-nav-add').click();
+
+        // Add Hero Section
+        await this.page.getByRole('button', {
+            name: 'Hero Full-screen hero section'
+        }).first().click();
+    }
+
+    async editHeroSection() {
+
+        // Select Hero Section
+        await this.page.getByRole('button', {
+            name: 'Hero Full-screen hero section'
+        }).first().click();
+
+        // Layout
+        await this.page.getByRole('combobox')
+            .filter({ hasText: 'Split Layout' }).click();
+
+        await this.page.getByRole('option', {
+            name: 'Split Layout'
+        }).click();
+
+        // Alignment
+        await this.page.getByRole('combobox')
+            .filter({ hasText: 'Split Layout' }).click();
+
+        await this.page.getByRole('option', {
+            name: 'Centered'
+        }).click();
+
+        // Background
+        await this.page.getByRole('combobox')
+            .filter({ hasText: 'Centered' }).click();
+
+        await this.page.getByRole('option', {
+            name: 'Video Background'
+        }).click();
+
+        // Style
+        await this.page.getByRole('combobox')
+            .filter({ hasText: 'Video Background' }).click();
+
+        await this.page.getByRole('option', {
+            name: 'Minimal'
+        }).click();
+
+        await this.page.getByRole('combobox')
+            .filter({ hasText: 'Minimal' }).click();
+
+        await this.page.getByRole('option', {
+            name: 'Bold Gradient'
+        }).click();
+
+        await this.page.getByRole('combobox')
+            .filter({ hasText: 'Bold Gradient' }).click();
+
+        await this.page.getByRole('option', {
+            name: 'Video Background'
+        }).click();
+
+        // Heading
+        await this.page.getByRole('textbox').first().fill(
+            'Build Beautiful Websites Without Code and with code'
+        );
+
+        // Description
+        await this.page.locator('textarea').fill(
+            'This website belongs to digital marketing and stock market.'
+        );
+
+        // Primary Button
+        await this.page.getByRole('textbox').nth(2)
+            .fill('Get Started Paid');
+
+        // Primary Button Link
+        await this.page.getByRole('textbox', {
+            name: 'https://example.com'
+        }).first().fill('https://example.com');
+
+        // Secondary Button
+        await this.page.getByRole('textbox').nth(4)
+            .fill('Watch Demo Start');
+
+        // Secondary Button Link
+        await this.page.getByRole('textbox', {
+            name: 'https://example.com'
+        }).nth(1).fill('https://example.com');
+
+        // Assets
+        await this.page.locator('#tour-nav-assets').click();
+
+        await this.page.getByRole('button', {
+            name: 'Copy Link'
+        }).first().click();
+
+        // Layers
+        await this.page.locator('#tour-nav-layers').click();
+
+        await this.page.getByRole('button', {
+            name: 'Hero Section hero'
+        }).first().click();
+
+        // Image URL
+        await this.page.getByRole('textbox', {
+            name: 'https://...'
+        }).fill(
+            'https://buildora-assets.s3.us-east-1.amazonaws.com/assets/cmp0zsac90000gifp2oqdd5ed/global/1a5c71f9-2433-410a-9504-522b467898ce.webp'
+        );
+
+        // Video URL
+        await this.page.getByRole('textbox', {
+            name: 'https://www.youtube.com/embed/'
+        }).fill('https://www.youtube.com/embed/');
+
+        // Toggle Switches
+        await this.page.getByRole('switch').first().click();
+        await this.page.getByRole('switch').first().click();
+        await this.page.getByRole('switch').nth(1).click();
+        await this.page.getByRole('switch').nth(1).click();
+
+        // Border Radius
+        await this.page.getByRole('button', { name: '° Sharp' }).click();
+        await this.page.getByRole('button', { name: '° Slight' }).click();
+        await this.page.getByRole('button', { name: '° Medium' }).click();
+        await this.page.getByRole('button', { name: '° Curved' }).click();
+    }
+
+    async openDashboard() {
+        await expect(
+            this.page.getByRole('button', { name: 'New Project' })
+        ).toBeVisible();
+    }
+
+    async createNewProject(projectName) {
+
+        // Create Project
+        await this.page.getByRole('button', { name: 'New Project' }).click();
+
+        await this.page.getByRole('textbox', {
+            name: 'e.g., My Awesome Site'
+        }).fill(projectName);
+
+        await this.page.getByRole('button', {
+            name: 'Start Building'
+        }).click();
+
+        // Close Tour
+        await this.page.locator('.absolute.top-10').click();
+    }
+
+    async customizeHeroSection() {
+
+        // Select Hero Section
+        await this.page.getByRole('button', {
+            name: 'Hero Full-screen hero section'
+        }).first().click();
+
+        // Layout
+        await this.page.getByRole('combobox')
+            .filter({ hasText: 'Split Layout' }).click();
+
+        await this.page.getByRole('option', {
+            name: 'Centered'
+        }).click();
+
+        // Background
+        await this.page.getByRole('combobox')
+            .filter({ hasText: 'Centered' }).click();
+
+        await this.page.getByRole('option', {
+            name: 'Video Background'
+        }).click();
+
+        // Style
+        await this.page.getByRole('combobox')
+            .filter({ hasText: 'Video Background' }).click();
+
+        await this.page.getByRole('option', {
+            name: 'Minimal'
+        }).click();
+
+        await this.page.getByRole('combobox')
+            .filter({ hasText: 'Minimal' }).click();
+
+        await this.page.getByText('Bold Gradient').click();
+
+        // Description
+        await this.page.locator('textarea').fill(
+            'Drag, drop, and design your dream website with our intuitive builder.'
+        );
+
+        // Primary Button
+        await this.page.getByRole('textbox').nth(2)
+            .fill('Get Started Paid');
+
+        // Primary Button Link
+        await this.page.getByRole('combobox').nth(1).click();
+        await this.page.getByText('External').click();
+
+        await this.page.getByRole('textbox', {
+            name: 'https://example.com'
+        }).first().fill('https://example.com');
+
+        // Secondary Button
+        await this.page.getByRole('textbox').nth(4)
+            .fill('Watch Demo Start');
+
+        // Secondary Button Action
+        await this.page.getByRole('combobox')
+            .filter({ hasText: 'None' }).click();
+
+        await this.page.getByLabel('External')
+            .getByText('External').click();
+
+        await this.page.getByRole('textbox', {
+            name: 'https://example.com'
+        }).nth(1).fill('https://example.com');
+
+        // Assets
+        await this.page.locator('#tour-nav-assets').click();
+
+        await this.page.getByRole('button', {
+            name: 'Copy Link'
+        }).nth(3).click();
+
+        // Layers
+        await this.page.locator('#tour-nav-layers').click();
+
+        await this.page.getByRole('button', {
+            name: 'Hero Section hero'
+        }).first().click();
+
+        // Image URL
+        await this.page.getByRole('textbox', {
+            name: 'https://...'
+        }).fill(
+            'https://buildora-assets.s3.us-east-1.amazonaws.com/assets/cmp0zsac90000gifp2oqdd5ed/global/05fa0304-ecb7-47bd-98bc-ed648bd25ab3.webp'
+        );
+
+        // Assets → Videos
+       // Assets
+await this.page.locator('#tour-nav-assets').click();
+
+await this.page.getByRole('tab', {
+    name: 'Videos'
+}).click();
+
+// Open Edit Panel
+await this.page.locator('#tour-nav-edit').click();
+
+// Border Radius
+await this.page.getByRole('button', { name: '° Sharp' }).click();
+await this.page.getByRole('button', { name: '° Medium' }).click();
+
+// Primary Button Color
+await this.page.locator('input[type="color"]').nth(3).fill('#0b3eb7');
+
+// Secondary Button Color
+await this.page.locator('input[type="color"]').nth(4).fill('#eed8d8');
+
+// Background Color
+await this.page.locator('input[type="color"]').first().fill('#9a2828');
+
+// Border Radius Variants
+await this.page.getByRole('button', { name: '° Slight' }).click();
+await this.page.getByRole('button', { name: '° Curved' }).click();
+await this.page.getByRole('button', { name: '° Medium' }).click();
+await this.page.getByRole('button', { name: '° Sharp' }).click();
+
+// Toggle
+await this.page.getByRole('switch').nth(1).click();
+await this.page.getByRole('switch').nth(1).click();
+
+// Padding
+await this.page.getByRole('textbox', {
+    name: '120px'
+}).fill('15px 0');
+
+// Height
+await this.page.getByRole('textbox', {
+    name: '80vh'
+}).click();
+    }
 }
 
 module.exports = DashboardPage;

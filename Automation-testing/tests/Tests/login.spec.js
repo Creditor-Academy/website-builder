@@ -185,4 +185,17 @@ test('TC_LOGIN_019 - Verify Email with spaces is rejected', async ({ page }) => 
     // Verify user is not logged in
     await expect(page).toHaveURL(/login/);
 })
+test('TC_LOGIN_020 - Verify Login with password containing spaces', async ({ page }) => {
+    const login = new LoginPage(page);
+
+    await login.navigate();
+
+    await login.loginWithPasswordSpaces(
+        loginData.validUser.email,
+        loginData.validUser.password
+    );
+
+    // Verify user is redirected to Dashboard
+    await expect(page).toHaveURL(/dashboard/);
+});
 });
