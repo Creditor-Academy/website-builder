@@ -244,5 +244,171 @@ test('TC_TEMPLATE_002 Verify Call To Action Section End-to-End Functionality', a
     await template.verifyTemplatePagination();
 
 });
+test('TC_TEMPLATE_022 Verify Hero Section End-to-End Functionality', async ({ page }) => {
+
+    const template = new TemplatePage(page);
+
+    /* ==========================
+       Open Template
+    ========================== */
+
+    await template.openTemplates();
+    await template.useTemplate();
+
+    /* ==========================
+       Hero Section
+    ========================== */
+
+    await template.openHeroSection();
+
+    /* ==========================
+       Layout & Style
+    ========================== */
+
+    await template.selectHeroLayout('Centered');
+    await template.selectHeroLayout('Video Background');
+    await template.selectHeroLayout('Minimal');
+    await template.selectHeroLayout('Bold Gradient');
+    await template.selectHeroLayout('Video Background');
+
+    /* ==========================
+       Hero Content
+    ========================== */
+
+    await template.clickHeroHeadingTextbox();
+    await template.clickHeroDescriptionTextbox();
+    await template.clickHeroPrimaryButtonTextbox();
+
+    /* ==========================
+       Primary Button Route
+    ========================== */
+
+    await template.selectHeroPrimaryExternalLink();
+    await template.enterHeroPrimaryButtonUrl('https://www.google.com');
+
+    /* ==========================
+       Secondary Button Route
+    ========================== */
+
+    await template.clickHeroSecondaryButtonTextbox();
+    await template.selectHeroSecondaryExternalLink();
+    await template.enterHeroSecondaryButtonUrl('https://www.google.com');
+
+    /* ==========================
+       Hero Image
+    ========================== */
+
+    await template.selectHeroImage();
+    await template.insertHeroImage();
+
+    /* ==========================
+       Linear Gradient
+    ========================== */
+
+    await template.enableHeroGradient();
+    await template.enterHeroGradient(
+        'linear-gradient(90deg, #3B82F6, #8B5CF6)'
+    );
+
+    /* ==========================
+       Hero Border Radius
+    ========================== */
+
+    await template.selectHeroSharpRadius();
+    await template.selectHeroSlightRadius();
+    await template.selectHeroMediumRadius();
+    await template.selectHeroCurvedRadius();
+
+    /* ==========================
+       Hero Animation
+    ========================== */
+
+    await template.toggleHeroAnimation();
+    await template.toggleHeroAnimation();
+
+    /* ==========================
+       Design System
+    ========================== */
+
+    await template.openHeroDesign();
+
+    await template.applyModernBlueTheme();
+    await template.applyOceanTealTheme();
+    await template.applySunriseRoseTheme();
+    await template.applyElegantGrayTheme();
+    await template.applyNatureGreenTheme();
+    await template.applyMidnightDeepTheme();
+    await template.applySunriseRoseTheme();
+
+    /* ==========================
+       Global Border Radius
+    ========================== */
+
+    await template.selectSharpBorder();
+    await template.select8pxBorder();
+    await template.select20pxBorder();
+    await template.selectFullBorder();
+
+    /* ==========================
+       Global Shadow
+    ========================== */
+
+    await template.selectNoShadow();
+    await template.selectSubtleShadow();
+    await template.selectPronouncedShadow();
+
+    /* ==========================
+       Design Toggles
+    ========================== */
+
+    await template.toggleFirstSwitch();
+    await template.toggleFirstSwitch();
+
+    await template.toggleSecondSwitch();
+    await template.toggleSecondSwitch();
+    await template.toggleSecondSwitch();
+    await template.toggleSecondSwitch();
+
+    /* ==========================
+       Theme Card
+    ========================== */
+
+    await template.clickThemeCard();
+    await template.clickThemeCard();
+
+    /* ==========================
+       Apply Design Presets
+    ========================== */
+
+    await template.applySoftClean();
+    await template.applySharpIndustrial();
+    await template.applyGlassmorphism();
+    await template.applyPlayfulRound();
+
+    /* ==========================
+       Edit
+    ========================== */
+
+    await template.openHeroEdit();
+    await template.updateHeroPrimaryButtonText('Get Started ');
+    await template.updateHeroPrimaryButtonText('Get Started P');
+    await template.updateHeroPrimaryButtonText('Get Started Paid');
+
+    /* ==========================
+       History
+    ========================== */
+
+    await template.openHeroHistory();
+
+    /* ==========================
+       Assets
+    ========================== */
+
+    await template.openHeroAssets();
+    await template.openHeroImages();
+    await template.openHeroVideos();
+    await template.openHeroAllAssets();
+
+});
 
 });

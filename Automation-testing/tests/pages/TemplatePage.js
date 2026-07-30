@@ -221,6 +221,29 @@ this.templateCards = page.locator('[class*="cursor-pointer"]');
 this.loadMoreBtn = page.getByRole('button', {
     name: /load more/i
 });
+// Navigation
+this.layersTab = page.locator('#tour-nav-layers');
+this.designTab = page.locator('#tour-nav-design');
+this.editTab = page.locator('#tour-nav-edit');
+this.historyTab = page.locator('#tour-nav-history');
+this.assetsTab = page.locator('#tour-nav-assets');
+
+// Hero
+this.heroSection = page.getByRole('button', { name: 'Hero Section hero' });
+// Hero Content
+    this.headingTextbox = page.getByRole('textbox').first();
+    this.descriptionTextbox = page.locator('textarea');
+    this.primaryButtonTextbox = page.getByRole('textbox').nth(2);
+    this.secondaryButtonTextbox = page.getByRole('textbox').nth(4);
+    // Primary Route
+    this.primaryRouteDropdown = page.locator('div').filter({ hasText: /^None$/ }).first();
+    this.externalOption = page.getByRole('option', { name: 'External Link' });
+
+    this.primaryUrlTextbox = page.getByPlaceholder('https://example.com').first();
+
+    // Secondary Route
+    this.secondaryRouteDropdown = page.locator('div').filter({ hasText: /^None$/ }).nth(1);
+    this.secondaryUrlTextbox = page.getByPlaceholder('https://example.com').nth(1);
     }
 
     /* ==========================
@@ -532,6 +555,181 @@ async verifyKeyboardAccessibility() {
     // Activate using keyboard
     await this.page.keyboard.press('Enter');
 
+}
+// Hero Section
+async openHeroSection() {
+    await this.layersTab.click();
+    await this.heroSection.click();
+}
+
+// Hero Layout
+async selectHeroLayout(option) {
+    await this.layoutDropdown.click();
+    await this.page.getByRole('option', { name: option }).click();
+}
+
+// Hero Content
+async clickHeroHeadingTextbox() {
+    await this.heroHeading.click();
+}
+async clickHeroDescriptionTextbox() {
+    await this.descriptionTextbox.click();
+}
+
+async clickHeroPrimaryButtonTextbox() {
+    await this.primaryButtonTextbox.click();
+}
+
+async clickHeroSecondaryButtonTextbox() {
+    await this.secondaryButtonTextbox.click();
+}
+
+// ==========================
+// Primary Button Route
+// ==========================
+
+async selectHeroPrimaryExternalLink() {
+    await this.primaryRouteDropdown.click();
+    await this.externalOption.click();
+    await this.primaryUrlTextbox.fill('https://example.com');
+}
+
+// ==========================
+// Secondary Button Route
+// ==========================
+
+async selectHeroSecondaryExternalLink() {
+    await this.secondaryRouteDropdown.click();
+    await this.externalOption.click();
+}
+
+async enterHeroSecondaryButtonUrl(url) {
+    await this.secondaryUrlTextbox.fill("https://example.com");
+}
+
+// ==========================
+// Hero Image
+// ==========================
+
+async selectHeroImage() {
+    await this.imagePicker.click();
+    await this.selectImageBtn.click();
+}
+
+async insertHeroImage() {
+    await this.insertImageBtn.click();
+}
+
+// ==========================
+// Hero Gradient
+// ==========================
+
+async enableHeroGradient() {
+    await this.gradientSwitch.click();
+}
+
+async enterHeroGradient(gradient) {
+    await this.gradientTextbox.fill(gradient);
+}
+
+// ==========================
+// Hero Border Radius
+// ==========================
+
+async selectHeroSharpRadius() {
+    await this.sharpRadius.click();
+}
+
+async selectHeroSlightRadius() {
+    await this.slightRadius.click();
+}
+
+async selectHeroMediumRadius() {
+    await this.mediumRadius.click();
+}
+
+async selectHeroCurvedRadius() {
+    await this.curvedRadius.click();
+}
+
+// ==========================
+// Hero Animation
+// ==========================
+
+async toggleHeroAnimation() {
+    await this.animationSwitch.click();
+}
+
+// ==========================
+// Hero Design
+// ==========================
+
+async openHeroDesign() {
+    await this.designTab.click();
+}
+
+async applyModernBlueTheme() {
+    await this.modernBlue.click();
+}
+
+async applyOceanTealTheme() {
+    await this.oceanTeal.click();
+}
+
+async applySunriseRoseTheme() {
+    await this.sunriseRose.click();
+}
+
+async applyElegantGrayTheme() {
+    await this.elegantGray.click();
+}
+
+async applyNatureGreenTheme() {
+    await this.natureGreen.click();
+}
+
+async applyMidnightDeepTheme() {
+    await this.midnightDeep.click();
+}
+
+// ==========================
+// Hero Edit
+// ==========================
+
+async openHeroEdit() {
+    await this.editTab.click();
+}
+
+async updateHeroPrimaryButtonText(text) {
+    await this.primaryButtonTextbox.fill(text);
+}
+
+// ==========================
+// Hero History
+// ==========================
+
+async openHeroHistory() {
+    await this.historyTab.click();
+}
+
+// ==========================
+// Hero Assets
+// ==========================
+
+async openHeroAssets() {
+    await this.assetsTab.click();
+}
+
+async openHeroImages() {
+    await this.imagesTab.click();
+}
+
+async openHeroVideos() {
+    await this.videosTab.click();
+}
+
+async openHeroAllAssets() {
+    await this.allTab.click();
 }
     
 
