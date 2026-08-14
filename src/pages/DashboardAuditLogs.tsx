@@ -37,7 +37,7 @@ export default function DashboardAuditLogs() {
   return (
     <Card className="rounded-3xl shadow-xl shadow-slate-200/50 p-8">
       <div className="mb-4 text-sm text-slate-500">
-        <a href="/dashboard" className="hover:underline">Dashboard</a> /{' '}
+        <a href="/admin" className="hover:underline">Dashboard</a> /{' '}
         <span className="font-semibold text-slate-700">Audit Logs</span>
       </div>
 

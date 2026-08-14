@@ -717,7 +717,7 @@ const Organizations = () => {
           </div>
           <DialogFooter className="bg-white p-6 border-t border-slate-100 shrink-0 gap-3 flex-row justify-end items-center">
             <Button variant="ghost" className="h-12 px-6 rounded-xl font-bold text-slate-500 hover:bg-slate-100" onClick={() => setIsViewModalOpen(false)}>Close Report</Button>
-            <GradientButton className="h-12 px-8 rounded-xl shadow-lg shadow-indigo-100" onClick={() => navigate(`/dashboard/websites?org=${selectedOrgForView?.id}`)}>
+            <GradientButton className="h-12 px-8 rounded-xl shadow-lg shadow-indigo-100" onClick={() => navigate(`/admin/websites?org=${selectedOrgForView?.id}`)}>
               Manage Organization Property
             </GradientButton>
           </DialogFooter>
@@ -865,14 +865,14 @@ const Organizations = () => {
                           <DropdownMenuContent align="end" className="w-56 rounded-2xl shadow-2xl border-slate-100 p-2">
                             <DropdownMenuItem 
                               className="gap-2 py-3 rounded-xl cursor-pointer font-semibold"
-                              onClick={() => navigate(`/dashboard/websites?org=${org.id}`)}
+                              onClick={() => navigate(`/admin/websites?org=${org.id}`)}
                             >
                               <div className="p-1.5 bg-blue-50 rounded-lg text-blue-600"><Globe className="w-4 h-4" /></div>
                               Manage Websites
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               className="gap-2 py-3 rounded-xl cursor-pointer font-semibold"
-                              onClick={() => navigate(`/dashboard/users?org=${org.id}`)}
+                              onClick={() => navigate(`/admin/users?org=${org.id}`)}
                             >
                               <div className="p-1.5 bg-indigo-50 rounded-lg text-indigo-600"><Users className="w-4 h-4" /></div>
                               Manage Users

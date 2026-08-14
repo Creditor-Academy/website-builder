@@ -7,6 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import React, { Suspense } from "react";
 
 const Index = React.lazy(() => import("./pages/Index"));
+const DashboardLayout = React.lazy(() => import("./layouts/DashboardLayout"));
 const Dashboard = React.lazy(() => import("./pages/Dashboard"));
 const DashboardUsers = React.lazy(() => import("./pages/DashboardUsers"));
 const DashboardWebsites = React.lazy(() => import("./pages/DashboardWebsites"));
@@ -65,8 +66,24 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route element={<ProtectedRoute />}>
-              <Route path="/dashboard" element={<Dashboard />}>
-                <Route index element={null} />
+              {/* User dashboard — /dashboard/* */}
+              <Route path="/dashboard" element={<DashboardLayout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="templates" element={<DashboardTemplates />} />
+                <Route path="assets" element={<DashboardAssets />} />
+                <Route path="messages" element={<DashboardMessages />} />
+                {/* <Route path="settings" element={<DashboardSettings />} /> */}
+                <Route path="profile" element={<DashboardProfile />} />
+                {/* Old admin paths — redirect to /admin/* */}
+                <Route path="users" element={<Navigate to="/admin/users" replace />} />
+                <Route path="organizations" element={<Navigate to="/admin/organizations" replace />} />
+                <Route path="websites" element={<Navigate to="/admin/websites" replace />} />
+                <Route path="deployment" element={<Navigate to="/admin/deployment" replace />} />
+                <Route path="audit" element={<Navigate to="/admin/audit" replace />} />
+              </Route>
+              {/* Admin dashboard — /admin/* */}
+              <Route path="/admin" element={<DashboardLayout />}>
+                <Route index element={<Dashboard />} />
                 <Route path="users" element={<DashboardUsers />} />
                 <Route path="organizations" element={<Organizations />} />
                 <Route path="websites" element={<DashboardWebsites />} />
@@ -75,7 +92,6 @@ const App = () => (
                 <Route path="assets" element={<DashboardAssets />} />
                 <Route path="messages" element={<DashboardMessages />} />
                 <Route path="audit" element={<DashboardAuditLogs />} />
-                {/* <Route path="settings" element={<DashboardSettings />} /> */}
                 <Route path="profile" element={<DashboardProfile />} />
               </Route>
               <Route path="/builder/:id" element={<WebsiteEditor />} />

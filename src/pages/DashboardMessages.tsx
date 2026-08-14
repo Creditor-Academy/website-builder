@@ -177,7 +177,7 @@ export default function DashboardMessages() {
                     <div className="flex items-center gap-4 mb-6">
                         <Button
                             variant="ghost"
-                            onClick={() => navigate('/dashboard')}
+                            onClick={() => navigate(isAdmin ? '/admin' : '/dashboard')}
                             className="text-slate-600 hover:text-slate-900"
                         >
                             <ArrowRight className="w-4 h-4 mr-2 rotate-180" />
