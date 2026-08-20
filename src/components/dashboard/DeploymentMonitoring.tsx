@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +37,7 @@ import {
 } from 'lucide-react';
 import DeploymentLogViewer from './DeploymentLogViewer';
 import { useToast } from '@/components/ui/use-toast';
+import { cn } from '@/lib/utils';
 import websiteApi from '@/api/website';
 import deploymentsApi from '@/api/deployments';
 
@@ -207,120 +207,96 @@ export default function DeploymentMonitoring() {
   };
 
   return (
-    <Card className="rounded-3xl shadow-xl shadow-slate-200/50 p-8">
-      {/* Breadcrumbs */}
-      <div className="mb-4 text-sm text-slate-500">
-        <a href="/admin" className="hover:underline">Dashboard</a> / <span className="font-semibold text-slate-700">Deployment</span>
-      </div>
+    <div>
+      {/* Header bar — match Templates / Assets */}
+      <div className="relative mb-6 overflow-hidden rounded-3xl bg-[#0F172A] px-4 py-5 shadow-[0_12px_40px_-8px_rgba(15,23,42,0.45)] sm:px-7">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(148,163,184,0.18),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 origin-bottom-right skew-x-[-12deg] bg-gradient-to-l from-white/[0.07] to-transparent" />
 
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
-        <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Deployment Monitoring</h2>
-          <p className="text-slate-500 mt-1">Track and manage your website deployments.</p>
+        <div className="relative z-10 min-w-0">
+          <h2 className="text-xl font-bold tracking-tight text-white sm:text-2xl lg:text-3xl">
+            Deployment Monitoring
+          </h2>
+          <p className="mt-1 text-xs text-slate-400 sm:text-sm">
+            Track and manage your website deployments.
+          </p>
         </div>
-
       </div>
 
       {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+      <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+        <div className="relative min-w-0 flex-1">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
           <Input
             placeholder="Search deployments by website name or ID..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-11 pr-4 w-full h-11 rounded-full bg-white border-slate-200 
-                       shadow-md shadow-slate-200/50 focus:ring-4 focus:ring-blue-500/50 
-                       focus:border-blue-600 focus:shadow-lg focus:shadow-blue-500/40 focus:outline-none transition-all duration-300"
+            className="h-9 w-full rounded-full border-[#E5E7EB] bg-white pl-9 text-sm text-[#0F172A] shadow-sm focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/10"
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant={filterStatus === 'all' ? 'default' : 'outline'}
-            className={`rounded-full h-10 px-4 text-sm font-semibold 
-                        ${filterStatus === 'all' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
-                        transition-all duration-200`}
-            onClick={() => setFilterStatus('all')}
-          >
-            All
-          </Button>
-          <Button
-            variant={filterStatus === 'Success' ? 'default' : 'outline'}
-            className={`rounded-full h-10 px-4 text-sm font-semibold 
-                        ${filterStatus === 'Success' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
-                        transition-all duration-200`}
-            onClick={() => setFilterStatus('Success')}
-          >
-            Success
-          </Button>
-          <Button
-            variant={filterStatus === 'Failed' ? 'default' : 'outline'}
-            className={`rounded-full h-10 px-4 text-sm font-semibold 
-                        ${filterStatus === 'Failed' ? 'bg-rose-600 text-white shadow-md shadow-rose-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
-                        transition-all duration-200`}
-            onClick={() => setFilterStatus('Failed')}
-          >
-            Failed
-          </Button>
-          <Button
-            variant={filterStatus === 'Pending' ? 'default' : 'outline'}
-            className={`rounded-full h-10 px-4 text-sm font-semibold 
-                        ${filterStatus === 'Pending' ? 'bg-amber-100 text-amber-700 hover:bg-amber-100/80 shadow-md shadow-amber-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'}
-                        transition-all duration-200`}
-            onClick={() => setFilterStatus('Pending')}
-          >
-            Pending
-          </Button>
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          {(['all', 'Success', 'Failed', 'Pending'] as const).map((status) => (
+            <Button
+              key={status}
+              variant={filterStatus === status ? 'default' : 'outline'}
+              className={cn(
+                'h-8 rounded-full border px-3 text-xs font-semibold shadow-none transition-colors hover:scale-100 active:scale-100 sm:h-9 sm:px-3.5 sm:text-[13px]',
+                filterStatus === status
+                  ? 'border-[#0F172A] bg-[#0F172A] text-white hover:bg-[#1E293B] hover:text-white'
+                  : 'border-[#E5E7EB] bg-white text-[#0F172A] hover:border-[#CBD5E1] hover:bg-[#F8FAFC] hover:text-[#0F172A]'
+              )}
+              onClick={() => setFilterStatus(status)}
+            >
+              {status === 'all' ? 'All' : status}
+            </Button>
+          ))}
         </div>
 
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-full md:w-[180px] h-11 rounded-full bg-white border-slate-200 
-                                    shadow-md shadow-slate-200/50 focus:ring-2 focus:ring-blue-500/20 
-                                    focus:border-blue-500 transition-all duration-300 hover:bg-slate-100 hover:text-indigo-700">
-            <ListFilter className="h-4 w-4 text-slate-400 mr-2" />
+          <SelectTrigger className="h-9 w-full rounded-full border-[#E5E7EB] bg-white shadow-sm md:w-[180px]">
+            <ListFilter className="mr-2 h-4 w-4 text-[#787778]" />
             <SelectValue placeholder="Sort By" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">
+          <SelectContent className="rounded-xl border-[#E8E8E8] bg-white shadow-lg">
             <SelectItem value="recent">Most Recent</SelectItem>
             <SelectItem value="status">Status</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-3xl border border-[#E5E7EB] bg-white shadow-sm">
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
-            <span className="ml-2 text-slate-500">Loading deployments...</span>
+            <Loader2 className="h-6 w-6 animate-spin text-[#787778]" />
+            <span className="ml-2 text-[#747781]">Loading deployments...</span>
           </div>
         ) : (
-        <Table className="w-full rounded-xl overflow-hidden border border-slate-200 shadow-md">
-          <TableHeader className="bg-slate-50 border-b border-slate-200">
+        <Table className="w-full overflow-hidden">
+          <TableHeader className="border-b border-[#E8E8E8] bg-[#F4F4F5]">
             <TableRow className="hover:bg-transparent">
-              <TableHead className="min-w-[150px] px-4 py-3 text-slate-500">
+              <TableHead className="min-w-[150px] px-4 py-3 text-[#747781]">
                 <span className="flex items-center gap-1.5"><Globe className="w-4 h-4" /> Website Name</span>
               </TableHead>
-              <TableHead className="min-w-[120px] px-4 py-3 text-slate-500">
+              <TableHead className="min-w-[120px] px-4 py-3 text-[#747781]">
                 <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4" /> Status</span>
               </TableHead>
-              <TableHead className="min-w-[200px] px-4 py-3 text-slate-500">
+              <TableHead className="min-w-[200px] px-4 py-3 text-[#747781]">
                 <span className="flex items-center gap-1.5"><Globe className="w-4 h-4" /> URL</span>
               </TableHead>
-              <TableHead className="min-w-[150px] px-4 py-3 text-slate-500">
+              <TableHead className="min-w-[150px] px-4 py-3 text-[#747781]">
                 <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> Deployed At</span>
               </TableHead>
-              <TableHead className="min-w-[120px] px-4 py-3 text-slate-500">
+              <TableHead className="min-w-[120px] px-4 py-3 text-[#747781]">
                 <span className="flex items-center gap-1.5"><UserIcon className="w-4 h-4" /> Deployed By</span>
               </TableHead>
-              <TableHead className="text-right px-4 py-3 text-slate-500">Actions</TableHead>
+              <TableHead className="text-right px-4 py-3 text-[#747781]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredAndSortedDeployments.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-slate-500">
+                <TableCell colSpan={6} className="h-24 text-center text-[#747781]">
                   No deployments found.
                 </TableCell>
               </TableRow>
@@ -329,8 +305,8 @@ export default function DeploymentMonitoring() {
                 const dep = row.deployment;
                 const display = statusDisplay(dep.status);
                 return (
-                <TableRow key={dep.id} className="group h-16 border-b border-slate-100 hover:bg-slate-50/70 transition-all duration-200">
-                  <TableCell className="font-medium text-slate-600 px-4 py-3">{row.websiteName}</TableCell>
+                <TableRow key={dep.id} className="group h-16 border-b border-[#E8E8E8] hover:bg-[#F4F4F5]/70 transition-all duration-200">
+                  <TableCell className="font-medium text-[#747781] px-4 py-3">{row.websiteName}</TableCell>
                   <TableCell className="px-4 py-3">
                     <Badge
                       className={
@@ -340,7 +316,7 @@ export default function DeploymentMonitoring() {
                           ? "bg-rose-100 text-rose-700 hover:bg-rose-100/80"
                           : display === "Pending"
                           ? "bg-amber-100 text-amber-700 hover:bg-amber-100/80"
-                          : "bg-slate-100 text-slate-600 hover:bg-slate-100/80"
+                          : "bg-[#F4F4F5] text-[#747781] hover:bg-[#F4F4F5]/80"
                       }
                     >
                       {display === "Success" && <CheckCircle className="w-3 h-3 mr-1" />}
@@ -350,12 +326,12 @@ export default function DeploymentMonitoring() {
                       {display}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-slate-500 text-sm px-4 py-3 max-w-[250px] truncate">
-                    {dep.url ? <a href={dep.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{dep.url}</a> : '—'}
+                  <TableCell className="text-[#747781] text-sm px-4 py-3 max-w-[250px] truncate">
+                    {dep.url ? <a href={dep.url} target="_blank" rel="noopener noreferrer" className="text-[#0F172A] hover:underline">{dep.url}</a> : '—'}
                   </TableCell>
-                  <TableCell className="text-slate-500 text-sm px-4 py-3">{new Date(dep.publishedAt).toLocaleString()}</TableCell>
-                  <TableCell className="flex items-center gap-2 text-slate-500 text-sm px-4 py-3">
-                    <div className="w-7 h-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-semibold text-xs">
+                  <TableCell className="text-[#747781] text-sm px-4 py-3">{new Date(dep.publishedAt).toLocaleString()}</TableCell>
+                  <TableCell className="flex items-center gap-2 text-[#747781] text-sm px-4 py-3">
+                    <div className="w-7 h-7 rounded-full bg-[#F4F4F5] text-[#747781] flex items-center justify-center font-semibold text-xs">
                         {(dep.deployedBy || '?').slice(0, 2).toUpperCase()}
                     </div>
                     {dep.deployedBy || 'System'}
@@ -363,17 +339,17 @@ export default function DeploymentMonitoring() {
                   <TableCell className="text-right px-4 py-3">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0 data-[state=open]:bg-slate-100">
-                          <MoreVertical className="h-4 w-4 text-slate-500" />
+                        <Button variant="ghost" className="h-8 w-8 p-0 data-[state=open]:bg-[#F4F4F5]">
+                          <MoreVertical className="h-4 w-4 text-[#747781]" />
                           <span className="sr-only">Open menu</span>
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-slate-200 shadow-lg">
-                        <DropdownMenuItem onClick={() => handleRollback(row)} disabled={dep.status !== 'active'} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100 focus:text-slate-900">
+                      <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-[#E8E8E8] shadow-lg">
+                        <DropdownMenuItem onClick={() => handleRollback(row)} disabled={dep.status !== 'active'} className="rounded-lg gap-2 cursor-pointer focus:bg-[#F4F4F5] focus:text-[#0F172A]">
                           <RefreshCw className="w-4 h-4" /> <span>Rollback</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleViewLogs(row)} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100 focus:text-slate-900">
+                        <DropdownMenuItem onClick={() => handleViewLogs(row)} className="rounded-lg gap-2 cursor-pointer focus:bg-[#F4F4F5] focus:text-[#0F172A]">
                           <FileText className="w-4 h-4" /> <span>View Logs</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -415,6 +391,6 @@ export default function DeploymentMonitoring() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Card>
+    </div>
   );
 }

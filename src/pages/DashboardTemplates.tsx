@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -16,7 +15,6 @@ import useBuilderStore from '@/store/useBuilderStore';
 import { cn } from '@/lib/utils';
 import templateApi from '@/api/templates';
 import { useToast } from '@/components/ui/use-toast';
-import GradientButton from '@/components/ui/GradientButton';
 import TemplateFormDialog from '@/components/dashboard/TemplateFormDialog';
 
 
@@ -190,115 +188,99 @@ export default function DashboardTemplates() {
   };
 
   return (
-    <Card className="rounded-3xl shadow-xl shadow-slate-200/50 p-8 min-h-[80vh] relative">
+    <div className="admin-page">
       {/* Full-screen creating overlay */}
       {creatingId && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm rounded-3xl">
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-xl shadow-purple-500/30">
+              <div className="w-16 h-16 rounded-2xl bg-[#0F172A] flex items-center justify-center shadow-none">
                 <Loader2 className="w-8 h-8 text-white animate-spin" />
               </div>
             </div>
             <div className="text-center">
-              <h3 className="text-xl font-bold text-slate-900">Creating your site...</h3>
-              <p className="text-sm text-slate-500 mt-1">Setting up your new project from the template</p>
+              <h3 className="text-xl font-bold text-[#0F172A]">Creating your site...</h3>
+              <p className="text-sm text-[#747781] mt-1">Setting up your new project from the template</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Breadcrumbs */}
-      <div className="mb-4 text-sm text-slate-500">
-        <a href="/dashboard" className="hover:underline">Dashboard</a> /{' '}
-        <span className="font-semibold text-slate-700">
-          Templates {showTrash && <span className="text-rose-500 font-black ml-1">/ Trash</span>}
-        </span>
-      </div>
+      {/* Header bar — floating dark glossy bar */}
+      <div className="relative mb-6 overflow-hidden rounded-3xl bg-[#0F172A] px-4 py-5 shadow-[0_12px_40px_-8px_rgba(15,23,42,0.45)] sm:px-7">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(148,163,184,0.18),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-gradient-to-l from-white/[0.07] to-transparent skew-x-[-12deg] origin-bottom-right" />
 
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
-        <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-            {showTrash ? 'Templates Trash' : 'Templates Library'}
-          </h2>
-          <p className="text-slate-500 mt-1">
-            {showTrash 
-              ? 'Manage and restore deleted templates.' 
-              : 'Choose a professional starting point for your next digital venture.'}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Search */}
-          <div className="relative w-full md:w-64">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              placeholder="Search templates..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="pl-10 h-11 rounded-full bg-white border-slate-200 shadow-md focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            />
+        <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-5">
+          {/* Title */}
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold tracking-tight text-white sm:text-2xl lg:text-3xl">
+              {showTrash ? 'Templates Trash' : 'Templates Library'}
+            </h2>
+            <p className="mt-1 text-xs text-slate-400 sm:text-sm">
+              {showTrash
+                ? 'Manage and restore deleted templates.'
+                : 'Choose a professional starting point for your next digital venture.'}
+            </p>
           </div>
 
-          {/* ADMIN ONLY: Trash toggle */}
-          {isAdminUser && (
-            <Button
-              variant={showTrash ? 'default' : 'outline'}
-              onClick={() => setShowTrash(!showTrash)}
-              className={cn(
-                'rounded-full h-11 px-5 text-sm font-semibold gap-2 transition-all duration-200',
-                showTrash
-                  ? 'bg-rose-600 text-white hover:bg-rose-700 shadow-md shadow-rose-500/20'
-                  : 'bg-white text-slate-600 border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200'
+          {/* Controls — below title on mobile, right on desktop */}
+          <div className="grid w-full grid-cols-2 gap-2 md:flex md:w-auto md:flex-wrap md:justify-end md:gap-2.5">
+              {isAdminUser && (
+                <Button
+                  variant={showTrash ? 'default' : 'outline'}
+                  onClick={() => setShowTrash(!showTrash)}
+                  className={cn(
+                    'h-10 w-full min-w-0 rounded-full px-3 text-xs font-semibold gap-1.5 shadow-none hover:scale-100 active:scale-100 transition-colors md:h-11 md:w-auto md:px-5 md:text-sm md:gap-2',
+                    showTrash
+                      ? 'bg-rose-600 text-white hover:bg-rose-700 hover:text-white'
+                      : 'border-white/15 bg-white/5 text-slate-200 hover:bg-white/10 hover:text-white hover:border-white/25'
+                  )}
+                >
+                  <Trash2 className="h-4 w-4 shrink-0" />
+                  <span className="truncate">Trash{trashedCount > 0 ? ` (${trashedCount})` : ''}</span>
+                </Button>
               )}
-            >
-              <Trash2 className="w-4 h-4" />
-              Trash{trashedCount > 0 && ` (${trashedCount})`}
-            </Button>
-          )}
 
-          {/* ADMIN ONLY: Scope filter */}
-          {isAdminUser && (
-            <Select value={scopeFilter} onValueChange={(v) => setScopeFilter(v as any)}>
-              <SelectTrigger className="w-[140px] h-11 rounded-full border-slate-200">
-                <SelectValue placeholder="All Scopes" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Scopes</SelectItem>
-                <SelectItem value="GLOBAL">Global</SelectItem>
-                <SelectItem value="INSTITUTION">Institution</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
+              {isAdminUser && (
+                <Select value={scopeFilter} onValueChange={(v) => setScopeFilter(v as any)}>
+                  <SelectTrigger className="h-10 w-full min-w-0 rounded-full border-white/15 bg-white/5 text-xs text-slate-200 hover:bg-white/10 md:h-11 md:w-[140px] md:text-sm">
+                    <SelectValue placeholder="All Scopes" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Scopes</SelectItem>
+                    <SelectItem value="GLOBAL">Global</SelectItem>
+                    <SelectItem value="INSTITUTION">Institution</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
 
-          {/* SUPER ADMIN ONLY: Institution filter */}
-          {isSuperAdmin && institutions.length > 0 && (
-            <Select value={institutionFilter} onValueChange={setInstitutionFilter}>
-              <SelectTrigger className="w-[180px] h-11 rounded-full border-slate-200">
-                <Building2 className="w-4 h-4 mr-2 text-slate-400" />
-                <SelectValue placeholder="All Orgs" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Organizations</SelectItem>
-                <SelectItem value="none">No Organization</SelectItem>
-                {institutions.map((org) => (
-                  <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+              {isSuperAdmin && institutions.length > 0 && (
+                <Select value={institutionFilter} onValueChange={setInstitutionFilter}>
+                  <SelectTrigger className="col-span-2 h-10 w-full rounded-full border-white/15 bg-white/5 text-slate-200 hover:bg-white/10 md:col-auto md:h-11 md:w-[180px]">
+                    <Building2 className="mr-2 h-4 w-4 shrink-0 text-slate-400" />
+                    <SelectValue placeholder="All Orgs" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Organizations</SelectItem>
+                    <SelectItem value="none">No Organization</SelectItem>
+                    {institutions.map((org) => (
+                      <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
 
-          {/* ADMIN ONLY: New Template button */}
-          {isAdminUser && !showTrash && (
-            <GradientButton
-              icon={<Plus className="w-5 h-5" />}
-              onClick={handleOpenCreate}
-              className="whitespace-nowrap"
-            >
-              New Template
-            </GradientButton>
-          )}
+              {isAdminUser && !showTrash && (
+                <Button
+                  onClick={handleOpenCreate}
+                  className="col-span-2 h-10 w-full rounded-full bg-white px-4 text-xs font-semibold text-[#0F172A] shadow-none hover:bg-slate-100 hover:text-[#0F172A] hover:scale-100 active:scale-100 transition-colors md:col-auto md:h-11 md:w-auto md:px-5 md:text-sm"
+                >
+                  <Plus className="h-4 w-4 shrink-0" />
+                  New Template
+                </Button>
+              )}
+          </div>
         </div>
       </div>
 
@@ -326,44 +308,59 @@ export default function DashboardTemplates() {
         </div>
       )}
 
-      {/* Category pills */}
-      <div className="flex items-center gap-2 flex-wrap mb-8">
-        {categories.map(cat => (
-          <Button
-            key={cat}
-            variant={activeCategory === cat ? 'default' : 'outline'}
-            className={cn(
-              'rounded-full h-10 px-4 text-sm font-semibold transition-all duration-200',
-              activeCategory === cat
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 hover:bg-blue-700'
-                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'
-            )}
-            onClick={() => setActiveCategory(cat)}
-          >
-            {cat}
-          </Button>
-        ))}
+      {/* Category pills + search */}
+      <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5 sm:gap-2">
+          {categories.map(cat => {
+            const active = activeCategory === cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setActiveCategory(cat)}
+                className={cn(
+                  'inline-flex h-8 shrink-0 items-center rounded-full border px-3 text-xs font-semibold transition-colors duration-200 sm:h-9 sm:px-3.5 sm:text-[13px]',
+                  active
+                    ? 'border-[#0F172A] bg-[#0F172A] text-white hover:bg-[#1E293B] hover:border-[#1E293B]'
+                    : 'border-[#E5E7EB] bg-white text-[#0F172A] hover:border-[#CBD5E1] hover:bg-[#F8FAFC]'
+                )}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="relative w-full shrink-0 md:w-64 lg:w-72">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
+          <Input
+            placeholder="Search templates..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="h-9 w-full rounded-full border-[#E5E7EB] bg-white pl-9 text-sm text-[#0F172A] shadow-sm transition-colors focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/10"
+          />
+        </div>
       </div>
 
       {/* Loading shimmer */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="rounded-2xl overflow-hidden border border-slate-100 bg-white shadow-md animate-pulse">
-              <div className="aspect-[4/3] bg-slate-100" />
+            <div key={i} className="rounded-2xl overflow-hidden border border-[#E5E7EB] bg-white shadow-md animate-pulse">
+              <div className="aspect-[16/10] bg-[#F4F4F5]" />
               <div className="p-6 space-y-3">
-                <div className="h-3 w-1/3 bg-slate-100 rounded-full" />
-                <div className="h-5 w-2/3 bg-slate-100 rounded-full" />
-                <div className="h-3 w-full bg-slate-100 rounded-full" />
+                <div className="h-3 w-1/3 bg-[#F4F4F5] rounded-full" />
+                <div className="h-5 w-2/3 bg-[#F4F4F5] rounded-full" />
+                <div className="h-3 w-full bg-[#F4F4F5] rounded-full" />
               </div>
             </div>
           ))}
         </div>
       ) : filtered.length === 0 ? (
         /* Empty state */
-        <div className="h-64 flex flex-col items-center justify-center gap-4 border-2 border-dashed border-slate-200 rounded-[2rem]">
+        <div className="h-64 flex flex-col items-center justify-center gap-4 border-2 border-dashed border-[#E8E8E8] rounded-[2rem]">
           <LayoutTemplate className="w-12 h-12 text-slate-200" />
-          <p className="text-slate-400 text-sm font-medium text-center px-8">
+          <p className="text-[#787778] text-sm font-medium text-center px-8">
             {showTrash
               ? 'Trash is empty. No deleted templates.'
               : templates.length === 0
@@ -375,7 +372,7 @@ export default function DashboardTemplates() {
           {isAdminUser && !showTrash && templates.filter(t => !t.deletedAt).length === 0 && (
             <Button
               onClick={handleOpenCreate}
-              className="rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 h-10 text-sm font-semibold shadow-lg"
+              className="rounded-full bg-[#0F172A] text-white px-6 h-10 text-sm font-semibold shadow-lg"
             >
               <Plus className="w-4 h-4 mr-2" /> Create First Template
             </Button>
@@ -383,9 +380,9 @@ export default function DashboardTemplates() {
         </div>
       ) : (
         /* Template grid */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {filtered.map((template: any) => (
-            <Card
+            <div
               key={template.id}
               onClick={() => {
                 if (template.deletedAt) {
@@ -400,22 +397,22 @@ export default function DashboardTemplates() {
                 void handleUseTemplate(template);
               }}
               className={cn(
-                "group/template-card overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer bg-white",
+                "group/template-card overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm cursor-pointer transition-shadow duration-200 hover:shadow-md",
                 showTrash && "opacity-75"
               )}
             >
               {/* Preview image */}
-              <div className="aspect-[4/3] bg-slate-50 relative overflow-hidden rounded-t-2xl">
+              <div className="aspect-[16/10] bg-[#F4F4F5] relative overflow-hidden">
                 {template.image ? (
                   <img
                     src={template.image}
                     alt={template.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover/template-card:scale-105"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50">
-                    <LayoutTemplate className="w-12 h-12 text-indigo-200" />
-                    <p className="text-xs text-indigo-300 font-medium mt-2">{template.category}</p>
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-[#F4F4F5]">
+                    <LayoutTemplate className="w-12 h-12 text-[#787778]" />
+                    <p className="text-xs text-[#747781] font-medium mt-2">{template.category}</p>
                   </div>
                 )}
 
@@ -426,24 +423,22 @@ export default function DashboardTemplates() {
                   </Badge>
                 )}
 
-                {/* Gradient overlay on hover */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover/template-card:opacity-100 transition-opacity duration-300" />
+                {/* Soft dark overlay on hover */}
+                <div className="absolute inset-0 bg-slate-900/35 opacity-0 transition-opacity duration-200 group-hover/template-card:opacity-100" />
 
                 {/* Hover action buttons */}
-                <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover/template-card:opacity-100 transition-all duration-300 z-20">
+                <div className="absolute inset-0 z-20 flex items-center justify-center gap-2 opacity-0 transition-opacity duration-200 group-hover/template-card:opacity-100">
                   {showTrash ? (
-                    /* Trash view: Restore only */
                     <Button
-                      className="bg-emerald-600 text-white font-semibold rounded-full px-5 h-10 text-sm shadow-lg shadow-emerald-500/30 hover:bg-emerald-700 hover:scale-105 transition-all duration-200"
+                      className="h-10 rounded-full bg-emerald-600 px-5 text-sm font-semibold text-white shadow-none hover:bg-emerald-700 hover:text-white hover:scale-100 active:scale-100"
                       onClick={e => { e.stopPropagation(); handleRestoreTemplate(template); }}
                     >
                       <RotateCcw className="w-4 h-4 mr-1.5" /> Restore
                     </Button>
                   ) : (
-                    /* Active view: Use + Design + Delete */
                     <>
                       <Button
-                        className="bg-blue-600 text-white font-semibold rounded-full px-5 h-10 text-sm shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:scale-105 transition-all duration-200"
+                        className="h-10 rounded-full bg-[#0F172A] px-5 text-sm font-semibold text-white shadow-none hover:bg-[#1E293B] hover:text-white hover:scale-100 active:scale-100"
                         disabled={!!creatingId}
                         onClick={e => { e.stopPropagation(); handleUseTemplate(template); }}
                       >
@@ -454,7 +449,7 @@ export default function DashboardTemplates() {
 
                       {isAdminUser && (
                         <Button
-                          className="bg-white text-slate-800 font-semibold rounded-full px-5 h-10 text-sm shadow-lg hover:bg-slate-50 hover:scale-105 transition-all duration-200"
+                          className="h-10 rounded-full border border-[#E5E7EB] bg-white px-5 text-sm font-semibold text-[#0F172A] shadow-none hover:bg-gray-100 hover:text-[#0F172A] hover:scale-100 active:scale-100"
                           onClick={e => { e.stopPropagation(); handleOpenEdit(template); }}
                         >
                           Edit Template
@@ -463,7 +458,7 @@ export default function DashboardTemplates() {
 
                       {isAdminUser && (
                         <Button
-                          className="bg-rose-600 text-white font-semibold rounded-full px-4 h-10 text-sm shadow-lg shadow-rose-500/30 hover:bg-rose-700 hover:scale-105 transition-all duration-200"
+                          className="h-10 w-10 rounded-full bg-rose-600 p-0 text-white shadow-none hover:bg-rose-700 hover:text-white hover:scale-100 active:scale-100"
                           onClick={e => { e.stopPropagation(); handleDeleteTemplate(template); }}
                         >
                           <Trash2 className="w-4 h-4" />
@@ -477,12 +472,12 @@ export default function DashboardTemplates() {
               {/* Card body */}
               <div className="p-6 pt-4 pb-4">
                 <div className="flex items-center justify-between mb-2">
-                  <Badge className="bg-blue-100 text-blue-700 font-medium px-3 py-1 rounded-full text-xs">
+                  <Badge className="bg-[#F4F4F5] text-[#0F172A] font-medium px-3 py-1 rounded-full text-xs">
                     {template.category || 'General'}
                   </Badge>
                   <div className="flex items-center gap-1.5">
                     {template.scope === 'INSTITUTION' && template.institution?.name && (
-                      <Badge className="bg-slate-100 text-slate-600 font-medium px-2 py-0.5 rounded-full text-[10px]">
+                      <Badge className="bg-[#F4F4F5] text-[#747781] font-medium px-2 py-0.5 rounded-full text-[10px]">
                         <Building2 className="w-3 h-3 mr-1 inline" />
                         {template.institution.name}
                       </Badge>
@@ -497,20 +492,20 @@ export default function DashboardTemplates() {
                     </Badge>
                   </div>
                 </div>
-                <h4 className="font-bold text-xl text-slate-900 leading-tight mt-1">{template.name}</h4>
-                <p className="text-sm text-slate-500 leading-relaxed line-clamp-2 mt-1">
+                <h4 className="font-bold text-xl text-[#0F172A] leading-tight mt-1">{template.name}</h4>
+                <p className="text-sm text-[#747781] leading-relaxed line-clamp-2 mt-1">
                   {template.description}
                 </p>
 
                 <div className={cn(
-                  "mt-4 pt-4 border-t border-slate-100 flex items-center justify-between font-semibold text-xs uppercase tracking-wider transition-all",
-                  showTrash ? 'text-rose-500 group-hover/template-card:text-rose-600' : 'text-blue-600 group-hover/template-card:text-blue-700'
+                  "mt-4 pt-4 border-t border-[#E8E8E8] flex items-center justify-between font-semibold text-xs uppercase tracking-wider transition-all",
+                  showTrash ? 'text-rose-500 group-hover/template-card:text-rose-600' : 'text-[#0F172A] group-hover/template-card:text-[#0F172A]'
                 )}>
                   <span>{showTrash ? 'In Trash' : isAdminUser ? 'Design or Use' : 'Use Template'}</span>
                   {showTrash ? <RotateCcw className="w-3 h-3" /> : <ArrowRight className="w-3 h-3" />}
                 </div>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       )}
@@ -525,6 +520,6 @@ export default function DashboardTemplates() {
         />
       )}
 
-    </Card>
+    </div>
   );
 }

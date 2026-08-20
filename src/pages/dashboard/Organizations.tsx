@@ -8,16 +8,8 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import useBuilderStore from '@/store/useBuilderStore';
 import institutionApi from '@/api/institution';
-import GradientButton from '@/components/ui/GradientButton';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -369,30 +361,34 @@ const Organizations = () => {
   });
 
   return (
-    <div className="p-6 space-y-8 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-            <Building2 className="w-8 h-8 text-indigo-600" />
-            Organizations
-          </h1>
-          <p className="text-slate-500 mt-1 font-medium">Manage platform tenants, branding, and global intelligence.</p>
-        </div>
-        
-        <Dialog open={isAddModalOpen} onOpenChange={handleModalClose}>
-          <DialogTrigger asChild>
-            <GradientButton 
-              className="flex items-center gap-2 px-6 py-6 h-auto shadow-lg shadow-indigo-200"
-            >
-              {/* <Plus className="w-5 h-5" /> */}
-              Add Organization
-            </GradientButton>
-          </DialogTrigger>
+    <div className="admin-page space-y-6 animate-in fade-in duration-500">
+      {/* Header bar — match Templates / Assets */}
+      <div className="relative overflow-hidden rounded-3xl bg-[#0F172A] px-4 py-5 shadow-[0_12px_40px_-8px_rgba(15,23,42,0.45)] sm:px-7">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(148,163,184,0.18),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 origin-bottom-right skew-x-[-12deg] bg-gradient-to-l from-white/[0.07] to-transparent" />
+
+        <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-5">
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl lg:text-3xl">
+              Organizations
+            </h1>
+            <p className="mt-1 text-xs text-slate-400 sm:text-sm">
+              Manage platform tenants, branding, and global intelligence.
+            </p>
+          </div>
+
+          <Dialog open={isAddModalOpen} onOpenChange={handleModalClose}>
+            <DialogTrigger asChild>
+              <Button className="h-10 w-full rounded-full bg-white px-5 text-xs font-semibold text-[#0F172A] shadow-none hover:scale-100 hover:bg-slate-100 hover:text-[#0F172A] active:scale-100 md:h-11 md:w-auto md:text-sm">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Organization
+              </Button>
+            </DialogTrigger>
 
           {/* ─── Add Organization Dialog ─────────────────────────────────── */}
-          <DialogContent className="sm:max-w-lg rounded-[2rem] p-0 overflow-hidden bg-white border-slate-100 shadow-2xl">
+          <DialogContent className="sm:max-w-lg rounded-3xl sm:rounded-3xl border-0 p-0 overflow-hidden bg-white shadow-xl gap-0">
             {/* Header */}
-            <div className="bg-gradient-to-r from-indigo-600 to-blue-600 px-8 py-7">
+            <div className="bg-[#0F172A] px-8 py-7">
               <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
                 <Building2 className="w-6 h-6 text-white" />
               </div>
@@ -408,7 +404,7 @@ const Organizations = () => {
 
                 {/* Organization Name */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  <label className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
                     Organization Name *
                   </label>
                   <Input
@@ -417,7 +413,7 @@ const Organizations = () => {
                     onChange={e => setField('name', e.target.value)}
                     disabled={isSubmitting}
                     className={cn(
-                      "h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all",
+                      "h-12 rounded-xl bg-[#F4F4F5] border-[#E8E8E8] focus:bg-white transition-all",
                       formErrors.name && "border-rose-400 bg-rose-50"
                     )}
                   />
@@ -428,7 +424,7 @@ const Organizations = () => {
 
                 {/* Admin Email */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  <label className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
                     Admin Email *
                   </label>
                   <Input
@@ -438,7 +434,7 @@ const Organizations = () => {
                     onChange={e => setField('email', e.target.value)}
                     disabled={isSubmitting}
                     className={cn(
-                      "h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all",
+                      "h-12 rounded-xl bg-[#F4F4F5] border-[#E8E8E8] focus:bg-white transition-all",
                       formErrors.email && "border-rose-400 bg-rose-50"
                     )}
                   />
@@ -449,7 +445,7 @@ const Organizations = () => {
 
                 {/* Admin Password */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  <label className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
                     Admin Password *
                   </label>
                   <div className="relative">
@@ -460,14 +456,14 @@ const Organizations = () => {
                       onChange={e => setField('password', e.target.value)}
                       disabled={isSubmitting}
                       className={cn(
-                        "h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all pr-12",
+                        "h-12 rounded-xl bg-[#F4F4F5] border-[#E8E8E8] focus:bg-white transition-all pr-12",
                         formErrors.password && "border-rose-400 bg-rose-50"
                       )}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(v => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#787778] hover:text-[#747781] transition-colors"
                       tabIndex={-1}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -476,7 +472,7 @@ const Organizations = () => {
                   {formErrors.password && (
                     <p className="text-xs text-rose-500 font-medium">{formErrors.password}</p>
                   )}
-                  <p className="text-[11px] text-slate-400 font-medium">
+                  <p className="text-[11px] text-[#787778] font-medium">
                     This password will be used for the Institution Admin account linked to this organization.
                   </p>
                 </div>
@@ -484,20 +480,20 @@ const Organizations = () => {
               </div>
 
               {/* Footer */}
-              <div className="px-8 pb-8 flex gap-3 justify-end border-t border-slate-100 pt-4">
+              <div className="px-8 pb-8 flex gap-3 justify-end border-t border-[#E8E8E8] pt-4">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => handleModalClose(false)}
                   disabled={isSubmitting}
-                  className="rounded-xl h-11 px-6 border-slate-200"
+                  className="rounded-xl h-11 px-6 border-[#E8E8E8] shadow-none hover:bg-gray-100 hover:scale-100"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="rounded-xl h-11 px-8 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all font-bold"
+                  className="rounded-xl h-11 px-8 bg-[#0F172A] text-white shadow-none hover:bg-[#1E293B] hover:scale-100 transition-colors font-bold"
                 >
                   {isSubmitting ? (
                     <span className="flex items-center gap-2">
@@ -513,134 +509,117 @@ const Organizations = () => {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-in slide-in-from-top duration-700">
-        <Card className="rounded-2xl border-none shadow-lg shadow-slate-200/50 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white overflow-hidden relative group">
-          <CardHeader className="pb-2">
-             <CardTitle className="text-indigo-100/60 text-[10px] font-black uppercase tracking-[0.2em]">Platform Reach</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-black mb-1">{institutions.length}</div>
-            <p className="text-indigo-100/80 text-xs font-bold flex items-center gap-1">
-              Active Organizations
-            </p>
-            <Building2 className="absolute -right-4 -bottom-4 w-24 h-24 text-white/10 group-hover:scale-110 transition-transform duration-500" />
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="relative overflow-hidden rounded-3xl bg-[#0F172A] p-5 text-white shadow-sm">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">Platform Reach</p>
+          <p className="mt-2 text-4xl font-bold">{institutions.length}</p>
+          <p className="mt-1 text-xs font-semibold text-white/70">Active Organizations</p>
+          <Building2 className="pointer-events-none absolute -bottom-4 -right-4 h-24 w-24 text-white/10" />
+        </div>
 
-        <Card className="rounded-2xl border-none shadow-lg shadow-slate-200/50 bg-white overflow-hidden relative group border border-slate-100">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">User Base</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-black text-slate-900 mb-1">
-              {totalUsers !== null
-                ? totalUsers
-                : institutions.reduce((acc, org) => acc + Math.max(org._count?.users || 0, org.users?.length || 0), 0)}
-            </div>
-            <p className="text-indigo-500 text-xs font-black flex items-center gap-1">
-              Platform Users
-            </p>
-            <Users className="absolute -right-4 -bottom-4 w-24 h-24 text-slate-50 group-hover:scale-110 transition-transform duration-500" />
-          </CardContent>
-        </Card>
+        <div className="relative overflow-hidden rounded-3xl bg-[#0F172A] p-5 text-white shadow-sm">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">User Base</p>
+          <p className="mt-2 text-4xl font-bold">
+            {totalUsers !== null
+              ? totalUsers
+              : institutions.reduce((acc, org) => acc + Math.max(org._count?.users || 0, org.users?.length || 0), 0)}
+          </p>
+          <p className="mt-1 text-xs font-semibold text-white/70">Platform Users</p>
+          <Users className="pointer-events-none absolute -bottom-4 -right-4 h-24 w-24 text-white/10" />
+        </div>
 
-        <Card className="rounded-2xl border-none shadow-lg shadow-slate-200/50 bg-white overflow-hidden relative group border border-slate-100">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Digital Footprint</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-black text-slate-900 mb-1">
-              {institutions.reduce((acc, org) => acc + (org._count?.websites || 0), 0)}
-            </div>
-            <p className="text-blue-500 text-xs font-black flex items-center gap-1">
-              Live Websites
-            </p>
-            <Globe className="absolute -right-4 -bottom-4 w-24 h-24 text-slate-50 group-hover:scale-110 transition-transform duration-500" />
-          </CardContent>
-        </Card>
+        <div className="relative overflow-hidden rounded-3xl bg-[#0F172A] p-5 text-white shadow-sm">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">Digital Footprint</p>
+          <p className="mt-2 text-4xl font-bold">
+            {institutions.reduce((acc, org) => acc + (org._count?.websites || 0), 0)}
+          </p>
+          <p className="mt-1 text-xs font-semibold text-white/70">Live Websites</p>
+          <Globe className="pointer-events-none absolute -bottom-4 -right-4 h-24 w-24 text-white/10" />
+        </div>
 
-        <Card className="rounded-2xl border-none shadow-lg shadow-slate-200/50 bg-white overflow-hidden relative group border border-slate-100 border-l-4 border-amber-400">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Compliance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-black text-slate-900 mb-1">
-              {institutions.filter(o => o.status === 'PENDING').length}
-            </div>
-            <p className="text-amber-500 text-xs font-black flex items-center gap-1">
-              Pending Approvals
-            </p>
-            <ShieldCheck className="absolute -right-4 -bottom-4 w-24 h-24 text-slate-50 group-hover:scale-110 transition-transform duration-500" />
-          </CardContent>
-        </Card>
+        <div className="relative overflow-hidden rounded-3xl bg-[#0F172A] p-5 text-white shadow-sm">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">Compliance</p>
+          <p className="mt-2 text-4xl font-bold">
+            {institutions.filter(o => o.status === 'PENDING').length}
+          </p>
+          <p className="mt-1 text-xs font-semibold text-amber-300/90">Pending Approvals</p>
+          <ShieldCheck className="pointer-events-none absolute -bottom-4 -right-4 h-24 w-24 text-white/10" />
+        </div>
       </div>
 
       <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-hidden p-0 border-none rounded-3xl shadow-2xl flex flex-col">
-          <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-8 text-white relative shrink-0">
+        <DialogContent className="flex max-h-[85vh] flex-col gap-0 overflow-hidden rounded-3xl border-0 p-0 shadow-xl sm:max-w-2xl sm:rounded-3xl">
+          <div className="relative shrink-0 bg-[#0F172A] px-5 py-4 text-white">
             <DialogHeader className="p-0 text-left">
-              <DialogTitle className="text-3xl font-black flex items-center gap-3">
-                <div className="p-2 bg-white/10 rounded-2xl">
-                  <Building2 className="w-8 h-8 text-white/40" />
+              <DialogTitle className="flex items-center gap-2.5 text-lg font-bold tracking-tight">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10">
+                  <Building2 className="h-4 w-4 text-white/70" />
                 </div>
                 {selectedOrgForView?.name}
               </DialogTitle>
-              <DialogDescription className="text-indigo-100 mt-2 text-lg opacity-80 font-medium">
+              <DialogDescription className="mt-1 text-xs font-medium text-white/50">
                 Organization Intelligence Report
               </DialogDescription>
             </DialogHeader>
-            <Building2 className="absolute right-4 bottom-4 w-32 h-32 text-white/5 pointer-events-none" />
+            <Building2 className="pointer-events-none absolute bottom-2 right-3 h-20 w-20 text-white/5" />
           </div>
-          
-          <div className="p-8 space-y-8 bg-slate-50 overflow-y-auto grow no-scrollbar">
-            <div className="grid grid-cols-3 gap-4">
-               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 group hover:shadow-md transition-shadow">
-                  <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors"><Users className="w-6 h-6" /></div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-400 uppercase tracking-widest">Team Members</div>
-                    <div className="text-2xl font-black text-slate-800 leading-none">{selectedOrgForView?.users?.length || 0}</div>
-                  </div>
-               </div>
-               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 group hover:shadow-md transition-shadow">
-                  <div className="p-3 bg-blue-50 rounded-xl text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors"><Globe className="w-6 h-6" /></div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-400 uppercase tracking-widest">Digital Assets</div>
-                    <div className="text-2xl font-black text-slate-800 leading-none">{selectedOrgForView?.websites?.length || 0}</div>
-                  </div>
-               </div>
-               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 group hover:shadow-md transition-shadow">
-                  <div className="p-3 bg-amber-50 rounded-xl text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors"><FileText className="w-6 h-6" /></div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-400 uppercase tracking-widest">Templates</div>
-                    <div className="text-2xl font-black text-slate-800 leading-none">{selectedOrgForView?.templates?.length || 0}</div>
-                  </div>
-               </div>
+
+          <div className="grow space-y-4 overflow-y-auto bg-[#F4F4F5] p-4 no-scrollbar sm:p-5">
+            <div className="grid grid-cols-3 gap-2.5">
+              <div className="flex items-center gap-2.5 rounded-2xl bg-[#0F172A] p-3 text-white shadow-sm">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10">
+                  <Users className="h-3.5 w-3.5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-white/45">Team Members</p>
+                  <p className="text-lg font-bold leading-none">{selectedOrgForView?.users?.length || 0}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2.5 rounded-2xl bg-[#0F172A] p-3 text-white shadow-sm">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10">
+                  <Globe className="h-3.5 w-3.5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-white/45">Digital Assets</p>
+                  <p className="text-lg font-bold leading-none">{selectedOrgForView?.websites?.length || 0}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2.5 rounded-2xl bg-[#0F172A] p-3 text-white shadow-sm">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10">
+                  <FileText className="h-3.5 w-3.5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-white/45">Templates</p>
+                  <p className="text-lg font-bold leading-none">{selectedOrgForView?.templates?.length || 0}</p>
+                </div>
+              </div>
             </div>
 
             <section>
-              <h3 className="text-xl font-black text-slate-900 flex items-center gap-2 mb-4 px-1">
-                <Users className="w-6 h-6 text-indigo-600" />
+              <h3 className="mb-2 flex items-center gap-1.5 text-sm font-bold text-[#0F172A]">
+                <Users className="h-3.5 w-3.5 text-[#747781]" />
                 Member Hierarchy
               </h3>
-              <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+              <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
                 <Table>
-                  <TableHeader className="bg-slate-50/80">
-                    <TableRow className="hover:bg-transparent border-slate-100">
-                      <TableHead className="font-bold py-4">Identity</TableHead>
-                      <TableHead className="font-bold py-4 text-right">Access Role</TableHead>
+                  <TableHeader className="bg-[#F4F4F5]">
+                    <TableRow className="border-[#E8E8E8] hover:bg-transparent">
+                      <TableHead className="py-2.5 text-xs font-semibold text-[#747781]">Identity</TableHead>
+                      <TableHead className="py-2.5 text-right text-xs font-semibold text-[#747781]">Access Role</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {selectedOrgForView?.users?.map((user: any) => (
-                      <TableRow key={user.id} className="border-slate-50 group hover:bg-slate-50/30">
-                        <TableCell className="py-4">
-                          <div className="font-bold text-slate-800">{user.name}</div>
-                          <div className="text-xs text-slate-500 font-medium">{user.email}</div>
+                      <TableRow key={user.id} className="border-[#E8E8E8] hover:bg-[#F8FAFC]">
+                        <TableCell className="py-2.5">
+                          <div className="text-sm font-semibold text-[#0F172A]">{user.name}</div>
+                          <div className="text-[11px] text-[#747781]">{user.email}</div>
                         </TableCell>
-                        <TableCell className="text-right py-4">
-                          <Badge variant="outline" className="capitalize font-bold bg-slate-50 text-slate-600 py-1 px-3 border-none group-hover:bg-white transition-colors">
+                        <TableCell className="py-2.5 text-right">
+                          <Badge variant="outline" className="border-none bg-[#F4F4F5] px-2.5 py-0.5 text-[10px] font-semibold capitalize text-[#747781]">
                             {user.role.toLowerCase().replace('_', ' ')}
                           </Badge>
                         </TableCell>
@@ -648,7 +627,7 @@ const Organizations = () => {
                     ))}
                     {(!selectedOrgForView?.users || selectedOrgForView.users.length === 0) && (
                       <TableRow>
-                        <TableCell colSpan={2} className="text-center py-12 text-slate-400 font-medium">No team members identified</TableCell>
+                        <TableCell colSpan={2} className="py-8 text-center text-sm text-[#787778]">No team members identified</TableCell>
                       </TableRow>
                     )}
                   </TableBody>
@@ -656,130 +635,139 @@ const Organizations = () => {
               </div>
             </section>
 
-            <section className="pb-4">
-              <h3 className="text-xl font-black text-slate-900 flex items-center gap-2 mb-4 px-1">
-                <BarChart3 className="w-6 h-6 text-blue-600" />
+            <section>
+              <h3 className="mb-2 flex items-center gap-1.5 text-sm font-bold text-[#0F172A]">
+                <BarChart3 className="h-3.5 w-3.5 text-[#747781]" />
                 Digital Assets
               </h3>
-              <div className="grid grid-cols-1 gap-3">
+              <div className="grid grid-cols-1 gap-2">
                 {selectedOrgForView?.websites?.map((site: any) => (
-                  <div key={site.id} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between group hover:border-indigo-200 hover:shadow-md hover:-translate-y-0.5 transition-all">
-                    <div className="flex items-center gap-3">
-                       <div className="w-10 h-10 bg-indigo-50 text-indigo-600 flex items-center justify-center rounded-xl font-bold group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                          {site.name.charAt(0).toUpperCase()}
-                       </div>
-                       <div>
-                          <p className="font-black text-slate-800 group-hover:text-indigo-600 transition-colors">{site.name}</p>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Indexed on {new Date(site.created_at).toLocaleDateString()}</p>
-                       </div>
+                  <div key={site.id} className="flex items-center justify-between rounded-xl border border-[#E5E7EB] bg-white p-3 shadow-sm">
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F4F4F5] text-xs font-bold text-[#0F172A]">
+                        {site.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-[#0F172A]">{site.name}</p>
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-[#787778]">
+                          Indexed on {new Date(site.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
                     <Badge className={cn(
-                      "capitalize rounded-full font-bold text-[10px] py-1 px-3 border-none",
-                      site.status === 'PUBLISHED' ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
+                      'rounded-full border-none px-2.5 py-0.5 text-[10px] font-semibold capitalize',
+                      site.status === 'PUBLISHED' ? 'bg-emerald-50 text-emerald-700' : 'bg-[#F4F4F5] text-[#747781]'
                     )}>
                       {site.status.toLowerCase()}
                     </Badge>
                   </div>
                 ))}
                 {(!selectedOrgForView?.websites || selectedOrgForView.websites.length === 0) && (
-                  <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200 text-slate-400 font-medium italic">No digital assets recorded</div>
+                  <div className="rounded-xl border border-dashed border-[#E8E8E8] bg-white py-8 text-center text-sm italic text-[#787778]">
+                    No digital assets recorded
+                  </div>
                 )}
               </div>
             </section>
 
-            <section className="pb-4">
-              <h3 className="text-xl font-black text-slate-900 flex items-center gap-2 mb-4 px-1">
-                <FileText className="w-6 h-6 text-amber-600" />
+            <section>
+              <h3 className="mb-2 flex items-center gap-1.5 text-sm font-bold text-[#0F172A]">
+                <FileText className="h-3.5 w-3.5 text-[#747781]" />
                 Organization Templates
               </h3>
-              <div className="grid grid-cols-1 gap-3">
+              <div className="grid grid-cols-1 gap-2">
                 {selectedOrgForView?.templates?.filter((t: any) => !t.deletedAt).map((tmpl: any) => (
-                  <div key={tmpl.id} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between group hover:border-amber-200 hover:shadow-md hover:-translate-y-0.5 transition-all">
-                    <div className="flex items-center gap-3">
-                       <div className="w-10 h-10 bg-amber-50 text-amber-600 flex items-center justify-center rounded-xl font-bold group-hover:bg-amber-600 group-hover:text-white transition-colors">
-                          {tmpl.name.charAt(0).toUpperCase()}
-                       </div>
-                       <div>
-                          <p className="font-black text-slate-800 group-hover:text-amber-600 transition-colors">{tmpl.name}</p>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{tmpl.category} • Created {new Date(tmpl.createdAt).toLocaleDateString()}</p>
-                       </div>
+                  <div key={tmpl.id} className="flex items-center justify-between rounded-xl border border-[#E5E7EB] bg-white p-3 shadow-sm">
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F4F4F5] text-xs font-bold text-[#0F172A]">
+                        {tmpl.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-[#0F172A]">{tmpl.name}</p>
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-[#787778]">
+                          {tmpl.category} • Created {new Date(tmpl.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
-                    <Badge className="capitalize rounded-full font-bold text-[10px] py-1 px-3 border-none bg-amber-50 text-amber-700">
+                    <Badge className="rounded-full border-none bg-[#F4F4F5] px-2.5 py-0.5 text-[10px] font-semibold capitalize text-[#747781]">
                       {tmpl.scope?.toLowerCase() || 'institution'}
                     </Badge>
                   </div>
                 ))}
                 {(!selectedOrgForView?.templates || selectedOrgForView.templates.filter((t: any) => !t.deletedAt).length === 0) && (
-                  <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200 text-slate-400 font-medium italic">No templates created for this organization</div>
+                  <div className="rounded-xl border border-dashed border-[#E8E8E8] bg-white py-8 text-center text-sm italic text-[#787778]">
+                    No templates created for this organization
+                  </div>
                 )}
               </div>
             </section>
           </div>
-          <DialogFooter className="bg-white p-6 border-t border-slate-100 shrink-0 gap-3 flex-row justify-end items-center">
-            <Button variant="ghost" className="h-12 px-6 rounded-xl font-bold text-slate-500 hover:bg-slate-100" onClick={() => setIsViewModalOpen(false)}>Close Report</Button>
-            <GradientButton className="h-12 px-8 rounded-xl shadow-lg shadow-indigo-100" onClick={() => navigate(`/admin/websites?org=${selectedOrgForView?.id}`)}>
+          <DialogFooter className="shrink-0 flex-row items-center justify-end gap-2 border-t border-[#E8E8E8] bg-white px-4 py-3">
+            <Button
+              variant="ghost"
+              className="h-9 rounded-xl px-4 text-xs font-semibold text-[#747781] shadow-none hover:scale-100 hover:bg-[#F4F4F5] hover:text-[#0F172A]"
+              onClick={() => setIsViewModalOpen(false)}
+            >
+              Close Report
+            </Button>
+            <Button
+              className="h-9 rounded-xl bg-[#0F172A] px-4 text-xs font-semibold text-white shadow-none hover:scale-100 hover:bg-[#1E293B]"
+              onClick={() => navigate(`/admin/websites?org=${selectedOrgForView?.id}`)}
+            >
               Manage Organization Property
-            </GradientButton>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <Card className="rounded-2xl border-none shadow-xl shadow-slate-200/50 bg-white/70 backdrop-blur-md overflow-hidden">
-        <CardHeader className="border-b border-slate-100 p-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input 
-                placeholder="Search organizations..." 
-                className="pl-10 h-10 bg-slate-50/50 border-slate-100 rounded-xl"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              {(['ALL', 'APPROVED', 'PENDING', 'BLOCKED'] as const).map(status => (
-                <Button
-                  key={status}
-                  variant={filterStatus === status ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setFilterStatus(status)}
-                  className={cn(
-                    "group h-9 rounded-full px-4 text-xs font-bold transition-all duration-200",
-                    filterStatus === status
-                      ? status === 'ALL'
-                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20 hover:bg-indigo-700'
-                        : status === 'APPROVED'
-                        ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20 hover:bg-emerald-700'
-                        : status === 'PENDING'
-                        ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20 hover:bg-amber-600'
-                        : 'bg-rose-600 text-white shadow-md shadow-rose-500/20 hover:bg-rose-700'
-                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-700'
-                  )}
-                >
-                  {status === 'ALL' ? 'All' : status.charAt(0) + status.slice(1).toLowerCase()}
-                  {status !== 'ALL' && (
-                    <span className={cn(
-                      "ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-black",
-                      filterStatus === status ? 'bg-white/20' : 'bg-slate-100 text-slate-500 group-hover:text-slate-600'
-                    )}>
-                      {institutions.filter(o => o.status === status).length}
-                    </span>
-                  )}
-                </Button>
-              ))}
-            </div>
+      <div className="overflow-hidden">
+        <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+          <div className="relative min-w-0 flex-1 max-w-md">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
+            <Input
+              placeholder="Search organizations..."
+              className="h-9 w-full rounded-full border-[#E5E7EB] bg-white pl-9 text-sm text-[#0F172A] shadow-sm focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
-        </CardHeader>
-        <CardContent className="p-0">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            {(['ALL', 'APPROVED', 'PENDING', 'BLOCKED'] as const).map(status => (
+              <Button
+                key={status}
+                variant={filterStatus === status ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterStatus(status)}
+                className={cn(
+                  'h-8 rounded-full border px-3 text-xs font-semibold shadow-none transition-colors hover:scale-100 active:scale-100 sm:h-9 sm:px-3.5 sm:text-[13px]',
+                  filterStatus === status
+                    ? 'border-[#0F172A] bg-[#0F172A] text-white hover:bg-[#1E293B] hover:text-white'
+                    : 'border-[#E5E7EB] bg-white text-[#0F172A] hover:border-[#CBD5E1] hover:bg-[#F8FAFC] hover:text-[#0F172A]'
+                )}
+              >
+                {status === 'ALL' ? 'All' : status.charAt(0) + status.slice(1).toLowerCase()}
+                {status !== 'ALL' && (
+                  <span className={cn(
+                    'ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold',
+                    filterStatus === status ? 'bg-white/20' : 'bg-[#F4F4F5] text-[#747781]'
+                  )}>
+                    {institutions.filter(o => o.status === status).length}
+                  </span>
+                )}
+              </Button>
+            ))}
+          </div>
+        </div>
+        <div className="overflow-x-auto rounded-3xl border border-[#E5E7EB] bg-white shadow-sm">
           <Table>
-            <TableHeader className="bg-slate-50/50">
-              <TableRow className="border-slate-100">
-                <TableHead className="font-semibold text-slate-700">Organization</TableHead>
-                <TableHead className="font-semibold text-slate-700">Status</TableHead>
-                <TableHead className="font-semibold text-slate-700 text-center">Users</TableHead>
-                <TableHead className="font-semibold text-slate-700 text-center">Websites</TableHead>
-                <TableHead className="font-semibold text-slate-700 text-center">Templates</TableHead>
-                <TableHead className="font-semibold text-slate-700">Created</TableHead>
+            <TableHeader className="bg-[#F4F4F5]">
+              <TableRow className="border-[#E8E8E8] hover:bg-transparent">
+                <TableHead className="font-semibold text-[#747781]">Organization</TableHead>
+                <TableHead className="font-semibold text-[#747781]">Status</TableHead>
+                <TableHead className="text-center font-semibold text-[#747781]">Users</TableHead>
+                <TableHead className="text-center font-semibold text-[#747781]">Websites</TableHead>
+                <TableHead className="text-center font-semibold text-[#747781]">Templates</TableHead>
+                <TableHead className="font-semibold text-[#747781]">Created</TableHead>
                 <TableHead className="text-right"></TableHead>
               </TableRow>
             </TableHeader>
@@ -787,19 +775,19 @@ const Organizations = () => {
               {loading ? (
                 Array(3).fill(0).map((_, i) => (
                   <TableRow key={i} className="animate-pulse">
-                    <TableCell><div className="h-10 w-48 bg-slate-100 rounded" /></TableCell>
-                    <TableCell><div className="h-6 w-20 bg-slate-100 rounded-full" /></TableCell>
-                    <TableCell><div className="h-6 w-10 bg-slate-100 rounded mx-auto" /></TableCell>
-                    <TableCell><div className="h-6 w-10 bg-slate-100 rounded mx-auto" /></TableCell>
-                    <TableCell><div className="h-6 w-10 bg-slate-100 rounded mx-auto" /></TableCell>
-                    <TableCell><div className="h-6 w-32 bg-slate-100 rounded" /></TableCell>
-                    <TableCell><div className="h-10 w-10 bg-slate-100 rounded ml-auto" /></TableCell>
+                    <TableCell><div className="h-10 w-48 bg-[#F4F4F5] rounded" /></TableCell>
+                    <TableCell><div className="h-6 w-20 bg-[#F4F4F5] rounded-full" /></TableCell>
+                    <TableCell><div className="h-6 w-10 bg-[#F4F4F5] rounded mx-auto" /></TableCell>
+                    <TableCell><div className="h-6 w-10 bg-[#F4F4F5] rounded mx-auto" /></TableCell>
+                    <TableCell><div className="h-6 w-10 bg-[#F4F4F5] rounded mx-auto" /></TableCell>
+                    <TableCell><div className="h-6 w-32 bg-[#F4F4F5] rounded" /></TableCell>
+                    <TableCell><div className="h-10 w-10 bg-[#F4F4F5] rounded ml-auto" /></TableCell>
                   </TableRow>
                 ))
               ) : filteredOrgs.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="h-64 text-center">
-                    <div className="flex flex-col items-center justify-center text-slate-400">
+                    <div className="flex flex-col items-center justify-center text-[#787778]">
                       <Building2 className="w-12 h-12 mb-4 opacity-20" />
                       <p className="text-lg font-medium">No organizations found</p>
                       <p className="text-sm">Try searching for a different name or add a new one.</p>
@@ -808,15 +796,15 @@ const Organizations = () => {
                 </TableRow>
               ) : (
                 filteredOrgs.map((org) => (
-                  <TableRow key={org.id} className="group hover:bg-slate-50/50 transition-colors border-slate-100">
-                    <TableCell className="py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                  <TableRow key={org.id} className="group border-[#E8E8E8] transition-colors hover:bg-[#F8FAFC]">
+                    <TableCell className="py-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F4F4F5] text-xs font-bold text-[#0F172A]">
                           {org.name.substring(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900 leading-tight">{org.name}</div>
-                          <div className="text-xs text-slate-500 font-medium">{org.email}</div>
+                          <div className="text-sm font-semibold leading-tight text-[#0F172A]">{org.name}</div>
+                          <div className="text-[11px] font-medium text-[#747781]">{org.email}</div>
                         </div>
                       </div>
                     </TableCell>
@@ -830,56 +818,60 @@ const Organizations = () => {
                         {org.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-center font-semibold text-slate-700">
+                    <TableCell className="text-center font-semibold text-[#0F172A]">
                       {Math.max(org._count?.users || 0, org.users?.length || 0)}
                     </TableCell>
-                    <TableCell className="text-center font-semibold text-slate-700">
+                    <TableCell className="text-center font-semibold text-[#0F172A]">
                       {org._count?.websites || 0}
                     </TableCell>
-                    <TableCell className="text-center font-semibold text-slate-700">
+                    <TableCell className="text-center font-semibold text-[#0F172A]">
                       {org._count?.templates || 0}
                     </TableCell>
-                    <TableCell className="text-slate-500 font-medium text-sm whitespace-nowrap">
+                    <TableCell className="text-[#747781] font-medium text-sm whitespace-nowrap">
                       {new Date(org.created_at).toLocaleDateString()}
                     </TableCell>
-                    <TableCell className="text-right px-6">
+                    <TableCell className="px-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="rounded-xl font-bold bg-white text-indigo-600 border-indigo-100 hover:bg-indigo-50 h-9 transition-all"
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 rounded-full border border-[#E5E7EB] bg-white px-3 text-xs font-semibold text-[#0F172A] shadow-none transition-colors hover:scale-100 hover:border-[#CBD5E1] hover:bg-[#F8FAFC] hover:text-[#0F172A] hover:shadow-none active:scale-100"
                           onClick={() => {
                             setSelectedOrgForView(org);
                             setIsViewModalOpen(true);
                           }}
                         >
-                          <FileText className="w-4 h-4 mr-2" /> View Report
+                          <FileText className="mr-1.5 h-3.5 w-3.5" /> View Report
                         </Button>
 
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-slate-100 shadow-sm border border-slate-100">
-                              <MoreVertical className="w-4 h-4 text-slate-500" />
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8 rounded-full border border-[#E5E7EB] bg-white shadow-none hover:scale-100 hover:border-[#CBD5E1] hover:bg-[#F8FAFC] hover:text-[#0F172A] hover:shadow-none active:scale-100"
+                            >
+                              <MoreVertical className="h-3.5 w-3.5 text-[#747781]" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-56 rounded-2xl shadow-2xl border-slate-100 p-2">
+                          <DropdownMenuContent align="end" className="w-56 rounded-2xl shadow-2xl border-[#E8E8E8] p-2">
                             <DropdownMenuItem 
                               className="gap-2 py-3 rounded-xl cursor-pointer font-semibold"
                               onClick={() => navigate(`/admin/websites?org=${org.id}`)}
                             >
-                              <div className="p-1.5 bg-blue-50 rounded-lg text-blue-600"><Globe className="w-4 h-4" /></div>
+                              <div className="p-1.5 bg-[#F4F4F5] rounded-lg text-[#0F172A]"><Globe className="w-4 h-4" /></div>
                               Manage Websites
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               className="gap-2 py-3 rounded-xl cursor-pointer font-semibold"
                               onClick={() => navigate(`/admin/users?org=${org.id}`)}
                             >
-                              <div className="p-1.5 bg-indigo-50 rounded-lg text-indigo-600"><Users className="w-4 h-4" /></div>
+                              <div className="p-1.5 bg-[#F4F4F5] rounded-lg text-[#0F172A]"><Users className="w-4 h-4" /></div>
                               Manage Users
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              className="gap-2 py-3 rounded-xl cursor-pointer font-medium text-slate-600"
+                              className="gap-2 py-3 rounded-xl cursor-pointer font-medium text-[#747781]"
                               onClick={() => handleEditClick(org)}
                             >
                               <Edit className="w-4 h-4" /> Edit Configuration
@@ -916,13 +908,13 @@ const Organizations = () => {
               )}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
       {/* ─── Edit Configuration Dialog ──────────────────────────────────────── */}
       <Dialog open={isEditModalOpen} onOpenChange={(open) => { if (!isSavingEdit) setIsEditModalOpen(open); }}>
-        <DialogContent className="sm:max-w-lg rounded-[2rem] p-0 overflow-hidden bg-white border-slate-100 shadow-2xl">
+        <DialogContent className="sm:max-w-lg rounded-3xl sm:rounded-3xl border-0 p-0 overflow-hidden bg-white shadow-xl gap-0">
           {/* Header */}
-          <div className="bg-gradient-to-r from-indigo-600 to-blue-600 px-8 py-7">
+          <div className="bg-[#0F172A] px-8 py-7">
             <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
               <Edit className="w-6 h-6 text-white" />
             </div>
@@ -937,14 +929,14 @@ const Organizations = () => {
 
             {/* Organization Name */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Organization Name *</label>
+              <label className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Organization Name *</label>
               <Input
                 placeholder="e.g. Buildora Global"
                 value={editForm.name}
                 onChange={e => handleEditField('name', e.target.value)}
                 disabled={isSavingEdit}
                 className={cn(
-                  "h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all",
+                  "h-12 rounded-xl bg-[#F4F4F5] border-[#E8E8E8] focus:bg-white transition-all",
                   editErrors.name && "border-rose-400 bg-rose-50"
                 )}
               />
@@ -953,7 +945,7 @@ const Organizations = () => {
 
             {/* Admin Email */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Admin Email *</label>
+              <label className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Admin Email *</label>
               <Input
                 type="email"
                 placeholder="admin@organization.com"
@@ -961,7 +953,7 @@ const Organizations = () => {
                 onChange={e => handleEditField('email', e.target.value)}
                 disabled={isSavingEdit}
                 className={cn(
-                  "h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all",
+                  "h-12 rounded-xl bg-[#F4F4F5] border-[#E8E8E8] focus:bg-white transition-all",
                   editErrors.email && "border-rose-400 bg-rose-50"
                 )}
               />
@@ -970,12 +962,12 @@ const Organizations = () => {
 
             {/* Status */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Status</label>
+              <label className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Status</label>
               <select
                 value={editForm.status}
                 onChange={e => handleEditField('status', e.target.value)}
                 disabled={isSavingEdit}
-                className="w-full h-12 rounded-xl bg-slate-50 border border-slate-200 px-3 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all"
+                className="w-full h-12 rounded-xl bg-[#F4F4F5] border border-[#E5E7EB] px-3 text-sm font-medium text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#0F172A] focus:border-transparent transition-all"
               >
                 <option value="APPROVED">Approved</option>
                 <option value="PENDING">Pending</option>
@@ -986,19 +978,19 @@ const Organizations = () => {
           </div>
 
           {/* Footer */}
-          <div className="px-8 pb-8 flex gap-3 justify-end border-t border-slate-100 pt-4">
+          <div className="px-8 pb-8 flex gap-3 justify-end border-t border-[#E8E8E8] pt-4">
             <Button
               variant="outline"
               onClick={() => setIsEditModalOpen(false)}
               disabled={isSavingEdit}
-              className="rounded-xl h-11 px-6 border-slate-200"
+              className="rounded-xl h-11 px-6 border-[#E8E8E8]"
             >
               Cancel
             </Button>
             <Button
               onClick={handleSaveEdit}
               disabled={isSavingEdit}
-              className="rounded-xl h-11 px-8 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all font-bold"
+              className="rounded-xl h-11 px-8 bg-[#0F172A] text-white shadow-none transition-colors font-bold"
             >
               {isSavingEdit ? (
                 <span className="flex items-center gap-2">

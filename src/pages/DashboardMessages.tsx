@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams, useOutletContext } from 'react-router-dom';
+import { useSearchParams, useOutletContext } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
     MessageSquare, Bell, CheckCircle, ArrowRight, Search, X, Mail, User, Calendar,
     Clock, Filter, Trash2, Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from "@/components/ui/use-toast";
@@ -14,9 +13,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import formsApi from '@/api/forms';
 import websiteApi from '@/api/website';
+import messagesHeroImg from '@/assets/admin_dashboard/pngtree-message-icon-cartoon-vector-illustration-clipart-png-image_12696555.avif';
 
 export default function DashboardMessages() {
-    const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const { toast } = useToast();
     const [messages, setMessages] = useState<any[]>([]);
@@ -151,8 +150,8 @@ export default function DashboardMessages() {
         switch (status) {
             case 'unread': return 'bg-amber-100 text-amber-700 border-amber-200';
             case 'read': return 'bg-green-100 text-green-700 border-green-200';
-            case 'replied': return 'bg-purple-100 text-purple-700 border-purple-200';
-            default: return 'bg-slate-100 text-slate-700 border-slate-200';
+            case 'replied': return 'bg-[#F4F4F5] text-[#0F172A] border-[#E8E8E8]';
+            default: return 'bg-[#F4F4F5] text-[#0F172A] border-[#E8E8E8]';
         }
     };
 
@@ -166,91 +165,91 @@ export default function DashboardMessages() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="admin-page">
             <Helmet>
                 <title>Messages | Buildora</title>
             </Helmet>
 
-            <div className="max-w-7xl mx-auto p-6">
-                {/* Header */}
-                <div className="mb-8">
-                    <div className="flex items-center gap-4 mb-6">
-                        <Button
-                            variant="ghost"
-                            onClick={() => navigate(isAdmin ? '/admin' : '/dashboard')}
-                            className="text-slate-600 hover:text-slate-900"
-                        >
-                            <ArrowRight className="w-4 h-4 mr-2 rotate-180" />
-                            Back to Dashboard
-                        </Button>
-                        <div className="h-8 w-px bg-slate-300" />
-                        <h1 className="text-3xl font-bold text-slate-900">Messages</h1>
+            <div className="w-full">
+                {/* Hero + stats: banner left, 2×2 cards right */}
+                <div className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-stretch">
+                    <div className="relative flex min-h-[220px] items-center overflow-hidden rounded-3xl bg-[#0F172A] px-7 py-6 shadow-[0_12px_40px_-8px_rgba(15,23,42,0.45)] lg:min-h-[240px]">
+                        <div className="pointer-events-none absolute right-0 top-0 h-full w-48 translate-x-8 skew-x-[-15deg] bg-white/5" />
+                        <div className="pointer-events-none absolute -bottom-6 -left-6 h-32 w-32 rounded-full bg-white/5" />
+                        <div className="relative z-10 max-w-[55%] pr-2 sm:max-w-[48%]">
+                            <p className="text-sm font-medium text-white/60">Inbox</p>
+                            <h1 className="mt-1 text-xl font-bold tracking-tight text-white sm:text-2xl">Messages</h1>
+                            <p className="mt-1.5 max-w-sm text-xs text-white/45">
+                                Manage contact form submissions from your website visitors.
+                            </p>
+                        </div>
+                        <img
+                            src={messagesHeroImg}
+                            alt=""
+                            className="pointer-events-none absolute -bottom-1 right-2 h-[78%] w-auto max-w-[46%] object-contain object-bottom sm:right-4 sm:h-[85%] sm:max-w-[52%] lg:-bottom-2 lg:h-[90%] lg:max-w-[55%]"
+                            draggable={false}
+                        />
                     </div>
-                    <p className="text-slate-600">
-                        Manage contact form submissions from your website visitors. View, respond to, and organize your messages.
-                    </p>
-                </div>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <Card className="hover:shadow-lg transition-shadow">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                            <CardTitle className="text-sm font-medium text-slate-600">Total Messages</CardTitle>
-                            <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
-                                <MessageSquare className="w-5 h-5" />
-                            </div>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                            <div className="text-2xl font-bold text-slate-900">{stats.total || 0}</div>
-                        </CardContent>
-                    </Card>
-                    
-                    <Card className="hover:shadow-lg transition-shadow">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                            <CardTitle className="text-sm font-medium text-slate-600">Unread</CardTitle>
-                            <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center">
-                                <Bell className="w-5 h-5" />
-                            </div>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                            <div className="text-2xl font-bold text-amber-600">{stats.unread || 0}</div>
-                        </CardContent>
-                    </Card>
-                    
-                    <Card className="hover:shadow-lg transition-shadow">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                            <CardTitle className="text-sm font-medium text-slate-600">Read</CardTitle>
-                            <div className="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center">
-                                <CheckCircle className="w-5 h-5" />
-                            </div>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                            <div className="text-2xl font-bold text-green-600">{stats.read || 0}</div>
-                        </CardContent>
-                    </Card>
-                    
-                    <Card className="hover:shadow-lg transition-shadow">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                            <CardTitle className="text-sm font-medium text-slate-600">Replied</CardTitle>
-                            <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center">
-                                <ArrowRight className="w-5 h-5" />
-                            </div>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                            <div className="text-2xl font-bold text-purple-600">{stats.replied || 0}</div>
-                        </CardContent>
-                    </Card>
+                    <div className="grid grid-cols-2 gap-4">
+                        {[
+                            {
+                                label: 'Total Messages',
+                                value: isLoading ? '…' : (stats.total || 0),
+                                icon: <MessageSquare className="w-4 h-4" />,
+                                iconBg: 'bg-[#F4F4F5] text-[#0F172A]',
+                                valueClass: 'text-[#0F172A]',
+                            },
+                            {
+                                label: 'Unread',
+                                value: isLoading ? '…' : (stats.unread || 0),
+                                icon: <Bell className="w-4 h-4" />,
+                                iconBg: 'bg-amber-50 text-amber-600',
+                                valueClass: 'text-amber-600',
+                            },
+                            {
+                                label: 'Read',
+                                value: isLoading ? '…' : (stats.read || 0),
+                                icon: <CheckCircle className="w-4 h-4" />,
+                                iconBg: 'bg-emerald-50 text-emerald-600',
+                                valueClass: 'text-emerald-600',
+                            },
+                            {
+                                label: 'Replied',
+                                value: isLoading ? '…' : (stats.replied || 0),
+                                icon: <ArrowRight className="w-4 h-4" />,
+                                iconBg: 'bg-[#F4F4F5] text-[#0F172A]',
+                                valueClass: 'text-[#0F172A]',
+                            },
+                        ].map((s, i) => (
+                            <motion.div
+                                key={s.label}
+                                initial={{ opacity: 0, y: 12 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.35, delay: i * 0.07 }}
+                                className="rounded-3xl border border-[#E8E8E8] bg-white p-5"
+                            >
+                                <div className="mb-3 flex items-center justify-between">
+                                    <p className="text-xs font-semibold text-[#747781]">{s.label}</p>
+                                    <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg', s.iconBg)}>
+                                        {s.icon}
+                                    </div>
+                                </div>
+                                <p className={cn('text-3xl font-bold', s.valueClass)}>{s.value}</p>
+                            </motion.div>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Filters */}
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
                     <div className="relative flex-1">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#787778]" />
                         <Input
                             placeholder="Search messages by name, email, subject, or message..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-12 h-12 rounded-xl bg-white border-slate-200 shadow-sm"
+                            className="pl-12 h-12 rounded-xl bg-white border-[#E8E8E8] shadow-sm"
                         />
                     </div>
                     <div className="flex gap-2">
@@ -262,8 +261,8 @@ export default function DashboardMessages() {
                                 className={cn(
                                     "rounded-full h-12 px-6 capitalize font-medium transition-all",
                                     filterStatus === status 
-                                        ? "bg-blue-600 text-white shadow-md shadow-blue-500/30" 
-                                        : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                                        ? "bg-[#0F172A] text-white shadow-none" 
+                                        : "bg-white text-[#0F172A] border-[#E8E8E8] hover:bg-[#F4F4F5]"
                                 )}
                             >
                                 {status}
@@ -273,12 +272,12 @@ export default function DashboardMessages() {
                 </div>
                 <div className="mb-6">
                     <div className="flex items-center gap-3">
-                        <label className="text-sm font-medium text-slate-600">Website</label>
+                        <label className="text-sm font-medium text-[#747781]">Website</label>
                         <select
                             value={selectedWebsiteId}
                             onChange={(e) => handleWebsiteChange(e.target.value)}
                             disabled={isLoadingWebsites}
-                            className="h-10 px-3 rounded-lg border border-slate-200 bg-white text-sm text-slate-700"
+                            className="h-10 px-3 rounded-lg border border-[#E5E7EB] bg-white text-sm text-[#0F172A]"
                         >
                             <option value="all">All websites</option>
                             {websites.map((website) => (
@@ -291,115 +290,121 @@ export default function DashboardMessages() {
                 </div>
 
                 {/* Messages List */}
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {isLoading ? (
-                        Array.from({ length: 5 }).map((_, i) => (
-                            <Card key={i} className="animate-pulse">
-                                <CardContent className="p-6">
-                                    <div className="space-y-4">
-                                        <div className="h-4 bg-slate-200 rounded-full w-3/4" />
-                                        <div className="h-3 bg-slate-100 rounded-full w-1/2" />
-                                        <div className="h-3 bg-slate-100 rounded-full w-full" />
-                                        <div className="h-3 bg-slate-100 rounded-full w-2/3" />
-                                    </div>
-                                </CardContent>
-                            </Card>
+                        Array.from({ length: 4 }).map((_, i) => (
+                            <div
+                                key={i}
+                                className="animate-pulse rounded-3xl border border-[#E8E8E8] bg-white p-6"
+                            >
+                                <div className="space-y-4">
+                                    <div className="h-4 w-3/4 rounded-full bg-slate-200" />
+                                    <div className="h-3 w-1/2 rounded-full bg-[#F4F4F5]" />
+                                    <div className="h-3 w-full rounded-full bg-[#F4F4F5]" />
+                                    <div className="h-3 w-2/3 rounded-full bg-[#F4F4F5]" />
+                                </div>
+                            </div>
                         ))
                     ) : filteredMessages.length === 0 ? (
-                        <Card className="border-dashed border-2 border-slate-300 bg-slate-50/50">
-                            <CardContent className="p-12 text-center">
-                                <MessageSquare className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                                <h3 className="text-xl font-semibold text-slate-600 mb-2">
-                                    {searchTerm ? 'No messages found' : 'No messages yet'}
-                                </h3>
-                                <p className="text-slate-400">
-                                    {searchTerm 
-                                        ? 'Try adjusting your search terms or filters' 
-                                        : 'When visitors fill out your contact forms, messages will appear here'
-                                    }
-                                </p>
-                            </CardContent>
-                        </Card>
+                        <div className="col-span-full rounded-3xl border-2 border-dashed border-slate-300 bg-[#F4F4F5]/50 p-12 text-center">
+                            <MessageSquare className="mx-auto mb-4 h-16 w-16 text-slate-300" />
+                            <h3 className="mb-2 text-xl font-semibold text-[#747781]">
+                                {searchTerm ? 'No messages found' : 'No messages yet'}
+                            </h3>
+                            <p className="text-[#787778]">
+                                {searchTerm
+                                    ? 'Try adjusting your search terms or filters'
+                                    : 'When visitors fill out your contact forms, messages will appear here'
+                                }
+                            </p>
+                        </div>
                     ) : (
                         filteredMessages.map((message) => (
-                            <Card 
-                                key={message.id} 
-                                className={cn(
-                                    "cursor-pointer transition-all hover:shadow-lg border-2",
-                                    message.status === 'unread' 
-                                        ? 'border-amber-200 bg-amber-50/30' 
-                                        : 'border-slate-200 bg-white'
-                                )}
+                            <div
+                                key={message.id}
+                                role="button"
+                                tabIndex={0}
                                 onClick={() => setSelectedMessage(message)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        setSelectedMessage(message);
+                                    }
+                                }}
+                                className={cn(
+                                    'cursor-pointer rounded-3xl border bg-white p-6 shadow-sm transition-colors',
+                                    'hover:border-[#CBD5E1] hover:bg-[#F8FAFC] hover:shadow-md',
+                                    message.status === 'unread'
+                                        ? 'border-amber-200 bg-amber-50/30'
+                                        : 'border-[#E8E8E8]'
+                                )}
                             >
-                                <CardContent className="p-6">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-3 mb-2">
-                                                <h4 className="font-semibold text-slate-900">{message.name}</h4>
-                                                <span className="text-sm text-slate-500">{message.email}</span>
-                                                <div className={cn(
-                                                    "px-2 py-1 text-xs font-medium rounded-full flex items-center gap-1.5",
-                                                    getStatusColor(message.status)
-                                                )}>
-                                                    {getStatusIcon(message.status)}
-                                                    {message.status}
-                                                </div>
+                                <div className="mb-4 flex items-start justify-between gap-3">
+                                    <div className="min-w-0 flex-1">
+                                        <div className="mb-2 flex flex-wrap items-center gap-2">
+                                            <h4 className="font-semibold text-[#0F172A]">{message.name}</h4>
+                                            <span className="truncate text-sm text-[#747781]">{message.email}</span>
+                                            <div className={cn(
+                                                'inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium',
+                                                getStatusColor(message.status)
+                                            )}>
+                                                {getStatusIcon(message.status)}
+                                                {message.status}
                                             </div>
-                                            {message.subject && (
-                                                <p className="font-medium text-slate-700 mb-2">{message.subject}</p>
-                                            )}
-                                            {message.website?.name && (
-                                                <p className="text-sm text-slate-500 mb-2">Website: {message.website.name}</p>
-                                            )}
                                         </div>
-                                        <div className="text-sm text-slate-500 flex items-center gap-1">
-                                            <Calendar className="w-4 h-4" />
-                                            {new Date(message.createdAt).toLocaleDateString()}
-                                        </div>
-                                    </div>
-                                    <p className="text-slate-600 line-clamp-2 mb-4">{message.message}</p>
-                                    
-                                    <div className="flex items-center gap-2 pt-4 border-t border-slate-100">
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setSelectedMessage(message);
-                                            }}
-                                            className="rounded-full"
-                                        >
-                                            <Eye className="w-4 h-4 mr-2" />
-                                            View Details
-                                        </Button>
-                                        {message.status === 'unread' && (
-                                            <Button
-                                                size="sm"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleMarkAsRead(message.id);
-                                                }}
-                                                className="rounded-full"
-                                            >
-                                                Mark as Read
-                                            </Button>
+                                        {message.subject && (
+                                            <p className="mb-2 font-medium text-[#0F172A]">{message.subject}</p>
                                         )}
+                                        {message.website?.name && (
+                                            <p className="mb-2 text-sm text-[#747781]">Website: {message.website.name}</p>
+                                        )}
+                                    </div>
+                                    <div className="flex shrink-0 items-center gap-1 text-sm text-[#747781]">
+                                        <Calendar className="h-4 w-4" />
+                                        {new Date(message.createdAt).toLocaleDateString()}
+                                    </div>
+                                </div>
+                                <p className="mb-4 line-clamp-2 text-[#747781]">{message.message}</p>
+
+                                <div className="flex flex-wrap items-center gap-2 border-t border-[#E8E8E8] pt-4">
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedMessage(message);
+                                        }}
+                                        className="rounded-full border-[#E5E7EB] bg-white text-[#0F172A] shadow-none hover:bg-gray-100 hover:text-[#0F172A] hover:shadow-none hover:scale-100"
+                                    >
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        View Details
+                                    </Button>
+                                    {message.status === 'unread' && (
                                         <Button
                                             size="sm"
-                                            variant="outline"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleDelete(message.id);
+                                                handleMarkAsRead(message.id);
                                             }}
-                                            className="rounded-full text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                                            className="rounded-full bg-[#0F172A] text-white shadow-none hover:bg-[#1E293B] hover:shadow-none hover:scale-100"
                                         >
-                                            <Trash2 className="w-4 h-4 mr-2" />
-                                            Delete
+                                            Mark as Read
                                         </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                    )}
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDelete(message.id);
+                                        }}
+                                        className="rounded-full border-rose-200 text-rose-600 shadow-none hover:bg-rose-50 hover:text-rose-700 hover:shadow-none hover:scale-100"
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Delete
+                                    </Button>
+                                </div>
+                            </div>
                         ))
                     )}
                 </div>
@@ -414,8 +419,8 @@ export default function DashboardMessages() {
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 transition={{ duration: 0.2 }}
                             >
-                                <DialogContent className="sm:max-w-3xl rounded-[2rem] p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
-                                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6 sticky top-0 z-10">
+                                <DialogContent className="sm:max-w-3xl rounded-3xl sm:rounded-3xl border-0 p-0 overflow-hidden max-h-[90vh] overflow-y-auto gap-0 shadow-xl [&>button]:hidden">
+                                    <div className="rounded-t-3xl bg-[#0F172A] px-8 py-6 sticky top-0 z-10">
                                         <DialogTitle className="text-2xl font-bold text-white flex items-center justify-between">
                                             Message Details
                                             <Button
@@ -427,43 +432,43 @@ export default function DashboardMessages() {
                                             </Button>
                                         </DialogTitle>
                                     </div>
-                                    <div className="p-8 space-y-6">
+                                    <div className="rounded-b-3xl bg-white p-8 space-y-6">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>
-                                                <label className="text-sm font-medium text-slate-500 flex items-center gap-2 mb-2">
+                                                <label className="text-sm font-medium text-[#747781] flex items-center gap-2 mb-2">
                                                     <User className="w-4 h-4" />
                                                     Name
                                                 </label>
-                                                <p className="font-semibold text-slate-900 bg-slate-50 p-3 rounded-lg">{selectedMessage.name}</p>
+                                                <p className="font-semibold text-[#0F172A] bg-[#F4F4F5] p-3 rounded-xl">{selectedMessage.name}</p>
                                             </div>
                                             <div>
-                                                <label className="text-sm font-medium text-slate-500 flex items-center gap-2 mb-2">
+                                                <label className="text-sm font-medium text-[#747781] flex items-center gap-2 mb-2">
                                                     <Mail className="w-4 h-4" />
                                                     Email
                                                 </label>
-                                                <p className="font-semibold text-slate-900 bg-slate-50 p-3 rounded-lg">{selectedMessage.email}</p>
+                                                <p className="font-semibold text-[#0F172A] bg-[#F4F4F5] p-3 rounded-xl">{selectedMessage.email}</p>
                                             </div>
                                         </div>
                                         {selectedMessage.subject && (
                                             <div>
-                                                <label className="text-sm font-medium text-slate-500 mb-2">Subject</label>
-                                                <p className="font-semibold text-slate-900 bg-slate-50 p-3 rounded-lg">{selectedMessage.subject}</p>
+                                                <label className="text-sm font-medium text-[#747781] mb-2">Subject</label>
+                                                <p className="font-semibold text-[#0F172A] bg-[#F4F4F5] p-3 rounded-xl">{selectedMessage.subject}</p>
                                             </div>
                                         )}
                                         {selectedMessage.website?.name && (
                                             <div>
-                                                <label className="text-sm font-medium text-slate-500 mb-2">Website</label>
-                                                <p className="font-semibold text-slate-900 bg-slate-50 p-3 rounded-lg">{selectedMessage.website.name}</p>
+                                                <label className="text-sm font-medium text-[#747781] mb-2">Website</label>
+                                                <p className="font-semibold text-[#0F172A] bg-[#F4F4F5] p-3 rounded-xl">{selectedMessage.website.name}</p>
                                             </div>
                                         )}
                                         <div>
-                                            <label className="text-sm font-medium text-slate-500 mb-2">Message</label>
-                                            <div className="text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                            <label className="text-sm font-medium text-[#747781] mb-2">Message</label>
+                                            <div className="text-[#0F172A] leading-relaxed bg-[#F4F4F5] p-4 rounded-xl border border-[#E5E7EB]">
                                                 {selectedMessage.message}
                                             </div>
                                         </div>
-                                        <div className="flex items-center justify-between pt-6 border-t border-slate-100">
-                                            <div className="text-sm text-slate-500 flex items-center gap-2">
+                                        <div className="flex items-center justify-between pt-6 border-t border-[#E8E8E8]">
+                                            <div className="text-sm text-[#747781] flex items-center gap-2">
                                                 <Clock className="w-4 h-4" />
                                                 Received: {new Date(selectedMessage.createdAt).toLocaleString()}
                                             </div>

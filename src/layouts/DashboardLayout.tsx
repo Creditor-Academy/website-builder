@@ -143,7 +143,10 @@ const DashboardLayout = () => {
     };
 
     return (
-        <div className="h-screen bg-[#f8fafc] flex font-sans selection:bg-primary/10 relative overflow-hidden">
+        <div className={cn(
+            "h-screen flex font-sans selection:bg-primary/10 relative overflow-hidden",
+            isAdmin ? "bg-white" : "bg-[#f8fafc]"
+        )}>
             <Helmet>
                 <title>Dashboard | Buildora</title>
             </Helmet>

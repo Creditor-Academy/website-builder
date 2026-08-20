@@ -8,7 +8,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -38,8 +37,8 @@ import {
   Globe2, LayoutGrid, ShieldCheck, User as UserIcon, Hash, FileText, Link, Clock, Edit, Copy, Eye, Trash2, MoreVertical, CheckCircle, CircleDotDashed, Ban, Search, ListFilter, Plus, Building2, RotateCcw
 } from 'lucide-react';
 import WebsiteShimmer from '@/components/dashboard/WebsiteShimmer';
-import GradientButton from '@/components/ui/GradientButton';
 import { useToast } from '@/components/ui/use-toast';
+import { cn } from '@/lib/utils';
 import useBuilderStore from '@/store/useBuilderStore';
 
 interface Website {
@@ -221,106 +220,108 @@ export default function DashboardWebsites() {
   };
 
   return (
-    <Card className="rounded-3xl shadow-xl shadow-slate-200/50 p-8">
-      {/* Breadcrumbs */}
-      <div className="mb-4 text-sm text-slate-500">
-        <a href="/admin" className="hover:underline">Dashboard</a> / <span className="font-semibold text-slate-700">Websites</span>
-      </div>
+    <div className="admin-page">
+      {/* Header bar — match Templates / Assets */}
+      <div className="relative mb-6 overflow-hidden rounded-3xl bg-[#0F172A] px-4 py-5 shadow-[0_12px_40px_-8px_rgba(15,23,42,0.45)] sm:px-7">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(148,163,184,0.18),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 origin-bottom-right skew-x-[-12deg] bg-gradient-to-l from-white/[0.07] to-transparent" />
 
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
-        <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-            {orgId ? `Organization Websites` : 'Website Management'}
-          </h2>
-          <p className="text-slate-500 mt-1">
-            {orgId ? `Managing websites for specific organization` : 'Manage your deployed and draft websites.'}
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          {isAdminRole && (
-            <GradientButton
-              onClick={() => {
-                setIsAdminView(prev => {
-                  const newAdminState = !prev;
-                  toast({
-                    title: newAdminState ? "Admin View Activated! 🛡️" : "User View Activated! 👤",
-                    description: newAdminState
-                      ? (isSuperAdmin ? "You are now viewing all websites across the platform." : "You are now viewing all websites in your organization.")
-                      : "You are now viewing your own websites.",
-                    variant: "themed",
-                    icon: newAdminState ? <ShieldCheck className="h-6 w-6 text-white stroke-2" /> : <UserIcon className="h-6 w-6 text-white stroke-2" />,
+        <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-5">
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold tracking-tight text-white sm:text-2xl lg:text-3xl">
+              {orgId ? 'Organization Websites' : 'Website Management'}
+            </h2>
+            <p className="mt-1 text-xs text-slate-400 sm:text-sm">
+              {orgId ? 'Managing websites for specific organization' : 'Manage your deployed and draft websites.'}
+            </p>
+          </div>
+
+          <div className="grid w-full grid-cols-2 gap-2 md:flex md:w-auto md:flex-wrap md:justify-end md:gap-2.5">
+            {isAdminRole && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsAdminView(prev => {
+                    const newAdminState = !prev;
+                    toast({
+                      title: newAdminState ? "Admin View Activated! 🛡️" : "User View Activated! 👤",
+                      description: newAdminState
+                        ? (isSuperAdmin ? "You are now viewing all websites across the platform." : "You are now viewing all websites in your organization.")
+                        : "You are now viewing your own websites.",
+                      variant: "themed",
+                      icon: newAdminState ? <ShieldCheck className="h-6 w-6 text-white stroke-2" /> : <UserIcon className="h-6 w-6 text-white stroke-2" />,
+                    });
+                    return newAdminState;
                   });
-                  return newAdminState;
-                });
+                }}
+                className="h-10 w-full min-w-0 rounded-full border-white/15 bg-white/5 px-3 text-xs font-semibold text-slate-200 shadow-none hover:scale-100 hover:border-white/25 hover:bg-white/10 hover:text-white active:scale-100 md:h-11 md:w-auto md:px-5 md:text-sm"
+              >
+                {isAdminView ? <ShieldCheck className="mr-1.5 h-4 w-4 shrink-0" /> : <UserIcon className="mr-1.5 h-4 w-4 shrink-0" />}
+                <span className="truncate">{isInstitutionAdmin ? 'Org View' : 'Admin View'} ({isAdminView ? 'ON' : 'OFF'})</span>
+              </Button>
+            )}
+
+            {isSuperAdmin && isAdminView && availableInstitutions.length > 0 && (
+              <Select value={institutionFilter} onValueChange={setInstitutionFilter}>
+                <SelectTrigger className="h-10 w-full min-w-0 rounded-full border-white/15 bg-white/5 text-xs text-slate-200 hover:bg-white/10 md:h-11 md:w-[180px] md:text-sm">
+                  <Building2 className="mr-2 h-4 w-4 shrink-0 text-slate-400" />
+                  <SelectValue placeholder="All Orgs" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Organizations</SelectItem>
+                  <SelectItem value="none">No Organization</SelectItem>
+                  {availableInstitutions.map((org) => (
+                    <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
+            <Button
+              onClick={async () => {
+                try {
+                  const id = await useBuilderStore.getState().createWebsite('My New Website', 'blank', orgId || undefined);
+                  navigate(`/builder/${id}`);
+                } catch (err) {
+                  toast({
+                    title: "Error",
+                    description: "Failed to create website",
+                    variant: "destructive"
+                  });
+                }
               }}
-              className="w-full md:w-auto"
-              icon={isAdminView ? <ShieldCheck className="w-4 h-4" /> : <UserIcon className="w-4 h-4" />}
+              className="col-span-2 h-10 w-full rounded-full bg-white px-4 text-xs font-semibold text-[#0F172A] shadow-none hover:scale-100 hover:bg-slate-100 hover:text-[#0F172A] active:scale-100 md:col-auto md:h-11 md:w-auto md:px-5 md:text-sm"
             >
-              {isInstitutionAdmin ? 'Org View' : 'Admin View'} ({isAdminView ? "ON" : "OFF"})
-            </GradientButton>
-          )}
-
-          {/* SUPER ADMIN: Institution filter */}
-          {isSuperAdmin && isAdminView && availableInstitutions.length > 0 && (
-            <Select value={institutionFilter} onValueChange={setInstitutionFilter}>
-              <SelectTrigger className="w-[180px] h-11 rounded-full border-slate-200">
-                <Building2 className="w-4 h-4 mr-2 text-slate-400" />
-                <SelectValue placeholder="All Orgs" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Organizations</SelectItem>
-                <SelectItem value="none">No Organization</SelectItem>
-                {availableInstitutions.map((org) => (
-                  <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-
-          <GradientButton
-            className="w-full md:w-auto"
-            icon={<Plus className="w-5 h-5" />}
-            onClick={async () => {
-              try {
-                const id = await useBuilderStore.getState().createWebsite('My New Website', 'blank', orgId || undefined);
-                navigate(`/builder/${id}`);
-              } catch (err) {
-                toast({
-                  title: "Error",
-                  description: "Failed to create website",
-                  variant: "destructive"
-                });
-              }
-            }}
-          >
-            New Website
-          </GradientButton>
+              <Plus className="mr-1.5 h-4 w-4 shrink-0" />
+              New Website
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+      <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+        <div className="relative min-w-0 flex-1">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
           <Input
             placeholder="Search websites by name or domain..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-11 pr-4 w-full h-11 rounded-full bg-white border-slate-200 
-                       shadow-md shadow-slate-200/50 focus:ring-2 focus:ring-blue-500/20 
-                       focus:border-blue-500 transition-all duration-300"
+            className="h-9 w-full rounded-full border-[#E5E7EB] bg-white pl-9 text-sm text-[#0F172A] shadow-sm focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/10"
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           {['all', 'Published', 'Draft', 'Deleted'].map((status) => (
             <Button
               key={status}
               variant={filterStatus === status ? 'default' : 'outline'}
-              className={`rounded-full h-10 px-4 text-sm font-semibold 
-                          ${filterStatus === status ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}
-                          transition-all duration-200`}
+              className={cn(
+                'h-8 rounded-full border px-3 text-xs font-semibold shadow-none transition-colors hover:scale-100 active:scale-100 sm:h-9 sm:px-3.5 sm:text-[13px]',
+                filterStatus === status
+                  ? 'border-[#0F172A] bg-[#0F172A] text-white hover:bg-[#1E293B] hover:text-white'
+                  : 'border-[#E5E7EB] bg-white text-[#0F172A] hover:border-[#CBD5E1] hover:bg-[#F8FAFC] hover:text-[#0F172A]'
+              )}
               onClick={() => setFilterStatus(status as any)}
             >
               {status}
@@ -329,13 +330,11 @@ export default function DashboardWebsites() {
         </div>
 
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-full md:w-[180px] h-11 rounded-full bg-white border-slate-200 
-                                    shadow-md shadow-slate-200/50 focus:ring-2 focus:ring-blue-500/20 
-                                    focus:border-blue-500 transition-all duration-300 hover:bg-slate-100">
-            <ListFilter className="h-4 w-4 text-slate-400 mr-2" />
+          <SelectTrigger className="h-9 w-full rounded-full border-[#E5E7EB] bg-white shadow-sm md:w-[180px]">
+            <ListFilter className="mr-2 h-4 w-4 text-[#787778]" />
             <SelectValue placeholder="Sort By" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">
+          <SelectContent className="rounded-xl border-[#E8E8E8] bg-white shadow-lg">
             <SelectItem value="recent">Most Recent</SelectItem>
             <SelectItem value="name">Name (A-Z)</SelectItem>
             <SelectItem value="status">Status</SelectItem>
@@ -343,20 +342,20 @@ export default function DashboardWebsites() {
         </Select>
       </div>
 
-      <div className="overflow-x-auto">
-        <Table className="w-full rounded-xl overflow-hidden border border-slate-200 shadow-md">
-          <TableHeader className="bg-slate-50 border-b border-slate-200">
+      <div className="overflow-x-auto rounded-3xl border border-[#E5E7EB] bg-white shadow-sm">
+        <Table className="w-full overflow-hidden">
+          <TableHeader className="border-b border-[#E8E8E8] bg-[#F4F4F5]">
             <TableRow className="hover:bg-transparent">
-              <TableHead className="w-[40px] px-2 text-center"><input type="checkbox" className="form-checkbox h-4 w-4 text-blue-600 rounded" /></TableHead>
-              <TableHead className="w-[80px] px-4 py-3 text-slate-500">ID</TableHead>
-              <TableHead className="min-w-[200px] px-4 py-3 text-slate-500">Website</TableHead>
-              <TableHead className="min-w-[120px] px-4 py-3 text-slate-500">Status</TableHead>
-              <TableHead className="min-w-[150px] px-4 py-3 text-slate-500">
+              <TableHead className="w-[40px] px-2 text-center"><input type="checkbox" className="form-checkbox h-4 w-4 rounded text-[#0F172A]" /></TableHead>
+              <TableHead className="w-[80px] px-4 py-3 text-[#747781]">ID</TableHead>
+              <TableHead className="min-w-[200px] px-4 py-3 text-[#747781]">Website</TableHead>
+              <TableHead className="min-w-[120px] px-4 py-3 text-[#747781]">Status</TableHead>
+              <TableHead className="min-w-[150px] px-4 py-3 text-[#747781]">
                 <span className="flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-slate-400" /> Last Updated
+                  <Clock className="w-4 h-4 text-[#787778]" /> Last Updated
                 </span>
               </TableHead>
-              <TableHead className="text-right min-w-[120px] px-4 py-3 text-slate-500">Actions</TableHead>
+              <TableHead className="text-right min-w-[120px] px-4 py-3 text-[#747781]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -364,22 +363,22 @@ export default function DashboardWebsites() {
               Array.from({ length: 5 }).map((_, i) => <WebsiteShimmer key={i} />)
             ) : filteredWebsites.length > 0 ? (
               filteredWebsites.map((website: any) => (
-                <TableRow key={website.id} className="group h-16 border-b border-slate-100 hover:bg-slate-50/70 transition-all duration-200">
-                  <TableCell className="px-2 text-center"><input type="checkbox" className="form-checkbox h-4 w-4 text-blue-600 rounded" /></TableCell>
-                  <TableCell className="font-medium text-slate-600 px-4 py-3">#{website.id.slice(0, 8)}</TableCell>
+                <TableRow key={website.id} className="group h-16 border-b border-[#E8E8E8] hover:bg-[#F4F4F5]/70 transition-all duration-200">
+                  <TableCell className="px-2 text-center"><input type="checkbox" className="form-checkbox h-4 w-4 text-[#0F172A] rounded" /></TableCell>
+                  <TableCell className="font-medium text-[#747781] px-4 py-3">#{website.id.slice(0, 8)}</TableCell>
                   <TableCell className="flex items-center gap-3 px-4 py-3">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm border border-indigo-100/50">
+                    <div className="w-10 h-10 rounded-xl bg-[#F4F4F5] text-[#0F172A] flex items-center justify-center font-bold text-sm border border-[#E5E7EB]/50">
                       {website.id.slice(-4).toUpperCase()}
                     </div>
                     <div>
-                      <p className="font-bold text-slate-900 leading-none">{website.name}</p>
+                      <p className="font-bold text-[#0F172A] leading-none">{website.name}</p>
                       <div className="flex items-center gap-2 mt-1.5">
-                        <Badge variant="outline" className="bg-slate-50 text-[10px] font-mono font-medium text-slate-500 py-0 px-2 h-5 border-slate-100">
+                        <Badge variant="outline" className="bg-[#F4F4F5] text-[10px] font-mono font-medium text-[#747781] py-0 px-2 h-5 border-[#E8E8E8]">
                           {website.id}
                         </Badge>
                       </div>
                       {isAdminView && website.institution && (
-                        <p className="text-[10px] text-indigo-500 font-bold uppercase mt-1 tracking-wider">
+                        <p className="text-[10px] text-[#747781] font-bold uppercase mt-1 tracking-wider">
                           <Building2 className="w-3 h-3 inline mr-0.5" />{website.institution.name}
                         </p>
                       )}
@@ -401,7 +400,7 @@ export default function DashboardWebsites() {
                       {website.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-slate-500 text-sm px-4 py-3">
+                  <TableCell className="text-[#747781] text-sm px-4 py-3">
                     {formatDate(website.lastEdited)}
                   </TableCell>
                   <TableCell className="text-right px-4 py-3">
@@ -417,11 +416,11 @@ export default function DashboardWebsites() {
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0 data-[state=open]:bg-slate-100">
-                              <MoreVertical className="h-4 w-4 text-slate-500" />
+                            <Button variant="ghost" className="h-8 w-8 p-0 data-[state=open]:bg-[#F4F4F5]">
+                              <MoreVertical className="h-4 w-4 text-[#747781]" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-slate-200 shadow-lg">
+                          <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-[#E8E8E8] shadow-lg">
                             <DropdownMenuItem onClick={() => handleRestore(website)} className="rounded-lg gap-2 cursor-pointer focus:bg-emerald-50 text-emerald-700">
                               <RotateCcw className="w-4 h-4" /> Restore
                             </DropdownMenuItem>
@@ -435,15 +434,15 @@ export default function DashboardWebsites() {
                     ) : (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0 data-[state=open]:bg-slate-100">
-                          <MoreVertical className="h-4 w-4 text-slate-500" />
+                        <Button variant="ghost" className="h-8 w-8 p-0 data-[state=open]:bg-[#F4F4F5]">
+                          <MoreVertical className="h-4 w-4 text-[#747781]" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-slate-200 shadow-lg">
-                        <DropdownMenuItem onClick={() => handleEdit(website)} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100">
+                      <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-[#E8E8E8] shadow-lg">
+                        <DropdownMenuItem onClick={() => handleEdit(website)} className="rounded-lg gap-2 cursor-pointer focus:bg-[#F4F4F5]">
                           <Edit className="w-4 h-4" /> Edit Status
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate(`/builder/${website.id}`)} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100">
+                        <DropdownMenuItem onClick={() => navigate(`/builder/${website.id}`)} className="rounded-lg gap-2 cursor-pointer focus:bg-[#F4F4F5]">
                           <LayoutGrid className="w-4 h-4" /> Open Editor
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -458,7 +457,7 @@ export default function DashboardWebsites() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-slate-500">
+                <TableCell colSpan={6} className="h-24 text-center text-[#747781]">
                   No websites found.
                 </TableCell>
               </TableRow>
@@ -499,6 +498,6 @@ export default function DashboardWebsites() {
           </div>
         </DialogContent>
       </Dialog>
-    </Card>
+    </div>
   );
 }

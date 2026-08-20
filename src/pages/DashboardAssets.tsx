@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Search, Upload, Check, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Trash2, Copy, Loader2 } from 'lucide-react';
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { ScrollArea } from "../components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
@@ -13,7 +12,7 @@ import { DuplicateAssetDialog } from "../components/ui/DuplicateAssetDialog";
 
 import { useToast } from "../hooks/use-toast";
 import useBuilderStore from '../store/useBuilderStore';
-
+import { cn } from '@/lib/utils';
 
 export default function DashboardAssets() {
     const { deleteAsset, fetchAssets, getScopedAssets, uploadAsset, importAssetFromUrl } = useBuilderStore();
@@ -154,95 +153,96 @@ export default function DashboardAssets() {
     };
 
     return (
-    <Card className="rounded-3xl shadow-xl shadow-slate-200/50 p-8 min-h-[80vh]">
-      {/* Breadcrumbs */}
-      <div className="mb-4 text-sm text-slate-500">
-        <a href="/dashboard" className="hover:underline">Dashboard</a> / <span className="font-semibold text-slate-700">Media Management</span>
+    <div className="admin-page">
+      {/* Header bar — match Templates Library */}
+      <div className="relative mb-6 overflow-hidden rounded-3xl bg-[#0F172A] px-4 py-5 shadow-[0_12px_40px_-8px_rgba(15,23,42,0.45)] sm:px-7">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(148,163,184,0.18),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 origin-bottom-right skew-x-[-12deg] bg-gradient-to-l from-white/[0.07] to-transparent" />
+
+        <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-5">
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold tracking-tight text-white sm:text-2xl lg:text-3xl">
+              Media Management
+            </h2>
+            <p className="mt-1 text-xs text-slate-400 sm:text-sm">
+              Manage the global asset library outside individual websites.
+            </p>
+          </div>
+
+          <div className="flex w-full items-center gap-2 md:w-auto md:justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  disabled={uploadingCount > 0}
+                  className="h-10 w-full rounded-full bg-white px-5 text-xs font-semibold text-[#0F172A] shadow-none hover:bg-slate-100 hover:text-[#0F172A] hover:scale-100 active:scale-100 disabled:opacity-60 md:h-11 md:w-auto md:text-sm"
+                >
+                  {uploadingCount > 0
+                    ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Uploading…</>
+                    : <><Upload className="mr-2 h-4 w-4" />Add Assets</>
+                  }
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="mt-2 w-56 rounded-xl border-[#E8E8E8] p-2 shadow-xl">
+                <DropdownMenuItem
+                  className="cursor-pointer gap-3 rounded-lg p-3 font-bold text-[#0F172A] hover:bg-[#F4F4F5]"
+                  onSelect={() => fileInputRef.current?.click()}
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F4F4F5] text-[#0F172A]">
+                    <Monitor className="h-4 w-4" />
+                  </div>
+                  Upload from Disk
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="mt-1 cursor-pointer gap-3 rounded-lg p-3 font-bold text-[#0F172A] hover:bg-[#F4F4F5]"
+                  onSelect={() => setIsUrlDialogOpen(true)}
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                    <LinkIcon className="h-4 w-4" />
+                  </div>
+                  Import from URL
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              onChange={handleUpload}
+              accept="image/*,video/*"
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
-        <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Media Management</h2>
-                    <p className="text-slate-500 mt-1">Manage the global asset library outside individual websites.</p>
-        </div>
-                
-        <div className="flex items-center gap-3">
-                   <div className="relative flex-1 w-full">
-                       <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                       <Input
-                            placeholder="Search assets..."
-                            className="pl-11 pr-4 w-full h-11 rounded-full bg-white border-slate-200 
-                       shadow-md shadow-slate-200/50 focus:ring-4 focus:ring-blue-500/50 
-                       focus:border-blue-600 focus:shadow-lg focus:shadow-blue-500/40 focus:outline-none transition-all duration-300"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                   </div>
-                   
-                   <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button 
-                          disabled={uploadingCount > 0}
-                          className="w-full md:w-auto h-11 bg-blue-600 text-white font-semibold rounded-full shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
-                        >
-                          {uploadingCount > 0
-                            ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Uploading…</>
-                            : <><Upload className="w-5 h-5 mr-2" />Add Assets</>
-                          }
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl border-slate-200 shadow-xl mt-2">
-                         <DropdownMenuItem 
-                            className="cursor-pointer gap-3 p-3 rounded-lg hover:bg-slate-50 font-bold text-slate-700" 
-                            onSelect={() => fileInputRef.current?.click()}
-                         >
-                            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                               <Monitor className="w-4 h-4" />
-                            </div>
-                            Upload from Disk
-                         </DropdownMenuItem>
-                         <DropdownMenuItem 
-                            className="cursor-pointer gap-3 p-3 rounded-lg hover:bg-slate-50 font-bold text-slate-700 mt-1" 
-                            onSelect={() => setIsUrlDialogOpen(true)}
-                         >
-                            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                               <LinkIcon className="w-4 h-4" />
-                            </div>
-                            Import from URL
-                         </DropdownMenuItem>
-                      </DropdownMenuContent>
-                   </DropdownMenu>
-
-                   <input
-                        ref={fileInputRef}
-                        type="file"
-                        className="hidden"
-                        onChange={handleUpload}
-                        accept="image/*,video/*"
-                    />
-                </div>
-            </div>
-
             <Tabs defaultValue="all" className="w-full">
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
-                   <TabsList className="flex items-center gap-2 bg-transparent p-0 h-auto">
+                <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+                   <TabsList className="flex h-auto flex-wrap items-center gap-1.5 bg-transparent p-0 sm:gap-2">
                        {['all', 'images', 'videos'].map(tab => (
                           <TabsTrigger 
                             key={tab} 
                             value={tab} 
-                            className="rounded-full h-10 px-4 text-sm font-semibold transition-all duration-200
-                              data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-blue-500/20 data-[state=active]:hover:bg-blue-700
-                              data-[state=inactive]:bg-white data-[state=inactive]:text-slate-700 data-[state=inactive]:border-slate-200 data-[state=inactive]:hover:bg-slate-100 data-[state=inactive]:hover:text-indigo-700"
+                            className="h-8 rounded-full border border-transparent px-3 text-xs font-semibold transition-colors duration-200 sm:h-9 sm:px-3.5 sm:text-[13px]
+                              data-[state=active]:border-[#0F172A] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:hover:bg-[#1E293B]
+                              data-[state=inactive]:border-[#E5E7EB] data-[state=inactive]:bg-white data-[state=inactive]:text-[#0F172A] data-[state=inactive]:hover:border-[#CBD5E1] data-[state=inactive]:hover:bg-[#F8FAFC]"
                           >
                              {tab === 'all' ? 'All Assets' : tab === 'images' ? 'Images' : 'Videos'}
                           </TabsTrigger>
                        ))}
                    </TabsList>
-                   
-                   <div className="flex gap-2 items-center">
-                      <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 rounded-full text-slate-500 border border-slate-200 font-semibold text-xs uppercase tracking-wider">
-                         Total: <span className="text-slate-900 font-bold">{filteredMedia.length}</span>
+
+                   <div className="flex w-full items-center gap-2 md:ml-auto md:w-auto">
+                      <div className="relative min-w-0 flex-1 md:w-64 lg:w-72 md:flex-none">
+                        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
+                        <Input
+                          placeholder="Search assets..."
+                          className="h-9 w-full rounded-full border-[#E5E7EB] bg-white pl-9 text-sm text-[#0F172A] shadow-sm focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/10"
+                          value={search}
+                          onChange={(e) => setSearch(e.target.value)}
+                        />
+                      </div>
+                      <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-[#E5E7EB] bg-[#F4F4F5] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#747781]">
+                         Total: <span className="font-bold text-[#0F172A]">{filteredMedia.length}</span>
                       </div>
                    </div>
                 </div>
@@ -250,13 +250,13 @@ export default function DashboardAssets() {
                 <div className="min-h-[400px]">
                    {isFetching ? (
                       /* ── Initial fetch skeleton ── */
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-                         {Array.from({ length: 12 }).map((_, i) => (
-                            <div key={i} className="flex flex-col rounded-2xl shadow-md bg-white overflow-hidden animate-pulse">
-                               <div className="aspect-square bg-slate-200" />
-                               <div className="p-4 space-y-2">
-                                  <div className="h-3 bg-slate-200 rounded-full w-3/4" />
-                                  <div className="h-2.5 bg-slate-100 rounded-full w-1/2" />
+                      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 lg:gap-8">
+                         {Array.from({ length: 6 }).map((_, i) => (
+                            <div key={i} className="flex flex-col overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm animate-pulse">
+                               <div className="aspect-[16/10] bg-slate-200" />
+                               <div className="space-y-2 p-4">
+                                  <div className="h-3 w-3/4 rounded-full bg-slate-200" />
+                                  <div className="h-2.5 w-1/2 rounded-full bg-[#F4F4F5]" />
                                </div>
                             </div>
                          ))}
@@ -265,28 +265,28 @@ export default function DashboardAssets() {
                    ['all', 'images', 'videos'].map(tabType => (
                       <TabsContent key={tabType} value={tabType} className="mt-0 outline-none">
                          {filteredMedia.filter(m => tabType === 'all' || m.type === tabType.slice(0, -1)).length === 0 && uploadingCount === 0 ? (
-                            <div className="h-[400px] flex flex-col items-center justify-center text-slate-300 gap-4 border-2 border-dashed border-slate-50 rounded-3xl bg-slate-50/20">
-                                <div className="w-20 h-20 rounded-3xl bg-slate-50 flex items-center justify-center border-2 border-white shadow-sm">
-                                   {tabType === 'videos' ? <Video className="w-8 h-8 opacity-20" /> : <ImageIcon className="w-8 h-8 opacity-20" />}
+                            <div className="flex h-[400px] flex-col items-center justify-center gap-4 rounded-3xl border-2 border-dashed border-slate-100 bg-[#F4F4F5]/20 text-slate-300">
+                                <div className="flex h-20 w-20 items-center justify-center rounded-3xl border-2 border-white bg-[#F4F4F5] shadow-sm">
+                                   {tabType === 'videos' ? <Video className="h-8 w-8 opacity-20" /> : <ImageIcon className="h-8 w-8 opacity-20" />}
                                 </div>
                                 <div className="text-center">
-                                   <p className="text-sm font-black text-slate-900">No {tabType} found</p>
-                                   <p className="text-xs text-slate-400 font-medium mt-1">Try searching another keyword or upload new media</p>
+                                   <p className="text-sm font-black text-[#0F172A]">No {tabType} found</p>
+                                   <p className="mt-1 text-xs font-medium text-[#787778]">Try searching another keyword or upload new media</p>
                                 </div>
                             </div>
                          ) : (
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 lg:gap-8">
 
                                 {/* ── Upload skeleton placeholders ── */}
                                 {uploadingCount > 0 && Array.from({ length: uploadingCount }).map((_, i) => (
-                                   <div key={`uploading-${i}`} className="flex flex-col rounded-2xl shadow-md bg-white overflow-hidden animate-pulse">
-                                      <div className="aspect-square bg-slate-200 flex flex-col items-center justify-center gap-2">
-                                         <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
-                                         <span className="text-[11px] font-semibold text-slate-400">Uploading…</span>
+                                   <div key={`uploading-${i}`} className="flex flex-col overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm animate-pulse">
+                                      <div className="flex aspect-[16/10] flex-col items-center justify-center gap-2 bg-slate-200">
+                                         <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+                                         <span className="text-[11px] font-semibold text-[#787778]">Uploading…</span>
                                       </div>
-                                      <div className="p-4 space-y-2">
-                                         <div className="h-3 bg-slate-200 rounded-full w-3/4" />
-                                         <div className="h-2.5 bg-slate-100 rounded-full w-1/2" />
+                                      <div className="space-y-2 p-4">
+                                         <div className="h-3 w-3/4 rounded-full bg-slate-200" />
+                                         <div className="h-2.5 w-1/2 rounded-full bg-[#F4F4F5]" />
                                       </div>
                                    </div>
                                 ))}
@@ -294,66 +294,66 @@ export default function DashboardAssets() {
                                 {filteredMedia.filter(m => tabType === 'all' || m.type === tabType.slice(0, -1)).map((item) => (
                                     <div
                                         key={item.id}
-                                        className={`group/media relative flex flex-col rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer bg-white ${
-                                            deletingIds.has(item.id)
-                                                ? 'opacity-60 scale-[0.97] pointer-events-none'
-                                                : 'hover:scale-[1.02]'
-                                        }`}
+                                        className={cn(
+                                          "group/media relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm transition-shadow duration-200 hover:shadow-md",
+                                          deletingIds.has(item.id) && "pointer-events-none opacity-60"
+                                        )}
                                     >
-                                        <div className="aspect-square relative overflow-hidden bg-slate-100 rounded-t-2xl">
+                                        <div className="relative aspect-[16/10] overflow-hidden bg-[#F4F4F5]">
                                            {item.type === 'image' ? (
-                                               <img src={item.url} alt={item.name} className="w-full h-full object-cover transition-transform duration-500 group-hover/media:scale-105" />
+                                               <img src={item.url} alt={item.name} className="h-full w-full object-cover" />
                                            ) : (
-                                               <div className="w-full h-full bg-slate-900 flex items-center justify-center">
-                                                   <Video className="w-10 h-10 text-white/40" />
+                                               <div className="flex h-full w-full items-center justify-center bg-slate-900">
+                                                   <Video className="h-10 w-10 text-white/40" />
                                                </div>
                                            )}
-                                           {/* Gradient Overlay */}
-                                           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover/media:opacity-100 transition-opacity duration-300"></div>
 
-                                           {/* Delete loading overlay */}
+                                           {/* Soft overlay on hover — no blur / no scale */}
+                                           <div className="absolute inset-0 bg-slate-900/35 opacity-0 transition-opacity duration-200 group-hover/media:opacity-100" />
+
                                            {deletingIds.has(item.id) ? (
-                                               <div className="absolute inset-0 bg-rose-900/70 flex flex-col items-center justify-center gap-2 z-30 backdrop-blur-[3px]">
-                                                   <Loader2 className="w-8 h-8 text-white animate-spin" />
+                                               <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-2 bg-rose-900/70">
+                                                   <Loader2 className="h-8 w-8 animate-spin text-white" />
                                                    <span className="text-[11px] font-semibold text-white/80">Deleting…</span>
                                                </div>
                                            ) : (
-                                           <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover/media:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-3 z-20 backdrop-blur-[4px]">
-                                               <Button 
-                                                  size="sm" 
-                                                  className="bg-blue-600 text-white font-semibold rounded-full px-6 h-11 text-sm shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:scale-105 transition-all duration-200"
+                                           <div className="absolute inset-0 z-20 flex items-center justify-center gap-2 opacity-0 transition-opacity duration-200 group-hover/media:opacity-100">
+                                               <Button
+                                                  size="sm"
+                                                  className="h-10 rounded-full bg-[#0F172A] px-5 text-sm font-semibold text-white shadow-none hover:bg-[#1E293B] hover:text-white hover:scale-100 active:scale-100"
                                                   onClick={() => handleCopy(item.id, item.url)}
                                                >
-                                                  {copiedId === item.id ? <div className="flex items-center gap-2"><Check className="w-3.5 h-3.5" /> Copied</div> : <div className="flex items-center gap-2"><Copy className="w-3.5 h-3.5" /> Copy Link</div>}
+                                                  {copiedId === item.id
+                                                    ? <span className="flex items-center gap-2"><Check className="h-3.5 w-3.5" /> Copied</span>
+                                                    : <span className="flex items-center gap-2"><Copy className="h-3.5 w-3.5" /> Copy Link</span>}
                                                </Button>
-                                               <Button 
-                                                  size="sm" 
-                                                  variant="destructive" 
-                                                  className="h-11 px-6 text-sm font-semibold rounded-full shadow-lg shadow-rose-500/30 hover:bg-rose-600 hover:scale-105 transition-all duration-200" 
+                                               <Button
+                                                  size="sm"
+                                                  className="h-10 rounded-full bg-rose-600 px-5 text-sm font-semibold text-white shadow-none hover:bg-rose-700 hover:text-white hover:scale-100 active:scale-100"
                                                   onClick={() => void handleDelete(item.id)}
                                                >
-                                                  <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+                                                  <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
                                                </Button>
                                            </div>
                                            )}
 
-                                           <div className="absolute top-4 left-4 flex gap-2">
-                                              <Badge className="bg-blue-100 text-blue-700 font-medium px-3 py-1 rounded-full text-xs capitalize">
+                                           <div className="absolute left-3 top-3 z-10 flex gap-1.5">
+                                              <Badge className="rounded-full bg-white/95 px-2.5 py-0.5 text-[10px] font-medium capitalize text-[#0F172A] shadow-sm">
                                                  {item.type || 'File'}
                                               </Badge>
                                               {item.isGlobal && (
-                                              <Badge className="bg-amber-100 text-amber-700 font-medium px-3 py-1 rounded-full text-xs">
+                                              <Badge className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-medium text-amber-700 shadow-sm">
                                                  Platform
                                               </Badge>
                                               )}
                                            </div>
                                         </div>
-                                        
-                                        <div className="p-4 bg-white grow flex flex-col">
-                                            <p className="text-sm font-bold text-slate-900 truncate">{item.name}</p>
-                                            <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-100">
-                                               <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">{item.size}</p>
-                                               <p className="text-xs text-slate-500 font-medium opacity-0 group-hover/media:opacity-100 transition-opacity">
+
+                                        <div className="flex grow flex-col bg-white p-4">
+                                            <p className="truncate text-sm font-bold text-[#0F172A]">{item.name}</p>
+                                            <div className="mt-2 flex items-center justify-between border-t border-[#E8E8E8] pt-2">
+                                               <p className="text-xs font-medium uppercase tracking-wider text-[#747781]">{item.size}</p>
+                                               <p className="text-xs font-medium text-[#747781]">
                                                   {new Date(item.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                                                </p>
                                             </div>
@@ -373,8 +373,8 @@ export default function DashboardAssets() {
                 <DialogContent className="sm:max-w-md rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
                     <div className="p-8 pb-4">
                        <DialogHeader>
-                           <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                           <DialogTitle className="text-2xl font-black text-[#0F172A] tracking-tight flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-2xl bg-[#F4F4F5] text-[#0F172A] flex items-center justify-center">
                                  <LinkIcon className="w-5 h-5" />
                               </div>
                               Import via URL
@@ -382,31 +382,31 @@ export default function DashboardAssets() {
                        </DialogHeader>
                        <div className="grid gap-6 py-8">
                            <div className="grid gap-3">
-                               <Label htmlFor="url-name" className="text-[11px] font-black text-slate-400 uppercase tracking-[2px] ml-1">Asset Name</Label>
+                               <Label htmlFor="url-name" className="text-[11px] font-black text-[#787778] uppercase tracking-[2px] ml-1">Asset Name</Label>
                                <Input
                                    id="url-name"
                                    placeholder="E.g. Brand Logo, Background Video..."
                                    value={urlName}
                                    onChange={(e) => setUrlName(e.target.value)}
-                                   className="h-12 rounded-2xl bg-slate-50 border-2 border-slate-100 focus:bg-white text-sm font-medium focus-visible:ring-indigo-100 transition-all"
+                                   className="h-12 rounded-2xl bg-[#F4F4F5] border-2 border-[#E8E8E8] focus:bg-white text-sm font-medium focus-visible:ring-[#0F172A]/15 transition-all"
                                />
                            </div>
                            <div className="grid gap-3">
-                               <Label htmlFor="url" className="text-[11px] font-black text-slate-400 uppercase tracking-[2px] ml-1">Media Source URL</Label>
+                               <Label htmlFor="url" className="text-[11px] font-black text-[#787778] uppercase tracking-[2px] ml-1">Media Source URL</Label>
                                <Input
                                    id="url"
                                    placeholder="https://images.unsplash.com/..."
                                    value={urlInput}
                                    onChange={(e) => setUrlInput(e.target.value)}
-                                   className="h-12 rounded-2xl bg-slate-50 border-2 border-slate-100 focus:bg-white text-sm font-medium focus-visible:ring-indigo-100 transition-all"
+                                   className="h-12 rounded-2xl bg-[#F4F4F5] border-2 border-[#E8E8E8] focus:bg-white text-sm font-medium focus-visible:ring-[#0F172A]/15 transition-all"
                                />
-                               <p className="text-[10px] text-slate-500 font-medium ml-1">Supports direct image and video links (jpg, png, mp4, etc.)</p>
+                               <p className="text-[10px] text-[#747781] font-medium ml-1">Supports direct image and video links (jpg, png, mp4, etc.)</p>
                            </div>
                        </div>
                     </div>
-                    <div className="p-6 bg-slate-50 flex justify-end gap-3 border-t border-slate-200/60">
-                        <Button variant="ghost" onClick={() => setIsUrlDialogOpen(false)} className="rounded-xl font-black text-slate-500 text-xs px-6 h-11 tracking-widest uppercase hover:bg-slate-100">Cancel</Button>
-                        <Button onClick={handleUrlUpload} disabled={!urlInput} className="rounded-xl font-black text-xs px-8 h-11 tracking-widest uppercase bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100 shadow-opacity-40">Import Asset</Button>
+                    <div className="p-6 bg-[#F4F4F5] flex justify-end gap-3 border-t border-[#E8E8E8]/60">
+                        <Button variant="ghost" onClick={() => setIsUrlDialogOpen(false)} className="rounded-xl font-black text-[#747781] text-xs px-6 h-11 tracking-widest uppercase hover:bg-[#F4F4F5]">Cancel</Button>
+                        <Button onClick={handleUrlUpload} disabled={!urlInput} className="rounded-xl font-black text-xs px-8 h-11 tracking-widest uppercase bg-[#0F172A] hover:bg-[#1E293B] shadow-none">Import Asset</Button>
                     </div>
                 </DialogContent>
             </Dialog>
@@ -419,6 +419,6 @@ export default function DashboardAssets() {
                 onRename={handleDupRename}
                 onCancel={handleDupCancel}
             />
-    </Card>
+    </div>
   );
 }
