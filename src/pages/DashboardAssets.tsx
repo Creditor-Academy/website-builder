@@ -280,9 +280,9 @@ export default function DashboardAssets() {
                                          <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
                                          <span className="text-[11px] font-semibold text-slate-400">Uploading…</span>
                                       </div>
-                                      <div className="p-4 space-y-2">
-                                         <div className="h-3 bg-slate-200 rounded-full w-3/4" />
-                                         <div className="h-2.5 bg-slate-100 rounded-full w-1/2" />
+                                      <div className="space-y-2 p-4">
+                                         <div className="h-3 w-3/4 rounded-full bg-slate-200" />
+                                         <div className="h-2.5 w-1/2 rounded-full bg-[#F4F4F5]" />
                                       </div>
                                    </div>
                                 ))}
@@ -379,8 +379,8 @@ export default function DashboardAssets() {
                 <DialogContent className="sm:max-w-md rounded-lg p-0 overflow-hidden border-[#c6c6cd] shadow-2xl">
                     <div className="p-8 pb-4">
                        <DialogHeader>
-                           <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                           <DialogTitle className="text-2xl font-black text-[#0F172A] tracking-tight flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-2xl bg-[#F4F4F5] text-[#0F172A] flex items-center justify-center">
                                  <LinkIcon className="w-5 h-5" />
                               </div>
                               Import via URL
@@ -388,25 +388,25 @@ export default function DashboardAssets() {
                        </DialogHeader>
                        <div className="grid gap-6 py-8">
                            <div className="grid gap-3">
-                               <Label htmlFor="url-name" className="text-[11px] font-black text-slate-400 uppercase tracking-[2px] ml-1">Asset Name</Label>
+                               <Label htmlFor="url-name" className="text-[11px] font-black text-[#787778] uppercase tracking-[2px] ml-1">Asset Name</Label>
                                <Input
                                    id="url-name"
                                    placeholder="E.g. Brand Logo, Background Video..."
                                    value={urlName}
                                    onChange={(e) => setUrlName(e.target.value)}
-                                   className="h-12 rounded-2xl bg-slate-50 border-2 border-slate-100 focus:bg-white text-sm font-medium focus-visible:ring-indigo-100 transition-all"
+                                   className="h-12 rounded-2xl bg-[#F4F4F5] border-2 border-[#E8E8E8] focus:bg-white text-sm font-medium focus-visible:ring-[#0F172A]/15 transition-all"
                                />
                            </div>
                            <div className="grid gap-3">
-                               <Label htmlFor="url" className="text-[11px] font-black text-slate-400 uppercase tracking-[2px] ml-1">Media Source URL</Label>
+                               <Label htmlFor="url" className="text-[11px] font-black text-[#787778] uppercase tracking-[2px] ml-1">Media Source URL</Label>
                                <Input
                                    id="url"
                                    placeholder="https://images.unsplash.com/..."
                                    value={urlInput}
                                    onChange={(e) => setUrlInput(e.target.value)}
-                                   className="h-12 rounded-2xl bg-slate-50 border-2 border-slate-100 focus:bg-white text-sm font-medium focus-visible:ring-indigo-100 transition-all"
+                                   className="h-12 rounded-2xl bg-[#F4F4F5] border-2 border-[#E8E8E8] focus:bg-white text-sm font-medium focus-visible:ring-[#0F172A]/15 transition-all"
                                />
-                               <p className="text-[10px] text-slate-500 font-medium ml-1">Supports direct image and video links (jpg, png, mp4, etc.)</p>
+                               <p className="text-[10px] text-[#747781] font-medium ml-1">Supports direct image and video links (jpg, png, mp4, etc.)</p>
                            </div>
                        </div>
                     </div>

@@ -365,43 +365,43 @@ export default function DashboardMessages() {
                                             </Button>
                                         </DialogTitle>
                                     </div>
-                                    <div className="p-8 space-y-6">
+                                    <div className="rounded-b-3xl bg-white p-8 space-y-6">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>
-                                                <label className="text-sm font-medium text-slate-500 flex items-center gap-2 mb-2">
+                                                <label className="text-sm font-medium text-[#747781] flex items-center gap-2 mb-2">
                                                     <User className="w-4 h-4" />
                                                     Name
                                                 </label>
-                                                <p className="font-semibold text-slate-900 bg-slate-50 p-3 rounded-lg">{selectedMessage.name}</p>
+                                                <p className="font-semibold text-[#0F172A] bg-[#F4F4F5] p-3 rounded-xl">{selectedMessage.name}</p>
                                             </div>
                                             <div>
-                                                <label className="text-sm font-medium text-slate-500 flex items-center gap-2 mb-2">
+                                                <label className="text-sm font-medium text-[#747781] flex items-center gap-2 mb-2">
                                                     <Mail className="w-4 h-4" />
                                                     Email
                                                 </label>
-                                                <p className="font-semibold text-slate-900 bg-slate-50 p-3 rounded-lg">{selectedMessage.email}</p>
+                                                <p className="font-semibold text-[#0F172A] bg-[#F4F4F5] p-3 rounded-xl">{selectedMessage.email}</p>
                                             </div>
                                         </div>
                                         {selectedMessage.subject && (
                                             <div>
-                                                <label className="text-sm font-medium text-slate-500 mb-2">Subject</label>
-                                                <p className="font-semibold text-slate-900 bg-slate-50 p-3 rounded-lg">{selectedMessage.subject}</p>
+                                                <label className="text-sm font-medium text-[#747781] mb-2">Subject</label>
+                                                <p className="font-semibold text-[#0F172A] bg-[#F4F4F5] p-3 rounded-xl">{selectedMessage.subject}</p>
                                             </div>
                                         )}
                                         {selectedMessage.website?.name && (
                                             <div>
-                                                <label className="text-sm font-medium text-slate-500 mb-2">Website</label>
-                                                <p className="font-semibold text-slate-900 bg-slate-50 p-3 rounded-lg">{selectedMessage.website.name}</p>
+                                                <label className="text-sm font-medium text-[#747781] mb-2">Website</label>
+                                                <p className="font-semibold text-[#0F172A] bg-[#F4F4F5] p-3 rounded-xl">{selectedMessage.website.name}</p>
                                             </div>
                                         )}
                                         <div>
-                                            <label className="text-sm font-medium text-slate-500 mb-2">Message</label>
-                                            <div className="text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                            <label className="text-sm font-medium text-[#747781] mb-2">Message</label>
+                                            <div className="text-[#0F172A] leading-relaxed bg-[#F4F4F5] p-4 rounded-xl border border-[#E5E7EB]">
                                                 {selectedMessage.message}
                                             </div>
                                         </div>
-                                        <div className="flex items-center justify-between pt-6 border-t border-slate-100">
-                                            <div className="text-sm text-slate-500 flex items-center gap-2">
+                                        <div className="flex items-center justify-between pt-6 border-t border-[#E8E8E8]">
+                                            <div className="text-sm text-[#747781] flex items-center gap-2">
                                                 <Clock className="w-4 h-4" />
                                                 Received: {new Date(selectedMessage.createdAt).toLocaleString()}
                                             </div>

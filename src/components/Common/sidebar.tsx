@@ -3,17 +3,21 @@ import { Slot } from "@radix-ui/react-slot";
 import { VariantProps, cva } from "class-variance-authority";
 import {
   PanelLeft,
-  Plus,
-  Folder,
-  LayoutDashboard,
-  Image as ImageIcon,
-  BarChart3,
-  Settings,
-  Shield,
-  ArrowRight,
-  HelpCircle,
+  Globe,
+  Layout,
   LogOut,
+  Building2,
+  Users,
+  Activity,
+  X,
+  ShieldCheck,
+  Image as ImageIcon,
+  MessageSquare,
+  User as UserIcon,
+  Plus,
+  ArrowRight,
 } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { useIsMobile } from "@/hooks/use-mobile.jsx";
 import { cn } from "@/lib/utils";
@@ -401,110 +405,216 @@ const SidebarMenuButton = React.forwardRef<
 });
 SidebarMenuButton.displayName = "SidebarMenuButton";
 
-// ==========================================
-// Composed Buildora Sidebar UI Implementation
-// ==========================================
+const getInitials = (name: string) => {
+  if (!name) return "";
+  const parts = name.split(" ").filter(Boolean);
+  if (parts.length > 1 && parts[1].length > 0) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return (parts[0]?.[0] || "").toUpperCase();
+};
 
-export const BuildoraSidebar: React.FC = () => {
+const NavItem = ({
+  icon,
+  label,
+  to,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  to: string;
+  onClick?: () => void;
+}) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isActive = location.pathname === to;
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    onClick?.();
+    navigate(to);
+  };
+
   return (
-    <Sidebar collapsible="icon">
-      {/* Workspace Header */}
-      <SidebarHeader>
-        <div className="group-data-[collapsible=icon]:hidden">
-          <h1 className="text-headline-md font-headline-md text-on-primary dark:text-primary-fixed">
-            Buildora Workspace
-          </h1>
-          <p className="font-body-sm text-body-sm mt-base text-on-primary">
-            Pro Plan
-          </p>
-        </div>
-        <div className="hidden group-data-[collapsible=icon]:block text-headline-md font-headline-md text-on-primary">
-          B
-        </div>
-      </SidebarHeader>
-
-      {/* New Project Action Button */}
-      <div className="mb-lg px-xs group-data-[collapsible=icon]:px-0">
-        <button className="bg-secondary-fixed-dim text-on-secondary-fixed px-sm py-xs font-label-md text-label-md hover:bg-secondary-fixed transition-colors flex items-center justify-center gap-xs duration-200 ease-in-out w-full rounded-lg group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:justify-center">
-          <Plus className="h-4 w-4" />
-          <span className="group-data-[collapsible=icon]:hidden">New Project</span>
-        </button>
-      </div>
-
-      {/* Navigation Content */}
-      <SidebarContent>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton isActive tooltip="Projects">
-              <Folder />
-              <span>Projects</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Templates">
-              <LayoutDashboard />
-              <span>Templates</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Assets">
-              <ImageIcon />
-              <span>Assets</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Analytics">
-              <BarChart3 />
-              <span>Analytics</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Settings">
-              <Settings />
-              <span>Settings</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarContent>
-
-      {/* Bottom Footer Section */}
-      <SidebarFooter>
-        <SidebarMenu>
-          {/* Admin Card */}
-          <SidebarMenuItem className="mb-md group-data-[collapsible=icon]:hidden">
-            <div className="bg-surface-container-high p-sm rounded-xl shadow-sm flex flex-col gap-xs">
-              <div className="w-8 h-8 bg-primary-container rounded-lg flex items-center justify-center">
-                <Shield className="h-4 w-4 text-on-primary-container" />
-              </div>
-              <div>
-                <p className="text-on-surface font-label-md text-label-md">Admin Access</p>
-                <p className="text-on-surface-variant text-[10px] leading-tight">Switch to manage platform</p>
-              </div>
-              <button className="w-full bg-primary-container text-on-primary-container py-xs rounded-full font-label-md text-label-md hover:bg-on-primary-fixed-variant transition-colors flex items-center justify-center gap-xs">
-                Go to Admin
-                <ArrowRight className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Help">
-              <HelpCircle />
-              <span>Help</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Logout">
-              <LogOut />
-              <span>Logout</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-      <SidebarRail />
-    </Sidebar>
+    <a
+      href={to}
+      onClick={handleClick}
+      className={cn(
+        "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out text-sm font-medium",
+        isActive
+          ? "bg-[#dedfeb] text-[#191b24] font-semibold"
+          : "text-slate-200 hover:bg-white/10 hover:text-white",
+      )}
+    >
+      <span className="shrink-0 w-5 h-5 flex items-center justify-center">{icon}</span>
+      <span className="truncate">{label}</span>
+    </a>
   );
 };
+
+export interface DashboardSidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+  isAdmin: boolean;
+  isAdminRole: boolean;
+  userRole?: string;
+  userName: string;
+  base: string;
+  onGoAdmin: () => void;
+  onExitAdmin: () => void;
+  onLogout: () => void;
+  isLoggingOut: boolean;
+}
+
+export function DashboardSidebar({
+  isOpen,
+  onClose,
+  isAdmin,
+  isAdminRole,
+  userRole,
+  userName,
+  base,
+  onGoAdmin,
+  onExitAdmin,
+  onLogout,
+  isLoggingOut,
+}: DashboardSidebarProps) {
+  const navigate = useNavigate();
+
+  return (
+    <>
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 w-64 bg-[#131b2e] border-r border-[#c6c6cd]/30 text-white flex flex-col h-full py-6 px-4 shrink-0 z-50",
+          "transition-transform duration-300 ease-in-out",
+          "lg:static lg:translate-x-0",
+          isOpen ? "translate-x-0" : "-translate-x-full",
+        )}
+      >
+        <div className="mb-6 px-2 flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-white">
+              Buildora Workspace
+            </h1>
+            <p className="text-xs text-slate-300 mt-1">
+              {isAdmin ? "System Admin Portal" : "Pro Plan"}
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden text-white hover:bg-white/10"
+            onClick={onClose}
+          >
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
+
+        <button
+          onClick={() => {
+            onClose();
+            navigate(`${base}/templates`);
+          }}
+          className="bg-[#c4c6d1] text-[#191b24] hover:bg-[#e1e2ed] transition-colors px-4 py-2 mb-6 text-sm font-medium flex items-center justify-center gap-2 w-full rounded-lg shadow-sm"
+        >
+          <Plus className="w-4 h-4" />
+          New Project
+        </button>
+
+        <nav className="flex-1 space-y-1 overflow-y-auto no-scrollbar">
+          <p className="text-[11px] font-semibold tracking-wider text-slate-300 uppercase px-3 mb-2">
+            Main Menu
+          </p>
+          <NavItem icon={<Globe className="w-4 h-4" />} label="Projects" to={base} onClick={onClose} />
+          <NavItem icon={<Layout className="w-4 h-4" />} label="Templates" to={`${base}/templates`} onClick={onClose} />
+          <NavItem icon={<ImageIcon className="w-4 h-4" />} label="Assets" to={`${base}/assets`} onClick={onClose} />
+          <NavItem icon={<MessageSquare className="w-4 h-4" />} label="Messages" to={`${base}/messages`} onClick={onClose} />
+          <NavItem icon={<UserIcon className="w-4 h-4" />} label="Profile" to={`${base}/profile`} onClick={onClose} />
+
+          {isAdmin && (
+            <div className="pt-4 space-y-1">
+              <p className="text-[11px] font-semibold tracking-wider text-slate-300 uppercase px-3 mb-2">
+                Admin System
+              </p>
+              <NavItem icon={<Users className="w-4 h-4" />} label="Users" to="/admin/users" onClick={onClose} />
+              {userRole === "SUPER_ADMIN" && (
+                <NavItem icon={<Building2 className="w-4 h-4" />} label="Organizations" to="/admin/organizations" onClick={onClose} />
+              )}
+              <NavItem icon={<Layout className="w-4 h-4" />} label="Websites" to="/admin/websites" onClick={onClose} />
+              <NavItem icon={<Activity className="w-4 h-4" />} label="Deployments" to="/admin/deployment" onClick={onClose} />
+              <NavItem icon={<ShieldCheck className="w-4 h-4" />} label="Audit Logs" to="/admin/audit" onClick={onClose} />
+            </div>
+          )}
+        </nav>
+
+        <div className="mt-auto border-t border-[#c6c6cd]/20 pt-4 space-y-2 text-white">
+          {!isAdmin && isAdminRole && (
+            <div className="mb-4 bg-[#eae7e9] text-[#1b1b1d] p-3 rounded-xl shadow-sm flex flex-col gap-2">
+              <div>
+                <p className="text-[#1b1b1d] font-semibold text-sm">Admin Access</p>
+                <p className="text-[#45464d] text-[10px] leading-tight">Switch to manage platform</p>
+              </div>
+              <button
+                onClick={onGoAdmin}
+                className="w-full bg-[#131b2e] text-white py-2 rounded-full text-xs font-semibold hover:bg-[#3f465c] transition-colors flex items-center justify-center gap-1.5"
+              >
+                Go to Admin
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {isAdmin && isAdminRole && (
+            <div className="mb-4">
+              <button
+                onClick={onExitAdmin}
+                className="w-full bg-[#eae7e9] text-[#1b1b1d] hover:bg-[#e4e2e4] py-2 px-3 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+              >
+                <ShieldCheck className="w-4 h-4 text-[#131b2e]" />
+                Exit Admin Mode
+              </button>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors">
+            <div
+              className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+              onClick={() => {
+                onClose();
+                navigate(`${base}/profile`);
+              }}
+            >
+              <div className="w-8 h-8 rounded-lg bg-[#c4c6d1] text-[#191b24] flex items-center justify-center text-xs font-bold shrink-0">
+                {getInitials(userName)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white truncate">
+                  {userName}
+                </p>
+                <p className="text-[10px] text-slate-300 truncate">View Profile</p>
+              </div>
+            </div>
+            <button
+              onClick={onLogout}
+              disabled={isLoggingOut}
+              title="Log out"
+              className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-50 shrink-0"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </aside>
+    </>
+  );
+}
 
 export {
   Sidebar,

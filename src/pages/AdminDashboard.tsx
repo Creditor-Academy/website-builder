@@ -4,7 +4,7 @@ import type { DashboardOutletContext } from '@/layouts/DashboardLayout';
 import { getInitials } from '@/layouts/DashboardLayout';
 import {
     Plus, Globe, CheckCircle, Users,
-    ArrowRight, LayoutTemplate, Activity, Menu, ShieldCheck, Bell, ArrowUp, ArrowDown,
+    ArrowRight, LayoutTemplate, Activity, ShieldCheck, Bell, ArrowUp, ArrowDown,
     UserX, RefreshCw, Eye,
     CheckCheck, Info, Trash, Globe2
 } from 'lucide-react';
@@ -17,7 +17,6 @@ import useBuilderStore from '@/store/useBuilderStore';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
 import templateApi from '@/api/templates';
 import statsApi from "../api/stats";
 import { getAuditLogs } from "../api/audit";
@@ -28,7 +27,7 @@ import {
     restoreUser,
     createUser,
 } from "../api/user";
-import { DashboardStatCard, DashboardPanel } from '@/components/dashboard/DashboardCard';
+import adminHeroImg from '@/assets/admin_dashboard/admin-manage-online-dashboard-with-laptop-illustration-svg-download-png-1597939.webp';
 
 // ─── AddUserDialog ────────────────────────────────────────────────────────────
 // ✅ Calls POST /users to create a new user (Admin / Institution Admin only)
@@ -85,13 +84,13 @@ const AddUserDialog = ({ open, onOpenChange, onUserCreated }) => {
 
     return (
         <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-lg rounded-[2rem] p-0 overflow-hidden bg-white border-slate-100 shadow-2xl">
-                <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-7">
-                    <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
+            <DialogContent className="sm:max-w-lg rounded-3xl sm:rounded-3xl border-0 p-0 overflow-hidden bg-white shadow-xl font-[Inter,sans-serif] gap-0">
+                <div className="bg-[#0F172A] px-8 py-7 border-0">
+                    <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-4">
                         <Users className="w-6 h-6 text-white" />
                     </div>
-                    <DialogTitle className="text-2xl font-black text-white">Add New User</DialogTitle>
-                    <DialogDescription className="text-white/70 mt-1 text-sm">
+                    <DialogTitle className="text-2xl font-bold text-white">Add New User</DialogTitle>
+                    <DialogDescription className="text-white/60 mt-1 text-sm">
                         Create a new user account on the platform.
                     </DialogDescription>
                 </div>
@@ -99,50 +98,50 @@ const AddUserDialog = ({ open, onOpenChange, onUserCreated }) => {
                 <div className="px-8 py-6 space-y-5">
                     {/* Name */}
                     <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Full Name</label>
+                        <label className="text-xs font-semibold text-[#0F172A] uppercase tracking-wider">Full Name</label>
                         <Input
                             placeholder="e.g., Jane Smith"
                             value={form.name}
                             onChange={e => handleChange('name', e.target.value)}
-                            className={cn("h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all", errors.name && "border-rose-400 bg-rose-50 focus:bg-rose-50")}
+                            className={cn("h-12 rounded-lg bg-[#F4F4F5] border-[#E8E8E8] text-[#0F172A] focus:bg-white focus:border-[#0F172A] transition-all", errors.name && "border-rose-400 bg-rose-50 focus:bg-rose-50")}
                         />
                         {errors.name && <p className="text-xs text-rose-500 font-medium">{errors.name}</p>}
                     </div>
 
                     {/* Email */}
                     <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Email Address</label>
+                        <label className="text-xs font-semibold text-[#0F172A] uppercase tracking-wider">Email Address</label>
                         <Input
                             type="email"
                             placeholder="jane@example.com"
                             value={form.email}
                             onChange={e => handleChange('email', e.target.value)}
-                            className={cn("h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all", errors.email && "border-rose-400 bg-rose-50 focus:bg-rose-50")}
+                            className={cn("h-12 rounded-lg bg-[#F4F4F5] border-[#E8E8E8] text-[#0F172A] focus:bg-white focus:border-[#0F172A] transition-all", errors.email && "border-rose-400 bg-rose-50 focus:bg-rose-50")}
                         />
                         {errors.email && <p className="text-xs text-rose-500 font-medium">{errors.email}</p>}
                     </div>
 
                     {/* Password */}
                     <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Password</label>
+                        <label className="text-xs font-semibold text-[#0F172A] uppercase tracking-wider">Password</label>
                         <Input
                             type="password"
                             placeholder="Min. 6 characters"
                             value={form.password}
                             onChange={e => handleChange('password', e.target.value)}
-                            className={cn("h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all", errors.password && "border-rose-400 bg-rose-50 focus:bg-rose-50")}
+                            className={cn("h-12 rounded-lg bg-[#F4F4F5] border-[#E8E8E8] text-[#0F172A] focus:bg-white focus:border-[#0F172A] transition-all", errors.password && "border-rose-400 bg-rose-50 focus:bg-rose-50")}
                         />
                         {errors.password && <p className="text-xs text-rose-500 font-medium">{errors.password}</p>}
                     </div>
 
                     {/* Role */}
                     <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Role</label>
+                        <label className="text-xs font-semibold text-[#0F172A] uppercase tracking-wider">Role</label>
                         <Select value={form.role} onValueChange={val => handleChange('role', val)}>
-                            <SelectTrigger className={cn("h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all", errors.role && "border-rose-400")}>
+                            <SelectTrigger className={cn("h-12 rounded-lg bg-[#F4F4F5] border-[#E8E8E8] text-[#0F172A] focus:bg-white transition-all", errors.role && "border-rose-400")}>
                                 <SelectValue placeholder="Select role" />
                             </SelectTrigger>
-                            <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">
+                            <SelectContent className="rounded-xl bg-white border-[#E8E8E8] shadow-lg">
                                 {ROLE_OPTIONS.map(r => (
                                     <SelectItem key={r} value={r} className="capitalize">
                                         {r.replace('_', ' ')}
@@ -159,14 +158,14 @@ const AddUserDialog = ({ open, onOpenChange, onUserCreated }) => {
                         variant="outline"
                         onClick={() => handleClose(false)}
                         disabled={loading}
-                        className="rounded-xl h-11 px-6 border-slate-200"
+                        className="h-11 rounded-xl px-6 border border-[#E5E7EB] bg-white text-[#0F172A] shadow-none hover:bg-gray-100 hover:text-[#0F172A] hover:border-[#E5E7EB] hover:shadow-none hover:scale-100 active:scale-100 transition-colors"
                     >
                         Cancel
                     </Button>
                     <Button
                         onClick={handleSubmit}
                         disabled={loading}
-                        className="rounded-xl h-11 px-8 bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-xl transition-all font-bold"
+                        className="h-11 rounded-xl px-8 bg-[#0F172A] text-white shadow-none hover:bg-[#1E293B] hover:text-white hover:shadow-none hover:scale-100 active:scale-100 transition-colors font-semibold"
                     >
                         {loading ? (
                             <span className="flex items-center gap-2"><RefreshCw className="w-4 h-4 animate-spin" /> Creating...</span>
@@ -199,7 +198,7 @@ const UserDetailDialog = ({ userId, open, onOpenChange }) => {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md rounded-[2rem] p-8">
+            <DialogContent className="sm:max-w-md rounded-3xl p-8">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-bold">User Details</DialogTitle>
                 </DialogHeader>
@@ -210,21 +209,21 @@ const UserDetailDialog = ({ userId, open, onOpenChange }) => {
                 ) : userDetail ? (
                     <div className="space-y-4 py-4">
                         <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-2xl">
+                            <div className="w-16 h-16 rounded-full bg-[#0F172A] text-white flex items-center justify-center font-bold text-2xl">
                                 {getInitials(userDetail.name)}
                             </div>
                             <div>
-                                <p className="text-lg font-bold text-slate-900">{userDetail.name}</p>
-                                <p className="text-sm text-slate-500">{userDetail.email}</p>
+                                <p className="text-lg font-bold text-[#0F172A]">{userDetail.name}</p>
+                                <p className="text-sm text-[#747781]">{userDetail.email}</p>
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4 pt-2">
-                            <div className="bg-slate-50 rounded-2xl p-4">
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Role</p>
-                                <p className="text-sm font-semibold text-slate-800">{userDetail.role || '—'}</p>
+                            <div className="bg-[#F4F4F5] rounded-xl p-4">
+                                <p className="text-[10px] font-bold text-[#787778] uppercase tracking-wider mb-1">Role</p>
+                                <p className="text-sm font-semibold text-[#0F172A]">{userDetail.role || '—'}</p>
                             </div>
-                            <div className="bg-slate-50 rounded-2xl p-4">
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Status</p>
+                            <div className="bg-[#F4F4F5] rounded-xl p-4">
+                                <p className="text-[10px] font-bold text-[#787778] uppercase tracking-wider mb-1">Status</p>
                                 <span className={cn(
                                     "text-sm font-semibold",
                                     userDetail.active ? "text-emerald-600" : "text-rose-500"
@@ -233,9 +232,9 @@ const UserDetailDialog = ({ userId, open, onOpenChange }) => {
                                 </span>
                             </div>
                             {userDetail.createdAt && (
-                                <div className="bg-slate-50 rounded-2xl p-4 col-span-2">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Joined</p>
-                                    <p className="text-sm font-semibold text-slate-800">
+                                <div className="bg-[#F4F4F5] rounded-xl p-4 col-span-2">
+                                    <p className="text-[10px] font-bold text-[#787778] uppercase tracking-wider mb-1">Joined</p>
+                                    <p className="text-sm font-semibold text-[#0F172A]">
                                         {format(new Date(userDetail.createdAt), 'PPP')}
                                     </p>
                                 </div>
@@ -258,9 +257,8 @@ const UserDetailDialog = ({ userId, open, onOpenChange }) => {
 const AdminDashboard = () => {
     const navigate = useNavigate();
     const { fetchWebsites } = useBuilderStore();
-    const isMobile = useIsMobile();
     // Sidebar / admin-mode state lives in DashboardLayout and is shared via Outlet context
-    const { isAdmin, setIsAdmin, setIsSidebarOpen, userName } = useOutletContext<DashboardOutletContext>();
+    const { isAdmin, setIsAdmin, userName } = useOutletContext<DashboardOutletContext>();
 
     const { toast } = useToast();
 
@@ -324,9 +322,9 @@ const AdminDashboard = () => {
                 const raw = res.data;
                 let users: any[] = [];
                 if (Array.isArray(raw?.data?.users)) users = raw.data.users;
-                else if (Array.isArray(raw?.data))   users = raw.data;
-                else if (Array.isArray(raw?.users))  users = raw.users;
-                else if (Array.isArray(raw))         users = raw;
+                else if (Array.isArray(raw?.data)) users = raw.data;
+                else if (Array.isArray(raw?.users)) users = raw.users;
+                else if (Array.isArray(raw)) users = raw;
                 setAdminUsers(users);
             })
             .catch((err) => {
@@ -420,7 +418,7 @@ const AdminDashboard = () => {
         const allIds = new Set(notifications.map((n: any) => n.id));
         setReadIds(allIds);
         setUnreadCount(0);
-        try { localStorage.setItem('readNotifIds', JSON.stringify([...allIds])); } catch {}
+        try { localStorage.setItem('readNotifIds', JSON.stringify([...allIds])); } catch { }
     };
 
     const getNotifIcon = (action: string) => {
@@ -428,9 +426,9 @@ const AdminDashboard = () => {
         if (a.includes('delete') || a.includes('purge')) return <Trash className="w-3.5 h-3.5 text-rose-500" />;
         if (a.includes('create') || a.includes('register')) return <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />;
         if (a.includes('login') || a.includes('auth')) return <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />;
-        if (a.includes('update') || a.includes('edit')) return <Info className="w-3.5 h-3.5 text-indigo-500" />;
-        if (a.includes('publish') || a.includes('deploy')) return <Globe2 className="w-3.5 h-3.5 text-purple-500" />;
-        return <Activity className="w-3.5 h-3.5 text-slate-400" />;
+        if (a.includes('update') || a.includes('edit')) return <Info className="w-3.5 h-3.5 text-[#747781]" />;
+        if (a.includes('publish') || a.includes('deploy')) return <Globe2 className="w-3.5 h-3.5 text-[#0F172A]" />;
+        return <Activity className="w-3.5 h-3.5 text-[#787778]" />;
     };
 
     const formatNotifTime = (dateStr: string) => {
@@ -447,161 +445,268 @@ const AdminDashboard = () => {
 
     return (
         <>
-            <div className="min-h-screen bg-[#f7f7fb]">
+            <div className="min-h-screen bg-[#F4F6F8] font-[Inter,sans-serif]">
 
-                {/* ── Admin top strip ── */}
-                <div className="bg-white border-b border-slate-100 px-6 lg:px-8 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        {isMobile && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8 -ml-1" onClick={() => setIsSidebarOpen(true)}>
-                                <Menu className="w-5 h-5" />
-                            </Button>
-                        )}
-                        <div>
-                            <h1 className="text-lg font-bold text-slate-900 leading-tight">Admin Dashboard</h1>
-                            <p className="text-xs text-slate-400 mt-0.5">Platform overview · {new Date().toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                {/* ── Pill top bar (glass) ── */}
+                <div className="px-4 pt-4 lg:px-6 lg:pt-5">
+                    <div className="flex items-center justify-between gap-4 rounded-3xl border border-white/60 bg-white/70 px-5 py-3 shadow-[0_8px_30px_rgba(15,23,42,0.08)] backdrop-blur-md lg:px-7 lg:py-3.5">
+                        <div className="flex min-w-0 items-center gap-3">
+                            <div className="min-w-0">
+                                <h1 className="truncate text-base font-bold leading-tight text-[#0F172A] lg:text-lg">
+                                    Admin Dashboard
+                                </h1>
+                                <p className="mt-0.5 truncate text-xs text-slate-500">
+                                    Platform overview ·{' '}
+                                    {new Date().toLocaleDateString('en', {
+                                        weekday: 'long',
+                                        month: 'long',
+                                        day: 'numeric',
+                                    })}
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        {/* Notification Bell */}
-                        <div ref={notifRef} className="relative">
-                            <Button variant="ghost" size="icon"
-                                onClick={() => setNotifOpen(v => !v)}
-                                className="relative rounded-lg h-9 w-9 text-slate-500 hover:bg-slate-100 transition-colors">
-                                <Bell className="w-4 h-4" />
-                                {unreadCount > 0 && (
-                                    <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full bg-rose-500 text-white text-[8px] font-black flex items-center justify-center">
-                                        {unreadCount > 9 ? '9+' : unreadCount}
-                                    </span>
-                                )}
-                            </Button>
-                            <AnimatePresence>
-                                {notifOpen && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: -8, scale: 0.97 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: -8, scale: 0.97 }}
-                                        transition={{ duration: 0.18 }}
-                                        className="absolute right-0 top-11 w-[340px] bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden"
-                                    >
-                                        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100">
-                                            <span className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                                                <Bell className="w-4 h-4" /> Notifications
-                                                {unreadCount > 0 && <span className="bg-rose-100 text-rose-600 text-[10px] font-black px-2 py-0.5 rounded-full">{unreadCount} new</span>}
-                                            </span>
-                                            {unreadCount > 0 && <button onClick={markAllRead} className="text-[11px] text-indigo-600 font-bold hover:underline flex items-center gap-1"><CheckCheck className="w-3.5 h-3.5" /> Mark all read</button>}
-                                        </div>
-                                        <div className="overflow-y-auto max-h-[320px]">
-                                            {notifLoading ? (
-                                                <div className="flex flex-col gap-3 p-4">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="flex items-start gap-3 animate-pulse"><div className="w-7 h-7 rounded-full bg-slate-100 shrink-0" /><div className="flex-1 space-y-1.5"><div className="h-3 bg-slate-100 rounded-full w-3/4" /><div className="h-2.5 bg-slate-100 rounded-full w-1/2" /></div></div>)}</div>
-                                            ) : notifications.length === 0 ? (
-                                                <div className="flex flex-col items-center justify-center py-10 gap-2 text-slate-400"><Bell className="w-8 h-8 opacity-20" /><p className="text-sm font-medium">No notifications yet</p></div>
-                                            ) : notifications.map((n: any) => {
-                                                const isUnread = !readIds.has(n.id);
-                                                return (
-                                                    <div key={n.id} className={cn("flex items-start gap-3 px-5 py-3.5 border-b border-slate-50 hover:bg-slate-50 transition-colors", isUnread && "bg-indigo-50/40")}>
-                                                        <div className={cn("w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5", isUnread ? "bg-white shadow-sm border border-slate-100" : "bg-slate-100")}>{getNotifIcon(n.action)}</div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className={cn("text-[13px] leading-snug truncate", isUnread ? "font-semibold text-slate-900" : "font-medium text-slate-600")}>{n.action || n.type || 'System event'}</p>
-                                                            <p className="text-[11px] text-slate-400 mt-0.5">{formatNotifTime(n.createdAt || n.created_at)}</p>
-                                                        </div>
-                                                        {isUnread && <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0 mt-2" />}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                        {notifications.length > 0 && (
-                                            <div className="px-5 py-3 bg-slate-50 border-t border-slate-100">
-                                                <button onClick={() => { setNotifOpen(false); navigate('/admin/audit'); }} className="text-[12px] font-bold text-indigo-600 hover:underline w-full text-center">View all in Audit Logs →</button>
+
+                        <div className="flex shrink-0 items-center gap-2">
+                            <div ref={notifRef} className="relative">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setNotifOpen((v) => !v)}
+                                    className="relative h-10 w-10 rounded-full text-slate-500 hover:bg-white/80 hover:text-slate-800 hover:scale-100"
+                                >
+                                    <Bell className="h-4 w-4" />
+                                    {unreadCount > 0 && (
+                                        <span className="absolute right-1.5 top-1.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-rose-500 px-1 text-[8px] font-black text-white">
+                                            {unreadCount > 9 ? '9+' : unreadCount}
+                                        </span>
+                                    )}
+                                </Button>
+                                <AnimatePresence>
+                                    {notifOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                                            transition={{ duration: 0.18 }}
+                                            className="absolute right-0 top-12 z-50 w-[340px] overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl"
+                                        >
+                                            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5">
+                                                <span className="flex items-center gap-2 text-sm font-bold text-[#0F172A]">
+                                                    <Bell className="h-4 w-4" /> Notifications
+                                                    {unreadCount > 0 && (
+                                                        <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-black text-rose-600">
+                                                            {unreadCount} new
+                                                        </span>
+                                                    )}
+                                                </span>
+                                                {unreadCount > 0 && (
+                                                    <button
+                                                        onClick={markAllRead}
+                                                        className="flex items-center gap-1 text-[11px] font-bold text-[#0F172A] hover:underline"
+                                                    >
+                                                        <CheckCheck className="h-3.5 w-3.5" /> Mark all read
+                                                    </button>
+                                                )}
                                             </div>
-                                        )}
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                                            <div className="max-h-[320px] overflow-y-auto">
+                                                {notifLoading ? (
+                                                    <div className="flex flex-col gap-3 p-4">
+                                                        {Array.from({ length: 4 }).map((_, i) => (
+                                                            <div key={i} className="flex animate-pulse items-start gap-3">
+                                                                <div className="h-7 w-7 shrink-0 rounded-full bg-slate-100" />
+                                                                <div className="flex-1 space-y-1.5">
+                                                                    <div className="h-3 w-3/4 rounded-full bg-slate-100" />
+                                                                    <div className="h-2.5 w-1/2 rounded-full bg-slate-100" />
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : notifications.length === 0 ? (
+                                                    <div className="flex flex-col items-center justify-center gap-2 py-10 text-slate-400">
+                                                        <Bell className="h-8 w-8 opacity-20" />
+                                                        <p className="text-sm font-medium">No notifications yet</p>
+                                                    </div>
+                                                ) : (
+                                                    notifications.map((n: any) => {
+                                                        const isUnread = !readIds.has(n.id);
+                                                        return (
+                                                            <div
+                                                                key={n.id}
+                                                                className={cn(
+                                                                    'flex items-start gap-3 border-b border-slate-50 px-5 py-3.5',
+                                                                    isUnread && 'bg-slate-50'
+                                                                )}
+                                                            >
+                                                                <div
+                                                                    className={cn(
+                                                                        'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
+                                                                        isUnread
+                                                                            ? 'border border-slate-200 bg-white shadow-sm'
+                                                                            : 'bg-slate-100'
+                                                                    )}
+                                                                >
+                                                                    {getNotifIcon(n.action)}
+                                                                </div>
+                                                                <div className="min-w-0 flex-1">
+                                                                    <p
+                                                                        className={cn(
+                                                                            'truncate text-[13px] leading-snug',
+                                                                            isUnread
+                                                                                ? 'font-semibold text-[#0F172A]'
+                                                                                : 'font-medium text-slate-500'
+                                                                        )}
+                                                                    >
+                                                                        {n.action || n.type || 'System event'}
+                                                                    </p>
+                                                                    <p className="mt-0.5 text-[11px] text-slate-400">
+                                                                        {formatNotifTime(n.createdAt || n.created_at)}
+                                                                    </p>
+                                                                </div>
+                                                                {isUnread && (
+                                                                    <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-[#0F172A]" />
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })
+                                                )}
+                                            </div>
+                                            {notifications.length > 0 && (
+                                                <div className="border-t border-slate-100 bg-slate-50 px-5 py-3">
+                                                    <button
+                                                        onClick={() => {
+                                                            setNotifOpen(false);
+                                                            navigate('/admin/audit');
+                                                        }}
+                                                        className="w-full text-center text-xs font-bold text-[#0F172A] hover:underline"
+                                                    >
+                                                        View all in Audit Logs →
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => navigate('/admin/profile')}
+                                title="Profile"
+                                aria-label="Profile"
+                                className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200"
+                            >
+                                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#0F172A] text-[10px] font-bold text-white">
+                                    {getInitials(userName || 'U')}
+                                </span>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setIsAdmin(false)}
+                                className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2.5 text-xs font-semibold text-[#0F172A] transition-colors hover:bg-gray-200"
+                            >
+                                <ShieldCheck className="h-3.5 w-3.5 text-[#0F172A]" />
+                                Exit Admin
+                            </button>
                         </div>
-                        <button
-                            onClick={() => setIsAdmin(false)}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg transition-all"
-                        >
-                            <ShieldCheck className="w-3.5 h-3.5" /> Exit Admin
-                        </button>
                     </div>
                 </div>
 
                 {/* ── Content ── */}
-                <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5">
+                <div className="space-y-5 bg-transparent px-6 py-6 lg:px-8">
 
-                    {/* Greeting banner */}
-                    <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-700 rounded-xl sm:rounded-2xl px-4 sm:px-7 py-4 sm:py-5 flex items-center justify-between shadow-md shadow-indigo-200/40">
-                        <div className="absolute right-0 top-0 w-48 h-full bg-white/5 skew-x-[-15deg] translate-x-8 pointer-events-none" />
-                        <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-white/5 rounded-full pointer-events-none" />
-                        <div className="relative z-10">
-                            <p className="text-indigo-200 text-sm font-medium">Good day, {userName} 👋</p>
-                            <h2 className="text-xl font-black text-white mt-0.5 tracking-tight">Admin Dashboard</h2>
-                            <p className="text-indigo-200/70 text-xs mt-1">Here's what's happening on the platform today.</p>
-                        </div>
-                    </div>
-
-                    {/* Stats */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                        {[
-                            { label: "Total Users",        value: isLoadingStats ? "…" : stats.totalUsers,        icon: <Users className="w-4 h-4" />,        iconBg: "bg-purple-100 text-purple-600", trend: "+12.5%", up: true  },
-                            { label: "Active Websites",    value: isLoadingStats ? "…" : stats.totalWebsites,     icon: <Globe className="w-4 h-4" />,         iconBg: "bg-indigo-100 text-indigo-600", trend: "+3.2%",  up: true  },
-                            { label: "Total Templates",    value: dbTemplates.length,                              icon: <LayoutTemplate className="w-4 h-4" />, iconBg: "bg-emerald-100 text-emerald-600",trend: "+2",     up: true  },
-                            { label: "Active Deployments", value: isLoadingStats ? "…" : stats.activeDeployments, icon: <Activity className="w-4 h-4" />,      iconBg: "bg-rose-100 text-rose-600",    trend: "+8.1%",  up: true  },
-                        ].map((s, i) => (
-                            <motion.div key={s.label}
-                                initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: i * 0.07 }}
-                            >
-                            <DashboardStatCard className="hover:shadow-lg transition-all">
-                                <div className="flex items-center justify-between mb-3">
-                                    <p className="text-sm font-medium text-[#45464d]">{s.label}</p>
-                                    <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center border border-[#c6c6cd] bg-[#f6f3f5]", s.iconBg)}>{s.icon}</div>
-                                </div>
-                                <p className="text-2xl sm:text-3xl font-bold text-[#000000]">{s.value}</p>
-                                <p className={cn("text-xs font-semibold mt-1 flex items-center gap-0.5", s.up ? "text-emerald-600" : "text-[#ba1a1a]")}>
-                                    {s.up ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}{s.trend}
+                    {/* Greeting + stats: banner left, 2×2 cards right */}
+                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-stretch">
+                        {/* Dark greeting banner — left */}
+                        <div className="relative flex min-h-[220px] items-center overflow-hidden rounded-3xl bg-[#0F172A] px-7 py-6 shadow-[0_12px_40px_-8px_rgba(15,23,42,0.45)] lg:min-h-[240px]">
+                            <div className="pointer-events-none absolute right-0 top-0 h-full w-48 translate-x-8 skew-x-[-15deg] bg-white/5" />
+                            <div className="pointer-events-none absolute -bottom-6 -left-6 h-32 w-32 rounded-full bg-white/5" />
+                            <div className="relative z-10 max-w-[55%] pr-2 sm:max-w-[48%]">
+                                <p className="text-sm font-medium text-white/60">
+                                    Good day,{' '}
+                                    <span className="font-semibold text-white">{userName}</span>
                                 </p>
-                            </DashboardStatCard>
-                            </motion.div>
-                        ))}
+                                <h2 className="mt-1 text-xl font-bold tracking-tight text-white sm:text-2xl">Admin Dashboard</h2>
+                                <p className="mt-1.5 max-w-sm text-xs text-white/45">
+                                    Here&apos;s what&apos;s happening on the platform today.
+                                </p>
+                            </div>
+                            <img
+                                src={adminHeroImg}
+                                alt=""
+                                className="pointer-events-none absolute -bottom-2 right-1 h-[80%] w-auto max-w-[48%] object-contain object-bottom sm:right-2 sm:h-[88%] sm:max-w-[58%] md:right-3 lg:-bottom-8 lg:h-[95%] lg:max-w-[60%]"
+                                draggable={false}
+                            />
+                        </div>
+
+                        {/* Stats — 2×2 grid on the right */}
+                        <div className="grid grid-cols-2 gap-4">
+                            {[
+                                { label: "Total Users", value: isLoadingStats ? "…" : stats.totalUsers, icon: <Users className="w-4 h-4" />, iconBg: "bg-[#F4F4F5] text-[#0F172A]", trend: "+12.5%", up: true },
+                                { label: "Active Websites", value: isLoadingStats ? "…" : stats.totalWebsites, icon: <Globe className="w-4 h-4" />, iconBg: "bg-[#F4F4F5] text-[#747781]", trend: "+3.2%", up: true },
+                                { label: "Total Templates", value: dbTemplates.length, icon: <LayoutTemplate className="w-4 h-4" />, iconBg: "bg-[#F4F4F5] text-[#231500]", trend: "+2", up: true },
+                                { label: "Active Deployments", value: isLoadingStats ? "…" : stats.activeDeployments, icon: <Activity className="w-4 h-4" />, iconBg: "bg-[#F4F4F5] text-[#787778]", trend: "+8.1%", up: true },
+                            ].map((s, i) => (
+                                <motion.div key={s.label}
+                                    initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: i * 0.07 }}
+                                    className="rounded-3xl border border-[#E8E8E8] bg-white p-5">
+                                    <div className="mb-3 flex items-center justify-between">
+                                        <p className="text-xs font-semibold text-[#747781]">{s.label}</p>
+                                        <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg", s.iconBg)}>{s.icon}</div>
+                                    </div>
+                                    <p className="text-3xl font-bold text-[#0F172A]">{s.value}</p>
+                                    <p className={cn("mt-1 flex items-center gap-0.5 text-xs font-semibold", s.up ? "text-emerald-600" : "text-rose-500")}>
+                                        {s.up ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}{s.trend}
+                                    </p>
+                                </motion.div>
+                            ))}
+                        </div>
                     </div>
 
                     {/* Main grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
                         {/* Recent Users — 2/3 */}
-                        <DashboardPanel className="lg:col-span-2">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 sm:px-6 py-4 border-b border-[#c6c6cd]">
-                                <div className="min-w-0">
-                                    <h3 className="text-sm font-bold text-slate-900">Recent Users</h3>
-                                    <p className="text-[11px] text-slate-400 mt-0.5">Latest registered accounts</p>
+                        <div className="lg:col-span-2 bg-white rounded-3xl border border-[#E8E8E8] overflow-hidden">
+                            <div className="flex items-center justify-between px-6 py-4 border-b border-[#E8E8E8]">
+                                <div>
+                                    <h3 className="text-sm font-bold text-[#0F172A]">Recent Users</h3>
+                                    <p className="text-[11px] text-[#747781] mt-0.5">Latest registered accounts</p>
                                 </div>
-                                <div className="flex gap-2 flex-wrap">
-                                    <Button size="sm" className="h-8 rounded-xl text-xs bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 shadow-sm" onClick={() => setIsAddUserOpen(true)}>
+                                <div className="flex gap-2">
+                                    <Button
+                                        size="sm"
+                                        className="h-9 rounded-full px-4 text-xs font-semibold bg-[#0F172A] text-white gap-1.5 shadow-none hover:bg-[#1E293B] hover:text-white hover:shadow-none hover:scale-100 active:scale-100 transition-colors"
+                                        onClick={() => setIsAddUserOpen(true)}
+                                    >
                                         <Plus className="w-3.5 h-3.5" /> Add User
                                     </Button>
-                                    <Button variant="outline" size="sm" className="h-8 rounded-xl text-xs border-slate-200 text-slate-600 hover:bg-slate-50" onClick={() => navigate('/admin/users')}>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-9 rounded-full px-4 text-xs font-semibold border border-[#E5E7EB] bg-white text-[#0F172A] shadow-none hover:bg-gray-100 hover:text-[#0F172A] hover:border-[#E5E7EB] hover:shadow-none hover:scale-100 active:scale-100 transition-colors"
+                                        onClick={() => navigate('/admin/users')}
+                                    >
                                         View All
                                     </Button>
                                 </div>
                             </div>
                             <div>
                                 {isLoadingUsers ? (
-                                    <div className="flex justify-center py-10"><RefreshCw className="w-5 h-5 animate-spin text-slate-300" /></div>
+                                    <div className="flex justify-center py-10"><RefreshCw className="w-5 h-5 animate-spin text-[#E8E8E8]" /></div>
                                 ) : adminUsers.length === 0 ? (
-                                    <p className="text-center text-slate-400 py-10 text-sm">No users found.</p>
+                                    <p className="text-center text-[#787778] py-10 text-sm">No users found.</p>
                                 ) : (
-                                    <div className="divide-y divide-slate-50">
+                                    <div className="divide-y divide-[#F4F4F5]">
                                         {adminUsers.slice(0, 6).map((u) => (
-                                            <div key={u.id} className="flex items-center justify-between px-6 py-3 hover:bg-slate-50/60 transition-colors">
+                                            <div key={u.id} className="flex items-center justify-between px-6 py-3">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                                                    <div className="w-8 h-8 rounded-full bg-[#0F172A] text-white flex items-center justify-center font-bold text-xs shrink-0">
                                                         {getInitials(u.name)}
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-semibold text-slate-800 leading-tight">{u.name}</p>
-                                                        <p className="text-[11px] text-slate-400">{u.email}</p>
+                                                        <p className="text-sm font-semibold text-[#0F172A] leading-tight">{u.name}</p>
+                                                        <p className="text-[11px] text-[#747781]">{u.email}</p>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2">
@@ -609,10 +714,10 @@ const AdminDashboard = () => {
                                                         u.active ? "bg-emerald-50 text-emerald-600 border border-emerald-100" : "bg-rose-50 text-rose-500 border border-rose-100")}>
                                                         {u.active ? "Active" : "Suspended"}
                                                     </span>
-                                                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg hover:bg-slate-100" onClick={() => { setSelectedUserId(u.id); setUserDetailOpen(true); }}>
-                                                        <Eye className="w-3.5 h-3.5 text-slate-400" />
+                                                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg hover:bg-[#F4F4F5] hover:scale-100" onClick={() => { setSelectedUserId(u.id); setUserDetailOpen(true); }}>
+                                                        <Eye className="w-3.5 h-3.5 text-[#787778]" />
                                                     </Button>
-                                                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg hover:bg-slate-100" onClick={() => handleToggleUserStatus(u.id, u.active)}>
+                                                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg hover:bg-[#F4F4F5] hover:scale-100" onClick={() => handleToggleUserStatus(u.id, u.active)}>
                                                         <UserX className={cn("w-3.5 h-3.5", u.active ? "text-rose-400" : "text-emerald-500")} />
                                                     </Button>
                                                 </div>
@@ -621,54 +726,54 @@ const AdminDashboard = () => {
                                     </div>
                                 )}
                             </div>
-                        </DashboardPanel>
+                        </div>
 
                         {/* Right column: Quick Actions + Recent Activity */}
                         <div className="flex flex-col gap-4">
                             {/* Quick Actions */}
-                            <DashboardPanel className="p-4 sm:p-5">
-                                <h3 className="text-sm font-bold text-slate-900 mb-3">Quick Actions</h3>
-                                <div className="space-y-1.5">
+                            <div className="bg-white rounded-3xl border border-[#E8E8E8] p-5">
+                                <h3 className="text-sm font-bold text-[#0F172A] mb-3">Quick Actions</h3>
+                                <div className="space-y-1">
                                     {[
-                                        { label: "Manage Users",        icon: <Users className="w-3.5 h-3.5" />,       bg: "bg-purple-100 text-purple-600", to: '/admin/users' },
-                                        { label: "Manage Websites",     icon: <Globe className="w-3.5 h-3.5" />,        bg: "bg-indigo-100 text-indigo-600", to: '/admin/websites' },
-                                        { label: "Manage Templates",    icon: <LayoutTemplate className="w-3.5 h-3.5" />,bg: "bg-emerald-100 text-emerald-600", to: '/admin/templates' },
-                                        { label: "Monitor Deployments", icon: <Activity className="w-3.5 h-3.5" />,     bg: "bg-rose-100 text-rose-600", to: '/admin/deployment' },
-                                        { label: "Audit Logs",          icon: <ShieldCheck className="w-3.5 h-3.5" />,  bg: "bg-slate-100 text-slate-500", to: '/admin/audit' },
+                                        { label: "Manage Users", icon: <Users className="w-3.5 h-3.5" />, bg: "bg-[#F4F4F5] text-[#0F172A]", to: '/admin/users' },
+                                        { label: "Manage Websites", icon: <Globe className="w-3.5 h-3.5" />, bg: "bg-[#F4F4F5] text-[#747781]", to: '/admin/websites' },
+                                        { label: "Manage Templates", icon: <LayoutTemplate className="w-3.5 h-3.5" />, bg: "bg-[#F4F4F5] text-[#231500]", to: '/admin/templates' },
+                                        { label: "Monitor Deployments", icon: <Activity className="w-3.5 h-3.5" />, bg: "bg-[#F4F4F5] text-[#787778]", to: '/admin/deployment' },
+                                        { label: "Audit Logs", icon: <ShieldCheck className="w-3.5 h-3.5" />, bg: "bg-[#F4F4F5] text-[#747781]", to: '/admin/audit' },
                                     ].map((a) => (
                                         <button key={a.label} onClick={() => navigate(a.to)}
-                                            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors group text-left">
+                                            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#F8F8F9] transition-colors group text-left">
                                             <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", a.bg)}>{a.icon}</div>
-                                            <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">{a.label}</span>
-                                            <ArrowRight className="w-3.5 h-3.5 text-slate-300 ml-auto group-hover:text-slate-500 transition-colors" />
+                                            <span className="text-sm font-medium text-[#0F172A]">{a.label}</span>
+                                            <ArrowRight className="w-3.5 h-3.5 text-[#E8E8E8] ml-auto group-hover:text-[#747781] transition-colors" />
                                         </button>
                                     ))}
                                 </div>
-                            </DashboardPanel>
+                                </div>
 
                             {/* Recent Activity */}
-                            <DashboardPanel className="p-4 sm:p-5 flex-1">
+                            <div className="bg-white rounded-3xl border border-[#E8E8E8] p-5 flex-1">
                                 <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-sm font-bold text-slate-900">Recent Activity</h3>
-                                    <button onClick={() => navigate('/admin/audit')} className="text-[11px] text-indigo-600 font-bold hover:underline">View All</button>
+                                    <h3 className="text-sm font-bold text-[#0F172A]">Recent Activity</h3>
+                                    <button onClick={() => navigate('/admin/audit')} className="text-[11px] text-[#0F172A] font-bold hover:underline">View All</button>
                                 </div>
                                 <div className="space-y-3">
                                     {notifications.length === 0 && !notifLoading && (
-                                        <p className="text-xs text-slate-400 text-center py-3">No recent activity</p>
+                                        <p className="text-xs text-[#787778] text-center py-3">No recent activity</p>
                                     )}
                                     {notifications.slice(0, 5).map((n: any) => (
                                         <div key={n.id} className="flex items-start gap-2.5">
-                                            <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center shrink-0 mt-0.5">
+                                            <div className="w-6 h-6 rounded-full bg-[#F4F4F5] flex items-center justify-center shrink-0 mt-0.5">
                                                 {getNotifIcon(n.action)}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-medium text-slate-700 truncate">{n.action || 'System event'}</p>
-                                                <p className="text-[10px] text-slate-400">{formatNotifTime(n.createdAt || n.created_at)}</p>
+                                                <p className="text-xs font-medium text-[#0F172A] truncate">{n.action || 'System event'}</p>
+                                                <p className="text-[10px] text-[#787778]">{formatNotifTime(n.createdAt || n.created_at)}</p>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
-                            </DashboardPanel>
+                                </div>
                         </div>
                     </div>
                 </div>

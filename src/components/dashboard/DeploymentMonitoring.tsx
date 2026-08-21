@@ -37,9 +37,9 @@ import {
 } from 'lucide-react';
 import DeploymentLogViewer from './DeploymentLogViewer';
 import { useToast } from '@/components/ui/use-toast';
+import { cn } from '@/lib/utils';
 import websiteApi from '@/api/website';
 import deploymentsApi from '@/api/deployments';
-import { cn } from '@/lib/utils';
 import { dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass, dashboardToolbarClass, dashboardTableWrapClass } from '@/components/dashboard/DashboardPageShell';
 import { dashboardPanelClass } from '@/components/dashboard/DashboardCard';
 
@@ -158,7 +158,7 @@ export default function DeploymentMonitoring() {
   const filteredAndSortedDeployments = React.useMemo(() => {
     const temp = rows.filter(row => {
       const display = statusDisplay(row.deployment.status);
-      const matchesSearch = 
+      const matchesSearch =
         row.websiteName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         row.websiteId.toLowerCase().includes(searchTerm.toLowerCase()) ||
         row.deployment.id.toLowerCase().includes(searchTerm.toLowerCase());
@@ -249,99 +249,99 @@ export default function DeploymentMonitoring() {
       <div className={dashboardTableWrapClass}>
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
-            <span className="ml-2 text-slate-500">Loading deployments...</span>
+            <Loader2 className="h-6 w-6 animate-spin text-[#787778]" />
+            <span className="ml-2 text-[#747781]">Loading deployments...</span>
           </div>
         ) : (
-        <Table className={cn('w-full overflow-hidden', dashboardPanelClass)}>
-          <TableHeader className="bg-slate-50 border-b border-slate-200">
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="min-w-[150px] px-4 py-3 text-slate-500">
-                <span className="flex items-center gap-1.5"><Globe className="w-4 h-4" /> Website Name</span>
-              </TableHead>
-              <TableHead className="min-w-[120px] px-4 py-3 text-slate-500">
-                <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4" /> Status</span>
-              </TableHead>
-              <TableHead className="min-w-[200px] px-4 py-3 text-slate-500">
-                <span className="flex items-center gap-1.5"><Globe className="w-4 h-4" /> URL</span>
-              </TableHead>
-              <TableHead className="min-w-[150px] px-4 py-3 text-slate-500">
-                <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> Deployed At</span>
-              </TableHead>
-              <TableHead className="min-w-[120px] px-4 py-3 text-slate-500">
-                <span className="flex items-center gap-1.5"><UserIcon className="w-4 h-4" /> Deployed By</span>
-              </TableHead>
-              <TableHead className="text-right px-4 py-3 text-slate-500">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredAndSortedDeployments.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-slate-500">
-                  No deployments found.
-                </TableCell>
+          <Table className={cn('w-full overflow-hidden', dashboardPanelClass)}>
+            <TableHeader className="bg-slate-50 border-b border-slate-200">
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="min-w-[150px] px-4 py-3 text-[#747781]">
+                  <span className="flex items-center gap-1.5"><Globe className="w-4 h-4" /> Website Name</span>
+                </TableHead>
+                <TableHead className="min-w-[120px] px-4 py-3 text-[#747781]">
+                  <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4" /> Status</span>
+                </TableHead>
+                <TableHead className="min-w-[200px] px-4 py-3 text-[#747781]">
+                  <span className="flex items-center gap-1.5"><Globe className="w-4 h-4" /> URL</span>
+                </TableHead>
+                <TableHead className="min-w-[150px] px-4 py-3 text-[#747781]">
+                  <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> Deployed At</span>
+                </TableHead>
+                <TableHead className="min-w-[120px] px-4 py-3 text-[#747781]">
+                  <span className="flex items-center gap-1.5"><UserIcon className="w-4 h-4" /> Deployed By</span>
+                </TableHead>
+                <TableHead className="text-right px-4 py-3 text-[#747781]">Actions</TableHead>
               </TableRow>
-            ) : (
-              filteredAndSortedDeployments.map((row) => {
-                const dep = row.deployment;
-                const display = statusDisplay(dep.status);
-                return (
-                <TableRow key={dep.id} className="group h-16 border-b border-slate-100 hover:bg-slate-50/70 transition-all duration-200">
-                  <TableCell className="font-medium text-slate-600 px-4 py-3">{row.websiteName}</TableCell>
-                  <TableCell className="px-4 py-3">
-                    <Badge
-                      className={
-                        display === "Success"
-                          ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100/80"
-                          : display === "Failed"
-                          ? "bg-rose-100 text-rose-700 hover:bg-rose-100/80"
-                          : display === "Pending"
-                          ? "bg-amber-100 text-amber-700 hover:bg-amber-100/80"
-                          : "bg-slate-100 text-slate-600 hover:bg-slate-100/80"
-                      }
-                    >
-                      {display === "Success" && <CheckCircle className="w-3 h-3 mr-1" />}
-                      {display === "Failed" && <XCircle className="w-3 h-3 mr-1" />}
-                      {display === "Pending" && <Hourglass className="w-3 h-3 mr-1 animate-pulse" />}
-                      {display === "Rolled Back" && <RotateCcw className="w-3 h-3 mr-1" />}
-                      {display}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-slate-500 text-sm px-4 py-3 max-w-[250px] truncate">
-                    {dep.url ? <a href={dep.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{dep.url}</a> : '—'}
-                  </TableCell>
-                  <TableCell className="text-slate-500 text-sm px-4 py-3">{new Date(dep.publishedAt).toLocaleString()}</TableCell>
-                  <TableCell className="flex items-center gap-2 text-slate-500 text-sm px-4 py-3">
-                    <div className="w-7 h-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-semibold text-xs">
-                        {(dep.deployedBy || '?').slice(0, 2).toUpperCase()}
-                    </div>
-                    {dep.deployedBy || 'System'}
-                  </TableCell>
-                  <TableCell className="text-right px-4 py-3">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0 data-[state=open]:bg-slate-100">
-                          <MoreVertical className="h-4 w-4 text-slate-500" />
-                          <span className="sr-only">Open menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-slate-200 shadow-lg">
-                        <DropdownMenuItem onClick={() => handleRollback(row)} disabled={dep.status !== 'active'} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100 focus:text-slate-900">
-                          <RefreshCw className="w-4 h-4" /> <span>Rollback</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleViewLogs(row)} className="rounded-lg gap-2 cursor-pointer focus:bg-slate-100 focus:text-slate-900">
-                          <FileText className="w-4 h-4" /> <span>View Logs</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+            </TableHeader>
+            <TableBody>
+              {filteredAndSortedDeployments.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-24 text-center text-[#747781]">
+                    No deployments found.
                   </TableCell>
                 </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                filteredAndSortedDeployments.map((row) => {
+                  const dep = row.deployment;
+                  const display = statusDisplay(dep.status);
+                  return (
+                    <TableRow key={dep.id} className="group h-16 border-b border-[#E8E8E8] hover:bg-[#F4F4F5]/70 transition-all duration-200">
+                      <TableCell className="font-medium text-[#747781] px-4 py-3">{row.websiteName}</TableCell>
+                      <TableCell className="px-4 py-3">
+                        <Badge
+                          className={
+                            display === "Success"
+                              ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100/80"
+                              : display === "Failed"
+                                ? "bg-rose-100 text-rose-700 hover:bg-rose-100/80"
+                                : display === "Pending"
+                                  ? "bg-amber-100 text-amber-700 hover:bg-amber-100/80"
+                                  : "bg-[#F4F4F5] text-[#747781] hover:bg-[#F4F4F5]/80"
+                          }
+                        >
+                          {display === "Success" && <CheckCircle className="w-3 h-3 mr-1" />}
+                          {display === "Failed" && <XCircle className="w-3 h-3 mr-1" />}
+                          {display === "Pending" && <Hourglass className="w-3 h-3 mr-1 animate-pulse" />}
+                          {display === "Rolled Back" && <RotateCcw className="w-3 h-3 mr-1" />}
+                          {display}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-[#747781] text-sm px-4 py-3 max-w-[250px] truncate">
+                        {dep.url ? <a href={dep.url} target="_blank" rel="noopener noreferrer" className="text-[#0F172A] hover:underline">{dep.url}</a> : '—'}
+                      </TableCell>
+                      <TableCell className="text-[#747781] text-sm px-4 py-3">{new Date(dep.publishedAt).toLocaleString()}</TableCell>
+                      <TableCell className="flex items-center gap-2 text-[#747781] text-sm px-4 py-3">
+                        <div className="w-7 h-7 rounded-full bg-[#F4F4F5] text-[#747781] flex items-center justify-center font-semibold text-xs">
+                          {(dep.deployedBy || '?').slice(0, 2).toUpperCase()}
+                        </div>
+                        {dep.deployedBy || 'System'}
+                      </TableCell>
+                      <TableCell className="text-right px-4 py-3">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0 data-[state=open]:bg-[#F4F4F5]">
+                              <MoreVertical className="h-4 w-4 text-[#747781]" />
+                              <span className="sr-only">Open menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-[#E8E8E8] shadow-lg">
+                            <DropdownMenuItem onClick={() => handleRollback(row)} disabled={dep.status !== 'active'} className="rounded-lg gap-2 cursor-pointer focus:bg-[#F4F4F5] focus:text-[#0F172A]">
+                              <RefreshCw className="w-4 h-4" /> <span>Rollback</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleViewLogs(row)} className="rounded-lg gap-2 cursor-pointer focus:bg-[#F4F4F5] focus:text-[#0F172A]">
+                              <FileText className="w-4 h-4" /> <span>View Logs</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
         )}
       </div>
 

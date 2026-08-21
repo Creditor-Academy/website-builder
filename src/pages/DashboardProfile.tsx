@@ -130,7 +130,7 @@ export default function DashboardProfile() {
     return (
         <DashboardPageShell
             basePath={basePath}
-            title={`Hi, ${loading ? '…' : (name.split(' ')[0] || 'there')} 👋`}
+            title={`Hi, ${loading ? '…' : (name.split(' ')[0] || 'there')}`}
             pageLabel="Profile"
             description="Manage your account, password and preferences."
         >
@@ -401,7 +401,7 @@ export default function DashboardProfile() {
                 <AlertDialogContent className="rounded-2xl w-[calc(100vw-2rem)] sm:max-w-lg">
                     <AlertDialogHeader>
                         <AlertDialogTitle className="flex items-center gap-2">
-                            <AlertTriangle className="w-5 h-5 text-rose-500" /> Deactivate account?
+                            <AlertTriangle className="h-5 w-5 text-rose-500" /> Deactivate account?
                         </AlertDialogTitle>
                         <AlertDialogDescription>
                             This will deactivate your account immediately. You'll be logged out and cannot log back in.

@@ -14,7 +14,6 @@ import useBuilderStore from '@/store/useBuilderStore';
 import { cn } from '@/lib/utils';
 import templateApi from '@/api/templates';
 import { useToast } from '@/components/ui/use-toast';
-import GradientButton from '@/components/ui/GradientButton';
 import TemplateFormDialog from '@/components/dashboard/TemplateFormDialog';
 import { DashboardPageShell, dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass } from '@/components/dashboard/DashboardPageShell';
 import {
@@ -36,6 +35,7 @@ import {
   dashboardCardTitleClass,
   dashboardCardDescriptionClass,
 } from '@/components/dashboard/DashboardCard';
+import GradientButton from '@/components/ui/GradientButton';
 
 
 export default function DashboardTemplates() {
@@ -298,119 +298,119 @@ export default function DashboardTemplates() {
         </div>
       )}
 
-        {/* Trash banner */}
-        {showTrash && (
-          <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 rounded-lg bg-[#ffdad6]/30 border border-[#ffdad6] shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-lg bg-[#ffdad6] flex items-center justify-center text-[#93000a]">
-                <Trash2 className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-base font-bold text-[#93000a]">Trash Management</p>
-                <p className="text-xs text-[#93000a]/80 font-medium">Viewing deleted templates. Restore items to make them public again.</p>
+      {/* Trash banner */}
+      {showTrash && (
+        <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 rounded-lg bg-[#ffdad6]/30 border border-[#ffdad6] shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-lg bg-[#ffdad6] flex items-center justify-center text-[#93000a]">
+              <Trash2 className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-base font-bold text-[#93000a]">Trash Management</p>
+              <p className="text-xs text-[#93000a]/80 font-medium">Viewing deleted templates. Restore items to make them public again.</p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            className="rounded-lg border-[#c6c6cd] bg-white text-[#1b1b1d] hover:bg-[#eae7e9] transition-all font-semibold px-6 shadow-sm"
+            onClick={() => setShowTrash(false)}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Library
+          </Button>
+        </div>
+      )}
+
+      <div className={cn(dashboardFilterScrollClass, 'mb-6 sm:mb-8')}>
+        {categories.map(cat => (
+          <button
+            key={cat}
+            onClick={() => setActiveCategory(cat)}
+            className={dashboardFilterPillClass(activeCategory === cat)}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      {/* Loading shimmer */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="rounded-lg overflow-hidden border border-[#c6c6cd] bg-[#fcf8fa] shadow-sm animate-pulse">
+              <div className="h-64 w-full bg-[#eae7e9]" />
+              <div className="p-6 space-y-3">
+                <div className="h-3 w-1/3 bg-[#eae7e9] rounded" />
+                <div className="h-6 w-2/3 bg-[#eae7e9] rounded" />
+                <div className="h-4 w-full bg-[#eae7e9] rounded" />
               </div>
             </div>
-            <Button 
-              variant="outline" 
-              className="rounded-lg border-[#c6c6cd] bg-white text-[#1b1b1d] hover:bg-[#eae7e9] transition-all font-semibold px-6 shadow-sm"
-              onClick={() => setShowTrash(false)}
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Library
-            </Button>
-          </div>
-        )}
-
-        <div className={cn(dashboardFilterScrollClass, 'mb-6 sm:mb-8')}>
-          {categories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={dashboardFilterPillClass(activeCategory === cat)}
-            >
-              {cat}
-            </button>
           ))}
         </div>
+      ) : filtered.length === 0 ? (
+        /* Empty state */
+        <div className="h-64 flex flex-col items-center justify-center gap-4 border border-dashed border-[#c6c6cd] rounded-lg bg-[#f6f3f5]">
+          <LayoutTemplate className="w-12 h-12 text-[#76777d]" />
+          <p className="text-[#45464d] text-sm font-medium text-center px-8">
+            {showTrash
+              ? 'Trash is empty. No deleted templates.'
+              : templates.length === 0
+                ? isAdminUser
+                  ? 'No templates yet. Click "New Template" to create your first one!'
+                  : 'No templates have been created yet. Ask your admin to add some!'
+                : 'No templates match your search.'}
+          </p>
+          {isAdminUser && !showTrash && templates.filter(t => !t.deletedAt).length === 0 && (
+            <Button
+              onClick={handleOpenCreate}
+              className="rounded-lg bg-[#131b2e] text-white px-6 h-10 text-sm font-semibold shadow-md hover:bg-[#252f4a]"
+            >
+              <Plus className="w-4 h-4 mr-2" /> Create First Template
+            </Button>
+          )}
+        </div>
+      ) : (
+        /* Templates Grid scaled dynamically for wide screen sizes */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-6">
+          {filtered.map((template: any) => (
+            <DashboardCard
+              key={template.id}
+              interactive
+              onClick={() => {
+                if (template.deletedAt) return;
+                if (isAdminUser) {
+                  handleOpenEdit(template);
+                  return;
+                }
+                void handleUseTemplate(template);
+              }}
+              className={cn(showTrash && 'opacity-75')}
+            >
+              <DashboardCardMedia>
+                {template.image ? (
+                  <img
+                    src={template.image}
+                    alt={template.name}
+                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-[#eae7e9]">
+                    <LayoutTemplate className="w-12 h-12 text-[#76777d]" />
+                    <p className="text-xs text-[#76777d] font-medium mt-2">{template.category}</p>
+                  </div>
+                )}
 
-        {/* Loading shimmer */}
-        {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-6">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="rounded-lg overflow-hidden border border-[#c6c6cd] bg-[#fcf8fa] shadow-sm animate-pulse">
-                <div className="h-64 w-full bg-[#eae7e9]" />
-                <div className="p-6 space-y-3">
-                  <div className="h-3 w-1/3 bg-[#eae7e9] rounded" />
-                  <div className="h-6 w-2/3 bg-[#eae7e9] rounded" />
-                  <div className="h-4 w-full bg-[#eae7e9] rounded" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
-          /* Empty state */
-          <div className="h-64 flex flex-col items-center justify-center gap-4 border border-dashed border-[#c6c6cd] rounded-lg bg-[#f6f3f5]">
-            <LayoutTemplate className="w-12 h-12 text-[#76777d]" />
-            <p className="text-[#45464d] text-sm font-medium text-center px-8">
-              {showTrash
-                ? 'Trash is empty. No deleted templates.'
-                : templates.length === 0
-                  ? isAdminUser
-                    ? 'No templates yet. Click "New Template" to create your first one!'
-                    : 'No templates have been created yet. Ask your admin to add some!'
-                  : 'No templates match your search.'}
-            </p>
-            {isAdminUser && !showTrash && templates.filter(t => !t.deletedAt).length === 0 && (
-              <Button
-                onClick={handleOpenCreate}
-                className="rounded-lg bg-[#131b2e] text-white px-6 h-10 text-sm font-semibold shadow-md hover:bg-[#252f4a]"
-              >
-                <Plus className="w-4 h-4 mr-2" /> Create First Template
-              </Button>
-            )}
-          </div>
-        ) : (
-          /* Templates Grid scaled dynamically for wide screen sizes */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-6">
-            {filtered.map((template: any) => (
-              <DashboardCard
-                key={template.id}
-                interactive
-                onClick={() => {
-                  if (template.deletedAt) return;
-                  if (isAdminUser) {
-                    handleOpenEdit(template);
-                    return;
-                  }
-                  void handleUseTemplate(template);
-                }}
-                className={cn(showTrash && 'opacity-75')}
-              >
-                <DashboardCardMedia>
-                  {template.image ? (
-                    <img
-                      src={template.image}
-                      alt={template.name}
-                      className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-[#eae7e9]">
-                      <LayoutTemplate className="w-12 h-12 text-[#76777d]" />
-                      <p className="text-xs text-[#76777d] font-medium mt-2">{template.category}</p>
-                    </div>
-                  )}
+                {showTrash ? (
+                  <DashboardCardBadge position="top-left" className="bg-[#ba1a1a] text-white border-transparent">
+                    Deleted
+                  </DashboardCardBadge>
+                ) : (
+                  <DashboardCardBadge>{template.category || 'Portfolio'}</DashboardCardBadge>
+                )}
 
-                  {showTrash ? (
-                    <DashboardCardBadge position="top-left" className="bg-[#ba1a1a] text-white border-transparent">
-                      Deleted
-                    </DashboardCardBadge>
-                  ) : (
-                    <DashboardCardBadge>{template.category || 'Portfolio'}</DashboardCardBadge>
-                  )}
+                <DashboardCardHoverTint />
 
-                  <DashboardCardHoverTint />
-
-                  {(showTrash || isAdminUser) && (
+                {(showTrash || isAdminUser) && (
                   <DashboardCardOverlay>
                     {showTrash ? (
                       <Button
@@ -436,66 +436,66 @@ export default function DashboardTemplates() {
                       </>
                     )}
                   </DashboardCardOverlay>
+                )}
+              </DashboardCardMedia>
+
+              <DashboardCardBody>
+                <div className="flex items-center justify-between mb-1">
+                  <DashboardCardTitle className="mb-1">{template.name}</DashboardCardTitle>
+                  {template.scope === 'INSTITUTION' && (
+                    <span className={dashboardCardTagClass}>Institution</span>
                   )}
-                </DashboardCardMedia>
-
-                <DashboardCardBody>
-                  <div className="flex items-center justify-between mb-1">
-                    <DashboardCardTitle className="mb-1">{template.name}</DashboardCardTitle>
-                    {template.scope === 'INSTITUTION' && (
-                      <span className={dashboardCardTagClass}>Institution</span>
-                    )}
-                  </div>
-
-                  <DashboardCardDescription>
-                    {template.description || 'A clean, typography-focused layout ideal for your next digital project.'}
-                  </DashboardCardDescription>
-
-                  <DashboardCardFooter>
-                    <DashboardCardSecondaryAction
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (isAdminUser) handleOpenEdit(template);
-                        else handleUseTemplate(template);
-                      }}
-                    >
-                      {isAdminUser ? 'Configure' : 'Preview'}
-                    </DashboardCardSecondaryAction>
-                    <DashboardCardPrimaryAction
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (!template.deletedAt) handleUseTemplate(template);
-                      }}
-                    >
-                      Use Template
-                    </DashboardCardPrimaryAction>
-                  </DashboardCardFooter>
-                </DashboardCardBody>
-              </DashboardCard>
-            ))}
-
-            {isAdminUser && !showTrash && (
-              <DashboardCardDashed onClick={handleOpenCreate} className="min-h-[380px]">
-                <div className="w-16 h-16 rounded-full bg-[#e4e2e4] flex items-center justify-center mb-4 group-hover:bg-[#000000] group-hover:text-white transition-colors text-[#45464d] shadow-sm">
-                  <Plus className="w-8 h-8" />
                 </div>
-                <h3 className={cn(dashboardCardTitleClass, 'mb-2')}>Start from Scratch</h3>
-                <p className={cn(dashboardCardDescriptionClass, 'text-center max-w-xs mb-0')}>
-                  Build your vision from the ground up using our blank canvas.
-                </p>
-              </DashboardCardDashed>
-            )}
-          </div>
-        )}
 
-        {isAdminUser && (
-          <TemplateFormDialog
-            open={formOpen}
-            onOpenChange={setFormOpen}
-            editingTemplate={editingTemplate}
-            onSuccess={handleFormSuccess}
-          />
-        )}
+                <DashboardCardDescription>
+                  {template.description || 'A clean, typography-focused layout ideal for your next digital project.'}
+                </DashboardCardDescription>
+
+                <DashboardCardFooter>
+                  <DashboardCardSecondaryAction
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isAdminUser) handleOpenEdit(template);
+                      else handleUseTemplate(template);
+                    }}
+                  >
+                    {isAdminUser ? 'Configure' : 'Preview'}
+                  </DashboardCardSecondaryAction>
+                  <DashboardCardPrimaryAction
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!template.deletedAt) handleUseTemplate(template);
+                    }}
+                  >
+                    Use Template
+                  </DashboardCardPrimaryAction>
+                </DashboardCardFooter>
+              </DashboardCardBody>
+            </DashboardCard>
+          ))}
+
+          {isAdminUser && !showTrash && (
+            <DashboardCardDashed onClick={handleOpenCreate} className="min-h-[380px]">
+              <div className="w-16 h-16 rounded-full bg-[#e4e2e4] flex items-center justify-center mb-4 group-hover:bg-[#000000] group-hover:text-white transition-colors text-[#45464d] shadow-sm">
+                <Plus className="w-8 h-8" />
+              </div>
+              <h3 className={cn(dashboardCardTitleClass, 'mb-2')}>Start from Scratch</h3>
+              <p className={cn(dashboardCardDescriptionClass, 'text-center max-w-xs mb-0')}>
+                Build your vision from the ground up using our blank canvas.
+              </p>
+            </DashboardCardDashed>
+          )}
+        </div>
+      )}
+
+      {isAdminUser && (
+        <TemplateFormDialog
+          open={formOpen}
+          onOpenChange={setFormOpen}
+          editingTemplate={editingTemplate}
+          onSuccess={handleFormSuccess}
+        />
+      )}
     </DashboardPageShell>
   );
 }

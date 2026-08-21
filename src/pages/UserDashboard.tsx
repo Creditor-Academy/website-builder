@@ -125,7 +125,7 @@ export default function DashboardProfile() {
     const firstName = name.split(' ')[0] || 'User';
 
     return (
-        <DashboardPageShell basePath={basePath} pageLabel="Profile">
+        <DashboardPageShell basePath={basePath} title="Profile" pageLabel="Profile">
             <style>{`
                 .glass-card {
                     background: rgba(255, 255, 255, 0.7);
