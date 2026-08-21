@@ -7,7 +7,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -57,6 +56,8 @@ import institutionApi from '@/api/institution';
 import GradientButton from '@/components/ui/GradientButton';
 import { useSearchParams } from 'react-router-dom';
 import { getUsers, updateUser, updateUserRole, updateUserStatus, restoreUser, createUser, deleteUser } from '../api/user';
+import { DashboardPageShell, dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass, dashboardToolbarClass, dashboardTableWrapClass } from '@/components/dashboard/DashboardPageShell';
+import { dashboardPanelClass } from '@/components/dashboard/DashboardCard';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface UserRow {
@@ -585,19 +586,12 @@ export default function DashboardUsers() {
 
   // ─── Render ─────────────────────────────────────────────────────────────────
   return (
-    <Card className="rounded-3xl shadow-xl shadow-slate-200/50 p-8">
-      {/* Breadcrumbs */}
-      <div className="mb-4 text-sm text-slate-500">
-        <a href="/admin" className="hover:underline">Dashboard</a> /{' '}
-        <span className="font-semibold text-slate-700">Users</span>
-      </div>
-
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
-        <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Users Management</h2>
-          <p className="text-slate-500 mt-1">Manage your users and permissions.</p>
-        </div>
+    <DashboardPageShell
+      basePath="/admin"
+      title="Users Management"
+      description="Manage your users and permissions."
+      pageLabel="Users"
+      actions={
         <GradientButton
           onClick={() => setIsAddUserModalOpen(true)}
           className="w-full md:w-auto h-11"
@@ -605,50 +599,38 @@ export default function DashboardUsers() {
         >
           Add User
         </GradientButton>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+      }
+    >
+      <div className={dashboardToolbarClass}>
+        <div className="relative flex-1 w-full min-w-0">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#76777d]" />
           <Input
             placeholder="Search users by name or email..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="pl-11 pr-4 w-full h-11 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-600 transition-all"
+            className={cn(dashboardSearchInputClass, 'w-full')}
           />
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className={dashboardFilterScrollClass}>
           {(['all', 'Active', 'Inactive', 'Suspended'] as const).map(s => (
-            <Button
+            <button
               key={s}
-              variant={filterStatus === s ? 'default' : 'outline'}
-              className={cn(
-                "rounded-full h-10 px-4 text-sm font-semibold transition-all duration-200",
-                filterStatus === s
-                  ? s === 'all'
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                    : s === 'Active'
-                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20'
-                    : s === 'Inactive'
-                    ? 'bg-amber-600 text-white shadow-md shadow-amber-500/20'
-                    : 'bg-rose-600 text-white shadow-md shadow-rose-500/20'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'
-              )}
+              type="button"
+              className={dashboardFilterPillClass(filterStatus === s)}
               onClick={() => setFilterStatus(s)}
             >
               {s === 'all' ? 'All Users' : s}
-            </Button>
+            </button>
           ))}
         </div>
 
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-full md:w-[180px] h-11 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-2 focus:ring-blue-500/20 transition-all">
-            <ListFilter className="h-4 w-4 text-slate-400 mr-2" />
+          <SelectTrigger className="w-full md:w-[180px] h-11 rounded-lg bg-white border-[#c6c6cd]">
+            <ListFilter className="h-4 w-4 text-[#76777d] mr-2" />
             <SelectValue placeholder="Sort By" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">
+          <SelectContent>
             <SelectItem value="recent">Most Recent</SelectItem>
             <SelectItem value="name">Name (A-Z)</SelectItem>
             <SelectItem value="role">Role</SelectItem>
@@ -656,9 +638,8 @@ export default function DashboardUsers() {
         </Select>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <Table className="w-full rounded-xl overflow-hidden border border-slate-200 shadow-md">
+      <div className={dashboardTableWrapClass}>
+        <Table className={cn('w-full overflow-hidden', dashboardPanelClass)}>
           <TableHeader className="bg-slate-50 border-b border-slate-200">
             <TableRow className="hover:bg-transparent">
               <TableHead className="w-[40px] px-2 text-center">
@@ -906,6 +887,6 @@ export default function DashboardUsers() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Card>
+    </DashboardPageShell>
   );
 }

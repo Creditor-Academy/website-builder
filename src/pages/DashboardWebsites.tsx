@@ -8,7 +8,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -41,6 +40,9 @@ import WebsiteShimmer from '@/components/dashboard/WebsiteShimmer';
 import GradientButton from '@/components/ui/GradientButton';
 import { useToast } from '@/components/ui/use-toast';
 import useBuilderStore from '@/store/useBuilderStore';
+import { cn } from '@/lib/utils';
+import { DashboardPageShell, dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass, dashboardToolbarClass, dashboardTableWrapClass } from '@/components/dashboard/DashboardPageShell';
+import { dashboardPanelClass } from '@/components/dashboard/DashboardCard';
 
 interface Website {
   id: string;
@@ -221,23 +223,13 @@ export default function DashboardWebsites() {
   };
 
   return (
-    <Card className="rounded-3xl shadow-xl shadow-slate-200/50 p-8">
-      {/* Breadcrumbs */}
-      <div className="mb-4 text-sm text-slate-500">
-        <a href="/admin" className="hover:underline">Dashboard</a> / <span className="font-semibold text-slate-700">Websites</span>
-      </div>
-
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
-        <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-            {orgId ? `Organization Websites` : 'Website Management'}
-          </h2>
-          <p className="text-slate-500 mt-1">
-            {orgId ? `Managing websites for specific organization` : 'Manage your deployed and draft websites.'}
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
+    <DashboardPageShell
+      basePath="/admin"
+      title={orgId ? 'Organization Websites' : 'Website Management'}
+      description={orgId ? 'Managing websites for specific organization' : 'Manage your deployed and draft websites.'}
+      pageLabel="Websites"
+      actions={
+        <div className="flex items-center gap-4 flex-wrap">
           {isAdminRole && (
             <GradientButton
               onClick={() => {
@@ -261,11 +253,10 @@ export default function DashboardWebsites() {
             </GradientButton>
           )}
 
-          {/* SUPER ADMIN: Institution filter */}
           {isSuperAdmin && isAdminView && availableInstitutions.length > 0 && (
             <Select value={institutionFilter} onValueChange={setInstitutionFilter}>
-              <SelectTrigger className="w-[180px] h-11 rounded-full border-slate-200">
-                <Building2 className="w-4 h-4 mr-2 text-slate-400" />
+              <SelectTrigger className="w-[180px] h-11 rounded-lg border-[#c6c6cd] bg-white">
+                <Building2 className="w-4 h-4 mr-2 text-[#76777d]" />
                 <SelectValue placeholder="All Orgs" />
               </SelectTrigger>
               <SelectContent>
@@ -297,45 +288,38 @@ export default function DashboardWebsites() {
             New Website
           </GradientButton>
         </div>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+      }
+    >
+      <div className={dashboardToolbarClass}>
+        <div className="relative flex-1 w-full min-w-0">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#76777d]" />
           <Input
             placeholder="Search websites by name or domain..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-11 pr-4 w-full h-11 rounded-full bg-white border-slate-200 
-                       shadow-md shadow-slate-200/50 focus:ring-2 focus:ring-blue-500/20 
-                       focus:border-blue-500 transition-all duration-300"
+            className={cn(dashboardSearchInputClass, 'w-full')}
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className={dashboardFilterScrollClass}>
           {['all', 'Published', 'Draft', 'Deleted'].map((status) => (
-            <Button
+            <button
               key={status}
-              variant={filterStatus === status ? 'default' : 'outline'}
-              className={`rounded-full h-10 px-4 text-sm font-semibold 
-                          ${filterStatus === status ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}
-                          transition-all duration-200`}
+              type="button"
+              className={dashboardFilterPillClass(filterStatus === status)}
               onClick={() => setFilterStatus(status as any)}
             >
               {status}
-            </Button>
+            </button>
           ))}
         </div>
 
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-full md:w-[180px] h-11 rounded-full bg-white border-slate-200 
-                                    shadow-md shadow-slate-200/50 focus:ring-2 focus:ring-blue-500/20 
-                                    focus:border-blue-500 transition-all duration-300 hover:bg-slate-100">
-            <ListFilter className="h-4 w-4 text-slate-400 mr-2" />
+          <SelectTrigger className="w-full md:w-[180px] h-11 rounded-lg bg-white border-[#c6c6cd]">
+            <ListFilter className="h-4 w-4 text-[#76777d] mr-2" />
             <SelectValue placeholder="Sort By" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">
+          <SelectContent>
             <SelectItem value="recent">Most Recent</SelectItem>
             <SelectItem value="name">Name (A-Z)</SelectItem>
             <SelectItem value="status">Status</SelectItem>
@@ -343,8 +327,8 @@ export default function DashboardWebsites() {
         </Select>
       </div>
 
-      <div className="overflow-x-auto">
-        <Table className="w-full rounded-xl overflow-hidden border border-slate-200 shadow-md">
+      <div className={dashboardTableWrapClass}>
+        <Table className={cn('w-full overflow-hidden', dashboardPanelClass)}>
           <TableHeader className="bg-slate-50 border-b border-slate-200">
             <TableRow className="hover:bg-transparent">
               <TableHead className="w-[40px] px-2 text-center"><input type="checkbox" className="form-checkbox h-4 w-4 text-blue-600 rounded" /></TableHead>
@@ -499,6 +483,6 @@ export default function DashboardWebsites() {
           </div>
         </DialogContent>
       </Dialog>
-    </Card>
+    </DashboardPageShell>
   );
 }

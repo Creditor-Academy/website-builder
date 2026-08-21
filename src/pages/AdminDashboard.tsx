@@ -28,6 +28,7 @@ import {
     restoreUser,
     createUser,
 } from "../api/user";
+import { DashboardStatCard, DashboardPanel } from '@/components/dashboard/DashboardCard';
 
 // ─── AddUserDialog ────────────────────────────────────────────────────────────
 // ✅ Calls POST /users to create a new user (Admin / Institution Admin only)
@@ -528,10 +529,10 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* ── Content ── */}
-                <div className="px-6 lg:px-8 py-6 space-y-5">
+                <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5">
 
                     {/* Greeting banner */}
-                    <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-700 rounded-2xl px-7 py-5 flex items-center justify-between shadow-md shadow-indigo-200/40">
+                    <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-700 rounded-xl sm:rounded-2xl px-4 sm:px-7 py-4 sm:py-5 flex items-center justify-between shadow-md shadow-indigo-200/40">
                         <div className="absolute right-0 top-0 w-48 h-full bg-white/5 skew-x-[-15deg] translate-x-8 pointer-events-none" />
                         <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-white/5 rounded-full pointer-events-none" />
                         <div className="relative z-10">
@@ -542,7 +543,7 @@ const AdminDashboard = () => {
                     </div>
 
                     {/* Stats */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                         {[
                             { label: "Total Users",        value: isLoadingStats ? "…" : stats.totalUsers,        icon: <Users className="w-4 h-4" />,        iconBg: "bg-purple-100 text-purple-600", trend: "+12.5%", up: true  },
                             { label: "Active Websites",    value: isLoadingStats ? "…" : stats.totalWebsites,     icon: <Globe className="w-4 h-4" />,         iconBg: "bg-indigo-100 text-indigo-600", trend: "+3.2%",  up: true  },
@@ -551,15 +552,17 @@ const AdminDashboard = () => {
                         ].map((s, i) => (
                             <motion.div key={s.label}
                                 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: i * 0.07 }}
-                                className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-all">
+                            >
+                            <DashboardStatCard className="hover:shadow-lg transition-all">
                                 <div className="flex items-center justify-between mb-3">
-                                    <p className="text-xs font-semibold text-slate-500">{s.label}</p>
-                                    <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center", s.iconBg)}>{s.icon}</div>
+                                    <p className="text-sm font-medium text-[#45464d]">{s.label}</p>
+                                    <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center border border-[#c6c6cd] bg-[#f6f3f5]", s.iconBg)}>{s.icon}</div>
                                 </div>
-                                <p className="text-3xl font-black text-slate-900">{s.value}</p>
-                                <p className={cn("text-xs font-semibold mt-1 flex items-center gap-0.5", s.up ? "text-emerald-500" : "text-rose-500")}>
+                                <p className="text-2xl sm:text-3xl font-bold text-[#000000]">{s.value}</p>
+                                <p className={cn("text-xs font-semibold mt-1 flex items-center gap-0.5", s.up ? "text-emerald-600" : "text-[#ba1a1a]")}>
                                     {s.up ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}{s.trend}
                                 </p>
+                            </DashboardStatCard>
                             </motion.div>
                         ))}
                     </div>
@@ -568,13 +571,13 @@ const AdminDashboard = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
                         {/* Recent Users — 2/3 */}
-                        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-50">
-                                <div>
+                        <DashboardPanel className="lg:col-span-2">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 sm:px-6 py-4 border-b border-[#c6c6cd]">
+                                <div className="min-w-0">
                                     <h3 className="text-sm font-bold text-slate-900">Recent Users</h3>
                                     <p className="text-[11px] text-slate-400 mt-0.5">Latest registered accounts</p>
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 flex-wrap">
                                     <Button size="sm" className="h-8 rounded-xl text-xs bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 shadow-sm" onClick={() => setIsAddUserOpen(true)}>
                                         <Plus className="w-3.5 h-3.5" /> Add User
                                     </Button>
@@ -618,12 +621,12 @@ const AdminDashboard = () => {
                                     </div>
                                 )}
                             </div>
-                        </div>
+                        </DashboardPanel>
 
                         {/* Right column: Quick Actions + Recent Activity */}
                         <div className="flex flex-col gap-4">
                             {/* Quick Actions */}
-                            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                            <DashboardPanel className="p-4 sm:p-5">
                                 <h3 className="text-sm font-bold text-slate-900 mb-3">Quick Actions</h3>
                                 <div className="space-y-1.5">
                                     {[
@@ -641,10 +644,10 @@ const AdminDashboard = () => {
                                         </button>
                                     ))}
                                 </div>
-                            </div>
+                            </DashboardPanel>
 
                             {/* Recent Activity */}
-                            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex-1">
+                            <DashboardPanel className="p-4 sm:p-5 flex-1">
                                 <div className="flex items-center justify-between mb-3">
                                     <h3 className="text-sm font-bold text-slate-900">Recent Activity</h3>
                                     <button onClick={() => navigate('/admin/audit')} className="text-[11px] text-indigo-600 font-bold hover:underline">View All</button>
@@ -665,7 +668,7 @@ const AdminDashboard = () => {
                                         </div>
                                     ))}
                                 </div>
-                            </div>
+                            </DashboardPanel>
                         </div>
                     </div>
                 </div>
