@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, ArrowRight, ArrowLeft, LayoutTemplate, Search, Trash2, RotateCcw, Building2, Loader2 } from 'lucide-react';
+import { Plus, ArrowLeft, LayoutTemplate, Search, Trash2, RotateCcw, Building2, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useBuilderStore from '@/store/useBuilderStore';
 import { cn } from '@/lib/utils';
@@ -344,23 +344,27 @@ export default function DashboardTemplates() {
 
       {/* Loading shimmer */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 lg:gap-6">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="rounded-2xl overflow-hidden border border-[#E5E7EB] bg-white shadow-md animate-pulse">
-              <div className="aspect-[16/10] bg-[#F4F4F5]" />
-              <div className="p-6 space-y-3">
-                <div className="h-3 w-1/3 bg-[#F4F4F5] rounded-full" />
-                <div className="h-5 w-2/3 bg-[#F4F4F5] rounded-full" />
-                <div className="h-3 w-full bg-[#F4F4F5] rounded-full" />
+            <div key={i} className="animate-pulse overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_4px_12px_rgba(15,23,42,0.08)]">
+              <div className="aspect-[16/10] bg-[#E5E7EB]" />
+              <div className="space-y-3 p-5">
+                <div className="h-5 w-2/3 rounded-full bg-[#E5E7EB]" />
+                <div className="h-3 w-full rounded-full bg-[#E5E7EB]" />
+                <div className="h-3 w-4/5 rounded-full bg-[#E5E7EB]" />
+                <div className="mt-4 flex justify-between">
+                  <div className="h-8 w-20 rounded-lg bg-[#E5E7EB]" />
+                  <div className="h-8 w-28 rounded-lg bg-[#E5E7EB]" />
+                </div>
               </div>
             </div>
           ))}
         </div>
       ) : filtered.length === 0 ? (
         /* Empty state */
-        <div className="h-64 flex flex-col items-center justify-center gap-4 border-2 border-dashed border-[#E8E8E8] rounded-[2rem]">
-          <LayoutTemplate className="w-12 h-12 text-slate-200" />
-          <p className="text-[#787778] text-sm font-medium text-center px-8">
+        <div className="flex h-64 flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-[#E8E8E8]">
+          <LayoutTemplate className="h-12 w-12 text-slate-300" />
+          <p className="px-8 text-center text-sm font-medium text-[#787778]">
             {showTrash
               ? 'Trash is empty. No deleted templates.'
               : templates.length === 0
@@ -372,141 +376,110 @@ export default function DashboardTemplates() {
           {isAdminUser && !showTrash && templates.filter(t => !t.deletedAt).length === 0 && (
             <Button
               onClick={handleOpenCreate}
-              className="rounded-full bg-[#0F172A] text-white px-6 h-10 text-sm font-semibold shadow-lg"
+              className="h-10 rounded-full bg-[#0F172A] px-6 text-sm font-semibold text-white shadow-none hover:bg-[#1E293B] hover:scale-100"
             >
-              <Plus className="w-4 h-4 mr-2" /> Create First Template
+              <Plus className="mr-2 h-4 w-4" /> Create First Template
             </Button>
           )}
         </div>
       ) : (
         /* Template grid */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 lg:gap-6">
           {filtered.map((template: any) => (
-            <div
-              key={template.id}
-              onClick={() => {
-                if (template.deletedAt) {
-                  return;
-                }
-
-                if (isAdminUser) {
-                  handleOpenEdit(template);
-                  return;
-                }
-
-                void handleUseTemplate(template);
-              }}
-              className={cn(
-                "group/template-card overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm cursor-pointer transition-shadow duration-200 hover:shadow-md",
-                showTrash && "opacity-75"
-              )}
-            >
-              {/* Preview image */}
-              <div className="aspect-[16/10] bg-[#F4F4F5] relative overflow-hidden">
-                {template.image ? (
-                  <img
-                    src={template.image}
-                    alt={template.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-[#F4F4F5]">
-                    <LayoutTemplate className="w-12 h-12 text-[#787778]" />
-                    <p className="text-xs text-[#747781] font-medium mt-2">{template.category}</p>
-                  </div>
+              <div
+                key={template.id}
+                className={cn(
+                  'flex flex-col overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_4px_12px_rgba(15,23,42,0.08)] transition-colors hover:border-[#CBD5E1]',
+                  showTrash && 'opacity-80'
                 )}
-
-                {/* Deleted badge — trash view */}
-                {showTrash && (
-                  <Badge className="absolute top-4 left-4 bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
-                    Deleted
-                  </Badge>
-                )}
-
-                {/* Soft dark overlay on hover */}
-                <div className="absolute inset-0 bg-slate-900/35 opacity-0 transition-opacity duration-200 group-hover/template-card:opacity-100" />
-
-                {/* Hover action buttons */}
-                <div className="absolute inset-0 z-20 flex items-center justify-center gap-2 opacity-0 transition-opacity duration-200 group-hover/template-card:opacity-100">
-                  {showTrash ? (
-                    <Button
-                      className="h-10 rounded-full bg-emerald-600 px-5 text-sm font-semibold text-white shadow-none hover:bg-emerald-700 hover:text-white hover:scale-100 active:scale-100"
-                      onClick={e => { e.stopPropagation(); handleRestoreTemplate(template); }}
-                    >
-                      <RotateCcw className="w-4 h-4 mr-1.5" /> Restore
-                    </Button>
+              >
+                {/* Preview image + category badge */}
+                <div className="relative aspect-[16/10] overflow-hidden bg-[#F4F4F5]">
+                  {template.image ? (
+                    <img
+                      src={template.image}
+                      alt={template.name}
+                      className="h-full w-full object-cover"
+                    />
                   ) : (
-                    <>
-                      <Button
-                        className="h-10 rounded-full bg-[#0F172A] px-5 text-sm font-semibold text-white shadow-none hover:bg-[#1E293B] hover:text-white hover:scale-100 active:scale-100"
-                        disabled={!!creatingId}
-                        onClick={e => { e.stopPropagation(); handleUseTemplate(template); }}
-                      >
-                        {creatingId === template.id
-                          ? <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Creating...</>
-                          : <><Plus className="w-4 h-4 mr-1.5" /> Use</>}
-                      </Button>
+                    <div className="flex h-full w-full flex-col items-center justify-center bg-[#F4F4F5]">
+                      <LayoutTemplate className="h-10 w-10 text-[#787778]" />
+                    </div>
+                  )}
 
-                      {isAdminUser && (
-                        <Button
-                          className="h-10 rounded-full border border-[#E5E7EB] bg-white px-5 text-sm font-semibold text-[#0F172A] shadow-none hover:bg-gray-100 hover:text-[#0F172A] hover:scale-100 active:scale-100"
-                          onClick={e => { e.stopPropagation(); handleOpenEdit(template); }}
-                        >
-                          Edit Template
-                        </Button>
-                      )}
+                  <span className="absolute right-3 top-3 rounded-md border border-white/40 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-[#0F172A] shadow-sm backdrop-blur-sm">
+                    {template.category || 'General'}
+                  </span>
 
-                      {isAdminUser && (
-                        <Button
-                          className="h-10 w-10 rounded-full bg-rose-600 p-0 text-white shadow-none hover:bg-rose-700 hover:text-white hover:scale-100 active:scale-100"
-                          onClick={e => { e.stopPropagation(); handleDeleteTemplate(template); }}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </>
+                  {showTrash && (
+                    <Badge className="absolute left-3 top-3 rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-bold text-white shadow">
+                      Deleted
+                    </Badge>
                   )}
                 </div>
-              </div>
 
-              {/* Card body */}
-              <div className="p-6 pt-4 pb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <Badge className="bg-[#F4F4F5] text-[#0F172A] font-medium px-3 py-1 rounded-full text-xs">
-                    {template.category || 'General'}
-                  </Badge>
-                  <div className="flex items-center gap-1.5">
-                    {template.scope === 'INSTITUTION' && template.institution?.name && (
-                      <Badge className="bg-[#F4F4F5] text-[#747781] font-medium px-2 py-0.5 rounded-full text-[10px]">
-                        <Building2 className="w-3 h-3 mr-1 inline" />
-                        {template.institution.name}
-                      </Badge>
+                {/* Body */}
+                <div className="flex flex-1 flex-col p-5">
+                  <h4 className="text-base font-bold leading-snug tracking-tight text-[#0F172A] sm:text-lg">
+                    {template.name}
+                  </h4>
+                  <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-[#64748B]">
+                    {template.description || 'No description provided.'}
+                  </p>
+
+                  {/* Footer actions — Configure + Use Template */}
+                  <div className="mt-5 flex items-center justify-between gap-3">
+                    {showTrash ? (
+                      <Button
+                        className="h-9 w-full rounded-lg bg-emerald-600 text-sm font-semibold text-white shadow-none hover:bg-emerald-700 hover:scale-100"
+                        onClick={() => handleRestoreTemplate(template)}
+                      >
+                        <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> Restore
+                      </Button>
+                    ) : (
+                      <>
+                        {isAdminUser ? (
+                          <button
+                            type="button"
+                            className="text-sm font-semibold text-[#0F172A] transition-colors hover:text-[#334155]"
+                            onClick={() => handleOpenEdit(template)}
+                          >
+                            Configure
+                          </button>
+                        ) : (
+                          <span />
+                        )}
+
+                        <div className="ml-auto flex items-center gap-1.5">
+                          {isAdminUser && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-9 w-9 rounded-lg text-[#94A3B8] hover:bg-rose-50 hover:text-rose-600 hover:scale-100"
+                              onClick={() => handleDeleteTemplate(template)}
+                              title="Delete template"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button
+                            className="h-9 rounded-lg bg-[#0F172A] px-3.5 text-sm font-semibold text-white shadow-none hover:bg-[#1E293B] hover:scale-100"
+                            disabled={!!creatingId}
+                            onClick={() => handleUseTemplate(template)}
+                          >
+                            {creatingId === template.id ? (
+                              <><Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> Creating...</>
+                            ) : (
+                              'Use Template'
+                            )}
+                          </Button>
+                        </div>
+                      </>
                     )}
-                    <Badge className={cn(
-                      'font-medium px-3 py-1 rounded-full text-[10px]',
-                      template.scope === 'INSTITUTION'
-                        ? 'bg-amber-100 text-amber-700'
-                        : 'bg-emerald-100 text-emerald-700'
-                    )}>
-                      {template.scope === 'INSTITUTION' ? 'Institution' : 'Global'}
-                    </Badge>
                   </div>
                 </div>
-                <h4 className="font-bold text-xl text-[#0F172A] leading-tight mt-1">{template.name}</h4>
-                <p className="text-sm text-[#747781] leading-relaxed line-clamp-2 mt-1">
-                  {template.description}
-                </p>
-
-                <div className={cn(
-                  "mt-4 pt-4 border-t border-[#E8E8E8] flex items-center justify-between font-semibold text-xs uppercase tracking-wider transition-all",
-                  showTrash ? 'text-rose-500 group-hover/template-card:text-rose-600' : 'text-[#0F172A] group-hover/template-card:text-[#0F172A]'
-                )}>
-                  <span>{showTrash ? 'In Trash' : isAdminUser ? 'Design or Use' : 'Use Template'}</span>
-                  {showTrash ? <RotateCcw className="w-3 h-3" /> : <ArrowRight className="w-3 h-3" />}
-                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       )}
 
