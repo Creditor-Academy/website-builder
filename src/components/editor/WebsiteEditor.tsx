@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { BuilderProvider, useBuilder } from "@/contexts/BuilderContext";
-import useBuilderStore from '@/store/useBuilderStore';
-import { useIsMobile } from "@/hooks/use-mobile";
+import { BuilderProvider } from "@/contexts/BuilderContext";
+import useBuilderStore from "@/store/useBuilderStore";
+import { useIsCompact } from "@/hooks/use-mobile";
 import { EditorToolbar } from "./EditorToolbar";
 import { SectionsList } from "./SectionsList";
 import { PageManager } from "./PageManager";
@@ -24,15 +24,11 @@ import {
   FileText,
   Plus,
   Settings,
-  Sliders,
-  Rocket,
-  Link,
-  Download,
-  AlertCircle,
   Image as ImageIcon,
-  Wand2,
+  Palette,
   Edit,
-  History
+  History,
+  X,
 } from "lucide-react";
 import {
   Tooltip,
@@ -41,47 +37,156 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+const NAV_ITEMS = [
+  { id: "add", icon: Plus, label: "Sections" },
+  { id: "layers", icon: Layers, label: "Layers" },
+  { id: "pages", icon: FileText, label: "Pages" },
+  { id: "assets", icon: ImageIcon, label: "Assets" },
+  { id: "design", icon: Palette, label: "Design System" },
+  { id: "edit", icon: Edit, label: "Edit" },
+  { id: "history", icon: History, label: "Version History" },
+];
+
+function EditorSidebarPanels({ leftNavTab }: { leftNavTab: string }) {
+  return (
+    <div className="flex-1 flex flex-col min-w-0 bg-white overflow-hidden">
+      <div className="h-full min-h-0 overflow-hidden">
+        {leftNavTab === "add" && <SectionsList view="add" />}
+        {leftNavTab === "layers" && <SectionsList view="layers" />}
+        {leftNavTab === "assets" && <AssetLibraryPanel />}
+        {leftNavTab === "design" && <DesignSystemPanel />}
+        {leftNavTab === "pages" && <PageManager />}
+        {leftNavTab === "edit" && <PropertiesPanel />}
+        {leftNavTab === "settings" && <SiteSettings />}
+        {leftNavTab === "history" && <VersionHistoryPanel />}
+      </div>
+    </div>
+  );
+}
+
+function EditorLeftSidebar({
+  leftNavTab,
+  setLeftNavTab,
+  onClose,
+}: {
+  leftNavTab: string;
+  setLeftNavTab: (id: string) => void;
+  onClose?: () => void;
+}) {
+  return (
+    <div className="h-full w-full flex overflow-hidden bg-white">
+      <div className="w-14 shrink-0 border-r border-slate-200 flex flex-col items-center bg-slate-50">
+        <TooltipProvider delayDuration={0}>
+          <nav className="flex flex-1 flex-col items-center py-3 w-full min-h-0">
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close sidebar"
+                className="mb-2 w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-200/80"
+              >
+                <X className="w-[18px] h-[18px]" strokeWidth={1.75} />
+              </button>
+            )}
+            <div className="flex flex-col items-center gap-1 overflow-y-auto">
+              {NAV_ITEMS.map((item) => {
+                const isActive = leftNavTab === item.id;
+                return (
+                  <Tooltip key={item.id}>
+                    <TooltipTrigger asChild>
+                      <button
+                        id={`tour-nav-${item.id}`}
+                        type="button"
+                        onClick={() => setLeftNavTab(item.id)}
+                        aria-label={item.label}
+                        aria-current={isActive ? "page" : undefined}
+                        className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${isActive
+                            ? "bg-neutral-900 text-white"
+                            : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/80"
+                          }`}
+                      >
+                        <item.icon className="w-[18px] h-[18px]" strokeWidth={1.75} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="text-xs font-medium">
+                      {item.label}
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </div>
+
+            <div className="mt-auto pt-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={() => setLeftNavTab("settings")}
+                    aria-label="Site Settings"
+                    aria-current={leftNavTab === "settings" ? "page" : undefined}
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${leftNavTab === "settings"
+                        ? "bg-neutral-900 text-white"
+                        : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/80"
+                      }`}
+                  >
+                    <Settings className="w-[18px] h-[18px]" strokeWidth={1.75} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="text-xs font-medium">
+                  Site Settings
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </nav>
+        </TooltipProvider>
+      </div>
+
+      <EditorSidebarPanels leftNavTab={leftNavTab} />
+    </div>
+  );
+}
+
 function EditorContent() {
-  const [leftNavTab, setLeftNavTab] = useState("add"); // 'add', 'layers', 'pages', 'settings', 'edit'
+  const [leftNavTab, setLeftNavTab] = useState("add");
   const store = useBuilderStore();
   const { editor, setTourState, activeWebsiteId, setEditorState } = store;
   const { id } = useParams();
-  const isMobile = useIsMobile();
+  const isCompact = useIsCompact();
 
-  // Auto-collapse left panel on mobile, auto-expand on desktop
   useEffect(() => {
-    if (isMobile) {
-      setEditorState({ showLeftPanel: false });
-    } else {
-      setEditorState({ showLeftPanel: true });
-    }
-  }, [isMobile, setEditorState]);
+    setEditorState({ showLeftPanel: !isCompact });
+  }, [isCompact, setEditorState]);
 
-  // Auto-switch to edit tab when a section or component is selected
   useEffect(() => {
     if (editor.selectedSectionId || editor.selectedComponentId) {
       setLeftNavTab("edit");
+      if (isCompact) {
+        setEditorState({ showLeftPanel: true });
+      }
     }
-  }, [editor.selectedSectionId, editor.selectedComponentId]);
+  }, [editor.selectedSectionId, editor.selectedComponentId, isCompact, setEditorState]);
 
-  const navItems = [
-    { id: "add", icon: Plus, label: "Sections" },
-    { id: "layers", icon: Layers, label: "Layers" },
-    { id: "pages", icon: FileText, label: "Pages" },
-    { id: "assets", icon: ImageIcon, label: "Assets" },
-    { id: "design", icon: Wand2, label: "Design System" },
-    { id: "edit", icon: Edit, label: "Edit" },  { id: "history", icon: History, label: "Version History" },  ];
+  useEffect(() => {
+    if (!isCompact || !editor.showLeftPanel) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setEditorState({ showLeftPanel: false });
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isCompact, editor.showLeftPanel, setEditorState]);
+
+  const showSidebar = !editor.previewMode && editor.showLeftPanel;
+  const closeSidebar = () => setEditorState({ showLeftPanel: false });
 
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden font-sans">
-      <EditorToolbar 
-        websiteId={activeWebsiteId || id} 
+      <EditorToolbar
+        websiteId={activeWebsiteId || id}
         onTabChange={setLeftNavTab}
       />
       <TextFormattingToolbar />
       <GuidedTour />
 
-      {/* Debug: Test Tour Button */}
       {!editor.tour.isActive && (
         <button
           onClick={() => setTourState({ isActive: true, step: 0, isFinished: false })}
@@ -91,98 +196,55 @@ function EditorContent() {
         </button>
       )}
 
-      <div className={`flex-1 min-h-0 transition-all duration-500 ${editor.tour.isActive ? 'pointer-events-none opacity-90' : ''}`}>
-        <ResizablePanelGroup direction="horizontal" className="h-full">
-          {!editor.previewMode && editor.showLeftPanel && (
+      <div className={`relative z-0 flex-1 min-h-0 isolate ${editor.tour.isActive ? "pointer-events-none opacity-90" : ""}`}>
+        <ResizablePanelGroup direction="horizontal" className="h-full relative z-0">
+          {!isCompact && showSidebar && (
             <>
               <ResizablePanel
-                defaultSize={22}
-                minSize={15}
-                maxSize={35}
-                className="bg-white border-r border-slate-200 flex overflow-hidden"
+                defaultSize={24}
+                minSize={20}
+                maxSize={40}
+                className="min-w-[20rem] bg-white border-r border-slate-200 flex overflow-hidden"
               >
-                {/* Slim Vertical Sidebar */}
-                <div className="w-[60px] border-r border-slate-100 flex flex-col items-center py-4 gap-4 bg-slate-50/50">
-                  <TooltipProvider delayDuration={0}>
-                    {navItems.map((item) => (
-                      <Tooltip key={item.id}>
-                        <TooltipTrigger asChild>
-                          <button
-                            id={`tour-nav-${item.id}`}
-                            onClick={() => setLeftNavTab(item.id)}
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${
-                              leftNavTab === item.id
-                                ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105"
-                                : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/50"
-                            }`}
-                          >
-                            <item.icon className="w-5 h-5" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent
-                          side="right"
-                          className="text-xs font-semibold"
-                        >
-                          {item.label}
-                        </TooltipContent>
-                      </Tooltip>
-                    ))}
-                  </TooltipProvider>
-
-                  <div className="mt-auto">
-                    <TooltipProvider delayDuration={0}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            onClick={() => setLeftNavTab("settings")}
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all
-                                          ${
-                                            leftNavTab === "settings"
-                                              ? "bg-blue-500 text-white shadow-md"
-                                              : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/50"
-                                          }
-                                        `}
-                                                          >
-                            <Settings className="w-5 h-5" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent
-                          side="right"
-                          className="text-xs font-semibold"
-                        >
-                          Site Settings
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                </div>
-
-                {/* Content Panel */}
-                <div className="flex-1 flex flex-col min-w-0 bg-white">
-                  <div className="h-full overflow-hidden">
-                    {leftNavTab === "add" && <SectionsList view="add" />}
-                    {leftNavTab === "layers" && <SectionsList view="layers" />}
-                    {leftNavTab === "assets" && <AssetLibraryPanel />}
-                    {leftNavTab === "design" && <DesignSystemPanel />}
-                    {leftNavTab === "pages" && <PageManager />}
-                    {leftNavTab === "edit" && <PropertiesPanel />}
-                    {leftNavTab === "settings" && <SiteSettings />}
-                    {leftNavTab === "history" && <VersionHistoryPanel />}
-                  </div>
-                </div>
+                <EditorLeftSidebar
+                  leftNavTab={leftNavTab}
+                  setLeftNavTab={setLeftNavTab}
+                />
               </ResizablePanel>
               <ResizableHandle className="w-1 bg-slate-100 hover:bg-primary/30 transition-all border-r border-slate-200" />
             </>
           )}
           <ResizablePanel
-            defaultSize={editor.previewMode ? 100 : 53}
-            className="bg-slate-100/30 p-4 lg:p-6 overflow-hidden flex flex-col relative"
+            defaultSize={editor.previewMode || isCompact ? 100 : 53}
+            className="bg-slate-100/30 p-3 sm:p-4 lg:p-6 overflow-hidden flex flex-col relative z-0 isolate min-w-0"
           >
             <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px] opacity-40 pointer-events-none"></div>
-              <CanvasPreview />
+            <CanvasPreview />
           </ResizablePanel>
-          {/* Right panel disabled — PropertiesPanel is already available via the Edit tab in the left sidebar */}
         </ResizablePanelGroup>
+
+        {isCompact && showSidebar && (
+          <>
+            <button
+              type="button"
+              aria-label="Close sidebar"
+              className="absolute inset-0 z-40 bg-slate-900/40"
+              onClick={closeSidebar}
+            />
+            <aside
+              role="dialog"
+              aria-modal="true"
+              aria-label="Editor sidebar"
+              className="absolute z-50 inset-y-0 left-0 w-[min(22.5rem,calc(100vw-2.5rem))] max-w-full bg-white border-r border-slate-200 shadow-[8px_0_24px_-8px_rgba(15,23,42,0.28)] flex overflow-hidden"
+            >
+              <EditorLeftSidebar
+                leftNavTab={leftNavTab}
+                setLeftNavTab={setLeftNavTab}
+                onClose={closeSidebar}
+              />
+            </aside>
+          </>
+        )}
       </div>
     </div>
   );
@@ -193,15 +255,14 @@ export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
   const store = useBuilderStore();
   const { selectWebsite, activeWebsiteId } = store;
 
-  // Editor always uses light mode
   useEffect(() => {
-    document.documentElement.classList.remove('dark');
-    document.body.style.backgroundColor = '';
+    document.documentElement.classList.remove("dark");
+    document.body.style.backgroundColor = "";
     return () => {
       try {
-        const saved = localStorage.getItem('buildora-theme');
-        if (saved === 'dark') document.documentElement.classList.add('dark');
-      } catch {}
+        const saved = localStorage.getItem("buildora-theme");
+        if (saved === "dark") document.documentElement.classList.add("dark");
+      } catch { }
     };
   }, []);
 

@@ -9,7 +9,9 @@ import {
     Settings,
     Search,
     Check,
-    Globe
+    Globe,
+    Utensils,
+    Image as ImageIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +24,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+
+function getPageIcon(page: { name: string; slug: string }) {
+    const key = `${page.slug} ${page.name}`.toLowerCase();
+    if (page.slug === '/' || page.name.toLowerCase() === 'home') return Globe;
+    if (key.includes('menu')) return Utensils;
+    if (key.includes('gallery')) return ImageIcon;
+    return FileText;
+}
 
 export function PageManager() {
     const { state, pages, setActivePage, addPage, duplicatePage, deletePage } = useBuilder();
@@ -44,67 +54,70 @@ export function PageManager() {
     };
 
     return (
-        <div className="h-full flex flex-col bg-white animate-in fade-in duration-300">
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-white">
-                <h2 className="text-sm font-bold text-slate-900 tracking-tight">Pages</h2>
-                <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-7 w-7 rounded-lg bg-primary/5 text-primary hover:bg-primary hover:text-white transition-all shadow-sm"
+        <div className="h-full flex flex-col bg-white">
+            <div className="h-12 px-4 border-b border-slate-100 flex items-center justify-between shrink-0">
+                <h2 className="text-sm font-semibold text-slate-900">Pages</h2>
+                <button
+                    type="button"
+                    className="h-7 w-7 rounded-md text-slate-500 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center"
                     onClick={() => setIsAddOpen(true)}
+                    aria-label="Add page"
                 >
-                    <Plus className="w-4 h-4" />
-                </Button>
+                    <Plus className="w-4 h-4" strokeWidth={1.75} />
+                </button>
             </div>
 
-            <div className="px-4 py-3 bg-slate-50/50 border-b border-slate-100">
-                <div className="relative group">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 group-focus-within:text-primary transition-colors" />
+            <div className="px-3 py-3">
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
                     <Input
                         placeholder="Find a page..."
-                        className="pl-9 bg-white h-9 text-xs border-slate-200 rounded-xl shadow-sm focus:ring-primary/20"
+                        className="pl-9 h-9 text-xs bg-slate-100 border-transparent rounded-lg shadow-none focus-visible:ring-1 focus-visible:ring-slate-300"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-3 space-y-2">
+            <div className="flex-1 overflow-y-auto px-2 pb-3 space-y-0.5">
                 {filteredPages.map((p) => {
                     const isIndex = p.slug === '/';
                     const isActive = activePage?.id === p.id;
+                    const PageIcon = getPageIcon(p);
 
                     return (
                         <div
                             key={p.id}
                             onClick={() => setActivePage(p.id)}
-                            className={`group flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all border ${isActive
-                                ? 'bg-primary/5 border-primary/20 shadow-sm translate-x-1'
-                                : 'bg-white border-slate-100 hover:border-slate-300 hover:shadow-md hover:shadow-slate-200/50'
-                                }`}
+                            className={`group flex items-center justify-between px-2 py-2 rounded-lg cursor-pointer ${
+                                isActive ? 'bg-slate-100' : 'hover:bg-slate-50'
+                            }`}
                         >
                             <div className="flex items-center gap-3 min-w-0">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-110 ${isActive ? 'bg-primary text-white shadow-primary/20' : 'bg-slate-50 text-slate-400'
-                                    }`}>
-                                    {isIndex ? <Globe className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
+                                <div className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 ${
+                                    isActive ? 'bg-neutral-900 text-white' : 'bg-slate-100 text-slate-600'
+                                }`}>
+                                    <PageIcon className="w-4 h-4" strokeWidth={1.75} />
                                 </div>
                                 <div className="min-w-0">
                                     <div className="flex items-center gap-2">
-                                        <p className={`text-[13px] font-bold truncate ${isActive ? 'text-primary' : 'text-slate-700'}`}>
+                                        <p className="text-[13px] font-medium truncate text-slate-900">
                                             {p.name}
                                         </p>
                                         {isIndex && (
-                                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 uppercase tracking-tighter">Home</span>
+                                            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-slate-200/80 text-slate-500 uppercase tracking-wide">
+                                                Home
+                                            </span>
                                         )}
                                     </div>
-                                    <p className="text-[10px] text-slate-400 font-mono truncate">{p.slug}</p>
+                                    <p className="text-[11px] text-slate-400 truncate">{p.slug}</p>
                                 </div>
                             </div>
 
-                            <div className="flex items-center opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                            <div className="flex items-center opacity-0 group-hover:opacity-100">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-slate-100" onClick={(e) => e.stopPropagation()}>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-md hover:bg-slate-200/70" onClick={(e) => e.stopPropagation()}>
                                             <MoreVertical className="w-4 h-4 text-slate-400" />
                                         </Button>
                                     </DropdownMenuTrigger>
@@ -130,47 +143,47 @@ export function PageManager() {
                     );
                 })}
                 {filteredPages.length === 0 && (
-                    <div className="text-center py-12 border-2 border-dashed border-slate-50 rounded-2xl bg-white">
-                        <FileText className="w-10 h-10 mx-auto mb-3 text-slate-100" />
-                        <p className="text-xs text-slate-400 font-medium">No pages found</p>
+                    <div className="text-center py-12">
+                        <FileText className="w-8 h-8 mx-auto mb-3 text-slate-200" />
+                        <p className="text-xs text-slate-400">No pages found</p>
                     </div>
                 )}
             </div>
 
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-                <DialogContent className="max-w-sm rounded-3xl p-6 border-none shadow-2xl">
+                <DialogContent className="max-w-sm rounded-2xl p-6">
                     <DialogHeader>
-                        <DialogTitle className="text-xl font-bold tracking-tight">New Page</DialogTitle>
+                        <DialogTitle className="text-lg font-semibold tracking-tight">New Page</DialogTitle>
                     </DialogHeader>
                     <div className="py-4 space-y-4">
                         <div className="space-y-2">
-                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Page Title</Label>
+                            <Label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Page Title</Label>
                             <Input
                                 placeholder="e.g., Services, Our Story"
                                 value={newPageName}
                                 onChange={(e) => setNewPageName(e.target.value)}
-                                className="h-11 rounded-xl border-slate-200 focus:ring-primary/20 bg-slate-50/50"
+                                className="h-11 rounded-lg border-slate-200 bg-slate-50"
                                 autoFocus
                             />
                         </div>
-                        <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10 flex gap-3">
-                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                                <Globe className="w-4 h-4 text-primary" />
+                        <div className="bg-slate-50 p-4 rounded-lg flex gap-3">
+                            <div className="w-8 h-8 rounded-md bg-slate-100 flex items-center justify-center shrink-0">
+                                <Globe className="w-4 h-4 text-slate-500" />
                             </div>
-                            <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                            <p className="text-[11px] text-slate-600 leading-relaxed">
                                 New pages automatically inherit your site's global Navbar and Footer configurations.
                             </p>
                         </div>
                     </div>
                     <DialogFooter className="gap-2">
-                        <Button variant="ghost" className="rounded-xl flex-1 font-bold text-slate-500" onClick={() => setIsAddOpen(false)}>Cancel</Button>
-                        <Button className="rounded-xl flex-1 font-bold shadow-lg shadow-primary/20" onClick={handleCreatePage}>Create Page</Button>
+                        <Button variant="ghost" className="rounded-lg flex-1 text-slate-500" onClick={() => setIsAddOpen(false)}>Cancel</Button>
+                        <Button className="rounded-lg flex-1 bg-neutral-900 hover:bg-neutral-800" onClick={handleCreatePage}>Create Page</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
 
-            <div className="p-4 border-t border-slate-100 bg-white shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.05)]">
-                <p className="text-[10px] text-slate-400 text-center font-medium italic">
+            <div className="px-4 py-3 border-t border-slate-100">
+                <p className="text-[10px] text-slate-400 italic">
                     Tip: Home page slug (/) cannot be changed
                 </p>
             </div>

@@ -43,7 +43,7 @@ export function SiteSettings() {
         if (!activeWebsite) return;
         websiteApi.getDomains(activeWebsite.id)
             .then((res: any) => setDomains(res.data?.domains || res.data || []))
-            .catch(() => {});
+            .catch(() => { });
     }, [activeWebsite]);
 
     const handleConnectDomain = useCallback(async () => {
@@ -56,10 +56,10 @@ export function SiteSettings() {
         setIsConnecting(true);
         try {
             const isSubdomain = domain.endsWith('.buildora.lmsathena.com');
-            const res = isSubdomain 
+            const res = isSubdomain
                 ? await websiteApi.addSubdomain(activeWebsite.id, domain.replace('.buildora.lmsathena.com', ''))
                 : await websiteApi.addDomain(activeWebsite.id, domain);
-            
+
             const newDomain = res.data?.domain || res.data;
             setDomains(prev => {
                 const filtered = prev.filter((d: any) => d.domain !== domain);
@@ -85,13 +85,13 @@ export function SiteSettings() {
                 if (result.verified) {
                     return result.domain || { ...d, status: 'ACTIVE', dns_records: { ...d.dns_records, verified: true } };
                 }
-                return { 
-                    ...d, 
-                    status: 'PENDING', 
-                    dns_records: { 
-                        ...d.dns_records, 
-                        validation: result.dnsValidationRecords || d.dns_records?.validation 
-                    } 
+                return {
+                    ...d,
+                    status: 'PENDING',
+                    dns_records: {
+                        ...d.dns_records,
+                        validation: result.dnsValidationRecords || d.dns_records?.validation
+                    }
                 };
             }));
             toast({
@@ -199,9 +199,8 @@ export function SiteSettings() {
                                                         <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
                                                     )}
                                                     <span className="text-xs font-semibold text-slate-800">{d.domain}</span>
-                                                    <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                                                        d.status === 'ACTIVE' ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'
-                                                    }`}>
+                                                    <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${d.status === 'ACTIVE' ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'
+                                                        }`}>
                                                         {d.status}
                                                     </span>
                                                 </div>

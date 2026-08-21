@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 
 const sectionIcons = { hero: Sparkles, features: Grid3X3, services: Layout, cta: MessageSquare, testimonials: Quote, gallery: Image, pricing: DollarSign, contact: Mail, stats: BarChart2, team: Users, faq: HelpCircle, logocloud: Building2, custom: Layout, about: Info };
-const sectionColors = { hero: 'from-blue-500 to-blue-600', features: 'from-purple-500 to-purple-600', services: 'from-green-500 to-green-600', cta: 'from-amber-500 to-amber-600', testimonials: 'from-pink-500 to-pink-600', gallery: 'from-cyan-500 to-cyan-600', pricing: 'from-indigo-500 to-indigo-600', contact: 'from-rose-500 to-rose-600', stats: 'from-teal-500 to-teal-600', team: 'from-orange-500 to-orange-600', faq: 'from-violet-500 to-violet-600', logocloud: 'from-slate-500 to-slate-600', custom: 'from-gray-500 to-gray-600', about: 'from-emerald-500 to-emerald-600' };
 
 export function SectionItem({ id, name, type, visible, isSelected, onClick }) {
   const { toggleSectionVisibility, duplicateSection, deleteSection } = useBuilder();
@@ -18,10 +17,10 @@ export function SectionItem({ id, name, type, visible, isSelected, onClick }) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative flex items-center gap-2 p-2 rounded-lg transition-all duration-200 cursor-pointer border ${isSelected
-        ? 'bg-primary/5 border-primary/30 shadow-sm shadow-primary/5 translate-x-1'
-        : 'bg-white border-slate-100 hover:border-slate-300 hover:shadow-md hover:shadow-slate-200/50'
-        } ${isDragging ? 'opacity-40 scale-95 shadow-2xl z-50' : ''} ${!visible ? 'opacity-60 bg-slate-50' : ''}`}
+      className={`group relative flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer ${isSelected
+        ? 'bg-slate-100'
+        : 'hover:bg-slate-50'
+        } ${isDragging ? 'opacity-40 z-50' : ''} ${!visible ? 'opacity-60' : ''}`}
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -30,12 +29,12 @@ export function SectionItem({ id, name, type, visible, isSelected, onClick }) {
         <GripVertical className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500" />
       </div>
 
-      <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${sectionColors[type]} flex items-center justify-center flex-shrink-0 shadow-sm shadow-black/5 group-hover:scale-110 transition-transform`}>
-        <Icon className="w-3.5 h-3.5 text-white" />
+      <div className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 ${isSelected ? 'bg-neutral-900 text-white' : 'bg-slate-100 text-slate-600'}`}>
+        <Icon className="w-3.5 h-3.5" strokeWidth={1.75} />
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className={`text-[11px] font-bold truncate ${isSelected ? 'text-primary' : 'text-slate-700'}`}>{name}</p>
+        <p className={`text-[13px] font-medium truncate ${isSelected ? 'text-slate-900' : 'text-slate-800'}`}>{name}</p>
         <div className="flex items-center gap-1.5 mt-0.5">
           <span className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">{type}</span>
           {!visible && (
@@ -46,7 +45,7 @@ export function SectionItem({ id, name, type, visible, isSelected, onClick }) {
         </div>
       </div>
 
-      <div className={`flex items-center transition-all transform ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} translate-x-1 group-hover:translate-x-0`}>
+      <div className={`flex items-center ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-slate-100" onClick={(e) => e.stopPropagation()}>
