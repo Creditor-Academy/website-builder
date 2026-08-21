@@ -335,7 +335,7 @@ export default function DashboardTemplates() {
 
         {/* Loading shimmer */}
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="rounded-lg overflow-hidden border border-[#c6c6cd] bg-[#fcf8fa] shadow-sm animate-pulse">
                 <div className="h-64 w-full bg-[#eae7e9]" />
@@ -371,7 +371,7 @@ export default function DashboardTemplates() {
           </div>
         ) : (
           /* Templates Grid scaled dynamically for wide screen sizes */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-6">
             {filtered.map((template: any) => (
               <DashboardCard
                 key={template.id}
