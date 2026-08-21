@@ -75,15 +75,15 @@ function EditorLeftSidebar({
 }) {
   return (
     <div className="h-full w-full flex overflow-hidden bg-white">
-      <div className="w-14 shrink-0 border-r border-slate-200 flex flex-col items-center bg-slate-50">
+      <div className="w-14 shrink-0 border-r border-white/10 flex flex-col items-center bg-[#131b2e]">
         <TooltipProvider delayDuration={0}>
-          <nav className="flex flex-1 flex-col items-center py-3 w-full min-h-0">
+          <nav className="flex flex-1 flex-col items-center py-3 w-full min-h-0 bg-[#131b2e]">
             {onClose && (
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close sidebar"
-                className="mb-2 w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-200/80"
+                className="mb-2 w-9 h-9 rounded-lg flex items-center justify-center text-slate-200 hover:text-white hover:bg-white/10"
               >
                 <X className="w-[18px] h-[18px]" strokeWidth={1.75} />
               </button>
@@ -101,8 +101,8 @@ function EditorLeftSidebar({
                         aria-label={item.label}
                         aria-current={isActive ? "page" : undefined}
                         className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${isActive
-                            ? "bg-neutral-900 text-white"
-                            : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/80"
+                            ? "bg-[#dedfeb] text-[#191b24]"
+                            : "text-slate-200 hover:text-white hover:bg-white/10"
                           }`}
                       >
                         <item.icon className="w-[18px] h-[18px]" strokeWidth={1.75} />
@@ -125,8 +125,8 @@ function EditorLeftSidebar({
                     aria-label="Site Settings"
                     aria-current={leftNavTab === "settings" ? "page" : undefined}
                     className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${leftNavTab === "settings"
-                        ? "bg-neutral-900 text-white"
-                        : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/80"
+                        ? "bg-[#dedfeb] text-[#191b24]"
+                        : "text-slate-200 hover:text-white hover:bg-white/10"
                       }`}
                   >
                     <Settings className="w-[18px] h-[18px]" strokeWidth={1.75} />
