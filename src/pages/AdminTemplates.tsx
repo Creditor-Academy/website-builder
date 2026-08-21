@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +22,8 @@ import { cn } from '@/lib/utils';
 import templateApi from '@/api/templates';
 import TemplateFormDialog from '@/components/dashboard/TemplateFormDialog';
 import GradientButton from '@/components/ui/GradientButton';
+import { DashboardPageShell, dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass, dashboardToolbarClass, dashboardTableWrapClass } from '@/components/dashboard/DashboardPageShell';
+import { dashboardPanelClass } from '@/components/dashboard/DashboardCard';
 
 export default function AdminTemplates() {
   const navigate = useNavigate();
@@ -132,57 +133,43 @@ export default function AdminTemplates() {
   };
 
   return (
-    <Card className="rounded-3xl shadow-xl shadow-slate-200/50 p-8">
-      {/* Breadcrumbs */}
-      <div className="mb-4 text-sm text-slate-500">
-        <a href="/dashboard" className="hover:underline">Dashboard</a> /{' '}
-        <span className="font-semibold text-slate-700">Templates</span>
-      </div>
-
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
-        <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Template Management</h2>
-          <p className="text-slate-500 mt-1">Create and manage global and institution-scoped templates.</p>
-        </div>
+    <DashboardPageShell
+      basePath="/admin"
+      title="Template Management"
+      description="Create and manage global and institution-scoped templates."
+      pageLabel="Templates"
+      actions={
         <GradientButton icon={<Plus className="w-5 h-5" />} onClick={handleCreate}>
           New Template
         </GradientButton>
-      </div>
-
-      {/* Search + filters */}
-      <div className="flex flex-col md:flex-row items-center gap-4 mb-8">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+      }
+    >
+      <div className={dashboardToolbarClass}>
+        <div className="relative flex-1 w-full min-w-0">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#76777d]" />
           <Input
             placeholder="Search by name or category..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="pl-11 h-11 rounded-full bg-white border-slate-200 shadow-md focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            className={cn(dashboardSearchInputClass, 'w-full')}
           />
         </div>
-        <div className="flex items-center gap-2">
+        <div className={dashboardFilterScrollClass}>
           {(['all', 'active', 'deleted'] as const).map(s => (
-            <Button
+            <button
               key={s}
-              variant={filterStatus === s ? 'default' : 'outline'}
-              className={cn(
-                'rounded-full h-10 px-4 text-sm font-semibold capitalize transition-all duration-200',
-                filterStatus === s
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
-              )}
+              type="button"
+              className={dashboardFilterPillClass(filterStatus === s)}
               onClick={() => setFilterStatus(s)}
             >
               {s}
-            </Button>
+            </button>
           ))}
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <Table className="w-full rounded-xl overflow-hidden border border-slate-200 shadow-md">
+      <div className={dashboardTableWrapClass}>
+        <Table className={cn('w-full overflow-hidden', dashboardPanelClass)}>
           <TableHeader className="bg-slate-50 border-b border-slate-200">
             <TableRow className="hover:bg-transparent">
               <TableHead className="px-4 py-3 text-slate-500">Template</TableHead>
@@ -352,6 +339,6 @@ export default function AdminTemplates() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Card>
+    </DashboardPageShell>
   );
 }

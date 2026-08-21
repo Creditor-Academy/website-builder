@@ -41,7 +41,37 @@ export interface Asset {
 
 type AssetScope = {
     websiteId?: string;
+    scope?: 'GLOBAL' | 'WEBSITE';
 };
+
+function normalizeAsset(raw: any, uploadScope: AssetScope = {}): Asset {
+    const asset: Asset = {
+        id: raw.id,
+        name: raw.name,
+        type: raw.type,
+        url: raw.url,
+        size: raw.size,
+        date: raw.date ?? raw.created_at ?? raw.createdAt ?? new Date().toISOString(),
+        scope: raw.scope,
+        websiteId: raw.websiteId ?? raw.website_id,
+        isGlobal: raw.isGlobal ?? raw.is_global,
+        ownerName: raw.ownerName ?? raw.owner_name,
+    };
+
+    if (uploadScope.scope === 'GLOBAL') {
+        return { ...asset, scope: 'GLOBAL', isGlobal: true, websiteId: undefined };
+    }
+
+    if (uploadScope.websiteId) {
+        return { ...asset, scope: 'WEBSITE', websiteId: uploadScope.websiteId, isGlobal: false };
+    }
+
+    if (asset.scope === 'GLOBAL' || asset.isGlobal) {
+        return { ...asset, scope: 'GLOBAL', isGlobal: true };
+    }
+
+    return asset;
+}
 
 export interface Page {
     id: string;
@@ -223,7 +253,7 @@ const useBuilderStore = create<BuilderStore>()(
                 try {
                     const { default: assetApi } = await import('../api/assets');
                     const response = await assetApi.listAssets(scope);
-                    const assets = response.data.assets || [];
+                    const assets = (response.data.assets || []).map((raw: any) => normalizeAsset(raw, scope));
 
                     if (scope.websiteId) {
                         set((state) => ({
@@ -724,7 +754,7 @@ const useBuilderStore = create<BuilderStore>()(
                 try {
                     const { default: assetApi } = await import('../api/assets');
                     const response = await assetApi.uploadAsset(file, scope);
-                    const asset = response.data.asset;
+                    const asset = normalizeAsset(response.data.asset, scope);
 
                     if (scope.websiteId) {
                         set((state) => ({
@@ -750,7 +780,7 @@ const useBuilderStore = create<BuilderStore>()(
                 try {
                     const { default: assetApi } = await import('../api/assets');
                     const response = await assetApi.importAssetFromUrl({ name, url }, scope);
-                    const asset = response.data.asset;
+                    const asset = normalizeAsset(response.data.asset, scope);
 
                     if (scope.websiteId) {
                         set((state) => ({

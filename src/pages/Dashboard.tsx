@@ -3,11 +3,11 @@ import { useNavigate, useOutletContext } from 'react-router-dom';
 import type { DashboardOutletContext } from '@/layouts/DashboardLayout';
 import { Users, Zap, Trash2, UserX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from '@/lib/utils';
+import { DashboardStatCard } from '@/components/dashboard/DashboardCard';
 import { updateUserProfile, deactivateOwnAccount } from "../api/user";
 import UserDashboard from './UserDashboard';
 import AdminDashboard from './AdminDashboard';
@@ -15,16 +15,14 @@ import AdminDashboard from './AdminDashboard';
 
 // OverviewCard component
 const OverviewCard = ({ title, value, icon, description, iconBgClass, iconColorClass }) => (
-    <Card className="rounded-3xl bg-white/70 backdrop-blur-md border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-300 hover:-translate-y-1 group/overview-card">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 p-6 pb-4">
-            <CardTitle className="text-base font-semibold text-slate-700">{title}</CardTitle>
-            <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shadow-lg group-hover/overview-card:scale-105 transition-transform", iconBgClass, iconColorClass)}>{icon}</div>
-        </CardHeader>
-        <CardContent className="px-6 pb-6">
-            <div className="text-4xl font-bold text-slate-900">{value}</div>
-            {description && <p className="text-xs text-slate-500 mt-2">{description}</p>}
-        </CardContent>
-    </Card>
+    <DashboardStatCard className="hover:shadow-lg transition-all duration-300 group/overview-card">
+        <div className="flex flex-row items-center justify-between mb-3">
+            <p className="text-sm font-medium text-[#45464d]">{title}</p>
+            <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center border border-[#c6c6cd] bg-[#f6f3f5] group-hover/overview-card:scale-105 transition-transform", iconBgClass, iconColorClass)}>{icon}</div>
+        </div>
+        <div className="text-3xl font-bold text-[#000000]">{value}</div>
+        {description && <p className="text-xs text-[#76777d] mt-2">{description}</p>}
+    </DashboardStatCard>
 );
 
 // ─── SettingsView ─────────────────────────────────────────────────────────────

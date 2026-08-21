@@ -7,11 +7,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Activity, CalendarDays, Key, Server, User as UserIcon } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { cn } from '@/lib/utils';
 import { getAuditLogs } from '../api/audit';
+import { DashboardPageShell, dashboardTableWrapClass } from '@/components/dashboard/DashboardPageShell';
+import { dashboardPanelClass } from '@/components/dashboard/DashboardCard';
 
 export default function DashboardAuditLogs() {
   const { toast } = useToast();
@@ -35,21 +37,14 @@ export default function DashboardAuditLogs() {
   }, [toast]);
 
   return (
-    <Card className="rounded-3xl shadow-xl shadow-slate-200/50 p-8">
-      <div className="mb-4 text-sm text-slate-500">
-        <a href="/admin" className="hover:underline">Dashboard</a> /{' '}
-        <span className="font-semibold text-slate-700">Audit Logs</span>
-      </div>
-
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
-        <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">System Audit Logs</h2>
-          <p className="text-slate-500 mt-1">Review system activities and administrative actions.</p>
-        </div>
-      </div>
-
-      <div className="overflow-x-auto">
-        <Table className="w-full rounded-xl overflow-hidden border border-slate-200 shadow-md">
+    <DashboardPageShell
+      basePath="/admin"
+      title="System Audit Logs"
+      description="Review system activities and administrative actions."
+      pageLabel="Audit Logs"
+    >
+      <div className={dashboardTableWrapClass}>
+        <Table className={cn('w-full overflow-hidden', dashboardPanelClass)}>
           <TableHeader className="bg-slate-50 border-b border-slate-200">
             <TableRow className="hover:bg-transparent">
               <TableHead className="min-w-[140px] px-4 py-3 text-slate-500">
@@ -124,6 +119,6 @@ export default function DashboardAuditLogs() {
           </TableBody>
         </Table>
       </div>
-    </Card>
+    </DashboardPageShell>
   );
 }
