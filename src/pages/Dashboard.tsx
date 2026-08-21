@@ -206,8 +206,8 @@ const SettingsView = () => {
 // shared by DashboardLayout via Outlet context.
 
 const Dashboard = () => {
-    const { isAdmin } = useOutletContext<DashboardOutletContext>();
-    return isAdmin ? <AdminDashboard /> : <UserDashboard />;
+    const ctx = useOutletContext<DashboardOutletContext | undefined>();
+    return ctx?.isAdmin ? <AdminDashboard /> : <UserDashboard />;
 };
 
 export { SettingsView, OverviewCard };

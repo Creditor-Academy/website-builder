@@ -110,7 +110,7 @@ export function DashboardPageShell({
 
     <div className={cn('bg-[#fcf8fa] text-[#1b1b1d] w-full min-h-full relative font-sans', className)}>
 
-      <div className="p-4 sm:p-6 md:p-10 w-full max-w-full overflow-x-hidden">
+      <div className="w-full min-w-0 overflow-x-hidden">
 
         <div className="mb-3 sm:mb-4 text-xs sm:text-sm text-[#45464d] truncate">
 

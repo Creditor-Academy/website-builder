@@ -14,12 +14,11 @@ import {
   Image as ImageIcon,
   MessageSquare,
   User as UserIcon,
-  Plus,
-  ArrowRight,
+  PanelLeftClose,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { useIsMobile } from "@/hooks/use-mobile.jsx";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -405,56 +404,106 @@ const SidebarMenuButton = React.forwardRef<
 });
 SidebarMenuButton.displayName = "SidebarMenuButton";
 
-const getInitials = (name: string) => {
-  if (!name) return "";
-  const parts = name.split(" ").filter(Boolean);
-  if (parts.length > 1 && parts[1].length > 0) {
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  }
-  return (parts[0]?.[0] || "").toUpperCase();
-};
-
 const NavItem = ({
   icon,
   label,
   to,
-  onClick,
+  exact = false,
+  collapsed,
+  onNavigate,
 }: {
   icon: React.ReactNode;
   label: string;
   to: string;
-  onClick?: () => void;
+  exact?: boolean;
+  collapsed: boolean;
+  onNavigate?: () => void;
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const isActive = location.pathname === to;
-
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    onClick?.();
-    navigate(to);
-  };
+  const isActive = exact
+    ? location.pathname === to
+    : location.pathname === to || location.pathname.startsWith(`${to}/`);
 
   return (
-    <a
-      href={to}
-      onClick={handleClick}
+    <button
+      type="button"
+      title={label}
+      aria-label={label}
+      onClick={() => {
+        onNavigate?.();
+        navigate(to);
+      }}
       className={cn(
-        "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out text-sm font-medium",
+        "inline-flex h-10 items-center gap-2.5 rounded-3xl text-sm transition-colors duration-200",
+        collapsed ? "w-10 justify-center px-0" : "w-full justify-start px-3",
         isActive
-          ? "bg-[#dedfeb] text-[#191b24] font-semibold"
-          : "text-slate-200 hover:bg-white/10 hover:text-white",
+          ? "bg-white/15 font-semibold text-white"
+          : "text-slate-300 hover:bg-white/10 hover:text-white",
       )}
     >
-      <span className="shrink-0 w-5 h-5 flex items-center justify-center">{icon}</span>
-      <span className="truncate">{label}</span>
-    </a>
+      <span className="shrink-0">{icon}</span>
+      {!collapsed && <span className="truncate">{label}</span>}
+    </button>
   );
 };
+
+function SidebarNav({
+  collapsed,
+  isAdmin,
+  userRole,
+  base,
+  onNavigate,
+}: {
+  collapsed: boolean;
+  isAdmin: boolean;
+  userRole?: string;
+  base: string;
+  onNavigate?: () => void;
+}) {
+  return (
+    <nav
+      className={cn(
+        "relative z-10 flex-1 space-y-1 overflow-y-auto py-3 no-scrollbar",
+        collapsed ? "flex flex-col items-center px-2" : "px-3",
+      )}
+    >
+      {!collapsed && (
+        <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          Main Menu
+        </p>
+      )}
+      <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<Globe className="h-4 w-4" />} label={isAdmin ? "Admin Dashboard" : "Dashboard"} to={base} exact />
+      <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<Layout className="h-4 w-4" />} label="Templates" to={`${base}/templates`} />
+      <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<ImageIcon className="h-4 w-4" />} label="Assets" to={`${base}/assets`} />
+      <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<MessageSquare className="h-4 w-4" />} label="Messages" to={`${base}/messages`} />
+      <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<UserIcon className="h-4 w-4" />} label="Profile" to={`${base}/profile`} />
+
+      {isAdmin && (
+        <div className={cn("pt-2", collapsed && "flex flex-col items-center")}>
+          {!collapsed && (
+            <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              System
+            </p>
+          )}
+          {collapsed && <div className="my-1 h-px w-8 bg-white/10" />}
+          <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<Users className="h-4 w-4" />} label="Users" to="/admin/users" />
+          {userRole === "SUPER_ADMIN" && (
+            <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<Building2 className="h-4 w-4" />} label="Organizations" to="/admin/organizations" />
+          )}
+          <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<Layout className="h-4 w-4" />} label="Websites" to="/admin/websites" />
+          <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<Activity className="h-4 w-4" />} label="Deployment Monitoring" to="/admin/deployment" />
+          <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<ShieldCheck className="h-4 w-4" />} label="Audit Logs" to="/admin/audit" />
+        </div>
+      )}
+    </nav>
+  );
+}
 
 export interface DashboardSidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  isCompact: boolean;
   isAdmin: boolean;
   isAdminRole: boolean;
   userRole?: string;
@@ -469,6 +518,7 @@ export interface DashboardSidebarProps {
 export function DashboardSidebar({
   isOpen,
   onClose,
+  isCompact,
   isAdmin,
   isAdminRole,
   userRole,
@@ -480,138 +530,153 @@ export function DashboardSidebar({
   isLoggingOut,
 }: DashboardSidebarProps) {
   const navigate = useNavigate();
+  const [collapsed, setCollapsed] = React.useState(() => {
+    try {
+      return localStorage.getItem("buildora-sidebar-collapsed") === "1";
+    } catch {
+      return false;
+    }
+  });
 
-  return (
+  const toggleCollapsed = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("buildora-sidebar-collapsed", next ? "1" : "0");
+      } catch { /* ignore */ }
+      return next;
+    });
+  };
+
+  const shellClass =
+    "flex flex-col overflow-hidden rounded-3xl bg-[#131924] shadow-[0_12px_40px_-12px_rgba(15,23,42,0.45)]";
+
+  const inner = (isCollapsed: boolean, closeable: boolean) => (
     <>
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={onClose}
-        />
-      )}
-
-      <aside
-        className={cn(
-          "fixed inset-y-0 left-0 w-64 bg-[#131b2e] border-r border-[#c6c6cd]/30 text-white flex flex-col h-full py-6 px-4 shrink-0 z-50",
-          "transition-transform duration-300 ease-in-out",
-          "lg:static lg:translate-x-0",
-          isOpen ? "translate-x-0" : "-translate-x-full",
-        )}
-      >
-        <div className="mb-6 px-2 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-white">
-              Buildora Workspace
-            </h1>
-            <p className="text-xs text-slate-300 mt-1">
-              {isAdmin ? "System Admin Portal" : "Pro Plan"}
-            </p>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden text-white hover:bg-white/10"
-            onClick={onClose}
-          >
-            <X className="w-5 h-5" />
-          </Button>
-        </div>
-
-        <button
-          onClick={() => {
-            onClose();
-            navigate(`${base}/templates`);
-          }}
-          className="bg-[#c4c6d1] text-[#191b24] hover:bg-[#e1e2ed] transition-colors px-4 py-2 mb-6 text-sm font-medium flex items-center justify-center gap-2 w-full rounded-lg shadow-sm"
-        >
-          <Plus className="w-4 h-4" />
-          New Project
-        </button>
-
-        <nav className="flex-1 space-y-1 overflow-y-auto no-scrollbar">
-          <p className="text-[11px] font-semibold tracking-wider text-slate-300 uppercase px-3 mb-2">
-            Main Menu
-          </p>
-          <NavItem icon={<Globe className="w-4 h-4" />} label="Projects" to={base} onClick={onClose} />
-          <NavItem icon={<Layout className="w-4 h-4" />} label="Templates" to={`${base}/templates`} onClick={onClose} />
-          <NavItem icon={<ImageIcon className="w-4 h-4" />} label="Assets" to={`${base}/assets`} onClick={onClose} />
-          <NavItem icon={<MessageSquare className="w-4 h-4" />} label="Messages" to={`${base}/messages`} onClick={onClose} />
-          <NavItem icon={<UserIcon className="w-4 h-4" />} label="Profile" to={`${base}/profile`} onClick={onClose} />
-
-          {isAdmin && (
-            <div className="pt-4 space-y-1">
-              <p className="text-[11px] font-semibold tracking-wider text-slate-300 uppercase px-3 mb-2">
-                Admin System
-              </p>
-              <NavItem icon={<Users className="w-4 h-4" />} label="Users" to="/admin/users" onClick={onClose} />
-              {userRole === "SUPER_ADMIN" && (
-                <NavItem icon={<Building2 className="w-4 h-4" />} label="Organizations" to="/admin/organizations" onClick={onClose} />
-              )}
-              <NavItem icon={<Layout className="w-4 h-4" />} label="Websites" to="/admin/websites" onClick={onClose} />
-              <NavItem icon={<Activity className="w-4 h-4" />} label="Deployments" to="/admin/deployment" onClick={onClose} />
-              <NavItem icon={<ShieldCheck className="w-4 h-4" />} label="Audit Logs" to="/admin/audit" onClick={onClose} />
-            </div>
-          )}
-        </nav>
-
-        <div className="mt-auto border-t border-[#c6c6cd]/20 pt-4 space-y-2 text-white">
-          {!isAdmin && isAdminRole && (
-            <div className="mb-4 bg-[#eae7e9] text-[#1b1b1d] p-3 rounded-xl shadow-sm flex flex-col gap-2">
-              <div>
-                <p className="text-[#1b1b1d] font-semibold text-sm">Admin Access</p>
-                <p className="text-[#45464d] text-[10px] leading-tight">Switch to manage platform</p>
-              </div>
-              <button
-                onClick={onGoAdmin}
-                className="w-full bg-[#131b2e] text-white py-2 rounded-full text-xs font-semibold hover:bg-[#3f465c] transition-colors flex items-center justify-center gap-1.5"
-              >
-                Go to Admin
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )}
-
-          {isAdmin && isAdminRole && (
-            <div className="mb-4">
-              <button
-                onClick={onExitAdmin}
-                className="w-full bg-[#eae7e9] text-[#1b1b1d] hover:bg-[#e4e2e4] py-2 px-3 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2"
-              >
-                <ShieldCheck className="w-4 h-4 text-[#131b2e]" />
-                Exit Admin Mode
-              </button>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors">
-            <div
-              className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
-              onClick={() => {
-                onClose();
-                navigate(`${base}/profile`);
-              }}
-            >
-              <div className="w-8 h-8 rounded-lg bg-[#c4c6d1] text-[#191b24] flex items-center justify-center text-xs font-bold shrink-0">
-                {getInitials(userName)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">
-                  {userName}
-                </p>
-                <p className="text-[10px] text-slate-300 truncate">View Profile</p>
-              </div>
-            </div>
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-[38%] origin-bottom-right skew-x-[-18deg] bg-[#202838]/70" />
+      <div className="relative z-10 flex h-full flex-col">
+        <div className={cn("shrink-0", isCollapsed ? "px-2 pt-3" : "px-4 pt-4")}>
+          <div className={cn("flex items-center", isCollapsed ? "flex-col gap-2" : "justify-between gap-2")}>
+            {!isCollapsed && (
+              <h1 className="truncate px-1 text-xl font-bold tracking-tight text-white">Buildora</h1>
+            )}
             <button
-              onClick={onLogout}
-              disabled={isLoggingOut}
-              title="Log out"
-              className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-50 shrink-0"
+              type="button"
+              title={closeable ? "Close sidebar" : isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-label={closeable ? "Close sidebar" : isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              onClick={() => (closeable ? onClose() : toggleCollapsed())}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-3xl text-white/70 transition-colors hover:bg-white/10 hover:text-white"
             >
-              <LogOut className="w-4 h-4" />
+              {closeable ? (
+                <X className="h-4 w-4" />
+              ) : isCollapsed ? (
+                <PanelLeft className="h-4 w-4" />
+              ) : (
+                <PanelLeftClose className="h-4 w-4" />
+              )}
             </button>
           </div>
         </div>
-      </aside>
+
+        <SidebarNav
+          collapsed={isCollapsed}
+          isAdmin={isAdmin}
+          userRole={userRole}
+          base={base}
+          onNavigate={closeable ? onClose : undefined}
+        />
+
+        <div className={cn("relative z-10 mt-auto space-y-2 pb-4", isCollapsed ? "px-2" : "px-3")}>
+          {!isAdmin && isAdminRole && (
+            isCollapsed ? (
+              <button
+                type="button"
+                title="Go to Admin"
+                aria-label="Go to Admin"
+                onClick={onGoAdmin}
+                className="mx-auto flex h-10 w-10 items-center justify-center rounded-3xl border border-white/10 bg-white/10 text-white transition-colors hover:bg-white/15"
+              >
+                <ShieldCheck className="h-4 w-4" />
+              </button>
+            ) : (
+              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/10 p-3">
+                <p className="text-sm font-bold text-white">Admin Access</p>
+                <p className="mt-0.5 mb-2 text-[11px] text-white/60">Switch to manage your platform.</p>
+                <button
+                  type="button"
+                  onClick={onGoAdmin}
+                  className="w-full rounded-3xl bg-white py-2 text-xs font-bold text-[#131924] transition-colors hover:bg-slate-100"
+                >
+                  Go to Admin
+                </button>
+              </div>
+            )
+          )}
+
+          {isAdmin && isAdminRole && (
+            <button
+              type="button"
+              title="Exit Admin Mode"
+              aria-label="Exit Admin Mode"
+              onClick={onExitAdmin}
+              className={cn(
+                "flex items-center gap-2 rounded-3xl border border-white/10 bg-white/10 text-sm font-semibold text-white transition-colors hover:bg-white/15",
+                isCollapsed ? "mx-auto h-10 w-10 justify-center" : "w-full px-3 py-2.5",
+              )}
+            >
+              <ShieldCheck className="h-4 w-4 shrink-0 text-slate-300" />
+              {!isCollapsed && <span className="truncate">Exit Admin Mode</span>}
+            </button>
+          )}
+
+          <button
+            type="button"
+            title="Log out"
+            onClick={onLogout}
+            disabled={isLoggingOut}
+            className={cn(
+              "flex items-center rounded-3xl text-sm font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-rose-400 disabled:opacity-50",
+              isCollapsed ? "mx-auto h-10 w-10 justify-center" : "w-full justify-between px-3 py-2.5",
+            )}
+          >
+            {!isCollapsed && <span className="truncate">Log out</span>}
+            <LogOut className="h-4 w-4 shrink-0" />
+          </button>
+          
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <>
+      {isCompact && isOpen && (
+        <div className="fixed inset-0 z-[55] bg-black/50 lg:hidden" onClick={onClose} />
+      )}
+
+      {!isCompact && (
+        <aside
+          className={cn(
+            shellClass,
+            "relative z-40 my-3 ml-3 shrink-0 transition-[width] duration-300 ease-in-out",
+            collapsed ? "w-[72px]" : "w-64",
+          )}
+        >
+          {inner(collapsed, false)}
+        </aside>
+      )}
+
+      {isCompact && (
+        <aside
+          className={cn(
+            shellClass,
+            "fixed inset-y-3 left-3 z-[60] h-[calc(100svh-1.5rem)] w-64 max-w-[calc(100vw-1.5rem)] shadow-xl transition-transform duration-300 ease-in-out",
+            isOpen ? "translate-x-0" : "-translate-x-[calc(100%+1.5rem)] pointer-events-none",
+          )}
+        >
+          {inner(false, true)}
+        </aside>
+      )}
     </>
   );
 }

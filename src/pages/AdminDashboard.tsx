@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import type { DashboardOutletContext } from '@/layouts/DashboardLayout';
-import { getInitials } from '@/layouts/DashboardLayout';
+import { getInitials } from '@/lib/getInitials';
 import {
     Plus, Globe, CheckCircle, Users,
     ArrowRight, LayoutTemplate, Activity, ShieldCheck, Bell, ArrowUp, ArrowDown,

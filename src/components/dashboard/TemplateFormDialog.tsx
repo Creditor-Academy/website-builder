@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
+  Dialog, DialogContent, DialogTitle, DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -115,15 +115,25 @@ export default function TemplateFormDialog({
     }
   };
 
+  const fieldClass =
+    'h-11 sm:h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white focus-visible:ring-2 focus-visible:ring-[#0F172A]/20 focus-visible:border-[#0F172A] transition-all';
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg rounded-[2rem] p-0 overflow-hidden bg-white border-slate-100 shadow-2xl">
-        {/* Gradient header */}
-        <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-7">
-          <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
-            <LayoutTemplate className="w-6 h-6 text-white" />
+      <DialogContent
+        className={cn(
+          'flex flex-col gap-0 w-[calc(100vw-1.5rem)] sm:max-w-lg p-0 overflow-hidden',
+          'max-h-[min(90dvh,40rem)] rounded-2xl sm:rounded-[1.5rem]',
+          'bg-white border-slate-100 shadow-2xl',
+          '[&>button]:text-white [&>button]:opacity-90 [&>button]:hover:opacity-100',
+          '[&>button]:hover:bg-white/10 [&>button]:hover:text-white',
+        )}
+      >
+        <div className="shrink-0 bg-[#0F172A] px-5 py-5 sm:px-8 sm:py-6">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-3 sm:mb-4">
+            <LayoutTemplate className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
-          <DialogTitle className="text-2xl font-black text-white">
+          <DialogTitle className="text-xl sm:text-2xl font-black text-white pr-8">
             {isEdit ? 'Edit Template' : 'Create New Template'}
           </DialogTitle>
           <DialogDescription className="text-white/70 mt-1 text-sm">
@@ -135,42 +145,33 @@ export default function TemplateFormDialog({
           </DialogDescription>
         </div>
 
-        <div className="px-8 py-6 space-y-5">
-          {/* Name */}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-8 sm:py-6 space-y-4 sm:space-y-5">
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Template Name</label>
             <Input
               placeholder="e.g., Modern Business Pro"
               value={form.name}
               onChange={e => handleChange('name', e.target.value)}
-              className={cn(
-                'h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all',
-                errors.name && 'border-rose-400 bg-rose-50'
-              )}
+              className={cn(fieldClass, errors.name && 'border-rose-400 bg-rose-50')}
             />
             {errors.name && <p className="text-xs text-rose-500 font-medium">{errors.name}</p>}
           </div>
 
-          {/* Description */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Description</label>
             <Input
               placeholder="A clean template for modern businesses..."
               value={form.description}
               onChange={e => handleChange('description', e.target.value)}
-              className={cn(
-                'h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all',
-                errors.description && 'border-rose-400 bg-rose-50'
-              )}
+              className={cn(fieldClass, errors.description && 'border-rose-400 bg-rose-50')}
             />
             {errors.description && <p className="text-xs text-rose-500 font-medium">{errors.description}</p>}
           </div>
 
-          {/* Category */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Category</label>
             <Select value={form.category} onValueChange={val => handleChange('category', val)}>
-              <SelectTrigger className={cn('h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all', errors.category && 'border-rose-400')}>
+              <SelectTrigger className={cn(fieldClass, errors.category && 'border-rose-400')}>
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">
@@ -182,7 +183,6 @@ export default function TemplateFormDialog({
             {errors.category && <p className="text-xs text-rose-500 font-medium">{errors.category}</p>}
           </div>
 
-          {/* Preview Image URL (optional) */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
               Preview Image URL <span className="text-slate-400 normal-case font-normal">(optional)</span>
@@ -191,11 +191,11 @@ export default function TemplateFormDialog({
               placeholder="https://example.com/preview.png"
               value={form.image}
               onChange={e => handleChange('image', e.target.value)}
-              className="h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white transition-all"
+              className={fieldClass}
             />
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <div className="rounded-2xl border border-[#0F172A]/15 bg-[#0F172A]/5 px-4 py-3">
             <div className="text-xs font-bold text-slate-700 uppercase tracking-wider">Template Scope</div>
             <p className="text-sm text-slate-600 mt-1">
               {isInstitutionAdmin
@@ -205,19 +205,19 @@ export default function TemplateFormDialog({
           </div>
         </div>
 
-        <div className="px-8 pb-8 flex gap-3 justify-end">
+        <div className="shrink-0 flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 sm:justify-end border-t border-slate-100 bg-white px-5 py-4 sm:px-8 sm:py-5">
           <Button
             variant="outline"
             onClick={() => handleClose(false)}
             disabled={loading}
-            className="rounded-xl h-11 px-6 border-slate-200"
+            className="rounded-xl h-11 px-6 border-slate-200 w-full sm:w-auto"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={loading}
-            className="rounded-xl h-11 px-8 bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-xl transition-all font-bold"
+            className="rounded-xl h-11 px-8 w-full sm:w-auto bg-[#0F172A] text-white shadow-lg shadow-[#0F172A]/20 hover:bg-[#1e293b] transition-all font-bold"
           >
             {loading ? (
               <span className="flex items-center gap-2">

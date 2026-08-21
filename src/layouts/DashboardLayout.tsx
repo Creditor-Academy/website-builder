@@ -1,8 +1,11 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Loader2, Menu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Menu, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useIsCompact } from '@/hooks/use-mobile';
+import { logoutUser } from '@/api/auth';
+import { DashboardSidebar } from '@/components/Common/sidebar';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -13,10 +16,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { cn } from '@/lib/utils';
-import { useIsCompact } from '@/hooks/use-mobile';
-import { logoutUser } from '@/api/auth';
-import { DashboardSidebar } from '@/components/Common/sidebar';
 
 export interface DashboardOutletContext {
     isAdmin: boolean;
@@ -27,23 +26,17 @@ export interface DashboardOutletContext {
     setUserName: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export const getInitials = (name) => {
-    if (!name) return '';
-    const parts = name.split(' ').filter(Boolean);
-    let initials = '';
-    if (parts.length > 1 && parts[1].length > 0) {
-        initials = parts[0][0] + parts[1][0];
-    } else if (parts[0] && parts[0].length > 0) {
-        initials = parts[0][0];
-    }
-    return initials.toUpperCase();
-};
-
 const DashboardLayout = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const isCompact = useIsCompact();
-    const user = JSON.parse(localStorage.getItem("user") || 'null');
+    const user = (() => {
+        try {
+            return JSON.parse(localStorage.getItem('user') || 'null');
+        } catch {
+            return null;
+        }
+    })();
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
     const [userName, setUserName] = useState(user?.name || 'User');
@@ -65,16 +58,17 @@ const DashboardLayout = () => {
             try {
                 const saved = localStorage.getItem('buildora-theme');
                 if (saved === 'dark') document.documentElement.classList.add('dark');
-            } catch {}
+            } catch { /* ignore */ }
         };
     }, []);
 
     useEffect(() => {
-        const handleUserUpdated = (e) => {
-            setUserName(e.detail.name);
+        const handleUserUpdated = (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail?.name) setUserName(detail.name);
         };
-        window.addEventListener("userUpdated", handleUserUpdated);
-        return () => window.removeEventListener("userUpdated", handleUserUpdated);
+        window.addEventListener('userUpdated', handleUserUpdated);
+        return () => window.removeEventListener('userUpdated', handleUserUpdated);
     }, []);
 
     useEffect(() => {
@@ -87,6 +81,10 @@ const DashboardLayout = () => {
         }
     }, [user, isAdmin, isAdminRole, navigate]);
 
+    useEffect(() => {
+        if (!isCompact) setIsSidebarOpen(false);
+    }, [isCompact]);
+
     const handleLogout = async () => {
         try {
             setIsLoggingOut(true);
@@ -96,10 +94,10 @@ const DashboardLayout = () => {
                 console.error(err);
             }
         } finally {
-            localStorage.removeItem("user");
+            localStorage.removeItem('user');
             setIsLoggingOut(false);
             setLogoutDialogOpen(false);
-            navigate("/");
+            navigate('/');
         }
     };
 
@@ -112,23 +110,11 @@ const DashboardLayout = () => {
         setUserName,
     };
 
-    const fullWidthPages = [
-        '/dashboard',
-        '/admin',
-        '/dashboard/templates',
-        '/admin/templates',
-        '/dashboard/assets',
-        '/admin/assets',
-        '/dashboard/messages',
-        '/admin/messages',
-        '/dashboard/profile',
-        '/admin/profile',
-    ];
-    const isDashboardShellPage = fullWidthPages.includes(location.pathname);
-    const isFullWidthPage = isDashboardShellPage;
-
     return (
-        <div className="h-screen bg-[#f6f3f5] text-[#1b1b1d] flex font-sans relative overflow-hidden">
+        <div className={cn(
+            'relative flex h-screen overflow-hidden font-sans selection:bg-primary/10',
+            isAdmin ? 'bg-[#F3F4F6]' : 'bg-[#f8fafc]'
+        )}>
             <Helmet>
                 <title>Dashboard | Buildora</title>
             </Helmet>
@@ -136,6 +122,7 @@ const DashboardLayout = () => {
             <DashboardSidebar
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
+                isCompact={isCompact}
                 isAdmin={isAdmin}
                 isAdminRole={isAdminRole}
                 userRole={user?.role}
@@ -147,24 +134,27 @@ const DashboardLayout = () => {
                 isLoggingOut={isLoggingOut}
             />
 
-            {/* Outlet Main View Area */}
-            <main className={cn(
-                "flex-1 min-h-0 overflow-y-auto w-full",
-                isDashboardShellPage ? "bg-[#fcf8fa] text-[#1b1b1d]" : "bg-[#f6f3f5] text-[#1b1b1d]",
-                isFullWidthPage ? "" : "p-6 lg:p-10 max-w-7xl mx-auto"
-            )}>
+            <main className="min-w-0 w-full flex-1 overflow-x-hidden overflow-y-auto">
+                <div
+                    className={cn(
+                        'mx-auto w-full min-w-0 max-w-[1600px] 2xl:max-w-[1760px]',
+                        isAdmin && location.pathname === '/admin'
+                            ? 'px-4 pb-8 pt-4 sm:px-6 lg:px-8'
+                            : 'p-4 sm:p-6 lg:px-10 lg:py-8'
+                    )}
+                >
                 {isCompact && (
-                    <div className="sticky top-0 z-30 flex items-center gap-2 border-b border-[#e5e7eb] bg-[#fcf8fa]/95 px-4 py-3 backdrop-blur lg:hidden">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-9 w-9 shrink-0 rounded-full hover:bg-[#eae7e9] hover:scale-100"
-                            onClick={() => setIsSidebarOpen(true)}
+                    <div className="sticky top-0 z-30 -mx-4 mb-4 flex items-center gap-2 border-b border-[#E5E7EB] bg-[#f8fafc]/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:hidden">
+                        <button
+                            type="button"
+                            title="Open menu"
                             aria-label="Open menu"
+                            onClick={() => setIsSidebarOpen(true)}
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#0F172A] shadow-sm"
                         >
-                            <Menu className="h-5 w-5 text-[#0F172A]" />
-                        </Button>
-                        <span className="text-sm font-semibold text-[#0F172A]">Buildora Workspace</span>
+                            <Menu className="h-5 w-5" />
+                        </button>
+                        <span className="text-sm font-semibold text-[#0F172A]">Buildora</span>
                     </div>
                 )}
                 <Suspense
@@ -176,6 +166,7 @@ const DashboardLayout = () => {
                 >
                     <Outlet key={location.pathname} context={outletContext} />
                 </Suspense>
+                </div>
             </main>
 
             <AlertDialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>

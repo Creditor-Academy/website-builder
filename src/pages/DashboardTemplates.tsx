@@ -365,7 +365,7 @@ export default function DashboardTemplates() {
               onClick={handleOpenCreate}
               className="rounded-lg bg-[#131b2e] text-white px-6 h-10 text-sm font-semibold shadow-md hover:bg-[#252f4a]"
             >
-              <Plus className="w-4 h-4 mr-2" /> Create First Template
+              <Plus className="mr-2 h-4 w-4" /> Create First Template
             </Button>
           )}
         </div>
