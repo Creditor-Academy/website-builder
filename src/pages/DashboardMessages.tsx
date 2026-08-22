@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useOutletContext, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
-    MessageSquare, Bell, CheckCircle, ArrowRight, Search, X, Mail, User, Calendar,
+    MessageSquare, Bell, CheckCircle, Reply, Search, X, Mail, User, Calendar,
     Clock, Trash2, Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -168,7 +168,7 @@ export default function DashboardMessages() {
         switch (status) {
             case 'unread': return <Bell className="w-4 h-4" />;
             case 'read': return <CheckCircle className="w-4 h-4" />;
-            case 'replied': return <ArrowRight className="w-4 h-4" />;
+            case 'replied': return <Reply className="w-4 h-4" />;
             default: return <MessageSquare className="w-4 h-4" />;
         }
     };
@@ -182,34 +182,35 @@ export default function DashboardMessages() {
             <DashboardPageShell
                 basePath={basePath}
                 title="Messages"
-                description="Manage contact form submissions from your website visitors. View, respond to, and organize your messages."
-                actions={
-                    <div className="relative w-full md:w-80">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#76777d]" />
+                description="Manage contact form submissions from your website visitors."
+            >
+                <div className={dashboardToolbarClass}>
+                    <div className="relative min-w-0 flex-1">
+                        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
                         <Input
                             placeholder="Search messages..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className={dashboardSearchInputClass}
+                            className={cn(dashboardSearchInputClass, 'h-9 rounded-full pl-9')}
                         />
                     </div>
-                }
-            >
+                </div>
+
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
                     {[
                         { label: 'Total Messages', value: stats.total || 0, icon: MessageSquare },
                         { label: 'Unread', value: stats.unread || 0, icon: Bell, accent: 'text-amber-600' },
                         { label: 'Read', value: stats.read || 0, icon: CheckCircle, accent: 'text-emerald-600' },
-                        { label: 'Replied', value: stats.replied || 0, icon: ArrowRight, accent: 'text-[#131b2e]' },
+                        { label: 'Replied', value: stats.replied || 0, icon: Reply, accent: 'text-white' },
                     ].map(({ label, value, icon: Icon, accent }) => (
-                        <DashboardStatCard key={label}>
+                        <DashboardStatCard key={label} className="rounded-3xl border-[#E8E8E8] bg-[#0F172A] p-5">
                             <div className="flex items-center justify-between mb-3">
-                                <p className="text-sm font-medium text-[#45464d]">{label}</p>
-                                <div className="w-9 h-9 bg-[#f6f3f5] rounded-lg flex items-center justify-center border border-[#c6c6cd]">
-                                    <Icon className="w-4 h-4 text-[#131b2e]" />
+                                <p className="text-sm font-medium text-white">{label}</p>
+                                <div className="flex items-center justify-center  text-white">
+                                    <Icon className="h-4 w-4" />
                                 </div>
                             </div>
-                            <div className={cn('text-2xl sm:text-3xl font-bold text-[#000000]', accent)}>{value}</div>
+                            <div className={cn('text-2xl sm:text-3xl font-bold text-white', accent)}>{value}</div>
                         </DashboardStatCard>
                     ))}
                 </div>
@@ -272,7 +273,8 @@ export default function DashboardMessages() {
                             <DashboardListCard
                                 key={message.id}
                                 className={cn(
-                                    message.status === 'unread' && 'border-amber-200 bg-amber-50/30'
+                                    'rounded-3xl border-[#E8E8E8] bg-white',
+                                    message.status === 'unread' && 'border-amber-200'
                                 )}
                                 onClick={() => setSelectedMessage(message)}
                             >

@@ -1,6 +1,37 @@
 import React from 'react';
+import { format } from 'date-fns';
 
 import { cn } from '@/lib/utils';
+
+export type DashboardPublishStatus = 'Draft' | 'Published' | 'Deleted';
+
+export function formatDashboardCardDate(value?: string | Date | null): string | null {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return format(date, 'MMM d, yyyy · h:mm a');
+}
+
+export function getDashboardPublishStatus({
+  status,
+  deleted,
+  publishedUrl,
+  publishedVersionId,
+  isTemplate = false,
+}: {
+  status?: string | null;
+  deleted?: boolean;
+  publishedUrl?: string | null;
+  publishedVersionId?: string | null;
+  isTemplate?: boolean;
+} = {}): DashboardPublishStatus {
+  const normalized = (status || '').toLowerCase();
+  if (deleted || normalized === 'deleted') return 'Deleted';
+  if (normalized === 'published' || normalized === 'live') return 'Published';
+  if (publishedUrl || publishedVersionId) return 'Published';
+  if (normalized === 'draft') return 'Draft';
+  return isTemplate ? 'Published' : 'Draft';
+}
 
 
 
@@ -30,13 +61,13 @@ export const dashboardCardMediaAspectClass =
 
 
 
-export const dashboardCardBodyClass = 'p-4 sm:p-6 flex-1 flex flex-col min-w-0';
+export const dashboardCardBodyClass = 'p-2 sm:p-4 flex-1 flex flex-col min-w-0';
 
 
 
 export const dashboardCardTitleClass =
 
-  'text-lg sm:text-xl md:text-[22px] font-semibold text-[#000000] leading-snug tracking-tight break-words';
+  'text-lg sm:text-lg md:text-lg font-semibold text-[#000000] leading-snug tracking-tight break-words';
 
 
 
@@ -194,8 +225,36 @@ export function DashboardCardTitle({ className, ...props }: React.ComponentProps
 
 export function DashboardCardDescription({ className, ...props }: React.ComponentProps<'p'>) {
 
-  return <p className={cn(dashboardCardDescriptionClass, 'flex-1 mb-4 sm:mb-6', className)} {...props} />;
+  return <p className={cn(dashboardCardDescriptionClass, className)} {...props} />;
 
+}
+
+export function DashboardCardMeta({
+  date,
+  status,
+  className,
+}: {
+  date?: string | null;
+  status: DashboardPublishStatus;
+  className?: string;
+}) {
+  return (
+    <div className={cn('mt-1.5 mb-4 sm:mb-6 flex items-center justify-between gap-2 min-w-0', className)}>
+      <p className="truncate text-xs sm:text-[13px] text-[#76777d]">
+        {date || '—'}
+      </p>
+      <span
+        className={cn(
+          'shrink-0 rounded px-2 py-0.5 text-[10px] font-semibold',
+          status === 'Published' && 'bg-emerald-50 text-emerald-700',
+          status === 'Draft' && 'bg-amber-50 text-amber-800',
+          status === 'Deleted' && 'bg-rose-50 text-rose-700',
+        )}
+      >
+        {status}
+      </span>
+    </div>
+  );
 }
 
 

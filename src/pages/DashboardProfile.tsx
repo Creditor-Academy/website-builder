@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {
     Eye, EyeOff, Loader2,
     AlertTriangle, Trash2, Mail, User,
-    CheckCircle2, KeyRound, Calendar, ChevronDown, UserCircle,
+    CheckCircle2, KeyRound, Calendar, ChevronDown, UserCircle, Pencil,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -29,8 +29,11 @@ export default function DashboardProfile() {
 
     // ─── State Logic ──────────────────────────────────────────────────────────
     const [name, setName] = useState(stored?.name || '');
+    const [savedName, setSavedName] = useState(stored?.name || '');
+    const [editingName, setEditingName] = useState(false);
     const [email] = useState(stored?.email || '');
     const [role] = useState(stored?.role || 'USER');
+    const [memberSince, setMemberSince] = useState(stored?.created_at || stored?.createdAt || '');
     const [loading, setLoading] = useState(true);
     const [savingProfile, setSavingProfile] = useState(false);
 
@@ -51,7 +54,13 @@ export default function DashboardProfile() {
             try {
                 const d = await getProfile();
                 const u = d?.user || d;
-                if (u?.name) setName(u.name);
+                if (u?.name) {
+                    setName(u.name);
+                    setSavedName(u.name);
+                }
+                if (u?.created_at || u?.createdAt) {
+                    setMemberSince(u.created_at || u.createdAt);
+                }
             } catch {
                 /* fallback to localStorage */
             } finally {
@@ -68,16 +77,29 @@ export default function DashboardProfile() {
         setSavingProfile(true);
         try {
             await updateUserProfile(name.trim());
-            if (stored) {
-                localStorage.setItem('user', JSON.stringify({ ...stored, name: name.trim() }));
+            const current = JSON.parse(localStorage.getItem('user') || 'null');
+            if (current) {
+                localStorage.setItem('user', JSON.stringify({ ...current, name: name.trim() }));
                 window.dispatchEvent(new CustomEvent('userUpdated', { detail: { name: name.trim() } }));
             }
+            setSavedName(name.trim());
+            setName(name.trim());
+            setEditingName(false);
             toast({ title: 'Profile updated ✓' });
         } catch (e: any) {
-            toast({ title: 'Update failed', description: e?.message, variant: 'destructive' });
+            toast({
+                title: 'Update failed',
+                description: e?.message || e?.error || 'Please try again.',
+                variant: 'destructive',
+            });
         } finally {
             setSavingProfile(false);
         }
+    };
+
+    const cancelEditName = () => {
+        setName(savedName);
+        setEditingName(false);
     };
 
     const savePw = async () => {
@@ -99,9 +121,16 @@ export default function DashboardProfile() {
             setOldPw('');
             setNewPw('');
             setConPw('');
+            setShowOld(false);
+            setShowNew(false);
+            setShowCon(false);
             toast({ title: 'Password changed ✓' });
         } catch (e: any) {
-            toast({ title: 'Failed', description: e?.message, variant: 'destructive' });
+            toast({
+                title: 'Failed',
+                description: e?.message || e?.error || 'Please try again.',
+                variant: 'destructive',
+            });
         } finally {
             setSavingPw(false);
         }
@@ -130,99 +159,12 @@ export default function DashboardProfile() {
     return (
         <DashboardPageShell
             basePath={basePath}
-            title={`Hi, ${loading ? '…' : (name.split(' ')[0] || 'there')}`}
+            title="Profile"
             pageLabel="Profile"
             description="Manage your account, password and preferences."
         >
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start font-sans">
-                {/* Left Column: Status & Info */}
-                <div className="lg:col-span-5 space-y-4 sm:space-y-6">
-                    {/* Role & Status Row */}
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                        <div className="bg-white border border-slate-200 rounded-lg p-4 sm:p-5 min-w-0">
-                            <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Role</h3>
-                            <div className="flex items-center gap-2 text-navy font-medium text-sm">
-                                <User className="w-4 h-4 text-slate-400 shrink-0" />
-                                {roleLabel(role)}
-                            </div>
-                        </div>
-                        <div className="bg-white border border-slate-200 rounded-lg p-4 sm:p-5 min-w-0">
-                            <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Status</h3>
-                            <div className="flex items-center gap-2 text-emerald-600 font-medium text-sm">
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                                Active
-                            </div>
-                        </div>
-                    </div>
 
-                    {/* Account Info Card */}
-                    <div className="bg-white border border-slate-200 rounded-lg p-4 sm:p-6 relative overflow-hidden">
-                        <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-6">
-                            Account Info
-                        </h3>
-                        {/* Decorative Icon Background */}
-                        <div className="absolute right-0 top-0 -translate-y-1/4 translate-x-1/4 opacity-[0.03] pointer-events-none select-none">
-                            <UserCircle className="w-40 h-40 text-navy" strokeWidth={1} />
-                        </div>
-                        <div className="space-y-6 relative z-10">
-                            <div className="flex items-start gap-4">
-                                <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 shrink-0">
-                                    <User className="w-4 h-4" />
-                                </div>
-                                <div className="min-w-0">
-                                    <p className="text-xs font-medium text-slate-500 mb-1">Name</p>
-                                    <p className="text-sm font-medium text-navy truncate">{name || '—'}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-4">
-                                <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 shrink-0">
-                                    <Mail className="w-4 h-4" />
-                                </div>
-                                <div className="min-w-0">
-                                    <p className="text-xs font-medium text-slate-500 mb-1">Email</p>
-                                    <p className="text-sm font-medium text-navy break-all">{email || '—'}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-4">
-                                <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 shrink-0">
-                                    <Calendar className="w-4 h-4" />
-                                </div>
-                                <div className="min-w-0">
-                                    <p className="text-xs font-medium text-slate-500 mb-1">Member Since</p>
-                                    <p className="text-sm font-medium text-navy">
-                                        {stored?.createdAt
-                                            ? new Date(stored.createdAt).toLocaleDateString('en', { month: 'short', year: 'numeric' })
-                                            : 'Buildora'}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Danger Zone Card */}
-                    <div className="bg-rose-50 border border-rose-100 rounded-lg p-4 sm:p-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0" />
-                            <h3 className="text-base font-semibold text-rose-600">Danger Zone</h3>
-                        </div>
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div>
-                                <p className="text-sm font-medium text-rose-900">Deactivate Account</p>
-                                <p className="text-sm text-rose-600/80 mt-1">You'll be logged out immediately.</p>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => setDelOpen(true)}
-                                className="px-4 py-2 bg-white border border-rose-200 text-rose-600 rounded-md text-sm font-medium flex items-center gap-2 hover:bg-rose-50 transition-colors shadow-sm shrink-0"
-                            >
-                                <Trash2 className="w-4 h-4" />
-                                Remove
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Right Column: Forms */}
                 <div className="lg:col-span-7 space-y-6">
                     {/* Profile Information Form Card */}
                     <div className="bg-white border border-slate-200 rounded-lg p-4 sm:p-6 md:p-8 flex flex-col">
@@ -236,63 +178,100 @@ export default function DashboardProfile() {
                                 <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
                             </div>
                         ) : (
-                            <form className="space-y-6 flex-1" onSubmit={(e) => { e.preventDefault(); saveProfile(); }}>
+                            <form className="space-y-6 flex-1" onSubmit={(e) => { e.preventDefault(); if (editingName) void saveProfile(); }}>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2" htmlFor="displayName">
                                         Display Name
                                     </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <User className="w-4 h-4 text-slate-400" />
+                                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                                        <div className="relative min-w-0 flex-1">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <User className="w-4 h-4 text-slate-400" />
+                                            </div>
+                                            <input
+                                                id="displayName"
+                                                type="text"
+                                                value={name}
+                                                disabled={!editingName}
+                                                onChange={(e) => setName(e.target.value)}
+                                                className={cn(
+                                                    'w-full pl-10 pr-4 py-2.5 border rounded-md text-sm outline-none transition-all shadow-sm',
+                                                    editingName
+                                                        ? 'bg-white border-slate-300 text-navy focus:ring-1 focus:ring-navy focus:border-navy'
+                                                        : 'bg-slate-50 border-slate-200 text-slate-600 cursor-not-allowed',
+                                                )}
+                                                placeholder="Your full name"
+                                            />
                                         </div>
-                                        <input
-                                            id="displayName"
-                                            type="text"
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-md text-navy text-sm focus:ring-1 focus:ring-navy focus:border-navy outline-none transition-all shadow-sm"
-                                            placeholder="Your full name"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2" htmlFor="emailAddress">
-                                        Email Address
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <Mail className="w-4 h-4 text-slate-400" />
-                                        </div>
-                                        <input
-                                            id="emailAddress"
-                                            type="email"
-                                            value={email}
-                                            disabled
-                                            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-md text-slate-500 text-sm cursor-not-allowed"
-                                        />
-                                    </div>
-                                    <p className="text-xs text-slate-400 mt-2">Email cannot be changed here.</p>
-                                </div>
-
-                                <div className="pt-6 sm:pt-8 flex justify-stretch sm:justify-end">
-                                    <button
-                                        type="submit"
-                                        disabled={savingProfile}
-                                        className="bg-navy text-white px-6 py-2.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 hover:bg-navy-hover transition-colors shadow-sm disabled:opacity-60 w-full sm:w-auto"
-                                    >
-                                        {savingProfile ? (
-                                            <>
-                                                <Loader2 className="w-4 h-4 animate-spin" /> Saving…
-                                            </>
+                                        {editingName ? (
+                                            <div className="flex shrink-0 gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={cancelEditName}
+                                                    disabled={savingProfile}
+                                                    className="flex-1 sm:flex-none px-4 py-2.5 rounded-md text-sm font-medium border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-60"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    type="submit"
+                                                    disabled={savingProfile || name.trim() === savedName.trim()}
+                                                    className="flex-1 sm:flex-none bg-navy text-[#0F172A] px-4 py-2.5 rounded-md text-sm font-medium inline-flex items-center justify-center gap-2 hover:bg-navy-hover transition-colors shadow-sm disabled:opacity-60"
+                                                >
+                                                    {savingProfile ? (
+                                                        <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>
+                                                    ) : (
+                                                        <><CheckCircle2 className="w-4 h-4" /> Save</>
+                                                    )}
+                                                </button>
+                                            </div>
                                         ) : (
-                                            <>
-                                                <CheckCircle2 className="w-4 h-4" />
-                                                Save Changes
-                                            </>
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditingName(true)}
+                                                className="inline-flex items-center justify-center gap-2 shrink-0 px-4 py-2.5 rounded-md text-sm font-medium border border-slate-200 bg-white text-navy hover:bg-slate-50 shadow-sm"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                                Edit
+                                            </button>
                                         )}
-                                    </button>
+                                    </div>
                                 </div>
+
+
+                                {/* Account Info Card */}
+                                <div className="bg-white relative overflow-hidden">
+                                 
+                                    <div className="space-y-6 relative z-10">
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 shrink-0">
+                                                <Mail className="w-4 h-4" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-xs font-medium text-slate-500 mb-1">Email</p>
+                                                <p className="text-sm font-medium text-navy break-all">{email || '—'}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 shrink-0">
+                                                <Calendar className="w-4 h-4" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-xs font-medium text-slate-500 mb-1">Member Since</p>
+                                                <p className="text-sm font-medium text-navy">
+                                                    {memberSince
+                                                        ? new Date(memberSince).toLocaleDateString('en', {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            year: 'numeric',
+                                                        })
+                                                        : '—'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </form>
                         )}
                     </div>
@@ -304,7 +283,7 @@ export default function DashboardProfile() {
                             className="p-4 sm:p-6 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors gap-3"
                         >
                             <div>
-                                <h3 className="text-base font-semibold text-navy">Change Password</h3>
+                                <h3 className="text-base font-semibold text-[#0F172A]">Change Password</h3>
                                 <p className="text-sm text-slate-500 mt-1">
                                     {pwOpen ? 'Fill in the fields to update your password' : 'Click to update your password'}
                                 </p>
@@ -329,6 +308,7 @@ export default function DashboardProfile() {
                                             value={oldPw}
                                             onChange={(e) => setOldPw(e.target.value)}
                                             placeholder="••••••••"
+                                            autoComplete="current-password"
                                             className="w-full pr-10 pl-3 py-2 bg-white border border-slate-300 rounded-md text-navy text-sm focus:ring-1 focus:ring-navy outline-none"
                                         />
                                         <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -346,6 +326,7 @@ export default function DashboardProfile() {
                                                 value={newPw}
                                                 onChange={(e) => setNewPw(e.target.value)}
                                                 placeholder="••••••••"
+                                                autoComplete="new-password"
                                                 className="w-full pr-10 pl-3 py-2 bg-white border border-slate-300 rounded-md text-navy text-sm focus:ring-1 focus:ring-navy outline-none"
                                             />
                                             <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -363,6 +344,7 @@ export default function DashboardProfile() {
                                                 value={conPw}
                                                 onChange={(e) => setConPw(e.target.value)}
                                                 placeholder="••••••••"
+                                                autoComplete="new-password"
                                                 className="w-full pr-10 pl-3 py-2 bg-white border border-slate-300 rounded-md text-navy text-sm focus:ring-1 focus:ring-navy outline-none"
                                             />
                                             <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -375,17 +357,17 @@ export default function DashboardProfile() {
                                 <div className="flex justify-stretch sm:justify-end pt-2">
                                     <button
                                         type="button"
-                                        onClick={savePw}
+                                        onClick={() => void savePw()}
                                         disabled={savingPw}
-                                        className="bg-navy text-white px-5 py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2 hover:bg-navy-hover transition-colors shadow-sm disabled:opacity-60 w-full sm:w-auto"
+                                        className="bg-navy text-[#0F172A] px-5 py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2 hover:bg-navy-hover transition-colors shadow-sm disabled:opacity-60 w-full sm:w-auto"
                                     >
                                         {savingPw ? (
                                             <>
-                                                <Loader2 className="w-4 h-4 animate-spin" /> Updating…
+                                                <Loader2 className="w-4 h-4 animate-spin" /> Changing…
                                             </>
                                         ) : (
                                             <>
-                                                <KeyRound className="w-4 h-4" /> Update Password
+                                                <KeyRound className="w-4 h-4" /> Change Password
                                             </>
                                         )}
                                     </button>
@@ -394,6 +376,52 @@ export default function DashboardProfile() {
                         )}
                     </div>
                 </div>
+
+
+                <div className="lg:col-span-5 space-y-4 sm:space-y-6">
+                    {/* Role & Status Row */}
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                        <div className="bg-white border border-slate-200 rounded-lg p-4 sm:p-5 min-w-0">
+                            <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Role</h3>
+                            <div className="flex items-center gap-2 text-navy font-medium text-sm">
+                                <User className="w-4 h-4 text-slate-400 shrink-0" />
+                                {roleLabel(role)}
+                            </div>
+                        </div>
+                        <div className="bg-white border border-slate-200 rounded-lg p-4 sm:p-5 min-w-0">
+                            <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Status</h3>
+                            <div className="flex items-center gap-2 text-emerald-600 font-medium text-sm">
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                Active
+                            </div>
+                        </div>
+                    </div>
+
+
+                    {/* Danger Zone Card */}
+                    <div className="bg-rose-50 border border-rose-100 rounded-lg p-4 sm:p-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0" />
+                            <h3 className="text-base font-semibold text-rose-600">Danger Zone</h3>
+                        </div>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div>
+                                <p className="text-sm font-medium text-rose-900">Deactivate Account</p>
+                                <p className="text-sm text-rose-600/80 mt-1">You'll be logged out immediately.</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setDelOpen(true)}
+                                className="px-4 py-2 bg-white border border-rose-200 text-rose-600 rounded-md text-sm font-medium flex items-center gap-2 hover:bg-rose-50 transition-colors shadow-sm shrink-0"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
 
             {/* Deactivate Account Confirmation Dialog */}

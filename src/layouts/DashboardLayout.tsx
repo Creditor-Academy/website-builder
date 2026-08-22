@@ -137,10 +137,7 @@ const DashboardLayout = () => {
             <main className="min-w-0 w-full flex-1 overflow-x-hidden overflow-y-auto">
                 <div
                     className={cn(
-                        'mx-auto w-full min-w-0 max-w-[1600px] 2xl:max-w-[1760px]',
-                        isAdmin && location.pathname === '/admin'
-                            ? 'px-4 pb-8 pt-4 sm:px-6 lg:px-8'
-                            : 'p-4 sm:p-6 lg:px-10 lg:py-8'
+                        'mx-auto w-full min-w-0 max-w-[1600px] 2xl:max-w-[1760px] p-4 sm:p-6 lg:px-6 lg:py-8',
                     )}
                 >
                 {isCompact && (

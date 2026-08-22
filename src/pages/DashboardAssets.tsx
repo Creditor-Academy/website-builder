@@ -11,7 +11,9 @@ import { DuplicateAssetDialog } from "../components/ui/DuplicateAssetDialog";
 import { cn } from '@/lib/utils';
 import { useToast } from "../hooks/use-toast";
 import useBuilderStore from '../store/useBuilderStore';
+import type { Asset } from '../store/useBuilderStore';
 import { DashboardPageShell, dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass, dashboardToolbarClass } from '@/components/dashboard/DashboardPageShell';
+import { dashboardHeroPrimaryClass } from '@/components/dashboard/DashboardHeroHeader';
 import {
   DashboardCard,
   DashboardCardMedia,
@@ -49,6 +51,7 @@ export default function DashboardAssets() {
     const [urlInput, setUrlInput] = useState('');
     const [urlName, setUrlName] = useState('');
     const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [previewAsset, setPreviewAsset] = useState<Asset | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const assets = getScopedAssets();
 
@@ -152,6 +155,7 @@ export default function DashboardAssets() {
         try {
             await deleteAsset(id);
             toast({ title: "Asset Deleted", description: "The asset has been removed." });
+            setPreviewAsset((current) => (current?.id === id ? null : current));
         } catch (error: any) {
             toast({
                 variant: "destructive",
@@ -172,29 +176,20 @@ export default function DashboardAssets() {
     return (
     <DashboardPageShell
       basePath={basePath}
-      title="Media Library"
+      title="Assets"
       pageLabel="Assets"
       description="Manage the global asset library outside individual websites."
       actions={
         <>
-          <div className="relative w-full md:w-64">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#76777d]" />
-            <Input
-              placeholder="Search assets..."
-              className={dashboardSearchInputClass}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 disabled={uploadingCount > 0}
-                className="h-11 bg-[#131b2e] text-white font-semibold rounded-lg hover:bg-[#252f4a] transition-all disabled:opacity-60"
+                className={dashboardHeroPrimaryClass}
               >
                 {uploadingCount > 0
-                  ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Uploading…</>
-                  : <><Upload className="w-5 h-5 mr-2" />Add Assets</>
+                  ? <><Loader2 className="mr-1.5 h-4 w-4 shrink-0 animate-spin" />Uploading…</>
+                  : <><Upload className="mr-1.5 h-4 w-4 shrink-0" />Add Assets</>
                 }
               </Button>
             </DropdownMenuTrigger>
@@ -225,7 +220,16 @@ export default function DashboardAssets() {
         </>
       }
     >
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-2 mb-6 sm:mb-8">
+            <div className={dashboardToolbarClass}>
+              <div className="relative min-w-0 flex-1">
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
+                <Input
+                  placeholder="Search assets..."
+                  className={cn(dashboardSearchInputClass, 'h-9 rounded-full pl-9')}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
               <div className={cn(dashboardFilterScrollClass, 'flex-1')}>
               {['all', 'images', 'videos'].map(tab => (
                 <button
@@ -246,13 +250,13 @@ export default function DashboardAssets() {
                 <div className="min-h-[400px]">
                    {isFetching ? (
                       /* ── Initial fetch skeleton ── */
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-6">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
                          {Array.from({ length: 12 }).map((_, i) => (
                             <div key={i} className={cn(dashboardCardClass, 'animate-pulse')}>
                                <div className="aspect-square bg-[#eae7e9] border-b border-[#c6c6cd]" />
-                               <div className="p-4 space-y-2">
-                                  <div className="h-3 bg-slate-200 rounded-full w-3/4" />
-                                  <div className="h-2.5 bg-slate-100 rounded-full w-1/2" />
+                               <div className="space-y-2 p-2.5 sm:p-3">
+                                  <div className="h-2.5 bg-slate-200 rounded-full w-3/4" />
+                                  <div className="h-2 bg-slate-100 rounded-full w-1/2" />
                                </div>
                             </div>
                          ))}
@@ -271,18 +275,18 @@ export default function DashboardAssets() {
                                 </div>
                             </div>
                          ) : (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-6">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
 
                                 {/* ── Upload skeleton placeholders ── */}
                                 {uploadingCount > 0 && Array.from({ length: uploadingCount }).map((_, i) => (
                                    <div key={`uploading-${i}`} className="flex flex-col rounded-lg border border-[#c6c6cd] bg-[#fcf8fa] overflow-hidden animate-pulse">
                                       <div className="aspect-square bg-[#eae7e9] flex flex-col items-center justify-center gap-2">
-                                         <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
-                                         <span className="text-[11px] font-semibold text-slate-400">Uploading…</span>
+                                         <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
+                                         <span className="text-[10px] font-semibold text-slate-400">Uploading…</span>
                                       </div>
-                                      <div className="space-y-2 p-4">
-                                         <div className="h-3 w-3/4 rounded-full bg-slate-200" />
-                                         <div className="h-2.5 w-1/2 rounded-full bg-[#F4F4F5]" />
+                                      <div className="space-y-2 p-2.5 sm:p-3">
+                                         <div className="h-2.5 w-3/4 rounded-full bg-slate-200" />
+                                         <div className="h-2 w-1/2 rounded-full bg-[#F4F4F5]" />
                                       </div>
                                    </div>
                                 ))}
@@ -290,76 +294,87 @@ export default function DashboardAssets() {
                                 {filteredMedia.filter(m => tabType === 'all' || m.type === tabType.slice(0, -1)).map((item) => (
                                     <DashboardCard
                                         key={item.id}
+                                        interactive
                                         className={cn(
-                                            'hover:shadow-none transition-none',
+                                            'hover:shadow-md',
                                             deletingIds.has(item.id) && 'opacity-60 scale-[0.97] pointer-events-none'
                                         )}
+                                        onClick={() => setPreviewAsset(item)}
                                     >
                                         <DashboardCardMedia aspect className="aspect-square">
                                            {item.type === 'image' ? (
                                                <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
                                            ) : (
                                                <div className="w-full h-full bg-[#131b2e] flex items-center justify-center">
-                                                   <Video className="w-10 h-10 text-white/40" />
+                                                   <Video className="w-8 h-8 text-white/40" />
                                                </div>
                                            )}
 
-                                           <div className="absolute top-2 left-2 sm:top-4 sm:left-4 flex flex-wrap gap-1.5 sm:gap-2 z-10">
-                                              <DashboardCardBadge position="top-left" className="static capitalize">
+                                           <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1">
+                                              <DashboardCardBadge position="top-left" className="static px-1.5 py-0.5 text-[10px] capitalize">
                                                  {item.type || 'File'}
                                               </DashboardCardBadge>
                                               {(item.scope === 'GLOBAL' || item.isGlobal) && (
-                                              <span className={cn(dashboardCardBadgeClass, 'static inline-flex items-center gap-1 bg-[#dedfeb]')}>
-                                                 <Globe className="w-3 h-3" />
+                                              <span className={cn(dashboardCardBadgeClass, 'static inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] bg-[#dedfeb]')}>
+                                                 <Globe className="w-2.5 h-2.5" />
                                                  Global
                                               </span>
                                               )}
                                            </div>
                                         </DashboardCardMedia>
 
-                                        <DashboardCardBody className="p-4 sm:p-5">
-                                            <DashboardCardTitle className="text-base sm:text-lg mb-1 truncate">
+                                        <DashboardCardBody className="gap-1 p-2.5 sm:p-3">
+                                            <DashboardCardTitle className="mb-0 truncate text-sm font-semibold leading-tight">
                                                 {item.name}
                                             </DashboardCardTitle>
 
-                                            <DashboardCardDescription className="mb-0 flex-none text-[#76777d]">
+                                            <DashboardCardDescription className="mb-0 sm:mb-0 flex-none text-[11px] sm:text-[11px] leading-snug text-[#76777d]">
                                                 <span className="uppercase tracking-wider">{item.size}</span>
-                                                <span className="mx-1.5">·</span>
+                                                <span className="mx-1">·</span>
                                                 <span>
                                                     {new Date(item.date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
                                                 </span>
                                             </DashboardCardDescription>
 
                                             {deletingIds.has(item.id) ? (
-                                                <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-[#c6c6cd] text-[#ba1a1a]">
-                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                    <span className="text-sm font-medium">Deleting…</span>
+                                                <div className="mt-2 flex items-center justify-center gap-1.5 border-t border-[#c6c6cd] pt-2 text-[#ba1a1a]">
+                                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                    <span className="text-[11px] font-medium">Deleting…</span>
                                                 </div>
                                             ) : (
-                                                <DashboardCardFooter className="mt-4 pt-4 border-t border-[#c6c6cd]">
+                                                <DashboardCardFooter
+                                                    className="mt-2 flex-row items-center gap-1.5 border-t border-[#c6c6cd] pt-2"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
                                                     <button
                                                         type="button"
-                                                        className="inline-flex items-center justify-center gap-1.5 text-[13px] sm:text-[14px] font-medium text-[#000000] w-full sm:w-auto"
-                                                        onClick={() => handleCopy(item.id, item.url)}
+                                                        className="inline-flex h-7 flex-1 items-center justify-center gap-1 rounded-md border border-[#c6c6cd] bg-white px-2 text-[11px] font-medium text-[#0F172A] hover:bg-[#eae7e9]"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleCopy(item.id, item.url);
+                                                        }}
                                                     >
                                                         {copiedId === item.id ? (
                                                             <>
-                                                                <Check className="w-3.5 h-3.5" />
+                                                                <Check className="h-3 w-3" />
                                                                 Copied
                                                             </>
                                                         ) : (
                                                             <>
-                                                                <Copy className="w-3.5 h-3.5" />
-                                                                Copy Link
+                                                                <Copy className="h-3 w-3" />
+                                                                Copy
                                                             </>
                                                         )}
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        className="inline-flex items-center justify-center gap-1.5 text-[13px] sm:text-[14px] font-medium text-[#ba1a1a] w-full sm:w-auto"
-                                                        onClick={() => void handleDelete(item.id)}
+                                                        className="inline-flex h-7 flex-1 items-center justify-center gap-1 rounded-md border border-rose-100 bg-white px-2 text-[11px] font-medium text-[#ba1a1a] hover:bg-rose-50"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            void handleDelete(item.id);
+                                                        }}
                                                     >
-                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                        <Trash2 className="h-3 w-3" />
                                                         Delete
                                                     </button>
                                                 </DashboardCardFooter>
@@ -374,6 +389,74 @@ export default function DashboardAssets() {
                    )}
                 </div>
             </Tabs>
+
+            <Dialog open={!!previewAsset} onOpenChange={(open) => { if (!open) setPreviewAsset(null); }}>
+                <DialogContent
+                    className={cn(
+                        'flex max-h-[min(92dvh,52rem)] w-[calc(100vw-1.5rem)] flex-col gap-0 overflow-hidden p-0',
+                        'rounded-2xl border-[#c6c6cd] bg-white shadow-2xl sm:max-w-4xl',
+                        '[&>button]:right-3 [&>button]:top-3 [&>button]:text-[#0F172A] [&>button]:hover:bg-slate-100',
+                        '[&>button>svg]:mr-0 [&>button>svg]:h-5 [&>button>svg]:w-5',
+                    )}
+                >
+                    <DialogHeader className="shrink-0 border-b border-[#c6c6cd] px-4 py-3 pr-12 sm:px-5 sm:py-4">
+                        <DialogTitle className="truncate text-left text-sm font-semibold text-[#0F172A] sm:text-base">
+                            {previewAsset?.name || 'Asset preview'}
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    <div className="flex min-h-0 flex-1 items-center justify-center bg-[#0F172A] p-3 sm:p-6">
+                        {previewAsset?.type === 'video' ? (
+                            <video
+                                key={previewAsset.id}
+                                src={previewAsset.url}
+                                controls
+                                autoPlay
+                                className="max-h-[min(58dvh,32rem)] w-full max-w-full rounded-lg bg-black sm:max-h-[min(68dvh,38rem)]"
+                            />
+                        ) : previewAsset?.url ? (
+                            <img
+                                src={previewAsset.url}
+                                alt={previewAsset.name}
+                                className="max-h-[min(58dvh,32rem)] max-w-full rounded-lg object-contain sm:max-h-[min(68dvh,38rem)]"
+                            />
+                        ) : null}
+                    </div>
+
+                    {previewAsset && (
+                        <div className="flex shrink-0 flex-col gap-3 border-t border-[#c6c6cd] bg-[#fcf8fa] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                            <p className="min-w-0 truncate text-[11px] text-[#76777d] sm:text-xs">
+                                <span className="uppercase tracking-wider">{previewAsset.size || previewAsset.type}</span>
+                                <span className="mx-1">·</span>
+                                <span>
+                                    {new Date(previewAsset.date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </span>
+                            </p>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md border border-[#c6c6cd] bg-white px-3 text-xs font-medium text-[#0F172A] hover:bg-[#eae7e9] sm:flex-none"
+                                    onClick={() => handleCopy(previewAsset.id, previewAsset.url)}
+                                >
+                                    {copiedId === previewAsset.id ? (
+                                        <><Check className="h-3.5 w-3.5" /> Copied</>
+                                    ) : (
+                                        <><Copy className="h-3.5 w-3.5" /> Copy</>
+                                    )}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md border border-rose-100 bg-white px-3 text-xs font-medium text-[#ba1a1a] hover:bg-rose-50 sm:flex-none"
+                                    onClick={() => void handleDelete(previewAsset.id)}
+                                >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
 
             <Dialog open={isUrlDialogOpen} onOpenChange={setIsUrlDialogOpen}>
                 <DialogContent className="sm:max-w-md rounded-lg p-0 overflow-hidden border-[#c6c6cd] shadow-2xl">

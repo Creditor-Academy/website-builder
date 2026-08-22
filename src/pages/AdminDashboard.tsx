@@ -447,15 +447,18 @@ const AdminDashboard = () => {
         <>
             <div className="min-h-screen bg-[#F4F6F8] font-[Inter,sans-serif]">
 
-                {/* ── Pill top bar (glass) ── */}
-                <div className="px-4 pt-4 lg:px-6 lg:pt-5">
-                    <div className="flex items-center justify-between gap-4 rounded-3xl border border-white/60 bg-white/70 px-5 py-3 shadow-[0_8px_30px_rgba(15,23,42,0.08)] backdrop-blur-md lg:px-7 lg:py-3.5">
+                {/* ── Pill top bar ── */}
+                <div>
+                    <div className="relative overflow-hidden rounded-3xl bg-[#0F172A] px-5 py-3 shadow-[0_12px_40px_-8px_rgba(15,23,42,0.45)] lg:px-7 lg:py-3.5">
+                        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(148,163,184,0.18),transparent_55%)]" />
+                        <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 origin-bottom-right skew-x-[-12deg] bg-gradient-to-l from-white/[0.07] to-transparent" />
+                        <div className="relative z-10 flex items-center justify-between gap-4">
                         <div className="flex min-w-0 items-center gap-3">
                             <div className="min-w-0">
-                                <h1 className="truncate text-base font-bold leading-tight text-[#0F172A] lg:text-lg">
+                                <h1 className="truncate text-base font-bold leading-tight text-white lg:text-lg">
                                     Admin Dashboard
                                 </h1>
-                                <p className="mt-0.5 truncate text-xs text-slate-500">
+                                <p className="mt-0.5 truncate text-xs text-slate-400">
                                     Platform overview ·{' '}
                                     {new Date().toLocaleDateString('en', {
                                         weekday: 'long',
@@ -472,7 +475,7 @@ const AdminDashboard = () => {
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => setNotifOpen((v) => !v)}
-                                    className="relative h-10 w-10 rounded-full text-slate-500 hover:bg-white/80 hover:text-slate-800 hover:scale-100"
+                                    className="relative h-10 w-10 rounded-full text-slate-300 hover:bg-white/10 hover:text-white hover:scale-100"
                                 >
                                     <Bell className="h-4 w-4" />
                                     {unreadCount > 0 && (
@@ -593,9 +596,9 @@ const AdminDashboard = () => {
                                 onClick={() => navigate('/admin/profile')}
                                 title="Profile"
                                 aria-label="Profile"
-                                className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200"
+                                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/15"
                             >
-                                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#0F172A] text-[10px] font-bold text-white">
+                                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[10px] font-bold text-[#0F172A]">
                                     {getInitials(userName || 'U')}
                                 </span>
                             </button>
@@ -603,17 +606,18 @@ const AdminDashboard = () => {
                             <button
                                 type="button"
                                 onClick={() => setIsAdmin(false)}
-                                className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2.5 text-xs font-semibold text-[#0F172A] transition-colors hover:bg-gray-200"
+                                className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-xs font-semibold text-[#0F172A] transition-colors hover:bg-slate-100"
                             >
                                 <ShieldCheck className="h-3.5 w-3.5 text-[#0F172A]" />
                                 Exit Admin
                             </button>
                         </div>
+                        </div>
                     </div>
                 </div>
 
                 {/* ── Content ── */}
-                <div className="space-y-5 bg-transparent px-6 py-6 lg:px-8">
+                <div className="space-y-5 bg-transparent py-6">
 
                     {/* Greeting + stats: banner left, 2×2 cards right */}
                     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-stretch">

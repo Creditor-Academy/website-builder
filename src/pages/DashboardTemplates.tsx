@@ -8,35 +8,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, ArrowLeft, LayoutTemplate, Search, Trash2, RotateCcw, Building2, Loader2 } from 'lucide-react';
+import { Plus, ArrowLeft, LayoutTemplate, Search, Trash2, RotateCcw, Building2, Loader2, MoreVertical, Edit2, AlertTriangle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useBuilderStore from '@/store/useBuilderStore';
 import { cn } from '@/lib/utils';
 import templateApi from '@/api/templates';
 import { useToast } from '@/components/ui/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import TemplateFormDialog from '@/components/dashboard/TemplateFormDialog';
-import { DashboardPageShell, dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass } from '@/components/dashboard/DashboardPageShell';
+import { DashboardPageShell, dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass, dashboardToolbarClass } from '@/components/dashboard/DashboardPageShell';
+import { dashboardHeroPrimaryClass, dashboardHeroSecondaryClass } from '@/components/dashboard/DashboardHeroHeader';
 import {
   DashboardCard,
   DashboardCardMedia,
   DashboardCardBody,
   DashboardCardTitle,
-  DashboardCardDescription,
   DashboardCardFooter,
   DashboardCardBadge,
-  DashboardCardOverlay,
-  DashboardCardHoverTint,
+  DashboardCardMeta,
   DashboardCardPrimaryAction,
   DashboardCardSecondaryAction,
   DashboardCardDashed,
   dashboardCardTagClass,
-  dashboardCardActionSecondaryClass,
-  dashboardCardActionDangerClass,
   dashboardCardTitleClass,
   dashboardCardDescriptionClass,
+  formatDashboardCardDate,
+  getDashboardPublishStatus,
 } from '@/components/dashboard/DashboardCard';
-import GradientButton from '@/components/ui/GradientButton';
-
 
 export default function DashboardTemplates() {
   const navigate = useNavigate();
@@ -59,6 +67,8 @@ export default function DashboardTemplates() {
   // Admin create/edit dialog
   const [formOpen, setFormOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<any | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Trash toggle (admin only)
   const [showTrash, setShowTrash] = useState(false);
@@ -183,13 +193,18 @@ export default function DashboardTemplates() {
     navigate(`/template-builder/${template.id}`);
   };
 
-  const handleDeleteTemplate = async (template: any) => {
+  const handleDeleteTemplate = async () => {
+    if (!deleteTarget?.id || isDeleting) return;
     try {
-      await templateApi.deleteWebsiteTemplate(template.id);
-      setTemplates(prev => prev.map(t => t.id === template.id ? { ...t, deletedAt: new Date().toISOString() } : t));
-      toast({ title: 'Template deleted' });
+      setIsDeleting(true);
+      await templateApi.deleteWebsiteTemplate(deleteTarget.id);
+      setTemplates(prev => prev.map(t => t.id === deleteTarget.id ? { ...t, deletedAt: new Date().toISOString() } : t));
+      toast({ title: 'Template deleted', description: `"${deleteTarget.name}" has been moved to trash.` });
+      setDeleteTarget(null);
     } catch (err: any) {
       toast({ title: 'Failed to delete template', description: err?.response?.data?.message || err?.message, variant: 'destructive' });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -206,82 +221,35 @@ export default function DashboardTemplates() {
   return (
     <DashboardPageShell
       basePath={basePath}
-      title={showTrash ? 'Templates Trash' : 'Template Library'}
+      title={showTrash ? 'Templates Trash' : 'Templates'}
       pageLabel="Templates"
-      breadcrumbSuffix={
-        <>
-          Templates
-          {showTrash && <span className="text-[#ba1a1a] font-bold ml-1">/ Trash</span>}
-        </>
-      }
       description={
         showTrash
           ? 'Manage and restore deleted templates.'
           : 'Start your next project with a professionally designed, fully customizable template.'
       }
       actions={
-        <>
-          <div className="relative w-full md:w-64">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#76777d]" />
-            <Input
-              placeholder="Search templates..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className={dashboardSearchInputClass}
-            />
-          </div>
-          {isAdminUser && (
+        isAdminUser ? (
+          <>
             <Button
-              variant={showTrash ? 'default' : 'outline'}
+              variant="outline"
               onClick={() => setShowTrash(!showTrash)}
               className={cn(
-                'rounded-lg h-11 px-5 text-sm font-semibold gap-2 transition-all duration-200',
-                showTrash
-                  ? 'bg-[#ba1a1a] text-white hover:bg-[#93000a] shadow-md'
-                  : 'bg-white text-[#1b1b1d] border-[#c6c6cd] hover:bg-[#eae7e9]'
+                dashboardHeroSecondaryClass,
+                showTrash && 'border-rose-400/40 bg-rose-500/20 text-white hover:bg-rose-500/30',
               )}
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="mr-1.5 h-4 w-4 shrink-0" />
               Trash{trashedCount > 0 && ` (${trashedCount})`}
             </Button>
-          )}
-          {isAdminUser && (
-            <Select value={scopeFilter} onValueChange={(v) => setScopeFilter(v as any)}>
-              <SelectTrigger className="w-[140px] h-11 rounded-lg border-[#c6c6cd] bg-white text-[#1b1b1d]">
-                <SelectValue placeholder="All Scopes" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Scopes</SelectItem>
-                <SelectItem value="GLOBAL">Global</SelectItem>
-                <SelectItem value="INSTITUTION">Institution</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-          {isSuperAdmin && institutions.length > 0 && (
-            <Select value={institutionFilter} onValueChange={setInstitutionFilter}>
-              <SelectTrigger className="w-[180px] h-11 rounded-lg border-[#c6c6cd] bg-white text-[#1b1b1d]">
-                <Building2 className="w-4 h-4 mr-2 text-[#76777d]" />
-                <SelectValue placeholder="All Orgs" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Organizations</SelectItem>
-                <SelectItem value="none">No Organization</SelectItem>
-                {institutions.map((org) => (
-                  <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          {isAdminUser && !showTrash && (
-            <GradientButton
-              icon={<Plus className="w-5 h-5" />}
-              onClick={handleOpenCreate}
-              className="whitespace-nowrap rounded-lg h-11"
-            >
-              New Template
-            </GradientButton>
-          )}
-        </>
+            {isAdminUser && !showTrash && (
+              <Button onClick={handleOpenCreate} className={dashboardHeroPrimaryClass}>
+                <Plus className="mr-1.5 h-4 w-4 shrink-0" />
+                New Template
+              </Button>
+            )}
+          </>
+        ) : undefined
       }
     >
       {creatingId && (
@@ -320,6 +288,45 @@ export default function DashboardTemplates() {
           </Button>
         </div>
       )}
+
+      <div className={dashboardToolbarClass}>
+        <div className="relative min-w-0 flex-1">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
+          <Input
+            placeholder="Search templates..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className={cn(dashboardSearchInputClass, 'h-9 rounded-full pl-9')}
+          />
+        </div>
+        {isAdminUser && (
+          <Select value={scopeFilter} onValueChange={(v) => setScopeFilter(v as any)}>
+            <SelectTrigger className="w-full sm:w-[140px] h-9 rounded-full border-[#c6c6cd] bg-white text-[#1b1b1d]">
+              <SelectValue placeholder="All Scopes" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Scopes</SelectItem>
+              <SelectItem value="GLOBAL">Global</SelectItem>
+              <SelectItem value="INSTITUTION">Institution</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
+        {isSuperAdmin && institutions.length > 0 && (
+          <Select value={institutionFilter} onValueChange={setInstitutionFilter}>
+            <SelectTrigger className="w-full sm:w-[180px] h-9 rounded-full border-[#c6c6cd] bg-white text-[#1b1b1d]">
+              <Building2 className="w-4 h-4 mr-2 text-[#76777d]" />
+              <SelectValue placeholder="All Orgs" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Organizations</SelectItem>
+              <SelectItem value="none">No Organization</SelectItem>
+              {institutions.map((org) => (
+                <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
 
       <div className={cn(dashboardFilterScrollClass, 'mb-6 sm:mb-8')}>
         {categories.map(cat => (
@@ -405,53 +412,77 @@ export default function DashboardTemplates() {
                     Deleted
                   </DashboardCardBadge>
                 ) : (
-                  <DashboardCardBadge>{template.category || 'Portfolio'}</DashboardCardBadge>
+                  <DashboardCardBadge position={(showTrash || isAdminUser) ? 'top-left' : 'top-right'}>
+                    {template.category || 'Portfolio'}
+                  </DashboardCardBadge>
                 )}
 
-                <DashboardCardHoverTint />
-
                 {(showTrash || isAdminUser) && (
-                  <DashboardCardOverlay>
-                    {showTrash ? (
-                      <Button
-                        className="bg-emerald-600 text-white font-semibold rounded-lg px-5 h-10 text-sm shadow-lg hover:bg-emerald-700 transition-all"
-                        onClick={e => { e.stopPropagation(); handleRestoreTemplate(template); }}
-                      >
-                        <RotateCcw className="w-4 h-4 mr-1.5" /> Restore
-                      </Button>
-                    ) : (
-                      <>
-                        <Button
-                          className={dashboardCardActionSecondaryClass}
-                          onClick={e => { e.stopPropagation(); handleOpenEdit(template); }}
+                  <div
+                    className="absolute right-2 top-2 z-20 sm:right-3 sm:top-3"
+                    onClick={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          type="button"
+                          title="Template actions"
+                          aria-label="Template actions"
+                          className="flex h-8 w-8 items-center justify-center rounded-full border border-white/80 bg-white/95 text-[#0F172A] shadow-sm transition-colors hover:bg-white"
                         >
-                          Edit
-                        </Button>
-                        <Button
-                          className={dashboardCardActionDangerClass}
-                          onClick={e => { e.stopPropagation(); handleDeleteTemplate(template); }}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </>
-                    )}
-                  </DashboardCardOverlay>
+                          <MoreVertical className="h-4 w-4" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-44 rounded-xl p-1.5">
+                        {showTrash ? (
+                          <DropdownMenuItem
+                            className="cursor-pointer gap-2 rounded-lg"
+                            onClick={(e) => { e.stopPropagation(); handleRestoreTemplate(template); }}
+                          >
+                            <RotateCcw className="h-4 w-4" /> Restore
+                          </DropdownMenuItem>
+                        ) : (
+                          <>
+                            <DropdownMenuItem
+                              className="cursor-pointer gap-2 rounded-lg"
+                              onClick={(e) => { e.stopPropagation(); handleOpenEdit(template); }}
+                            >
+                              <Edit2 className="h-4 w-4" /> Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="cursor-pointer gap-2 rounded-lg text-rose-600 focus:bg-rose-50 focus:text-rose-700"
+                              onClick={(e) => { e.stopPropagation(); setDeleteTarget(template); }}
+                            >
+                              <Trash2 className="h-4 w-4" /> Delete
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 )}
               </DashboardCardMedia>
 
               <DashboardCardBody>
-                <div className="flex items-center justify-between mb-1">
-                  <DashboardCardTitle className="mb-1">{template.name}</DashboardCardTitle>
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <DashboardCardTitle className="mb-0">{template.name}</DashboardCardTitle>
                   {template.scope === 'INSTITUTION' && (
                     <span className={dashboardCardTagClass}>Institution</span>
                   )}
                 </div>
+                <DashboardCardMeta
+                  date={formatDashboardCardDate(
+                    template.updatedAt || template.updated_at || template.createdAt || template.created_at
+                  )}
+                  status={getDashboardPublishStatus({
+                    status: template.status,
+                    deleted: Boolean(template.deletedAt),
+                    isTemplate: true,
+                  })}
+                />
 
-                <DashboardCardDescription>
-                  {template.description || 'A clean, typography-focused layout ideal for your next digital project.'}
-                </DashboardCardDescription>
-
-                <DashboardCardFooter>
+                <DashboardCardFooter className="flex-col sm:flex-row">
                   <DashboardCardSecondaryAction
                     onClick={(e) => {
                       e.stopPropagation();
@@ -496,6 +527,42 @@ export default function DashboardTemplates() {
           onSuccess={handleFormSuccess}
         />
       )}
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open && !isDeleting) setDeleteTarget(null); }}>
+        <AlertDialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl p-5 sm:p-6">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-[#0F172A]">
+              <AlertTriangle className="h-5 w-5 shrink-0 text-rose-500" />
+              Delete template?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will move “{deleteTarget?.name}” to trash. You can restore it later from Trash.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <AlertDialogCancel disabled={isDeleting} className="mt-0 w-full sm:w-auto">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void handleDeleteTemplate();
+              }}
+              disabled={isDeleting}
+              className="w-full bg-rose-600 text-white hover:bg-rose-700 sm:w-auto"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting…
+                </>
+              ) : (
+                'Delete'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardPageShell>
   );
 }

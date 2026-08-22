@@ -2,36 +2,45 @@
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import type { DashboardOutletContext } from '@/layouts/DashboardLayout';
 import {
-    Plus, Globe, Trash2,
-    CheckCircle, Search,
-    ArrowRight, LayoutTemplate, Menu, ListFilter,
-    Loader2
+    Plus, Globe, Trash2, MoreVertical, Edit2, Search, MessageSquare,
+    ArrowRight, LayoutTemplate, ListFilter, CheckCircle, Loader2, AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from "@/components/ui/use-toast";
 import useBuilderStore from '@/store/useBuilderStore';
-import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { SiteThumbnail } from '@/components/dashboard/SiteThumbnail';
+import {
+    DashboardHeroHeader,
+    dashboardHeroPrimaryClass,
+} from '@/components/dashboard/DashboardHeroHeader';
 import {
     DashboardCard,
     DashboardCardMedia,
     DashboardCardBody,
     DashboardCardTitle,
-    DashboardCardDescription,
     DashboardCardFooter,
     DashboardCardBadge,
-    DashboardCardOverlay,
-    DashboardCardHoverTint,
+    DashboardCardMeta,
     DashboardCardPrimaryAction,
     DashboardCardSecondaryAction,
-    dashboardCardActionSecondaryClass,
-    dashboardCardActionDangerClass,
+    formatDashboardCardDate,
+    getDashboardPublishStatus,
 } from '@/components/dashboard/DashboardCard';
 import { templatesList } from '@/lib/templates';
 import templateApi from '@/api/templates';
@@ -45,13 +54,14 @@ const WebsiteCard = ({ site, onDelete, onEdit, onViewMessages, dbTemplates = [] 
     ) || null;
     const thumbnailImage = localTemplate?.image || dbTemplate?.image || null;
     const rawCategory = dbTemplate?.category || localTemplate?.category;
-    const category = rawCategory && rawCategory !== 'All' ? rawCategory : (site.status || 'Project');
-    const description =
-        dbTemplate?.description
-        || localTemplate?.desc
-        || (site.lastEdited
-            ? `Last edited ${format(new Date(site.lastEdited), 'MMM d, p')}`
-            : 'A website project ready to customize in the editor.');
+    const category = rawCategory && rawCategory !== 'All' ? rawCategory : 'Project';
+    const projectDate = formatDashboardCardDate(site.lastEdited || site.updated_at || site.created_at);
+    const publishStatus = getDashboardPublishStatus({
+        status: site.status,
+        deleted: site.status?.toLowerCase() === 'deleted',
+        publishedUrl: site.publishedUrl,
+        publishedVersionId: site.builderMeta?.currentPublishedVersionId,
+    });
 
     return (
         <DashboardCard interactive onClick={onEdit}>
@@ -72,32 +82,57 @@ const WebsiteCard = ({ site, onDelete, onEdit, onViewMessages, dbTemplates = [] 
                     </div>
                 )}
 
-                <DashboardCardBadge>{category}</DashboardCardBadge>
-                <DashboardCardHoverTint />
-                <DashboardCardOverlay>
-                    <Button
-                        className={dashboardCardActionSecondaryClass}
-                        onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                    >
-                        Edit
-                    </Button>
-                    <Button
-                        className={dashboardCardActionDangerClass}
-                        onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                    >
-                        <Trash2 className="w-4 h-4" />
-                    </Button>
-                </DashboardCardOverlay>
+                <DashboardCardBadge position="top-left">{category}</DashboardCardBadge>
+                <div
+                    className="absolute right-2 top-2 z-20 sm:right-3 sm:top-3"
+                    onClick={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                >
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button
+                                type="button"
+                                title="Project actions"
+                                aria-label="Project actions"
+                                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/80 bg-white/95 text-[#0F172A] shadow-sm transition-colors hover:bg-white"
+                            >
+                                <MoreVertical className="h-4 w-4" />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44 rounded-xl p-1.5">
+                            <DropdownMenuItem
+                                className="cursor-pointer gap-2 rounded-lg"
+                                onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                            >
+                                <Edit2 className="h-4 w-4" /> Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="cursor-pointer gap-2 rounded-lg"
+                                onClick={(e) => { e.stopPropagation(); onViewMessages(); }}
+                            >
+                                <MessageSquare className="h-4 w-4" /> Messages
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="cursor-pointer gap-2 rounded-lg text-rose-600 focus:bg-rose-50 focus:text-rose-700"
+                                onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                            >
+                                <Trash2 className="h-4 w-4" /> Delete
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             </DashboardCardMedia>
 
             <DashboardCardBody>
                 <DashboardCardTitle>{site.name}</DashboardCardTitle>
-                <DashboardCardDescription>{description}</DashboardCardDescription>
-                <DashboardCardFooter>
+                <DashboardCardMeta date={projectDate} status={publishStatus} />
+                <DashboardCardFooter className="flex-col sm:flex-row">
                     <DashboardCardSecondaryAction
+                        className="inline-flex items-center justify-center gap-1.5"
                         onClick={(e) => { e.stopPropagation(); onViewMessages(); }}
                     >
-                        Configure
+                        <MessageSquare className="h-4 w-4" />
+                        Messages
                     </DashboardCardSecondaryAction>
                     <DashboardCardPrimaryAction
                         onClick={(e) => { e.stopPropagation(); onEdit(); }}
@@ -111,17 +146,29 @@ const WebsiteCard = ({ site, onDelete, onEdit, onViewMessages, dbTemplates = [] 
 };
 
 const EmptyState = ({ onAction }) => (
-    <div className="h-[400px] flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-[2rem] bg-white p-12 text-center transition-all hover:border-primary/20 hover:bg-slate-50/50">
-        <div className="w-20 h-20 bg-primary/5 rounded-3xl flex items-center justify-center mb-6">
-            <Globe className="w-10 h-10 text-primary" />
+    <div className="flex h-[400px] flex-col items-center justify-center rounded-[2rem] border-2 border-dashed border-slate-200 bg-white p-8 text-center sm:p-12">
+        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/5">
+            <Globe className="h-10 w-10 text-primary" />
         </div>
         <h3 className="text-2xl font-bold text-slate-900">Your creative journey starts here</h3>
-        <p className="text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">
+        <p className="mx-auto mt-2 max-w-sm leading-relaxed text-slate-500">
             Every great brand starts with a single page. Build yours with our visual canvas.
         </p>
-        <Button size="lg" className="mt-6 rounded-full px-8 gap-2 shadow-lg shadow-primary/20" onClick={onAction}>
-            <Plus className="w-5 h-5" /> Create Your First Site
+        <Button size="lg" className="mt-6 gap-2 rounded-full px-8 shadow-lg shadow-primary/20" onClick={onAction}>
+            <Plus className="h-5 w-5" /> Create Your First Site
         </Button>
+    </div>
+);
+
+const FilterEmptyState = ({ filterLabel }: { filterLabel: string }) => (
+    <div className="flex min-h-[280px] flex-col items-center justify-center rounded-[2rem] border-2 border-dashed border-slate-200 bg-white px-6 py-12 text-center sm:min-h-[320px]">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F4F4F5] text-[#0F172A]">
+            <Globe className="h-7 w-7" />
+        </div>
+        <h3 className="text-lg font-bold text-[#0F172A] sm:text-xl">No project available with this filter</h3>
+        <p className="mt-2 max-w-sm text-sm text-slate-500">
+            There are no {filterLabel} projects to show right now. Try another filter or create a new project.
+        </p>
     </div>
 );
 
@@ -133,7 +180,6 @@ const UserDashboard = () => {
     const fetchWebsites = useBuilderStore((state) => state.fetchWebsites);
     const createWebsite = useBuilderStore((state) => state.createWebsite);
     const deleteWebsite = useBuilderStore((state) => state.deleteWebsite);
-    const isMobile = useIsMobile();
     const user = (() => {
         try {
             return JSON.parse(localStorage.getItem("user") || 'null');
@@ -143,10 +189,11 @@ const UserDashboard = () => {
     })();
     const {
         isAdmin = false,
-        setIsSidebarOpen = () => {},
+        setIsAdmin = () => { },
         userName = 'User',
-        setUserName = () => {},
+        setUserName = () => { },
     } = useOutletContext<DashboardOutletContext>() || {};
+    const isAdminRole = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' || user?.role === 'INSTITUTION_ADMIN';
     const [tempUserName, setTempUserName] = useState(user?.name || 'User');
     const [tempUserEmail] = useState(user?.email || '');
 
@@ -164,6 +211,8 @@ const UserDashboard = () => {
     // DB templates for New Project dialog
     const [dbTemplates, setDbTemplates] = useState<any[]>([]);
     const [isCreatingSite, setIsCreatingSite] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Γ£à Listen for userUpdated event (userName itself is kept in sync by DashboardLayout)
     useEffect(() => {
@@ -242,6 +291,24 @@ const UserDashboard = () => {
         return tempWebsites;
     }, [siteList, searchQuery, sortBy, filterStatus]);
 
+    const handleConfirmDelete = async () => {
+        if (!deleteTarget?.id || isDeleting) return;
+        try {
+            setIsDeleting(true);
+            await deleteWebsite(deleteTarget.id);
+            toast({ title: 'Project deleted', description: `"${deleteTarget.name}" has been deleted.` });
+            setDeleteTarget(null);
+        } catch (err: any) {
+            toast({
+                title: 'Could not delete project',
+                description: err?.message || 'Please try again.',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     const handleCreateSite = async () => {
         if (!newSiteName.trim() || isCreatingSite) return;
         try {
@@ -264,195 +331,223 @@ const UserDashboard = () => {
 
     return (
         <>
-            {/* ΓöÇΓöÇ User dashboard header ΓöÇΓöÇ */}
-            <div className="flex items-center justify-between gap-4 mb-8">
-                <div className="flex items-center gap-3">
-                    {isMobile && (
-                        <Button variant="ghost" size="icon" className="lg:hidden -ml-2"
-                            onClick={() => setIsSidebarOpen(true)}>
-                            <Menu className="w-5 h-5" />
-                        </Button>
+            <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+                <DashboardHeroHeader
+                    title="Dashboard"
+                    description={`Good day, ${userName.split(' ')[0]}.`}
+                    actions={
+                        <>
+                            <DialogTrigger asChild>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsDialogOpen(true)}
+                                    className={cn('inline-flex items-center justify-center', dashboardHeroPrimaryClass)}
+                                >
+                                    <Plus className="mr-1.5 h-4 w-4 shrink-0" />
+                                    New Project
+                                </button>
+                            </DialogTrigger>
+                        </>
+                    }
+                />
+                <DialogContent
+                    className={cn(
+                        'flex flex-col gap-0 w-[calc(100vw-1.5rem)] sm:max-w-5xl p-0 overflow-hidden',
+                        'max-h-[min(92dvh,44rem)] rounded-2xl sm:rounded-[1.5rem]',
+                        'bg-white border-slate-100 shadow-2xl',
+                        '[&>button]:right-3 [&>button]:top-3 [&>button]:text-[#0F172A] [&>button]:hover:bg-slate-100',
                     )}
-                    <div>
-                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">
-                            Good day, {userName.split(' ')[0]}
-                        </h2>
-                        <p className="text-slate-400 text-sm mt-0.5">
-                            {siteList.filter((w) => w.status?.toLowerCase() !== 'deleted').length} active projects
-                        </p>
-                    </div>
-                </div>
-                <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-                    <DialogTrigger asChild>
-                        <button
-                            onClick={() => setIsDialogOpen(true)}
-                            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-700 text-white font-semibold text-sm px-4 py-2.5 rounded-xl shadow-sm active:scale-[0.98] transition-all shrink-0"
-                        >
-                            <Plus className="w-4 h-4" /> New Project
-                        </button>
-                    </DialogTrigger>
-                        <DialogContent className="sm:max-w-5xl rounded-[2rem] p-0 overflow-hidden bg-white border-slate-100 shadow-2xl">
-                            <DialogTitle className="sr-only">Create New Website</DialogTitle>
-                            <div className="flex flex-col md:flex-row h-[700px] w-full">
-                                <div className="w-full md:w-1/3 bg-white p-10 flex flex-col pt-12 border-r border-slate-100 relative z-10 shadow-xl rounded-l-[2rem]">
-                                    <div>
-                                        <div className="w-14 h-14 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-                                            <LayoutTemplate className="w-7 h-7" />
-                                        </div>
-                                        <h2 className="text-[2rem] font-black text-slate-900 tracking-tight mb-3 leading-none">Create a Project</h2>
-                                        <p className="text-slate-500 font-medium text-sm leading-relaxed mb-10">
-                                            Give your masterpiece a name and select a starting template to kick things off.
-                                        </p>
-                                    </div>
-                                    <div className="mt-4 space-y-4 flex-1">
-                                        <div className="relative group/input-wrapper">
-                                            <label className="text-xs font-bold text-slate-800 mb-2 block uppercase tracking-wider">Project Name</label>
-                                            <Input
-                                                placeholder="e.g., My Awesome Site"
-                                                value={newSiteName}
-                                                onChange={(e) => setNewSiteName(e.target.value)}
-                                                className="h-14 bg-slate-50 border-slate-200 rounded-xl px-4 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all font-medium text-slate-900 shadow-inner"
-                                                onKeyDown={(e) => e.key === 'Enter' && handleCreateSite()}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="mt-auto pt-8 border-t border-slate-100">
-                                        <Button
-                                            onClick={handleCreateSite}
-                                            disabled={!newSiteName.trim() || isCreatingSite}
-                                            className="w-full h-14 font-bold text-lg flex items-center justify-center gap-2 group/button-create-site active:scale-[0.98] rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/30 transition-all">
-                                            {isCreatingSite ? (
-                                                <><Loader2 className="w-5 h-5 animate-spin" /> Creating...
-                                                </>
-                                            ) : (
-                                                <>Start Building
-                                                <ArrowRight className="w-5 h-5 group-hover/button-create-site:translate-x-1 transition-transform" />
-                                                </>
-                                            )}
-                                        </Button>
-                                    </div>
+                >
+                    <DialogTitle className="sr-only">Create New Website</DialogTitle>
+                    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain md:flex-row md:overflow-hidden">
+                        <div className="flex w-full shrink-0 flex-col border-b border-slate-100 bg-white p-5 pt-12 sm:p-8 sm:pt-12 md:w-[38%] md:border-b-0 md:border-r md:p-10">
+                            <div>
+                                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0F172A]/10 text-[#0F172A] sm:mb-6 sm:h-14 sm:w-14">
+                                    <LayoutTemplate className="h-5 w-5 sm:h-7 sm:w-7" />
                                 </div>
-
-                                <div className="w-full md:w-2/3 bg-slate-50 p-10 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                                    <div className="flex items-center justify-between mb-8">
-                                        <h3 className="text-xl font-bold text-slate-900 tracking-tight">Select a Template</h3>
-                                        <span className="text-xs font-bold text-slate-500 px-4 py-1.5 bg-white rounded-full border border-slate-200 shadow-sm uppercase tracking-wider">
-                                            {dbTemplates.length} options
-                                        </span>
-                                    </div>
-
-
-
-                                    {/* DB Templates */}
-                                    {dbTemplates.length > 0 && (
-                                        <>
-                                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Custom Templates</p>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-20">
-                                                {dbTemplates.map((tpl) => (
-                                                    <div
-                                                        key={tpl.id}
-                                                        onClick={() => setSelectedTemplate(tpl.id)}
-                                                        className={cn(
-                                                            "group/template-dialog-card cursor-pointer rounded-[1.5rem] overflow-hidden transition-all duration-300 relative border-[3px] bg-white flex flex-col",
-                                                            selectedTemplate === tpl.id
-                                                                ? "border-blue-500 shadow-[0_10px_40px_rgba(59,130,246,0.15)] scale-[1.02]"
-                                                                : "border-transparent border-slate-200 hover:border-blue-300 hover:shadow-xl opacity-80 hover:opacity-100"
-                                                        )}
-                                                    >
-                                                        <div className="aspect-[4/3] bg-slate-100 relative overflow-hidden">
-                                                            {tpl.image ? (
-                                                                <img
-                                                                    src={tpl.image}
-                                                                    alt={tpl.name}
-                                                                    className={cn("w-full h-full object-cover transition-transform duration-700", selectedTemplate === tpl.id ? "scale-105" : "group-hover/template-dialog-card:scale-105")}
-                                                                />
-                                                            ) : (
-                                                                <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50">
-                                                                    <LayoutTemplate className="w-12 h-12 text-indigo-200" />
-                                                                    <p className="text-xs text-indigo-300 font-medium mt-2">{tpl.category || 'Template'}</p>
-                                                                </div>
-                                                            )}
-                                                            <AnimatePresence>
-                                                                {selectedTemplate === tpl.id && (
-                                                                    <motion.div
-                                                                        initial={{ scale: 0, opacity: 0 }}
-                                                                        animate={{ scale: 1, opacity: 1 }}
-                                                                        exit={{ scale: 0, opacity: 0 }}
-                                                                        className="absolute top-4 right-4 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-lg"
-                                                                    >
-                                                                        <CheckCircle className="w-5 h-5 text-white" />
-                                                                    </motion.div>
-                                                                )}
-                                                            </AnimatePresence>
-                                                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover/template-dialog-card:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                                                                <p className="text-white font-semibold text-sm drop-shadow-md">{tpl.description || ''}</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="p-6 flex items-center gap-4 bg-white relative z-10 border-t border-slate-100">
-                                                            <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center transition-colors shadow-sm", selectedTemplate === tpl.id ? "bg-blue-100 text-blue-600" : "bg-slate-50 text-slate-500")}>
-                                                                <LayoutTemplate className="w-6 h-6" />
-                                                            </div>
-                                                            <div>
-                                                                <h4 className={cn("font-bold text-lg transition-colors leading-tight", selectedTemplate === tpl.id ? "text-slate-900" : "text-slate-700")}>{tpl.name}</h4>
-                                                                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">{tpl.category || 'Custom'}</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </>
-                                    )}
+                                <h2 className="mb-2 text-2xl font-black leading-none tracking-tight text-[#0F172A] sm:mb-3 sm:text-[2rem]">
+                                    Create a Project
+                                </h2>
+                                <p className="mb-5 text-sm font-medium leading-relaxed text-slate-500 sm:mb-8">
+                                    Give your masterpiece a name and select a starting template to kick things off.
+                                </p>
+                            </div>
+                            <div className="flex-1 space-y-4">
+                                <div>
+                                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-[#0F172A]">
+                                        Project Name
+                                    </label>
+                                    <Input
+                                        placeholder="e.g., My Awesome Site"
+                                        value={newSiteName}
+                                        onChange={(e) => setNewSiteName(e.target.value)}
+                                        className="h-12 rounded-xl border-slate-200 bg-slate-50 px-4 font-medium text-slate-900 shadow-inner transition-all focus:bg-white focus-visible:border-[#0F172A] focus-visible:ring-2 focus-visible:ring-[#0F172A]/20 sm:h-14"
+                                        onKeyDown={(e) => e.key === 'Enter' && handleCreateSite()}
+                                    />
                                 </div>
                             </div>
-                        </DialogContent>
-                    </Dialog>
-                </div>
+                            <div className="mt-5 border-t border-slate-100 pt-5 sm:mt-8 sm:pt-8">
+                                <Button
+                                    onClick={handleCreateSite}
+                                    disabled={!newSiteName.trim() || isCreatingSite}
+                                    className="group/button-create-site flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#0F172A] text-base font-bold text-white shadow-lg shadow-[#0F172A]/20 transition-all hover:bg-[#1e293b] active:scale-[0.98] sm:h-14 sm:text-lg"
+                                >
+                                    {isCreatingSite ? (
+                                        <>
+                                            <Loader2 className="h-5 w-5 animate-spin" /> Creating...
+                                        </>
+                                    ) : (
+                                        <>
+                                            Start Building
+                                            <ArrowRight className="h-5 w-5 transition-transform group-hover/button-create-site:translate-x-1" />
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="min-h-0 flex-1 bg-[#F8FAFC] p-5 sm:p-8 md:overflow-y-auto md:overscroll-contain md:p-10">
+                            <div className="mb-5 flex items-center justify-between gap-3 sm:mb-8">
+                                <h3 className="text-lg font-bold tracking-tight text-[#0F172A] sm:text-xl">Select a Template</h3>
+                                <span className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 shadow-sm sm:px-4 sm:text-xs">
+                                    {dbTemplates.length} options
+                                </span>
+                            </div>
+
+                            {dbTemplates.length > 0 ? (
+                                <>
+                                    <p className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400 sm:mb-4">Custom Templates</p>
+                                    <div className="grid grid-cols-1 gap-4 pb-6 sm:grid-cols-2 sm:gap-6 sm:pb-8">
+                                        {dbTemplates.map((tpl) => (
+                                            <div
+                                                key={tpl.id}
+                                                onClick={() => setSelectedTemplate(tpl.id)}
+                                                className={cn(
+                                                    'group/template-dialog-card relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border-[3px] bg-white transition-all duration-300',
+                                                    selectedTemplate === tpl.id
+                                                        ? 'scale-[1.01] border-[#0F172A] shadow-[0_10px_40px_rgba(15,23,42,0.12)]'
+                                                        : 'border-slate-200 opacity-90 hover:border-[#0F172A]/40 hover:opacity-100 hover:shadow-xl',
+                                                )}
+                                            >
+                                                <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 sm:aspect-[4/3]">
+                                                    {tpl.image ? (
+                                                        <img
+                                                            src={tpl.image}
+                                                            alt={tpl.name}
+                                                            className={cn(
+                                                                'h-full w-full object-cover transition-transform duration-700',
+                                                                selectedTemplate === tpl.id ? 'scale-105' : 'group-hover/template-dialog-card:scale-105',
+                                                            )}
+                                                        />
+                                                    ) : (
+                                                        <div className="flex h-full w-full flex-col items-center justify-center bg-[#F4F4F5]">
+                                                            <LayoutTemplate className="h-10 w-10 text-slate-300 sm:h-12 sm:w-12" />
+                                                            <p className="mt-2 text-xs font-medium text-slate-400">{tpl.category || 'Template'}</p>
+                                                        </div>
+                                                    )}
+                                                    <AnimatePresence>
+                                                        {selectedTemplate === tpl.id && (
+                                                            <motion.div
+                                                                initial={{ scale: 0, opacity: 0 }}
+                                                                animate={{ scale: 1, opacity: 1 }}
+                                                                exit={{ scale: 0, opacity: 0 }}
+                                                                className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-[#0F172A] shadow-lg sm:right-4 sm:top-4 sm:h-8 sm:w-8"
+                                                            >
+                                                                <CheckCircle className="h-4 w-4 text-white sm:h-5 sm:w-5" />
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                </div>
+                                                <div className="relative z-10 flex items-center gap-3 border-t border-slate-100 bg-white p-4 sm:gap-4 sm:p-6">
+                                                    <div className={cn(
+                                                        'flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl shadow-sm transition-colors sm:h-12 sm:w-12',
+                                                        selectedTemplate === tpl.id ? 'bg-[#0F172A]/10 text-[#0F172A]' : 'bg-slate-50 text-slate-500',
+                                                    )}>
+                                                        <LayoutTemplate className="h-5 w-5 sm:h-6 sm:w-6" />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <h4 className={cn(
+                                                            'truncate text-base font-bold leading-tight transition-colors sm:text-lg',
+                                                            selectedTemplate === tpl.id ? 'text-[#0F172A]' : 'text-slate-700',
+                                                        )}>
+                                                            {tpl.name}
+                                                        </h4>
+                                                        <p className="mt-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                                            {tpl.category || 'Custom'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-12 text-center">
+                                    <LayoutTemplate className="mb-3 h-10 w-10 text-slate-300" />
+                                    <p className="text-sm font-medium text-slate-500">No templates yet. You can still start from a blank project.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             {/* Search and Filters */}
-            <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
-                <div className="relative flex-1 w-full">
-                    <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <div className="mb-6 flex flex-col gap-3">
+                <div className="relative w-full">
+                    <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <Input
                         placeholder="Search projects..."
-                        className="pl-10 w-full h-12 bg-white border-slate-200 rounded-full shadow-md shadow-slate-200/50 focus:ring-primary/20 focus:shadow-lg focus:shadow-slate-300/50 transition-all"
+                        className="h-11 w-full rounded-full border-slate-200 bg-white pl-10 text-sm shadow-sm focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/10"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
 
-                <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-full md:w-[160px] h-12 rounded-full bg-white border-slate-200 shadow-md shadow-slate-200/50 focus:ring-primary/20 focus:shadow-lg focus:shadow-slate-300/50 transition-all flex items-center justify-between px-4">
-                        <ListFilter className="w-4 h-4 text-slate-400" />
-                        <SelectValue placeholder="Sort By" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl bg-white border-slate-200 shadow-lg">
-                        <SelectItem value="recent">Recent</SelectItem>
-                        <SelectItem value="name">Name</SelectItem>
-                    </SelectContent>
-                </Select>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                        <SelectTrigger className="h-11 w-full rounded-full border-slate-200 bg-white px-4 shadow-sm sm:w-[160px]">
+                            <ListFilter className="mr-2 h-4 w-4 text-slate-400" />
+                            <SelectValue placeholder="Sort By" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-slate-200 bg-white shadow-lg">
+                            <SelectItem value="recent">Recent</SelectItem>
+                            <SelectItem value="name">Name</SelectItem>
+                        </SelectContent>
+                    </Select>
 
-                <div className="flex items-center gap-2">
-                    {['all', 'draft', 'published', 'deleted'].map((status) => (
-                        <Button
-                            key={status}
-                            variant={filterStatus === status ? 'default' : 'outline'}
-                            className={cn(
-                                "rounded-full h-10 px-4 text-sm font-semibold capitalize",
-                                filterStatus === status
-                                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20"
-                                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700",
-                                "transition-all duration-200"
-                            )}
-                            onClick={() => setFilterStatus(status)}
-                        >
-                            {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
-                        </Button>
-                    ))}
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                        {['all', 'draft', 'published', 'deleted'].map((status) => (
+                            <button
+                                key={status}
+                                type="button"
+                                className={cn(
+                                    'h-9 shrink-0 rounded-full border px-3.5 text-xs font-semibold capitalize sm:h-10 sm:px-4 sm:text-sm',
+                                    filterStatus === status
+                                        ? 'border-[#0F172A] bg-[#0F172A] text-white'
+                                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50',
+                                )}
+                                onClick={() => setFilterStatus(status)}
+                            >
+                                {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
-            {siteList.filter((w) => w.status?.toLowerCase() !== 'deleted').length === 0 ? (
+            {siteList.filter((w) => w.status?.toLowerCase() !== 'deleted').length === 0 && filterStatus === 'all' && !searchQuery.trim() ? (
                 <EmptyState onAction={() => setIsDialogOpen(true)} />
+            ) : filteredWebsites.length === 0 ? (
+                <FilterEmptyState
+                    filterLabel={
+                        searchQuery.trim()
+                            ? 'matching'
+                            : filterStatus === 'all'
+                                ? 'active'
+                                : filterStatus
+                    }
+                />
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredWebsites.map((site, index) => (
@@ -461,13 +556,49 @@ const UserDashboard = () => {
                             site={site}
                             index={index}
                             dbTemplates={dbTemplates}
-                            onDelete={() => deleteWebsite(site.id)}
+                            onDelete={() => setDeleteTarget(site)}
                             onEdit={() => navigate(`/builder/${site.id}`)}
                             onViewMessages={() => navigate(`/dashboard/messages?websiteId=${site.id}`)}
                         />
                     ))}
                 </div>
             )}
+
+            <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open && !isDeleting) setDeleteTarget(null); }}>
+                <AlertDialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl p-5 sm:p-6">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2 text-[#0F172A]">
+                            <AlertTriangle className="h-5 w-5 shrink-0 text-rose-500" />
+                            Delete project?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will delete “{deleteTarget?.name}”. You can restore it later from Deleted if needed.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                        <AlertDialogCancel disabled={isDeleting} className="mt-0 w-full sm:w-auto">
+                            Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => {
+                                e.preventDefault();
+                                void handleConfirmDelete();
+                            }}
+                            disabled={isDeleting}
+                            className="w-full bg-rose-600 text-white hover:bg-rose-700 sm:w-auto"
+                        >
+                            {isDeleting ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Deleting…
+                                </>
+                            ) : (
+                                'Delete'
+                            )}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 };
