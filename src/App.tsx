@@ -44,6 +44,7 @@ const DashboardProfile = React.lazy(() => import("./pages/DashboardProfile"));
 import { ScrollToTop } from "./components/utils/ScrollToTop";
 import { JumpToTop } from "./components/ui/JumpToTop";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { AuthSessionProvider } from "./components/auth/AuthSessionProvider";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
@@ -56,6 +57,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <AuthSessionProvider>
           <ScrollToTop />
           <JumpToTop />
           <Suspense fallback={<div className="flex h-screen w-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
@@ -114,6 +116,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
+          </AuthSessionProvider>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

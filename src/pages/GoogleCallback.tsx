@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { googleLogin } from "../api/auth";
+import { getDashboardPath, setStoredUser } from "@/lib/authSession";
 
 export default function GoogleCallback() {
   const navigate = useNavigate();
@@ -19,8 +20,8 @@ export default function GoogleCallback() {
 
     googleLogin(accessToken)
       .then((res) => {
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-        navigate("/dashboard");
+        setStoredUser(res.data.user);
+        navigate(getDashboardPath(res.data.user));
       })
       .catch((err) => {
         console.error("Google login error:", err);

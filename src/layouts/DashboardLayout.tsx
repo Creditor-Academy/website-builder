@@ -16,6 +16,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useIsCompact } from '@/hooks/use-mobile';
 import { logoutUser } from '@/api/auth';
+import { clearStoredUser } from '@/lib/authSession';
 import { DashboardSidebar } from '@/components/Common/sidebar';
 
 export interface DashboardOutletContext {
@@ -96,7 +97,7 @@ const DashboardLayout = () => {
                 console.error(err);
             }
         } finally {
-            localStorage.removeItem("user");
+            clearStoredUser();
             setIsLoggingOut(false);
             setLogoutDialogOpen(false);
             navigate("/");

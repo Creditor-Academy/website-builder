@@ -32,6 +32,34 @@ export const clearCsrfToken = () => {
   csrfTokenPromise = null;
 };
 
+const markSessionExpired = () => {
+  try {
+    sessionStorage.setItem('authRedirectReason', 'session-expired');
+  } catch {
+    /* ignore */
+  }
+};
+
+const clearStoredUserLocal = () => {
+  localStorage.removeItem('user');
+  clearCsrfToken();
+};
+
+const notifySessionExpired = () => {
+  const hadUser = !!localStorage.getItem('user');
+  clearStoredUserLocal();
+  if (!hadUser) return;
+  markSessionExpired();
+  window.dispatchEvent(new CustomEvent('auth:session-expired'));
+};
+
+const redirectToLogin = () => {
+  const { pathname } = window.location;
+  if (pathname !== '/login') {
+    window.location.href = '/login';
+  }
+};
+
 apiClient.interceptors.request.use(async (config) => {
   const method = config.method?.toLowerCase();
   if (method && ['post', 'put', 'patch', 'delete'].includes(method)) {
@@ -68,11 +96,8 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       // Don't retry refresh or login requests
       if (originalRequest.url?.includes('/auth/refresh-token') || originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/google')) {
-        localStorage.removeItem('user');
-        const { pathname } = window.location;
-        if (pathname !== '/login') {
-          window.location.href = '/login';
-        }
+        notifySessionExpired();
+        redirectToLogin();
         return Promise.reject(error);
       }
 
@@ -91,11 +116,8 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError);
-        localStorage.removeItem('user');
-        const { pathname } = window.location;
-        if (pathname !== '/login') {
-          window.location.href = '/login';
-        }
+        notifySessionExpired();
+        redirectToLogin();
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, MouseEvent } from "react";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue, useInView } from "framer-motion";
-import { ChevronDown, ArrowRight, MousePointer2, Sparkles, Menu, X, Zap, LayoutTemplate, Layers, Palette, Move, Sun, Moon } from "lucide-react";
+import { ChevronDown, ArrowRight, MousePointer2, Sparkles, Menu, X, Zap, LayoutTemplate, Layers, Palette, Move, Sun, Moon, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "./Footer";
 import { cn } from "@/lib/utils";
+import { getDashboardPath, validateSession } from "@/lib/authSession";
 
 import { useTheme } from "@/hooks/useTheme";
 
@@ -62,6 +63,7 @@ export default function LandingPage() {
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
 
   const { theme, setTheme, isDark } = useTheme();
 
@@ -69,6 +71,25 @@ export default function LandingPage() {
   useEffect(() => {
     document.body.style.backgroundColor = isDark ? '#020617' : '#f8fafc'; // slate-950 or slate-50
   }, [isDark]);
+
+  // If session cookie is still valid, go straight to the dashboard
+  useEffect(() => {
+    void validateSession().then(({ valid, user }) => {
+      if (valid && user) {
+        navigate(getDashboardPath(user), { replace: true });
+        return;
+      }
+      setIsCheckingSession(false);
+    });
+  }, [navigate]);
+
+  if (isCheckingSession) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-slate-950">
+        <Loader2 className="h-8 w-8 animate-spin text-white" aria-label="Checking session" />
+      </div>
+    );
+  }
 
   // Scroll Animations
   const { scrollYProgress } = useScroll();
