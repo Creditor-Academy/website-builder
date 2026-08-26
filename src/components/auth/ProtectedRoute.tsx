@@ -1,20 +1,20 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-
-function isAuthenticated(): boolean {
-  try {
-    const raw = localStorage.getItem('user');
-    if (!raw) return false;
-    const user = JSON.parse(raw);
-    return !!(user && user.id);
-  } catch {
-    return false;
-  }
-}
+import { Loader2 } from 'lucide-react';
+import { useAuthSession } from '@/components/auth/AuthSessionProvider';
 
 export function ProtectedRoute() {
   const location = useLocation();
+  const { isAuthenticated, isLoading } = useAuthSession();
 
-  if (!isAuthenticated()) {
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-[#fcf8fa]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#131b2e]" aria-label="Checking session" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

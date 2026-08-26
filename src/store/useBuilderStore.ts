@@ -88,7 +88,7 @@ export interface Website {
     id: string;
     name: string;
     lastEdited: string;
-    status: 'Draft' | 'Published';
+    status: 'Draft' | 'Published' | 'DELETED';
     pages: Page[];
     activePageId: string | null;
     templateId?: string;

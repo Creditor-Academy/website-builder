@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import type { DashboardOutletContext } from '@/layouts/DashboardLayout';
 import {
@@ -236,6 +236,18 @@ const UserDashboard = () => {
                 setDbTemplates(flat.filter((t: any) => !t.deletedAt));
             })
             .catch(() => setDbTemplates([]));
+        fetchWebsites(undefined, isAdmin);
+    }, [isAdmin, fetchWebsites]);
+
+    // Fetch DB templates
+    useEffect(() => {
+        templateApi.getWebsiteTemplates()
+            .then(res => {
+                const raw = res.data?.data || res.data || [];
+                const flat: any[] = Array.isArray(raw) ? raw : Object.values(raw).flat();
+                setDbTemplates(flat.filter((t: any) => !t.deletedAt));
+            })
+            .catch(() => setDbTemplates([]));
     }, []);
 
     const handleProfileSave = async () => {
@@ -325,6 +337,7 @@ const UserDashboard = () => {
                 variant: 'destructive',
             });
         } finally {
+            setIsCreatingSite(false);
             setIsCreatingSite(false);
         }
     };
@@ -605,3 +618,4 @@ const UserDashboard = () => {
 
 export { WebsiteCard, EmptyState };
 export default UserDashboard;
+

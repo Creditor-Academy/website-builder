@@ -627,7 +627,7 @@ export default function DashboardUsers() {
 
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           {(['all', 'Active', 'Inactive', 'Suspended'] as const).map(s => (
-            <button
+            <Button
               key={s}
               variant={filterStatus === s ? 'default' : 'outline'}
               className={cn(
@@ -639,7 +639,7 @@ export default function DashboardUsers() {
               onClick={() => setFilterStatus(s)}
             >
               {s === 'all' ? 'All Users' : s}
-            </button>
+            </Button>
           ))}
         </div>
 

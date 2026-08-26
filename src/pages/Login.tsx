@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Eye, LayoutTemplate } from "lucide-react";
+import { ArrowLeft, Eye, LayoutTemplate, Loader2 } from "lucide-react";
 import loginbg from "../assets/login.png";
 import { useGoogleLogin } from "@react-oauth/google";
 import { loginUser, registerUser, forgotPassword, googleLogin } from "../api/auth";
+import {
+  getDashboardPath,
+  setStoredUser,
+  validateSession,
+} from "@/lib/authSession";
 
 // ── Moved outside so React never sees a new component type on re-render ────────
 
@@ -323,6 +328,8 @@ export default function LoginSignup() {
   const [signupData, setSignupData] = useState({ name: "", email: "", password: "" });
   const [isSignup, setIsSignup] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [isLoadingLogin, setIsLoadingLogin] = useState(false);
   const [isLoadingSignup, setIsLoadingSignup] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -335,23 +342,34 @@ export default function LoginSignup() {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotMsg, setForgotMsg] = useState("");
   const [forgotError, setForgotError] = useState("");
-
-  // ── On mount: restore remembered email + skip login if session exists ────────
+  // Restore remembered email + validate cookie session on open
   useEffect(() => {
-    // Auto-fill email if user previously checked Remember Me
+    let active = true;
+
     const savedEmail = localStorage.getItem("rememberedEmail");
     if (savedEmail) {
       setLoginData((prev) => ({ ...prev, email: savedEmail }));
       setRememberMe(true);
     }
 
-    // If user is already logged in and chose Remember Me, go straight to dashboard
-    const savedUser = localStorage.getItem("user");
-    const wasRemembered = localStorage.getItem("rememberMe") === "true";
-    if (savedUser && wasRemembered) {
-      navigate("/dashboard");
-    }
-  }, [navigate]);
+    void validateSession().then(({ valid, user }) => {
+      if (!active) return;
+      if (valid && user) {
+        const from = (location.state as { from?: { pathname?: string } })?.from?.pathname;
+        const redirectTo =
+          from && (from.startsWith('/dashboard') || from.startsWith('/admin') || from.startsWith('/builder'))
+            ? from
+            : getDashboardPath(user);
+        navigate(redirectTo, { replace: true });
+        return;
+      }
+      setIsCheckingSession(false);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [location.state, navigate]);
 
   const handleLogin = async () => {
     setLoginError("");
@@ -359,20 +377,17 @@ export default function LoginSignup() {
       setIsLoadingLogin(true);
       const res = await loginUser(loginData);
 
-      // Always save the user session
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      setStoredUser(res.data.user);
 
       if (rememberMe) {
-        // Save email for auto-fill + flag to skip login next visit
         localStorage.setItem("rememberedEmail", loginData.email);
         localStorage.setItem("rememberMe", "true");
       } else {
-        // User didn't check Remember Me — clear any saved data
         localStorage.removeItem("rememberedEmail");
         localStorage.removeItem("rememberMe");
       }
 
-      navigate("/dashboard");
+      navigate(getDashboardPath(res.data.user));
     } catch (err) {
       console.error(err);
       setLoginError(err.response?.data?.message || err.response?.data?.error || "Incorrect email or password.");
@@ -407,15 +422,11 @@ export default function LoginSignup() {
       try {
         setIsLoadingLogin(true);
         const res = await googleLogin(tokenResponse.access_token);
-        
-        // Save user session
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-        
-        // Google auth doesn't have a "Remember me" option technically, 
-        // but we can just set it to skip login next time
+
+        setStoredUser(res.data.user);
         localStorage.setItem("rememberMe", "true");
-        
-        navigate("/dashboard");
+
+        navigate(getDashboardPath(res.data.user));
       } catch (err: any) {
         console.error(err);
         setLoginError(err.response?.data?.message || err.response?.data?.error || "Google login failed.");
@@ -476,6 +487,14 @@ export default function LoginSignup() {
     setSignupError,
     onGoogleLogin: handleGoogleLogin,
   };
+
+  if (isCheckingSession) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-slate-950">
+        <Loader2 className="h-8 w-8 animate-spin text-white" aria-label="Checking session" />
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-[100svh] w-full flex overflow-hidden bg-slate-950">
