@@ -349,11 +349,10 @@ export default function DashboardWebsites() {
       </div>
 
       <div className="overflow-x-auto rounded-3xl border border-[#E5E7EB] bg-white shadow-sm">
-        <Table className="w-full overflow-hidden">
+        <Table className="w-full">
           <TableHeader className="border-b border-[#E8E8E8] bg-[#F4F4F5]">
             <TableRow className="hover:bg-transparent">
-              <TableHead className="w-[40px] px-2 text-center"><input type="checkbox" className="form-checkbox h-4 w-4 rounded text-[#0F172A]" /></TableHead>
-              <TableHead className="w-[80px] px-4 py-3 text-[#747781]">ID</TableHead>
+              <TableHead className="min-w-[200px] px-4 py-3 text-[#747781]">ID</TableHead>
               <TableHead className="min-w-[200px] px-4 py-3 text-[#747781]">Website</TableHead>
               <TableHead className="min-w-[120px] px-4 py-3 text-[#747781]">Status</TableHead>
               <TableHead className="min-w-[150px] px-4 py-3 text-[#747781]">
@@ -369,23 +368,16 @@ export default function DashboardWebsites() {
               Array.from({ length: 5 }).map((_, i) => <WebsiteShimmer key={i} />)
             ) : filteredWebsites.length > 0 ? (
               filteredWebsites.map((website: any) => (
-                <TableRow key={website.id} className="group h-16 border-b border-[#E8E8E8] hover:bg-[#F4F4F5]/70 transition-all duration-200">
-                  <TableCell className="px-2 text-center"><input type="checkbox" className="form-checkbox h-4 w-4 text-[#0F172A] rounded" /></TableCell>
-                  <TableCell className="font-medium text-[#747781] px-4 py-3">#{website.id.slice(0, 8)}</TableCell>
-                  <TableCell className="flex items-center gap-3 px-4 py-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#F4F4F5] text-[#0F172A] flex items-center justify-center font-bold text-sm border border-[#E5E7EB]/50">
-                      {website.id.slice(-4).toUpperCase()}
-                    </div>
+                <TableRow key={website.id} className="group h-16 border-b border-[#E8E8E8] hover:bg-[#F4F4F5]/70 transition-colors">
+                  <TableCell className="px-4 py-3 font-mono text-sm text-[#747781]">
+                    {website.id}
+                  </TableCell>
+                  <TableCell className="px-4 py-3">
                     <div>
-                      <p className="font-bold text-[#0F172A] leading-none">{website.name}</p>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <Badge variant="outline" className="bg-[#F4F4F5] text-[10px] font-mono font-medium text-[#747781] py-0 px-2 h-5 border-[#E8E8E8]">
-                          {website.id}
-                        </Badge>
-                      </div>
+                      <p className="font-bold leading-none text-[#0F172A]">{website.name}</p>
                       {isAdminView && website.institution && (
-                        <p className="text-[10px] text-[#747781] font-bold uppercase mt-1 tracking-wider">
-                          <Building2 className="w-3 h-3 inline mr-0.5" />{website.institution.name}
+                        <p className="mt-1.5 text-[10px] font-bold uppercase tracking-wider text-[#747781]">
+                          <Building2 className="mr-0.5 inline h-3 w-3" />{website.institution.name}
                         </p>
                       )}
                     </div>
@@ -422,17 +414,17 @@ export default function DashboardWebsites() {
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0 data-[state=open]:bg-[#F4F4F5]">
-                              <MoreVertical className="h-4 w-4 text-[#747781]" />
+                            <Button variant="ghost" className="h-8 w-8 rounded-xl p-0 text-[#747781] hover:bg-[#F4F4F5] hover:text-[#0F172A] hover:shadow-none hover:scale-100 active:scale-100 data-[state=open]:bg-[#F4F4F5] data-[state=open]:text-[#0F172A]">
+                              <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-[#E8E8E8] shadow-lg">
-                            <DropdownMenuItem onClick={() => handleRestore(website)} className="rounded-lg gap-2 cursor-pointer focus:bg-emerald-50 text-emerald-700">
-                              <RotateCcw className="w-4 h-4" /> Restore
+                            <DropdownMenuItem onClick={() => handleRestore(website)} className="cursor-pointer gap-2 rounded-lg text-emerald-700 focus:bg-emerald-50 focus:text-emerald-700">
+                              <RotateCcw className="h-4 w-4" /> Restore
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleDelete(website)} className="rounded-lg gap-2 cursor-pointer text-destructive focus:bg-destructive/5">
-                              <Trash2 className="w-4 h-4" /> Delete Permanently
+                            <DropdownMenuItem onClick={() => handleDelete(website)} className="cursor-pointer gap-2 rounded-lg text-destructive focus:bg-rose-50 focus:text-destructive">
+                              <Trash2 className="h-4 w-4" /> Delete Permanently
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -440,20 +432,20 @@ export default function DashboardWebsites() {
                     ) : (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0 data-[state=open]:bg-[#F4F4F5]">
-                            <MoreVertical className="h-4 w-4 text-[#747781]" />
+                          <Button variant="ghost" className="h-8 w-8 rounded-xl p-0 text-[#747781] hover:bg-[#F4F4F5] hover:text-[#0F172A] hover:shadow-none hover:scale-100 active:scale-100 data-[state=open]:bg-[#F4F4F5] data-[state=open]:text-[#0F172A]">
+                            <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-[#E8E8E8] shadow-lg">
-                          <DropdownMenuItem onClick={() => handleEdit(website)} className="rounded-lg gap-2 cursor-pointer focus:bg-[#F4F4F5]">
-                            <Edit className="w-4 h-4" /> Edit Status
+                          <DropdownMenuItem onClick={() => handleEdit(website)} className="cursor-pointer gap-2 rounded-lg text-[#0F172A] focus:bg-[#F4F4F5] focus:text-[#0F172A]">
+                            <Edit className="h-4 w-4" /> Edit Status
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => navigate(`/builder/${website.id}`)} className="rounded-lg gap-2 cursor-pointer focus:bg-[#F4F4F5]">
-                            <LayoutGrid className="w-4 h-4" /> Open Editor
+                          <DropdownMenuItem onClick={() => navigate(`/builder/${website.id}`)} className="cursor-pointer gap-2 rounded-lg text-[#0F172A] focus:bg-[#F4F4F5] focus:text-[#0F172A]">
+                            <LayoutGrid className="h-4 w-4" /> Open Editor
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => handleDelete(website)} className="rounded-lg gap-2 cursor-pointer text-destructive focus:bg-destructive/5">
-                            <Trash2 className="w-4 h-4" /> Delete
+                          <DropdownMenuItem onClick={() => handleDelete(website)} className="cursor-pointer gap-2 rounded-lg text-destructive focus:bg-rose-50 focus:text-destructive">
+                            <Trash2 className="h-4 w-4" /> Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -463,7 +455,7 @@ export default function DashboardWebsites() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-[#747781]">
+                <TableCell colSpan={5} className="h-24 text-center text-[#747781]">
                   No websites found.
                 </TableCell>
               </TableRow>

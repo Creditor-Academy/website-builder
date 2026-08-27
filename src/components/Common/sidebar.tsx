@@ -468,25 +468,25 @@ function SidebarNav({
         collapsed ? "flex flex-col items-center px-2" : "px-3",
       )}
     >
-      {!collapsed && (
+      {!isAdmin && !collapsed && (
         <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
           Main Menu
         </p>
       )}
-      <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<Globe className="h-4 w-4" />} label={isAdmin ? "Admin Dashboard" : "Dashboard"} to={base} exact />
-      <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<Layout className="h-4 w-4" />} label="Templates" to={`${base}/templates`} />
-      <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<ImageIcon className="h-4 w-4" />} label="Assets" to={`${base}/assets`} />
-      <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<MessageSquare className="h-4 w-4" />} label="Messages" to={`${base}/messages`} />
-      <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<UserIcon className="h-4 w-4" />} label="Profile" to={`${base}/profile`} />
+      
+      {!isAdmin && (
+        <>
+          <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<Layout className="h-4 w-4" />} label="Templates" to={`${base}/templates`} />
+          <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<ImageIcon className="h-4 w-4" />} label="Assets" to={`${base}/assets`} />
+          <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<MessageSquare className="h-4 w-4" />} label="Messages" to={`${base}/messages`} />
+          <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<UserIcon className="h-4 w-4" />} label="Profile" to={`${base}/profile`} />
+        </>
+      )}
 
       {isAdmin && (
         <div className={cn("pt-2", collapsed && "flex flex-col items-center")}>
-          {!collapsed && (
-            <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-              System
-            </p>
-          )}
           {collapsed && <div className="my-1 h-px w-8 bg-white/10" />}
+          <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<Globe className="h-4 w-4" />} label={isAdmin ? "Admin Dashboard" : "Dashboard"} to={base} exact />
           <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<Users className="h-4 w-4" />} label="Users" to="/admin/users" />
           {userRole === "SUPER_ADMIN" && (
             <NavItem collapsed={collapsed} onNavigate={onNavigate} icon={<Building2 className="h-4 w-4" />} label="Organizations" to="/admin/organizations" />

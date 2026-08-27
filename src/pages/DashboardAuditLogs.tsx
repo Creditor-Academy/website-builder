@@ -7,13 +7,44 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Activity, CalendarDays, Key, Server, User as UserIcon } from 'lucide-react';
+import { CalendarDays, Key, Server, User as UserIcon } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import { getAuditLogs } from '../api/audit';
 import { DashboardPageShell, dashboardTableWrapClass } from '@/components/dashboard/DashboardPageShell';
 import { dashboardPanelClass } from '@/components/dashboard/DashboardCard';
+
+function parseMetadata(metadata: unknown): { kind: 'status' | 'name' | 'empty'; value: string; active?: boolean } {
+  if (metadata == null) return { kind: 'empty', value: '—' };
+
+  let data = metadata;
+  if (typeof data === 'string') {
+    try {
+      data = JSON.parse(data);
+    } catch {
+      return { kind: 'name', value: data };
+    }
+  }
+
+  if (typeof data !== 'object' || Array.isArray(data)) {
+    return { kind: 'name', value: String(data) };
+  }
+
+  const meta = data as Record<string, unknown>;
+  if (meta.name != null && String(meta.name).trim() !== '') {
+    return { kind: 'name', value: String(meta.name) };
+  }
+  if (typeof meta.active === 'boolean') {
+    return { kind: 'status', value: meta.active ? 'Active' : 'Inactive', active: meta.active };
+  }
+  if (meta.active != null) {
+    const active = String(meta.active).toLowerCase() === 'true';
+    return { kind: 'status', value: active ? 'Active' : 'Inactive', active };
+  }
+
+  const firstValue = Object.values(meta).find((v) => v != null && typeof v !== 'object');
+  return firstValue != null ? { kind: 'name', value: String(firstValue) } : { kind: 'empty', value: '—' };
+}
 
 export default function DashboardAuditLogs() {
   const { toast } = useToast();
@@ -67,11 +98,6 @@ export default function DashboardAuditLogs() {
                   <UserIcon className="h-4 w-4 text-[#787778]" /> User ID
                 </span>
               </TableHead>
-              <TableHead className="min-w-[150px] px-4 py-3 text-[#747781]">
-                <span className="flex items-center gap-1.5">
-                  <Activity className="h-4 w-4 text-[#787778]" /> Action
-                </span>
-              </TableHead>
               <TableHead className="min-w-[120px] px-4 py-3 text-[#747781]">
                 <span className="flex items-center gap-1.5">
                   <Server className="h-4 w-4 text-[#787778]" /> Entity
@@ -88,21 +114,20 @@ export default function DashboardAuditLogs() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-[#747781]">Loading logs...</TableCell>
+                <TableCell colSpan={5} className="h-24 text-center text-[#747781]">Loading logs...</TableCell>
               </TableRow>
             ) : logs.length > 0 ? (
-              logs.map(log => (
+              logs.map(log => {
+                const meta = parseMetadata(log.metadata);
+                return (
                 <TableRow key={log.id} className="h-16 border-b border-[#E8E8E8]">
-                  <TableCell className="px-4 py-3 text-sm text-[#747781]">
-                    {new Date(log.created_at).toLocaleString()}
+                  <TableCell className="px-4 py-3">
+                    <span className="inline-flex items-center rounded-full border border-[#E5E7EB] bg-[#F4F4F5] px-2.5 py-1 text-xs font-medium text-[#0F172A]">
+                      {new Date(log.created_at).toLocaleString()}
+                    </span>
                   </TableCell>
                   <TableCell className="px-4 py-3 text-sm font-mono text-[#747781]">
                     {log.user_id || 'System'}
-                  </TableCell>
-                  <TableCell className="px-4 py-3">
-                    <Badge variant="outline" className="bg-[#F4F4F5] text-[#0F172A]">
-                      {log.action}
-                    </Badge>
                   </TableCell>
                   <TableCell className="px-4 py-3 text-sm font-medium text-[#0F172A]">
                     {log.entity_type}
@@ -110,18 +135,32 @@ export default function DashboardAuditLogs() {
                   <TableCell className="px-4 py-3 text-sm font-mono text-[#747781]">
                     {log.entity_id || '—'}
                   </TableCell>
-                  <TableCell className="px-4 py-3 text-xs text-[#747781]">
-                    {log.metadata ? (
-                      <pre className="bg-[#F4F4F5] p-2 rounded-md overflow-x-auto max-w-xs whitespace-pre-wrap">
-                        {JSON.stringify(log.metadata, null, 2)}
-                      </pre>
-                    ) : '—'}
+                  <TableCell className="px-4 py-3">
+                    {meta.kind === 'status' ? (
+                      <span
+                        className={cn(
+                          'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold',
+                          meta.active
+                            ? 'border border-emerald-100 bg-emerald-50 text-emerald-700'
+                            : 'border border-rose-100 bg-rose-50 text-rose-600'
+                        )}
+                      >
+                        {meta.value}
+                      </span>
+                    ) : meta.kind === 'name' ? (
+                      <span className="inline-flex max-w-[280px] items-center truncate rounded-full border border-[#E5E7EB] bg-[#F4F4F5] px-2.5 py-1 text-xs font-medium text-[#0F172A]" title={meta.value}>
+                        {meta.value}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-[#747781]">—</span>
+                    )}
                   </TableCell>
                 </TableRow>
-              ))
+                );
+              })
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-[#747781]">
+                <TableCell colSpan={5} className="h-24 text-center text-[#747781]">
                   No audit logs found.
                 </TableCell>
               </TableRow>

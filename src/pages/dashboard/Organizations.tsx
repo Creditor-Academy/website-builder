@@ -720,13 +720,13 @@ const Organizations = () => {
         </DialogContent>
       </Dialog>
 
-      <div className="overflow-hidden">
+      <div>
         <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
           <div className="relative min-w-0 flex-1 max-w-md">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
             <Input
               placeholder="Search organizations..."
-              className="h-9 w-full rounded-full border-[#E5E7EB] bg-white pl-9 text-sm text-[#0F172A] shadow-sm focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/10"
+              className="h-9 w-full rounded-full border border-[#E5E7EB] bg-white pl-9 text-sm text-[#0F172A] shadow-sm hover:border-[#CBD5E1] hover:shadow-none focus:border-[#0F172A] focus:shadow-none focus-visible:ring-2 focus-visible:ring-[#0F172A]/10 focus-visible:ring-offset-0"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -798,22 +798,21 @@ const Organizations = () => {
                 filteredOrgs.map((org) => (
                   <TableRow key={org.id} className="group border-[#E8E8E8] transition-colors hover:bg-[#F8FAFC]">
                     <TableCell className="py-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F4F4F5] text-xs font-bold text-[#0F172A]">
-                          {org.name.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold leading-tight text-[#0F172A]">{org.name}</div>
-                          <div className="text-[11px] font-medium text-[#747781]">{org.email}</div>
-                        </div>
+                      <div className="space-y-1.5">
+                        <span className="inline-flex max-w-[220px] items-center truncate rounded-full border border-[#E5E7EB] bg-[#F4F4F5] px-2.5 py-1 text-xs font-semibold text-[#0F172A]" title={org.name}>
+                          {org.name}
+                        </span>
+                        <div className="pl-1 text-[11px] font-medium text-[#747781]">{org.email}</div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge className={cn(
-                        "rounded-full px-3 py-1 font-semibold text-[10px] uppercase tracking-wider border-none",
-                        org.status === 'APPROVED' ? "bg-emerald-50 text-emerald-700" : 
-                        org.status === 'BLOCKED' ? "bg-rose-50 text-rose-700" : 
-                        "bg-amber-50 text-amber-700"
+                        'rounded-full border-none px-3 py-1 text-[10px] font-semibold uppercase tracking-wider shadow-none',
+                        org.status === 'APPROVED'
+                          ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-700'
+                          : org.status === 'BLOCKED'
+                            ? 'bg-rose-50 text-rose-700 hover:bg-rose-50 hover:text-rose-700'
+                            : 'bg-amber-50 text-amber-700 hover:bg-amber-50 hover:text-amber-700'
                       )}>
                         {org.status}
                       </Badge>
@@ -827,8 +826,10 @@ const Organizations = () => {
                     <TableCell className="text-center font-semibold text-[#0F172A]">
                       {org._count?.templates || 0}
                     </TableCell>
-                    <TableCell className="text-[#747781] font-medium text-sm whitespace-nowrap">
-                      {new Date(org.created_at).toLocaleDateString()}
+                    <TableCell className="whitespace-nowrap px-4 py-3">
+                      <span className="inline-flex items-center rounded-full border border-[#E5E7EB] bg-[#F4F4F5] px-2.5 py-1 text-xs font-medium text-[#0F172A]">
+                        {new Date(org.created_at).toLocaleDateString()}
+                      </span>
                     </TableCell>
                     <TableCell className="px-4 text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -854,42 +855,42 @@ const Organizations = () => {
                               <MoreVertical className="h-3.5 w-3.5 text-[#747781]" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-56 rounded-2xl shadow-2xl border-[#E8E8E8] p-2">
+                          <DropdownMenuContent align="end" className="w-56 rounded-2xl border-[#E8E8E8] bg-white p-2 shadow-lg">
                             <DropdownMenuItem 
-                              className="gap-2 py-3 rounded-xl cursor-pointer font-semibold"
+                              className="cursor-pointer gap-2 rounded-xl py-3 font-semibold text-[#0F172A] focus:bg-[#F4F4F5] focus:text-[#0F172A]"
                               onClick={() => navigate(`/admin/websites?org=${org.id}`)}
                             >
-                              <div className="p-1.5 bg-[#F4F4F5] rounded-lg text-[#0F172A]"><Globe className="w-4 h-4" /></div>
+                              <div className="rounded-lg bg-[#F4F4F5] p-1.5 text-[#0F172A]"><Globe className="h-4 w-4" /></div>
                               Manage Websites
                             </DropdownMenuItem>
                             <DropdownMenuItem 
-                              className="gap-2 py-3 rounded-xl cursor-pointer font-semibold"
+                              className="cursor-pointer gap-2 rounded-xl py-3 font-semibold text-[#0F172A] focus:bg-[#F4F4F5] focus:text-[#0F172A]"
                               onClick={() => navigate(`/admin/users?org=${org.id}`)}
                             >
-                              <div className="p-1.5 bg-[#F4F4F5] rounded-lg text-[#0F172A]"><Users className="w-4 h-4" /></div>
+                              <div className="rounded-lg bg-[#F4F4F5] p-1.5 text-[#0F172A]"><Users className="h-4 w-4" /></div>
                               Manage Users
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              className="gap-2 py-3 rounded-xl cursor-pointer font-medium text-[#747781]"
+                              className="cursor-pointer gap-2 rounded-xl py-3 font-medium text-[#747781] focus:bg-[#F4F4F5] focus:text-[#0F172A]"
                               onClick={() => handleEditClick(org)}
                             >
-                              <Edit className="w-4 h-4" /> Edit Configuration
+                              <Edit className="h-4 w-4" /> Edit Configuration
                             </DropdownMenuItem>
                             {org.status !== 'APPROVED' && (
                               <DropdownMenuItem 
-                                className="gap-2 py-3 rounded-xl cursor-pointer text-emerald-600 focus:text-emerald-700 font-bold"
+                                className="cursor-pointer gap-2 rounded-xl py-3 font-bold text-emerald-600 focus:bg-emerald-50 focus:text-emerald-700"
                                 onClick={() => handleStatusUpdate(org.id, 'APPROVED')}
                               >
-                                <CheckCircle className="w-4 h-4" /> Approve Tenant
+                                <CheckCircle className="h-4 w-4" /> Approve Tenant
                               </DropdownMenuItem>
                             )}
                             {org.status !== 'BLOCKED' && (
                               <DropdownMenuItem 
-                                className="gap-2 py-3 rounded-xl cursor-pointer text-rose-600 focus:text-rose-700 font-bold"
+                                className="cursor-pointer gap-2 rounded-xl py-3 font-bold text-rose-600 focus:bg-rose-50 focus:text-rose-700"
                                 onClick={() => handleStatusUpdate(org.id, 'BLOCKED')}
                               >
-                                <AlertCircle className="w-4 h-4" /> Block Access
+                                <AlertCircle className="h-4 w-4" /> Block Access
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuSeparator />
