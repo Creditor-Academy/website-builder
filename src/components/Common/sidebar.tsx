@@ -549,11 +549,11 @@ export function DashboardSidebar({
   };
 
   const shellClass =
-    "flex flex-col overflow-hidden rounded-3xl bg-[#131924] shadow-[0_12px_40px_-12px_rgba(15,23,42,0.45)]";
+    "flex flex-col overflow-hidden rounded-3xl bg-[#0F172A] shadow-[0_12px_40px_-12px_rgba(15,23,42,0.45)]";
 
   const inner = (isCollapsed: boolean, closeable: boolean) => (
     <>
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-[38%] origin-bottom-right skew-x-[-18deg] bg-[#202838]/70" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-[38%] origin-bottom-right skew-x-[-18deg] bg-white/[0.06]" />
       <div className="relative z-10 flex h-full flex-col">
         <div className={cn("shrink-0", isCollapsed ? "px-2 pt-3" : "px-4 pt-4")}>
           <div className={cn("flex items-center", isCollapsed ? "flex-col gap-2" : "justify-between gap-2")}>
@@ -605,7 +605,7 @@ export function DashboardSidebar({
                 <button
                   type="button"
                   onClick={onGoAdmin}
-                  className="w-full rounded-3xl bg-white py-2 text-xs font-bold text-[#131924] transition-colors hover:bg-slate-100"
+                  className="w-full rounded-3xl bg-white py-2 text-xs font-bold text-[#0F172A] transition-colors hover:bg-slate-100"
                 >
                   Go to Admin
                 </button>

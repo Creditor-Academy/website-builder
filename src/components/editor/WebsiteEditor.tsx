@@ -77,7 +77,7 @@ function EditorLeftSidebar({
     <div className="h-full w-full flex overflow-hidden bg-white">
       <div className="w-14 shrink-0 border-r border-white/10 flex flex-col items-center bg-[#131b2e]">
         <TooltipProvider delayDuration={0}>
-          <nav className="flex flex-1 flex-col items-center py-3 w-full min-h-0 bg-[#131b2e]">
+          <nav className="flex flex-1 flex-col items-center py-3 w-full min-h-0 bg-[#0f172a]">
             {onClose && (
               <button
                 type="button"
