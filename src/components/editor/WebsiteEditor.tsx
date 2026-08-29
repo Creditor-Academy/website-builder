@@ -4,11 +4,12 @@ import { BuilderProvider } from "@/contexts/BuilderContext";
 import useBuilderStore from "@/store/useBuilderStore";
 import { useIsCompact } from "@/hooks/use-mobile";
 import { EditorToolbar } from "./EditorToolbar";
-import { SectionsList } from "./SectionsList";
 import { PageManager } from "./PageManager";
 import { SiteSettings } from "./SiteSettings";
-import { CanvasPreview } from "./CanvasPreview";
-import { PropertiesPanel } from "./PropertiesPanel";
+import { BuilderCanvas } from "@/builder/components/Canvas";
+import { CanvasProperties } from "@/builder/components/CanvasProperties";
+import { LayersPanel } from "@/builder/components/LayersPanel";
+import { ElementsPanel } from "@/builder/components/ElementsPanel";
 import { TextFormattingToolbar } from "./TextFormattingToolbar";
 import { GuidedTour } from "./GuidedTour";
 import { AssetLibraryPanel } from "./AssetLibraryPanel";
@@ -27,7 +28,6 @@ import {
   Settings,
   Image as ImageIcon,
   Palette,
-  Edit,
   History,
   X,
 } from "lucide-react";
@@ -39,12 +39,11 @@ import {
 } from "@/components/ui/tooltip";
 
 const NAV_ITEMS = [
-  { id: "add", icon: Plus, label: "Sections" },
+  { id: "add", icon: Plus, label: "Elements" },
   { id: "layers", icon: Layers, label: "Layers" },
   { id: "pages", icon: FileText, label: "Pages" },
   { id: "assets", icon: ImageIcon, label: "Assets" },
   { id: "design", icon: Palette, label: "Design System" },
-  { id: "edit", icon: Edit, label: "Edit" },
   { id: "history", icon: History, label: "Version History" },
 ];
 
@@ -52,14 +51,14 @@ function EditorSidebarPanels({ leftNavTab }: { leftNavTab: string }) {
   return (
     <div className="flex-1 flex flex-col min-w-0 bg-white overflow-hidden">
       <div className="h-full min-h-0 overflow-hidden">
-        {leftNavTab === "add" && <SectionsList view="add" />}
-        {leftNavTab === "layers" && <SectionsList view="layers" />}
+        {leftNavTab === "add" && <ElementsPanel />}
+        {leftNavTab === "layers" && <LayersPanel />}
         {leftNavTab === "assets" && <AssetLibraryPanel />}
         {leftNavTab === "design" && <DesignSystemPanel />}
         {leftNavTab === "pages" && <PageManager />}
-        {leftNavTab === "edit" && <PropertiesPanel />}
         {leftNavTab === "settings" && <SiteSettings />}
         {leftNavTab === "history" && <VersionHistoryPanel />}
+        {leftNavTab === "edit" && <CanvasProperties />}
       </div>
     </div>
   );
@@ -150,33 +149,58 @@ function EditorLeftSidebar({
 function EditorContent() {
   const [leftNavTab, setLeftNavTab] = useState("add");
   const store = useBuilderStore();
-  const { editor, setTourState, activeWebsiteId, setEditorState } = store;
+  const { editor, setTourState, activeWebsiteId, setEditorState, undo, redo, selectNode, deleteCanvasNode, duplicateCanvasNode } = store;
   const { id } = useParams();
   const isCompact = useIsCompact();
 
   useEffect(() => {
-    setEditorState({ showLeftPanel: !isCompact });
+    setEditorState({ showLeftPanel: !isCompact, showRightPanel: !isCompact });
   }, [isCompact, setEditorState]);
 
   useEffect(() => {
-    if (editor.selectedSectionId || editor.selectedComponentId) {
+    if (isCompact && editor.selectedNodeId) {
       setLeftNavTab("edit");
-      if (isCompact) {
-        setEditorState({ showLeftPanel: true });
-      }
+      setEditorState({ showLeftPanel: true });
     }
-  }, [editor.selectedSectionId, editor.selectedComponentId, isCompact, setEditorState]);
+  }, [editor.selectedNodeId, isCompact, setEditorState]);
 
   useEffect(() => {
-    if (!isCompact || !editor.showLeftPanel) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setEditorState({ showLeftPanel: false });
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      if (target.closest("input, textarea, select, [contenteditable='true']")) return;
+
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        if (event.shiftKey) redo();
+        else undo();
+        return;
+      }
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "y") {
+        event.preventDefault();
+        redo();
+        return;
+      }
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "d") {
+        event.preventDefault();
+        if (editor.selectedNodeId) duplicateCanvasNode(editor.selectedNodeId);
+        return;
+      }
+      if ((event.key === "Delete" || event.key === "Backspace") && editor.selectedNodeId && editor.selectedKind !== "navbar" && editor.selectedKind !== "footer") {
+        event.preventDefault();
+        deleteCanvasNode(editor.selectedNodeId);
+        return;
+      }
+      if (event.key === "Escape") {
+        selectNode(null);
+        if (isCompact) setEditorState({ showLeftPanel: false });
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isCompact, editor.showLeftPanel, setEditorState]);
+  }, [editor.selectedNodeId, editor.selectedKind, isCompact, undo, redo, selectNode, deleteCanvasNode, duplicateCanvasNode, setEditorState]);
 
   const showSidebar = !editor.previewMode && editor.showLeftPanel;
+  const showRight = !editor.previewMode && editor.showRightPanel && !isCompact;
   const closeSidebar = () => setEditorState({ showLeftPanel: false });
 
   return (
@@ -202,10 +226,10 @@ function EditorContent() {
           {!isCompact && showSidebar && (
             <>
               <ResizablePanel
-                defaultSize={24}
-                minSize={20}
-                maxSize={40}
-                className="min-w-[20rem] bg-white border-r border-slate-200 flex overflow-hidden"
+                defaultSize={20}
+                minSize={16}
+                maxSize={32}
+                className="min-w-[16rem] bg-white border-r border-slate-200 flex overflow-hidden"
               >
                 <EditorLeftSidebar
                   leftNavTab={leftNavTab}
@@ -216,12 +240,25 @@ function EditorContent() {
             </>
           )}
           <ResizablePanel
-            defaultSize={editor.previewMode || isCompact ? 100 : 53}
-            className="bg-slate-100/30 p-3 sm:p-4 lg:p-6 overflow-hidden flex flex-col relative z-0 isolate min-w-0"
+            defaultSize={editor.previewMode || isCompact ? 100 : showRight ? 56 : 80}
+            className="bg-slate-100/30 overflow-hidden flex flex-col relative z-0 isolate min-w-0"
           >
             <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px] opacity-40 pointer-events-none"></div>
-            <CanvasPreview />
+            <BuilderCanvas />
           </ResizablePanel>
+          {showRight && (
+            <>
+              <ResizableHandle className="w-1 bg-slate-100 hover:bg-primary/30 transition-all border-l border-slate-200" />
+              <ResizablePanel
+                defaultSize={24}
+                minSize={18}
+                maxSize={36}
+                className="min-w-[18rem] bg-white border-l border-slate-200 overflow-hidden"
+              >
+                <CanvasProperties />
+              </ResizablePanel>
+            </>
+          )}
         </ResizablePanelGroup>
 
         {isCompact && showSidebar && (
@@ -263,7 +300,9 @@ export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
       try {
         const saved = localStorage.getItem("buildora-theme");
         if (saved === "dark") document.documentElement.classList.add("dark");
-      } catch { }
+      } catch {
+        // theme restore is best-effort
+      }
     };
   }, []);
 
