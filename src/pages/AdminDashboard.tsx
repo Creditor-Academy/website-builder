@@ -191,22 +191,70 @@ const AddUserDialog = ({ open, onOpenChange, onUserCreated }) => {
     );
 };
 
+/** Pull a single user out of GET /users/:id (and similar) response shapes. */
+function extractUserFromResponse(responseData: any) {
+    if (!responseData) return null;
+    if (responseData.user && typeof responseData.user === 'object') return responseData.user;
+    if (responseData.data?.user && typeof responseData.data.user === 'object') return responseData.data.user;
+    if (responseData.data && typeof responseData.data === 'object' && !Array.isArray(responseData.data) && responseData.data.id) {
+        return responseData.data;
+    }
+    if (responseData.id) return responseData;
+    return null;
+}
+
+function formatUserRoleLabel(role?: string) {
+    if (!role) return '—';
+    if (role === 'SUPER_ADMIN') return 'Super Admin';
+    if (role === 'INSTITUTION_ADMIN') return 'Inst. Admin';
+    if (role === 'ADMIN') return 'Admin';
+    if (role === 'USER') return 'User';
+    return role;
+}
+
+function isUserActiveStatus(u: any) {
+    if (!u) return false;
+    if (u.isActive === true || u.active === true) return true;
+    if (u.status === 'ACTIVE' || u.status === 'Active') return true;
+    return false;
+}
+
 // ─── UserDetailDialog ─────────────────────────────────────────────────────────
-// ✅ Calls GET /users/:id to show detailed user info in a dialog
-const UserDetailDialog = ({ userId, open, onOpenChange }) => {
+// Calls GET /users/:id; seeds from list row so details show correctly immediately
+const UserDetailDialog = ({ userId, open, onOpenChange, initialUser = null }) => {
     const [userDetail, setUserDetail] = useState(null);
     const [loading, setLoading] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
-        if (open && userId) {
-            setLoading(true);
-            getUserById(userId)
-                .then((res) => setUserDetail(res.data?.data || res.data))
-                .catch(() => toast({ title: "Failed to load user", variant: "destructive" }))
-                .finally(() => setLoading(false));
+        if (!open) {
+            setUserDetail(null);
+            return;
         }
-    }, [open, userId, toast]);
+        if (!userId) return;
+
+        // Show list-row data right away so Role/Status match Recent Users
+        if (initialUser) setUserDetail(initialUser);
+
+        setLoading(!initialUser);
+        getUserById(userId)
+            .then((res) => {
+                const user = extractUserFromResponse(res.data);
+                if (user) setUserDetail(user);
+            })
+            .catch(() => {
+                if (!initialUser) {
+                    toast({ title: "Failed to load user", variant: "destructive" });
+                }
+            })
+            .finally(() => setLoading(false));
+    }, [open, userId, initialUser, toast]);
+
+    const name = userDetail?.name || '—';
+    const email = userDetail?.email || '—';
+    const roleLabel = formatUserRoleLabel(userDetail?.role);
+    const active = isUserActiveStatus(userDetail);
+    const joinedAt = userDetail?.created_at || userDetail?.createdAt;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -225,29 +273,29 @@ const UserDetailDialog = ({ userId, open, onOpenChange }) => {
                                 {getInitials(userDetail.name)}
                             </div>
                             <div>
-                                <p className="text-lg font-bold text-[#0F172A]">{userDetail.name}</p>
-                                <p className="text-sm text-[#747781]">{userDetail.email}</p>
+                                <p className="text-lg font-bold text-[#0F172A]">{name}</p>
+                                <p className="text-sm text-[#747781]">{email}</p>
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4 pt-2">
                             <div className="bg-[#F4F4F5] rounded-xl p-4">
                                 <p className="text-[10px] font-bold text-[#787778] uppercase tracking-wider mb-1">Role</p>
-                                <p className="text-sm font-semibold text-[#0F172A]">{userDetail.role || '—'}</p>
+                                <p className="text-sm font-semibold text-[#0F172A]">{roleLabel}</p>
                             </div>
                             <div className="bg-[#F4F4F5] rounded-xl p-4">
                                 <p className="text-[10px] font-bold text-[#787778] uppercase tracking-wider mb-1">Status</p>
                                 <span className={cn(
                                     "text-sm font-semibold",
-                                    userDetail.active ? "text-emerald-600" : "text-rose-500"
+                                    active ? "text-emerald-600" : "text-rose-500"
                                 )}>
-                                    {userDetail.active ? "Active" : "Suspended"}
+                                    {active ? "Active" : "Suspended"}
                                 </span>
                             </div>
-                            {userDetail.createdAt && (
+                            {joinedAt && (
                                 <div className="bg-[#F4F4F5] rounded-xl p-4 col-span-2">
                                     <p className="text-[10px] font-bold text-[#787778] uppercase tracking-wider mb-1">Joined</p>
                                     <p className="text-sm font-semibold text-[#0F172A]">
-                                        {format(new Date(userDetail.createdAt), 'PPP')}
+                                        {format(new Date(joinedAt), 'PPP')}
                                     </p>
                                 </div>
                             )}
@@ -286,6 +334,7 @@ const AdminDashboard = () => {
     const [adminUsers, setAdminUsers] = useState([]);
     const [isLoadingUsers, setIsLoadingUsers] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState(null);
+    const [selectedUserPreview, setSelectedUserPreview] = useState(null);
     const [userDetailOpen, setUserDetailOpen] = useState(false);
     const [isAddUserOpen, setIsAddUserOpen] = useState(false);
     const [confirmStatusUser, setConfirmStatusUser] = useState<{ id: string; name: string; active: boolean } | null>(null);
@@ -764,7 +813,11 @@ const AdminDashboard = () => {
                                                                     variant="ghost"
                                                                     size="icon"
                                                                     className="h-7 w-7 rounded-lg hover:bg-[#F4F4F5] hover:scale-100"
-                                                                    onClick={() => { setSelectedUserId(u.id); setUserDetailOpen(true); }}
+                                                                    onClick={() => {
+                                                                        setSelectedUserId(u.id);
+                                                                        setSelectedUserPreview(u);
+                                                                        setUserDetailOpen(true);
+                                                                    }}
                                                                 >
                                                                     <Eye className="w-3.5 h-3.5 text-[#787778]" />
                                                                 </Button>
@@ -866,7 +919,11 @@ const AdminDashboard = () => {
             <UserDetailDialog
                 userId={selectedUserId}
                 open={userDetailOpen}
-                onOpenChange={setUserDetailOpen}
+                onOpenChange={(open) => {
+                    setUserDetailOpen(open);
+                    if (!open) setSelectedUserPreview(null);
+                }}
+                initialUser={selectedUserPreview}
             />
 
             {/* Confirm suspend / reactivate */}
