@@ -7,6 +7,9 @@ import { useIsCompact } from '@/hooks/use-mobile';
 import { logoutUser } from '@/api/auth';
 import { clearStoredUser } from '@/lib/authSession';
 import { DashboardSidebar } from '@/components/Common/sidebar';
+import { BrandLogo } from '@/components/Common/BrandLogo';
+import { motion } from 'framer-motion';
+import { pageMotion } from '@/lib/motion';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -45,6 +48,7 @@ const DashboardLayout = () => {
 
     const isAdminRole = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN' || user?.role === 'INSTITUTION_ADMIN';
     const isAdmin = location.pathname === '/admin' || location.pathname.startsWith('/admin/');
+    const hideMainScrollbar = location.pathname.includes('/templates') || location.pathname.includes('/messages');
     const base = isAdmin ? '/admin' : '/dashboard';
 
     const setIsAdmin = (val: boolean | ((prev: boolean) => boolean)) => {
@@ -113,8 +117,9 @@ const DashboardLayout = () => {
 
     return (
         <div className={cn(
-            'relative flex h-screen overflow-hidden font-sans selection:bg-primary/10',
-            isAdmin ? 'bg-[#F3F4F6]' : 'bg-[#f8fafc]'
+            'relative flex h-dvh overflow-hidden font-sans selection:bg-primary/10',
+            isAdmin ? 'bg-[#F3F4F6]' : 'bg-[#f8fafc]',
+            isCompact ? 'p-3' : 'gap-3 p-3',
         )}>
             <Helmet>
                 <title>Dashboard | Buildora</title>
@@ -135,14 +140,13 @@ const DashboardLayout = () => {
                 isLoggingOut={isLoggingOut}
             />
 
-            <main className="min-w-0 w-full flex-1 overflow-x-hidden overflow-y-auto">
-                <div
-                    className={cn(
-                        'mx-auto w-full min-w-0 max-w-[1600px] 2xl:max-w-[1760px] p-4 sm:p-6 lg:px-6 lg:py-8',
-                    )}
-                >
+            <main className={cn(
+                'min-h-0 min-w-0 w-full flex-1 overflow-x-clip overflow-y-auto',
+                hideMainScrollbar && 'no-scrollbar',
+            )}>
+                <div className="w-full min-w-0">
                 {isCompact && (
-                    <div className="sticky top-0 z-30 -mx-4 mb-4 flex items-center gap-2 border-b border-[#E5E7EB] bg-[#f8fafc]/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:hidden">
+                    <div className="sticky top-0 z-30 mb-3 flex items-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white/95 px-3 py-2.5 shadow-sm backdrop-blur">
                         <button
                             type="button"
                             title="Open menu"
@@ -152,7 +156,10 @@ const DashboardLayout = () => {
                         >
                             <Menu className="h-5 w-5" />
                         </button>
-                        <span className="text-sm font-semibold text-[#0F172A]">Buildora</span>
+                        <BrandLogo
+                          imgClassName="h-7 w-7"
+                          wordmarkClassName="text-sm font-semibold text-[#0F172A]"
+                        />
                     </div>
                 )}
                 <Suspense
@@ -162,7 +169,9 @@ const DashboardLayout = () => {
                         </div>
                     }
                 >
-                    <Outlet key={location.pathname} context={outletContext} />
+                    <motion.div key={location.pathname} {...pageMotion}>
+                    <Outlet context={outletContext} />
+                    </motion.div>
                 </Suspense>
                 </div>
             </main>

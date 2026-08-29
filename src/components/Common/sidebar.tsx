@@ -9,18 +9,19 @@ import {
   Building2,
   Users,
   Activity,
-  X,
   ShieldCheck,
   Image as ImageIcon,
   MessageSquare,
   User as UserIcon,
-  PanelLeftClose,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/Common/BrandLogo";
+import { dashboardPanelInsetClass, dashboardPageTitleClass } from "@/components/dashboard/DashboardHeroHeader";
+import backButton from "@/assets/backButton.svg";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -435,8 +436,8 @@ const NavItem = ({
         navigate(to);
       }}
       className={cn(
-        "inline-flex h-10 items-center gap-2.5 rounded-3xl text-sm transition-colors duration-200",
-        collapsed ? "w-10 justify-center px-0" : "w-full justify-start px-3",
+        "inline-flex h-10 items-center gap-2.5 rounded-3xl text-sm transition-all duration-500 ease-out",
+        collapsed ? "w-10 justify-center px-0" : "w-full justify-start px-2.5",
         isActive
           ? "bg-white/15 font-semibold text-white"
           : "text-slate-300 hover:bg-white/10 hover:text-white",
@@ -464,12 +465,12 @@ function SidebarNav({
   return (
     <nav
       className={cn(
-        "relative z-10 flex-1 space-y-1 overflow-y-auto py-3 no-scrollbar",
-        collapsed ? "flex flex-col items-center px-2" : "px-3",
+        "relative z-10 flex-1 space-y-1 overflow-y-auto no-scrollbar",
+        collapsed && "flex flex-col items-center",
       )}
     >
       {!collapsed && (
-        <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+        <p className="mb-1 px-2.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
           Main Menu
         </p>
       )}
@@ -482,7 +483,7 @@ function SidebarNav({
       {isAdmin && (
         <div className={cn("pt-2", collapsed && "flex flex-col items-center")}>
           {!collapsed && (
-            <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            <p className="mb-1 px-2.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
               System
             </p>
           )}
@@ -554,26 +555,38 @@ export function DashboardSidebar({
   const inner = (isCollapsed: boolean, closeable: boolean) => (
     <>
       <div className="pointer-events-none absolute inset-y-0 right-0 w-[38%] origin-bottom-right skew-x-[-18deg] bg-[#202838]/70" />
-      <div className="relative z-10 flex h-full flex-col">
-        <div className={cn("shrink-0", isCollapsed ? "px-2 pt-3" : "px-4 pt-4")}>
+      <div
+        className={cn(
+          "relative z-10 flex h-full flex-col gap-4",
+          isCollapsed ? "p-2.5" : dashboardPanelInsetClass,
+        )}
+      >
+        <div className="shrink-0">
           <div className={cn("flex items-center", isCollapsed ? "flex-col gap-2" : "justify-between gap-2")}>
-            {!isCollapsed && (
-              <h1 className="truncate px-1 text-xl font-bold tracking-tight text-white">Buildora</h1>
+            {isCollapsed ? (
+              <BrandLogo showWordmark={false} imgClassName="h-8 w-8" />
+            ) : (
+              <BrandLogo
+                className="min-w-0"
+                imgClassName="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10"
+                wordmarkClassName={dashboardPageTitleClass}
+              />
             )}
             <button
               type="button"
               title={closeable ? "Close sidebar" : isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               aria-label={closeable ? "Close sidebar" : isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               onClick={() => (closeable ? onClose() : toggleCollapsed())}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-3xl text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-3xl text-white/70 transition-colors hover:bg-white/10"
             >
-              {closeable ? (
-                <X className="h-4 w-4" />
-              ) : isCollapsed ? (
-                <PanelLeft className="h-4 w-4" />
-              ) : (
-                <PanelLeftClose className="h-4 w-4" />
-              )}
+              <img
+                src={backButton}
+                alt=""
+                className={cn(
+                  "h-6 w-6 brightness-0 invert opacity-80 transition-transform duration-300",
+                  !closeable && isCollapsed && "rotate-180",
+                )}
+              />
             </button>
           </div>
         </div>
@@ -586,7 +599,7 @@ export function DashboardSidebar({
           onNavigate={closeable ? onClose : undefined}
         />
 
-        <div className={cn("relative z-10 mt-auto space-y-2 pb-4", isCollapsed ? "px-2" : "px-3")}>
+        <div className="relative z-10 mt-auto space-y-2">
           {!isAdmin && isAdminRole && (
             isCollapsed ? (
               <button
@@ -635,7 +648,7 @@ export function DashboardSidebar({
             onClick={onLogout}
             disabled={isLoggingOut}
             className={cn(
-              "flex items-center rounded-3xl text-sm font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-rose-400 disabled:opacity-50",
+              "flex items-center rounded-3xl border border-grey text-sm font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-rose-400 disabled:opacity-50",
               isCollapsed ? "mx-auto h-10 w-10 justify-center" : "w-full justify-between px-3 py-2.5",
             )}
           >
@@ -658,8 +671,8 @@ export function DashboardSidebar({
         <aside
           className={cn(
             shellClass,
-            "relative z-40 my-3 ml-3 shrink-0 transition-[width] duration-300 ease-in-out",
-            collapsed ? "w-[72px]" : "w-64",
+            "relative z-40 h-full shrink-0 transition-[width] duration-300 ease-in-out",
+            collapsed ? "w-[4.5rem]" : "w-72",
           )}
         >
           {inner(collapsed, false)}
@@ -670,7 +683,7 @@ export function DashboardSidebar({
         <aside
           className={cn(
             shellClass,
-            "fixed inset-y-3 left-3 z-[60] h-[calc(100svh-1.5rem)] w-64 max-w-[calc(100vw-1.5rem)] shadow-xl transition-transform duration-300 ease-in-out",
+            "fixed inset-y-3 left-3 z-[60] h-[calc(100svh-1.5rem)] w-72 max-w-[calc(100vw-1.5rem)] shadow-xl transition-transform duration-300 ease-in-out",
             isOpen ? "translate-x-0" : "-translate-x-[calc(100%+1.5rem)] pointer-events-none",
           )}
         >

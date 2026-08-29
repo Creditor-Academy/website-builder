@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, ArrowLeft, LayoutTemplate, Search, Trash2, RotateCcw, Building2, Loader2, MoreVertical, Edit2, AlertTriangle } from 'lucide-react';
+import { Plus, ArrowLeft, LayoutTemplate, Search, Trash2, RotateCcw, Building2, Loader2, AlertTriangle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useBuilderStore from '@/store/useBuilderStore';
 import { cn } from '@/lib/utils';
@@ -24,7 +24,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import TemplateFormDialog from '@/components/dashboard/TemplateFormDialog';
 import { DashboardPageShell, dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass, dashboardToolbarClass } from '@/components/dashboard/DashboardPageShell';
 import { dashboardHeroPrimaryClass, dashboardHeroSecondaryClass } from '@/components/dashboard/DashboardHeroHeader';
@@ -328,7 +327,7 @@ export default function DashboardTemplates() {
         )}
       </div>
 
-      <div className={cn(dashboardFilterScrollClass, 'mb-6 sm:mb-8')}>
+      <div className={cn(dashboardFilterScrollClass, 'mb-6 sm:mb-8 no-scrollbar')}>
         {categories.map(cat => (
           <button
             key={cat}
@@ -391,7 +390,7 @@ export default function DashboardTemplates() {
                 }
                 void handleUseTemplate(template);
               }}
-              className={cn(showTrash && 'opacity-75')}
+              className={cn('h-full', showTrash && 'opacity-75')}
             >
               <DashboardCardMedia>
                 {template.image ? (
@@ -412,61 +411,15 @@ export default function DashboardTemplates() {
                     Deleted
                   </DashboardCardBadge>
                 ) : (
-                  <DashboardCardBadge position={(showTrash || isAdminUser) ? 'top-left' : 'top-right'}>
+                  <DashboardCardBadge position="top-left">
                     {template.category || 'Portfolio'}
                   </DashboardCardBadge>
-                )}
-
-                {(showTrash || isAdminUser) && (
-                  <div
-                    className="absolute right-2 top-2 z-20 sm:right-3 sm:top-3"
-                    onClick={(e) => e.stopPropagation()}
-                    onPointerDown={(e) => e.stopPropagation()}
-                  >
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button
-                          type="button"
-                          title="Template actions"
-                          aria-label="Template actions"
-                          className="flex h-8 w-8 items-center justify-center rounded-full border border-white/80 bg-white/95 text-[#0F172A] shadow-sm transition-colors hover:bg-white"
-                        >
-                          <MoreVertical className="h-4 w-4" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-44 rounded-xl p-1.5">
-                        {showTrash ? (
-                          <DropdownMenuItem
-                            className="cursor-pointer gap-2 rounded-lg"
-                            onClick={(e) => { e.stopPropagation(); handleRestoreTemplate(template); }}
-                          >
-                            <RotateCcw className="h-4 w-4" /> Restore
-                          </DropdownMenuItem>
-                        ) : (
-                          <>
-                            <DropdownMenuItem
-                              className="cursor-pointer gap-2 rounded-lg"
-                              onClick={(e) => { e.stopPropagation(); handleOpenEdit(template); }}
-                            >
-                              <Edit2 className="h-4 w-4" /> Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="cursor-pointer gap-2 rounded-lg text-rose-600 focus:bg-rose-50 focus:text-rose-700"
-                              onClick={(e) => { e.stopPropagation(); setDeleteTarget(template); }}
-                            >
-                              <Trash2 className="h-4 w-4" /> Delete
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
                 )}
               </DashboardCardMedia>
 
               <DashboardCardBody>
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <DashboardCardTitle className="mb-0">{template.name}</DashboardCardTitle>
+                  <DashboardCardTitle className="mb-0 line-clamp-2 min-h-[2.75rem]">{template.name}</DashboardCardTitle>
                   {template.scope === 'INSTITUTION' && (
                     <span className={dashboardCardTagClass}>Institution</span>
                   )}
@@ -483,15 +436,42 @@ export default function DashboardTemplates() {
                 />
 
                 <DashboardCardFooter className="flex-col sm:flex-row">
-                  <DashboardCardSecondaryAction
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (isAdminUser) handleOpenEdit(template);
-                      else handleUseTemplate(template);
-                    }}
-                  >
-                    {isAdminUser ? 'Configure' : 'Preview'}
-                  </DashboardCardSecondaryAction>
+                  <div className="flex w-full items-center gap-1 sm:w-auto">
+                    <DashboardCardSecondaryAction
+                      className="inline-flex items-center justify-center gap-1.5"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (showTrash) {
+                          void handleRestoreTemplate(template);
+                          return;
+                        }
+                        if (isAdminUser) handleOpenEdit(template);
+                        else handleUseTemplate(template);
+                      }}
+                    >
+                      {showTrash ? (
+                        <>
+                          <RotateCcw className="h-4 w-4" />
+                          Restore
+                        </>
+                      ) : isAdminUser ? (
+                        'Configure'
+                      ) : (
+                        'Preview'
+                      )}
+                    </DashboardCardSecondaryAction>
+                    {isAdminUser && !showTrash && (
+                      <button
+                        type="button"
+                        title="Delete template"
+                        aria-label="Delete template"
+                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded text-[#ba1a1a] transition-colors hover:text-[#93000a]"
+                        onClick={(e) => { e.stopPropagation(); setDeleteTarget(template); }}
+                      >
+                        <Trash2 className="h-4 w-4" strokeWidth={2} />
+                      </button>
+                    )}
+                  </div>
                   <DashboardCardPrimaryAction
                     onClick={(e) => {
                       e.stopPropagation();

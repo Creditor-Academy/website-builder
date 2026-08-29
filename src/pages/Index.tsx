@@ -4,6 +4,7 @@ import { ChevronDown, ArrowRight, MousePointer2, Sparkles, Menu, X, Zap, LayoutT
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "./Footer";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/Common/BrandLogo";
 import { getDashboardPath, validateSession } from "@/lib/authSession";
 
 import { useTheme } from "@/hooks/useTheme";
@@ -169,9 +170,11 @@ export default function LandingPage() {
               : "bg-white/60 border border-slate-200/50 shadow-[0_8px_32px_rgba(0,0,0,0.05)] hover:bg-white/80"
           )}
         >
-          <Link to="/" className="flex items-center gap-3 cursor-pointer group pointer-events-auto">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-lg">B</div>
-            <span className={cn("text-xl font-bold tracking-tight transition-colors", isDark ? "text-white group-hover:text-blue-200" : "text-slate-900 group-hover:text-blue-600")}>Buildora</span>
+          <Link to="/" className="flex items-center cursor-pointer group pointer-events-auto">
+            <BrandLogo
+              imgClassName="h-8 w-8 transition-transform duration-300 group-hover:scale-110"
+              wordmarkClassName={cn("text-xl transition-colors", isDark ? "text-white group-hover:text-blue-200" : "text-slate-900 group-hover:text-blue-600")}
+            />
           </Link>
 
           <div className="hidden md:flex items-center gap-8 text-sm font-medium">

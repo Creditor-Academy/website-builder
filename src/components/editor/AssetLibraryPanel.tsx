@@ -12,6 +12,7 @@ import useBuilderStore from '@/store/useBuilderStore';
 import type { Asset } from '@/store/useBuilderStore';
 import { useToast } from '@/hooks/use-toast';
 import { DuplicateAssetDialog } from '@/components/ui/DuplicateAssetDialog';
+import { isAssetVisibleToUsers } from '@/lib/assetVisibility';
 
 // ── Shared card used in every tab grid ─────────────────────────────────────
 interface AssetCardProps {
@@ -111,8 +112,19 @@ export function AssetLibraryPanel() {
     }, [activeWebsiteId, fetchAssets]);
 
     const assets = activeWebsiteId ? getScopedAssets(activeWebsiteId) : [];
+    const user = (() => {
+        try {
+            return JSON.parse(localStorage.getItem('user') || 'null');
+        } catch {
+            return null;
+        }
+    })();
+    const isAdminUser = ['ADMIN', 'SUPER_ADMIN', 'INSTITUTION_ADMIN'].includes(user?.role);
+    const visibleAssets = isAdminUser
+        ? assets
+        : assets.filter((item) => item.websiteId === activeWebsiteId || item.scope === 'WEBSITE' || isAssetVisibleToUsers(item.id));
 
-    const filteredMedia = assets.filter(item =>
+    const filteredMedia = visibleAssets.filter(item =>
         item.name.toLowerCase().includes(search.toLowerCase())
     );
 

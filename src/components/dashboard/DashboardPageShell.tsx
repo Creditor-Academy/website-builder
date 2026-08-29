@@ -7,7 +7,7 @@ export const dashboardSearchInputClass =
 
 export const dashboardFilterPillClass = (active: boolean) =>
   cn(
-    'py-1.5 px-3 sm:px-4 rounded-full text-xs sm:text-sm font-medium transition-colors border whitespace-nowrap shrink-0',
+    'py-1.5 px-3 sm:px-4 rounded-full text-xs sm:text-sm font-medium transition-all duration-500 ease-out border whitespace-nowrap shrink-0',
     active
       ? 'bg-[#131b2e] text-white border-transparent'
       : 'bg-[#f6f3f5] text-[#45464d] border-[#c6c6cd] hover:bg-[#eae7e9]'
@@ -48,8 +48,8 @@ export function DashboardPageShell({
   children,
 }: DashboardPageShellProps) {
   return (
-    <div className={cn('bg-[#fcf8fa] text-[#1b1b1d] w-full min-h-full relative font-sans', className)}>
-      <div className="w-full min-w-0 overflow-x-hidden">
+    <div className={cn('w-full min-w-0 relative font-sans', className)}>
+      <div className="w-full min-w-0">
         <DashboardHeroHeader title={title} description={description} actions={actions} />
         {children}
       </div>

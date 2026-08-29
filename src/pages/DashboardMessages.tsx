@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import formsApi from '@/api/forms';
 import websiteApi from '@/api/website';
-import { DashboardPageShell, dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass, dashboardToolbarClass } from '@/components/dashboard/DashboardPageShell';
+import { DashboardPageShell, dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass } from '@/components/dashboard/DashboardPageShell';
 import {
   DashboardStatCard,
   DashboardListCard,
@@ -166,10 +166,10 @@ export default function DashboardMessages() {
 
     const getStatusIcon = (status: string) => {
         switch (status) {
-            case 'unread': return <Bell className="w-4 h-4" />;
-            case 'read': return <CheckCircle className="w-4 h-4" />;
-            case 'replied': return <Reply className="w-4 h-4" />;
-            default: return <MessageSquare className="w-4 h-4" />;
+            case 'unread': return <Bell className="w-3 h-3" />;
+            case 'read': return <CheckCircle className="w-3 h-3" />;
+            case 'replied': return <Reply className="w-3 h-3" />;
+            default: return <MessageSquare className="w-3 h-3" />;
         }
     };
 
@@ -184,7 +184,7 @@ export default function DashboardMessages() {
                 title="Messages"
                 description="Manage contact form submissions from your website visitors."
             >
-                <div className={dashboardToolbarClass}>
+                <div className="mb-4 flex flex-col gap-3 lg:mb-5 lg:flex-row lg:items-center">
                     <div className="relative min-w-0 flex-1">
                         <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
                         <Input
@@ -194,75 +194,76 @@ export default function DashboardMessages() {
                             className={cn(dashboardSearchInputClass, 'h-9 rounded-full pl-9')}
                         />
                     </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-                    {[
-                        { label: 'Total Messages', value: stats.total || 0, icon: MessageSquare },
-                        { label: 'Unread', value: stats.unread || 0, icon: Bell, accent: 'text-amber-600' },
-                        { label: 'Read', value: stats.read || 0, icon: CheckCircle, accent: 'text-emerald-600' },
-                        { label: 'Replied', value: stats.replied || 0, icon: Reply, accent: 'text-white' },
-                    ].map(({ label, value, icon: Icon, accent }) => (
-                        <DashboardStatCard key={label} className="rounded-3xl border-[#E8E8E8] bg-[#0F172A] p-5">
-                            <div className="flex items-center justify-between mb-3">
-                                <p className="text-sm font-medium text-white">{label}</p>
-                                <div className="flex items-center justify-center  text-white">
-                                    <Icon className="h-4 w-4" />
-                                </div>
-                            </div>
-                            <div className={cn('text-2xl sm:text-3xl font-bold text-white', accent)}>{value}</div>
-                        </DashboardStatCard>
-                    ))}
-                </div>
-
-                <div className={dashboardToolbarClass}>
-                    <div className={dashboardFilterScrollClass}>
-                        {['all', 'unread', 'read', 'replied'].map(status => (
+                    <div className={cn(dashboardFilterScrollClass, 'lg:flex-none')}>
+                        {['all', 'unread', 'read', 'replied'].map((status) => (
                             <button
                                 key={status}
+                                type="button"
                                 onClick={() => setFilterStatus(status)}
-                                className={dashboardFilterPillClass(filterStatus === status)}
+                                className={cn(
+                                    dashboardFilterPillClass(filterStatus === status),
+                                    filterStatus !== status && 'hover:border-[#131924] hover:bg-[#131924] hover:text-white',
+                                    filterStatus === status && 'bg-[#131924] border-transparent',
+                                )}
                             >
                                 {status.charAt(0).toUpperCase() + status.slice(1)}
                             </button>
                         ))}
                     </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full lg:w-auto lg:ml-auto">
-                        <label className="text-sm font-medium text-[#45464d] shrink-0">Website</label>
-                        <select
-                            value={selectedWebsiteId}
-                            onChange={(e) => handleWebsiteChange(e.target.value)}
-                            disabled={isLoadingWebsites}
-                            className="h-11 px-3 rounded-lg border border-[#c6c6cd] bg-white text-sm text-[#1b1b1d] w-full sm:min-w-[180px]"
-                        >
-                            <option value="all">All websites</option>
-                            {websites.map((website) => (
-                                <option key={website.id} value={website.id}>
-                                    {website.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    <select
+                        value={selectedWebsiteId}
+                        onChange={(e) => handleWebsiteChange(e.target.value)}
+                        disabled={isLoadingWebsites}
+                        aria-label="Filter by website"
+                        className="h-9 w-full shrink-0 rounded-full border border-[#c6c6cd] bg-white px-3 text-sm text-[#1b1b1d] lg:w-[200px]"
+                    >
+                        <option value="all">All websites</option>
+                        {websites.map((website) => (
+                            <option key={website.id} value={website.id}>
+                                {website.name}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
-                <div className="space-y-4">
+                <div className="mb-4 grid grid-cols-2 gap-3 lg:mb-5 md:grid-cols-4">
+                    {[
+                        { label: 'Total', value: stats.total || 0, icon: MessageSquare },
+                        { label: 'Unread', value: stats.unread || 0, icon: Bell },
+                        { label: 'Read', value: stats.read || 0, icon: CheckCircle },
+                        { label: 'Replied', value: stats.replied || 0, icon: Reply },
+                    ].map(({ label, value, icon: Icon }) => (
+                        <DashboardStatCard
+                            key={label}
+                            className="rounded-lg border border-[#f3f4f6] bg-[#131924] p-3 sm:p-4"
+                        >
+                            <div className="mb-2 flex items-center justify-between gap-2">
+                                <p className="truncate text-xs font-medium text-white/80 sm:text-sm">{label}</p>
+                                <Icon className="h-3.5 w-3.5 shrink-0 text-white/70" />
+                            </div>
+                            <div className="text-xl font-bold text-white sm:text-2xl">{value}</div>
+                        </DashboardStatCard>
+                    ))}
+                </div>
+
+                <div className="space-y-3">
                     {isLoading ? (
-                        Array.from({ length: 5 }).map((_, i) => (
-                            <div key={i} className={cn(dashboardCardClass, 'animate-pulse p-6')}>
-                                <div className="space-y-4">
-                                    <div className="h-4 bg-[#eae7e9] rounded-full w-3/4" />
-                                    <div className="h-3 bg-[#eae7e9] rounded-full w-1/2" />
-                                    <div className="h-3 bg-[#eae7e9] rounded-full w-full" />
+                        Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className={cn(dashboardCardClass, 'animate-pulse p-4')}>
+                                <div className="space-y-3">
+                                    <div className="h-3.5 w-2/3 rounded-full bg-[#eae7e9]" />
+                                    <div className="h-3 w-1/3 rounded-full bg-[#eae7e9]" />
+                                    <div className="h-3 w-full rounded-full bg-[#eae7e9]" />
                                 </div>
                             </div>
                         ))
                     ) : filteredMessages.length === 0 ? (
-                        <div className="border border-dashed border-[#c6c6cd] rounded-lg bg-[#f6f3f5] p-12 text-center">
-                            <MessageSquare className="w-16 h-16 text-[#76777d] mx-auto mb-4" />
-                            <h3 className="text-xl font-semibold text-[#1b1b1d] mb-2">
+                        <div className="flex min-h-[220px] flex-col items-center justify-center rounded-lg border border-dashed border-[#c6c6cd] bg-[#f6f3f5] px-6 py-10 text-center">
+                            <MessageSquare className="mb-3 h-10 w-10 text-[#76777d]" />
+                            <h3 className="text-base font-semibold text-[#1b1b1d]">
                                 {searchTerm ? 'No messages found' : 'No messages yet'}
                             </h3>
-                            <p className="text-[#45464d]">
+                            <p className="mt-1 max-w-md text-sm text-[#45464d]">
                                 {searchTerm
                                     ? 'Try adjusting your search terms or filters'
                                     : 'When visitors fill out your contact forms, messages will appear here'}
@@ -273,55 +274,57 @@ export default function DashboardMessages() {
                             <DashboardListCard
                                 key={message.id}
                                 className={cn(
-                                    'rounded-3xl border-[#E8E8E8] bg-white',
-                                    message.status === 'unread' && 'border-amber-200'
+                                    'rounded-lg border border-[#f3f4f6] bg-[#fcf8fa] p-3 sm:p-4',
+                                    message.status === 'unread' && 'border-amber-200 bg-white',
                                 )}
                                 onClick={() => setSelectedMessage(message)}
                             >
-                                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4">
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 mb-2">
-                                            <h4 className="text-lg sm:text-[22px] font-semibold text-[#000000] leading-snug break-words">{message.name}</h4>
-                                            <span className="text-xs sm:text-sm text-[#45464d] break-all">{message.email}</span>
+                                <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                    <div className="min-w-0 flex-1">
+                                        <div className="mb-1 flex flex-wrap items-center gap-2">
+                                            <h4 className="text-sm font-semibold leading-snug text-[#000000] sm:text-base">
+                                                {message.name}
+                                            </h4>
+                                            <span className="break-all text-xs text-[#45464d]">{message.email}</span>
                                             <div className={cn(
-                                                "px-2 py-1 text-xs font-medium rounded-full flex items-center gap-1.5 border w-fit",
-                                                getStatusColor(message.status)
+                                                'flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
+                                                getStatusColor(message.status),
                                             )}>
                                                 {getStatusIcon(message.status)}
                                                 {message.status}
                                             </div>
                                         </div>
                                         {message.subject && (
-                                            <p className="font-medium text-[#1b1b1d] mb-2">{message.subject}</p>
+                                            <p className="truncate text-sm font-medium text-[#1b1b1d]">{message.subject}</p>
                                         )}
                                         {message.website?.name && (
-                                            <p className="text-sm text-[#45464d] mb-2">Website: {message.website.name}</p>
+                                            <p className="mt-0.5 text-xs text-[#45464d]">Website: {message.website.name}</p>
                                         )}
                                     </div>
-                                    <div className="text-xs sm:text-sm text-[#45464d] flex items-center gap-1 shrink-0">
-                                        <Calendar className="w-4 h-4" />
+                                    <div className="flex shrink-0 items-center gap-1 text-xs text-[#45464d]">
+                                        <Calendar className="h-3.5 w-3.5" />
                                         {new Date(message.createdAt).toLocaleDateString()}
                                     </div>
                                 </div>
-                                <p className="text-[14px] text-[#45464d] line-clamp-2 mb-4">{message.message}</p>
+                                <p className="mb-3 line-clamp-2 text-sm leading-snug text-[#45464d]">{message.message}</p>
 
-                                <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2 pt-4 border-t border-[#c6c6cd]">
+                                <div className="flex flex-wrap items-center gap-2 border-t border-[#f3f4f6] pt-2">
                                     <DashboardCardSecondaryAction
-                                        className="inline-flex items-center justify-center gap-2"
+                                        className="inline-flex h-8 w-auto items-center justify-center gap-1.5 px-0 text-xs"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             setSelectedMessage(message);
                                         }}
                                     >
-                                        <Eye className="w-4 h-4" /> View Details
+                                        <Eye className="h-3.5 w-3.5" /> View
                                     </DashboardCardSecondaryAction>
                                     {message.status === 'unread' && (
                                         <button
                                             type="button"
-                                            className={dashboardCardActionPrimaryClass}
+                                            className={cn(dashboardCardActionPrimaryClass, 'h-8 px-3 text-xs')}
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleMarkAsRead(message.id);
+                                                void handleMarkAsRead(message.id);
                                             }}
                                         >
                                             Mark as Read
@@ -329,13 +332,13 @@ export default function DashboardMessages() {
                                     )}
                                     <button
                                         type="button"
-                                        className="text-[14px] font-medium text-[#ba1a1a] hover:text-[#93000a] transition-colors sm:ml-auto text-center py-2"
+                                        className="ml-auto inline-flex h-8 items-center gap-1 text-xs font-medium text-[#ba1a1a] transition-colors hover:text-[#93000a]"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            handleDelete(message.id);
+                                            void handleDelete(message.id);
                                         }}
                                     >
-                                        <Trash2 className="w-4 h-4 inline mr-1" /> Delete
+                                        <Trash2 className="h-3.5 w-3.5" /> Delete
                                     </button>
                                 </div>
                             </DashboardListCard>
@@ -354,74 +357,74 @@ export default function DashboardMessages() {
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 transition={{ duration: 0.2 }}
                             >
-                                <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-3xl rounded-2xl sm:rounded-[2rem] p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
-                                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 sm:px-8 py-5 sm:py-6 sticky top-0 z-10">
-                                        <DialogTitle className="text-xl sm:text-2xl font-bold text-white flex items-center justify-between gap-2">
+                                <DialogContent className="w-[calc(100vw-2rem)] max-h-[90vh] overflow-hidden rounded-2xl p-0 sm:max-w-2xl">
+                                    <div className="sticky top-0 z-10 bg-[#131924] px-4 py-4 sm:px-6">
+                                        <DialogTitle className="flex items-center justify-between gap-2 text-lg font-semibold text-white">
                                             Message Details
                                             <Button
                                                 variant="ghost"
                                                 onClick={() => setSelectedMessage(null)}
-                                                className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8 p-0"
+                                                className="h-8 w-8 rounded-full p-0 text-white/80 hover:bg-white/10 hover:text-white"
                                             >
-                                                <X className="w-5 h-5" />
+                                                <X className="h-4 w-4" />
                                             </Button>
                                         </DialogTitle>
                                     </div>
-                                    <div className="rounded-b-3xl bg-white p-8 space-y-6">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="max-h-[min(70vh,32rem)] space-y-4 overflow-y-auto bg-white p-4 sm:p-6 no-scrollbar">
+                                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                                             <div>
-                                                <label className="text-sm font-medium text-[#747781] flex items-center gap-2 mb-2">
-                                                    <User className="w-4 h-4" />
+                                                <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-[#747781]">
+                                                    <User className="h-3.5 w-3.5" />
                                                     Name
                                                 </label>
-                                                <p className="font-semibold text-[#0F172A] bg-[#F4F4F5] p-3 rounded-xl">{selectedMessage.name}</p>
+                                                <p className="rounded-lg bg-[#F4F4F5] p-2.5 text-sm font-semibold text-[#0F172A]">{selectedMessage.name}</p>
                                             </div>
                                             <div>
-                                                <label className="text-sm font-medium text-[#747781] flex items-center gap-2 mb-2">
-                                                    <Mail className="w-4 h-4" />
+                                                <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-[#747781]">
+                                                    <Mail className="h-3.5 w-3.5" />
                                                     Email
                                                 </label>
-                                                <p className="font-semibold text-[#0F172A] bg-[#F4F4F5] p-3 rounded-xl">{selectedMessage.email}</p>
+                                                <p className="rounded-lg bg-[#F4F4F5] p-2.5 text-sm font-semibold text-[#0F172A]">{selectedMessage.email}</p>
                                             </div>
                                         </div>
                                         {selectedMessage.subject && (
                                             <div>
-                                                <label className="text-sm font-medium text-[#747781] mb-2">Subject</label>
-                                                <p className="font-semibold text-[#0F172A] bg-[#F4F4F5] p-3 rounded-xl">{selectedMessage.subject}</p>
+                                                <label className="mb-1.5 text-xs font-medium text-[#747781]">Subject</label>
+                                                <p className="rounded-lg bg-[#F4F4F5] p-2.5 text-sm font-semibold text-[#0F172A]">{selectedMessage.subject}</p>
                                             </div>
                                         )}
                                         {selectedMessage.website?.name && (
                                             <div>
-                                                <label className="text-sm font-medium text-[#747781] mb-2">Website</label>
-                                                <p className="font-semibold text-[#0F172A] bg-[#F4F4F5] p-3 rounded-xl">{selectedMessage.website.name}</p>
+                                                <label className="mb-1.5 text-xs font-medium text-[#747781]">Website</label>
+                                                <p className="rounded-lg bg-[#F4F4F5] p-2.5 text-sm font-semibold text-[#0F172A]">{selectedMessage.website.name}</p>
                                             </div>
                                         )}
                                         <div>
-                                            <label className="text-sm font-medium text-[#747781] mb-2">Message</label>
-                                            <div className="text-[#0F172A] leading-relaxed bg-[#F4F4F5] p-4 rounded-xl border border-[#E5E7EB]">
+                                            <label className="mb-1.5 text-xs font-medium text-[#747781]">Message</label>
+                                            <div className="rounded-lg border border-[#f3f4f6] bg-[#F4F4F5] p-3 text-sm leading-relaxed text-[#0F172A]">
                                                 {selectedMessage.message}
                                             </div>
                                         </div>
-                                        <div className="flex items-center justify-between pt-6 border-t border-[#E8E8E8]">
-                                            <div className="text-sm text-[#747781] flex items-center gap-2">
-                                                <Clock className="w-4 h-4" />
-                                                Received: {new Date(selectedMessage.createdAt).toLocaleString()}
+                                        <div className="flex flex-col gap-3 border-t border-[#f3f4f6] pt-3 sm:flex-row sm:items-center sm:justify-between">
+                                            <div className="flex items-center gap-1.5 text-xs text-[#747781]">
+                                                <Clock className="h-3.5 w-3.5" />
+                                                {new Date(selectedMessage.createdAt).toLocaleString()}
                                             </div>
                                             <div className="flex gap-2">
                                                 {selectedMessage.status === 'unread' && (
                                                     <Button
-                                                        onClick={() => handleMarkAsRead(selectedMessage.id)}
-                                                        className="rounded-full"
+                                                        onClick={() => void handleMarkAsRead(selectedMessage.id)}
+                                                        className="h-9 rounded-full bg-[#131924] px-4 text-xs hover:bg-[#202838]"
                                                     >
                                                         Mark as Read
                                                     </Button>
                                                 )}
                                                 <Button
                                                     variant="outline"
-                                                    onClick={() => handleDelete(selectedMessage.id)}
-                                                    className="rounded-full text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                                                    onClick={() => void handleDelete(selectedMessage.id)}
+                                                    className="h-9 rounded-full px-4 text-xs text-[#ba1a1a] hover:border-[#ba1a1a] hover:bg-rose-50 hover:text-[#93000a]"
                                                 >
-                                                    <Trash2 className="w-4 h-4 mr-2" />
+                                                    <Trash2 className="mr-1.5 h-3.5 w-3.5" />
                                                     Delete
                                                 </Button>
                                             </div>

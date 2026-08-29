@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LayoutTemplate, Eye, CheckCircle2 } from "lucide-react";
+import { Eye, CheckCircle2 } from "lucide-react";
+import { BrandLogo } from "@/components/Common/BrandLogo";
 import { resetPassword } from "../api/auth";
 
 export default function ResetPassword() {
@@ -45,11 +46,11 @@ export default function ResetPassword() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-      <Link to="/" className="flex items-center gap-3 mb-10">
-        <div className="w-10 h-10 bg-slate-950 text-white rounded-2xl flex items-center justify-center">
-          <LayoutTemplate className="w-6 h-6" />
-        </div>
-        <span className="font-bold text-2xl tracking-tight text-slate-900">Buildora</span>
+      <Link to="/" className="mb-10">
+        <BrandLogo
+          imgClassName="h-10 w-10"
+          wordmarkClassName="text-2xl text-slate-900"
+        />
       </Link>
 
       <motion.div

@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/Common/BrandLogo";
 
 export default function Footer({ isDark = true }: { isDark?: boolean }) {
   return (
@@ -8,8 +9,10 @@ export default function Footer({ isDark = true }: { isDark?: boolean }) {
        <div className={cn("max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 border-b pb-12 transition-colors duration-1000", isDark ? "border-white/5" : "border-white/20")}> 
         <div className="md:col-span-2 space-y-10">
           <div className="flex items-center gap-4">
-            <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl shadow-xl transition-colors duration-1000", isDark ? "bg-white text-black" : "bg-white text-blue-600")}>B</div>
-            <span className="text-2xl md:text-4xl font-black tracking-tighter">BUILDORA</span>
+            <BrandLogo
+              imgClassName="h-14 w-14"
+              wordmarkClassName="text-2xl md:text-4xl font-black tracking-tighter text-white uppercase"
+            />
           </div>
           <p className={cn("text-base md:text-xl max-w-md leading-relaxed font-medium transition-colors duration-1000", isDark ? "text-slate-400" : "text-blue-50")}>Build modern, responsive websites with powerful tools, flexible layouts, and complete creative control — no coding required.</p>
         </div>

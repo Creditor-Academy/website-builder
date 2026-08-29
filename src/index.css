@@ -32,8 +32,8 @@
     --muted: 210 40% 96%;
     --muted-foreground: 215 16% 47%;
 
-    /* Accent - Vibrant purple */
-    --accent: 262 83% 58%;
+    /* Accent - sidebar navy */
+    --accent: 219 31% 11%;
     --accent-foreground: 0 0% 100%;
 
     /* Success green */
@@ -64,7 +64,7 @@
     --sidebar-foreground: 222 47% 11%;
     --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 262 83% 58%;
+    --sidebar-accent: 219 31% 11%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 214 32% 91%;
     --sidebar-ring: 217 91% 60%;
@@ -96,8 +96,8 @@
     --secondary-foreground: 210 40% 98%;
     --muted: 217 33% 17%;
     --muted-foreground: 215 20% 65%;
-    --accent: 262 83% 58%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 219 31% 11%;
+    --accent-foreground: 0 0% 100%;
     --success: 142 76% 36%;
     --success-foreground: 210 40% 98%;
     --warning: 38 92% 50%;
@@ -115,8 +115,8 @@
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 222 47% 11%;
-    --sidebar-accent: 262 83% 58%;
-    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-accent: 219 31% 11%;
+    --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 217 33% 20%;
     --sidebar-ring: 217 91% 60%;
 
@@ -137,7 +137,7 @@
     --secondary-foreground: 222 47% 11%;
     --muted: 210 40% 96%;
     --muted-foreground: 215 16% 47%;
-    --accent: 262 83% 58%;
+    --accent: 219 31% 11%;
     --accent-foreground: 0 0% 100%;
     --border: 214 32% 91%;
   }
@@ -188,7 +188,31 @@
 
   /* Smooth transitions */
   .transition-smooth {
-    @apply transition-all duration-300 ease-out;
+    @apply transition-all duration-500 ease-out;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    button,
+    a,
+    input,
+    select,
+    textarea,
+    [role="button"] {
+      transition-property: color, background-color, border-color, box-shadow, transform, opacity, filter;
+      transition-duration: 480ms;
+      transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
   /* Glass effect */

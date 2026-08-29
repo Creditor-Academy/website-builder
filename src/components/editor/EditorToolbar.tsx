@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { PublishDialog } from './PublishDialog';
+import { BrandLogo } from '@/components/Common/BrandLogo';
 
 export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websiteId = '', onTabChange = (tab: string) => {} }: any) {
   const [showPublishDialog, setShowPublishDialog] = useState(false);
@@ -45,9 +46,10 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
         <div className="flex items-center gap-2 md:gap-6">
         
           <div id="tour-logo" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center shadow-lg shadow-black/20 transition-all duration-300  group-hover:shadow-xl">
-              <span className="text-white font-black text-sm tracking-tighter">B</span>
-            </div>
+            <BrandLogo
+              showWordmark={false}
+              imgClassName="h-10 w-10"
+            />
             <div className="hidden sm:flex flex-col">
               <span className="font-black text-[14px] text-slate-900 leading-none tracking-tight">Buildora</span>
               <div className="flex items-center gap-2 mt-1">

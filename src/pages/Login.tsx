@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Eye, LayoutTemplate, Loader2 } from "lucide-react";
+import { ArrowLeft, Eye, Loader2 } from "lucide-react";
 import loginbg from "../assets/login.png";
 import { useGoogleLogin } from "@react-oauth/google";
 import { loginUser, registerUser, forgotPassword, googleLogin } from "../api/auth";
@@ -10,6 +10,7 @@ import {
   setStoredUser,
   validateSession,
 } from "@/lib/authSession";
+import { BrandLogo } from "@/components/Common/BrandLogo";
 
 // ── Moved outside so React never sees a new component type on re-render ────────
 
@@ -510,11 +511,11 @@ export default function LoginSignup() {
 
       <div className={`absolute top-8 left-8 right-8 z-50 flex items-center justify-between pointer-events-none ${isSignup ? "md:justify-end" : "md:justify-start"}`}>
         <motion.div layout transition={{ type: "spring", stiffness: 220, damping: 28 }} className="flex items-center justify-between w-full md:w-auto">
-          <Link to="/" className="flex items-center gap-3 text-white pointer-events-auto hover:opacity-80 transition-opacity drop-shadow-lg">
-            <div className="w-10 h-10 bg-white text-blue-600 rounded-2xl flex items-center justify-center">
-              <LayoutTemplate className="w-6 h-6" />
-            </div>
-            <span className="font-bold text-2xl tracking-tight">Buildora</span>
+          <Link to="/" className="flex items-center text-white pointer-events-auto hover:opacity-80 transition-opacity drop-shadow-lg">
+            <BrandLogo
+              imgClassName="h-10 w-10"
+              wordmarkClassName="text-2xl text-white"
+            />
           </Link>
           <Link to="/" className="md:ml-20 flex items-center justify-end gap-2 text-white/80 hover:text-white transition-colors text-sm font-medium pointer-events-auto drop-shadow-md">
             <ArrowLeft className="w-4 h-4" /> Back to Website
