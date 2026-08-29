@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { BarChart3, Eye, TrendingUp, FileText, Loader2, Globe } from 'lucide-react';
+import { BarChart3, Eye, TrendingUp, FileText, Globe } from 'lucide-react';
 import websiteApi from '@/api/website';
 import analyticsApi from '@/api/analytics';
 import { DashboardStatCard } from '@/components/dashboard/DashboardCard';
 import DeploymentMonitoring from '../components/dashboard/DeploymentMonitoring';
+import Loading from '@/components/Common/LoadingUI';
 
 interface DailyView { date: string; views: number; }
 interface TopPage { path: string; views: number; }
@@ -59,7 +60,7 @@ export default function DashboardDeployment() {
 
   return (
     <div className="admin-page space-y-8">
-      <div className="relative mb-6 overflow-hidden rounded-3xl bg-[#0F172A] px-4 py-5 shadow-[0_12px_40px_-8px_rgba(15,23,42,0.45)] sm:px-7">
+      <div className="relative mb-6 overflow-hidden rounded-3xl bg-[#0F172A] px-4 py-5 sm:px-7">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(148,163,184,0.18),transparent_55%)]" />
         <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 origin-bottom-right skew-x-[-12deg] bg-gradient-to-l from-white/[0.07] to-transparent" />
 
@@ -121,10 +122,7 @@ export default function DashboardDeployment() {
               <p>Select a published website to view analytics.</p>
             </div>
           ) : loadingAnalytics ? (
-            <div className="flex items-center justify-center py-16">
-              <Loader2 className="h-6 w-6 animate-spin text-[#787778]" />
-              <span className="ml-2 text-[#747781]">Loading analytics...</span>
-            </div>
+            <Loading label="Loading analytics" />
           ) : !analytics ? (
             <div className="py-12 text-center text-[#787778]">
               <p>No analytics data available yet.</p>

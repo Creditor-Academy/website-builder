@@ -33,6 +33,7 @@ const assetApi = {
     ...toUploadScope(scope),
   }),
   deleteAsset: (id, scope = {}) => apiClient.delete(`/assets/${id}`, { params: toParams(scope) }),
+  setVisibleAssets: (assetIds) => apiClient.put('/assets/visibility', { asset_ids: assetIds }),
 };
 
 export default assetApi;

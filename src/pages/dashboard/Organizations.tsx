@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { createUser } from '../../api/user';
+import Loading from '@/components/Common/LoadingUI';
 
 interface Institution {
   id: string;
@@ -363,7 +364,7 @@ const Organizations = () => {
   return (
     <div className="admin-page space-y-6 animate-in fade-in duration-500">
       {/* Header bar — match Templates / Assets */}
-      <div className="relative overflow-hidden rounded-3xl bg-[#0F172A] px-4 py-5 shadow-[0_12px_40px_-8px_rgba(15,23,42,0.45)] sm:px-7">
+      <div className="relative overflow-hidden rounded-3xl bg-[#0F172A] px-4 py-5 sm:px-7">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(148,163,184,0.18),transparent_55%)]" />
         <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 origin-bottom-right skew-x-[-12deg] bg-gradient-to-l from-white/[0.07] to-transparent" />
 
@@ -773,17 +774,11 @@ const Organizations = () => {
             </TableHeader>
             <TableBody>
               {loading ? (
-                Array(3).fill(0).map((_, i) => (
-                  <TableRow key={i} className="animate-pulse">
-                    <TableCell><div className="h-10 w-48 bg-[#F4F4F5] rounded" /></TableCell>
-                    <TableCell><div className="h-6 w-20 bg-[#F4F4F5] rounded-full" /></TableCell>
-                    <TableCell><div className="h-6 w-10 bg-[#F4F4F5] rounded mx-auto" /></TableCell>
-                    <TableCell><div className="h-6 w-10 bg-[#F4F4F5] rounded mx-auto" /></TableCell>
-                    <TableCell><div className="h-6 w-10 bg-[#F4F4F5] rounded mx-auto" /></TableCell>
-                    <TableCell><div className="h-6 w-32 bg-[#F4F4F5] rounded" /></TableCell>
-                    <TableCell><div className="h-10 w-10 bg-[#F4F4F5] rounded ml-auto" /></TableCell>
-                  </TableRow>
-                ))
+                <TableRow>
+                  <TableCell colSpan={7}>
+                    <Loading label="Loading organizations" />
+                  </TableCell>
+                </TableRow>
               ) : filteredOrgs.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="h-64 text-center">

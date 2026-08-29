@@ -11,18 +11,19 @@ import { CalendarDays, Key, Server, User as UserIcon } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import { getAuditLogs } from '../api/audit';
+import Loading from '@/components/Common/LoadingUI';
 import { DashboardPageShell, dashboardTableWrapClass } from '@/components/dashboard/DashboardPageShell';
 import { dashboardPanelClass } from '@/components/dashboard/DashboardCard';
 
 function parseMetadata(metadata: unknown): { kind: 'status' | 'name' | 'empty'; value: string; active?: boolean } {
   if (metadata == null) return { kind: 'empty', value: '—' };
 
-  let data = metadata;
-  if (typeof data === 'string') {
+  let data: unknown = metadata;
+  if (typeof metadata === 'string') {
     try {
-      data = JSON.parse(data);
+      data = JSON.parse(metadata);
     } catch {
-      return { kind: 'name', value: data };
+      return { kind: 'name', value: metadata };
     }
   }
 
@@ -70,7 +71,7 @@ export default function DashboardAuditLogs() {
   return (
     <div className="admin-page">
       {/* Header bar — match Templates / Assets */}
-      <div className="relative mb-6 overflow-hidden rounded-3xl bg-[#0F172A] px-4 py-5 shadow-[0_12px_40px_-8px_rgba(15,23,42,0.45)] sm:px-7">
+      <div className="relative mb-6 overflow-hidden rounded-3xl bg-[#0F172A] px-4 py-5 sm:px-7">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(148,163,184,0.18),transparent_55%)]" />
         <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 origin-bottom-right skew-x-[-12deg] bg-gradient-to-l from-white/[0.07] to-transparent" />
 
@@ -114,7 +115,9 @@ export default function DashboardAuditLogs() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center text-[#747781]">Loading logs...</TableCell>
+                <TableCell colSpan={5}>
+                  <Loading label="Loading logs" />
+                </TableCell>
               </TableRow>
             ) : logs.length > 0 ? (
               logs.map(log => {

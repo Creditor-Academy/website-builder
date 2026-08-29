@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { googleLogin } from "../api/auth";
 import { getDashboardPath, setStoredUser } from "@/lib/authSession";
+import Loading from "@/components/Common/LoadingUI";
 
 export default function GoogleCallback() {
   const navigate = useNavigate();
@@ -41,12 +42,5 @@ export default function GoogleCallback() {
     );
   }
 
-  return (
-    <div className="flex h-screen items-center justify-center bg-slate-50">
-      <div className="text-center space-y-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto" />
-        <p className="text-slate-600 font-medium">Signing in with Google...</p>
-      </div>
-    </div>
-  );
+  return <Loading fullScreen label="Signing in with Google" />;
 }

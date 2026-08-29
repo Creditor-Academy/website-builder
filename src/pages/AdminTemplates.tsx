@@ -24,6 +24,7 @@ import TemplateFormDialog from '@/components/dashboard/TemplateFormDialog';
 import GradientButton from '@/components/ui/GradientButton';
 import { DashboardPageShell, dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass, dashboardToolbarClass, dashboardTableWrapClass } from '@/components/dashboard/DashboardPageShell';
 import { dashboardPanelClass } from '@/components/dashboard/DashboardCard';
+import Loading from '@/components/Common/LoadingUI';
 
 export default function AdminTemplates() {
   const navigate = useNavigate();
@@ -182,15 +183,11 @@ export default function AdminTemplates() {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              Array.from({ length: 4 }).map((_, i) => (
-                <TableRow key={i} className="border-b border-slate-100">
-                  {Array.from({ length: 6 }).map((__, j) => (
-                    <TableCell key={j} className="px-4 py-4">
-                      <div className="h-4 bg-slate-100 rounded-full animate-pulse w-3/4" />
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              <TableRow>
+                <TableCell colSpan={6}>
+                  <Loading label="Loading templates" />
+                </TableCell>
+              </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-32 text-center text-slate-400">

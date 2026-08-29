@@ -8,11 +8,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, ArrowLeft, LayoutTemplate, Search, Trash2, RotateCcw, Building2, Loader2, MoreVertical, Edit2, AlertTriangle } from 'lucide-react';
+import { Plus, ArrowLeft, LayoutTemplate, Search, Trash2, RotateCcw, Building2, Loader2, AlertTriangle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useBuilderStore from '@/store/useBuilderStore';
 import { cn } from '@/lib/utils';
 import templateApi from '@/api/templates';
+import Loading from '@/components/Common/LoadingUI';
 import { useToast } from '@/components/ui/use-toast';
 import {
   AlertDialog,
@@ -24,7 +25,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import TemplateFormDialog from '@/components/dashboard/TemplateFormDialog';
 import { DashboardPageShell, dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass, dashboardToolbarClass } from '@/components/dashboard/DashboardPageShell';
 import { dashboardHeroPrimaryClass, dashboardHeroSecondaryClass } from '@/components/dashboard/DashboardHeroHeader';
@@ -39,6 +39,7 @@ import {
   DashboardCardPrimaryAction,
   DashboardCardSecondaryAction,
   DashboardCardDashed,
+  dashboardCardGridClass,
   dashboardCardTagClass,
   dashboardCardTitleClass,
   dashboardCardDescriptionClass,
@@ -253,16 +254,8 @@ export default function DashboardTemplates() {
       }
     >
       {creatingId && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-16 h-16 rounded-lg bg-[#131b2e] flex items-center justify-center shadow-lg">
-              <Loader2 className="w-8 h-8 text-white animate-spin" />
-            </div>
-            <div className="text-center">
-              <h3 className="text-xl font-bold text-[#1b1b1d]">Creating your site...</h3>
-              <p className="text-sm text-[#45464d] mt-1">Setting up your new project from the template</p>
-            </div>
-          </div>
+        <div className="fixed inset-0 z-50">
+          <Loading fullScreen label="Creating your site" />
         </div>
       )}
 
@@ -328,7 +321,7 @@ export default function DashboardTemplates() {
         )}
       </div>
 
-      <div className={cn(dashboardFilterScrollClass, 'mb-6 sm:mb-8')}>
+      <div className={cn(dashboardFilterScrollClass, 'mb-6 sm:mb-8 no-scrollbar')}>
         {categories.map(cat => (
           <button
             key={cat}
@@ -342,18 +335,7 @@ export default function DashboardTemplates() {
 
       {/* Loading shimmer */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-6">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="rounded-lg overflow-hidden border border-[#c6c6cd] bg-[#fcf8fa] shadow-sm animate-pulse">
-              <div className="h-64 w-full bg-[#eae7e9]" />
-              <div className="p-6 space-y-3">
-                <div className="h-3 w-1/3 bg-[#eae7e9] rounded" />
-                <div className="h-6 w-2/3 bg-[#eae7e9] rounded" />
-                <div className="h-4 w-full bg-[#eae7e9] rounded" />
-              </div>
-            </div>
-          ))}
-        </div>
+        <Loading label="Loading templates" />
       ) : filtered.length === 0 ? (
         /* Empty state */
         <div className="h-64 flex flex-col items-center justify-center gap-4 border border-dashed border-[#c6c6cd] rounded-lg bg-[#f6f3f5]">
@@ -378,7 +360,7 @@ export default function DashboardTemplates() {
         </div>
       ) : (
         /* Templates Grid scaled dynamically for wide screen sizes */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-6">
+        <div className={dashboardCardGridClass}>
           {filtered.map((template: any) => (
             <DashboardCard
               key={template.id}
@@ -391,7 +373,7 @@ export default function DashboardTemplates() {
                 }
                 void handleUseTemplate(template);
               }}
-              className={cn(showTrash && 'opacity-75')}
+              className={cn('h-full', showTrash && 'opacity-75')}
             >
               <DashboardCardMedia>
                 {template.image ? (
@@ -412,61 +394,15 @@ export default function DashboardTemplates() {
                     Deleted
                   </DashboardCardBadge>
                 ) : (
-                  <DashboardCardBadge position={(showTrash || isAdminUser) ? 'top-left' : 'top-right'}>
+                  <DashboardCardBadge position="top-left">
                     {template.category || 'Portfolio'}
                   </DashboardCardBadge>
-                )}
-
-                {(showTrash || isAdminUser) && (
-                  <div
-                    className="absolute right-2 top-2 z-20 sm:right-3 sm:top-3"
-                    onClick={(e) => e.stopPropagation()}
-                    onPointerDown={(e) => e.stopPropagation()}
-                  >
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button
-                          type="button"
-                          title="Template actions"
-                          aria-label="Template actions"
-                          className="flex h-8 w-8 items-center justify-center rounded-full border border-white/80 bg-white/95 text-[#0F172A] shadow-sm transition-colors hover:bg-white"
-                        >
-                          <MoreVertical className="h-4 w-4" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-44 rounded-xl p-1.5">
-                        {showTrash ? (
-                          <DropdownMenuItem
-                            className="cursor-pointer gap-2 rounded-lg"
-                            onClick={(e) => { e.stopPropagation(); handleRestoreTemplate(template); }}
-                          >
-                            <RotateCcw className="h-4 w-4" /> Restore
-                          </DropdownMenuItem>
-                        ) : (
-                          <>
-                            <DropdownMenuItem
-                              className="cursor-pointer gap-2 rounded-lg"
-                              onClick={(e) => { e.stopPropagation(); handleOpenEdit(template); }}
-                            >
-                              <Edit2 className="h-4 w-4" /> Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="cursor-pointer gap-2 rounded-lg text-rose-600 focus:bg-rose-50 focus:text-rose-700"
-                              onClick={(e) => { e.stopPropagation(); setDeleteTarget(template); }}
-                            >
-                              <Trash2 className="h-4 w-4" /> Delete
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
                 )}
               </DashboardCardMedia>
 
               <DashboardCardBody>
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <DashboardCardTitle className="mb-0">{template.name}</DashboardCardTitle>
+                  <DashboardCardTitle className="mb-0 line-clamp-2 min-h-[2.75rem]">{template.name}</DashboardCardTitle>
                   {template.scope === 'INSTITUTION' && (
                     <span className={dashboardCardTagClass}>Institution</span>
                   )}
@@ -482,16 +418,43 @@ export default function DashboardTemplates() {
                   })}
                 />
 
-                <DashboardCardFooter className="flex-col sm:flex-row">
-                  <DashboardCardSecondaryAction
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (isAdminUser) handleOpenEdit(template);
-                      else handleUseTemplate(template);
-                    }}
-                  >
-                    {isAdminUser ? 'Configure' : 'Preview'}
-                  </DashboardCardSecondaryAction>
+                <DashboardCardFooter>
+                  <div className="flex min-w-0 justify-between gap-1 ">
+                    <DashboardCardSecondaryAction
+                      className="gap-1.5"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (showTrash) {
+                          void handleRestoreTemplate(template);
+                          return;
+                        }
+                        if (isAdminUser) handleOpenEdit(template);
+                        else handleUseTemplate(template);
+                      }}
+                    >
+                      {showTrash ? (
+                        <>
+                          <RotateCcw className="h-4 w-4" />
+                          Restore
+                        </>
+                      ) : isAdminUser ? (
+                        'Configure'
+                      ) : (
+                        'Preview'
+                      )}
+                    </DashboardCardSecondaryAction>
+                    {isAdminUser && !showTrash && (
+                      <button
+                        type="button"
+                        title="Delete template"
+                        aria-label="Delete template"
+                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded text-[#ba1a1a] transition-colors hover:text-[#93000a]"
+                        onClick={(e) => { e.stopPropagation(); setDeleteTarget(template); }}
+                      >
+                        <Trash2 className="h-4 w-4" strokeWidth={2} />
+                      </button>
+                    )}
+                  </div>
                   <DashboardCardPrimaryAction
                     onClick={(e) => {
                       e.stopPropagation();

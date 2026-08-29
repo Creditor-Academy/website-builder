@@ -51,7 +51,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
-import UserShimmer from '@/components/dashboard/UserShimmer';
+import Loading from '@/components/Common/LoadingUI';
 import institutionApi from '@/api/institution';
 import { useSearchParams } from 'react-router-dom';
 import { getUsers, updateUser, updateUserRole, updateUserStatus, restoreUser, createUser, deleteUser } from '../api/user';
@@ -587,7 +587,7 @@ export default function DashboardUsers() {
   return (
     <div className="admin-page">
       {/* Header bar — match Templates / Assets */}
-      <div className="relative mb-6 overflow-hidden rounded-3xl bg-[#0F172A] px-4 py-5 shadow-[0_12px_40px_-8px_rgba(15,23,42,0.45)] sm:px-7">
+      <div className="relative mb-6 overflow-hidden rounded-3xl bg-[#0F172A] px-4 py-5 sm:px-7">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(148,163,184,0.18),transparent_55%)]" />
         <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 origin-bottom-right skew-x-[-12deg] bg-gradient-to-l from-white/[0.07] to-transparent" />
 
@@ -680,7 +680,11 @@ export default function DashboardUsers() {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              Array.from({ length: 5 }).map((_, i) => <UserShimmer key={i} />)
+              <TableRow>
+                <TableCell colSpan={6}>
+                  <Loading label="Loading users" />
+                </TableCell>
+              </TableRow>
             ) : sortedUsers.length > 0 ? (
               sortedUsers.map(user => (
                 <TableRow key={user.id} className="h-16 border-b border-[#E8E8E8] transition-colors hover:bg-[#F8FAFC]">

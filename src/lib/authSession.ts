@@ -41,12 +41,7 @@ export function invalidateSessionCache() {
   cachedValidation = null;
 }
 
-export function getDashboardPath(user?: AuthUser | null): string {
-  const resolved = user ?? getStoredUser();
-  const role = resolved?.role;
-  if (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'INSTITUTION_ADMIN') {
-    return '/admin';
-  }
+export function getDashboardPath(_user?: AuthUser | null): string {
   return '/dashboard';
 }
 

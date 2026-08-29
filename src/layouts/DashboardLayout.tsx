@@ -7,6 +7,10 @@ import { useIsCompact } from '@/hooks/use-mobile';
 import { logoutUser } from '@/api/auth';
 import { clearStoredUser } from '@/lib/authSession';
 import { DashboardSidebar } from '@/components/Common/sidebar';
+import { BrandLogo } from '@/components/Common/BrandLogo';
+import Loading from '@/components/Common/LoadingUI';
+import { motion } from 'framer-motion';
+import { pageMotion } from '@/lib/motion';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -54,8 +58,9 @@ const DashboardLayout = () => {
 
     useEffect(() => {
         document.documentElement.classList.remove('dark');
-        document.body.style.backgroundColor = '';
+        document.body.style.backgroundColor = 'var(--dashboard-bg)';
         return () => {
+            document.body.style.backgroundColor = '';
             try {
                 const saved = localStorage.getItem('buildora-theme');
                 if (saved === 'dark') document.documentElement.classList.add('dark');
@@ -112,9 +117,10 @@ const DashboardLayout = () => {
     };
 
     return (
+        <div className="h-dvh w-full bg-dashboard">
         <div className={cn(
-            'relative flex h-screen overflow-hidden font-sans selection:bg-primary/10',
-            isAdmin ? 'bg-[#F3F4F6]' : 'bg-[#f8fafc]'
+            'relative mx-auto flex h-full w-full max-w-dashboard overflow-hidden font-sans selection:bg-primary/10',
+            isCompact ? 'p-2 sm:p-3' : 'gap-2 p-2 sm:gap-3 sm:p-3 lg:gap-4 lg:p-4',
         )}>
             <Helmet>
                 <title>Dashboard | Buildora</title>
@@ -135,35 +141,29 @@ const DashboardLayout = () => {
                 isLoggingOut={isLoggingOut}
             />
 
-            <main className="min-w-0 w-full flex-1 overflow-x-hidden overflow-y-auto">
-                <div
-                    className={cn(
-                        'mx-auto w-full min-w-0 max-w-[1600px] 2xl:max-w-[1760px] p-4 sm:p-6 lg:px-6 lg:py-8',
-                    )}
-                >
-                {isCompact && (
-                    <div className="sticky top-0 z-30 -mx-4 mb-4 flex items-center gap-2 border-b border-[#E5E7EB] bg-[#f8fafc]/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:hidden">
-                        <button
-                            type="button"
-                            title="Open menu"
-                            aria-label="Open menu"
-                            onClick={() => setIsSidebarOpen(true)}
-                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#0F172A] shadow-sm"
-                        >
-                            <Menu className="h-5 w-5" />
-                        </button>
-                        <span className="text-sm font-semibold text-[#0F172A]">Buildora</span>
-                    </div>
-                )}
-                <Suspense
-                    fallback={
-                        <div className="flex h-full w-full items-center justify-center">
-                            <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+            <main className="min-h-0 min-w-0 w-full flex-1 overflow-x-clip overflow-y-auto no-scrollbar">
+                <div className="w-full min-w-0">
+                    {isCompact && (
+                        <div className="sticky top-0 z-30 mb-3 flex items-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white/95 px-3 py-2.5 shadow-sm backdrop-blur">
+                            <button
+                                type="button"
+                                title="Open menu"
+                                aria-label="Open menu"
+                                onClick={() => setIsSidebarOpen(true)}
+                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#0F172A] shadow-sm"
+                            >
+                                <Menu className="h-5 w-5" />
+                            </button>
+                            <BrandLogo
+                                imgClassName="h-7 w-7"
+                            />
                         </div>
-                    }
-                >
-                    <Outlet key={location.pathname} context={outletContext} />
-                </Suspense>
+                    )}
+                    <Suspense fallback={<Loading />}>
+                        <motion.div key={location.pathname} {...pageMotion}>
+                            <Outlet context={outletContext} />
+                        </motion.div>
+                    </Suspense>
                 </div>
             </main>
 
@@ -197,6 +197,7 @@ const DashboardLayout = () => {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+        </div>
         </div>
     );
 };

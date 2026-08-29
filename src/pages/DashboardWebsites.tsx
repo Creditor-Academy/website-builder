@@ -36,7 +36,7 @@ import {
 import {
   Globe2, LayoutGrid, ShieldCheck, User as UserIcon, Hash, FileText, Link, Clock, Edit, Copy, Eye, Trash2, MoreVertical, CheckCircle, CircleDotDashed, Ban, Search, ListFilter, Plus, Building2, RotateCcw
 } from 'lucide-react';
-import WebsiteShimmer from '@/components/dashboard/WebsiteShimmer';
+import Loading from '@/components/Common/LoadingUI';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import useBuilderStore from '@/store/useBuilderStore';
@@ -228,7 +228,7 @@ export default function DashboardWebsites() {
   return (
     <div className="admin-page">
       {/* Header bar — match Templates / Assets */}
-      <div className="relative mb-6 overflow-hidden rounded-3xl bg-[#0F172A] px-4 py-5 shadow-[0_12px_40px_-8px_rgba(15,23,42,0.45)] sm:px-7">
+      <div className="relative mb-6 overflow-hidden rounded-3xl bg-[#0F172A] px-4 py-5 sm:px-7">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(148,163,184,0.18),transparent_55%)]" />
         <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 origin-bottom-right skew-x-[-12deg] bg-gradient-to-l from-white/[0.07] to-transparent" />
 
@@ -365,7 +365,11 @@ export default function DashboardWebsites() {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              Array.from({ length: 5 }).map((_, i) => <WebsiteShimmer key={i} />)
+              <TableRow>
+                <TableCell colSpan={5}>
+                  <Loading label="Loading websites" />
+                </TableCell>
+              </TableRow>
             ) : filteredWebsites.length > 0 ? (
               filteredWebsites.map((website: any) => (
                 <TableRow key={website.id} className="group h-16 border-b border-[#E8E8E8] hover:bg-[#F4F4F5]/70 transition-colors">

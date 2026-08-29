@@ -36,6 +36,7 @@ import {
   CheckCircle, XCircle, Hourglass, FileText, RefreshCw, MoreVertical, RotateCcw, Clock, Search, ListFilter, Loader2, AlertCircle
 } from 'lucide-react';
 import DeploymentLogViewer from './DeploymentLogViewer';
+import Loading from '@/components/Common/LoadingUI';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import websiteApi from '@/api/website';
@@ -251,10 +252,7 @@ export default function DeploymentMonitoring() {
 
       <div className="overflow-x-auto rounded-3xl border border-[#E5E7EB] bg-white shadow-sm">
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-[#787778]" />
-            <span className="ml-2 text-[#747781]">Loading deployments...</span>
-          </div>
+          <Loading label="Loading deployments" />
         ) : (
           <Table className="w-full overflow-hidden">
             <TableHeader className="border-b border-[#E8E8E8] bg-[#F4F4F5]">

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Search, Upload, Check, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Trash2, Copy, Loader2, Globe } from 'lucide-react';
+import { Search, Upload, Check, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Trash2, Copy, Loader2, Globe, SlidersHorizontal } from 'lucide-react';
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Tabs, TabsContent } from "../components/ui/tabs";
@@ -13,7 +13,16 @@ import { useToast } from "../hooks/use-toast";
 import useBuilderStore from '../store/useBuilderStore';
 import type { Asset } from '../store/useBuilderStore';
 import { DashboardPageShell, dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass, dashboardToolbarClass } from '@/components/dashboard/DashboardPageShell';
-import { dashboardHeroPrimaryClass } from '@/components/dashboard/DashboardHeroHeader';
+import { dashboardHeroPrimaryClass, dashboardHeroSecondaryClass } from '@/components/dashboard/DashboardHeroHeader';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
+import assetApi from '@/api/assets';
+import Loading from '@/components/Common/LoadingUI';
+import {
+  filterAssetsVisibleToUsers,
+  getUserVisibleAssetIds,
+  setUserVisibleAssetIds,
+} from '@/lib/assetVisibility';
 import {
   DashboardCard,
   DashboardCardMedia,
@@ -22,7 +31,6 @@ import {
   DashboardCardDescription,
   DashboardCardFooter,
   DashboardCardBadge,
-  dashboardCardClass,
   dashboardCardBadgeClass,
 } from '@/components/dashboard/DashboardCard';
 
@@ -53,11 +61,24 @@ export default function DashboardAssets() {
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [previewAsset, setPreviewAsset] = useState<Asset | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const assets = getScopedAssets();
+    const allAssets = getScopedAssets();
+    const assets = isAdmin ? allAssets : filterAssetsVisibleToUsers(allAssets);
 
     const filteredMedia = assets.filter(item =>
         item.name.toLowerCase().includes(search.toLowerCase())
     );
+
+    const [manageOpen, setManageOpen] = useState(false);
+    const [draftVisibleIds, setDraftVisibleIds] = useState<Set<string>>(new Set());
+    const [savingVisibility, setSavingVisibility] = useState(false);
+
+    const allAssetIds = allAssets.map((asset) => asset.id).join(',');
+
+    useEffect(() => {
+        if (!manageOpen) return;
+        const saved = getUserVisibleAssetIds();
+        setDraftVisibleIds(new Set(saved ?? allAssetIds.split(',').filter(Boolean)));
+    }, [manageOpen, allAssetIds]);
 
     const { toast } = useToast();
 
@@ -140,14 +161,48 @@ export default function DashboardAssets() {
         }
     };
 
-    const copyToClipboard = (url: string) => {
-        navigator.clipboard.writeText(url);
+    const handleCopy = async (id: string, url: string) => {
+        try {
+            await navigator.clipboard.writeText(url);
+            setCopiedId(id);
+            toast({ title: 'Asset link copied!' });
+            setTimeout(() => setCopiedId(null), 2000);
+        } catch {
+            toast({
+                variant: 'destructive',
+                title: 'Could not copy link',
+                description: 'Please try again.',
+            });
+        }
     };
 
-    const handleCopy = (id: string, url: string) => {
-        copyToClipboard(url);
-        setCopiedId(id);
-        setTimeout(() => setCopiedId(null), 2000);
+    const toggleDraftVisible = (id: string, checked: boolean) => {
+        setDraftVisibleIds((prev) => {
+            const next = new Set(prev);
+            if (checked) next.add(id);
+            else next.delete(id);
+            return next;
+        });
+    };
+
+    const handleSaveVisibility = async () => {
+        const ids = [...draftVisibleIds];
+        setSavingVisibility(true);
+        setUserVisibleAssetIds(ids);
+        try {
+            await assetApi.setVisibleAssets(ids);
+        } catch {
+            // Visibility is stored locally even if the API is unavailable.
+        } finally {
+            setSavingVisibility(false);
+            setManageOpen(false);
+            toast({
+                title: 'User library updated',
+                description: ids.length
+                    ? `${ids.length} asset${ids.length === 1 ? '' : 's'} will be visible on the user side.`
+                    : 'No assets will be visible on the user side.',
+            });
+        }
     };
 
     const handleDelete = async (id: string) => {
@@ -181,6 +236,91 @@ export default function DashboardAssets() {
       description="Manage the global asset library outside individual websites."
       actions={
         <>
+          {isAdmin && (
+            <Popover open={manageOpen} onOpenChange={setManageOpen}>
+              <PopoverTrigger asChild>
+                <Button type="button" className={dashboardHeroSecondaryClass}>
+                  <SlidersHorizontal className="mr-1.5 h-4 w-4 shrink-0" />
+                  Manage Assets
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                align="end"
+                sideOffset={10}
+                className="w-[min(22rem,calc(100vw-2rem))] rounded-2xl border border-slate-200 p-0 shadow-xl"
+              >
+                <div className="border-b border-slate-100 px-4 py-3">
+                  <p className="text-sm font-semibold text-[#0F172A]">Visible to users</p>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    Choose which library assets appear on the user dashboard.
+                  </p>
+                </div>
+                <div className="flex items-center justify-between gap-2 px-4 py-2">
+                  <button
+                    type="button"
+                    className="text-xs font-semibold text-[#131924] hover:underline"
+                    onClick={() => setDraftVisibleIds(new Set(allAssets.map((asset) => asset.id)))}
+                  >
+                    Select all
+                  </button>
+                  <button
+                    type="button"
+                    className="text-xs font-semibold text-slate-500 hover:underline"
+                    onClick={() => setDraftVisibleIds(new Set())}
+                  >
+                    Clear
+                  </button>
+                </div>
+                <div className="max-h-64 overflow-y-auto px-2 pb-2">
+                  {allAssets.length === 0 ? (
+                    <p className="px-2 py-6 text-center text-xs text-slate-500">
+                      Upload assets first, then choose which ones users can see.
+                    </p>
+                  ) : (
+                    allAssets.map((asset) => (
+                      <label
+                        key={asset.id}
+                        className="flex cursor-pointer items-center gap-2.5 rounded-xl px-2 py-2 hover:bg-slate-50"
+                      >
+                        <Checkbox
+                          checked={draftVisibleIds.has(asset.id)}
+                          onCheckedChange={(checked) => toggleDraftVisible(asset.id, checked === true)}
+                          className="border-[#131924] data-[state=checked]:bg-[#131924] data-[state=checked]:text-white"
+                        />
+                        {asset.type === 'image' ? (
+                          <img src={asset.url} alt="" className="h-8 w-8 shrink-0 rounded object-cover bg-slate-100" />
+                        ) : (
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-[#131924]">
+                            <Video className="h-3.5 w-3.5 text-white/70" />
+                          </span>
+                        )}
+                        <span className="min-w-0 flex-1 truncate text-sm font-medium text-[#1b1b1d]">
+                          {asset.name}
+                        </span>
+                      </label>
+                    ))
+                  )}
+                </div>
+                <div className="border-t border-slate-100 p-3">
+                  <Button
+                    type="button"
+                    disabled={savingVisibility}
+                    onClick={() => void handleSaveVisibility()}
+                    className="h-9 w-full rounded-full bg-[#131924] text-sm font-semibold text-white hover:bg-[#202838]"
+                  >
+                    {savingVisibility ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving…
+                      </>
+                    ) : (
+                      'Save visibility'
+                    )}
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -249,18 +389,7 @@ export default function DashboardAssets() {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <div className="min-h-[400px]">
                    {isFetching ? (
-                      /* ── Initial fetch skeleton ── */
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
-                         {Array.from({ length: 12 }).map((_, i) => (
-                            <div key={i} className={cn(dashboardCardClass, 'animate-pulse')}>
-                               <div className="aspect-square bg-[#eae7e9] border-b border-[#c6c6cd]" />
-                               <div className="space-y-2 p-2.5 sm:p-3">
-                                  <div className="h-2.5 bg-slate-200 rounded-full w-3/4" />
-                                  <div className="h-2 bg-slate-100 rounded-full w-1/2" />
-                               </div>
-                            </div>
-                         ))}
-                      </div>
+                      <Loading label="Loading assets" />
                    ) : (
                    ['all', 'images', 'videos'].map(tabType => (
                       <TabsContent key={tabType} value={tabType} className="mt-0 outline-none">

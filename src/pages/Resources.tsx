@@ -25,6 +25,7 @@ import {
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/Common/BrandLogo";
 import Footer from "./Footer";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -143,9 +144,10 @@ const Resources = () => {
               : "bg-white/60 border-slate-200/50 shadow-[0_8px_32px_rgba(0,0,0,0.05)]"
           )}
         >
-          <Link to="/" className="flex items-center gap-3 cursor-pointer group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black group-hover:scale-110 transition-transform duration-300 shadow-lg">B</div>
-            <span className={cn("text-xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Buildora</span>
+          <Link to="/" className="flex items-center cursor-pointer group">
+            <BrandLogo
+              imgClassName="h-8 w-8 transition-transform duration-300 group-hover:scale-110"
+            />
           </Link>
 
           <div className="hidden md:flex items-center gap-8 text-sm font-medium">

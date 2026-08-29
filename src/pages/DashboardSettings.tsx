@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import { getProfile, updateUserProfile, changePassword } from '@/api/user';
+import Loading from '@/components/Common/LoadingUI';
 
 // ── Reusable field ─────────────────────────────────────────────────────────
 function Field({ label, value, onChange, disabled, type = 'text', placeholder, hint, icon, right }: {
@@ -45,8 +46,8 @@ function ToggleRow({ icon, title, subtitle, checked, onChange, accent = 'purple'
 }) {
     const accentMap: Record<string, string> = {
         purple: 'bg-purple-50 text-purple-500',
-        blue:   'bg-blue-50 text-blue-500',
-        emerald:'bg-emerald-50 text-emerald-500',
+        blue: 'bg-blue-50 text-blue-500',
+        emerald: 'bg-emerald-50 text-emerald-500',
     };
     return (
         <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50/60 hover:bg-slate-50 border border-slate-100 transition-all">
@@ -74,9 +75,9 @@ function SaveBtn({ onClick, loading, label = 'Save Changes' }: { onClick: () => 
 
 // ── Main ───────────────────────────────────────────────────────────────────
 const TABS = [
-    { id: 'profile',       label: 'Profile',       icon: <UserCircle className="w-4 h-4" /> },
-    { id: 'notifications', label: 'Notifications',  icon: <Bell className="w-4 h-4" /> },
-    { id: 'integrations',  label: 'Integrations',   icon: <Puzzle className="w-4 h-4" /> },
+    { id: 'profile', label: 'Profile', icon: <UserCircle className="w-4 h-4" /> },
+    { id: 'notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" /> },
+    { id: 'integrations', label: 'Integrations', icon: <Puzzle className="w-4 h-4" /> },
 ];
 
 export default function DashboardSettings() {
@@ -85,16 +86,16 @@ export default function DashboardSettings() {
     const [tab, setTab] = useState('profile');
 
     // Profile
-    const [profileName,  setProfileName]  = useState('');
+    const [profileName, setProfileName] = useState('');
     const [profileEmail, setProfileEmail] = useState('');
     const [loadingP, setLoadingP] = useState(true);
-    const [savingP,  setSavingP]  = useState(false);
+    const [savingP, setSavingP] = useState(false);
 
     // Password collapsible
-    const [pwOpen,  setPwOpen]  = useState(false);
-    const [curPw,   setCurPw]   = useState('');
-    const [newPw,   setNewPw]   = useState('');
-    const [conPw,   setConPw]   = useState('');
+    const [pwOpen, setPwOpen] = useState(false);
+    const [curPw, setCurPw] = useState('');
+    const [newPw, setNewPw] = useState('');
+    const [conPw, setConPw] = useState('');
     const [showCur, setShowCur] = useState(false);
     const [showNew, setShowNew] = useState(false);
     const [showCon, setShowCon] = useState(false);
@@ -102,7 +103,7 @@ export default function DashboardSettings() {
 
     // Notifications
     const [emailN, setEmailN] = useState(() => { try { return JSON.parse(localStorage.getItem('pref_emailNotifications') ?? 'true'); } catch { return true; } });
-    const [smsN,   setSmsN]   = useState(() => { try { return JSON.parse(localStorage.getItem('pref_smsNotifications')    ?? 'false'); } catch { return false; } });
+    const [smsN, setSmsN] = useState(() => { try { return JSON.parse(localStorage.getItem('pref_smsNotifications') ?? 'false'); } catch { return false; } });
     const [savingN, setSavingN] = useState(false);
 
     useEffect(() => {
@@ -158,7 +159,7 @@ export default function DashboardSettings() {
     );
 
     return (
-        <div className="bg-[#f7f7fb] min-h-full">
+        <div className="bg-dashboard min-h-full">
 
             {/* ── Banner ── */}
             <div className="relative overflow-hidden bg-gradient-to-r from-[#e8e4f9] via-[#ede8fb] to-[#dde8fb] px-8 py-7">
@@ -214,7 +215,7 @@ export default function DashboardSettings() {
                             </div>
                             <div className="px-6 py-5">
                                 {loadingP ? (
-                                    <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-slate-300" /></div>
+                                    <Loading label="Loading profile" />
                                 ) : (
                                     <div className="space-y-4">
                                         <Field label="Display Name" value={profileName} onChange={setProfileName}

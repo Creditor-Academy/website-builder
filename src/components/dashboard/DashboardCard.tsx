@@ -1,7 +1,9 @@
 import React from 'react';
 import { format } from 'date-fns';
+import { motion, type HTMLMotionProps } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
+import { cardMotion } from '@/lib/motion';
 
 export type DashboardPublishStatus = 'Draft' | 'Published' | 'Deleted';
 
@@ -41,7 +43,7 @@ export function getDashboardPublishStatus({
 
 export const dashboardCardClass =
 
-  'group relative bg-[#fcf8fa] border border-[#c6c6cd] rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col';
+  'group relative @container bg-[#fcf8fa] border border-[#f3f4f6] rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-500 ease-out flex flex-col min-w-0';
 
 
 
@@ -51,13 +53,13 @@ export const dashboardCardInteractiveClass = cn(dashboardCardClass, 'cursor-poin
 
 export const dashboardCardMediaClass =
 
-  'relative h-48 sm:h-56 md:h-64 w-full bg-[#eae7e9] overflow-hidden border-b border-[#c6c6cd]';
+  'relative h-48 sm:h-56 md:h-64 w-full bg-[#eae7e9] overflow-hidden';
 
 
 
 export const dashboardCardMediaAspectClass =
 
-  'relative aspect-[16/10] w-full bg-[#eae7e9] overflow-hidden border-b border-[#c6c6cd]';
+  'relative aspect-[16/10] w-full bg-[#eae7e9] overflow-hidden';
 
 
 
@@ -77,21 +79,27 @@ export const dashboardCardDescriptionClass =
 
 
 
+export const dashboardCardGridClass =
+
+  'grid gap-4 sm:gap-6 [grid-template-columns:repeat(auto-fill,minmax(min(100%,18rem),1fr))]';
+
+
+
 export const dashboardCardFooterClass =
 
-  'flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between mt-auto pt-2 gap-2 sm:gap-3';
+  'mt-auto flex flex-col-reverse gap-2 pt-2 @[18rem]:flex-row @[18rem]:flex-wrap @[18rem]:items-center @[18rem]:justify-between';
 
 
 
 export const dashboardCardPrimaryBtnClass =
 
-  'bg-[#000000] text-white text-[13px] sm:text-[14px] font-medium py-2 px-3 sm:px-4 rounded hover:bg-[#000000]/90 transition-colors shadow-sm w-full sm:w-auto text-center';
+  'inline-flex shrink-0 items-center justify-center whitespace-nowrap bg-[#131924] text-white text-[13px] sm:text-[14px] font-medium py-2 px-3 sm:px-4 rounded hover:bg-[#202838] transition-colors duration-500 ease-out shadow-sm w-full @[18rem]:w-auto text-center';
 
 
 
 export const dashboardCardSecondaryBtnClass =
 
-  'text-[13px] sm:text-[14px] font-medium text-[#000000] hover:text-[#000000]/70 transition-colors w-full sm:w-auto text-center';
+  'inline-flex min-w-0 items-center justify-center whitespace-nowrap text-[13px] sm:text-[14px] font-medium text-[#000000] hover:text-[#131924] transition-colors duration-500 ease-out text-center';
 
 
 
@@ -121,19 +129,19 @@ export const dashboardCardDashedClass =
 
 export const dashboardStatCardClass =
 
-  'bg-[#fcf8fa] border border-[#c6c6cd] rounded-lg p-4 sm:p-5 min-w-0';
+  'bg-[#fcf8fa] rounded-lg p-4 sm:p-5 min-w-0';
 
 
 
 export const dashboardListCardClass =
 
-  'border rounded-lg p-4 sm:p-6 bg-[#fcf8fa] border-[#c6c6cd] cursor-pointer transition-all hover:shadow-lg min-w-0';
+  'rounded-lg p-4 sm:p-6 bg-[#fcf8fa] cursor-pointer transition-all hover:shadow-lg min-w-0';
 
 
 
 export const dashboardPanelClass =
 
-  'bg-[#fcf8fa] border border-[#c6c6cd] rounded-lg overflow-hidden min-w-0';
+  'bg-[#fcf8fa] rounded-lg overflow-hidden min-w-0';
 
 
 
@@ -167,15 +175,19 @@ export const dashboardCardTagClass =
 
 type DivProps = React.ComponentProps<'div'>;
 
+type MotionDivProps = HTMLMotionProps<'div'>;
+
 type ButtonProps = React.ComponentProps<'button'>;
 
 
 
-export function DashboardCard({ className, interactive, ...props }: DivProps & { interactive?: boolean }) {
+export function DashboardCard({ className, interactive, ...props }: MotionDivProps & { interactive?: boolean }) {
 
   return (
 
-    <div
+    <motion.div
+
+      {...cardMotion}
 
       className={cn(interactive ? dashboardCardInteractiveClass : dashboardCardClass, className)}
 
@@ -335,25 +347,61 @@ export function DashboardCardSecondaryAction({ className, ...props }: ButtonProp
 
 
 
-export function DashboardCardDashed({ className, ...props }: DivProps) {
+export function DashboardCardDashed({ className, ...props }: MotionDivProps) {
 
-  return <div className={cn(dashboardCardDashedClass, className)} {...props} />;
+  return (
+
+    <motion.div
+
+      {...cardMotion}
+
+      className={cn(dashboardCardDashedClass, className)}
+
+      {...props}
+
+    />
+
+  );
 
 }
 
 
 
-export function DashboardStatCard({ className, ...props }: DivProps) {
+export function DashboardStatCard({ className, ...props }: MotionDivProps) {
 
-  return <div className={cn(dashboardStatCardClass, className)} {...props} />;
+  return (
+
+    <motion.div
+
+      {...cardMotion}
+
+      className={cn(dashboardStatCardClass, className)}
+
+      {...props}
+
+    />
+
+  );
 
 }
 
 
 
-export function DashboardListCard({ className, ...props }: DivProps) {
+export function DashboardListCard({ className, ...props }: MotionDivProps) {
 
-  return <div className={cn(dashboardListCardClass, className)} {...props} />;
+  return (
+
+    <motion.div
+
+      {...cardMotion}
+
+      className={cn(dashboardListCardClass, className)}
+
+      {...props}
+
+    />
+
+  );
 
 }
 

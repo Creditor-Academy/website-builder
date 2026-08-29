@@ -14,6 +14,7 @@ import { GuidedTour } from "./GuidedTour";
 import { AssetLibraryPanel } from "./AssetLibraryPanel";
 import { DesignSystemPanel } from "./DesignSystemPanel";
 import { VersionHistoryPanel } from "./VersionHistoryPanel";
+import Loading from "@/components/Common/LoadingUI";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -273,14 +274,7 @@ export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
   }, [id, selectWebsite]);
 
   if (!activeWebsiteId && id) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-slate-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-slate-600 font-medium">Loading your project...</p>
-        </div>
-      </div>
-    );
+    return <Loading fullScreen label="Loading your project" />;
   }
 
   return (

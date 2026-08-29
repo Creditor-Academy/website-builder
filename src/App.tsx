@@ -43,9 +43,10 @@ const DashboardProfile = React.lazy(() => import("./pages/DashboardProfile"));
 
 import { ScrollToTop } from "./components/utils/ScrollToTop";
 import { JumpToTop } from "./components/ui/JumpToTop";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AuthSessionProvider } from "./components/auth/AuthSessionProvider";
-import { ErrorBoundary } from "./components/ErrorBoundary";
+import Loading from "./components/Common/LoadingUI";
 
 const queryClient = new QueryClient();
 
@@ -60,7 +61,7 @@ const App = () => (
           <AuthSessionProvider>
           <ScrollToTop />
           <JumpToTop />
-          <Suspense fallback={<div className="flex h-screen w-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
+          <Suspense fallback={<Loading fullScreen />}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />

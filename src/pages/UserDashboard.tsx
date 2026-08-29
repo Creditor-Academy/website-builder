@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import type { DashboardOutletContext } from '@/layouts/DashboardLayout';
 import {
-    Plus, Globe, Trash2, MoreVertical, Edit2, Search, MessageSquare,
+    Plus, Globe, Trash2, Search, MessageSquare, Pencil,
     ArrowRight, LayoutTemplate, ListFilter, CheckCircle, Loader2, AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -19,12 +19,12 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from "@/components/ui/use-toast";
 import useBuilderStore from '@/store/useBuilderStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { SiteThumbnail } from '@/components/dashboard/SiteThumbnail';
+import Loading from '@/components/Common/LoadingUI';
 import {
     DashboardHeroHeader,
     dashboardHeroPrimaryClass,
@@ -39,6 +39,7 @@ import {
     DashboardCardMeta,
     DashboardCardPrimaryAction,
     DashboardCardSecondaryAction,
+    dashboardCardGridClass,
     formatDashboardCardDate,
     getDashboardPublishStatus,
 } from '@/components/dashboard/DashboardCard';
@@ -64,7 +65,7 @@ const WebsiteCard = ({ site, onDelete, onEdit, onViewMessages, dbTemplates = [] 
     });
 
     return (
-        <DashboardCard interactive onClick={onEdit}>
+        <DashboardCard interactive className="h-full" onClick={onEdit}>
             <DashboardCardMedia>
                 {site?.pages?.[0]?.sections?.length > 0 ? (
                     <SiteThumbnail site={site} className="absolute inset-0 w-full h-full" />
@@ -83,62 +84,34 @@ const WebsiteCard = ({ site, onDelete, onEdit, onViewMessages, dbTemplates = [] 
                 )}
 
                 <DashboardCardBadge position="top-left">{category}</DashboardCardBadge>
-                <div
-                    className="absolute right-2 top-2 z-20 sm:right-3 sm:top-3"
-                    onClick={(e) => e.stopPropagation()}
-                    onPointerDown={(e) => e.stopPropagation()}
-                >
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <button
-                                type="button"
-                                title="Project actions"
-                                aria-label="Project actions"
-                                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/80 bg-white/95 text-[#0F172A] shadow-sm transition-colors hover:bg-white"
-                            >
-                                <MoreVertical className="h-4 w-4" />
-                            </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-44 rounded-xl p-1.5">
-                            <DropdownMenuItem
-                                className="cursor-pointer gap-2 rounded-lg"
-                                onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                            >
-                                <Edit2 className="h-4 w-4" /> Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                className="cursor-pointer gap-2 rounded-lg"
-                                onClick={(e) => { e.stopPropagation(); onViewMessages(); }}
-                            >
-                                <MessageSquare className="h-4 w-4" /> Messages
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                className="cursor-pointer gap-2 rounded-lg text-rose-600 focus:bg-rose-50 focus:text-rose-700"
-                                onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                            >
-                                <Trash2 className="h-4 w-4" /> Delete
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
             </DashboardCardMedia>
 
             <DashboardCardBody>
-                <DashboardCardTitle>{site.name}</DashboardCardTitle>
+                <div className="mb-1 flex items-center justify-between gap-2">
+                    <DashboardCardTitle className="mb-0 line-clamp-2 min-h-[2.75rem]">
+                        {site.name}
+                    </DashboardCardTitle>
+                </div>
                 <DashboardCardMeta date={projectDate} status={publishStatus} />
-                <DashboardCardFooter className="flex-col sm:flex-row">
-                    <DashboardCardSecondaryAction
-                        className="inline-flex items-center justify-center gap-1.5"
-                        onClick={(e) => { e.stopPropagation(); onViewMessages(); }}
-                    >
-                        <MessageSquare className="h-4 w-4" />
-                        Messages
-                    </DashboardCardSecondaryAction>
-                    <DashboardCardPrimaryAction
-                        onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                    >
-                        Open Editor
-                    </DashboardCardPrimaryAction>
+                <DashboardCardFooter>
+                    <div className="flex min-w-0 items-center gap-1 justify-between border-t border-slate-300 pt-2">
+                        <DashboardCardSecondaryAction
+                            className="gap-1.5"
+                            onClick={(e) => { e.stopPropagation(); onViewMessages(); }}
+                        >
+                            <MessageSquare className="h-4 w-4 shrink-0" />
+                            Messages
+                        </DashboardCardSecondaryAction>
+                        <button
+                            type="button"
+                            title="Delete project"
+                            aria-label="Delete project"
+                            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded text-[#ba1a1a] transition-colors hover:text-[#93000a]"
+                            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                        >
+                            <Trash2 className="h-4 w-4" strokeWidth={2} />
+                        </button>
+                    </div>
                 </DashboardCardFooter>
             </DashboardCardBody>
         </DashboardCard>
@@ -174,6 +147,8 @@ const FilterEmptyState = ({ filterLabel }: { filterLabel: string }) => (
 
 // ΓöÇΓöÇΓöÇ UserDashboard ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
+const WEBSITE_NAME_MAX_LENGTH = 100;
+
 const UserDashboard = () => {
     const navigate = useNavigate();
     const websites = useBuilderStore((state) => state.websites) ?? [];
@@ -200,6 +175,7 @@ const UserDashboard = () => {
     const { toast } = useToast();
 
     const [newSiteName, setNewSiteName] = useState('');
+    const nameExceedsLimit = newSiteName.length > WEBSITE_NAME_MAX_LENGTH;
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTemplate, setSelectedTemplate] = useState('blank');
@@ -213,6 +189,7 @@ const UserDashboard = () => {
     const [isCreatingSite, setIsCreatingSite] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isLoadingSites, setIsLoadingSites] = useState(true);
 
     // Γ£à Listen for userUpdated event (userName itself is kept in sync by DashboardLayout)
     useEffect(() => {
@@ -224,7 +201,14 @@ const UserDashboard = () => {
     }, []);
 
     useEffect(() => {
-        fetchWebsites(undefined, isAdmin);
+        let mounted = true;
+        setIsLoadingSites(true);
+        void fetchWebsites(undefined, isAdmin).finally(() => {
+            if (mounted) setIsLoadingSites(false);
+        });
+        return () => {
+            mounted = false;
+        };
     }, [isAdmin, fetchWebsites]);
 
     // Fetch DB templates
@@ -322,7 +306,7 @@ const UserDashboard = () => {
     };
 
     const handleCreateSite = async () => {
-        if (!newSiteName.trim() || isCreatingSite) return;
+        if (!newSiteName.trim() || isCreatingSite || nameExceedsLimit) return;
         try {
             setIsCreatingSite(true);
             const id = await createWebsite(newSiteName, selectedTemplate);
@@ -344,25 +328,21 @@ const UserDashboard = () => {
 
     return (
         <>
+            <DashboardHeroHeader
+                title="Dashboard"
+                description={`Good day, ${userName.split(' ')[0]}.`}
+                actions={
+                    <button
+                        type="button"
+                        onClick={() => setIsDialogOpen(true)}
+                        className={cn('inline-flex items-center justify-center', dashboardHeroPrimaryClass)}
+                    >
+                        <Plus className="mr-1.5 h-4 w-4 shrink-0" />
+                        New Project
+                    </button>
+                }
+            />
             <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-                <DashboardHeroHeader
-                    title="Dashboard"
-                    description={`Good day, ${userName.split(' ')[0]}.`}
-                    actions={
-                        <>
-                            <DialogTrigger asChild>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsDialogOpen(true)}
-                                    className={cn('inline-flex items-center justify-center', dashboardHeroPrimaryClass)}
-                                >
-                                    <Plus className="mr-1.5 h-4 w-4 shrink-0" />
-                                    New Project
-                                </button>
-                            </DialogTrigger>
-                        </>
-                    }
-                />
                 <DialogContent
                     className={cn(
                         'flex flex-col gap-0 w-[calc(100vw-1.5rem)] sm:max-w-5xl p-0 overflow-hidden',
@@ -390,19 +370,41 @@ const UserDashboard = () => {
                                     <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-[#0F172A]">
                                         Project Name
                                     </label>
-                                    <Input
-                                        placeholder="e.g., My Awesome Site"
-                                        value={newSiteName}
-                                        onChange={(e) => setNewSiteName(e.target.value)}
-                                        className="h-12 rounded-xl border-slate-200 bg-slate-50 px-4 font-medium text-slate-900 shadow-inner transition-all focus:bg-white focus-visible:border-[#0F172A] focus-visible:ring-2 focus-visible:ring-[#0F172A]/20 sm:h-14"
-                                        onKeyDown={(e) => e.key === 'Enter' && handleCreateSite()}
-                                    />
+                                    <div>
+                                        <Input
+                                            placeholder="e.g., My Awesome Site"
+                                            value={newSiteName}
+                                            onChange={(e) => setNewSiteName(e.target.value)}
+                                            aria-invalid={nameExceedsLimit}
+                                            className={cn(
+                                                'h-12 rounded-xl border-slate-200 bg-slate-50 px-4 font-medium text-slate-900 shadow-inner transition-all focus:bg-white focus-visible:ring-2 sm:h-14',
+                                                nameExceedsLimit
+                                                    ? 'border-rose-400 focus-visible:border-rose-500 focus-visible:ring-rose-400/20'
+                                                    : 'focus-visible:border-[#0F172A] focus-visible:ring-[#0F172A]/20',
+                                            )}
+                                            onKeyDown={(e) => e.key === 'Enter' && !nameExceedsLimit && handleCreateSite()}
+                                        />
+                                        {nameExceedsLimit && (
+                                            <div
+                                                role="alert"
+                                                className="mt-2 rounded-xl border border-rose-200 bg-white p-3 shadow-lg"
+                                            >
+                                                <p className="text-sm font-semibold text-rose-700">Invalid data</p>
+                                                <p className="mt-1 text-xs text-rose-600">
+                                                    name: Name must not exceed 100 characters
+                                                </p>
+                                                <p className="mt-1.5 text-[11px] font-medium text-slate-500">
+                                                    {newSiteName.length}/{WEBSITE_NAME_MAX_LENGTH} characters
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                             <div className="mt-5 border-t border-slate-100 pt-5 sm:mt-8 sm:pt-8">
                                 <Button
                                     onClick={handleCreateSite}
-                                    disabled={!newSiteName.trim() || isCreatingSite}
+                                    disabled={!newSiteName.trim() || isCreatingSite || nameExceedsLimit}
                                     className="group/button-create-site flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#0F172A] text-base font-bold text-white shadow-lg shadow-[#0F172A]/20 transition-all hover:bg-[#1e293b] active:scale-[0.98] sm:h-14 sm:text-lg"
                                 >
                                     {isCreatingSite ? (
@@ -419,7 +421,7 @@ const UserDashboard = () => {
                             </div>
                         </div>
 
-                        <div className="min-h-0 flex-1 bg-[#F8FAFC] p-5 sm:p-8 md:overflow-y-auto md:overscroll-contain md:p-10">
+                        <div className="min-h-0 flex-1 bg-dashboard p-5 sm:p-8 md:overflow-y-auto md:overscroll-contain md:p-10">
                             <div className="mb-5 flex items-center justify-between gap-3 sm:mb-8">
                                 <h3 className="text-lg font-bold tracking-tight text-[#0F172A] sm:text-xl">Select a Template</h3>
                                 <span className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 shadow-sm sm:px-4 sm:text-xs">
@@ -519,8 +521,8 @@ const UserDashboard = () => {
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                     <Select value={sortBy} onValueChange={setSortBy}>
-                        <SelectTrigger className="h-11 w-full rounded-full border-slate-200 bg-white px-4 shadow-sm sm:w-[160px]">
-                            <ListFilter className="mr-2 h-4 w-4 text-slate-400" />
+                        <SelectTrigger className="group h-11 w-full rounded-full border-slate-200 bg-white px-4 shadow-sm hover:border-[#131924] hover:bg-[#131924] hover:text-white sm:w-[160px] data-[state=open]:border-[#131924] data-[state=open]:bg-[#131924] data-[state=open]:text-white">
+                            <ListFilter className="mr-2 h-4 w-4 text-slate-400 group-hover:text-white group-data-[state=open]:text-white" />
                             <SelectValue placeholder="Sort By" />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl border-slate-200 bg-white shadow-lg">
@@ -537,8 +539,8 @@ const UserDashboard = () => {
                                 className={cn(
                                     'h-9 shrink-0 rounded-full border px-3.5 text-xs font-semibold capitalize sm:h-10 sm:px-4 sm:text-sm',
                                     filterStatus === status
-                                        ? 'border-[#0F172A] bg-[#0F172A] text-white'
-                                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50',
+                                        ? 'border-[#131924] bg-[#131924] text-white'
+                                        : 'border-slate-200 bg-white text-slate-700 hover:border-[#131924] hover:bg-[#131924] hover:text-white',
                                 )}
                                 onClick={() => setFilterStatus(status)}
                             >
@@ -549,7 +551,9 @@ const UserDashboard = () => {
                 </div>
             </div>
 
-            {siteList.filter((w) => w.status?.toLowerCase() !== 'deleted').length === 0 && filterStatus === 'all' && !searchQuery.trim() ? (
+            {isLoadingSites ? (
+                <Loading label="Loading websites" />
+            ) : siteList.filter((w) => w.status?.toLowerCase() !== 'deleted').length === 0 && filterStatus === 'all' && !searchQuery.trim() ? (
                 <EmptyState onAction={() => setIsDialogOpen(true)} />
             ) : filteredWebsites.length === 0 ? (
                 <FilterEmptyState
@@ -562,7 +566,7 @@ const UserDashboard = () => {
                     }
                 />
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className={dashboardCardGridClass}>
                     {filteredWebsites.map((site, index) => (
                         <WebsiteCard
                             key={site.id}
@@ -589,7 +593,10 @@ const UserDashboard = () => {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                        <AlertDialogCancel disabled={isDeleting} className="mt-0 w-full sm:w-auto">
+                        <AlertDialogCancel
+                            disabled={isDeleting}
+                            className="mt-0 w-full hover:border-[#131924] hover:bg-[#131924] hover:text-white sm:w-auto"
+                        >
                             Cancel
                         </AlertDialogCancel>
                         <AlertDialogAction

@@ -1,11 +1,19 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { motionTransition } from '@/lib/motion';
+
+/** Equal inset used by the page-name bar and the dashboard sidebar. */
+export const dashboardPanelInsetClass = 'p-5 sm:p-6';
+
+export const dashboardPageTitleClass =
+  'text-xl font-bold leading-snug tracking-tight text-white sm:text-2xl lg:text-3xl';
 
 export const dashboardHeroPrimaryClass =
-  'h-10 w-full rounded-full bg-white px-4 text-xs font-semibold text-[#0F172A] shadow-none hover:scale-100 hover:bg-slate-100 hover:text-[#0F172A] active:scale-100 md:h-11 md:w-auto md:px-5 md:text-sm';
+  'h-10 w-full rounded-full bg-white px-4 text-xs font-semibold text-[#0F172A] shadow-none hover:scale-100 hover:bg-[#131924] hover:text-white active:scale-100 transition-all duration-500 ease-out md:h-11 md:w-auto md:px-5 md:text-sm';
 
 export const dashboardHeroSecondaryClass =
-  'h-10 w-full min-w-0 rounded-full border border-white/15 bg-white/5 px-3 text-xs font-semibold text-slate-200 shadow-none hover:scale-100 hover:border-white/25 hover:bg-white/10 hover:text-white active:scale-100 md:h-11 md:w-auto md:px-5 md:text-sm';
+  'h-10 w-full min-w-0 rounded-full border border-white/15 bg-white/5 px-3 text-xs font-semibold text-slate-200 shadow-none hover:scale-100 hover:border-white/25 hover:bg-white/10 hover:text-white active:scale-100 transition-all duration-500 ease-out md:h-11 md:w-auto md:px-5 md:text-sm';
 
 interface DashboardHeroHeaderProps {
   title: string;
@@ -21,18 +29,21 @@ export function DashboardHeroHeader({
   className,
 }: DashboardHeroHeaderProps) {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={motionTransition}
       className={cn(
-        'relative mb-6 overflow-hidden rounded-2xl bg-[#0F172A] px-4 py-5  sm:px-7',
+        'relative mb-6 shrink-0 overflow-hidden rounded-3xl bg-[#131924]',
+        dashboardPanelInsetClass,
         className,
       )}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(148,163,184,0.18),transparent_55%)]" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 origin-bottom-right skew-x-[-12deg] bg-gradient-to-l from-white/[0.07] to-transparent" />
+      <div className="pointer-events-none absolute inset-y-[-45%] right-[-12%] w-[72%] origin-bottom-right skew-x-[-150deg] bg-[#202838]/70" />
 
       <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-5">
         <div className="min-w-0">
-          <h2 className="text-xl font-bold tracking-tight text-white sm:text-2xl lg:text-3xl">
+          <h2 className={dashboardPageTitleClass}>
             {title}
           </h2>
           {description && (
@@ -46,6 +57,6 @@ export function DashboardHeroHeader({
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -15,6 +15,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import { getProfile, updateUserProfile, changePassword, deactivateOwnAccount } from '@/api/user';
 import { DashboardPageShell } from '@/components/dashboard/DashboardPageShell';
+import Loading from '@/components/Common/LoadingUI';
 
 function roleLabel(role: string) {
     return (role || 'USER').replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
@@ -174,9 +175,7 @@ export default function DashboardProfile() {
                         </div>
 
                         {loading ? (
-                            <div className="flex justify-center py-8">
-                                <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
-                            </div>
+                            <Loading label="Loading profile" />
                         ) : (
                             <form className="space-y-6 flex-1" onSubmit={(e) => { e.preventDefault(); if (editingName) void saveProfile(); }}>
                                 <div>

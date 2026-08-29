@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState, MouseEvent } from "react";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue, useInView } from "framer-motion";
-import { ChevronDown, ArrowRight, MousePointer2, Sparkles, Menu, X, Zap, LayoutTemplate, Layers, Palette, Move, Sun, Moon, Loader2 } from "lucide-react";
+import { ChevronDown, ArrowRight, MousePointer2, Sparkles, Menu, X, Zap, LayoutTemplate, Layers, Palette, Move, Sun, Moon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "./Footer";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/Common/BrandLogo";
+import Loading from "@/components/Common/LoadingUI";
 import { getDashboardPath, validateSession } from "@/lib/authSession";
 
 import { useTheme } from "@/hooks/useTheme";
@@ -83,14 +85,6 @@ export default function LandingPage() {
     });
   }, [navigate]);
 
-  if (isCheckingSession) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-slate-950">
-        <Loader2 className="h-8 w-8 animate-spin text-white" aria-label="Checking session" />
-      </div>
-    );
-  }
-
   // Scroll Animations
   const { scrollYProgress } = useScroll();
   const opacityHero = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
@@ -103,6 +97,12 @@ export default function LandingPage() {
   const springConfig = { damping: 20, stiffness: 100 };
   const smoothX = useSpring(mouseX, springConfig);
   const smoothY = useSpring(mouseY, springConfig);
+  const floatingLayersX = useTransform(smoothX, (v) => v * -2.5);
+  const floatingLayersY = useTransform(smoothY, (v) => v * -2.5);
+  const floatingStylesX = useTransform(smoothX, (v) => v * 1.8);
+  const floatingStylesY = useTransform(smoothY, (v) => v * 1.8);
+  const floatingRightX = useTransform(smoothX, (v) => v * 2.5);
+  const floatingRightY = useTransform(smoothY, (v) => v * -1);
 
   const handleMouseMove = (e: MouseEvent) => {
     const { innerWidth, innerHeight } = window;
@@ -151,6 +151,10 @@ export default function LandingPage() {
     };
   }, []);
 
+  if (isCheckingSession) {
+    return <Loading fullScreen label="Checking session" />;
+  }
+
   return (
     <main
       className={cn("w-full overflow-x-hidden selection:bg-blue-500/30 font-sans transition-colors duration-1000", isDark ? "bg-slate-950 text-slate-100 selection:text-white" : "bg-slate-50 text-slate-900 selection:text-black")}
@@ -169,9 +173,10 @@ export default function LandingPage() {
               : "bg-white/60 border border-slate-200/50 shadow-[0_8px_32px_rgba(0,0,0,0.05)] hover:bg-white/80"
           )}
         >
-          <Link to="/" className="flex items-center gap-3 cursor-pointer group pointer-events-auto">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-lg">B</div>
-            <span className={cn("text-xl font-bold tracking-tight transition-colors", isDark ? "text-white group-hover:text-blue-200" : "text-slate-900 group-hover:text-blue-600")}>Buildora</span>
+          <Link to="/" className="flex items-center cursor-pointer group pointer-events-auto">
+            <BrandLogo
+              imgClassName="h-8 w-8 transition-transform duration-300 group-hover:scale-110"
+            />
           </Link>
 
           <div className="hidden md:flex items-center gap-8 text-sm font-medium">
@@ -263,8 +268,8 @@ export default function LandingPage() {
 
         {/* Floating Mock UI Elements for "Builder" Context */}
         <FloatingElement
-          x={useTransform(smoothX, (v) => v * -2.5)}
-          y={useTransform(smoothY, (v) => v * -2.5)}
+          x={floatingLayersX}
+          y={floatingLayersY}
           delay={0.2}
           isDark={isDark}
           className="top-[20%] left-[5%] w-48 z-10"
@@ -281,8 +286,8 @@ export default function LandingPage() {
         </FloatingElement>
 
         <FloatingElement
-          x={useTransform(smoothX, (v) => v * 1.8)}
-          y={useTransform(smoothY, (v) => v * 1.8)}
+          x={floatingStylesX}
+          y={floatingStylesY}
           delay={0.4}
           isDark={isDark}
           className="bottom-[25%] right-[8%] w-56 z-10"
@@ -300,8 +305,8 @@ export default function LandingPage() {
         </FloatingElement>
 
         <FloatingElement
-          x={useTransform(smoothX, (v) => v * 2.5)}
-          y={useTransform(smoothY, (v) => v * -1)}
+          x={floatingRightX}
+          y={floatingRightY}
           delay={0.6}
           isDark={isDark}
           className="top-[30%] right-[10%] w-40 z-10 p-3"
