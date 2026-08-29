@@ -658,12 +658,9 @@ export default function DashboardUsers() {
 
       {/* Table */}
       <div className="overflow-x-auto rounded-3xl border border-[#E5E7EB] bg-white shadow-sm">
-        <Table className="w-full overflow-hidden">
+        <Table className="w-full">
           <TableHeader className="border-b border-[#E8E8E8] bg-[#F4F4F5]">
             <TableRow className="hover:bg-transparent">
-              <TableHead className="w-[40px] px-2 text-center">
-                <input type="checkbox" className="form-checkbox h-4 w-4 rounded text-[#0F172A]" />
-              </TableHead>
               <TableHead className="min-w-[200px] px-4 py-3 text-[#747781]">User</TableHead>
               <TableHead className="min-w-[100px] px-4 py-3 text-[#747781]">Role</TableHead>
               <TableHead className="min-w-[150px] px-4 py-3 text-[#747781]">Organization</TableHead>
@@ -687,18 +684,12 @@ export default function DashboardUsers() {
             ) : sortedUsers.length > 0 ? (
               sortedUsers.map(user => (
                 <TableRow key={user.id} className="h-16 border-b border-[#E8E8E8] transition-colors hover:bg-[#F8FAFC]">
-                  <TableCell className="px-2 text-center">
-                    <input type="checkbox" className="form-checkbox h-4 w-4 rounded text-[#0F172A]" />
-                  </TableCell>
                   <TableCell className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0F172A] text-xs font-semibold text-white">
                         {user.name.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2)}
                       </div>
-                      <div>
-                        <p className="font-semibold leading-tight text-[#0F172A]">{user.name}</p>
-                        <p className="text-xs text-[#747781]">{user.email}</p>
-                      </div>
+                      <p className="font-semibold leading-tight text-[#0F172A]">{user.name}</p>
                     </div>
                   </TableCell>
                   <TableCell className="px-4 py-3">
@@ -731,13 +722,24 @@ export default function DashboardUsers() {
                       {user.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-[#747781] text-sm px-4 py-3">{user.createdAt}</TableCell>
-                  <TableCell className="text-[#747781] text-sm px-4 py-3">{user.lastLogin}</TableCell>
+                  <TableCell className="px-4 py-3">
+                    <span className="inline-flex items-center rounded-full border border-[#E5E7EB] bg-[#F4F4F5] px-2.5 py-1 text-xs font-medium text-[#0F172A]">
+                      {user.createdAt}
+                    </span>
+                  </TableCell>
+                  <TableCell className="px-4 py-3">
+                    <span className="inline-flex items-center rounded-full border border-[#E5E7EB] bg-[#F4F4F5] px-2.5 py-1 text-xs font-medium text-[#0F172A]">
+                      {user.lastLogin}
+                    </span>
+                  </TableCell>
                   <TableCell className="text-right px-4 py-3">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0 data-[state=open]:bg-[#F4F4F5]">
-                          <MoreVertical className="h-4 w-4 text-[#747781]" />
+                        <Button
+                          variant="ghost"
+                          className="h-8 w-8 rounded-xl p-0 text-[#747781] hover:bg-[#F4F4F5] hover:text-[#0F172A] hover:shadow-none hover:scale-100 active:scale-100 data-[state=open]:bg-[#F4F4F5] data-[state=open]:text-[#0F172A]"
+                        >
+                          <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-[#E8E8E8] shadow-lg">
@@ -764,7 +766,7 @@ export default function DashboardUsers() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center text-[#747781]">
+                <TableCell colSpan={7} className="h-24 text-center text-[#747781]">
                   No users found.
                 </TableCell>
               </TableRow>

@@ -12,6 +12,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from "@/components/ui/use-toast";
 import useBuilderStore from '@/store/useBuilderStore';
 import { format } from 'date-fns';
@@ -276,6 +287,7 @@ const AdminDashboard = () => {
     const [selectedUserId, setSelectedUserId] = useState(null);
     const [userDetailOpen, setUserDetailOpen] = useState(false);
     const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+    const [confirmStatusUser, setConfirmStatusUser] = useState<{ id: string; name: string; active: boolean } | null>(null);
 
     // ── Notification panel state ────────────────────────────────────────────
     const [notifOpen, setNotifOpen] = useState(false);
@@ -381,12 +393,16 @@ const AdminDashboard = () => {
         }
     };
 
-    // ── Notification logic ──────────────────────────────────────────────────
+    // ── Notification / recent activity ──────────────────────────────────────
     const fetchNotifications = async () => {
         setNotifLoading(true);
         try {
             const data = await getAuditLogs({ limit: 15, page: 1 });
-            const logs = data?.logs || data?.data?.logs || data?.data || [];
+            const logs =
+                data?.logs ||
+                data?.data?.logs ||
+                data?.data ||
+                (Array.isArray(data) ? data : []);
             setNotifications(Array.isArray(logs) ? logs : []);
             const unread = Array.isArray(logs)
                 ? logs.filter((l: any) => !readIds.has(l.id)).length
@@ -399,9 +415,13 @@ const AdminDashboard = () => {
         }
     };
 
-    // Open panel → fetch + close on outside click
+    // Load recent activity on mount + when notification panel opens
     useEffect(() => {
-        if (notifOpen) fetchNotifications();
+        void fetchNotifications();
+    }, []);
+
+    useEffect(() => {
+        if (notifOpen) void fetchNotifications();
     }, [notifOpen]);
 
     useEffect(() => {
@@ -419,6 +439,38 @@ const AdminDashboard = () => {
         setReadIds(allIds);
         setUnreadCount(0);
         try { localStorage.setItem('readNotifIds', JSON.stringify([...allIds])); } catch { }
+    };
+
+    const formatActivityLabel = (n: any) => {
+        const action = (n.action || '').toLowerCase();
+        const entity = (n.entity_type || n.entityType || '').toLowerCase();
+        let meta = n.metadata;
+        if (typeof meta === 'string') {
+            try { meta = JSON.parse(meta); } catch { /* ignore */ }
+        }
+        const name = meta?.name ? String(meta.name) : '';
+
+        if (action.includes('status')) {
+            if (typeof meta?.active === 'boolean') {
+                return meta.active ? `User reactivated${name ? `: ${name}` : ''}` : `User suspended${name ? `: ${name}` : ''}`;
+            }
+            return 'User status updated';
+        }
+        if (action.includes('create') && entity.includes('website')) {
+            return name ? `Website created: ${name}` : 'Website created';
+        }
+        if (action.includes('create') && entity.includes('user')) {
+            return name ? `User created: ${name}` : 'User created';
+        }
+        if (action.includes('create')) return name ? `Created: ${name}` : (n.action || 'Item created');
+        if (action.includes('delete')) return name ? `Deleted: ${name}` : (n.action || 'Item deleted');
+        if (action.includes('publish') || action.includes('deploy')) {
+            return name ? `Published: ${name}` : 'Site published';
+        }
+        if (action.includes('update') || action.includes('edit')) {
+            return name ? `Updated: ${name}` : (n.action || 'Item updated');
+        }
+        return n.action || 'System event';
     };
 
     const getNotifIcon = (action: string) => {
@@ -718,12 +770,38 @@ const AdminDashboard = () => {
                                                         u.active ? "bg-emerald-50 text-emerald-600 border border-emerald-100" : "bg-rose-50 text-rose-500 border border-rose-100")}>
                                                         {u.active ? "Active" : "Suspended"}
                                                     </span>
-                                                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg hover:bg-[#F4F4F5] hover:scale-100" onClick={() => { setSelectedUserId(u.id); setUserDetailOpen(true); }}>
-                                                        <Eye className="w-3.5 h-3.5 text-[#787778]" />
-                                                    </Button>
-                                                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg hover:bg-[#F4F4F5] hover:scale-100" onClick={() => handleToggleUserStatus(u.id, u.active)}>
-                                                        <UserX className={cn("w-3.5 h-3.5", u.active ? "text-rose-400" : "text-emerald-500")} />
-                                                    </Button>
+                                                    <TooltipProvider delayDuration={200}>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-7 w-7 rounded-lg hover:bg-[#F4F4F5] hover:scale-100"
+                                                                    onClick={() => { setSelectedUserId(u.id); setUserDetailOpen(true); }}
+                                                                >
+                                                                    <Eye className="w-3.5 h-3.5 text-[#787778]" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="top" className="rounded-lg border-[#E5E7EB] bg-white text-[#0F172A] shadow-md">
+                                                                View user details
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-7 w-7 rounded-lg hover:bg-[#F4F4F5] hover:scale-100"
+                                                                    onClick={() => setConfirmStatusUser({ id: u.id, name: u.name, active: u.active })}
+                                                                >
+                                                                    <UserX className={cn("w-3.5 h-3.5", u.active ? "text-rose-400" : "text-emerald-500")} />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="top" className="rounded-lg border-[#E5E7EB] bg-white text-[#0F172A] shadow-md">
+                                                                {u.active ? 'Suspend user' : 'Reactivate user'}
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
                                                 </div>
                                             </div>
                                         ))}
@@ -756,28 +834,37 @@ const AdminDashboard = () => {
                                 </div>
 
                             {/* Recent Activity */}
-                            <div className="bg-white rounded-3xl border border-[#E8E8E8] p-5 flex-1">
-                                <div className="flex items-center justify-between mb-3">
+                            <div className="flex flex-1 flex-col rounded-3xl border border-[#E8E8E8] bg-white p-5">
+                                <div className="mb-3 flex items-center justify-between">
                                     <h3 className="text-sm font-bold text-[#0F172A]">Recent Activity</h3>
-                                    <button onClick={() => navigate('/admin/audit')} className="text-[11px] text-[#0F172A] font-bold hover:underline">View All</button>
+                                    <button type="button" onClick={() => navigate('/admin/audit')} className="text-[11px] font-bold text-[#0F172A] hover:underline">View All</button>
                                 </div>
                                 <div className="space-y-3">
-                                    {notifications.length === 0 && !notifLoading && (
-                                        <p className="text-xs text-[#787778] text-center py-3">No recent activity</p>
+                                    {notifLoading && notifications.length === 0 && (
+                                        <div className="flex items-center justify-center gap-2 py-4 text-xs text-[#787778]">
+                                            <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Loading...
+                                        </div>
+                                    )}
+                                    {!notifLoading && notifications.length === 0 && (
+                                        <p className="py-3 text-center text-xs text-[#787778]">No recent activity</p>
                                     )}
                                     {notifications.slice(0, 5).map((n: any) => (
                                         <div key={n.id} className="flex items-start gap-2.5">
-                                            <div className="w-6 h-6 rounded-full bg-[#F4F4F5] flex items-center justify-center shrink-0 mt-0.5">
+                                            <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#F4F4F5]">
                                                 {getNotifIcon(n.action)}
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-medium text-[#0F172A] truncate">{n.action || 'System event'}</p>
-                                                <p className="text-[10px] text-[#787778]">{formatNotifTime(n.createdAt || n.created_at)}</p>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="truncate text-xs font-medium text-[#0F172A]">
+                                                    {formatActivityLabel(n)}
+                                                </p>
+                                                <p className="text-[10px] text-[#787778]">
+                                                    {formatNotifTime(n.createdAt || n.created_at)}
+                                                </p>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
-                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -796,6 +883,46 @@ const AdminDashboard = () => {
                 open={userDetailOpen}
                 onOpenChange={setUserDetailOpen}
             />
+
+            {/* Confirm suspend / reactivate */}
+            <AlertDialog open={!!confirmStatusUser} onOpenChange={(open) => { if (!open) setConfirmStatusUser(null); }}>
+                <AlertDialogContent className="w-[90%] max-w-md rounded-2xl border-[#E5E7EB]">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-[#0F172A]">
+                            {confirmStatusUser?.active ? 'Suspend this user?' : 'Reactivate this user?'}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {confirmStatusUser?.active
+                                ? <>This will suspend <span className="font-semibold text-[#0F172A]">{confirmStatusUser?.name}</span> and they will lose access.</>
+                                : <>This will reactivate <span className="font-semibold text-[#0F172A]">{confirmStatusUser?.name}</span> and restore their access.</>}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel
+                            className="rounded-xl hover:scale-100"
+                            onClick={() => setConfirmStatusUser(null)}
+                        >
+                            No
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            className={cn(
+                                'rounded-xl text-white hover:scale-100',
+                                confirmStatusUser?.active
+                                    ? 'bg-rose-600 hover:bg-rose-700'
+                                    : 'bg-[#0F172A] hover:bg-[#1E293B]'
+                            )}
+                            onClick={() => {
+                                if (confirmStatusUser) {
+                                    void handleToggleUserStatus(confirmStatusUser.id, confirmStatusUser.active);
+                                    setConfirmStatusUser(null);
+                                }
+                            }}
+                        >
+                            Yes
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 };

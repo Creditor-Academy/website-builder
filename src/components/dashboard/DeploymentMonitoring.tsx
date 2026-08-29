@@ -33,15 +33,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Activity, Globe, Tag, CheckCircle, XCircle, Hourglass, User as UserIcon, FileText, RefreshCw, MoreVertical, AlertCircle, RotateCcw, Clock, Search, ListFilter, Loader2
+  CheckCircle, XCircle, Hourglass, FileText, RefreshCw, MoreVertical, RotateCcw, Clock, Search, ListFilter, Loader2, AlertCircle
 } from 'lucide-react';
 import DeploymentLogViewer from './DeploymentLogViewer';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import websiteApi from '@/api/website';
 import deploymentsApi from '@/api/deployments';
-import { dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass, dashboardToolbarClass, dashboardTableWrapClass } from '@/components/dashboard/DashboardPageShell';
-import { dashboardPanelClass } from '@/components/dashboard/DashboardCard';
 
 interface DeploymentRecord {
   id: string;
@@ -210,68 +208,67 @@ export default function DeploymentMonitoring() {
 
   return (
     <>
-      <div className={dashboardToolbarClass}>
-        <div className="relative flex-1 w-full min-w-0">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#76777d]" />
+      <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+        <div className="relative min-w-0 flex-1">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
           <Input
             placeholder="Search deployments by website name or ID..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className={cn(dashboardSearchInputClass, 'w-full')}
+            className="h-9 w-full rounded-full border-[#E5E7EB] bg-white pl-9 text-sm text-[#0F172A] shadow-sm focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/10 focus:ring-offset-0"
           />
         </div>
 
-        <div className={dashboardFilterScrollClass}>
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           {(['all', 'Success', 'Failed', 'Pending'] as const).map((status) => (
             <button
               key={status}
               type="button"
-              className={dashboardFilterPillClass(filterStatus === status)}
+              className={cn(
+                'h-8 rounded-full border px-3 text-xs font-semibold capitalize shadow-none transition-colors hover:scale-100 active:scale-100 sm:h-9 sm:px-3.5 sm:text-[13px]',
+                filterStatus === status
+                  ? 'border-[#0F172A] bg-[#0F172A] text-white hover:bg-[#1E293B] hover:text-white'
+                  : 'border-[#E5E7EB] bg-white text-[#0F172A] hover:border-[#CBD5E1] hover:bg-[#F8FAFC] hover:text-[#0F172A]'
+              )}
               onClick={() => setFilterStatus(status)}
             >
-              {status}
+              {status === 'all' ? 'All' : status}
             </button>
           ))}
         </div>
 
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-full sm:w-[180px] h-11 rounded-lg bg-white border-[#c6c6cd]">
-            <ListFilter className="h-4 w-4 text-[#76777d] mr-2" />
+          <SelectTrigger className="h-9 w-full shrink-0 rounded-full border-[#E5E7EB] bg-white shadow-sm focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/10 focus:ring-offset-0 md:w-[180px]">
+            <ListFilter className="mr-2 h-4 w-4 text-[#787778]" />
             <SelectValue placeholder="Sort By" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-xl border-[#E8E8E8] bg-white shadow-lg">
             <SelectItem value="recent">Most Recent</SelectItem>
             <SelectItem value="status">Status</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <div className={dashboardTableWrapClass}>
+      <div className="overflow-x-auto rounded-3xl border border-[#E5E7EB] bg-white shadow-sm">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-[#787778]" />
             <span className="ml-2 text-[#747781]">Loading deployments...</span>
           </div>
         ) : (
-          <Table className={cn('w-full overflow-hidden', dashboardPanelClass)}>
-            <TableHeader className="bg-slate-50 border-b border-slate-200">
+          <Table className="w-full overflow-hidden">
+            <TableHeader className="border-b border-[#E8E8E8] bg-[#F4F4F5]">
               <TableRow className="hover:bg-transparent">
+                <TableHead className="min-w-[200px] px-4 py-3 text-[#747781]">Website</TableHead>
+                <TableHead className="min-w-[120px] px-4 py-3 text-[#747781]">Status</TableHead>
+                <TableHead className="min-w-[200px] px-4 py-3 text-[#747781]">URL</TableHead>
                 <TableHead className="min-w-[150px] px-4 py-3 text-[#747781]">
-                  <span className="flex items-center gap-1.5"><Globe className="w-4 h-4" /> Website Name</span>
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="h-4 w-4 text-[#787778]" /> Deployed At
+                  </span>
                 </TableHead>
-                <TableHead className="min-w-[120px] px-4 py-3 text-[#747781]">
-                  <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4" /> Status</span>
-                </TableHead>
-                <TableHead className="min-w-[200px] px-4 py-3 text-[#747781]">
-                  <span className="flex items-center gap-1.5"><Globe className="w-4 h-4" /> URL</span>
-                </TableHead>
-                <TableHead className="min-w-[150px] px-4 py-3 text-[#747781]">
-                  <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> Deployed At</span>
-                </TableHead>
-                <TableHead className="min-w-[120px] px-4 py-3 text-[#747781]">
-                  <span className="flex items-center gap-1.5"><UserIcon className="w-4 h-4" /> Deployed By</span>
-                </TableHead>
-                <TableHead className="text-right px-4 py-3 text-[#747781]">Actions</TableHead>
+                <TableHead className="min-w-[140px] px-4 py-3 text-[#747781]">Deployed By</TableHead>
+                <TableHead className="min-w-[100px] px-4 py-3 text-right text-[#747781]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -286,52 +283,63 @@ export default function DeploymentMonitoring() {
                   const dep = row.deployment;
                   const display = statusDisplay(dep.status);
                   return (
-                    <TableRow key={dep.id} className="group h-16 border-b border-[#E8E8E8] hover:bg-[#F4F4F5]/70 transition-all duration-200">
-                      <TableCell className="font-medium text-[#747781] px-4 py-3">{row.websiteName}</TableCell>
+                    <TableRow key={dep.id} className="group h-16 border-b border-[#E8E8E8] hover:bg-[#F4F4F5]/70 transition-colors">
+                      <TableCell className="px-4 py-3">
+                        <p className="truncate font-bold text-[#0F172A]">{row.websiteName}</p>
+                      </TableCell>
                       <TableCell className="px-4 py-3">
                         <Badge
-                          className={
-                            display === "Success"
-                              ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100/80"
-                              : display === "Failed"
-                                ? "bg-rose-100 text-rose-700 hover:bg-rose-100/80"
-                                : display === "Pending"
-                                  ? "bg-amber-100 text-amber-700 hover:bg-amber-100/80"
-                                  : "bg-[#F4F4F5] text-[#747781] hover:bg-[#F4F4F5]/80"
-                          }
+                          className={cn(
+                            'rounded-full border-0',
+                            display === 'Success'
+                              ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100/80'
+                              : display === 'Failed'
+                                ? 'bg-rose-100 text-rose-700 hover:bg-rose-100/80'
+                                : display === 'Pending'
+                                  ? 'bg-amber-100 text-amber-700 hover:bg-amber-100/80'
+                                  : 'bg-[#F4F4F5] text-[#747781] hover:bg-[#F4F4F5]/80'
+                          )}
                         >
-                          {display === "Success" && <CheckCircle className="w-3 h-3 mr-1" />}
-                          {display === "Failed" && <XCircle className="w-3 h-3 mr-1" />}
-                          {display === "Pending" && <Hourglass className="w-3 h-3 mr-1 animate-pulse" />}
-                          {display === "Rolled Back" && <RotateCcw className="w-3 h-3 mr-1" />}
+                          {display === 'Success' && <CheckCircle className="mr-1 h-3 w-3" />}
+                          {display === 'Failed' && <XCircle className="mr-1 h-3 w-3" />}
+                          {display === 'Pending' && <Hourglass className="mr-1 h-3 w-3 animate-pulse" />}
+                          {display === 'Rolled Back' && <RotateCcw className="mr-1 h-3 w-3" />}
                           {display}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-[#747781] text-sm px-4 py-3 max-w-[250px] truncate">
-                        {dep.url ? <a href={dep.url} target="_blank" rel="noopener noreferrer" className="text-[#0F172A] hover:underline">{dep.url}</a> : '—'}
+                      <TableCell className="max-w-[220px] truncate px-4 py-3 text-sm text-[#747781]">
+                        {dep.url ? (
+                          <a href={dep.url} target="_blank" rel="noopener noreferrer" className="text-[#0F172A] hover:underline" title={dep.url}>
+                            {dep.url.replace(/^https?:\/\//, '')}
+                          </a>
+                        ) : '—'}
                       </TableCell>
-                      <TableCell className="text-[#747781] text-sm px-4 py-3">{new Date(dep.publishedAt).toLocaleString()}</TableCell>
-                      <TableCell className="flex items-center gap-2 text-[#747781] text-sm px-4 py-3">
-                        <div className="w-7 h-7 rounded-full bg-[#F4F4F5] text-[#747781] flex items-center justify-center font-semibold text-xs">
-                          {(dep.deployedBy || '?').slice(0, 2).toUpperCase()}
-                        </div>
+                      <TableCell className="px-4 py-3">
+                        <span className="inline-flex items-center rounded-full border border-[#E5E7EB] bg-[#F4F4F5] px-2.5 py-1 text-xs font-medium text-[#0F172A]">
+                          {new Date(dep.publishedAt).toLocaleString()}
+                        </span>
+                      </TableCell>
+                      <TableCell className="px-4 py-3 text-sm text-[#747781]">
                         {dep.deployedBy || 'System'}
                       </TableCell>
-                      <TableCell className="text-right px-4 py-3">
+                      <TableCell className="px-4 py-3 text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0 data-[state=open]:bg-[#F4F4F5]">
-                              <MoreVertical className="h-4 w-4 text-[#747781]" />
+                            <Button
+                              variant="ghost"
+                              className="h-8 w-8 rounded-xl p-0 text-[#747781] hover:bg-[#F4F4F5] hover:text-[#0F172A] hover:shadow-none hover:scale-100 active:scale-100 data-[state=open]:bg-[#F4F4F5] data-[state=open]:text-[#0F172A]"
+                            >
+                              <MoreVertical className="h-4 w-4" />
                               <span className="sr-only">Open menu</span>
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 bg-white border-[#E8E8E8] shadow-lg">
-                            <DropdownMenuItem onClick={() => handleRollback(row)} disabled={dep.status !== 'active'} className="rounded-lg gap-2 cursor-pointer focus:bg-[#F4F4F5] focus:text-[#0F172A]">
-                              <RefreshCw className="w-4 h-4" /> <span>Rollback</span>
+                          <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#E8E8E8] bg-white p-2 shadow-lg">
+                            <DropdownMenuItem onClick={() => handleRollback(row)} disabled={dep.status !== 'active' && dep.status !== 'ACTIVE'} className="cursor-pointer gap-2 rounded-lg focus:bg-[#F4F4F5] focus:text-[#0F172A]">
+                              <RefreshCw className="h-4 w-4" /> <span>Rollback</span>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleViewLogs(row)} className="rounded-lg gap-2 cursor-pointer focus:bg-[#F4F4F5] focus:text-[#0F172A]">
-                              <FileText className="w-4 h-4" /> <span>View Logs</span>
+                            <DropdownMenuItem onClick={() => handleViewLogs(row)} className="cursor-pointer gap-2 rounded-lg focus:bg-[#F4F4F5] focus:text-[#0F172A]">
+                              <FileText className="h-4 w-4" /> <span>View Logs</span>
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
