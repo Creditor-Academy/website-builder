@@ -45,15 +45,16 @@ export interface Asset {
     url: string;
     size?: string;
     date: string;
-    scope?: 'GLOBAL' | 'WEBSITE';
+    scope?: 'GLOBAL' | 'WEBSITE' | 'USER';
     websiteId?: string;
     isGlobal?: boolean;
+    ownerId?: string;
     ownerName?: string;
 }
 
 type AssetScope = {
     websiteId?: string;
-    scope?: 'GLOBAL' | 'WEBSITE';
+    scope?: 'GLOBAL' | 'WEBSITE' | 'USER';
 };
 
 function normalizeAsset(raw: any, uploadScope: AssetScope = {}): Asset {
@@ -64,9 +65,10 @@ function normalizeAsset(raw: any, uploadScope: AssetScope = {}): Asset {
         url: raw.url,
         size: raw.size,
         date: raw.date ?? raw.created_at ?? raw.createdAt ?? new Date().toISOString(),
-        scope: raw.scope,
+        scope: typeof raw.scope === 'string' ? raw.scope.toUpperCase() : raw.scope,
         websiteId: raw.websiteId ?? raw.website_id,
-        isGlobal: raw.isGlobal ?? raw.is_global,
+        isGlobal: raw.isGlobal ?? raw.is_global ?? raw.global,
+        ownerId: raw.ownerId ?? raw.owner_id ?? raw.user_id ?? raw.created_by ?? raw.uploaded_by,
         ownerName: raw.ownerName ?? raw.owner_name,
     };
 
@@ -74,14 +76,35 @@ function normalizeAsset(raw: any, uploadScope: AssetScope = {}): Asset {
         return { ...asset, scope: 'GLOBAL', isGlobal: true, websiteId: undefined };
     }
 
+    if (uploadScope.scope === 'USER') {
+        return { ...asset, scope: 'USER', isGlobal: false };
+    }
+
     if (uploadScope.websiteId) {
         return { ...asset, scope: 'WEBSITE', websiteId: uploadScope.websiteId, isGlobal: false };
+    }
+
+    if (asset.scope === 'USER') {
+        return { ...asset, scope: 'USER', isGlobal: false };
     }
 
     if (asset.scope === 'GLOBAL' || asset.isGlobal) {
         return { ...asset, scope: 'GLOBAL', isGlobal: true };
     }
 
+    return asset;
+}
+
+function attachCurrentOwner(asset: Asset): Asset {
+    if (asset.ownerId) return asset;
+    try {
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        if (user?.id) {
+            return { ...asset, ownerId: user.id, ownerName: asset.ownerName ?? user.name };
+        }
+    } catch {
+        /* ignore */
+    }
     return asset;
 }
 
@@ -185,8 +208,8 @@ export interface BuilderStore {
     updateComponent: (sectionId: string, componentId: string, updates: any) => void;
     deleteComponent: (sectionId: string, componentId: string) => void;
     addAsset: (asset: Omit<Asset, 'id' | 'date'>) => void;
-    uploadAsset: (file: File, scope?: AssetScope) => Promise<void>;
-    importAssetFromUrl: (name: string, url: string, scope?: AssetScope) => Promise<void>;
+    uploadAsset: (file: File, scope?: AssetScope) => Promise<Asset>;
+    importAssetFromUrl: (name: string, url: string, scope?: AssetScope) => Promise<Asset>;
     deleteAsset: (id: string, scope?: AssetScope) => Promise<void>;
     getScopedAssets: (websiteId?: string) => Asset[];
     getActiveWebsite: () => Website | undefined;
@@ -309,7 +332,24 @@ const useBuilderStore = create<BuilderStore>()(
                         return;
                     }
 
-                    set({ globalAssets: assets });
+                    set((state) => {
+                        const byId = new Map(state.globalAssets.map((asset) => [asset.id, asset]));
+                        assets.forEach((asset: Asset) => {
+                            const prev = byId.get(asset.id);
+                            if (prev && (prev.scope === 'USER' || (!prev.isGlobal && prev.ownerId))) {
+                                byId.set(asset.id, {
+                                    ...asset,
+                                    scope: 'USER',
+                                    isGlobal: false,
+                                    ownerId: prev.ownerId ?? asset.ownerId,
+                                    ownerName: prev.ownerName ?? asset.ownerName,
+                                });
+                                return;
+                            }
+                            byId.set(asset.id, asset);
+                        });
+                        return { globalAssets: Array.from(byId.values()) };
+                    });
                 } catch (error) {
                     console.error('Failed to fetch assets from backend:', error);
                 }
@@ -837,7 +877,7 @@ const useBuilderStore = create<BuilderStore>()(
                 try {
                     const { default: assetApi } = await import('../api/assets');
                     const response = await assetApi.uploadAsset(file, scope);
-                    const asset = normalizeAsset(response.data.asset, scope);
+                    const asset = attachCurrentOwner(normalizeAsset(response.data.asset, scope));
 
                     if (scope.websiteId) {
                         set((state) => ({
@@ -849,10 +889,11 @@ const useBuilderStore = create<BuilderStore>()(
                                 ],
                             }
                         }));
-                        return;
+                        return asset;
                     }
 
-                    set((state) => ({ globalAssets: [asset, ...state.globalAssets] }));
+                    set((state) => ({ globalAssets: [asset, ...state.globalAssets.filter((item) => item.id !== asset.id)] }));
+                    return asset;
                 } catch (error) {
                     console.error('Failed to upload asset:', error);
                     throw error;
@@ -863,7 +904,7 @@ const useBuilderStore = create<BuilderStore>()(
                 try {
                     const { default: assetApi } = await import('../api/assets');
                     const response = await assetApi.importAssetFromUrl({ name, url }, scope);
-                    const asset = normalizeAsset(response.data.asset, scope);
+                    const asset = attachCurrentOwner(normalizeAsset(response.data.asset, scope));
 
                     if (scope.websiteId) {
                         set((state) => ({
@@ -875,10 +916,11 @@ const useBuilderStore = create<BuilderStore>()(
                                 ],
                             }
                         }));
-                        return;
+                        return asset;
                     }
 
-                    set((state) => ({ globalAssets: [asset, ...state.globalAssets] }));
+                    set((state) => ({ globalAssets: [asset, ...state.globalAssets.filter((item) => item.id !== asset.id)] }));
+                    return asset;
                 } catch (error) {
                     console.error('Failed to import asset from URL:', error);
                     throw error;
