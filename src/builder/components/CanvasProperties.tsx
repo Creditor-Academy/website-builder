@@ -89,9 +89,21 @@ export function CanvasProperties() {
   }
 
   if (editor.selectedKind === 'footer') {
+    if (!page.footer) return null;
     return (
       <div className="h-full overflow-y-auto bg-white">
-        <div className="border-b border-slate-100 px-4 py-3 text-sm font-semibold">Footer</div>
+        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+          <div className="text-sm font-semibold">Footer</div>
+          <button
+            type="button"
+            title="Remove footer"
+            aria-label="Remove footer"
+            className="rounded-md p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600"
+            onClick={() => deleteCanvasNode('footer')}
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
         <FooterSettings footer={page.footer} pages={pages} onUpdate={updateFooter} isExpanded />
       </div>
     );

@@ -30,13 +30,9 @@ import {
   Palette,
   History,
   X,
+  type LucideIcon,
 } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { id: "add", icon: Plus, label: "Elements" },
@@ -64,6 +60,41 @@ function EditorSidebarPanels({ leftNavTab }: { leftNavTab: string }) {
   );
 }
 
+function NavRailButton({
+  id,
+  icon: Icon,
+  label,
+  isActive,
+  onClick,
+}: {
+  id?: string;
+  icon: LucideIcon;
+  label: string;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      id={id}
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      aria-current={isActive ? "page" : undefined}
+      className={cn(
+        "flex w-full flex-col items-center gap-1 rounded-lg px-1 py-1.5 transition-colors",
+        isActive
+          ? "bg-[#dedfeb] text-[#191b24]"
+          : "text-slate-200 hover:bg-white/10 hover:text-white",
+      )}
+    >
+      <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
+      <span className="max-w-full text-center text-[9px] font-medium leading-tight tracking-wide">
+        {label}
+      </span>
+    </button>
+  );
+}
+
 function EditorLeftSidebar({
   leftNavTab,
   setLeftNavTab,
@@ -75,70 +106,40 @@ function EditorLeftSidebar({
 }) {
   return (
     <div className="h-full w-full flex overflow-hidden bg-white">
-      <div className="w-14 shrink-0 border-r border-white/10 flex flex-col items-center bg-[#131b2e]">
-        <TooltipProvider delayDuration={0}>
-          <nav className="flex flex-1 flex-col items-center py-3 w-full min-h-0 bg-[#0f172a]">
-            {onClose && (
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close sidebar"
-                className="mb-2 w-9 h-9 rounded-lg flex items-center justify-center text-slate-200 hover:text-white hover:bg-white/10"
-              >
-                <X className="w-[18px] h-[18px]" strokeWidth={1.75} />
-              </button>
-            )}
-            <div className="flex flex-col items-center gap-1 overflow-y-auto">
-              {NAV_ITEMS.map((item) => {
-                const isActive = leftNavTab === item.id;
-                return (
-                  <Tooltip key={item.id}>
-                    <TooltipTrigger asChild>
-                      <button
-                        id={`tour-nav-${item.id}`}
-                        type="button"
-                        onClick={() => setLeftNavTab(item.id)}
-                        aria-label={item.label}
-                        aria-current={isActive ? "page" : undefined}
-                        className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${isActive
-                            ? "bg-[#dedfeb] text-[#191b24]"
-                            : "text-slate-200 hover:text-white hover:bg-white/10"
-                          }`}
-                      >
-                        <item.icon className="w-[18px] h-[18px]" strokeWidth={1.75} />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" className="text-xs font-medium">
-                      {item.label}
-                    </TooltipContent>
-                  </Tooltip>
-                );
-              })}
-            </div>
+      <div className="flex w-[4.75rem] shrink-0 flex-col items-center border-r border-white/10 bg-[#131b2e]">
+        <nav className="flex min-h-0 w-full flex-1 flex-col items-center bg-[#0f172a] px-1 py-3">
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close sidebar"
+              className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg text-slate-200 hover:bg-white/10 hover:text-white"
+            >
+              <X className="h-[18px] w-[18px]" strokeWidth={1.75} />
+            </button>
+          )}
+          <div className="flex w-full flex-col items-center gap-0.5 overflow-y-auto">
+            {NAV_ITEMS.map((item) => (
+              <NavRailButton
+                key={item.id}
+                id={`tour-nav-${item.id}`}
+                icon={item.icon}
+                label={item.label}
+                isActive={leftNavTab === item.id}
+                onClick={() => setLeftNavTab(item.id)}
+              />
+            ))}
+          </div>
 
-            <div className="mt-auto pt-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    onClick={() => setLeftNavTab("settings")}
-                    aria-label="Site Settings"
-                    aria-current={leftNavTab === "settings" ? "page" : undefined}
-                    className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${leftNavTab === "settings"
-                        ? "bg-[#dedfeb] text-[#191b24]"
-                        : "text-slate-200 hover:text-white hover:bg-white/10"
-                      }`}
-                  >
-                    <Settings className="w-[18px] h-[18px]" strokeWidth={1.75} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="text-xs font-medium">
-                  Site Settings
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </nav>
-        </TooltipProvider>
+          <div className="mt-auto w-full pt-2">
+            <NavRailButton
+              icon={Settings}
+              label="Settings"
+              isActive={leftNavTab === "settings"}
+              onClick={() => setLeftNavTab("settings")}
+            />
+          </div>
+        </nav>
       </div>
 
       <EditorSidebarPanels leftNavTab={leftNavTab} />
@@ -185,7 +186,7 @@ function EditorContent() {
         if (editor.selectedNodeId) duplicateCanvasNode(editor.selectedNodeId);
         return;
       }
-      if ((event.key === "Delete" || event.key === "Backspace") && editor.selectedNodeId && editor.selectedKind !== "navbar" && editor.selectedKind !== "footer") {
+      if ((event.key === "Delete" || event.key === "Backspace") && editor.selectedNodeId && editor.selectedKind !== "navbar") {
         event.preventDefault();
         deleteCanvasNode(editor.selectedNodeId);
         return;

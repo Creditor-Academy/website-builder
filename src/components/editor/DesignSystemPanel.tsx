@@ -285,14 +285,16 @@ export function DesignSystemPanel() {
                             }
                         };
 
-                        const updatedFooter = {
-                            ...page.footer,
-                            styles: {
-                                ...page.footer.styles,
-                                backgroundColor: undefined,
-                                textColor: undefined
+                        const updatedFooter = page.footer
+                            ? {
+                                ...page.footer,
+                                styles: {
+                                    ...page.footer.styles,
+                                    backgroundColor: undefined,
+                                    textColor: undefined
+                                }
                             }
-                        };
+                            : page.footer;
 
                         updateCurrentPage({
                             globalStyles: globalStyles,

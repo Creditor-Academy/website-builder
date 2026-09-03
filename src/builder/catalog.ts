@@ -19,6 +19,7 @@ import {
   Building2,
   Info,
   Columns,
+  PanelBottom,
 } from 'lucide-react';
 import {
   createDefaultAboutSection,
@@ -44,7 +45,7 @@ export interface CatalogItem {
   description: string;
   icon: LucideIcon;
   category: string;
-  kind: 'element' | 'container' | 'prebuilt';
+  kind: 'element' | 'container' | 'prebuilt' | 'footer';
   elementType?: ElementType;
   createPrebuilt?: () => Record<string, unknown>;
 }
@@ -77,6 +78,7 @@ export const PREBUILT_CATALOG: CatalogItem[] = [
   { id: 'logocloud', name: 'Logo cloud', description: 'Partner logos', icon: Building2, category: 'Features', kind: 'prebuilt', createPrebuilt: () => createDefaultLogoCloudSection() },
   { id: 'blog', name: 'Blog list', description: 'Article cards', icon: FileText, category: 'Features', kind: 'prebuilt', createPrebuilt: () => createDefaultBlogListSection() },
   { id: 'footer-note', name: 'Two column', description: 'Split layout section', icon: Columns, category: 'Features', kind: 'prebuilt', createPrebuilt: () => createDefaultAboutSection() },
+  { id: 'footer', name: 'Footer', description: 'Links, social, and copyright', icon: PanelBottom, category: 'Footer', kind: 'footer' },
 ];
 
 export const CATALOG_CATEGORIES = [
@@ -92,4 +94,5 @@ export const CATALOG_CATEGORIES = [
   'Gallery',
   'CTA',
   'Contact',
+  'Footer',
 ];

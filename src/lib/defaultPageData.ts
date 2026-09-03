@@ -746,6 +746,33 @@ export const createTermsOfServicePage = () => ({
   footer: createDefaultFooter(),
 });
 
+const DEFAULT_GLOBAL_STYLES = {
+  fontFamily: 'Inter, system-ui, sans-serif',
+  primaryColor: '#3b82f6',
+  secondaryColor: '#8b5cf6',
+  accentColor: '#f59e0b',
+  backgroundColor: '#ffffff',
+  textColor: '#0f172a',
+  borderRadius: '12px',
+  glassmorphism: false,
+  animations: true,
+  shadows: 'subtle',
+};
+
+export const getBlankPage = () => ({
+  id: uuidv4(),
+  name: 'Home',
+  slug: '/',
+  meta: {
+    title: 'Home',
+    description: '',
+  },
+  navbar: createDefaultNavbar(),
+  sections: [],
+  footer: null,
+  globalStyles: { ...DEFAULT_GLOBAL_STYLES },
+});
+
 export const getDefaultPage = () => ({ 
   id: uuidv4(),
   name: 'Home',
@@ -762,18 +789,7 @@ export const getDefaultPage = () => ({
     createDefaultCTASection(),
   ],
   footer: createDefaultFooter(),
-  globalStyles: {
-    fontFamily: 'Inter, system-ui, sans-serif',
-    primaryColor: '#3b82f6',
-    secondaryColor: '#8b5cf6',
-    accentColor: '#f59e0b',
-    backgroundColor: '#ffffff',
-    textColor: '#0f172a',
-    borderRadius: '12px',
-    glassmorphism: false,
-    animations: true,
-    shadows: 'subtle',
-  },
+  globalStyles: { ...DEFAULT_GLOBAL_STYLES },
 });
 
 // Layout Sections

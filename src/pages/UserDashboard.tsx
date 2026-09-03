@@ -362,7 +362,7 @@ const UserDashboard = () => {
                                     Create a Project
                                 </h2>
                                 <p className="mb-5 text-sm font-medium leading-relaxed text-slate-500 sm:mb-8">
-                                    Give your masterpiece a name and select a starting template to kick things off.
+                                    Give your project a name. Start from a blank canvas, or pick a template.
                                 </p>
                             </div>
                             <div className="flex-1 space-y-4">
@@ -425,83 +425,127 @@ const UserDashboard = () => {
                             <div className="mb-5 flex items-center justify-between gap-3 sm:mb-8">
                                 <h3 className="text-lg font-bold tracking-tight text-[#0F172A] sm:text-xl">Select a Template</h3>
                                 <span className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 shadow-sm sm:px-4 sm:text-xs">
-                                    {dbTemplates.length} options
+                                    {dbTemplates.length + 1} options
                                 </span>
                             </div>
 
-                            {dbTemplates.length > 0 ? (
-                                <>
-                                    <p className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400 sm:mb-4">Custom Templates</p>
-                                    <div className="grid grid-cols-1 gap-4 pb-6 sm:grid-cols-2 sm:gap-6 sm:pb-8">
-                                        {dbTemplates.map((tpl) => (
-                                            <div
-                                                key={tpl.id}
-                                                onClick={() => setSelectedTemplate(tpl.id)}
-                                                className={cn(
-                                                    'group/template-dialog-card relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border-[3px] bg-white transition-all duration-300',
-                                                    selectedTemplate === tpl.id
-                                                        ? 'scale-[1.01] border-[#0F172A] shadow-[0_10px_40px_rgba(15,23,42,0.12)]'
-                                                        : 'border-slate-200 opacity-90 hover:border-[#0F172A]/40 hover:opacity-100 hover:shadow-xl',
-                                                )}
-                                            >
-                                                <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 sm:aspect-[4/3]">
-                                                    {tpl.image ? (
-                                                        <img
-                                                            src={tpl.image}
-                                                            alt={tpl.name}
-                                                            className={cn(
-                                                                'h-full w-full object-cover transition-transform duration-700',
-                                                                selectedTemplate === tpl.id ? 'scale-105' : 'group-hover/template-dialog-card:scale-105',
-                                                            )}
-                                                        />
-                                                    ) : (
-                                                        <div className="flex h-full w-full flex-col items-center justify-center bg-[#F4F4F5]">
-                                                            <LayoutTemplate className="h-10 w-10 text-slate-300 sm:h-12 sm:w-12" />
-                                                            <p className="mt-2 text-xs font-medium text-slate-400">{tpl.category || 'Template'}</p>
-                                                        </div>
-                                                    )}
-                                                    <AnimatePresence>
-                                                        {selectedTemplate === tpl.id && (
-                                                            <motion.div
-                                                                initial={{ scale: 0, opacity: 0 }}
-                                                                animate={{ scale: 1, opacity: 1 }}
-                                                                exit={{ scale: 0, opacity: 0 }}
-                                                                className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-[#0F172A] shadow-lg sm:right-4 sm:top-4 sm:h-8 sm:w-8"
-                                                            >
-                                                                <CheckCircle className="h-4 w-4 text-white sm:h-5 sm:w-5" />
-                                                            </motion.div>
-                                                        )}
-                                                    </AnimatePresence>
+                            <div className="grid grid-cols-1 gap-4 pb-6 sm:grid-cols-2 sm:gap-6 sm:pb-8">
+                                <div
+                                    onClick={() => setSelectedTemplate('blank')}
+                                    className={cn(
+                                        'group/template-dialog-card relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border-[3px] bg-white transition-all duration-300',
+                                        selectedTemplate === 'blank'
+                                            ? 'scale-[1.01] border-[#0F172A] shadow-[0_10px_40px_rgba(15,23,42,0.12)]'
+                                            : 'border-slate-200 opacity-90 hover:border-[#0F172A]/40 hover:opacity-100 hover:shadow-xl',
+                                    )}
+                                >
+                                    <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 sm:aspect-[4/3]">
+                                        <div className="flex h-full w-full flex-col items-center justify-center bg-white">
+                                            <div className="flex h-16 w-12 flex-col overflow-hidden rounded-md border-2 border-dashed border-slate-200 bg-slate-50 sm:h-20 sm:w-14">
+                                                <div className="h-2.5 w-full bg-slate-200/80" />
+                                                <div className="flex flex-1 items-center justify-center">
+                                                    <Plus className="h-4 w-4 text-slate-300 sm:h-5 sm:w-5" />
                                                 </div>
-                                                <div className="relative z-10 flex items-center gap-3 border-t border-slate-100 bg-white p-4 sm:gap-4 sm:p-6">
-                                                    <div className={cn(
-                                                        'flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl shadow-sm transition-colors sm:h-12 sm:w-12',
-                                                        selectedTemplate === tpl.id ? 'bg-[#0F172A]/10 text-[#0F172A]' : 'bg-slate-50 text-slate-500',
-                                                    )}>
-                                                        <LayoutTemplate className="h-5 w-5 sm:h-6 sm:w-6" />
-                                                    </div>
-                                                    <div className="min-w-0">
-                                                        <h4 className={cn(
-                                                            'truncate text-base font-bold leading-tight transition-colors sm:text-lg',
-                                                            selectedTemplate === tpl.id ? 'text-[#0F172A]' : 'text-slate-700',
-                                                        )}>
-                                                            {tpl.name}
-                                                        </h4>
-                                                        <p className="mt-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                                                            {tpl.category || 'Custom'}
-                                                        </p>
-                                                    </div>
-                                                </div>
+                                                <div className="h-2 w-full bg-slate-200/80" />
                                             </div>
-                                        ))}
+                                            <p className="mt-2 text-xs font-medium text-slate-400">Empty canvas</p>
+                                        </div>
+                                        <AnimatePresence>
+                                            {selectedTemplate === 'blank' && (
+                                                <motion.div
+                                                    initial={{ scale: 0, opacity: 0 }}
+                                                    animate={{ scale: 1, opacity: 1 }}
+                                                    exit={{ scale: 0, opacity: 0 }}
+                                                    className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-[#0F172A] shadow-lg sm:right-4 sm:top-4 sm:h-8 sm:w-8"
+                                                >
+                                                    <CheckCircle className="h-4 w-4 text-white sm:h-5 sm:w-5" />
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
-                                </>
-                            ) : (
-                                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-12 text-center">
-                                    <LayoutTemplate className="mb-3 h-10 w-10 text-slate-300" />
-                                    <p className="text-sm font-medium text-slate-500">No templates yet. You can still start from a blank project.</p>
+                                    <div className="relative z-10 flex items-center gap-3 border-t border-slate-100 bg-white p-4 sm:gap-4 sm:p-6">
+                                        <div className={cn(
+                                            'flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl shadow-sm transition-colors sm:h-12 sm:w-12',
+                                            selectedTemplate === 'blank' ? 'bg-[#0F172A]/10 text-[#0F172A]' : 'bg-slate-50 text-slate-500',
+                                        )}>
+                                            <Plus className="h-5 w-5 sm:h-6 sm:w-6" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <h4 className={cn(
+                                                'truncate text-base font-bold leading-tight transition-colors sm:text-lg',
+                                                selectedTemplate === 'blank' ? 'text-[#0F172A]' : 'text-slate-700',
+                                            )}>
+                                                Blank canvas
+                                            </h4>
+                                            <p className="mt-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                                Start from scratch
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
-                            )}
+
+                                {dbTemplates.map((tpl) => (
+                                    <div
+                                        key={tpl.id}
+                                        onClick={() => setSelectedTemplate(tpl.id)}
+                                        className={cn(
+                                            'group/template-dialog-card relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border-[3px] bg-white transition-all duration-300',
+                                            selectedTemplate === tpl.id
+                                                ? 'scale-[1.01] border-[#0F172A] shadow-[0_10px_40px_rgba(15,23,42,0.12)]'
+                                                : 'border-slate-200 opacity-90 hover:border-[#0F172A]/40 hover:opacity-100 hover:shadow-xl',
+                                        )}
+                                    >
+                                        <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 sm:aspect-[4/3]">
+                                            {tpl.image ? (
+                                                <img
+                                                    src={tpl.image}
+                                                    alt={tpl.name}
+                                                    className={cn(
+                                                        'h-full w-full object-cover transition-transform duration-700',
+                                                        selectedTemplate === tpl.id ? 'scale-105' : 'group-hover/template-dialog-card:scale-105',
+                                                    )}
+                                                />
+                                            ) : (
+                                                <div className="flex h-full w-full flex-col items-center justify-center bg-[#F4F4F5]">
+                                                    <LayoutTemplate className="h-10 w-10 text-slate-300 sm:h-12 sm:w-12" />
+                                                    <p className="mt-2 text-xs font-medium text-slate-400">{tpl.category || 'Template'}</p>
+                                                </div>
+                                            )}
+                                            <AnimatePresence>
+                                                {selectedTemplate === tpl.id && (
+                                                    <motion.div
+                                                        initial={{ scale: 0, opacity: 0 }}
+                                                        animate={{ scale: 1, opacity: 1 }}
+                                                        exit={{ scale: 0, opacity: 0 }}
+                                                        className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-[#0F172A] shadow-lg sm:right-4 sm:top-4 sm:h-8 sm:w-8"
+                                                    >
+                                                        <CheckCircle className="h-4 w-4 text-white sm:h-5 sm:w-5" />
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </div>
+                                        <div className="relative z-10 flex items-center gap-3 border-t border-slate-100 bg-white p-4 sm:gap-4 sm:p-6">
+                                            <div className={cn(
+                                                'flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl shadow-sm transition-colors sm:h-12 sm:w-12',
+                                                selectedTemplate === tpl.id ? 'bg-[#0F172A]/10 text-[#0F172A]' : 'bg-slate-50 text-slate-500',
+                                            )}>
+                                                <LayoutTemplate className="h-5 w-5 sm:h-6 sm:w-6" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <h4 className={cn(
+                                                    'truncate text-base font-bold leading-tight transition-colors sm:text-lg',
+                                                    selectedTemplate === tpl.id ? 'text-[#0F172A]' : 'text-slate-700',
+                                                )}>
+                                                    {tpl.name}
+                                                </h4>
+                                                <p className="mt-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                                    {tpl.category || 'Custom'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </DialogContent>
