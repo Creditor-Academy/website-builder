@@ -4,11 +4,15 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import useBuilderStore from '@/store/useBuilderStore';
 import { CATALOG_CATEGORIES, ELEMENT_CATALOG, PREBUILT_CATALOG, type CatalogItem } from '@/builder/catalog';
+import { createDefaultFooter } from '@/lib/defaultPageData';
 
 export function ElementsPanel() {
   const addCanvasElement = useBuilderStore((state) => state.addCanvasElement);
   const addCanvasContainer = useBuilderStore((state) => state.addCanvasContainer);
   const addCanvasSection = useBuilderStore((state) => state.addCanvasSection);
+  const updateFooter = useBuilderStore((state) => state.updateFooter);
+  const selectNode = useBuilderStore((state) => state.selectNode);
+  const getActivePage = useBuilderStore((state) => state.getActivePage);
   const [query, setQuery] = useState('');
 
   const items = useMemo(() => [...ELEMENT_CATALOG, ...PREBUILT_CATALOG], []);
@@ -29,6 +33,14 @@ export function ElementsPanel() {
     }
     if (item.kind === 'container') {
       addCanvasContainer();
+      return;
+    }
+    if (item.kind === 'footer') {
+      const page = getActivePage();
+      if (!page?.footer) {
+        updateFooter(createDefaultFooter());
+      }
+      selectNode('footer', 'footer');
       return;
     }
     if (item.createPrebuilt) {

@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { Copy, Trash2, ChevronUp } from 'lucide-react';
 import { NavbarPreview } from '@/components/preview/NavbarPreview';
 import { FooterPreview } from '@/components/preview/FooterPreview';
@@ -232,6 +232,9 @@ export function BuilderCanvas() {
   const setZoom = useBuilderStore((state) => state.setZoom);
   const scrollRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
+  const scalerRef = useRef<HTMLDivElement>(null);
+  const zoomAnchorRef = useRef<{ canvasX: number; canvasY: number; clientX: number; clientY: number } | null>(null);
+  const gestureStartZoomRef = useRef(100);
   const [contentHeight, setContentHeight] = useState(800);
 
   const sections = useMemo(
@@ -242,6 +245,31 @@ export function BuilderCanvas() {
   useEffect(() => {
     if (scrollRef.current && page?.id) scrollRef.current.scrollTo({ top: 0 });
   }, [page?.id]);
+
+  useLayoutEffect(() => {
+    if (!page?.id) return;
+
+    const applyFit = () => {
+      const node = scrollRef.current;
+      if (!node) return;
+      const width = node.clientWidth;
+      if (width < 80) return;
+      const frame = DEVICE_WIDTHS[useBuilderStore.getState().editor.device] || DEVICE_WIDTHS.desktop;
+      const next = Math.max(25, Math.min(100, Math.floor(((width - 64) / frame) * 100)));
+      const current = useBuilderStore.getState().editor.zoom || 100;
+      if (Math.abs(current - next) >= 1) {
+        useBuilderStore.getState().setZoom(next);
+      }
+    };
+
+    applyFit();
+    const frame = requestAnimationFrame(applyFit);
+    const timeout = window.setTimeout(applyFit, 120);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(timeout);
+    };
+  }, [page?.id, editor.device]);
 
   useEffect(() => {
     const node = frameRef.current;
@@ -254,6 +282,78 @@ export function BuilderCanvas() {
     return () => observer.disconnect();
   }, [page?.id, editor.device]);
 
+  useLayoutEffect(() => {
+    const anchor = zoomAnchorRef.current;
+    const scroller = scrollRef.current;
+    const scaler = scalerRef.current;
+    if (!anchor || !scroller || !scaler) return;
+    zoomAnchorRef.current = null;
+    const nextZoom = (editor.zoom || 100) / 100;
+    const nextRect = scaler.getBoundingClientRect();
+    scroller.scrollLeft += nextRect.left + anchor.canvasX * nextZoom - anchor.clientX;
+    scroller.scrollTop += nextRect.top + anchor.canvasY * nextZoom - anchor.clientY;
+  }, [editor.zoom]);
+
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+
+    const applyZoom = (nextPercent: number, clientX: number, clientY: number) => {
+      const current = useBuilderStore.getState().editor.zoom || 100;
+      const next = Math.max(25, Math.min(200, nextPercent));
+      if (Math.abs(next - current) < 0.05) return;
+
+      const scaler = scalerRef.current;
+      const oldZoom = current / 100;
+      if (scaler) {
+        const rect = scaler.getBoundingClientRect();
+        zoomAnchorRef.current = {
+          canvasX: (clientX - rect.left) / oldZoom,
+          canvasY: (clientY - rect.top) / oldZoom,
+          clientX,
+          clientY,
+        };
+      }
+      useBuilderStore.getState().setZoom(next);
+    };
+
+    const onWheel = (event: WheelEvent) => {
+      const isPinchOrModifier = event.ctrlKey || event.metaKey;
+      if (!isPinchOrModifier) return;
+      event.preventDefault();
+
+      const current = useBuilderStore.getState().editor.zoom || 100;
+      const pixels = event.deltaMode === 1 ? event.deltaY * 16 : event.deltaMode === 2 ? event.deltaY * 800 : event.deltaY;
+      applyZoom(current * Math.exp(-pixels * 0.0015), event.clientX, event.clientY);
+    };
+
+    const onGestureStart = (event: Event) => {
+      event.preventDefault();
+      gestureStartZoomRef.current = useBuilderStore.getState().editor.zoom || 100;
+    };
+
+    const onGestureChange = (event: Event) => {
+      event.preventDefault();
+      const scale = (event as Event & { scale?: number }).scale;
+      if (!scale) return;
+      const gesture = event as Event & { clientX?: number; clientY?: number };
+      applyZoom(
+        gestureStartZoomRef.current * scale,
+        gesture.clientX ?? 0,
+        gesture.clientY ?? 0
+      );
+    };
+
+    scroller.addEventListener('wheel', onWheel, { passive: false, capture: true });
+    scroller.addEventListener('gesturestart', onGestureStart as EventListener, { passive: false });
+    scroller.addEventListener('gesturechange', onGestureChange as EventListener, { passive: false });
+    return () => {
+      scroller.removeEventListener('wheel', onWheel, { capture: true });
+      scroller.removeEventListener('gesturestart', onGestureStart as EventListener);
+      scroller.removeEventListener('gesturechange', onGestureChange as EventListener);
+    };
+  }, [page?.id]);
+
   if (!page) {
     return (
       <div className="flex h-full items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-white">
@@ -264,6 +364,8 @@ export function BuilderCanvas() {
 
   const zoom = (editor.zoom || 100) / 100;
   const frameWidth = DEVICE_WIDTHS[editor.device] || DEVICE_WIDTHS.desktop;
+  const scaledWidth = frameWidth * zoom;
+  const scaledHeight = contentHeight * zoom;
   const globalStyles = page.globalStyles || {};
   const previewMode = editor.previewMode;
 
@@ -316,19 +418,31 @@ export function BuilderCanvas() {
         }}
       />
 
-      <div className="flex justify-center px-4 py-6" style={{ minWidth: frameWidth * zoom + 48 }}>
-        <div style={{ width: frameWidth * zoom, height: contentHeight * zoom }}>
+      <div
+        className="flex justify-center px-4 py-6"
+        style={{ minWidth: `max(100%, ${scaledWidth + 48}px)` }}
+      >
+        <div
+          ref={scalerRef}
+          className="relative shrink-0"
+          style={{
+            width: scaledWidth,
+            height: scaledHeight,
+            overflow: 'clip',
+            overflowClipMargin: '32px',
+          }}
+        >
           <div
             id="canvas-root"
             ref={frameRef}
             className={cn(
-              'canvas-edit light-canvas mx-auto overflow-x-hidden rounded-xl bg-white shadow-elevated',
+              'canvas-edit light-canvas absolute left-0 top-0 overflow-x-hidden rounded-xl bg-white shadow-elevated',
               previewMode && 'is-preview'
             )}
             style={{
               width: frameWidth,
               transform: `scale(${zoom})`,
-              transformOrigin: 'top center',
+              transformOrigin: 'top left',
               backgroundColor: globalStyles.backgroundColor || '#ffffff',
             }}
             data-fit-canvas="true"
@@ -346,7 +460,7 @@ export function BuilderCanvas() {
               <NavbarPreview config={page.navbar} isEditing={!previewMode} onUpdate={updateNavbar} />
             </div>
 
-            {sections.map((section, index) => (
+            {sortByOrder(sections).map((section, index) => (
               <div key={section.id}>
                 {!previewMode && (
                   <DropZone parentId={page.id} parentKind="page" index={index} edge="before" accepts={['section']} />
@@ -370,6 +484,7 @@ export function BuilderCanvas() {
               </div>
             )}
 
+            {page.footer && (
             <div
               data-canvas-node="footer"
               data-canvas-kind="footer"
@@ -382,6 +497,7 @@ export function BuilderCanvas() {
             >
               <FooterPreview config={page.footer} isEditing={!previewMode} onUpdate={updateFooter} />
             </div>
+            )}
           </div>
         </div>
       </div>

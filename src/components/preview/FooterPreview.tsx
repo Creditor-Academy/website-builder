@@ -81,6 +81,7 @@ function InjectStyles() {
 }
 
 export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
+  if (!rawConfig) return null;
   const config = {
     ...rawConfig,
     logo: rawConfig.logo && typeof rawConfig.logo === 'object' ? rawConfig.logo : { text: rawConfig.logo || 'Logo', imageUrl: '' },

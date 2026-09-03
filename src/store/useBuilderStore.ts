@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
 import { persist } from 'zustand/middleware';
 import {
-    getDefaultPage,
+    getBlankPage,
     getBusinessPage,
     getPortfolioPage,
     getEcommercePage,
@@ -29,7 +29,7 @@ const SAVE_DEBOUNCE_MS = 800;
 const MAX_HISTORY = 50;
 
 const TEMPLATE_MAP: Record<string, () => any> = {
-    blank: getDefaultPage,
+    blank: getBlankPage,
     business: getBusinessPage,
     portfolio: getPortfolioPage,
     ecommerce: getEcommercePage,
@@ -754,7 +754,19 @@ const useBuilderStore = create<BuilderStore>()(
                 if (!page) return;
 
                 const sectionMap = new Map(page.sections.map(s => [s.id, s]));
-                const newSections = ids.map(id => sectionMap.get(id)).filter(Boolean);
+                const seen = new Set<string>();
+                const ordered = ids
+                    .map((id) => sectionMap.get(id))
+                    .filter((section): section is NonNullable<typeof section> => {
+                        if (!section || seen.has(section.id)) return false;
+                        seen.add(section.id);
+                        return true;
+                    });
+                const rest = page.sections.filter((section) => !seen.has(section.id));
+                const newSections = [...ordered, ...rest].map((section, index) => ({
+                    ...section,
+                    order: index,
+                }));
 
                 get().updateCurrentPage({ sections: newSections });
                 get().saveActiveWebsite();
@@ -1143,6 +1155,14 @@ const useBuilderStore = create<BuilderStore>()(
             },
 
             deleteCanvasNode: (id) => {
+                if (id === 'footer') {
+                    const website = get().getActiveWebsite();
+                    if (!website) return;
+                    get().updateWebsitePages(website.pages.map((page) => ({ ...page, footer: null })));
+                    get().saveActiveWebsite();
+                    get().selectNode(null);
+                    return;
+                }
                 const page = get().getActivePage();
                 if (!page) return;
                 get().updateCurrentPage({ sections: applyDelete(page, id) });
