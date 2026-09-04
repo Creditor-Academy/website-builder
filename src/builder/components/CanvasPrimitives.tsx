@@ -1,5 +1,5 @@
-import { memo } from 'react';
-import type { CSSProperties } from 'react';
+import { memo, useEffect, useRef } from 'react';
+import type { CSSProperties, KeyboardEvent } from 'react';
 import * as Lucide from 'lucide-react';
 import { FileText } from 'lucide-react';
 import { sanitizeHTML } from '@/utils/sanitize';
@@ -68,17 +68,85 @@ function FormView({ element, css }: { element: CanvasElement; css: CSSProperties
   );
 }
 
+function InlineTextEditor({
+  html,
+  tag,
+  css,
+  onSave,
+  onCancel,
+}: {
+  html: string;
+  tag: 'p' | 'h1' | 'h2' | 'h3' | 'span';
+  css: CSSProperties;
+  onSave: (next: string) => void;
+  onCancel: () => void;
+}) {
+  const ref = useRef<HTMLElement>(null);
+  const initialRef = useRef(html);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    node.innerHTML = sanitizeHTML(html);
+    node.focus();
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    range.collapse(false);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  }, [html]);
+
+  const commit = (value: string) => onSave(sanitizeHTML(value));
+
+  const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      onCancel();
+      return;
+    }
+    if (event.key === 'Enter' && !event.shiftKey && tag !== 'p') {
+      event.preventDefault();
+      commit(ref.current?.innerHTML || '');
+    }
+  };
+
+  const Tag = tag;
+  return (
+    <Tag
+      ref={ref as never}
+      contentEditable
+      suppressContentEditableWarning
+      style={css}
+      className="outline-none ring-1 ring-sky-400/70"
+      onBlur={() => commit(ref.current?.innerHTML || initialRef.current)}
+      onKeyDown={onKeyDown}
+      onClick={(event) => event.stopPropagation()}
+    />
+  );
+}
+
 export const CanvasElementView = memo(function CanvasElementView({
   element,
   css,
+  editing = false,
+  onSaveText,
+  onCancelEdit,
 }: {
   element: CanvasElement;
   css: CSSProperties;
+  editing?: boolean;
+  onSaveText?: (html: string) => void;
+  onCancelEdit?: () => void;
 }) {
   switch (element.type) {
     case 'text': {
       const html = String(element.content.text || 'Edit this text');
       const Tag = (element.content.tag as 'p' | 'h1' | 'h2' | 'h3' | 'span') || 'p';
+      if (editing && onSaveText && onCancelEdit) {
+        return <InlineTextEditor html={html} tag={Tag} css={css} onSave={onSaveText} onCancel={onCancelEdit} />;
+      }
       return <Tag style={css} dangerouslySetInnerHTML={{ __html: sanitizeHTML(html) }} />;
     }
     case 'image':

@@ -12,15 +12,22 @@ import {
 } from '@/lib/defaultPageData';
 import { builderWebsiteToTemplatePayload, templateToBuilderWebsite } from '@/lib/templateBuilder';
 import type { DeviceId, DropTarget, ElementType, NodeKind, SaveStatus } from '@/builder/types';
+import type { PaletteDragData } from '@/builder/dnd';
 import {
     addContainerToPage,
     addElementToPage,
+    addItemAtDropTarget,
+    addPrebuiltAtDropTarget,
     addSectionToPage,
     applyDelete,
     applyDuplicate,
     applyMove,
     applyNodePatch,
     applyStylePatch,
+    copyNodeToClipboard,
+    normalizeActiveSections,
+    pasteClipboard,
+    type CanvasClipboard,
 } from '@/builder/documentOps';
 import { findNode } from '@/builder/tree';
 
@@ -157,6 +164,7 @@ export interface BuilderStore {
     history: Page[][];
     historyIndex: number;
     templateEditor: TemplateEditorState | null;
+    clipboard: CanvasClipboard | null;
 
     setWebsites: (websites: Website[]) => void;
     startTemplateEditing: (template: any) => void;
@@ -214,6 +222,9 @@ export interface BuilderStore {
     deleteCanvasNode: (id: string) => void;
     duplicateCanvasNode: (id: string) => string | null;
     moveCanvasNode: (id: string, target: DropTarget) => void;
+    addPaletteItem: (item: PaletteDragData, target: DropTarget | null, prebuilt?: Record<string, unknown>) => string | null;
+    copyCanvasNode: (id?: string | null) => void;
+    pasteCanvasNode: () => string | null;
     undo: () => void;
     redo: () => void;
 }
@@ -252,6 +263,7 @@ const useBuilderStore = create<BuilderStore>()(
             history: [],
             historyIndex: -1,
             templateEditor: null,
+            clipboard: null,
 
             // Actions
             setWebsites: (websites) => set({ websites }),
@@ -1143,6 +1155,8 @@ const useBuilderStore = create<BuilderStore>()(
             updateCanvasNode: (id, patch) => {
                 const page = get().getActivePage();
                 if (!page) return;
+                const found = findNode(normalizeActiveSections(page), id);
+                if (found?.node.locked && !('locked' in patch) && !('visible' in patch) && !('visibility' in patch)) return;
                 get().updateCurrentPage({ sections: applyNodePatch(page, id, patch) });
                 get().saveActiveWebsite();
             },
@@ -1150,6 +1164,8 @@ const useBuilderStore = create<BuilderStore>()(
             updateCanvasStyles: (id, patch) => {
                 const page = get().getActivePage();
                 if (!page) return;
+                const found = findNode(normalizeActiveSections(page), id);
+                if (found?.node.locked) return;
                 get().updateCurrentPage({ sections: applyStylePatch(page, id, get().editor.device, patch) });
                 get().saveActiveWebsite();
             },
@@ -1165,22 +1181,34 @@ const useBuilderStore = create<BuilderStore>()(
                 }
                 const page = get().getActivePage();
                 if (!page) return;
-                get().updateCurrentPage({ sections: applyDelete(page, id) });
+                const found = findNode(normalizeActiveSections(page), id);
+                if (found?.node.locked) return;
+                const next = applyDelete(page, id);
+                if (!next) return;
+                const parentId = found?.kind === 'element' ? found.container?.id : found?.kind === 'container' ? found.section?.id : null;
+                const parentKind = found?.kind === 'element' ? 'container' as const : found?.kind === 'container' ? 'section' as const : null;
+                get().updateCurrentPage({ sections: next });
                 get().saveActiveWebsite();
-                set((state) => ({
-                    editor: {
-                        ...state.editor,
-                        selectedNodeId: null,
-                        selectedKind: null,
-                        selectedSectionId: state.editor.selectedSectionId === id ? null : state.editor.selectedSectionId,
-                        selectedComponentId: state.editor.selectedComponentId === id ? null : state.editor.selectedComponentId,
-                    }
-                }));
+                if (parentId && parentKind) {
+                    get().selectNode(parentId, parentKind);
+                } else {
+                    set((state) => ({
+                        editor: {
+                            ...state.editor,
+                            selectedNodeId: null,
+                            selectedKind: null,
+                            selectedSectionId: state.editor.selectedSectionId === id ? null : state.editor.selectedSectionId,
+                            selectedComponentId: state.editor.selectedComponentId === id ? null : state.editor.selectedComponentId,
+                        }
+                    }));
+                }
             },
 
             duplicateCanvasNode: (id) => {
                 const page = get().getActivePage();
                 if (!page) return null;
+                const found = findNode(normalizeActiveSections(page), id);
+                if (found?.node.locked) return null;
                 const result = applyDuplicate(page, id);
                 if (!result) return null;
                 get().updateCurrentPage({ sections: result.sections });
@@ -1192,8 +1220,42 @@ const useBuilderStore = create<BuilderStore>()(
             moveCanvasNode: (id, target) => {
                 const page = get().getActivePage();
                 if (!page) return;
-                get().updateCurrentPage({ sections: applyMove(page, id, target) });
+                const next = applyMove(page, id, target);
+                if (!next) return;
+                get().updateCurrentPage({ sections: next });
                 get().saveActiveWebsite();
+            },
+
+            addPaletteItem: (item, target, prebuilt) => {
+                const page = get().getActivePage();
+                if (!page) return null;
+                const result = prebuilt
+                    ? addPrebuiltAtDropTarget(page, prebuilt, target)
+                    : addItemAtDropTarget(page, item, target);
+                get().updateCurrentPage({ sections: result.sections });
+                get().saveActiveWebsite();
+                get().selectNode(result.selectId, result.selectKind);
+                return result.selectId;
+            },
+
+            copyCanvasNode: (id) => {
+                const page = get().getActivePage();
+                const nodeId = id || get().editor.selectedNodeId;
+                if (!page || !nodeId) return;
+                const clipboard = copyNodeToClipboard(page, nodeId);
+                if (clipboard) set({ clipboard });
+            },
+
+            pasteCanvasNode: () => {
+                const page = get().getActivePage();
+                const clipboard = get().clipboard;
+                if (!page || !clipboard) return null;
+                const result = pasteClipboard(page, clipboard, get().editor.selectedNodeId);
+                if (!result) return null;
+                get().updateCurrentPage({ sections: result.sections });
+                get().saveActiveWebsite();
+                get().selectNode(result.selectId, result.selectKind);
+                return result.selectId;
             },
 
             undo: () => {

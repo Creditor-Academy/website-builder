@@ -1,10 +1,50 @@
 import { useMemo, useState } from 'react';
+import { useDraggable } from '@dnd-kit/core';
 import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import useBuilderStore from '@/store/useBuilderStore';
 import { CATALOG_CATEGORIES, ELEMENT_CATALOG, PREBUILT_CATALOG, type CatalogItem } from '@/builder/catalog';
+import { paletteDragId, type PaletteDragData } from '@/builder/dnd';
 import { createDefaultFooter } from '@/lib/defaultPageData';
+import { cn } from '@/lib/utils';
+
+function CatalogCard({ item, onAdd }: { item: CatalogItem; onAdd: (item: CatalogItem) => void }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: paletteDragId(item),
+    data: {
+      source: 'palette',
+      itemKind: item.kind,
+      catalogId: item.id,
+      name: item.name,
+      elementType: item.elementType,
+    } satisfies PaletteDragData,
+  });
+
+  return (
+    <button
+      ref={setNodeRef}
+      type="button"
+      onClick={() => onAdd(item)}
+      aria-label={`Add ${item.name}`}
+      title={item.name}
+      className={cn(
+        'flex flex-col gap-1.5 rounded-lg border border-slate-100 bg-white p-2.5 text-left hover:shadow-[0_4px_4px_-2px_rgba(8,12,22,0.28)]',
+        isDragging && 'opacity-40'
+      )}
+      {...listeners}
+      {...attributes}
+    >
+      <div className="flex w-full min-w-0 items-center gap-2">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#0F172A] text-white">
+          <item.icon className="h-3.5 w-3.5" strokeWidth={1.75} />
+        </div>
+        <p className="truncate text-xs font-medium text-slate-800">{item.name}</p>
+      </div>
+      <p className="line-clamp-2 text-[10px] leading-snug text-slate-400">{item.description}</p>
+    </button>
+  );
+}
 
 export function ElementsPanel() {
   const addCanvasElement = useBuilderStore((state) => state.addCanvasElement);
@@ -78,20 +118,7 @@ export function ElementsPanel() {
               </h3>
               <div className="grid grid-cols-2 gap-2">
                 {group.items.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => handleAdd(item)}
-                    className="flex flex-col gap-1.5 rounded-lg border border-slate-100 bg-white p-2.5 text-left hover:shadow-[0_4px_4px_-2px_rgba(8,12,22,0.28)]"
-                  >
-                    <div className="flex w-full min-w-0 items-center gap-2">
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#0F172A] text-white">
-                        <item.icon className="h-3.5 w-3.5" strokeWidth={1.75} />
-                      </div>
-                      <p className="truncate text-xs font-medium text-slate-800">{item.name}</p>
-                    </div>
-                    <p className="line-clamp-2 text-[10px] leading-snug text-slate-400">{item.description}</p>
-                  </button>
+                  <CatalogCard key={item.id} item={item} onAdd={handleAdd} />
                 ))}
               </div>
             </div>

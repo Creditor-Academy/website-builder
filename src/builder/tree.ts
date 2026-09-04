@@ -1,5 +1,17 @@
 import { v4 as uuidv4 } from 'uuid';
-import { CANVAS_PARENT_RULES, type CanvasContainer, type CanvasElement, type CanvasSection, type NodeKind, type NodeLocation } from './types';
+import { CANVAS_PARENT_RULES, type CanvasContainer, type CanvasElement, type CanvasSection, type DeviceId, type NodeKind, type NodeLocation } from './types';
+
+export function cloneData<T>(value: T): T {
+  if (value == null) return value;
+  if (typeof structuredClone === 'function') {
+    try {
+      return structuredClone(value);
+    } catch {
+      // Fall through to JSON for values structuredClone cannot handle.
+    }
+  }
+  return JSON.parse(JSON.stringify(value)) as T;
+}
 
 export function sortByOrder<T extends { order: number }>(nodes: T[]): T[] {
   return [...nodes].sort((a, b) => a.order - b.order);
@@ -47,6 +59,108 @@ export function findNode(sections: CanvasSection[], id: string | null): NodeLoca
   }
 
   return null;
+}
+
+export function collectDescendantIds(sections: CanvasSection[], id: string): Set<string> {
+  const found = findNode(sections, id);
+  const ids = new Set<string>();
+  if (!found) return ids;
+
+  if (found.kind === 'section') {
+    const section = found.node as CanvasSection;
+    for (const container of section.children || []) {
+      ids.add(container.id);
+      for (const element of container.children || []) ids.add(element.id);
+    }
+    for (const component of (section.components || []) as Array<{ id: string }>) {
+      ids.add(component.id);
+    }
+  }
+
+  if (found.kind === 'container') {
+    for (const element of (found.node as CanvasContainer).children || []) {
+      ids.add(element.id);
+    }
+  }
+
+  return ids;
+}
+
+export function isDescendant(sections: CanvasSection[], ancestorId: string, nodeId: string): boolean {
+  return collectDescendantIds(sections, ancestorId).has(nodeId);
+}
+
+export function collectAllIds(sections: CanvasSection[]): string[] {
+  const ids: string[] = [];
+  for (const section of sections) {
+    ids.push(section.id);
+    for (const container of section.children || []) {
+      ids.push(container.id);
+      for (const element of container.children || []) ids.push(element.id);
+    }
+    for (const component of (section.components || []) as Array<{ id: string }>) {
+      ids.push(component.id);
+    }
+  }
+  return ids;
+}
+
+export function hasDuplicateIds(sections: CanvasSection[]): boolean {
+  const ids = collectAllIds(sections);
+  return new Set(ids).size !== ids.length;
+}
+
+export interface MoveTarget {
+  parentId: string;
+  parentKind: NodeKind;
+  index: number;
+}
+
+export function getSourcePosition(sections: CanvasSection[], nodeId: string): { parentId: string; index: number } | null {
+  const found = findNode(sections, nodeId);
+  if (!found) return null;
+
+  if (found.kind === 'section') {
+    return { parentId: found.node.parentId || '', index: sections.findIndex((section) => section.id === nodeId) };
+  }
+  if (found.kind === 'container' && found.section) {
+    return {
+      parentId: found.section.id,
+      index: (found.section.children || []).findIndex((container) => container.id === nodeId),
+    };
+  }
+  if (found.kind === 'element' && found.container && !found.isFloating) {
+    return {
+      parentId: found.container.id,
+      index: (found.container.children || []).findIndex((element) => element.id === nodeId),
+    };
+  }
+  return null;
+}
+
+export function validateMove(sections: CanvasSection[], nodeId: string, target: MoveTarget): boolean {
+  if (!nodeId || !target.parentId) return false;
+  if (nodeId === target.parentId) return false;
+  if (target.index < 0 || Number.isNaN(target.index)) return false;
+
+  const found = findNode(sections, nodeId);
+  if (!found) return false;
+  if (found.kind === 'page' || found.kind === 'navbar' || found.kind === 'footer') return false;
+  if (found.isFloating) return false;
+  if (found.node.locked) return false;
+  if (isDescendant(sections, nodeId, target.parentId)) return false;
+
+  const childType =
+    found.kind === 'section' ? 'section' : found.kind === 'container' ? 'container' : (found.node as CanvasElement).type;
+  if (!canAcceptChild(target.parentKind, childType)) return false;
+
+  if (target.parentKind === 'section') {
+    const parent = findNode(sections, target.parentId);
+    const section = parent?.kind === 'section' ? (parent.node as CanvasSection) : parent?.section;
+    if (section?.kind === 'prebuilt' && !(section.children || []).length) return false;
+  }
+
+  return true;
 }
 
 export function getAncestors(sections: CanvasSection[], id: string): NodeLocation[] {
@@ -109,6 +223,7 @@ export function updateNodeById<T extends Record<string, unknown>>(
 export function removeNode(sections: CanvasSection[], id: string): CanvasSection[] {
   const found = findNode(sections, id);
   if (!found) return sections;
+  if (found.node.locked) return sections;
 
   if (found.kind === 'section') {
     return reindex(sections.filter((section) => section.id !== id));
@@ -211,53 +326,59 @@ export function reorderChildren(sections: CanvasSection[], parentId: string, ord
   });
 }
 
-export function moveNode(
-  sections: CanvasSection[],
-  nodeId: string,
-  target: { parentId: string; parentKind: NodeKind; index: number }
-): CanvasSection[] {
-  const found = findNode(sections, nodeId);
-  if (!found || found.kind === 'page' || found.kind === 'navbar' || found.kind === 'footer') return sections;
+export function moveNode(sections: CanvasSection[], nodeId: string, target: MoveTarget): CanvasSection[] {
+  if (!validateMove(sections, nodeId, target)) return sections;
 
-  const childType = found.kind === 'section' ? 'section' : found.kind === 'container' ? 'container' : (found.node as CanvasElement).type;
-  if (!canAcceptChild(target.parentKind, childType)) return sections;
+  const found = findNode(sections, nodeId);
+  if (!found) return sections;
+
+  const source = getSourcePosition(sections, nodeId);
+  let index = target.index;
+  if (source && source.parentId === target.parentId && source.index >= 0) {
+    if (source.index < index) index -= 1;
+    if (source.index === index) return sections;
+  }
 
   const without = removeNode(sections, nodeId);
   if (found.kind === 'section') {
-    return insertSection(without, { ...(found.node as CanvasSection), parentId: target.parentId }, target.index);
+    return insertSection(without, { ...(found.node as CanvasSection), parentId: target.parentId }, index);
   }
   if (found.kind === 'container') {
-    return insertContainer(without, target.parentId, { ...(found.node as CanvasContainer), parentId: target.parentId }, target.index);
+    return insertContainer(without, target.parentId, { ...(found.node as CanvasContainer), parentId: target.parentId }, index);
   }
-  return insertElement(without, target.parentId, { ...(found.node as CanvasElement), parentId: target.parentId }, target.index);
+  return insertElement(without, target.parentId, { ...(found.node as CanvasElement), parentId: target.parentId }, index);
 }
 
-function cloneElement(element: CanvasElement, parentId: string, order: number): CanvasElement {
+export function cloneElement(element: CanvasElement, parentId: string, order: number): CanvasElement {
   return {
     ...element,
     id: uuidv4(),
     parentId,
     order,
-    styles: { ...element.styles },
-    responsiveStyles: { ...element.responsiveStyles },
-    content: { ...element.content },
-    properties: { ...element.properties },
-    visibility: { ...element.visibility },
+    styles: cloneData(element.styles || {}),
+    responsiveStyles: cloneData(element.responsiveStyles || {}),
+    content: cloneData(element.content || {}),
+    properties: cloneData(element.properties || {}),
+    visibility: cloneData(element.visibility || { desktop: true, tablet: true, mobile: true }),
+    animation: element.animation ? cloneData(element.animation) : element.animation,
+    locked: element.locked,
   };
 }
 
-function cloneContainer(container: CanvasContainer, parentId: string, order: number): CanvasContainer {
+export function cloneContainer(container: CanvasContainer, parentId: string, order: number): CanvasContainer {
   const id = uuidv4();
   return {
     ...container,
     id,
     parentId,
     order,
-    styles: { ...container.styles },
-    responsiveStyles: { ...container.responsiveStyles },
-    content: { ...container.content },
-    properties: { ...container.properties },
-    visibility: { ...container.visibility },
+    styles: cloneData(container.styles || {}),
+    responsiveStyles: cloneData(container.responsiveStyles || {}),
+    content: cloneData(container.content || {}),
+    properties: cloneData(container.properties || {}),
+    visibility: cloneData(container.visibility || { desktop: true, tablet: true, mobile: true }),
+    animation: container.animation ? cloneData(container.animation) : container.animation,
+    locked: container.locked,
     children: (container.children || []).map((element, index) => cloneElement(element, id, index)),
   };
 }
@@ -270,14 +391,16 @@ export function cloneSection(section: CanvasSection, pageId: string, order: numb
     parentId: pageId,
     order,
     name: `${section.name} (Copy)`,
-    styles: { ...section.styles },
-    responsiveStyles: { ...section.responsiveStyles },
-    content: structuredClone(section.content || {}),
-    properties: { ...section.properties },
-    visibility: { ...section.visibility },
+    styles: cloneData(section.styles || {}),
+    responsiveStyles: cloneData(section.responsiveStyles || {}),
+    content: cloneData(section.content || {}),
+    properties: cloneData(section.properties || {}),
+    visibility: cloneData(section.visibility || { desktop: true, tablet: true, mobile: true }),
+    animation: section.animation ? cloneData(section.animation) : section.animation,
+    locked: false,
     children: (section.children || []).map((container, index) => cloneContainer(container, id, index)),
     components: ((section.components || []) as Array<Record<string, unknown>>).map((component) => ({
-      ...component,
+      ...cloneData(component),
       id: uuidv4(),
     })),
   };
@@ -285,7 +408,7 @@ export function cloneSection(section: CanvasSection, pageId: string, order: numb
 
 export function cloneNode(sections: CanvasSection[], id: string, pageId: string): { sections: CanvasSection[]; newId: string } | null {
   const found = findNode(sections, id);
-  if (!found) return null;
+  if (!found || found.node.locked) return null;
 
   if (found.kind === 'section') {
     const index = sections.findIndex((section) => section.id === id);
@@ -308,26 +431,39 @@ export function cloneNode(sections: CanvasSection[], id: string, pageId: string)
   return null;
 }
 
-export function collectLayerTree(sections: CanvasSection[]) {
+export interface LayerTreeNode {
+  id: string;
+  kind: 'section' | 'container' | 'element';
+  type: string;
+  name: string;
+  visible: boolean;
+  locked: boolean;
+  children: LayerTreeNode[];
+}
+
+export function collectLayerTree(sections: CanvasSection[], device: DeviceId = 'desktop'): LayerTreeNode[] {
   return sortByOrder(sections).map((section) => ({
     id: section.id,
     kind: 'section' as const,
     type: section.type,
     name: section.name,
-    visible: section.visible !== false && section.visibility?.desktop !== false,
+    visible: section.visible !== false && section.visibility?.[device] !== false,
+    locked: Boolean(section.locked),
     children: sortByOrder(section.children || []).map((container) => ({
       id: container.id,
       kind: 'container' as const,
       type: 'container',
       name: container.name,
-      visible: container.visibility?.desktop !== false,
+      visible: container.visibility?.[device] !== false,
+      locked: Boolean(container.locked),
       children: sortByOrder(container.children || []).map((element) => ({
         id: element.id,
         kind: 'element' as const,
         type: element.type,
         name: element.name,
-        visible: element.visibility?.desktop !== false,
-        children: [] as { id: string; kind: 'element'; type: string; name: string; visible: boolean; children: never[] }[],
+        visible: element.visibility?.[device] !== false,
+        locked: Boolean(element.locked),
+        children: [] as LayerTreeNode[],
       })),
     })),
   }));
