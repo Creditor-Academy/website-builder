@@ -1,5 +1,6 @@
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { Copy, Trash2, ChevronUp } from 'lucide-react';
+import { useDraggable } from '@dnd-kit/core';
+import { Copy, Trash2, ChevronUp, GripVertical, EyeOff, Lock, Unlock } from 'lucide-react';
 import { NavbarPreview } from '@/components/preview/NavbarPreview';
 import { FooterPreview } from '@/components/preview/FooterPreview';
 import { SectionRenderer } from '@/components/sections/SectionRenderer';
@@ -10,6 +11,7 @@ import { normalizePageSections } from '@/builder/adapter';
 import { DEVICE_WIDTHS, type CanvasContainer, type CanvasElement, type CanvasSection, type DeviceId, type NodeKind } from '@/builder/types';
 import { resolveStyles, stylesToCss } from '@/builder/styles';
 import { sortByOrder } from '@/builder/tree';
+import { canvasDragId, ELEMENT_ACCEPTS, type CanvasDragData } from '@/builder/dnd';
 import { DropZone } from './DropZone';
 import { CanvasElementView } from './CanvasPrimitives';
 
@@ -27,35 +29,72 @@ function NodeFrame({
   id,
   kind,
   name,
+  type,
   hidden,
+  locked,
   previewMode,
   children,
   className,
   style,
   onSelectParent,
+  parentId,
+  index,
+  pageId,
+  dragDisabled,
 }: {
   id: string;
   kind: NodeKind;
   name: string;
+  type?: string;
   hidden?: boolean;
+  locked?: boolean;
   previewMode: boolean;
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
   onSelectParent?: () => void;
+  parentId?: string;
+  index?: number;
+  pageId?: string;
+  dragDisabled?: boolean;
 }) {
   const selected = useIsSelected(id);
   const selectNode = useBuilderStore((state) => state.selectNode);
   const deleteCanvasNode = useBuilderStore((state) => state.deleteCanvasNode);
   const duplicateCanvasNode = useBuilderStore((state) => state.duplicateCanvasNode);
+  const updateCanvasNode = useBuilderStore((state) => state.updateCanvasNode);
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: canvasDragId(kind, id),
+    data: {
+      source: 'canvas',
+      nodeId: id,
+      kind,
+      type: type || kind,
+      name,
+      parentId,
+      index,
+      pageId,
+      locked,
+    } satisfies CanvasDragData,
+    disabled: previewMode || locked || dragDisabled,
+  });
 
   return (
     <div
+      ref={setNodeRef}
       data-canvas-node={id}
       data-canvas-kind={kind}
       data-canvas-name={name}
-      className={cn('canvas-node relative', selected && !previewMode && 'is-selected', hidden && 'opacity-40', className)}
+      className={cn(
+        'canvas-node relative',
+        selected && !previewMode && 'is-selected',
+        hidden && 'opacity-40',
+        isDragging && 'opacity-40',
+        className
+      )}
       style={style}
+      {...(!previewMode && !locked && !dragDisabled ? listeners : {})}
+      {...(!previewMode && !locked && !dragDisabled ? attributes : {})}
       onClick={(event) => {
         if (previewMode) return;
         event.stopPropagation();
@@ -70,18 +109,56 @@ function NodeFrame({
             selected ? 'opacity-100 pointer-events-auto' : 'opacity-0'
           )}
         >
+          {!locked && (
+            <button
+              type="button"
+              className="rounded p-0.5 hover:bg-white/20"
+              aria-label={`Move ${name}`}
+              title="Move"
+              onClick={(event) => event.stopPropagation()}
+              {...listeners}
+              {...attributes}
+            >
+              <GripVertical className="h-3 w-3" />
+            </button>
+          )}
           <span>{name}</span>
+          {locked && <Lock className="h-3 w-3 opacity-80" />}
           {selected && (
             <span className="ml-1 flex items-center gap-0.5">
               {onSelectParent && (
-                <button type="button" className="rounded p-0.5 hover:bg-white/20" onClick={(event) => { event.stopPropagation(); onSelectParent(); }}>
+                <button type="button" className="rounded p-0.5 hover:bg-white/20" aria-label="Select parent" title="Select parent" onClick={(event) => { event.stopPropagation(); onSelectParent(); }}>
                   <ChevronUp className="h-3 w-3" />
                 </button>
               )}
-              <button type="button" className="rounded p-0.5 hover:bg-white/20" onClick={(event) => { event.stopPropagation(); duplicateCanvasNode(id); }}>
+              <button
+                type="button"
+                className="rounded p-0.5 hover:bg-white/20"
+                aria-label={locked ? `Unlock ${name}` : `Lock ${name}`}
+                title={locked ? 'Unlock' : 'Lock'}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  updateCanvasNode(id, { locked: !locked });
+                }}
+              >
+                {locked ? <Unlock className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+              </button>
+              <button
+                type="button"
+                className="rounded p-0.5 hover:bg-white/20"
+                aria-label={`Hide ${name}`}
+                title="Hide"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  updateCanvasNode(id, kind === 'section' ? { visible: false } : { visibility: { desktop: false, tablet: false, mobile: false } });
+                }}
+              >
+                <EyeOff className="h-3 w-3" />
+              </button>
+              <button type="button" className="rounded p-0.5 hover:bg-white/20" aria-label={`Duplicate ${name}`} title="Duplicate" disabled={locked} onClick={(event) => { event.stopPropagation(); if (!locked) duplicateCanvasNode(id); }}>
                 <Copy className="h-3 w-3" />
               </button>
-              <button type="button" className="rounded p-0.5 hover:bg-white/20" onClick={(event) => { event.stopPropagation(); deleteCanvasNode(id); }}>
+              <button type="button" className="rounded p-0.5 hover:bg-white/20" aria-label={`Delete ${name}`} title="Delete" disabled={locked} onClick={(event) => { event.stopPropagation(); if (!locked) deleteCanvasNode(id); }}>
                 <Trash2 className="h-3 w-3" />
               </button>
             </span>
@@ -98,12 +175,18 @@ const CanvasElementNode = memo(function CanvasElementNode({
   device,
   previewMode,
   onSelectParent,
+  parentId,
+  index,
 }: {
   element: CanvasElement;
   device: DeviceId;
   previewMode: boolean;
   onSelectParent: () => void;
+  parentId: string;
+  index: number;
 }) {
+  const [editing, setEditing] = useState(false);
+  const updateCanvasNode = useBuilderStore((state) => state.updateCanvasNode);
   const visible = element.visibility?.[device] !== false;
   if (!visible && previewMode) return null;
   const css = stylesToCss(resolveStyles(element.styles, element.responsiveStyles, device));
@@ -111,12 +194,34 @@ const CanvasElementNode = memo(function CanvasElementNode({
     <NodeFrame
       id={element.id}
       kind="element"
+      type={element.type}
       name={element.name || element.type}
       hidden={!visible}
+      locked={element.locked}
       previewMode={previewMode}
       onSelectParent={onSelectParent}
+      parentId={parentId}
+      index={index}
+      dragDisabled={editing}
     >
-      <CanvasElementView element={element} css={css} />
+      <div
+        onDoubleClick={(event) => {
+          if (previewMode || element.locked || element.type !== 'text') return;
+          event.stopPropagation();
+          setEditing(true);
+        }}
+      >
+        <CanvasElementView
+          element={element}
+          css={css}
+          editing={editing}
+          onSaveText={(html) => {
+            updateCanvasNode(element.id, { content: { ...element.content, text: html } });
+            setEditing(false);
+          }}
+          onCancelEdit={() => setEditing(false)}
+        />
+      </div>
     </NodeFrame>
   );
 });
@@ -126,11 +231,15 @@ const CanvasContainerNode = memo(function CanvasContainerNode({
   device,
   previewMode,
   onSelectParent,
+  parentId,
+  index,
 }: {
   container: CanvasContainer;
   device: DeviceId;
   previewMode: boolean;
   onSelectParent: () => void;
+  parentId: string;
+  index: number;
 }) {
   const visible = container.visibility?.[device] !== false;
   if (!visible && previewMode) return null;
@@ -141,28 +250,37 @@ const CanvasContainerNode = memo(function CanvasContainerNode({
     <NodeFrame
       id={container.id}
       kind="container"
+      type="container"
       name={container.name || 'Container'}
       hidden={!visible}
+      locked={container.locked}
       previewMode={previewMode}
       onSelectParent={onSelectParent}
+      parentId={parentId}
+      index={index}
       style={css}
     >
-      {!previewMode && (
-        <DropZone parentId={container.id} parentKind="container" index={0} edge="inside" accepts={['text', 'image', 'button', 'icon', 'video', 'divider', 'form', 'pdf']} empty={children.length === 0} />
+      {!previewMode && children.length === 0 && (
+        <DropZone parentId={container.id} parentKind="container" index={0} edge="inside" accepts={ELEMENT_ACCEPTS} empty />
       )}
-      {children.map((element, index) => (
+      {children.map((element, elementIndex) => (
         <div key={element.id}>
           {!previewMode && (
-            <DropZone parentId={container.id} parentKind="container" index={index} edge="before" accepts={['text', 'image', 'button', 'icon', 'video', 'divider', 'form', 'pdf']} />
+            <DropZone parentId={container.id} parentKind="container" index={elementIndex} edge="before" accepts={ELEMENT_ACCEPTS} />
           )}
           <CanvasElementNode
             element={element}
             device={device}
             previewMode={previewMode}
+            parentId={container.id}
+            index={elementIndex}
             onSelectParent={() => useBuilderStore.getState().selectNode(container.id, 'container')}
           />
         </div>
       ))}
+      {!previewMode && children.length > 0 && (
+        <DropZone parentId={container.id} parentKind="container" index={children.length} edge="before" accepts={ELEMENT_ACCEPTS} />
+      )}
     </NodeFrame>
   );
 });
@@ -173,12 +291,14 @@ const CanvasSectionNode = memo(function CanvasSectionNode({
   device,
   previewMode,
   isAlternate,
+  pageId,
 }: {
   section: CanvasSection;
   index: number;
   device: DeviceId;
   previewMode: boolean;
   isAlternate: boolean;
+  pageId: string;
 }) {
   const selectNode = useBuilderStore((state) => state.selectNode);
   const updateSection = useBuilderStore((state) => state.updateSection);
@@ -186,27 +306,44 @@ const CanvasSectionNode = memo(function CanvasSectionNode({
   if (!visible && previewMode) return null;
   const css = stylesToCss(resolveStyles(section.styles, section.responsiveStyles, device));
   const isCanvas = section.kind === 'canvas' && (section.children || []).length > 0;
+  const containers = sortByOrder(section.children || []);
 
   return (
     <NodeFrame
       id={section.id}
       kind="section"
+      type={section.type}
       name={section.name || section.type}
       hidden={!visible}
+      locked={section.locked}
       previewMode={previewMode}
+      parentId={pageId}
+      index={index}
+      pageId={pageId}
       style={isCanvas ? css : undefined}
       className={cn(!previewMode && 'cursor-pointer')}
     >
       {isCanvas ? (
-        sortByOrder(section.children || []).map((container) => (
-          <CanvasContainerNode
-            key={container.id}
-            container={container}
-            device={device}
-            previewMode={previewMode}
-            onSelectParent={() => selectNode(section.id, 'section')}
-          />
-        ))
+        <>
+          {containers.map((container, containerIndex) => (
+            <div key={container.id}>
+              {!previewMode && (
+                <DropZone parentId={section.id} parentKind="section" index={containerIndex} edge="before" accepts={['container']} />
+              )}
+              <CanvasContainerNode
+                container={container}
+                device={device}
+                previewMode={previewMode}
+                parentId={section.id}
+                index={containerIndex}
+                onSelectParent={() => selectNode(section.id, 'section')}
+              />
+            </div>
+          ))}
+          {!previewMode && (
+            <DropZone parentId={section.id} parentKind="section" index={containers.length} edge="before" accepts={['container']} />
+          )}
+        </>
       ) : (
         <SectionRenderer
           section={section}
@@ -230,6 +367,7 @@ export function BuilderCanvas() {
   const updateFooter = useBuilderStore((state) => state.updateFooter);
   const selectNode = useBuilderStore((state) => state.selectNode);
   const setZoom = useBuilderStore((state) => state.setZoom);
+  const addCanvasSection = useBuilderStore((state) => state.addCanvasSection);
   const scrollRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const scalerRef = useRef<HTMLDivElement>(null);
@@ -468,19 +606,40 @@ export function BuilderCanvas() {
                 <CanvasSectionNode
                   section={section}
                   index={index}
+                  pageId={page.id}
                   device={editor.device || 'desktop'}
                   previewMode={previewMode}
                   isAlternate={index % 2 === 0}
                 />
               </div>
             ))}
+            {!previewMode && sections.length > 0 && (
+              <DropZone parentId={page.id} parentKind="page" index={sections.length} edge="before" accepts={['section']} />
+            )}
 
             {sections.length === 0 && (
-              <div className="flex h-[40vh] items-center justify-center text-slate-400">
-                <div className="text-center">
-                  <p className="text-lg font-medium">No sections yet</p>
-                  <p className="text-sm">Add an element or prebuilt section from the left panel</p>
-                </div>
+              <div className="flex min-h-[40vh] flex-col items-center justify-center px-8 py-16 text-slate-500">
+                {!previewMode && (
+                  <div className="mb-6 w-full max-w-lg">
+                    <DropZone parentId={page.id} parentKind="page" index={0} edge="inside" accepts={['section']} empty label="Drop a section or element here" />
+                  </div>
+                )}
+                <p className="text-lg font-semibold text-slate-800">Start building your website</p>
+                <p className="mt-1 max-w-sm text-center text-sm text-slate-500">
+                  Add a section or drag an element onto the canvas.
+                </p>
+                {!previewMode && (
+                  <button
+                    type="button"
+                    className="mt-5 rounded-full bg-[#0F172A] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      addCanvasSection();
+                    }}
+                  >
+                    Add Section
+                  </button>
+                )}
               </div>
             )}
 

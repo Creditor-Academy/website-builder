@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { AlignCenter, AlignLeft, AlignRight, Copy, Settings2, Trash2 } from 'lucide-react';
+import { AlignCenter, AlignLeft, AlignRight, Copy, Lock, Settings2, Trash2, Unlock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -66,6 +66,7 @@ export function CanvasProperties() {
   const updateCanvasStyles = useBuilderStore((state) => state.updateCanvasStyles);
   const deleteCanvasNode = useBuilderStore((state) => state.deleteCanvasNode);
   const duplicateCanvasNode = useBuilderStore((state) => state.duplicateCanvasNode);
+  const addCanvasContainer = useBuilderStore((state) => state.addCanvasContainer);
   const updateNavbar = useBuilderStore((state) => state.updateNavbar);
   const updateFooter = useBuilderStore((state) => state.updateFooter);
   const pages = useBuilderStore((state) => state.getActiveWebsite()?.pages || []);
@@ -148,10 +149,20 @@ export function CanvasProperties() {
           <p className="text-[11px] uppercase tracking-wide text-slate-400">{location.kind}</p>
         </div>
         <div className="flex gap-1">
-          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => duplicateCanvasNode(node.id)}>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8"
+            aria-label={node.locked ? 'Unlock' : 'Lock'}
+            title={node.locked ? 'Unlock' : 'Lock'}
+            onClick={() => updateCanvasNode(node.id, { locked: !node.locked })}
+          >
+            {node.locked ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+          </Button>
+          <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Duplicate" title="Duplicate" disabled={node.locked} onClick={() => duplicateCanvasNode(node.id)}>
             <Copy className="h-4 w-4" />
           </Button>
-          <Button size="icon" variant="ghost" className="h-8 w-8 text-rose-500" onClick={() => deleteCanvasNode(node.id)}>
+          <Button size="icon" variant="ghost" className="h-8 w-8 text-rose-500" aria-label="Delete" title="Delete" disabled={node.locked} onClick={() => deleteCanvasNode(node.id)}>
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
@@ -160,14 +171,31 @@ export function CanvasProperties() {
       <div className="flex-1 overflow-y-auto">
         <Group title="Identity">
           <Field label="Name">
-            <Input value={node.name} className="h-8 text-xs" onChange={(event) => updateCanvasNode(node.id, { name: event.target.value })} />
+            <Input value={node.name} className="h-8 text-xs" disabled={node.locked} onChange={(event) => updateCanvasNode(node.id, { name: event.target.value })} />
           </Field>
+          {location.kind === 'section' && (
+            <Button type="button" variant="outline" className="h-8 w-full text-xs" disabled={node.locked} onClick={() => addCanvasContainer()}>
+              Add Container
+            </Button>
+          )}
         </Group>
 
         {element?.type === 'text' && (
           <Group title="Content">
             <Field label="Text">
-              <Textarea value={String(element.content.text || '')} onChange={(event) => patchContent({ text: event.target.value })} />
+              <Textarea value={String(element.content.text || '')} disabled={node.locked} onChange={(event) => patchContent({ text: event.target.value })} />
+            </Field>
+            <Field label="Tag">
+              <Select value={String(element.content.tag || 'p')} onValueChange={(value) => patchContent({ tag: value })} disabled={node.locked}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="h1">Heading 1</SelectItem>
+                  <SelectItem value="h2">Heading 2</SelectItem>
+                  <SelectItem value="h3">Heading 3</SelectItem>
+                  <SelectItem value="p">Paragraph</SelectItem>
+                  <SelectItem value="span">Span</SelectItem>
+                </SelectContent>
+              </Select>
             </Field>
           </Group>
         )}
@@ -177,7 +205,17 @@ export function CanvasProperties() {
               <Input value={String(element.content.src || '')} onChange={(event) => patchContent({ src: event.target.value })} />
             </Field>
             <Field label="Alt text">
-              <Input value={String(element.content.alt || '')} onChange={(event) => patchContent({ alt: event.target.value })} />
+              <Input value={String(element.content.alt || '')} disabled={node.locked} onChange={(event) => patchContent({ alt: event.target.value })} />
+            </Field>
+            <Field label="Object fit">
+              <Select value={String(styles.objectFit || 'cover')} onValueChange={(value) => patchStyle({ objectFit: value })} disabled={node.locked}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cover">Cover</SelectItem>
+                  <SelectItem value="contain">Contain</SelectItem>
+                  <SelectItem value="fill">Fill</SelectItem>
+                </SelectContent>
+              </Select>
             </Field>
           </Group>
         )}
@@ -187,21 +225,42 @@ export function CanvasProperties() {
               <Input value={String(element.content.label || '')} onChange={(event) => patchContent({ label: event.target.value })} />
             </Field>
             <Field label="Link">
-              <Input value={String(element.content.href || '')} onChange={(event) => patchContent({ href: event.target.value })} />
+              <Input value={String(element.content.href || '')} disabled={node.locked} onChange={(event) => patchContent({ href: event.target.value })} />
+            </Field>
+            <Field label="Target">
+              <Select value={String(element.content.target || '_self')} onValueChange={(value) => patchContent({ target: value })} disabled={node.locked}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="_self">Same tab</SelectItem>
+                  <SelectItem value="_blank">New tab</SelectItem>
+                </SelectContent>
+              </Select>
             </Field>
           </Group>
         )}
         {element?.type === 'icon' && (
           <Group title="Content">
             <Field label="Icon name">
-              <Input value={String(element.content.icon || 'Sparkles')} onChange={(event) => patchContent({ icon: event.target.value })} />
+              <Input value={String(element.content.icon || 'Sparkles')} disabled={node.locked} onChange={(event) => patchContent({ icon: event.target.value })} />
+            </Field>
+            <Field label="Size">
+              <Input type="number" value={Number(element.content.size || 28)} disabled={node.locked} onChange={(event) => patchContent({ size: Number(event.target.value) })} className="h-8 text-xs" />
             </Field>
           </Group>
         )}
         {element?.type === 'video' && (
           <Group title="Content">
             <Field label="Video URL">
-              <Input value={String(element.content.url || '')} onChange={(event) => patchContent({ url: event.target.value })} />
+              <Input value={String(element.content.url || '')} disabled={node.locked} onChange={(event) => patchContent({ url: event.target.value })} />
+            </Field>
+            <Field label="Provider">
+              <Select value={String(element.content.provider || 'youtube')} onValueChange={(value) => patchContent({ provider: value })} disabled={node.locked}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="youtube">YouTube</SelectItem>
+                  <SelectItem value="file">File</SelectItem>
+                </SelectContent>
+              </Select>
             </Field>
           </Group>
         )}
@@ -211,16 +270,48 @@ export function CanvasProperties() {
               <Input value={String(element.content.title || '')} onChange={(event) => patchContent({ title: event.target.value })} />
             </Field>
             <Field label="PDF URL">
-              <Input value={String(element.content.url || '')} onChange={(event) => patchContent({ url: event.target.value })} />
+              <Input value={String(element.content.url || '')} disabled={node.locked} onChange={(event) => patchContent({ url: event.target.value })} />
+            </Field>
+            <Field label="Description">
+              <Input value={String(element.content.description || '')} disabled={node.locked} onChange={(event) => patchContent({ description: event.target.value })} />
             </Field>
           </Group>
         )}
         {element?.type === 'form' && (
           <Group title="Form fields">
-            <p className="text-[11px] text-slate-500">Text, email, phone, checkbox, radio, dropdown, file, and consent fields are stored on this element and can be extended later.</p>
-            {((element.content.fields as FormField[]) || []).map((field) => (
-              <div key={field.id} className="rounded-lg border border-slate-100 p-2 text-xs text-slate-600">
-                {field.label} · {field.type}
+            <Field label="Title">
+              <Input value={String(element.content.title || '')} disabled={node.locked} onChange={(event) => patchContent({ title: event.target.value })} />
+            </Field>
+            <Field label="Submit label">
+              <Input value={String(element.content.submitLabel || '')} disabled={node.locked} onChange={(event) => patchContent({ submitLabel: event.target.value })} />
+            </Field>
+            {((element.content.fields as FormField[]) || []).map((field, fieldIndex) => (
+              <div key={field.id} className="space-y-2 rounded-lg border border-slate-100 p-2">
+                <Input
+                  value={field.label}
+                  disabled={node.locked}
+                  className="h-8 text-xs"
+                  onChange={(event) => {
+                    const fields = [...((element.content.fields as FormField[]) || [])];
+                    fields[fieldIndex] = { ...field, label: event.target.value };
+                    patchContent({ fields });
+                  }}
+                />
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] text-slate-500">{field.type}</span>
+                  <label className="flex items-center gap-2 text-[11px] text-slate-600">
+                    Required
+                    <Switch
+                      checked={Boolean(field.required)}
+                      disabled={node.locked}
+                      onCheckedChange={(checked) => {
+                        const fields = [...((element.content.fields as FormField[]) || [])];
+                        fields[fieldIndex] = { ...field, required: checked };
+                        patchContent({ fields });
+                      }}
+                    />
+                  </label>
+                </div>
               </div>
             ))}
           </Group>
@@ -243,6 +334,17 @@ export function CanvasProperties() {
             </Select>
           </Field>
           <Field label="Gap"><StyleInput styles={styles} styleKey="gap" onChange={patchStyle} placeholder="16px" /></Field>
+          <Field label="Justify">
+            <Select value={String(styles.justifyContent || 'flex-start')} onValueChange={(value) => patchStyle({ display: 'flex', justifyContent: value })}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="flex-start">Start</SelectItem>
+                <SelectItem value="center">Center</SelectItem>
+                <SelectItem value="flex-end">End</SelectItem>
+                <SelectItem value="space-between">Space between</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
           <Field label="Alignment">
             <div className="flex gap-1">
               {[
@@ -303,6 +405,9 @@ export function CanvasProperties() {
           </Field>
           <Field label="Background">
             <Input type="color" value={String(styles.backgroundColor || '#ffffff')} onChange={(event) => patchStyle({ backgroundColor: event.target.value })} className="h-8 w-full p-1" />
+          </Field>
+          <Field label="Background image">
+            <Input value={String(styles.backgroundImage || '')} placeholder="https://..." onChange={(event) => patchStyle({ backgroundImage: event.target.value })} />
           </Field>
           <Field label="Gradient">
             <Input value={String(styles.backgroundGradient || '')} placeholder="linear-gradient(...)" onChange={(event) => patchStyle({ backgroundGradient: event.target.value })} />

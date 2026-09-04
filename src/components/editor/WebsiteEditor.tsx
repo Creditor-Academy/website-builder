@@ -7,6 +7,7 @@ import { EditorToolbar } from "./EditorToolbar";
 import { PageManager } from "./PageManager";
 import { SiteSettings } from "./SiteSettings";
 import { BuilderCanvas } from "@/builder/components/Canvas";
+import { CanvasDndProvider } from "@/builder/components/CanvasDnd";
 import { CanvasProperties } from "@/builder/components/CanvasProperties";
 import { LayersPanel } from "@/builder/components/LayersPanel";
 import { ElementsPanel } from "@/builder/components/ElementsPanel";
@@ -150,7 +151,7 @@ function EditorLeftSidebar({
 function EditorContent() {
   const [leftNavTab, setLeftNavTab] = useState("add");
   const store = useBuilderStore();
-  const { editor, setTourState, activeWebsiteId, setEditorState, undo, redo, selectNode, deleteCanvasNode, duplicateCanvasNode } = store;
+  const { editor, setTourState, activeWebsiteId, setEditorState, undo, redo, selectNode, deleteCanvasNode, duplicateCanvasNode, copyCanvasNode, pasteCanvasNode } = store;
   const { id } = useParams();
   const isCompact = useIsCompact();
 
@@ -186,6 +187,16 @@ function EditorContent() {
         if (editor.selectedNodeId) duplicateCanvasNode(editor.selectedNodeId);
         return;
       }
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "c") {
+        event.preventDefault();
+        copyCanvasNode(editor.selectedNodeId);
+        return;
+      }
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "v") {
+        event.preventDefault();
+        pasteCanvasNode();
+        return;
+      }
       if ((event.key === "Delete" || event.key === "Backspace") && editor.selectedNodeId && editor.selectedKind !== "navbar") {
         event.preventDefault();
         deleteCanvasNode(editor.selectedNodeId);
@@ -198,7 +209,7 @@ function EditorContent() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [editor.selectedNodeId, editor.selectedKind, isCompact, undo, redo, selectNode, deleteCanvasNode, duplicateCanvasNode, setEditorState]);
+  }, [editor.selectedNodeId, editor.selectedKind, isCompact, undo, redo, selectNode, deleteCanvasNode, duplicateCanvasNode, copyCanvasNode, pasteCanvasNode, setEditorState]);
 
   const showSidebar = !editor.previewMode && editor.showLeftPanel;
   const showRight = !editor.previewMode && editor.showRightPanel && !isCompact;
@@ -223,6 +234,7 @@ function EditorContent() {
       )}
 
       <div className={`relative z-0 flex-1 min-h-0 isolate ${editor.tour.isActive ? "pointer-events-none opacity-90" : ""}`}>
+        <CanvasDndProvider>
         <ResizablePanelGroup direction="horizontal" className="h-full relative z-0">
           {!isCompact && showSidebar && (
             <>
@@ -284,6 +296,7 @@ function EditorContent() {
             </aside>
           </>
         )}
+        </CanvasDndProvider>
       </div>
     </div>
   );
