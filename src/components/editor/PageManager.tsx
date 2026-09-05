@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useBuilder } from '@/contexts/BuilderContext';
+import useBuilderStore from '@/store/useBuilderStore';
 import {
     FileText,
     Plus,
@@ -35,10 +36,14 @@ function getPageIcon(page: { name: string; slug: string }) {
 
 export function PageManager() {
     const { state, pages, setActivePage, addPage, duplicatePage, deletePage } = useBuilder();
+    const renamePage = useBuilderStore((store) => store.renamePage);
+    const setHomePage = useBuilderStore((store) => store.setHomePage);
     const { page: activePage } = state;
     const [search, setSearch] = useState('');
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [newPageName, setNewPageName] = useState('');
+    const [renameId, setRenameId] = useState<string | null>(null);
+    const [renameValue, setRenameValue] = useState('');
 
     const filteredPages = pages.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
 
@@ -125,6 +130,12 @@ export function PageManager() {
                                         <DropdownMenuItem className="gap-2 rounded-lg" onClick={(e) => { e.stopPropagation(); setActivePage(p.id); }}>
                                             <Check className="w-4 h-4" /> Set Active
                                         </DropdownMenuItem>
+                                        <DropdownMenuItem className="gap-2 rounded-lg" onClick={(e) => { e.stopPropagation(); setHomePage(p.id); }}>
+                                            <Globe className="w-4 h-4" /> Set as Home
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem className="gap-2 rounded-lg" onClick={(e) => { e.stopPropagation(); setRenameId(p.id); setRenameValue(p.name); }}>
+                                            <Settings className="w-4 h-4" /> Rename
+                                        </DropdownMenuItem>
                                         <DropdownMenuItem className="gap-2 rounded-lg" onClick={(e) => { e.stopPropagation(); duplicatePage(p.id); }}>
                                             <Copy className="w-4 h-4" /> Duplicate
                                         </DropdownMenuItem>
@@ -178,6 +189,27 @@ export function PageManager() {
                     <DialogFooter className="gap-2">
                         <Button variant="ghost" className="rounded-lg flex-1 text-slate-500" onClick={() => setIsAddOpen(false)}>Cancel</Button>
                         <Button className="rounded-lg flex-1 bg-neutral-900 hover:bg-neutral-800" onClick={handleCreatePage}>Create Page</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={Boolean(renameId)} onOpenChange={(open) => { if (!open) setRenameId(null); }}>
+                <DialogContent className="max-w-sm rounded-2xl p-6">
+                    <DialogHeader>
+                        <DialogTitle className="text-lg font-semibold tracking-tight">Rename Page</DialogTitle>
+                    </DialogHeader>
+                    <Input
+                        value={renameValue}
+                        onChange={(e) => setRenameValue(e.target.value)}
+                        className="h-11 rounded-lg border-slate-200 bg-slate-50"
+                        autoFocus
+                    />
+                    <DialogFooter className="gap-2">
+                        <Button variant="ghost" className="rounded-lg flex-1 text-slate-500" onClick={() => setRenameId(null)}>Cancel</Button>
+                        <Button className="rounded-lg flex-1 bg-neutral-900 hover:bg-neutral-800" onClick={() => {
+                            if (renameId) renamePage(renameId, renameValue);
+                            setRenameId(null);
+                        }}>Save</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

@@ -30,7 +30,7 @@ const fieldClass =
   'h-11 border-slate-200 bg-white text-[#0F172A] focus-visible:border-[#0F172A] focus-visible:ring-2 focus-visible:ring-[#0F172A]/15';
 
 export function PublishDialog({ open, onOpenChange, websiteId }) {
-  const { websites, updateWebsite } = useBuilderStore();
+  const { websites, updateWebsite, setSaveStatus } = useBuilderStore();
   const website = websites.find(w => w.id === websiteId);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishStatus, setPublishStatus] = useState('idle');
@@ -68,6 +68,7 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
   const handlePublish = async () => {
     setIsPublishing(true);
     setPublishStatus('publishing');
+    setSaveStatus('publishing');
 
     try {
       const response = await publishService.publishWebsite({
@@ -78,6 +79,7 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
 
       if (response.success) {
         setPublishStatus('success');
+        setSaveStatus('published');
         setPublishedUrl(response.url);
         updateWebsite(websiteId, {
           status: 'Published',
@@ -87,9 +89,11 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
         });
       } else {
         setPublishStatus('error');
+        setSaveStatus('publish-error');
       }
     } catch (error) {
       setPublishStatus('error');
+      setSaveStatus('publish-error');
       console.error('Publishing failed:', error);
     } finally {
       setIsPublishing(false);

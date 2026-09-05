@@ -42,12 +42,29 @@ const templates: Template[] = [
   { id: "blank", title: "Blank Canvas", image: Ecommerce },
 ];
 
+const LazyVideo = ({ src, className }: { src: string; className?: string }) => {
+  const ref = useRef<HTMLVideoElement>(null);
+  const inView = useInView(ref, { once: true, margin: "200px" });
+  return (
+    <video
+      ref={ref}
+      src={inView ? src : undefined}
+      autoPlay={inView}
+      muted
+      loop
+      playsInline
+      preload="none"
+      className={className}
+    />
+  );
+};
+
 const FloatingElement = ({ children, x, y, delay = 0, className, isDark }: any) => {
   return (
     <motion.div
       initial={{ y: 50, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 100, damping: 20, delay }}
+      transition={{ type: "spring", stiffness: 80, damping: 24, delay }}
       style={{ x, y }}
       className={cn(
         "absolute hidden lg:flex flex-col gap-2 p-4 backdrop-blur-2xl border rounded-2xl shadow-2xl transition-colors duration-1000",
@@ -424,7 +441,7 @@ export default function LandingPage() {
                 <p className="text-white text-lg max-w-sm font-medium">Drag and drop elements anywhere on the canvas with pixel-perfect control.</p>
               </div>
               <div className="flex-1 mt-6 relative w-full translate-y-8 group-hover:translate-y-2 group-hover:scale-[1.02] transition-all duration-700 ease-out">
-                <img src={Drag} alt="Drag Interface" className="absolute right-0 bottom-0 w-[90%] md:w-[75%] rounded-tl-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)] border-t border-l border-slate-600 opacity-90 group-hover:opacity-100" />
+                <img src={Drag} alt="Drag Interface" loading="lazy" decoding="async" className="absolute right-0 bottom-0 w-[90%] md:w-[75%] rounded-tl-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)] border-t border-l border-slate-600 opacity-90 group-hover:opacity-100" />
               </div>
             </motion.div>
 
@@ -442,7 +459,7 @@ export default function LandingPage() {
                 <p className="text-slate-300 font-medium leading-relaxed">Pre-designed sections and blocks that adapt to your brand automatically.</p>
                 <div className="mt-auto relative w-full h-44 rounded-2xl overflow-hidden border border-slate-700 shadow-lg translate-y-8 group-hover:translate-y-0 transition-transform duration-700">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent z-10 opacity-50" />
-                  <video src={library} autoPlay muted loop className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-700" />
+                  <LazyVideo src={library} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-700" />
                 </div>
               </div>
             </motion.div>
@@ -461,7 +478,7 @@ export default function LandingPage() {
                 <p className="text-slate-300 font-medium leading-relaxed">Edit content directly in place. WYSIWYG re-imagined for the modern era.</p>
                 <div className="mt-auto relative w-full h-44 rounded-2xl overflow-hidden border border-slate-700 shadow-lg translate-y-8 group-hover:translate-y-0 transition-transform duration-700">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent z-10 opacity-50" />
-                  <video src={create} autoPlay muted loop className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-700" />
+                  <LazyVideo src={create} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-700" />
                 </div>
               </div>
             </motion.div>
@@ -472,7 +489,7 @@ export default function LandingPage() {
               className="md:col-span-2 relative rounded-[2.5rem] border border-slate-700/50 bg-slate-900/60 backdrop-blur-xl overflow-hidden group flex flex-col md:flex-row hover:border-orange-500/50 transition-colors duration-500 shadow-2xl"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/80 to-transparent z-10" /> 
-              <video src={brand} autoPlay muted loop className={cn("absolute right-0 top-0 h-full w-[70%] object-cover transition-opacity duration-700", isDark ? "opacity-20 group-hover:opacity-80 mix-blend-screen" : "opacity-30 group-hover:opacity-50 mix-blend-multiply")} />
+              <LazyVideo src={brand} className={cn("absolute right-0 top-0 h-full w-[70%] object-cover transition-opacity duration-700", isDark ? "opacity-20 group-hover:opacity-80 mix-blend-screen" : "opacity-30 group-hover:opacity-50 mix-blend-multiply")} />
 
               <div className="p-10 z-20 relative flex flex-col justify-center max-w-md h-full">
                 <div className="w-14 h-14 rounded-2xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_15px_rgba(249,115,22,0.5)]">
@@ -511,7 +528,7 @@ export default function LandingPage() {
         >
           {templates.concat(templates).map((tpl, i) => (
             <div key={i} className="relative shrink-0 w-[85vw] md:w-[450px] aspect-[4/5] group rounded-[3rem] overflow-hidden border border-slate-700 bg-slate-900 shadow-2xl hover:shadow-[0_20px_50px_rgba(59,130,246,0.2)] hover:border-blue-500/50 transition-all duration-500 cursor-pointer">
-              <img src={tpl.image} alt={tpl.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 opacity-100" />
+              <img src={tpl.image} alt={tpl.title} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 opacity-100" />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent flex flex-col justify-end p-10">
                 <h3 className="text-4xl font-bold mb-6 text-white transform translate-y-6 group-hover:translate-y-0 transition-transform duration-500">{tpl.title}</h3>
                 <button
@@ -530,7 +547,7 @@ export default function LandingPage() {
       <section className={cn("relative py-40 flex items-center justify-center text-center px-6 overflow-hidden transition-colors duration-1000", isDark ? "bg-slate-950" : "bg-slate-50")}>
         {/* Restored Background Image */}
         <div className="absolute inset-0 z-0">
-          <img src={CTA} alt="CTA" className="w-full h-full object-cover opacity-60 scale-105 filter blur-[1px]" />
+          <img src={CTA} alt="CTA" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-60 scale-105 filter blur-[1px]" />
           <div className={cn("absolute inset-0 bg-gradient-to-t transition-colors duration-1000", isDark ? "from-slate-950 via-slate-950/40 to-transparent" : "from-slate-50 via-slate-50/40 to-transparent")} />
           <div className={cn("absolute inset-0 bg-gradient-to-b transition-colors duration-1000", isDark ? "from-slate-950 via-transparent to-slate-950" : "from-slate-50 via-transparent to-slate-50")} />
         </div>

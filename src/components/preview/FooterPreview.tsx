@@ -81,6 +81,11 @@ function InjectStyles() {
 }
 
 export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
+  const navigate = useNavigate();
+  const { updatePageName, pages, setActivePage, createPage, selectSection, state } = useBuilder();
+  const { editor } = state;
+
+  if (!rawConfig) return null;
   const config = {
     ...rawConfig,
     logo: rawConfig.logo && typeof rawConfig.logo === 'object' ? rawConfig.logo : { text: rawConfig.logo || 'Logo', imageUrl: '' },
@@ -90,9 +95,6 @@ export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
     copyright: rawConfig.copyright || rawConfig.text || '',
     styles: rawConfig.styles || {},
   };
-  const navigate = useNavigate();
-  const { updatePageName, pages, setActivePage, createPage, selectSection, state } = useBuilder();
-  const { editor } = state;
 
   const styles = config.styles;
   const bg = styles.backgroundColor || 'var(--theme-bg, #0a0a0f)';
