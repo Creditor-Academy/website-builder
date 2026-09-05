@@ -139,7 +139,7 @@ export function SiteSettings() {
     const fieldLabelClass = 'text-xs font-bold text-white';
     const inputClass =
         'h-10 text-xs rounded-xl border-white/15 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-white/30';
-    const cardClass = 'rounded-2xl border border-white/10 bg-white/10';
+    const cardClass = 'rounded-xl border border-white/10 bg-white/10';
     const ghostIconClass = 'h-7 w-7 p-0 text-white/70 hover:bg-white/10 hover:text-white';
     const switchClass =
         'data-[state=checked]:bg-white data-[state=unchecked]:bg-white/20 [&>span]:bg-white data-[state=checked]:[&>span]:bg-[#0F172A]';
@@ -148,23 +148,23 @@ export function SiteSettings() {
         <div className="relative h-full flex flex-col overflow-hidden bg-[#0F172A] text-white animate-in fade-in duration-300">
             <div className="pointer-events-none absolute inset-y-0 right-0 w-[38%] origin-bottom-right skew-x-[-18deg] bg-white/[0.06]" />
 
-            <div className="relative z-10 p-4 border-b border-white/10 flex items-center justify-between">
-                <h2 className="text-sm font-bold tracking-tight text-white">Site Settings</h2>
-                <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white">
-                    <Settings className="w-4 h-4" />
+            <div className="relative z-10 flex h-12 shrink-0 items-center justify-between border-b border-white/10 px-3">
+                <h2 className="text-sm font-semibold tracking-tight text-white">Site Settings</h2>
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-white/10 text-white">
+                    <Settings className="h-3.5 w-3.5" />
                 </div>
             </div>
 
             <div className="relative z-10 flex-1 overflow-y-auto no-scrollbar">
-                <div className="p-6 space-y-8">
+                <div className="space-y-4 p-3">
                     {/* General Section */}
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                            <Globe className="w-4 h-4 text-slate-400" />
+                    <div className="space-y-2.5">
+                        <div className="flex items-center gap-2 px-0.5">
+                            <Globe className="h-3.5 w-3.5 text-slate-400" />
                             <h3 className={sectionLabelClass}>General</h3>
                         </div>
 
-                        <div className={cn(cardClass, 'space-y-4 p-4')}>
+                        <div className={cn(cardClass, 'space-y-3 p-3')}>
                             <div className="space-y-2">
                                 <Label className={fieldLabelClass}>Project Name</Label>
                                 <Input
@@ -197,10 +197,10 @@ export function SiteSettings() {
 
                             {/* Connected Domains List */}
                             {domains.length > 0 && (
-                                <div className="space-y-2 mt-3">
+                                <div className="mt-2 space-y-2">
                                     <Label className={fieldLabelClass}>Connected Domains</Label>
                                     {domains.map((d: any) => (
-                                        <div key={d.domain} className="space-y-2 rounded-xl border border-white/10 bg-white/[0.06] p-3">
+                                        <div key={d.domain} className="space-y-2 rounded-lg border border-white/10 bg-white/[0.06] p-2.5">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-2">
                                                     {d.status === 'ACTIVE' ? (
@@ -290,21 +290,21 @@ export function SiteSettings() {
                     </div>
 
                     {/* SEO & Performance */}
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                            <Zap className="w-4 h-4 text-slate-400" />
+                    <div className="space-y-2.5">
+                        <div className="flex items-center gap-2 px-0.5">
+                            <Zap className="h-3.5 w-3.5 text-slate-400" />
                             <h3 className={sectionLabelClass}>Performance</h3>
                         </div>
 
-                        <div className="space-y-4">
-                            <div className={cn(cardClass, 'flex cursor-pointer items-center justify-between p-4 transition-colors hover:bg-white/15')}>
+                        <div className="space-y-2">
+                            <div className={cn(cardClass, 'flex cursor-pointer items-center justify-between p-3 transition-colors hover:bg-white/15')}>
                                 <div className="space-y-1">
                                     <p className="text-xs font-bold text-white">Lazy Loading</p>
                                     <p className="min-w-0 text-[10px] text-white/60">Load images as they enter the viewport</p>
                                 </div>
                                 <Switch className={switchClass} checked={lazyLoading} onCheckedChange={setLazyLoading} />
                             </div>
-                            <div className={cn(cardClass, 'flex cursor-pointer items-center justify-between p-4 transition-colors hover:bg-white/15')}>
+                            <div className={cn(cardClass, 'flex cursor-pointer items-center justify-between p-3 transition-colors hover:bg-white/15')}>
                                 <div className="space-y-1">
                                     <p className="text-xs font-bold text-white">Asset Optimization</p>
                                     <p className="min-w-0 text-[10px] text-white/60">Compress images and minify code</p>
@@ -315,13 +315,13 @@ export function SiteSettings() {
                     </div>
 
                     {/* Security */}
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                            <Shield className="w-4 h-4 text-slate-400" />
+                    <div className="space-y-2.5">
+                        <div className="flex items-center gap-2 px-0.5">
+                            <Shield className="h-3.5 w-3.5 text-slate-400" />
                             <h3 className={sectionLabelClass}>Security</h3>
                         </div>
 
-                        <div className={cn(cardClass, 'flex gap-3 p-4')}>
+                        <div className={cn(cardClass, 'flex gap-2.5 p-3')}>
                             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10">
                                 <CheckCircle2 className="w-4 h-4 text-white" />
                             </div>
@@ -336,11 +336,11 @@ export function SiteSettings() {
                 </div>
             </div>
 
-            <div className="relative z-10 border-t border-white/10 bg-[#0F172A] p-4">
+            <div className="relative z-10 border-t border-white/10 bg-[#0F172A] px-3 py-3">
                 <Button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="h-11 w-full rounded-2xl bg-white font-bold text-[#0F172A] shadow-none hover:bg-slate-100"
+                    className="h-9 w-full rounded-xl bg-white text-xs font-bold text-[#0F172A] shadow-none hover:bg-slate-100"
                 >
                     {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</> : 'Save Changes'}
                 </Button>
