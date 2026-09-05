@@ -191,10 +191,9 @@ const AddUserDialog = ({ open, onOpenChange, onUserCreated }) => {
     );
 };
 
-<<<<<<< HEAD
 /** Pull a single user out of GET /users/:id (and similar) response shapes. */
 function extractUserFromResponse(responseData: any) {
-    if (!responseData) return null;
+    if (!responseData || typeof responseData !== 'object') return null;
     if (responseData.user && typeof responseData.user === 'object') return responseData.user;
     if (responseData.data?.user && typeof responseData.data.user === 'object') return responseData.data.user;
     if (responseData.data && typeof responseData.data === 'object' && !Array.isArray(responseData.data) && responseData.data.id) {
@@ -218,19 +217,6 @@ function isUserActiveStatus(u: any) {
     if (u.isActive === true || u.active === true) return true;
     if (u.status === 'ACTIVE' || u.status === 'Active') return true;
     return false;
-=======
-function extractUserDetail(responseData: any) {
-    if (!responseData || typeof responseData !== 'object') return null;
-    const layer = responseData.data && typeof responseData.data === 'object' && !Array.isArray(responseData.data)
-        ? responseData.data
-        : responseData;
-    const user = layer.user && typeof layer.user === 'object' && !Array.isArray(layer.user)
-        ? layer.user
-        : layer;
-    if (!user || typeof user !== 'object' || Array.isArray(user)) return null;
-    if (!user.id && !user.name && !user.email) return null;
-    return user;
->>>>>>> 381ba936202bb24469cdd09a86e1949b605dae78
 }
 
 // ─── UserDetailDialog ─────────────────────────────────────────────────────────
@@ -241,20 +227,9 @@ const UserDetailDialog = ({ userId, open, onOpenChange, initialUser = null }) =>
     const { toast } = useToast();
 
     useEffect(() => {
-<<<<<<< HEAD
         if (!open) {
             setUserDetail(null);
             return;
-=======
-        if (open && userId) {
-            setLoading(true);
-            getUserById(userId)
-                .then((res) => setUserDetail(extractUserDetail(res.data)))
-                .catch(() => toast({ title: "Failed to load user", variant: "destructive" }))
-                .finally(() => setLoading(false));
-        } else if (!open) {
-            setUserDetail(null);
->>>>>>> 381ba936202bb24469cdd09a86e1949b605dae78
         }
         if (!userId) return;
 
@@ -279,11 +254,6 @@ const UserDetailDialog = ({ userId, open, onOpenChange, initialUser = null }) =>
     const email = userDetail?.email || '—';
     const roleLabel = formatUserRoleLabel(userDetail?.role);
     const active = isUserActiveStatus(userDetail);
-    const joinedAt = userDetail?.created_at || userDetail?.createdAt;
-
-    const isActive = Boolean(
-        userDetail?.active ?? userDetail?.isActive ?? userDetail?.status === 'ACTIVE'
-    );
     const joinedAt = userDetail?.created_at || userDetail?.createdAt;
 
     return (
@@ -316,15 +286,9 @@ const UserDetailDialog = ({ userId, open, onOpenChange, initialUser = null }) =>
                                 <p className="text-[10px] font-bold text-[#787778] uppercase tracking-wider mb-1">Status</p>
                                 <span className={cn(
                                     "text-sm font-semibold",
-<<<<<<< HEAD
                                     active ? "text-emerald-600" : "text-rose-500"
                                 )}>
                                     {active ? "Active" : "Suspended"}
-=======
-                                    isActive ? "text-emerald-600" : "text-rose-500"
-                                )}>
-                                    {isActive ? "Active" : "Suspended"}
->>>>>>> 381ba936202bb24469cdd09a86e1949b605dae78
                                 </span>
                             </div>
                             {joinedAt && (
