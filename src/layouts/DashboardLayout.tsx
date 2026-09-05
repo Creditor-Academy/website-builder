@@ -118,86 +118,86 @@ const DashboardLayout = () => {
 
     return (
         <div className="h-dvh w-full bg-dashboard">
-        <div className={cn(
-            'relative mx-auto flex h-full w-full max-w-dashboard overflow-hidden font-sans selection:bg-primary/10',
-            isCompact ? 'p-2 sm:p-3' : 'gap-2 p-2 sm:gap-3 sm:p-3 lg:gap-4 lg:p-4',
-        )}>
-            <Helmet>
-                <title>Dashboard | Buildora</title>
-            </Helmet>
+            <div className={cn(
+                'relative mx-auto flex h-full w-full max-w-dashboard overflow-hidden font-sans selection:bg-primary/10',
+                isCompact ? 'p-2 sm:p-3' : 'gap-2 p-2 sm:gap-3 sm:p-3 lg:gap-4 lg:p-4',
+            )}>
+                <Helmet>
+                    <title>Buildora</title>
+                </Helmet>
 
-            <DashboardSidebar
-                isOpen={isSidebarOpen}
-                onClose={() => setIsSidebarOpen(false)}
-                isCompact={isCompact}
-                isAdmin={isAdmin}
-                isAdminRole={isAdminRole}
-                userRole={user?.role}
-                userName={userName}
-                base={base}
-                onGoAdmin={() => setIsAdmin(true)}
-                onExitAdmin={() => setIsAdmin(false)}
-                onLogout={() => setLogoutDialogOpen(true)}
-                isLoggingOut={isLoggingOut}
-            />
+                <DashboardSidebar
+                    isOpen={isSidebarOpen}
+                    onClose={() => setIsSidebarOpen(false)}
+                    isCompact={isCompact}
+                    isAdmin={isAdmin}
+                    isAdminRole={isAdminRole}
+                    userRole={user?.role}
+                    userName={userName}
+                    base={base}
+                    onGoAdmin={() => setIsAdmin(true)}
+                    onExitAdmin={() => setIsAdmin(false)}
+                    onLogout={() => setLogoutDialogOpen(true)}
+                    isLoggingOut={isLoggingOut}
+                />
 
-            <main className="min-h-0 min-w-0 w-full flex-1 overflow-x-clip overflow-y-auto no-scrollbar">
-                <div className="w-full min-w-0">
-                    {isCompact && (
-                        <div className="sticky top-0 z-30 mb-3 flex items-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white/95 px-3 py-2.5 shadow-sm backdrop-blur">
-                            <button
-                                type="button"
-                                title="Open menu"
-                                aria-label="Open menu"
-                                onClick={() => setIsSidebarOpen(true)}
-                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#0F172A] shadow-sm"
+                <main className="min-h-0 min-w-0 w-full flex-1 overflow-x-clip overflow-y-auto no-scrollbar">
+                    <div className="w-full min-w-0">
+                        {isCompact && (
+                            <div className="sticky top-0 z-30 mb-3 flex items-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white/95 px-3 py-2.5 shadow-sm backdrop-blur">
+                                <button
+                                    type="button"
+                                    title="Open menu"
+                                    aria-label="Open menu"
+                                    onClick={() => setIsSidebarOpen(true)}
+                                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#0F172A] shadow-sm"
+                                >
+                                    <Menu className="h-5 w-5" />
+                                </button>
+                                <BrandLogo
+                                    imgClassName="h-7 w-7"
+                                />
+                            </div>
+                        )}
+                        <Suspense fallback={<Loading />}>
+                            <motion.div key={location.pathname} {...pageMotion}>
+                                <Outlet context={outletContext} />
+                            </motion.div>
+                        </Suspense>
+                    </div>
+                </main>
+
+                <AlertDialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
+                    <AlertDialogContent className="rounded-2xl w-[calc(100vw-2rem)] sm:max-w-md">
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Log out?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Are you sure you want to log out of your Buildora account?
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter className="gap-2 sm:gap-0">
+                            <AlertDialogCancel disabled={isLoggingOut}>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    void handleLogout();
+                                }}
+                                disabled={isLoggingOut}
+                                className="bg-[#131b2e] hover:bg-[#252f4a] text-white"
                             >
-                                <Menu className="h-5 w-5" />
-                            </button>
-                            <BrandLogo
-                                imgClassName="h-7 w-7"
-                            />
-                        </div>
-                    )}
-                    <Suspense fallback={<Loading />}>
-                        <motion.div key={location.pathname} {...pageMotion}>
-                            <Outlet context={outletContext} />
-                        </motion.div>
-                    </Suspense>
-                </div>
-            </main>
-
-            <AlertDialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
-                <AlertDialogContent className="rounded-2xl w-[calc(100vw-2rem)] sm:max-w-md">
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Log out?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Are you sure you want to log out of your Buildora account?
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter className="gap-2 sm:gap-0">
-                        <AlertDialogCancel disabled={isLoggingOut}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={(e) => {
-                                e.preventDefault();
-                                void handleLogout();
-                            }}
-                            disabled={isLoggingOut}
-                            className="bg-[#131b2e] hover:bg-[#252f4a] text-white"
-                        >
-                            {isLoggingOut ? (
-                                <>
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Logging out…
-                                </>
-                            ) : (
-                                'OK'
-                            )}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-        </div>
+                                {isLoggingOut ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        Logging out…
+                                    </>
+                                ) : (
+                                    'OK'
+                                )}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </div>
         </div>
     );
 };
