@@ -7,7 +7,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CalendarDays, Key, Server, User as UserIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { Activity, CalendarDays, Key, Server, User as UserIcon } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import { getAuditLogs } from '../api/audit';
@@ -47,6 +48,36 @@ function parseMetadata(metadata: unknown): { kind: 'status' | 'name' | 'empty'; 
   return firstValue != null ? { kind: 'name', value: String(firstValue) } : { kind: 'empty', value: '—' };
 }
 
+function extractAuditLogs(payload: any): any[] {
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.logs)) return payload.logs;
+  if (Array.isArray(payload?.data?.logs)) return payload.data.logs;
+  if (Array.isArray(payload)) return payload;
+  return [];
+}
+
+function formatAuditAction(action?: string) {
+  if (!action) return '—';
+  return action
+    .replace(/[._]/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function actionBadgeClass(action?: string) {
+  const value = (action || '').toLowerCase();
+  if (value.includes('delete') || value.includes('deactivate')) {
+    return 'border-rose-100 bg-rose-50 text-rose-600';
+  }
+  return 'border-[#E5E7EB] bg-[#F4F4F5] text-[#0F172A]';
+}
+
+function formatLogTimestamp(value?: string) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return format(date, 'dd/MM/yyyy, hh:mm:ss a');
+}
+
 export default function DashboardAuditLogs() {
   const { toast } = useToast();
   const [logs, setLogs] = useState<any[]>([]);
@@ -57,7 +88,7 @@ export default function DashboardAuditLogs() {
       setIsLoading(true);
       try {
         const res = await getAuditLogs();
-        setLogs(res.data || []);
+        setLogs(extractAuditLogs(res));
       } catch (error) {
         console.error("Failed to fetch audit logs", error);
         toast({ title: "Error", description: "Failed to fetch audit logs", variant: "destructive" });
@@ -99,6 +130,11 @@ export default function DashboardAuditLogs() {
                   <UserIcon className="h-4 w-4 text-[#787778]" /> User ID
                 </span>
               </TableHead>
+              <TableHead className="min-w-[160px] px-4 py-3 text-[#747781]">
+                <span className="flex items-center gap-1.5">
+                  <Activity className="h-4 w-4 text-[#787778]" /> Action
+                </span>
+              </TableHead>
               <TableHead className="min-w-[120px] px-4 py-3 text-[#747781]">
                 <span className="flex items-center gap-1.5">
                   <Server className="h-4 w-4 text-[#787778]" /> Entity
@@ -115,7 +151,7 @@ export default function DashboardAuditLogs() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5}>
+                <TableCell colSpan={6}>
                   <Loading label="Loading logs" />
                 </TableCell>
               </TableRow>
@@ -126,11 +162,22 @@ export default function DashboardAuditLogs() {
                 <TableRow key={log.id} className="h-16 border-b border-[#E8E8E8]">
                   <TableCell className="px-4 py-3">
                     <span className="inline-flex items-center rounded-full border border-[#E5E7EB] bg-[#F4F4F5] px-2.5 py-1 text-xs font-medium text-[#0F172A]">
-                      {new Date(log.created_at).toLocaleString()}
+                      {formatLogTimestamp(log.created_at)}
                     </span>
                   </TableCell>
                   <TableCell className="px-4 py-3 text-sm font-mono text-[#747781]">
                     {log.user_id || 'System'}
+                  </TableCell>
+                  <TableCell className="px-4 py-3">
+                    <span
+                      className={cn(
+                        'inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold',
+                        actionBadgeClass(log.action)
+                      )}
+                      title={log.action}
+                    >
+                      {formatAuditAction(log.action)}
+                    </span>
                   </TableCell>
                   <TableCell className="px-4 py-3 text-sm font-medium text-[#0F172A]">
                     {log.entity_type}
@@ -163,7 +210,7 @@ export default function DashboardAuditLogs() {
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center text-[#747781]">
+                <TableCell colSpan={6} className="h-24 text-center text-[#747781]">
                   No audit logs found.
                 </TableCell>
               </TableRow>
