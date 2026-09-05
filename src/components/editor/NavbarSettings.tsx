@@ -52,11 +52,11 @@ export function NavbarSettings({ navbar, pages = [], onUpdate, isExpanded = true
   };
 
   return (
-    <Collapsible open={expanded} onOpenChange={setExpanded} className="border-b border-slate-100">
-      <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+    <Collapsible open={expanded} onOpenChange={setExpanded} className="border-b border-[#0F172A]">
+      <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-[#0F172A]/5 transition-colors">
         <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 text-blue-600" />
-          <span className="text-sm font-semibold text-slate-700">Navbar Settings</span>
+          <Zap className="w-4 h-4 text-[#0F172A]" />
+          <span className="text-sm font-semibold text-[#0F172A]">Navbar Settings</span>
         </div>
       </CollapsibleTrigger>
       

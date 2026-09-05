@@ -191,6 +191,19 @@ const AddUserDialog = ({ open, onOpenChange, onUserCreated }) => {
     );
 };
 
+function extractUserDetail(responseData: any) {
+    if (!responseData || typeof responseData !== 'object') return null;
+    const layer = responseData.data && typeof responseData.data === 'object' && !Array.isArray(responseData.data)
+        ? responseData.data
+        : responseData;
+    const user = layer.user && typeof layer.user === 'object' && !Array.isArray(layer.user)
+        ? layer.user
+        : layer;
+    if (!user || typeof user !== 'object' || Array.isArray(user)) return null;
+    if (!user.id && !user.name && !user.email) return null;
+    return user;
+}
+
 // ─── UserDetailDialog ─────────────────────────────────────────────────────────
 // ✅ Calls GET /users/:id to show detailed user info in a dialog
 const UserDetailDialog = ({ userId, open, onOpenChange }) => {
@@ -202,11 +215,18 @@ const UserDetailDialog = ({ userId, open, onOpenChange }) => {
         if (open && userId) {
             setLoading(true);
             getUserById(userId)
-                .then((res) => setUserDetail(res.data?.data || res.data))
+                .then((res) => setUserDetail(extractUserDetail(res.data)))
                 .catch(() => toast({ title: "Failed to load user", variant: "destructive" }))
                 .finally(() => setLoading(false));
+        } else if (!open) {
+            setUserDetail(null);
         }
     }, [open, userId, toast]);
+
+    const isActive = Boolean(
+        userDetail?.active ?? userDetail?.isActive ?? userDetail?.status === 'ACTIVE'
+    );
+    const joinedAt = userDetail?.created_at || userDetail?.createdAt;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -238,16 +258,16 @@ const UserDetailDialog = ({ userId, open, onOpenChange }) => {
                                 <p className="text-[10px] font-bold text-[#787778] uppercase tracking-wider mb-1">Status</p>
                                 <span className={cn(
                                     "text-sm font-semibold",
-                                    userDetail.active ? "text-emerald-600" : "text-rose-500"
+                                    isActive ? "text-emerald-600" : "text-rose-500"
                                 )}>
-                                    {userDetail.active ? "Active" : "Suspended"}
+                                    {isActive ? "Active" : "Suspended"}
                                 </span>
                             </div>
-                            {userDetail.createdAt && (
+                            {joinedAt && (
                                 <div className="bg-[#F4F4F5] rounded-xl p-4 col-span-2">
                                     <p className="text-[10px] font-bold text-[#787778] uppercase tracking-wider mb-1">Joined</p>
                                     <p className="text-sm font-semibold text-[#0F172A]">
-                                        {format(new Date(userDetail.createdAt), 'PPP')}
+                                        {format(new Date(joinedAt), 'PPP')}
                                     </p>
                                 </div>
                             )}

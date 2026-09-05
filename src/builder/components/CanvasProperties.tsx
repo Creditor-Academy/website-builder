@@ -19,7 +19,7 @@ import type { CanvasElement, CanvasStyles, DeviceId, FormField } from '@/builder
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-[11px] font-semibold text-slate-500">{label}</Label>
+      <Label className="text-[11px] font-semibold text-[#0F172A]">{label}</Label>
       {children}
     </div>
   );
@@ -28,12 +28,12 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 function Group({ title, children, defaultOpen = true }: { title: string; children: ReactNode; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <Collapsible open={open} onOpenChange={setOpen} className="border-b border-slate-100">
-      <CollapsibleTrigger className="flex w-full items-center justify-between px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-700 hover:bg-slate-50">
+    <Collapsible open={open} onOpenChange={setOpen} className="min-w-0 px-1 pt-1 last:pb-1">
+      <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border border-[#0F172A] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#0F172A] hover:bg-[#0F172A]/5">
         {title}
-        <span className="text-slate-400">{open ? '–' : '+'}</span>
+        <span className="text-[#0F172A]">{open ? '–' : '+'}</span>
       </CollapsibleTrigger>
-      <CollapsibleContent className="space-y-3 px-4 pb-4">{children}</CollapsibleContent>
+      <CollapsibleContent className="space-y-3 px-3 pb-4">{children}</CollapsibleContent>
     </Collapsible>
   );
 }
@@ -82,8 +82,8 @@ export function CanvasProperties() {
 
   if (editor.selectedKind === 'navbar') {
     return (
-      <div className="h-full overflow-y-auto bg-white">
-        <div className="border-b border-slate-100 px-4 py-3 text-sm font-semibold">Header / Logo</div>
+      <div className="h-full overflow-y-auto bg-white text-[#0F172A]">
+        <div className="border-b border-[#0F172A] px-4 py-3 text-sm font-semibold text-[#0F172A]">Header / Logo</div>
         <NavbarSettings navbar={page.navbar} pages={pages} onUpdate={updateNavbar} isExpanded />
       </div>
     );
@@ -92,14 +92,14 @@ export function CanvasProperties() {
   if (editor.selectedKind === 'footer') {
     if (!page.footer) return null;
     return (
-      <div className="h-full overflow-y-auto bg-white">
-        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-          <div className="text-sm font-semibold">Footer</div>
+      <div className="h-full overflow-y-auto bg-white text-[#0F172A]">
+        <div className="flex items-center justify-between border-b border-[#0F172A] px-4 py-3">
+          <div className="text-sm font-semibold text-[#0F172A]">Footer</div>
           <button
             type="button"
             title="Remove footer"
             aria-label="Remove footer"
-            className="rounded-md p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600"
+            className="rounded-md p-1.5 text-[#0F172A]/50 hover:bg-rose-50 hover:text-rose-600"
             onClick={() => deleteCanvasNode('footer')}
           >
             <Trash2 className="h-4 w-4" />
@@ -112,12 +112,12 @@ export function CanvasProperties() {
 
   if (!location) {
     return (
-      <div className="h-full overflow-y-auto bg-white">
-        <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
-          <Settings2 className="h-4 w-4 text-slate-500" />
+      <div className="h-full overflow-y-auto bg-white text-[#0F172A]">
+        <div className="flex items-center gap-2 border-b border-[#0F172A] px-4 py-3">
+          <Settings2 className="h-4 w-4 text-[#0F172A]" />
           <div>
-            <p className="text-sm font-semibold text-slate-900">Page</p>
-            <p className="text-[11px] text-slate-500">{page.name}</p>
+            <p className="text-sm font-semibold text-[#0F172A]">Page</p>
+            <p className="text-[11px] text-[#0F172A]/60">{page.name}</p>
           </div>
         </div>
         <div className="space-y-3 p-4">
@@ -142,24 +142,24 @@ export function CanvasProperties() {
   const patchContent = (patch: Record<string, unknown>) => updateCanvasNode(node.id, { content: { ...node.content, ...patch } });
 
   return (
-    <div className="flex h-full flex-col bg-white">
-      <div className="flex items-start justify-between gap-2 border-b border-slate-100 px-4 py-3">
+    <div className="flex h-full flex-col bg-white text-[#0F172A]">
+      <div className="flex items-start justify-between gap-2 border-b border-[#0F172A] px-4 py-3">
         <div>
-          <p className="text-sm font-semibold text-slate-900">{node.name}</p>
-          <p className="text-[11px] uppercase tracking-wide text-slate-400">{location.kind}</p>
+          <p className="text-sm font-semibold text-[#0F172A]">{node.name}</p>
+          <p className="text-[11px] uppercase tracking-wide text-[#0F172A]/55">{location.kind}</p>
         </div>
         <div className="flex gap-1">
           <Button
             size="icon"
             variant="ghost"
-            className="h-8 w-8"
+            className="h-8 w-8 text-[#0F172A] hover:bg-[#0F172A]/5 hover:text-[#0F172A]"
             aria-label={node.locked ? 'Unlock' : 'Lock'}
             title={node.locked ? 'Unlock' : 'Lock'}
             onClick={() => updateCanvasNode(node.id, { locked: !node.locked })}
           >
             {node.locked ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
           </Button>
-          <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Duplicate" title="Duplicate" disabled={node.locked} onClick={() => duplicateCanvasNode(node.id)}>
+          <Button size="icon" variant="ghost" className="h-8 w-8 text-[#0F172A] hover:bg-[#0F172A]/5 hover:text-[#0F172A]" aria-label="Duplicate" title="Duplicate" disabled={node.locked} onClick={() => duplicateCanvasNode(node.id)}>
             <Copy className="h-4 w-4" />
           </Button>
           <Button size="icon" variant="ghost" className="h-8 w-8 text-rose-500" aria-label="Delete" title="Delete" disabled={node.locked} onClick={() => deleteCanvasNode(node.id)}>
@@ -168,7 +168,7 @@ export function CanvasProperties() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
         <Group title="Identity">
           <Field label="Name">
             <Input value={node.name} className="h-8 text-xs" disabled={node.locked} onChange={(event) => updateCanvasNode(node.id, { name: event.target.value })} />
@@ -286,7 +286,7 @@ export function CanvasProperties() {
               <Input value={String(element.content.submitLabel || '')} disabled={node.locked} onChange={(event) => patchContent({ submitLabel: event.target.value })} />
             </Field>
             {((element.content.fields as FormField[]) || []).map((field, fieldIndex) => (
-              <div key={field.id} className="space-y-2 rounded-lg border border-slate-100 p-2">
+              <div key={field.id} className="space-y-2 rounded-lg border border-[#0F172A] p-2">
                 <Input
                   value={field.label}
                   disabled={node.locked}
@@ -298,8 +298,8 @@ export function CanvasProperties() {
                   }}
                 />
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-slate-500">{field.type}</span>
-                  <label className="flex items-center gap-2 text-[11px] text-slate-600">
+                  <span className="text-[11px] text-[#0F172A]/60">{field.type}</span>
+                  <label className="flex items-center gap-2 text-[11px] text-[#0F172A]">
                     Required
                     <Switch
                       checked={Boolean(field.required)}
@@ -356,7 +356,7 @@ export function CanvasProperties() {
                   key={value as string}
                   type="button"
                   onClick={() => patchStyle({ alignItems: value as string })}
-                  className={`rounded-md border p-1.5 ${styles.alignItems === value ? 'border-slate-900' : 'border-slate-200'}`}
+                  className={`rounded-md border p-1.5 text-[#0F172A] ${styles.alignItems === value ? 'border-[#0F172A]' : 'border-[#0F172A]/25'}`}
                 >
                   <Icon className="h-4 w-4" />
                 </button>
@@ -453,7 +453,7 @@ export function CanvasProperties() {
         <Group title="Visibility">
           {(['desktop', 'tablet', 'mobile'] as DeviceId[]).map((item) => (
             <div key={item} className="flex items-center justify-between">
-              <span className="text-xs capitalize text-slate-600">{item}</span>
+              <span className="text-xs capitalize text-[#0F172A]">{item}</span>
               <Switch
                 checked={node.visibility?.[item] !== false}
                 onCheckedChange={(checked) => updateCanvasNode(node.id, { visibility: { ...node.visibility, [item]: checked } })}
@@ -475,8 +475,8 @@ export function CanvasProperties() {
         </Group>
 
         {isPrebuilt && (
-          <div className="border-t border-slate-100">
-            <div className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Section content</div>
+          <div className="border-t border-[#0F172A]">
+            <div className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[#0F172A]">Section content</div>
             <PropertiesPanel />
           </div>
         )}

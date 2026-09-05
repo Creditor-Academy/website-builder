@@ -40,8 +40,8 @@ const NAV_ITEMS = [
   { id: "layers", icon: Layers, label: "Layers" },
   { id: "pages", icon: FileText, label: "Pages" },
   { id: "assets", icon: ImageIcon, label: "Assets" },
-  { id: "design", icon: Palette, label: "Design System" },
-  { id: "history", icon: History, label: "Version History" },
+  { id: "design", icon: Palette, label: "Design" },
+  { id: "history", icon: History, label: "History" },
 ];
 
 function EditorSidebarPanels({ leftNavTab }: { leftNavTab: string }) {
@@ -82,10 +82,10 @@ function NavRailButton({
       aria-label={label}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "flex w-full flex-col items-center gap-1 rounded-lg px-1 py-1.5 transition-colors",
+        "flex w-full flex-col items-center gap-1 rounded-xl px-1 py-2 transition-colors",
         isActive
-          ? "bg-[#dedfeb] text-[#191b24]"
-          : "text-slate-200 hover:bg-white/10 hover:text-white",
+          ? "bg-white/15 font-semibold text-white"
+          : "text-slate-300 hover:bg-white/10 hover:text-white",
       )}
     >
       <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
@@ -106,42 +106,40 @@ function EditorLeftSidebar({
   onClose?: () => void;
 }) {
   return (
-    <div className="h-full w-full flex overflow-hidden bg-white">
-      <div className="flex w-[4.75rem] shrink-0 flex-col items-center border-r border-white/10 bg-[#131b2e]">
-        <nav className="flex min-h-0 w-full flex-1 flex-col items-center bg-[#0f172a] px-1 py-3">
-          {onClose && (
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close sidebar"
-              className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg text-slate-200 hover:bg-white/10 hover:text-white"
-            >
-              <X className="h-[18px] w-[18px]" strokeWidth={1.75} />
-            </button>
-          )}
-          <div className="flex w-full flex-col items-center gap-0.5 overflow-y-auto">
-            {NAV_ITEMS.map((item) => (
-              <NavRailButton
-                key={item.id}
-                id={`tour-nav-${item.id}`}
-                icon={item.icon}
-                label={item.label}
-                isActive={leftNavTab === item.id}
-                onClick={() => setLeftNavTab(item.id)}
-              />
-            ))}
-          </div>
-
-          <div className="mt-auto w-full pt-2">
+    <div className="flex h-full w-full overflow-hidden bg-white">
+      <nav className="flex w-[4.75rem] shrink-0 flex-col items-center border-r border-white/10 bg-[#0F172A] px-1.5 py-3">
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close sidebar"
+            className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+          >
+            <X className="h-[18px] w-[18px]" strokeWidth={1.75} />
+          </button>
+        )}
+        <div className="flex w-full min-h-0 flex-1 flex-col items-center gap-0.5 overflow-y-auto">
+          {NAV_ITEMS.map((item) => (
             <NavRailButton
-              icon={Settings}
-              label="Settings"
-              isActive={leftNavTab === "settings"}
-              onClick={() => setLeftNavTab("settings")}
+              key={item.id}
+              id={`tour-nav-${item.id}`}
+              icon={item.icon}
+              label={item.label}
+              isActive={leftNavTab === item.id}
+              onClick={() => setLeftNavTab(item.id)}
             />
-          </div>
-        </nav>
-      </div>
+          ))}
+        </div>
+
+        <div className="mt-auto w-full border-t border-white/10 pt-2">
+          <NavRailButton
+            icon={Settings}
+            label="Settings"
+            isActive={leftNavTab === "settings"}
+            onClick={() => setLeftNavTab("settings")}
+          />
+        </div>
+      </nav>
 
       <EditorSidebarPanels leftNavTab={leftNavTab} />
     </div>
@@ -249,7 +247,7 @@ function EditorContent() {
                   setLeftNavTab={setLeftNavTab}
                 />
               </ResizablePanel>
-              <ResizableHandle className="w-1 bg-slate-100 hover:bg-primary/30 transition-all border-r border-slate-200" />
+              <ResizableHandle className="w-1 bg-slate-100 hover:bg-[#0F172A]/20 transition-all border-r border-slate-200" />
             </>
           )}
           <ResizablePanel
@@ -261,7 +259,7 @@ function EditorContent() {
           </ResizablePanel>
           {showRight && (
             <>
-              <ResizableHandle className="w-1 bg-slate-100 hover:bg-primary/30 transition-all border-l border-slate-200" />
+              <ResizableHandle className="w-1 bg-slate-100 hover:bg-[#0F172A]/20 transition-all border-l border-slate-200" />
               <ResizablePanel
                 defaultSize={24}
                 minSize={18}
