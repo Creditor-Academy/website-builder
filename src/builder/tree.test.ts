@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canAcceptChild, cloneNode, collectAllIds, findNode, insertElement, insertSection, moveNode, removeNode, validateMove } from './tree';
+import { canAcceptChild, cloneNode, collectAllIds, findNode, getKeyboardNeighbor, getSelectionAfterDelete, insertElement, insertSection, moveNode, removeNode, validateMove } from './tree';
 import { applyDuplicate, applyMove, copyNodeToClipboard, pasteClipboard } from './documentOps';
 import { createCanvasSection, createTextElement, createButtonElement, createContainer } from './defaults';
 import { insertContainer } from './tree';
@@ -103,6 +103,16 @@ describe('canvas tree', () => {
     expect(validateMove(sections, section.id, { parentId: section.children[0].id, parentKind: 'container', index: 0 })).toBe(false);
     expect(validateMove(sections, section.children[0].id, { parentId: text.id, parentKind: 'element', index: 0 })).toBe(false);
     expect(moveNode(sections, text.id, { parentId: extra.id, parentKind: 'section', index: 0 })).toBe(sections);
+  });
+
+  it('selects a nearby node after delete and navigates with arrows', () => {
+    const pageId = 'page-1';
+    const first = createCanvasSection(pageId, 0, 'A');
+    const second = createCanvasSection(pageId, 1, 'B');
+    const sections = [first, second];
+    expect(getSelectionAfterDelete(sections, first.id)).toEqual({ id: second.id, kind: 'section' });
+    expect(getKeyboardNeighbor(sections, first.id, 'ArrowDown')).toEqual({ id: second.id, kind: 'section' });
+    expect(getKeyboardNeighbor(sections, first.children[0].id, 'ArrowLeft')).toEqual({ id: first.id, kind: 'section' });
   });
 
   it('clones trees with unique ids and rewritten parent ids', () => {

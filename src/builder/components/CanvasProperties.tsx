@@ -16,6 +16,18 @@ import { normalizePageSections } from '@/builder/adapter';
 import { resolveStyles } from '@/builder/styles';
 import type { CanvasElement, CanvasStyles, DeviceId, FormField } from '@/builder/types';
 
+const EMPTY_PAGES: { id: string; name?: string; slug?: string }[] = [];
+
+function styleOffset(value: string | undefined): number {
+  const parsed = parseFloat(String(value || '0'));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function freeAxis(position: unknown, key: 'x' | 'y', fallback: string | undefined): number {
+  const stored = (position as { x?: number; y?: number } | undefined)?.[key];
+  return Math.round(stored ?? styleOffset(fallback));
+}
+
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="space-y-1.5">
@@ -69,7 +81,7 @@ export function CanvasProperties() {
   const addCanvasContainer = useBuilderStore((state) => state.addCanvasContainer);
   const updateNavbar = useBuilderStore((state) => state.updateNavbar);
   const updateFooter = useBuilderStore((state) => state.updateFooter);
-  const pages = useBuilderStore((state) => state.getActiveWebsite()?.pages || []);
+  const pages = useBuilderStore((state) => state.websites.find((website) => website.id === state.activeWebsiteId)?.pages);
   const updatePageSEO = useBuilderStore((state) => state.updatePageSEO);
 
   const location = useMemo(() => {
@@ -84,7 +96,7 @@ export function CanvasProperties() {
     return (
       <div className="h-full overflow-y-auto bg-white text-[#0F172A]">
         <div className="border-b border-[#0F172A] px-4 py-3 text-sm font-semibold text-[#0F172A]">Header / Logo</div>
-        <NavbarSettings navbar={page.navbar} pages={pages} onUpdate={updateNavbar} isExpanded />
+        <NavbarSettings navbar={page.navbar} pages={pages ?? EMPTY_PAGES} onUpdate={updateNavbar} isExpanded selectedItemId={editor.selectedNodeId} />
       </div>
     );
   }
@@ -105,7 +117,7 @@ export function CanvasProperties() {
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
-        <FooterSettings footer={page.footer} pages={pages} onUpdate={updateFooter} isExpanded />
+        <FooterSettings footer={page.footer} pages={pages ?? EMPTY_PAGES} onUpdate={updateFooter} isExpanded />
       </div>
     );
   }
@@ -314,6 +326,72 @@ export function CanvasProperties() {
                 </div>
               </div>
             ))}
+          </Group>
+        )}
+
+        {element?.type === 'html' && (
+          <Group title="Content">
+            <Field label="HTML">
+              <Textarea value={String(element.content.html || '')} disabled={node.locked} onChange={(event) => patchContent({ html: event.target.value })} />
+            </Field>
+          </Group>
+        )}
+        {element?.type === 'gallery' && (
+          <Group title="Content">
+            <Field label="Image URLs (one per line)">
+              <Textarea
+                value={((element.content.images as Array<{ src?: string } | string>) || []).map((image) => (typeof image === 'string' ? image : image.src || '')).join('\n')}
+                disabled={node.locked}
+                onChange={(event) => patchContent({ images: event.target.value.split('\n').filter(Boolean).map((src) => ({ src, alt: 'Gallery image' })) })}
+              />
+            </Field>
+          </Group>
+        )}
+        {element?.type === 'social' && (
+          <Group title="Content">
+            <Field label="Links (Name|URL)">
+              <Textarea
+                value={((element.content.links as Array<{ network?: string; url?: string }>) || []).map((link) => `${link.network || ''}|${link.url || ''}`).join('\n')}
+                disabled={node.locked}
+                onChange={(event) => patchContent({
+                  links: event.target.value.split('\n').filter(Boolean).map((line) => {
+                    const [network, url] = line.split('|');
+                    return { network: network?.trim() || 'Link', url: url?.trim() || '#' };
+                  }),
+                })}
+              />
+            </Field>
+          </Group>
+        )}
+
+        {(location.kind === 'element' || location.kind === 'container') && (
+          <Group title="Position">
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="X">
+                <Input
+                  type="number"
+                  value={freeAxis(node.properties?.freePosition, 'x', styles.left)}
+                  disabled={node.locked}
+                  onChange={(event) => {
+                    const x = Number(event.target.value) || 0;
+                    const y = freeAxis(node.properties?.freePosition, 'y', styles.top);
+                    useBuilderStore.getState().updateFreePosition(node.id, { x, y });
+                  }}
+                />
+              </Field>
+              <Field label="Y">
+                <Input
+                  type="number"
+                  value={freeAxis(node.properties?.freePosition, 'y', styles.top)}
+                  disabled={node.locked}
+                  onChange={(event) => {
+                    const y = Number(event.target.value) || 0;
+                    const x = freeAxis(node.properties?.freePosition, 'x', styles.left);
+                    useBuilderStore.getState().updateFreePosition(node.id, { x, y });
+                  }}
+                />
+              </Field>
+            </div>
           </Group>
         )}
 

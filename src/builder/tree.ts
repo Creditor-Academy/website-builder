@@ -441,6 +441,106 @@ export interface LayerTreeNode {
   children: LayerTreeNode[];
 }
 
+export function getSelectionAfterDelete(
+  sections: CanvasSection[],
+  id: string
+): { id: string; kind: NodeKind } | null {
+  const found = findNode(sections, id);
+  if (!found) return null;
+
+  if (found.kind === 'element') {
+    if (found.container) return { id: found.container.id, kind: 'container' };
+    if (found.section) return { id: found.section.id, kind: 'section' };
+    return null;
+  }
+
+  if (found.kind === 'container' && found.section) {
+    return { id: found.section.id, kind: 'section' };
+  }
+
+  if (found.kind === 'section') {
+    const index = sections.findIndex((section) => section.id === id);
+    const nearby = sections[index + 1] || sections[index - 1];
+    return nearby ? { id: nearby.id, kind: 'section' } : null;
+  }
+
+  return null;
+}
+
+export function getKeyboardNeighbor(
+  sections: CanvasSection[],
+  id: string,
+  direction: 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight'
+): { id: string; kind: NodeKind } | null {
+  const found = findNode(sections, id);
+  if (!found) return null;
+
+  if (direction === 'ArrowLeft') {
+    if (found.kind === 'element' && found.container) return { id: found.container.id, kind: 'container' };
+    if (found.kind === 'container' && found.section) return { id: found.section.id, kind: 'section' };
+    return null;
+  }
+
+  if (direction === 'ArrowRight') {
+    if (found.kind === 'section') {
+      const first = sortByOrder((found.node as CanvasSection).children || [])[0];
+      return first ? { id: first.id, kind: 'container' } : null;
+    }
+    if (found.kind === 'container') {
+      const first = sortByOrder((found.node as CanvasContainer).children || [])[0];
+      return first ? { id: first.id, kind: 'element' } : null;
+    }
+    return null;
+  }
+
+  if (found.kind === 'section') {
+    const index = sections.findIndex((section) => section.id === id);
+    const next = direction === 'ArrowDown' ? sections[index + 1] : sections[index - 1];
+    return next ? { id: next.id, kind: 'section' } : null;
+  }
+
+  if (found.kind === 'container' && found.section) {
+    const siblings = sortByOrder(found.section.children || []);
+    const index = siblings.findIndex((container) => container.id === id);
+    const next = direction === 'ArrowDown' ? siblings[index + 1] : siblings[index - 1];
+    return next ? { id: next.id, kind: 'container' } : found.section ? { id: found.section.id, kind: 'section' } : null;
+  }
+
+  if (found.kind === 'element' && found.container) {
+    const siblings = sortByOrder(found.container.children || []);
+    const index = siblings.findIndex((element) => element.id === id);
+    const next = direction === 'ArrowDown' ? siblings[index + 1] : siblings[index - 1];
+    return next ? { id: next.id, kind: 'element' } : { id: found.container.id, kind: 'container' };
+  }
+
+  return null;
+}
+
+export function isFreePositioned(node: { styles?: { position?: string }; properties?: Record<string, unknown> }): boolean {
+  return node.properties?.placement === 'absolute' || node.styles?.position === 'absolute';
+}
+
+export function getFreePosition(node: { properties?: Record<string, unknown>; styles?: { left?: string; top?: string; width?: string; height?: string } }): {
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+  rotation?: number;
+  zIndex?: number;
+} {
+  const stored = node.properties?.freePosition as
+    | { x?: number; y?: number; width?: number; height?: number; rotation?: number; zIndex?: number }
+    | undefined;
+  return {
+    x: stored?.x ?? (parseFloat(String(node.styles?.left || '0')) || 0),
+    y: stored?.y ?? (parseFloat(String(node.styles?.top || '0')) || 0),
+    width: stored?.width,
+    height: stored?.height,
+    rotation: stored?.rotation,
+    zIndex: stored?.zIndex,
+  };
+}
+
 export function collectLayerTree(sections: CanvasSection[], device: DeviceId = 'desktop'): LayerTreeNode[] {
   return sortByOrder(sections).map((section) => ({
     id: section.id,

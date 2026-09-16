@@ -149,7 +149,7 @@ function EditorLeftSidebar({
 function EditorContent() {
   const [leftNavTab, setLeftNavTab] = useState("add");
   const store = useBuilderStore();
-  const { editor, setTourState, activeWebsiteId, setEditorState, undo, redo, selectNode, deleteCanvasNode, duplicateCanvasNode, copyCanvasNode, pasteCanvasNode } = store;
+  const { editor, setTourState, activeWebsiteId, setEditorState } = store;
   const { id } = useParams();
   const isCompact = useIsCompact();
 
@@ -166,48 +166,14 @@ function EditorContent() {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || !isCompact) return;
       const target = event.target as HTMLElement;
       if (target.closest("input, textarea, select, [contenteditable='true']")) return;
-
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "z") {
-        event.preventDefault();
-        if (event.shiftKey) redo();
-        else undo();
-        return;
-      }
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "y") {
-        event.preventDefault();
-        redo();
-        return;
-      }
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "d") {
-        event.preventDefault();
-        if (editor.selectedNodeId) duplicateCanvasNode(editor.selectedNodeId);
-        return;
-      }
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "c") {
-        event.preventDefault();
-        copyCanvasNode(editor.selectedNodeId);
-        return;
-      }
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "v") {
-        event.preventDefault();
-        pasteCanvasNode();
-        return;
-      }
-      if ((event.key === "Delete" || event.key === "Backspace") && editor.selectedNodeId && editor.selectedKind !== "navbar") {
-        event.preventDefault();
-        deleteCanvasNode(editor.selectedNodeId);
-        return;
-      }
-      if (event.key === "Escape") {
-        selectNode(null);
-        if (isCompact) setEditorState({ showLeftPanel: false });
-      }
+      setEditorState({ showLeftPanel: false });
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [editor.selectedNodeId, editor.selectedKind, isCompact, undo, redo, selectNode, deleteCanvasNode, duplicateCanvasNode, copyCanvasNode, pasteCanvasNode, setEditorState]);
+  }, [isCompact, setEditorState]);
 
   const showSidebar = !editor.previewMode && editor.showLeftPanel;
   const showRight = !editor.previewMode && editor.showRightPanel && !isCompact;
@@ -302,8 +268,8 @@ function EditorContent() {
 
 export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
   const { id } = useParams();
-  const store = useBuilderStore();
-  const { selectWebsite, activeWebsiteId } = store;
+  const activeWebsiteId = useBuilderStore((state) => state.activeWebsiteId);
+  const [hydrated, setHydrated] = useState(() => useBuilderStore.persist.hasHydrated());
 
   useEffect(() => {
     document.documentElement.classList.remove("dark");
@@ -319,12 +285,19 @@ export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
   }, []);
 
   useEffect(() => {
-    if (id) {
-      selectWebsite(id);
-    }
-  }, [id, selectWebsite]);
+    const finish = () => setHydrated(true);
+    const unsub = useBuilderStore.persist.onFinishHydration(finish);
+    if (useBuilderStore.persist.hasHydrated()) finish();
+    return unsub;
+  }, []);
 
-  if (!activeWebsiteId && id) {
+  useEffect(() => {
+    if (hydrated && id) {
+      useBuilderStore.getState().selectWebsite(id);
+    }
+  }, [id, hydrated]);
+
+  if (!hydrated || (!activeWebsiteId && id)) {
     return <Loading fullScreen label="Loading your project" />;
   }
 

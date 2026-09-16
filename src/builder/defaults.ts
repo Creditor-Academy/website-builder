@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { withFreeContainerPlacement, withFreePlacement } from './freeMove';
 import { DEFAULT_VISIBILITY, type CanvasContainer, type CanvasElement, type CanvasSection, type ElementType, type FormField } from './types';
 
 function baseNode(name: string, parentId: string | null, order: number) {
@@ -35,6 +36,37 @@ export function createTextElement(parentId: string, order = 0): CanvasElement {
       mobile: { fontSize: '15px' },
     },
     animation: { duration: 300, easing: 'ease' },
+  };
+}
+
+export function createHeadingElement(parentId: string, order = 0): CanvasElement {
+  return {
+    ...baseNode('Heading', parentId, order),
+    type: 'text',
+    content: { text: 'Add a heading', tag: 'h2' },
+    styles: {
+      fontFamily: 'Inter',
+      fontSize: '36px',
+      fontWeight: '700',
+      lineHeight: '1.2',
+      letterSpacing: '-0.02em',
+      color: '#0f172a',
+      textAlign: 'left',
+      width: '100%',
+    },
+    responsiveStyles: {
+      tablet: { fontSize: '30px' },
+      mobile: { fontSize: '26px' },
+    },
+    animation: { duration: 300, easing: 'ease' },
+  };
+}
+
+export function createParagraphElement(parentId: string, order = 0): CanvasElement {
+  return {
+    ...createTextElement(parentId, order),
+    name: 'Paragraph',
+    content: { text: 'Write a short paragraph that introduces this section.', tag: 'p' },
   };
 }
 
@@ -153,6 +185,49 @@ export function createPdfElement(parentId: string, order = 0): CanvasElement {
   };
 }
 
+export function createHtmlElement(parentId: string, order = 0): CanvasElement {
+  return {
+    ...baseNode('HTML', parentId, order),
+    type: 'html',
+    content: { html: '<p>Custom HTML</p>' },
+    styles: { width: '100%' },
+  };
+}
+
+export function createGalleryElement(parentId: string, order = 0): CanvasElement {
+  return {
+    ...baseNode('Gallery', parentId, order),
+    type: 'gallery',
+    content: {
+      images: [
+        { src: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80', alt: 'Gallery image 1' },
+        { src: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80', alt: 'Gallery image 2' },
+        { src: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&q=80', alt: 'Gallery image 3' },
+      ],
+    },
+    styles: {
+      width: '100%',
+      display: 'grid',
+      gap: '12px',
+    },
+  };
+}
+
+export function createSocialElement(parentId: string, order = 0): CanvasElement {
+  return {
+    ...baseNode('Social', parentId, order),
+    type: 'social',
+    content: {
+      links: [
+        { network: 'Twitter', url: '#' },
+        { network: 'LinkedIn', url: '#' },
+        { network: 'Instagram', url: '#' },
+      ],
+    },
+    styles: { display: 'flex', gap: '12px', alignItems: 'center' },
+  };
+}
+
 export const ELEMENT_FACTORIES: Record<ElementType, (parentId: string, order?: number) => CanvasElement> = {
   text: createTextElement,
   image: createImageElement,
@@ -162,26 +237,71 @@ export const ELEMENT_FACTORIES: Record<ElementType, (parentId: string, order?: n
   divider: createDividerElement,
   form: createFormElement,
   pdf: createPdfElement,
+  html: createHtmlElement,
+  gallery: createGalleryElement,
+  social: createSocialElement,
 };
+
+export function createElementByCatalog(catalogId: string, parentId: string, order = 0): CanvasElement {
+  let element: CanvasElement;
+  if (catalogId === 'heading') element = createHeadingElement(parentId, order);
+  else if (catalogId === 'paragraph') element = createParagraphElement(parentId, order);
+  else {
+    const factory = ELEMENT_FACTORIES[catalogId as ElementType];
+    element = factory ? factory(parentId, order) : createTextElement(parentId, order);
+  }
+  return withFreePlacement(element, { x: 64, y: 64 + order * 40 });
+}
 
 export function createContainer(parentId: string, order = 0, elements: CanvasElement[] = []): CanvasContainer {
   const id = uuidv4();
   const children = elements.map((element, index) => ({ ...element, parentId: id, order: index }));
-  return {
-    ...baseNode('Container', parentId, order),
-    id,
-    type: 'container',
-    styles: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '16px',
-      width: '100%',
-      maxWidth: '1120px',
-      margin: '0 auto',
-      padding: '0px',
-      alignItems: 'stretch',
+  return withFreeContainerPlacement(
+    {
+      ...baseNode('Container', parentId, order),
+      id,
+      type: 'container',
+      styles: {
+        padding: '24px',
+      },
+      children,
     },
-    children,
+    { x: 48, y: 48 + order * 40 }
+  );
+}
+
+export function createBlankCanvasSection(pageId: string, order = 0): CanvasSection {
+  const id = uuidv4();
+  const containerId = uuidv4();
+  return {
+    ...baseNode('Section', pageId, order),
+    id,
+    type: 'section',
+    kind: 'canvas',
+    visible: true,
+    locked: false,
+    styles: {
+      position: 'relative',
+      width: '100%',
+      minHeight: '800px',
+      backgroundColor: '#ffffff',
+    },
+    content: {},
+    children: [
+      {
+        ...baseNode('Canvas', id, 0),
+        id: containerId,
+        type: 'container',
+        styles: {
+          position: 'relative',
+          width: '100%',
+          minHeight: '800px',
+        },
+        properties: { placement: 'flow' },
+        children: [],
+      },
+    ],
+    components: [],
   };
 }
 
@@ -196,8 +316,10 @@ export function createCanvasSection(pageId: string, order = 0, name = 'Section')
     visible: true,
     locked: false,
     styles: {
+      position: 'relative',
       width: '100%',
-      padding: '72px 24px',
+      minHeight: '800px',
+      padding: '24px',
       backgroundColor: '#ffffff',
     },
     content: {},
@@ -211,9 +333,13 @@ export function createCanvasSectionWithElement(
   type: ElementType,
   order = 0
 ): CanvasSection {
+  return createCanvasSectionWithCatalog(pageId, type, order);
+}
+
+export function createCanvasSectionWithCatalog(pageId: string, catalogId: string, order = 0): CanvasSection {
   const section = createCanvasSection(pageId, order);
   const container = section.children[0];
-  const element = ELEMENT_FACTORIES[type](container.id, 0);
+  const element = createElementByCatalog(catalogId, container.id, 0);
   return {
     ...section,
     name: element.name,

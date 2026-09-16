@@ -28,6 +28,7 @@ function normalizeElement(element: Partial<CanvasElement>, parentId: string, ord
 
 function normalizeContainer(container: Partial<CanvasContainer>, parentId: string, order: number): CanvasContainer {
   const id = (container.id as string) || parentId;
+  const free = container.properties?.placement === 'absolute' || container.styles?.position === 'absolute';
   return {
     id,
     type: 'container',
@@ -35,14 +36,14 @@ function normalizeContainer(container: Partial<CanvasContainer>, parentId: strin
     name: container.name || 'Container',
     order: container.order ?? order,
     content: (container.content as Record<string, unknown>) || {},
-    styles: container.styles || {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '16px',
-      width: '100%',
-      maxWidth: '1120px',
-      margin: '0 auto',
-    },
+    styles: free
+      ? { ...(container.styles || {}), position: 'absolute' }
+      : {
+          ...(container.styles || {}),
+          position: container.styles?.position || 'relative',
+          width: container.styles?.width || '100%',
+          minHeight: container.styles?.minHeight || '320px',
+        },
     responsiveStyles: container.responsiveStyles || {},
     properties: container.properties || {},
     visibility: visibilityOf(container.visibility),

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,11 +12,17 @@ interface NavbarSettingsProps {
   pages: any[];
   onUpdate: (updates: any) => void;
   isExpanded?: boolean;
+  selectedItemId?: string | null;
 }
 
-export function NavbarSettings({ navbar, pages = [], onUpdate, isExpanded = true }: NavbarSettingsProps) {
+export function NavbarSettings({ navbar, pages = [], onUpdate, isExpanded = true, selectedItemId }: NavbarSettingsProps) {
   const [expanded, setExpanded] = useState(isExpanded);
-  const [editingLink, setEditingLink] = useState<string | null>(null);
+  const selectedLinkId = selectedItemId?.startsWith('navbar-link-') ? selectedItemId.slice('navbar-link-'.length) : null;
+  const [editingLink, setEditingLink] = useState<string | null>(selectedLinkId);
+
+  useEffect(() => {
+    if (selectedLinkId) setEditingLink(selectedLinkId);
+  }, [selectedLinkId]);
 
   if (!navbar) return null;
 

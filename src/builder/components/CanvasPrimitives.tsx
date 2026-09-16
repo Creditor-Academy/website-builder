@@ -157,7 +157,7 @@ export const CanvasElementView = memo(function CanvasElementView({
           loading="lazy"
           decoding="async"
           style={css}
-          className="max-w-full"
+          className="h-full w-full max-w-full object-cover"
         />
       );
     case 'button':
@@ -216,6 +216,43 @@ export const CanvasElementView = memo(function CanvasElementView({
           </div>
         </div>
       );
+    case 'html':
+      return (
+        <div
+          style={css}
+          className="prose prose-sm max-w-none"
+          dangerouslySetInnerHTML={{ __html: sanitizeHTML(String(element.content.html || '')) }}
+        />
+      );
+    case 'gallery': {
+      const images = (element.content.images as Array<{ src?: string; alt?: string } | string>) || [];
+      return (
+        <div style={{ ...css, display: css.display || 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
+          {images.map((image, index) => {
+            const src = typeof image === 'string' ? image : String(image.src || '');
+            const alt = typeof image === 'string' ? 'Gallery image' : String(image.alt || 'Gallery image');
+            return <img key={`${src}-${index}`} src={src} alt={alt} className="h-32 w-full rounded-lg object-cover" />;
+          })}
+        </div>
+      );
+    }
+    case 'social': {
+      const links = (element.content.links as Array<{ network?: string; url?: string }>) || [];
+      return (
+        <div style={css} className="flex flex-wrap gap-3">
+          {links.map((link, index) => (
+            <a
+              key={`${link.network}-${index}`}
+              href={String(link.url || '#')}
+              onClick={(event) => event.preventDefault()}
+              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 no-underline"
+            >
+              {String(link.network || 'Link')}
+            </a>
+          ))}
+        </div>
+      );
+    }
     default:
       return <div style={css}>{element.name}</div>;
   }

@@ -146,7 +146,7 @@ function buildPage(slug, label) {
   }
 }
 
-export function NavbarPreview({ config: rawConfig, isEditing, onUpdate }) {
+export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selectedItemId, onSelectItem }) {
   const config = {
     ...rawConfig,
     logo: rawConfig.logo && typeof rawConfig.logo === 'object' ? rawConfig.logo : { text: rawConfig.logo || 'Logo', imageUrl: '' },
@@ -154,7 +154,7 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate }) {
     styles: rawConfig.styles || {},
   };
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { pages, setActivePage, updatePageName, createPage, selectSection, state } = useBuilder();
+  const { pages, setActivePage, updatePageName, createPage, state } = useBuilder();
   const navigate = useNavigate();
   const { editor } = state;
 
@@ -168,6 +168,13 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate }) {
 
   // ── Enhanced handleNavClick logic with preview mode support ──────────────────────────
   const handleNavClick = (e, link) => {
+    if (isEditing && onSelectItem) {
+      e.preventDefault();
+      e.stopPropagation();
+      onSelectItem(`navbar-link-${link.id}`);
+      return;
+    }
+
     // Scroll to top on any navigation click
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
@@ -214,9 +221,10 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate }) {
   };
 
   const handleNavbarClick = (e) => {
-    if (isEditing && e.target.closest('a, button') === null) {
-      e.stopPropagation(); selectSection(null);
-    }
+    if (!isEditing) return;
+    if (e.target.closest('[data-navbar-item]')) return;
+    e.stopPropagation();
+    onSelectItem?.('navbar');
   };
 
   const isLight = (() => {
@@ -250,7 +258,24 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate }) {
       <div className="nb-inner">
 
         {/* ── Logo ─────────────────────────────────────────────── */}
-        <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+        <div
+          data-canvas-node="navbar-logo"
+          data-canvas-kind="navbar"
+          data-navbar-item="logo"
+          style={{
+            flexShrink: 0,
+            display: 'flex',
+            alignItems: 'center',
+            borderRadius: 4,
+            cursor: isEditing ? 'pointer' : 'default',
+          }}
+          onClick={(e) => {
+            if (!isEditing) return;
+            e.preventDefault();
+            e.stopPropagation();
+            onSelectItem?.('navbar-logo');
+          }}
+        >
           {config.logo.imageUrl ? (
             <img src={config.logo.imageUrl} alt="Logo" style={{ height: 34 }} />
           ) : (
@@ -261,7 +286,7 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate }) {
                 fontSize: 22, fontWeight: 900, fontStyle: 'italic',
                 color: tc, letterSpacing: '-0.02em',
               }}
-              contentEditable={isEditing}
+              contentEditable={isEditing && selectedItemId === 'navbar-logo'}
               suppressContentEditableWarning
               onBlur={(e) => onUpdate({ logo: { ...config.logo, text: e.target.innerText } })}
             >
@@ -281,12 +306,15 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate }) {
               <a
                 key={link.id}
                 href={link.href}
+                data-canvas-node={`navbar-link-${link.id}`}
+                data-canvas-kind="navbar"
+                data-navbar-item={link.id}
                 className="nb-cta"
                 onClick={(e) => handleNavClick(e, link)}
                 style={{ 
                   background: styles.buttonBg || '#0f172a', 
                   color: styles.buttonText || '#fff',
-                  borderRadius: styles.buttonRadius || '2px'
+                  borderRadius: styles.buttonRadius || '2px',
                 }}
               >
                 {link.label}
@@ -295,10 +323,16 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate }) {
               <a
                 key={link.id}
                 href={link.href}
+                data-canvas-node={`navbar-link-${link.id}`}
+                data-canvas-kind="navbar"
+                data-navbar-item={link.id}
                 className={`nb-link nb-ce ${isLight ? '' : 'nb-ce-inv'}`}
                 onClick={(e) => handleNavClick(e, link)}
-                style={{ color: tc }}
-                contentEditable={isEditing}
+                style={{
+                  color: tc,
+                  borderRadius: 4,
+                }}
+                contentEditable={isEditing && selectedItemId === `navbar-link-${link.id}`}
                 suppressContentEditableWarning
                 onBlur={(e) => {
                   const newLabel = e.target.innerText;

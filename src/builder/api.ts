@@ -1,4 +1,6 @@
 import websiteApi from '@/api/website';
+import { USE_WEBSITE_API } from '@/lib/localMode';
+import useBuilderStore from '@/store/useBuilderStore';
 import type { SaveStatus } from './types';
 
 export interface CanvasPagePayload {
@@ -15,9 +17,20 @@ export interface CanvasSavePayload {
 }
 
 export const canvasApi = {
-  loadWebsite: (id: string) => websiteApi.getWebsiteById(id),
+  loadWebsite: async (id: string) => {
+    if (!USE_WEBSITE_API) {
+      const website = useBuilderStore.getState().websites.find((w) => w.id === id);
+      return { data: { website } };
+    }
+    return websiteApi.getWebsiteById(id);
+  },
 
-  saveWebsite: (id: string, payload: CanvasSavePayload) => websiteApi.updateWebsite(id, payload),
+  saveWebsite: async (id: string, payload: CanvasSavePayload) => {
+    if (!USE_WEBSITE_API) {
+      return { data: { ok: true, id, payload } };
+    }
+    return websiteApi.updateWebsite(id, payload);
+  },
 
   publishWebsite: (id: string, data: { subdomain?: string; customDomain?: string }) =>
     websiteApi.publishWebsite(id, data),
