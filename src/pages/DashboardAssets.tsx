@@ -36,6 +36,8 @@ import {
   DashboardCardBadge,
   dashboardCardBadgeClass,
 } from '@/components/dashboard/DashboardCard';
+import { PexelsStockSection, photoName, photoUrl } from '@/components/dashboard/PexelsStockSection';
+import type { PexelsPhoto } from '@/api/pexels';
 
 
 export default function DashboardAssets() {
@@ -58,10 +60,12 @@ export default function DashboardAssets() {
     }, [fetchAssets]);
 
     const [search, setSearch] = useState('');
+    const [activeTab, setActiveTab] = useState('all');
     const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
     const [urlInput, setUrlInput] = useState('');
     const [urlName, setUrlName] = useState('');
     const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [importingStockId, setImportingStockId] = useState<string | null>(null);
     const [previewAsset, setPreviewAsset] = useState<Asset | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const allAssets = getScopedAssets();
@@ -166,6 +170,27 @@ export default function DashboardAssets() {
         }
     };
 
+    const handleAddStockPhoto = async (photo: PexelsPhoto) => {
+        const id = String(photo.id);
+        setImportingStockId(id);
+        try {
+            const asset = await importAssetFromUrl(photoName(photo), photoUrl(photo), uploadScope);
+            if (isAdmin && asset?.id) rememberAssetVisibleToUsers(asset.id);
+            toast({
+                title: 'Added to your assets',
+                description: 'This Pexels photo is now in your library. Open Images to use it, or keep browsing stock photos.',
+            });
+        } catch (error: any) {
+            toast({
+                variant: 'destructive',
+                title: 'Could not add photo',
+                description: error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to import stock photo.',
+            });
+        } finally {
+            setImportingStockId(null);
+        }
+    };
+
     const handleCopy = async (id: string, url: string) => {
         try {
             await navigator.clipboard.writeText(url);
@@ -241,8 +266,6 @@ export default function DashboardAssets() {
             });
         }
     };
-
-    const [activeTab, setActiveTab] = useState('all');
 
     return (
     <DashboardPageShell
@@ -380,31 +403,39 @@ export default function DashboardAssets() {
               <div className="relative min-w-0 flex-1">
                 <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
                 <Input
-                  placeholder="Search assets..."
+                  placeholder={activeTab === 'stock' ? 'Search stock photos…' : 'Search assets...'}
                   className={cn(dashboardSearchInputClass, 'h-9 rounded-full pl-9')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
               <div className={cn(dashboardFilterScrollClass, 'flex-1')}>
-              {['all', 'images', 'videos'].map(tab => (
+              {['all', 'images', 'videos', 'stock'].map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={dashboardFilterPillClass(activeTab === tab)}
                 >
-                  {tab === 'all' ? 'All Assets' : tab === 'images' ? 'Images' : 'Videos'}
+                  {tab === 'all' ? 'All Assets' : tab === 'images' ? 'Images' : tab === 'videos' ? 'Videos' : 'Stock photos'}
                 </button>
               ))}
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-[#f6f3f5] rounded-full text-[#45464d] border border-[#c6c6cd] font-semibold text-xs uppercase tracking-wider shrink-0 self-start sm:self-auto">
-                Total: <span className="text-[#1b1b1d] font-bold">{filteredMedia.length}</span>
+              <div className="hidden items-center gap-1.5 self-start rounded-full border border-[#c6c6cd] bg-[#f6f3f5] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#45464d] sm:flex sm:self-auto">
+                Total: <span className="text-[#1b1b1d] font-bold">{activeTab === 'stock' ? 'Pexels' : filteredMedia.length}</span>
               </div>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <div className="min-h-[400px]">
-                   {isFetching ? (
+                   {activeTab === 'stock' ? (
+                      <PexelsStockSection
+                        query={search}
+                        importingId={importingStockId}
+                        onClearQuery={() => setSearch('')}
+                        onCopy={handleCopy}
+                        onAddToLibrary={(photo) => void handleAddStockPhoto(photo)}
+                      />
+                   ) : isFetching ? (
                       <Loading label="Loading assets" />
                    ) : (
                    ['all', 'images', 'videos'].map(tabType => (
@@ -420,7 +451,7 @@ export default function DashboardAssets() {
                                 </div>
                             </div>
                          ) : (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
+                            <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 sm:gap-4">
 
                                 {/* ── Upload skeleton placeholders ── */}
                                 {uploadingCount > 0 && Array.from({ length: uploadingCount }).map((_, i) => (
@@ -608,10 +639,10 @@ export default function DashboardAssets() {
             </Dialog>
 
             <Dialog open={isUrlDialogOpen} onOpenChange={setIsUrlDialogOpen}>
-                <DialogContent className="sm:max-w-md rounded-lg p-0 overflow-hidden border-[#c6c6cd] shadow-2xl">
-                    <div className="p-8 pb-4">
+                <DialogContent className="w-[calc(100vw-1.5rem)] overflow-hidden rounded-lg border-[#c6c6cd] p-0 shadow-2xl sm:max-w-md">
+                    <div className="p-5 pb-4 sm:p-8 sm:pb-4">
                        <DialogHeader>
-                           <DialogTitle className="text-2xl font-black text-[#0F172A] tracking-tight flex items-center gap-3">
+                           <DialogTitle className="flex items-center gap-3 text-xl font-black tracking-tight text-[#0F172A] sm:text-2xl">
                               <div className="w-10 h-10 rounded-2xl bg-[#F4F4F5] text-[#0F172A] flex items-center justify-center">
                                  <LinkIcon className="w-5 h-5" />
                               </div>

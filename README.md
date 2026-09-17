@@ -61,6 +61,7 @@ Ensure the following critical variables are set:
 ```env
 VITE_API_BASE_URL=http://localhost:5000/api/v1  # Points to your local or staging backend
 VITE_SITE_HOST=https://buildora.lmsathena.com   # Platform host domain
+PEXELS_API_KEY=                                 # Pexels stock photos (used by the Vite proxy, not shipped to the browser)
 ```
 
 ### 3. Start Development Server
