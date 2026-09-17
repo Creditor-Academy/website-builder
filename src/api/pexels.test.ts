@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildPexelsSearchParams } from './pexels';
+import { buildPexelsSearchParams, buildPexelsVideoSearchParams } from './pexels';
 
 describe('Pexels search filters', () => {
   it('sends orientation, size, and color so users can narrow media', () => {
@@ -21,6 +21,19 @@ describe('Pexels search filters', () => {
     const params = buildPexelsSearchParams('nature', { orientation: '', size: '', color: '' });
     expect(params.has('orientation')).toBe(false);
     expect(params.has('size')).toBe(false);
+    expect(params.has('color')).toBe(false);
+  });
+
+  it('builds video search params without color', () => {
+    const params = buildPexelsVideoSearchParams('city', {
+      page: 1,
+      perPage: 20,
+      orientation: 'portrait',
+      size: 'medium',
+    });
+    expect(params.get('query')).toBe('city');
+    expect(params.get('orientation')).toBe('portrait');
+    expect(params.get('size')).toBe('medium');
     expect(params.has('color')).toBe(false);
   });
 });

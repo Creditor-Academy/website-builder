@@ -36,8 +36,7 @@ import {
   DashboardCardBadge,
   dashboardCardBadgeClass,
 } from '@/components/dashboard/DashboardCard';
-import { PexelsStockSection, photoName, photoUrl } from '@/components/dashboard/PexelsStockSection';
-import type { PexelsPhoto } from '@/api/pexels';
+import { PexelsStockSection } from '@/components/dashboard/PexelsStockSection';
 
 
 export default function DashboardAssets() {
@@ -60,7 +59,7 @@ export default function DashboardAssets() {
     }, [fetchAssets]);
 
     const [search, setSearch] = useState('');
-    const [activeTab, setActiveTab] = useState('all');
+    const [activeTab, setActiveTab] = useState('stock');
     const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
     const [urlInput, setUrlInput] = useState('');
     const [urlName, setUrlName] = useState('');
@@ -170,21 +169,22 @@ export default function DashboardAssets() {
         }
     };
 
-    const handleAddStockPhoto = async (photo: PexelsPhoto) => {
-        const id = String(photo.id);
-        setImportingStockId(id);
+    const handleAddStockMedia = async (item: { name: string; url: string; media: 'image' | 'video' }) => {
+        setImportingStockId(item.url);
         try {
-            const asset = await importAssetFromUrl(photoName(photo), photoUrl(photo), uploadScope);
+            const asset = await importAssetFromUrl(item.name, item.url, uploadScope);
             if (isAdmin && asset?.id) rememberAssetVisibleToUsers(asset.id);
             toast({
                 title: 'Added to your assets',
-                description: 'This Pexels photo is now in your library. Open Images to use it, or keep browsing stock photos.',
+                description: item.media === 'video'
+                  ? 'This Pexels video is now in your library. Open Videos to use it, or keep browsing stock.'
+                  : 'This Pexels photo is now in your library. Open Images to use it, or keep browsing stock.',
             });
         } catch (error: any) {
             toast({
                 variant: 'destructive',
-                title: 'Could not add photo',
-                description: error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to import stock photo.',
+                title: item.media === 'video' ? 'Could not add video' : 'Could not add photo',
+                description: error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to import stock media.',
             });
         } finally {
             setImportingStockId(null);
@@ -403,20 +403,20 @@ export default function DashboardAssets() {
               <div className="relative min-w-0 flex-1">
                 <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
                 <Input
-                  placeholder={activeTab === 'stock' ? 'Search stock photos…' : 'Search assets...'}
+                  placeholder={activeTab === 'stock' ? 'Search stock photos and videos…' : 'Search assets...'}
                   className={cn(dashboardSearchInputClass, 'h-9 rounded-full pl-9')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
               <div className={cn(dashboardFilterScrollClass, 'flex-1')}>
-              {['all', 'images', 'videos', 'stock'].map(tab => (
+              {['stock', 'all', 'images', 'videos'].map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={dashboardFilterPillClass(activeTab === tab)}
                 >
-                  {tab === 'all' ? 'All Assets' : tab === 'images' ? 'Images' : tab === 'videos' ? 'Videos' : 'Stock photos'}
+                  {tab === 'stock' ? 'Stock' : tab === 'all' ? 'All Assets' : tab === 'images' ? 'Images' : 'Videos'}
                 </button>
               ))}
               </div>
@@ -433,7 +433,7 @@ export default function DashboardAssets() {
                         importingId={importingStockId}
                         onClearQuery={() => setSearch('')}
                         onCopy={handleCopy}
-                        onAddToLibrary={(photo) => void handleAddStockPhoto(photo)}
+                        onAddToLibrary={(item) => void handleAddStockMedia(item)}
                       />
                    ) : isFetching ? (
                       <Loading label="Loading assets" />

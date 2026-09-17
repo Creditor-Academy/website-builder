@@ -11,7 +11,8 @@ import {
     getCoachPage
 } from '@/lib/defaultPageData';
 import { builderWebsiteToTemplatePayload, templateToBuilderWebsite } from '@/lib/templateBuilder';
-import type { DeviceId, DropTarget, ElementType, NodeKind, SaveStatus } from '@/builder/types';
+import type { DeviceId, DropTarget, ElementType, FreePosition, NodeKind, SaveStatus } from '@/builder/types';
+import { SCHEMA_VERSION } from '@/builder/types';
 import type { PaletteDragData } from '@/builder/dnd';
 import {
     addContainerToPage,
@@ -24,12 +25,17 @@ import {
     applyMove,
     applyNodePatch,
     applyStylePatch,
+    applyFreePosition,
+    applyResize,
     copyNodeToClipboard,
     normalizeActiveSections,
     pasteClipboard,
     type CanvasClipboard,
 } from '@/builder/documentOps';
-import { findNode } from '@/builder/tree';
+import { findNode, getSelectionAfterDelete } from '@/builder/tree';
+import { USE_WEBSITE_API } from '@/lib/localMode';
+
+export { USE_WEBSITE_API };
 
 let _saveTimer: ReturnType<typeof setTimeout> | null = null;
 const SAVE_DEBOUNCE_MS = 800;
@@ -44,6 +50,20 @@ const TEMPLATE_MAP: Record<string, () => any> = {
     agencies: getAgenciesPage,
     coaching: getCoachPage,
 };
+
+function createLocalWebsite(id: string, name = 'Untitled website', template = 'blank'): Website {
+    const templateFn = TEMPLATE_MAP[template] || TEMPLATE_MAP.blank;
+    const homePage: Page = { ...templateFn(), schemaVersion: SCHEMA_VERSION };
+    return {
+        id,
+        name,
+        lastEdited: new Date().toISOString(),
+        status: 'Draft',
+        pages: [homePage],
+        activePageId: homePage.id,
+        templateId: template,
+    };
+}
 
 export interface Asset {
     id: string;
@@ -124,6 +144,7 @@ export interface Page {
     navbar: any;
     footer: any;
     globalStyles: any;
+    schemaVersion?: number;
 }
 
 export interface Website {
@@ -239,15 +260,17 @@ export interface BuilderStore {
     setZoom: (zoom: number) => void;
     setSaveStatus: (status: SaveStatus) => void;
     setDropTarget: (target: DropTarget | null) => void;
-    addCanvasElement: (type: ElementType) => string | null;
+    addCanvasElement: (type: ElementType, catalogId?: string) => string | null;
     addCanvasContainer: () => string | null;
     addCanvasSection: (section?: Record<string, unknown>) => string | null;
     updateCanvasNode: (id: string, patch: Record<string, unknown>) => void;
     updateCanvasStyles: (id: string, patch: Record<string, unknown>) => void;
+    resizeCanvasNode: (id: string, patch: Record<string, unknown>) => void;
+    updateFreePosition: (id: string, position: FreePosition) => void;
     deleteCanvasNode: (id: string) => void;
     duplicateCanvasNode: (id: string) => string | null;
     moveCanvasNode: (id: string, target: DropTarget) => void;
-    addPaletteItem: (item: PaletteDragData, target: DropTarget | null, prebuilt?: Record<string, unknown>) => string | null;
+    addPaletteItem: (item: PaletteDragData, target: DropTarget | null, prebuilt?: Record<string, unknown>, at?: { x: number; y: number }) => string | null;
     copyCanvasNode: (id?: string | null) => void;
     pasteCanvasNode: () => string | null;
     undo: () => void;
@@ -372,6 +395,8 @@ const useBuilderStore = create<BuilderStore>()(
             },
 
             fetchWebsites: async (institutionId?: string, isAdmin = false) => {
+                if (!USE_WEBSITE_API) return;
+
                 try {
                     const { default: websiteApi } = await import('../api/website');
                     let response;
@@ -459,6 +484,26 @@ const useBuilderStore = create<BuilderStore>()(
             },
 
             createWebsite: async (name, template = 'blank', institutionId?: string) => {
+                if (!USE_WEBSITE_API) {
+                    const newWebsite = createLocalWebsite(uuidv4(), name, template);
+                    set((state) => ({
+                        websites: [...state.websites, newWebsite],
+                        activeWebsiteId: newWebsite.id,
+                        activePageId: newWebsite.activePageId,
+                        history: [newWebsite.pages],
+                        historyIndex: 0,
+                        editor: {
+                            ...state.editor,
+                            tour: {
+                                isActive: true,
+                                step: 0,
+                                isFinished: false,
+                            }
+                        }
+                    }));
+                    return newWebsite.id;
+                }
+
                 const isLocalTemplate = Boolean(TEMPLATE_MAP[template]);
                 const templateFn = TEMPLATE_MAP[template] || TEMPLATE_MAP.blank;
                 const homePage = templateFn();
@@ -525,28 +570,129 @@ const useBuilderStore = create<BuilderStore>()(
                 set((state) => ({
                     websites: state.websites.map(w => w.id === id ? { ...w, ...updates } : w)
                 }));
-                // PATCH /websites/:id disabled — keep canvas changes local only.
-                // if (updates.pages || updates.activePageId || updates.name || updates.status) {
-                //     const { default: websiteApi } = await import('../api/website');
-                //     await websiteApi.updateWebsite(id, { ... });
-                // }
+
+                if (!USE_WEBSITE_API) return;
+                
+                // If the update includes content-affecting fields, sync to backend
+                if (updates.pages || updates.activePageId || updates.name || updates.status) {
+                    try {
+                        const { default: websiteApi } = await import('../api/website');
+                        const website = get().websites.find(w => w.id === id);
+                        if (website) {
+                            await websiteApi.updateWebsite(id, {
+                                name: website.name,
+                                status: website.status,
+                                content: {
+                                    pages: website.pages,
+                                    activePageId: website.activePageId,
+                                    templateId: website.templateId,
+                                    builderMeta: website.builderMeta
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        console.error("Failed to update website on backend:", error);
+                    }
+                }
             },
 
             saveActiveWebsite: async () => {
-                // Autosave API is off until canvas move/resize is finished.
-                // Do not PATCH /websites/:id and do not flip saveStatus (avoids extra renders mid-drag).
+                if (_saveTimer) clearTimeout(_saveTimer);
+                set((state) => ({ editor: { ...state.editor, saveStatus: 'saving' } }));
+                _saveTimer = setTimeout(async () => {
+                const state = get();
+                const activeId = state.activeWebsiteId;
+                if (!activeId) return;
+                
+                const website = state.websites.find(w => w.id === activeId);
+                if (!website) return;
+
+                if (!USE_WEBSITE_API) {
+                    set((current) => ({
+                        websites: current.websites.map((w) =>
+                            w.id === activeId ? { ...w, lastEdited: new Date().toISOString() } : w
+                        ),
+                        editor: { ...current.editor, saveStatus: 'saved' },
+                    }));
+                    return;
+                }
+                
+                try {
+                    if (state.templateEditor && state.templateEditor.id === activeId) {
+                        const { default: templateApi } = await import('../api/templates');
+                        await templateApi.updateWebsiteTemplate(
+                            state.templateEditor.id,
+                            builderWebsiteToTemplatePayload(website, state.templateEditor)
+                        );
+                        set((current) => ({ editor: { ...current.editor, saveStatus: 'saved' } }));
+                        return;
+                    }
+
+                    const { default: websiteApi } = await import('../api/website');
+                    await websiteApi.updateWebsite(activeId, {
+                        name: website.name,
+                        status: website.status,
+                        content: {
+                            pages: website.pages,
+                            activePageId: website.activePageId,
+                            templateId: website.templateId,
+                            builderMeta: website.builderMeta
+                        }
+                    });
+                    set((current) => ({ editor: { ...current.editor, saveStatus: 'saved' } }));
+                } catch (error) {
+                    console.error("Auto-save failed:", error);
+                    set((current) => ({ editor: { ...current.editor, saveStatus: 'error' } }));
+                }
+                }, SAVE_DEBOUNCE_MS);
             },
 
             selectWebsite: async (id) => {
-                const website = get().websites.find(w => w.id === id);
-                // GET /websites/:id is disabled. Opening a project uses the local store
-                // so a stale or empty API payload cannot overwrite canvas changes.
-                // const { default: websiteApi } = await import('../api/website');
-                // const response = await websiteApi.getWebsiteById(id);
+                let website = get().websites.find(w => w.id === id);
+                if (!website) {
+                    if (!USE_WEBSITE_API) {
+                        website = createLocalWebsite(id);
+                        set((state) => ({ websites: [...state.websites, website!] }));
+                    } else {
+                    // Fetch from backend if not in local store
+                    try {
+                        const { default: websiteApi } = await import('../api/website');
+                        const response = await websiteApi.getWebsiteById(id);
+                        const w = response.data?.website || response.data;
+                        if (w) {
+                            website = {
+                                id: w.id,
+                                name: w.name,
+                                status: w.status,
+                                lastEdited: w.updated_at || w.created_at,
+                                pages: w.content?.pages || [],
+                                activePageId: w.content?.activePageId || null,
+                                templateId: w.content?.templateId || 'blank',
+                                publishedUrl: w.content?.builderMeta?.publishedUrl || undefined,
+                                subdomain: w.content?.builderMeta?.subdomain || undefined,
+                                customDomain: w.content?.builderMeta?.customDomain || undefined,
+                                builderMeta: w.content?.builderMeta || undefined,
+                                sourceTemplateId: w.source_template_id || w.content?.sourceTemplateId || undefined,
+                                institution: w.institution,
+                                institution_id: w.institution_id,
+                                owner_id: w.owner_id,
+                                settings: w.settings
+                            };
+                            set((state) => ({ websites: [...state.websites, website!] }));
+                        }
+                    } catch (error) {
+                        console.error("Failed to fetch website:", error);
+                    }
+                    }
+                }
                 if (website) {
+                    const nextPageId = website.activePageId || website.pages[0]?.id;
+                    if (get().activeWebsiteId === id && get().activePageId === nextPageId) {
+                        return;
+                    }
                     set({
                         activeWebsiteId: id,
-                        activePageId: website.activePageId || website.pages[0]?.id,
+                        activePageId: nextPageId,
                         history: [website.pages],
                         historyIndex: 0
                     });
@@ -556,39 +702,45 @@ const useBuilderStore = create<BuilderStore>()(
             },
 
             deleteWebsite: async (id: string) => {
-                try {
-                    const { default: websiteApi } = await import('../api/website');
-                    await websiteApi.deleteWebsite(id);
-                    set((state) => {
-                        const website = state.websites.find(w => w.id === id);
-                        if (website && website.status !== 'DELETED') {
-                            return {
-                                websites: state.websites.map(w => w.id === id ? { ...w, status: 'DELETED' } : w),
-                                activeWebsiteId: state.activeWebsiteId === id ? null : state.activeWebsiteId
-                            };
-                        }
-                        // If it's already DELETED, it means we are hard-deleting it
+                if (USE_WEBSITE_API) {
+                    try {
+                        const { default: websiteApi } = await import('../api/website');
+                        await websiteApi.deleteWebsite(id);
+                    } catch (error) {
+                        console.error("Failed to delete website from backend:", error);
+                        return;
+                    }
+                }
+
+                set((state) => {
+                    const website = state.websites.find(w => w.id === id);
+                    if (website && website.status !== 'DELETED') {
                         return {
-                            websites: state.websites.filter(w => w.id !== id),
+                            websites: state.websites.map(w => w.id === id ? { ...w, status: 'DELETED' } : w),
                             activeWebsiteId: state.activeWebsiteId === id ? null : state.activeWebsiteId
                         };
-                    });
-                } catch (error) {
-                    console.error("Failed to delete website from backend:", error);
-                }
+                    }
+                    return {
+                        websites: state.websites.filter(w => w.id !== id),
+                        activeWebsiteId: state.activeWebsiteId === id ? null : state.activeWebsiteId
+                    };
+                });
             },
 
             restoreWebsite: async (id: string) => {
-                try {
-                    const { default: websiteApi } = await import('../api/website');
-                    await websiteApi.restoreWebsite(id);
-                    set((state) => ({
-                        websites: state.websites.map(w => w.id === id ? { ...w, status: 'Draft' } : w),
-                    }));
-                } catch (error) {
-                    console.error("Failed to restore website from backend:", error);
-                    throw error;
+                if (USE_WEBSITE_API) {
+                    try {
+                        const { default: websiteApi } = await import('../api/website');
+                        await websiteApi.restoreWebsite(id);
+                    } catch (error) {
+                        console.error("Failed to restore website from backend:", error);
+                        throw error;
+                    }
                 }
+
+                set((state) => ({
+                    websites: state.websites.map(w => w.id === id ? { ...w, status: 'Draft' } : w),
+                }));
             },
 
             setActivePage: (pageId) => set({ activePageId: pageId }),
@@ -702,15 +854,20 @@ const useBuilderStore = create<BuilderStore>()(
                 const { activeWebsiteId, history, historyIndex } = get();
                 if (!activeWebsiteId) return;
 
+                const stamped = newPages.map((page) => ({
+                    ...page,
+                    schemaVersion: page.schemaVersion || SCHEMA_VERSION,
+                }));
+
                 let newHistory = history.slice(0, historyIndex + 1);
-                newHistory.push(newPages);
+                newHistory.push(stamped);
                 if (newHistory.length > MAX_HISTORY) {
                     newHistory = newHistory.slice(newHistory.length - MAX_HISTORY);
                 }
 
                 set((state) => ({
                     websites: state.websites.map(w =>
-                        w.id === activeWebsiteId ? { ...w, pages: newPages, lastEdited: new Date().toISOString() } : w
+                        w.id === activeWebsiteId ? { ...w, pages: stamped, lastEdited: new Date().toISOString() } : w
                     ),
                     history: newHistory,
                     historyIndex: newHistory.length - 1
@@ -1151,10 +1308,10 @@ const useBuilderStore = create<BuilderStore>()(
                 editor: { ...state.editor, dropTarget: target }
             })),
 
-            addCanvasElement: (type) => {
+            addCanvasElement: (type, catalogId) => {
                 const page = get().getActivePage();
                 if (!page) return null;
-                const result = addElementToPage(page, get().editor.selectedNodeId, type);
+                const result = addElementToPage(page, get().editor.selectedNodeId, type, catalogId);
                 get().updateCurrentPage({ sections: result.sections });
                 get().saveActiveWebsite();
                 get().selectNode(result.selectId, result.selectKind);
@@ -1199,6 +1356,41 @@ const useBuilderStore = create<BuilderStore>()(
                 get().saveActiveWebsite();
             },
 
+            resizeCanvasNode: (id, patch) => {
+                const page = get().getActivePage();
+                if (!page) return;
+                const found = findNode(normalizeActiveSections(page), id);
+                if (found?.node.locked) return;
+                get().updateCurrentPage({ sections: applyResize(page, id, get().editor.device, patch) });
+                get().saveActiveWebsite();
+            },
+
+            updateFreePosition: (id, position) => {
+                const page = get().getActivePage();
+                if (!page) return;
+                if (id === 'navbar' && page.navbar) {
+                    get().updateCurrentPage({
+                        navbar: {
+                            ...page.navbar,
+                            styles: {
+                                ...(page.navbar.styles || {}),
+                                position: 'absolute',
+                                left: `${Math.round(position.x)}px`,
+                                top: `${Math.round(position.y)}px`,
+                                ...(position.width != null ? { width: `${Math.round(position.width)}px` } : {}),
+                                sticky: false,
+                            },
+                        },
+                    });
+                    get().saveActiveWebsite();
+                    return;
+                }
+                const found = findNode(normalizeActiveSections(page), id);
+                if (found?.node.locked) return;
+                get().updateCurrentPage({ sections: applyFreePosition(page, id, get().editor.device, position) });
+                get().saveActiveWebsite();
+            },
+
             deleteCanvasNode: (id) => {
                 if (id === 'footer') {
                     const website = get().getActiveWebsite();
@@ -1210,16 +1402,34 @@ const useBuilderStore = create<BuilderStore>()(
                 }
                 const page = get().getActivePage();
                 if (!page) return;
+                if (id === 'navbar' && page.navbar) {
+                    get().updateCurrentPage({ navbar: null });
+                    get().saveActiveWebsite();
+                    get().selectNode(null);
+                    return;
+                }
+                if (id === 'navbar-logo' && page.navbar) {
+                    get().updateNavbar({ logo: { text: '', imageUrl: '' } });
+                    get().selectNode('navbar', 'navbar');
+                    return;
+                }
+                if (id.startsWith('navbar-link-') && page.navbar) {
+                    const linkId = id.slice('navbar-link-'.length);
+                    get().updateNavbar({
+                        links: (page.navbar.links || []).filter((link: { id: string }) => link.id !== linkId),
+                    });
+                    get().selectNode('navbar', 'navbar');
+                    return;
+                }
                 const found = findNode(normalizeActiveSections(page), id);
                 if (found?.node.locked) return;
                 const next = applyDelete(page, id);
                 if (!next) return;
-                const parentId = found?.kind === 'element' ? found.container?.id : found?.kind === 'container' ? found.section?.id : null;
-                const parentKind = found?.kind === 'element' ? 'container' as const : found?.kind === 'container' ? 'section' as const : null;
+                const nextSelection = getSelectionAfterDelete(normalizeActiveSections(page), id);
                 get().updateCurrentPage({ sections: next });
                 get().saveActiveWebsite();
-                if (parentId && parentKind) {
-                    get().selectNode(parentId, parentKind);
+                if (nextSelection) {
+                    get().selectNode(nextSelection.id, nextSelection.kind);
                 } else {
                     set((state) => ({
                         editor: {
@@ -1255,12 +1465,12 @@ const useBuilderStore = create<BuilderStore>()(
                 get().saveActiveWebsite();
             },
 
-            addPaletteItem: (item, target, prebuilt) => {
+            addPaletteItem: (item, target, prebuilt, at) => {
                 const page = get().getActivePage();
                 if (!page) return null;
                 const result = prebuilt
                     ? addPrebuiltAtDropTarget(page, prebuilt, target)
-                    : addItemAtDropTarget(page, item, target);
+                    : addItemAtDropTarget(page, item, target, at);
                 get().updateCurrentPage({ sections: result.sections });
                 get().saveActiveWebsite();
                 get().selectNode(result.selectId, result.selectKind);

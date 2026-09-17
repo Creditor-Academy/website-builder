@@ -18,9 +18,11 @@ export type CanvasDragData = {
   type: string;
   name: string;
   parentId?: string;
+  parentKind?: NodeKind;
   index?: number;
   pageId?: string;
   locked?: boolean;
+  childCount?: number;
 };
 
 export type DropZoneData = {
@@ -150,7 +152,8 @@ export function resolveDropAction(
   overId: string | null,
   activeData: unknown,
   overData: unknown,
-  pageId?: string
+  pageId?: string,
+  calculatedTarget?: DropTarget | null
 ): DropAction | null {
   const activeParsed = parseDragId(String(activeId));
   if (!activeParsed) return null;
@@ -165,12 +168,19 @@ export function resolveDropAction(
       name: item.name || activeParsed.catalogId,
       elementType: item.elementType,
     };
-    if (!overId) return { type: 'palette', item: paletteItem, target: null };
-    return { type: 'palette', item: paletteItem, target: dropTargetFromOver(overId, overData, pageId) };
+    if (!overId && !calculatedTarget) return { type: 'palette', item: paletteItem, target: null };
+    return { type: 'palette', item: paletteItem, target: calculatedTarget || dropTargetFromOver(overId || '', overData, pageId) };
   }
 
   if (activeParsed.origin !== 'node' && activeParsed.origin !== 'layer') return null;
-  if (!overId || overId === activeId) return null;
+  if (!overId || overId === activeId) {
+    if (calculatedTarget) return { type: 'move', nodeId: activeParsed.nodeId, target: calculatedTarget };
+    return null;
+  }
+
+  if (calculatedTarget) {
+    return { type: 'move', nodeId: activeParsed.nodeId, target: calculatedTarget };
+  }
 
   const overParsed = parseDragId(overId);
   const activeCanvas = activeData as CanvasDragData | undefined;

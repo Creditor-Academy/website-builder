@@ -1,24 +1,45 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Check, ChevronLeft, ChevronRight, Heart, Image as ImageIcon, Loader2, X } from 'lucide-react';
+import {
+  Briefcase,
+  Check,
+  Cpu,
+  Film,
+  ExternalLink,
+  Image as ImageIcon,
+  Images,
+  Layers,
+  Loader2,
+  Mountain,
+  Play,
+  Plus,
+  Trees,
+  Users,
+  UtensilsCrossed,
+  X,
+  type LucideIcon,
+} from 'lucide-react';
 import {
   getCuratedPexelsPhotos,
+  getPopularPexelsVideos,
   searchPexelsPhotos,
+  searchPexelsVideos,
+  videoFileUrl,
+  videoName,
+  videoThumb,
+  videoThumbnails,
+  type PexelsMediaType,
   type PexelsOrientation,
   type PexelsPhoto,
   type PexelsPhotoFilters,
   type PexelsSize,
+  type PexelsVideo,
+  type PexelsVideoFilters,
 } from '@/api/pexels';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
-const PAGE_SIZE = 10;
-
-const LICENSE_OPTIONS = [
-  { id: '', label: 'Any use' },
-  { id: 'commercial', label: 'Commercial' },
-  { id: 'personal', label: 'Personal' },
-  { id: 'editorial', label: 'Editorial' },
-] as const;
+const PAGE_SIZE = 20;
 
 const ORIENTATIONS: { id: '' | PexelsOrientation; label: string }[] = [
   { id: '', label: 'Any' },
@@ -48,16 +69,21 @@ const COLORS = [
   { id: 'pink', swatch: '#ec4899' },
 ] as const;
 
-const CATEGORIES = [
-  { id: '', label: 'All Images', count: '8,000+', preview: 'linear-gradient(135deg, #f5d0fe, #e0e7ff)' },
-  { id: 'nature', label: 'Nature', count: '2.4k', preview: 'linear-gradient(135deg, #0f172a, #334155)' },
-  { id: 'abstract', label: 'Abstract', count: '1.8k', preview: 'linear-gradient(135deg, #f8fafc, #e2e8f0)' },
-  { id: 'people', label: 'People', count: '1.2k', preview: 'linear-gradient(135deg, #1e293b, #64748b)' },
-  { id: 'office', label: 'Office', count: '980', preview: 'linear-gradient(135deg, #ecfccb, #fef9c3)' },
-  { id: 'food', label: 'Food', count: '760', preview: 'linear-gradient(135deg, #fff7ed, #fed7aa)' },
-  { id: 'technology', label: 'Technology', count: '650', preview: 'linear-gradient(135deg, #e0f2fe, #bae6fd)' },
-  { id: 'texture', label: 'Texture', count: '520', preview: 'linear-gradient(135deg, #0ea5e9, #22c55e)' },
-] as const;
+const MEDIA_TYPES: { id: PexelsMediaType; label: string }[] = [
+  { id: 'images', label: 'Images' },
+  { id: 'videos', label: 'Videos' },
+];
+
+const CATEGORIES: { id: string; label: string; count: string; preview: string; icon: LucideIcon }[] = [
+  { id: '', label: 'All Images', count: '8,000+', preview: 'linear-gradient(135deg, #f5d0fe, #e0e7ff)', icon: Images },
+  { id: 'nature', label: 'Nature', count: '2.4k', preview: 'linear-gradient(135deg, #0f172a, #334155)', icon: Trees },
+  { id: 'landscape', label: 'Landscape', count: '1.8k', preview: 'linear-gradient(135deg, #f8fafc, #e2e8f0)', icon: Mountain },
+  { id: 'people', label: 'People', count: '1.2k', preview: 'linear-gradient(135deg, #1e293b, #64748b)', icon: Users },
+  { id: 'office', label: 'Office', count: '980', preview: 'linear-gradient(135deg, #ecfccb, #fef9c3)', icon: Briefcase },
+  { id: 'food', label: 'Food', count: '760', preview: 'linear-gradient(135deg, #fff7ed, #fed7aa)', icon: UtensilsCrossed },
+  { id: 'technology', label: 'Technology', count: '650', preview: 'linear-gradient(135deg, #e0f2fe, #bae6fd)', icon: Cpu },
+  { id: 'texture', label: 'Texture', count: '520', preview: 'linear-gradient(135deg, #0ea5e9, #22c55e)', icon: Layers },
+];
 
 function photoName(photo: PexelsPhoto) {
   return (photo.alt || `Photo by ${photo.photographer}`).slice(0, 80);
@@ -65,6 +91,67 @@ function photoName(photo: PexelsPhoto) {
 
 function photoUrl(photo: PexelsPhoto) {
   return photo.src.large || photo.src.medium || photo.src.original;
+}
+
+function photoSrc(photo: PexelsPhoto) {
+  if (photo.height > photo.width) return photo.src.portrait || photo.src.medium || photo.src.large;
+  if (photo.width === photo.height) return photo.src.medium || photo.src.large;
+  return photo.src.landscape || photo.src.large || photo.src.medium;
+}
+
+function formatDuration(seconds: number) {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.max(0, Math.round(seconds % 60));
+  return `${mins}:${String(secs).padStart(2, '0')}`;
+}
+
+function cardAspect(photo: { width: number; height: number }, compact?: boolean) {
+  const ratio = photo.width / Math.max(photo.height, 1);
+  const min = compact ? 0.82 : 0.62;
+  const max = compact ? 1.35 : 1.7;
+  const clamped = Math.min(max, Math.max(min, ratio));
+  return `${clamped} / 1`;
+}
+
+type StockPreview =
+  | { kind: 'image'; photo: PexelsPhoto }
+  | { kind: 'video'; video: PexelsVideo };
+
+function VideoThumb({ video, className }: { video: PexelsVideo; className?: string }) {
+  const sources = useMemo(() => videoThumbnails(video), [video]);
+  const [index, setIndex] = useState(0);
+  const src = sources[Math.min(index, Math.max(0, sources.length - 1))];
+  if (!src) {
+    return <div className={cn('h-full w-full bg-slate-800', className)} />;
+  }
+  return (
+    <img
+      src={src}
+      alt={videoName(video)}
+      referrerPolicy="no-referrer"
+      className={className}
+      onError={() => setIndex((current) => (current < sources.length - 1 ? current + 1 : current))}
+    />
+  );
+}
+
+function SelectBadge({ selected, onToggle }: { selected: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-label={selected ? 'Deselect' : 'Select'}
+      onClick={(event) => {
+        event.stopPropagation();
+        onToggle();
+      }}
+      className={cn(
+        'absolute right-2.5 top-2.5 z-10 flex h-7 w-7 items-center justify-center rounded-full shadow-sm',
+        selected ? 'bg-emerald-500 text-white' : 'bg-white/90 text-slate-500'
+      )}
+    >
+      {selected ? <Check className="h-3.5 w-3.5" strokeWidth={2.75} /> : <Plus className="h-3.5 w-3.5" strokeWidth={2.25} />}
+    </button>
+  );
 }
 
 function pillClass(active: boolean) {
@@ -88,83 +175,144 @@ export function PexelsStockSection({
   importingId,
   onClearQuery,
   onAddToLibrary,
+  layout = 'page',
 }: {
   query: string;
   importingId: string | null;
   onClearQuery?: () => void;
   onCopy?: (id: string, url: string) => void;
-  onAddToLibrary: (photo: PexelsPhoto) => void | Promise<void>;
+  onAddToLibrary: (item: { name: string; url: string; media: 'image' | 'video' }) => void | Promise<void>;
+  layout?: 'page' | 'panel';
 }) {
+  const [mediaType, setMediaType] = useState<PexelsMediaType>('images');
   const [photos, setPhotos] = useState<PexelsPhoto[]>([]);
+  const [videos, setVideos] = useState<PexelsVideo[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [license, setLicense] = useState('');
   const [category, setCategory] = useState('');
   const [orientation, setOrientation] = useState<'' | PexelsOrientation>('');
   const [size, setSize] = useState<'' | PexelsSize>('');
   const [color, setColor] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [preview, setPreview] = useState<StockPreview | null>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const loadLockRef = useRef(false);
+  const isPanel = layout === 'panel';
   const term = query.trim();
   const searchQuery = [term, category].filter(Boolean).join(' ');
-  const hasFilters = Boolean(orientation || size || color || license);
-  const filterKey = `${searchQuery}|${orientation}|${size}|${color}|${license}`;
+  const isVideo = mediaType === 'videos';
+  const hasFilters = Boolean(orientation || size || (!isPanel && !isVideo && color));
+  const filterKey = `${mediaType}|${searchQuery}|${orientation}|${size}|${isPanel || isVideo ? '' : color}`;
 
-  const fetchPage = (nextPage: number) => {
-    const options: PexelsPhotoFilters = {
-      page: nextPage,
-      perPage: PAGE_SIZE,
-      orientation,
-      size,
-      color,
-    };
-    if (searchQuery || hasFilters) {
-      return searchPexelsPhotos(searchQuery || 'photo', options);
+  const fetchPage = async (nextPage: number) => {
+    if (isVideo) {
+      const options: PexelsVideoFilters = { page: nextPage, perPage: PAGE_SIZE, orientation, size };
+      const result = searchQuery || orientation || size
+        ? await searchPexelsVideos(searchQuery || 'nature', options)
+        : await getPopularPexelsVideos({ page: nextPage, perPage: PAGE_SIZE });
+      return { items: result.videos || [], total: result.total_results || result.videos?.length || 0, next: result.next_page };
     }
-    return getCuratedPexelsPhotos({ page: nextPage, perPage: PAGE_SIZE });
+    const options: PexelsPhotoFilters = { page: nextPage, perPage: PAGE_SIZE, orientation, size, color: isPanel ? '' : color };
+    const result = searchQuery || hasFilters
+      ? await searchPexelsPhotos(searchQuery || 'photo', options)
+      : await getCuratedPexelsPhotos({ page: nextPage, perPage: PAGE_SIZE });
+    return { items: result.photos || [], total: result.total_results || result.photos?.length || 0, next: result.next_page };
   };
 
   const filterRef = useRef(filterKey);
   useEffect(() => {
     if (filterRef.current !== filterKey) {
       filterRef.current = filterKey;
+      setPhotos([]);
+      setVideos([]);
+      setHasMore(true);
+      setSelectedIds(new Set());
       if (page !== 1) {
         setPage(1);
         return;
       }
     }
     let cancelled = false;
+    let started = false;
+    loadLockRef.current = true;
     const timer = window.setTimeout(async () => {
-      setLoading(true);
+      started = true;
+      if (page === 1) setLoading(true);
+      else setLoadingMore(true);
       setError(null);
       try {
         const result = await fetchPage(page);
         if (cancelled) return;
-        setPhotos(result.photos || []);
-        setTotal(result.total_results || result.photos?.length || 0);
+        const incoming = result.items;
+        if (isVideo) {
+          setVideos((current) => {
+            if (page === 1) return incoming as PexelsVideo[];
+            const seen = new Set(current.map((video) => video.id));
+            return [...current, ...(incoming as PexelsVideo[]).filter((video) => !seen.has(video.id))];
+          });
+          setPhotos([]);
+        } else {
+          setPhotos((current) => {
+            if (page === 1) return incoming as PexelsPhoto[];
+            const seen = new Set(current.map((photo) => photo.id));
+            return [...current, ...(incoming as PexelsPhoto[]).filter((photo) => !seen.has(photo.id))];
+          });
+          setVideos([]);
+        }
+        setTotal(result.total || incoming.length || 0);
+        setHasMore(Boolean(result.next) && incoming.length > 0);
       } catch (err) {
         if (cancelled) return;
-        setPhotos([]);
-        setTotal(0);
+        if (page === 1) {
+          setPhotos([]);
+          setVideos([]);
+          setTotal(0);
+        }
+        setHasMore(false);
         setError(err instanceof Error ? err.message : 'Could not load stock photos.');
       } finally {
-        if (!cancelled) setLoading(false);
+        loadLockRef.current = false;
+        if (!cancelled) {
+          setLoading(false);
+          setLoadingMore(false);
+        }
       }
-    }, term ? 400 : 0);
+    }, term && page === 1 ? 400 : 0);
 
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
+      if (!started) loadLockRef.current = false;
     };
-  }, [filterKey, page, term]);
+  }, [filterKey, page, term, isVideo]);
 
-  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const rangeStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
-  const rangeEnd = Math.min(page * PAGE_SIZE, total);
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0]?.isIntersecting || !hasMore || loading || loadingMore || loadLockRef.current) return;
+        loadLockRef.current = true;
+        setPage((current) => current + 1);
+      },
+      { rootMargin: '480px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasMore, loading, loadingMore, photos.length, videos.length]);
+
+  const itemsCount = isVideo ? videos.length : photos.length;
   const selectedPhotos = useMemo(
     () => photos.filter((photo) => selectedIds.has(String(photo.id))),
     [photos, selectedIds]
+  );
+  const selectedVideos = useMemo(
+    () => videos.filter((video) => selectedIds.has(String(video.id))),
+    [videos, selectedIds]
   );
 
   const toggleSelected = (id: string) => {
@@ -177,7 +325,6 @@ export function PexelsStockSection({
   };
 
   const clearFilters = () => {
-    setLicense('');
     setCategory('');
     setOrientation('');
     setSize('');
@@ -186,39 +333,60 @@ export function PexelsStockSection({
   };
 
   const applySelected = async () => {
-    for (const photo of selectedPhotos) {
-      await onAddToLibrary(photo);
+    if (isVideo) {
+      for (const video of selectedVideos) {
+        const url = videoFileUrl(video);
+        if (url) await onAddToLibrary({ name: videoName(video), url, media: 'video' });
+      }
+    } else {
+      for (const photo of selectedPhotos) {
+        await onAddToLibrary({ name: photoName(photo), url: photoUrl(photo), media: 'image' });
+      }
     }
     setSelectedIds(new Set());
   };
 
-  const pages = useMemo(() => {
-    if (pageCount <= 5) return Array.from({ length: pageCount }, (_, index) => index + 1);
-    if (page <= 3) return [1, 2, 3, 'ellipsis', pageCount] as const;
-    if (page >= pageCount - 2) return [1, 'ellipsis', pageCount - 2, pageCount - 1, pageCount] as const;
-    return [1, 'ellipsis', page, 'ellipsis', pageCount] as const;
-  }, [page, pageCount]);
-
-  const compactPages = [page > 1 ? page - 1 : null, page, page < pageCount ? page + 1 : null].filter(
-    (value): value is number => value != null
-  );
-
   return (
-    <div className="min-w-0 space-y-4 pb-24 sm:space-y-5 sm:pb-0">
-      <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 shadow-sm sm:rounded-[28px] sm:px-5 sm:py-4">
-        <div className="grid min-w-0 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+    <div className={cn(!isPanel && 'min-w-0 space-y-4 pb-24 sm:space-y-5', isPanel && 'flex h-full min-h-0 flex-col')}>
+      <div className={cn(isPanel ? 'min-h-0 flex-1 space-y-3 overflow-y-auto p-3' : 'contents')}>
+      <div className={cn('rounded-2xl border border-slate-200 bg-white px-3 py-3 shadow-sm', !isPanel && 'sm:rounded-[28px] sm:px-5 sm:py-4')}>
+        <div className="flex min-w-0 flex-wrap items-end gap-x-5 gap-y-3">
           <div className="min-w-0">
-            <p className="mb-2 text-[11px] font-medium text-slate-400">Usage</p>
+            <p className="mb-1.5 text-[11px] font-medium text-slate-400">Type</p>
             <div className={filterScrollClass}>
-              {LICENSE_OPTIONS.map((option) => (
-                <button key={option.id || 'any-use'} type="button" onClick={() => setLicense(option.id)} className={pillClass(license === option.id)}>
+              {MEDIA_TYPES.map((option) => (
+                <button key={option.id} type="button" onClick={() => setMediaType(option.id)} className={pillClass(mediaType === option.id)}>
                   {option.label}
                 </button>
               ))}
             </div>
           </div>
+          {!isPanel && !isVideo && (
           <div className="min-w-0">
-            <p className="mb-2 text-[11px] font-medium text-slate-400">Orientation</p>
+            <p className="mb-1.5 text-[11px] font-medium text-slate-400">Color</p>
+            <div className="inline-flex items-center gap-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {COLORS.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  title={option.id}
+                  onClick={() => setColor(color === option.id ? '' : option.id)}
+                  className="flex h-4 w-4 shrink-0 items-center justify-center touch-manipulation"
+                >
+                  <span
+                    className={cn(
+                      'h-4 w-4 rounded-full border border-slate-200 shadow-sm',
+                      color === option.id && 'ring-2 ring-[#111827] ring-offset-1'
+                    )}
+                    style={{ backgroundColor: option.swatch }}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+          )}
+          <div className="min-w-0">
+            <p className="mb-1.5 text-[11px] font-medium text-slate-400">Orientation</p>
             <div className={filterScrollClass}>
               {ORIENTATIONS.map((option) => (
                 <button key={option.id || 'any-shape'} type="button" onClick={() => setOrientation(option.id)} className={pillClass(orientation === option.id)}>
@@ -227,8 +395,8 @@ export function PexelsStockSection({
               ))}
             </div>
           </div>
-          <div className="min-w-0 md:col-span-2 lg:col-span-1">
-            <p className="mb-2 text-[11px] font-medium text-slate-400">Size</p>
+          <div className="min-w-0">
+            <p className="mb-1.5 text-[11px] font-medium text-slate-400">Size</p>
             <div className={filterScrollClass}>
               {SIZES.map((option) => (
                 <button key={option.id || 'any-size'} type="button" onClick={() => setSize(option.id)} className={pillClass(size === option.id)}>
@@ -237,31 +405,11 @@ export function PexelsStockSection({
               ))}
             </div>
           </div>
-        </div>
-        <div className="mt-3 flex flex-col gap-3 border-t border-slate-100 pt-3 sm:mt-4 sm:flex-row sm:items-center sm:justify-between sm:pt-4">
-          <div className="min-w-0">
-            <p className="mb-2 text-[11px] font-medium text-slate-400">Color</p>
-            <div className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {COLORS.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  title={option.id}
-                  onClick={() => setColor(color === option.id ? '' : option.id)}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center touch-manipulation"
-                >
-                  <span
-                    className={cn(
-                      'h-5 w-5 rounded-full border border-black/10',
-                      color === option.id && 'ring-2 ring-[#111827] ring-offset-2'
-                    )}
-                    style={{ backgroundColor: option.swatch }}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-          <button type="button" onClick={clearFilters} className="self-start text-xs font-medium text-slate-400 hover:text-slate-700 sm:self-auto">
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="ml-auto shrink-0 pb-1.5 text-xs font-medium text-slate-400 hover:text-slate-700"
+          >
             Clear all filters
           </button>
         </div>
@@ -269,7 +417,7 @@ export function PexelsStockSection({
 
       <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0 flex-1">
-          <p className="break-words text-lg font-semibold tracking-tight text-[#111827] sm:text-2xl">{total.toLocaleString()}+ results</p>
+          <p className={cn('break-words font-semibold tracking-tight text-[#111827]', isPanel ? 'text-sm' : 'text-lg sm:text-2xl')}>{total.toLocaleString()}+ results</p>
           {(term || category) && (
             <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2 text-xs text-slate-500 sm:text-sm">
               <span className="shrink-0">Filtered for</span>
@@ -286,11 +434,30 @@ export function PexelsStockSection({
             </div>
           )}
         </div>
+        {!isPanel && (
         <p className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-400 sm:text-xs">
           Most Relevant
         </p>
+        )}
       </div>
 
+      {isPanel ? (
+        <div className="flex min-w-0 flex-wrap gap-1.5">
+          {CATEGORIES.map((item) => {
+            const active = category === item.id;
+            return (
+              <button
+                key={item.id || 'all'}
+                type="button"
+                onClick={() => setCategory(item.id)}
+                className={pillClass(active)}
+              >
+                {item.id === '' ? (isVideo ? 'All Videos' : 'All Images') : item.label}
+              </button>
+            );
+          })}
+        </div>
+      ) : (
       <div className="grid min-w-0 grid-cols-2 gap-2 min-[480px]:grid-cols-3 sm:grid-cols-4 sm:gap-3 lg:grid-cols-6 xl:grid-cols-8">
         {CATEGORIES.map((item) => {
           const active = category === item.id;
@@ -302,159 +469,249 @@ export function PexelsStockSection({
               className="flex min-w-0 w-full flex-col rounded-2xl border border-slate-200 bg-white p-1.5 text-left shadow-sm transition hover:shadow-md sm:p-2"
             >
               <div className="relative mb-1.5 aspect-[16/9] w-full overflow-hidden rounded-xl sm:mb-2" style={{ backgroundImage: item.preview, backgroundSize: 'cover' }}>
+                <span className="absolute inset-0 flex items-center justify-center bg-black/25">
+                  <item.icon className="h-6 w-6 text-white drop-shadow-md sm:h-7 sm:w-7" strokeWidth={1.75} />
+                </span>
                 {active && (
                   <span className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-md bg-white text-[#111827] shadow">
                     <Check className="h-3 w-3" />
                   </span>
                 )}
               </div>
-              <p className="truncate text-[11px] font-semibold text-[#111827] sm:text-sm">{item.label}</p>
+              <p className="truncate text-[11px] font-semibold text-[#111827] sm:text-sm">
+                {item.id === '' ? (isVideo ? 'All Videos' : 'All Images') : item.label}
+              </p>
               <p className="truncate text-[10px] text-slate-400 sm:text-[11px]">{item.id && category === item.id ? `${formatCount(total)}` : item.count}</p>
             </button>
           );
         })}
       </div>
+      )}
 
-      {loading ? (
+      {loading && itemsCount === 0 ? (
         <div className="flex h-[280px] flex-col items-center justify-center gap-3 text-slate-400">
           <Loader2 className="h-6 w-6 animate-spin text-[#111827]" />
-          <p className="text-sm font-medium">Loading stock photos…</p>
+          <p className="text-sm font-medium">{isVideo ? 'Loading stock videos…' : 'Loading stock photos…'}</p>
         </div>
-      ) : error ? (
+      ) : error && itemsCount === 0 ? (
         <div className="flex h-[280px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 text-center">
-          <ImageIcon className="h-8 w-8 opacity-40" />
-          <p className="text-sm font-bold text-[#111827]">Stock photos unavailable</p>
+          {isVideo ? <Film className="h-8 w-8 opacity-40" /> : <ImageIcon className="h-8 w-8 opacity-40" />}
+          <p className="text-sm font-bold text-[#111827]">{isVideo ? 'Stock videos unavailable' : 'Stock photos unavailable'}</p>
           <p className="max-w-md text-xs text-slate-500">{error}. Add PEXELS_API_KEY to .env.local and restart the app.</p>
         </div>
-      ) : photos.length === 0 ? (
+      ) : itemsCount === 0 ? (
         <div className="flex h-[280px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50 text-center">
-          <p className="text-sm font-bold text-[#111827]">No photos match these filters</p>
+          <p className="text-sm font-bold text-[#111827]">No {isVideo ? 'videos' : 'photos'} match these filters</p>
           <p className="text-xs text-slate-500">Clear a filter or try another search term.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          {photos.map((photo) => {
-            const id = String(photo.id);
-            const selected = selectedIds.has(id);
-            return (
-              <button
-                key={photo.id}
-                type="button"
-                onClick={() => toggleSelected(id)}
-                className="group relative aspect-[16/10] overflow-hidden rounded-2xl bg-slate-100"
-              >
-                <img src={photo.src.landscape || photo.src.medium} alt={photo.alt || photoName(photo)} className="h-full w-full object-cover" />
-                <span className="absolute left-2.5 bottom-2.5 rounded-md bg-black/45 px-1.5 py-0.5 text-[10px] font-medium text-white">
-                  {photo.width} × {photo.height}
-                </span>
-                <span
+        <>
+          <div className={cn(isPanel ? 'grid grid-cols-1 gap-3' : 'columns-1 gap-2.5 sm:columns-2 sm:gap-3 lg:columns-3 xl:columns-4 2xl:columns-5')}>
+            {isVideo
+              ? videos.map((video) => {
+                  const id = String(video.id);
+                  const selected = selectedIds.has(id);
+                  const portrait = video.height > video.width;
+                  return (
+                    <div
+                      key={`video-${video.id}`}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setPreview({ kind: 'video', video })}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          setPreview({ kind: 'video', video });
+                        }
+                      }}
+                      className={cn(
+                        'group relative mb-2.5 inline-block w-full cursor-pointer break-inside-avoid overflow-hidden rounded-2xl bg-slate-100 sm:mb-3',
+                        isPanel && 'mb-0 sm:mb-0',
+                        selected && 'ring-2 ring-emerald-500 ring-offset-2'
+                      )}
+                      style={{ aspectRatio: cardAspect(video, isPanel) }}
+                    >
+                      <VideoThumb
+                        video={video}
+                        className={cn('h-full w-full', portrait ? 'object-cover object-center' : 'object-cover')}
+                      />
+                      <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/10">
+                        <span className={cn('flex items-center justify-center rounded-full bg-white/90 text-[#111827] shadow', isPanel ? 'h-11 w-11' : 'h-9 w-9')}>
+                          <Play className={cn('fill-current', isPanel ? 'h-5 w-5' : 'h-4 w-4')} />
+                        </span>
+                      </span>
+                      <span className="absolute left-2.5 bottom-2.5 rounded-md bg-black/45 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                        {formatDuration(video.duration)} · {video.width} × {video.height}
+                      </span>
+                      <SelectBadge selected={selected} onToggle={() => toggleSelected(id)} />
+                    </div>
+                  );
+                })
+              : photos.map((photo) => {
+              const id = String(photo.id);
+              const selected = selectedIds.has(id);
+              const portrait = photo.height > photo.width;
+              return (
+                <div
+                  key={photo.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setPreview({ kind: 'image', photo })}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      setPreview({ kind: 'image', photo });
+                    }
+                  }}
                   className={cn(
-                    'absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-slate-500 shadow-sm',
-                    selected && 'text-[#111827]'
+                    'group relative mb-2.5 inline-block w-full cursor-pointer break-inside-avoid overflow-hidden rounded-2xl bg-slate-100 sm:mb-3',
+                    isPanel && 'mb-0 sm:mb-0',
+                    selected && 'ring-2 ring-emerald-500 ring-offset-2'
                   )}
+                  style={{ aspectRatio: cardAspect(photo, isPanel) }}
                 >
-                  <Heart className={cn('h-3.5 w-3.5', selected && 'fill-current')} />
-                </span>
-              </button>
-            );
-          })}
-        </div>
+                  <img
+                    src={photoSrc(photo)}
+                    alt={photo.alt || photoName(photo)}
+                    className={cn('h-full w-full', portrait ? 'object-cover object-center' : 'object-cover')}
+                  />
+                  <span className="absolute left-2.5 bottom-2.5 rounded-md bg-black/45 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                    {photo.width} × {photo.height}
+                  </span>
+                  <SelectBadge selected={selected} onToggle={() => toggleSelected(id)} />
+                </div>
+              );
+            })}
+          </div>
+          <div ref={sentinelRef} className="h-8 w-full" aria-hidden />
+          {loadingMore && (
+            <div className="flex items-center justify-center gap-2 py-3 text-slate-400">
+              <Loader2 className="h-4 w-4 animate-spin text-[#111827]" />
+              <p className="text-xs font-medium">{isVideo ? 'Loading more videos…' : 'Loading more photos…'}</p>
+            </div>
+          )}
+        </>
       )}
 
       <div className="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <p className="text-center text-xs text-slate-400 sm:text-left">
-          Showing {rangeStart}–{rangeEnd} of {total.toLocaleString()} assets
+          Showing {itemsCount.toLocaleString()} of {total.toLocaleString()} {isVideo ? 'videos' : 'photos'}
         </p>
-        <div className="flex items-center justify-center gap-1">
-          <button
-            type="button"
-            disabled={page <= 1}
-            onClick={() => setPage((value) => Math.max(1, value - 1))}
-            className="inline-flex h-9 min-w-9 items-center justify-center rounded-full text-xs text-slate-500 disabled:opacity-40"
-            aria-label="Previous page"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">Previous</span>
-          </button>
-          <div className="flex items-center gap-1 sm:hidden">
-            {compactPages.map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setPage(item)}
-                className={cn(
-                  'h-9 min-w-9 rounded-full px-2 text-xs font-semibold',
-                  page === item ? 'bg-[#111827] text-white' : 'text-slate-500'
-                )}
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-          <div className="hidden items-center gap-1 sm:flex">
-            {pages.map((item, index) =>
-              item === 'ellipsis' ? (
-                <span key={`e-${index}`} className="px-1 text-xs text-slate-400">
-                  …
-                </span>
-              ) : (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => setPage(item)}
-                  className={cn(
-                    'h-8 min-w-8 rounded-full px-2 text-xs font-semibold',
-                    page === item ? 'bg-[#111827] text-white' : 'text-slate-500 hover:bg-slate-100'
-                  )}
-                >
-                  {item}
-                </button>
-              )
-            )}
-          </div>
-          <button
-            type="button"
-            disabled={page >= pageCount}
-            onClick={() => setPage((value) => Math.min(pageCount, value + 1))}
-            className="inline-flex h-9 min-w-9 items-center justify-center rounded-full text-xs text-slate-500 disabled:opacity-40"
-            aria-label="Next page"
-          >
-            <span className="hidden sm:inline">Next</span>
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="hidden w-full items-center justify-between gap-2 rounded-full bg-[#111827] px-2 py-1.5 text-white sm:flex sm:w-auto">
-          <span className="px-2 text-[11px] font-medium">
-            {selectedIds.size} item{selectedIds.size === 1 ? '' : 's'} ready for canvas
-          </span>
-          <Button
-            type="button"
-            disabled={selectedIds.size === 0 || Boolean(importingId)}
-            onClick={() => void applySelected()}
-            className="h-8 rounded-full bg-white px-3 text-[11px] font-semibold text-[#111827] hover:bg-slate-100"
-          >
-            {importingId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Apply to Artboard'}
-          </Button>
-        </div>
+      </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-3 py-2.5 backdrop-blur sm:hidden" style={{ paddingBottom: 'max(0.625rem, env(safe-area-inset-bottom))' }}>
-        <div className="mx-auto flex max-w-lg items-center gap-2 rounded-full bg-[#111827] px-2 py-1.5 text-white">
-          <span className="min-w-0 flex-1 truncate px-2 text-[11px] font-medium">
-            {selectedIds.size} item{selectedIds.size === 1 ? '' : 's'} ready for canvas
-          </span>
-          <Button
-            type="button"
-            disabled={selectedIds.size === 0 || Boolean(importingId)}
-            onClick={() => void applySelected()}
-            className="h-8 shrink-0 rounded-full bg-white px-3 text-[11px] font-semibold text-[#111827] hover:bg-slate-100"
-          >
-            {importingId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Apply'}
-          </Button>
+      {selectedIds.size > 0 && !preview && (
+        isPanel ? (
+          <div className="shrink-0 border-t border-slate-200 bg-white p-2">
+            <div className="flex items-center gap-2 rounded-full bg-[#111827] px-2 py-1.5 text-white">
+              <span className="min-w-0 flex-1 truncate px-2 text-[11px] font-medium">
+                Add to assets {selectedIds.size}
+              </span>
+              <Button
+                type="button"
+                disabled={Boolean(importingId)}
+                onClick={() => void applySelected()}
+                className="h-8 shrink-0 rounded-full bg-white px-3 text-[11px] font-semibold text-[#111827] hover:bg-slate-100"
+              >
+                {importingId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Add to assets'}
+              </Button>
+            </div>
+          </div>
+        ) : (
+        <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-3 sm:bottom-6">
+          <div className="pointer-events-auto flex w-full max-w-lg items-center gap-2 rounded-full bg-[#111827] px-2 py-1.5 text-white shadow-lg animate-in fade-in slide-in-from-bottom-3 duration-200">
+            <span className="min-w-0 flex-1 truncate px-2 text-[11px] font-medium sm:text-xs">
+              Add to assets {selectedIds.size}
+            </span>
+            <Button
+              type="button"
+              disabled={Boolean(importingId)}
+              onClick={() => void applySelected()}
+              className="h-8 shrink-0 rounded-full bg-white px-3 text-[11px] font-semibold text-[#111827] hover:bg-slate-100"
+            >
+              {importingId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Add to assets'}
+            </Button>
+          </div>
         </div>
-      </div>
+        )
+      )}
+
+      <Dialog open={Boolean(preview)} onOpenChange={(open) => { if (!open) setPreview(null); }}>
+        <DialogContent
+          className={cn(
+            'flex max-h-[min(92dvh,52rem)] w-[calc(100vw-1.5rem)] flex-col gap-0 overflow-hidden p-0',
+            'rounded-2xl border-[#c6c6cd] bg-white shadow-2xl sm:max-w-4xl',
+            '[&>button]:right-3 [&>button]:top-3 [&>button]:text-[#0F172A] [&>button]:hover:bg-slate-100',
+            '[&>button>svg]:mr-0 [&>button>svg]:h-5 [&>button>svg]:w-5',
+          )}
+        >
+          <DialogHeader className="shrink-0 border-b border-[#c6c6cd] px-4 py-3 pr-12 sm:px-5 sm:py-4">
+            <DialogTitle className="truncate text-left text-sm font-semibold text-[#0F172A] sm:text-base">
+              {preview?.kind === 'video'
+                ? videoName(preview.video)
+                : preview?.kind === 'image'
+                  ? photoName(preview.photo)
+                  : 'Stock preview'}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex min-h-0 flex-1 items-center justify-center bg-[#0F172A] p-3 sm:p-6">
+            {preview?.kind === 'video' ? (
+              <video
+                key={preview.video.id}
+                src={videoFileUrl(preview.video)}
+                poster={videoThumb(preview.video)}
+                controls
+                autoPlay
+                playsInline
+                referrerPolicy="no-referrer"
+                className="max-h-[min(58dvh,32rem)] w-full max-w-full rounded-lg bg-black sm:max-h-[min(68dvh,38rem)]"
+              />
+            ) : preview?.kind === 'image' ? (
+              <img
+                src={preview.photo.src.original || photoUrl(preview.photo)}
+                alt={photoName(preview.photo)}
+                className="max-h-[min(58dvh,32rem)] max-w-full rounded-lg object-contain sm:max-h-[min(68dvh,38rem)]"
+              />
+            ) : null}
+          </div>
+
+          {preview && (
+            <div className="flex shrink-0 flex-col gap-3 border-t border-[#c6c6cd] bg-[#fcf8fa] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+              <p className="min-w-0 truncate text-[11px] text-[#76777d] sm:text-xs">
+                <span className="uppercase tracking-wider">{preview.kind === 'video' ? 'Video' : 'Image'}</span>
+                <span className="mx-1">·</span>
+                <span>
+                  {preview.kind === 'video'
+                    ? `${preview.video.width} × ${preview.video.height}`
+                    : `${preview.photo.width} × ${preview.photo.height}`}
+                </span>
+                {preview.kind === 'video' && (
+                  <>
+                    <span className="mx-1">·</span>
+                    <span>{formatDuration(preview.video.duration)}</span>
+                  </>
+                )}
+              </p>
+              <button
+                type="button"
+                className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-[#c6c6cd] bg-white px-3 text-xs font-medium text-[#0F172A] hover:bg-[#eae7e9]"
+                onClick={() => {
+                  const url = preview.kind === 'video'
+                    ? videoFileUrl(preview.video)
+                    : preview.photo.src.original || photoUrl(preview.photo);
+                  if (url) window.open(url, '_blank', 'noopener,noreferrer');
+                }}
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                Preview
+              </button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
-export { photoName, photoUrl };
+export { photoName, photoUrl, videoFileUrl, videoName };

@@ -79,7 +79,7 @@ export function ElementsPanel() {
 
   const handleAdd = (item: CatalogItem) => {
     if (item.kind === 'element' && item.elementType) {
-      addCanvasElement(item.elementType);
+      addCanvasElement(item.elementType, item.id);
       return;
     }
     if (item.kind === 'container') {

@@ -17,7 +17,12 @@ export default defineConfig(({ mode }) => {
       '/pexels-api': {
         target: 'https://api.pexels.com',
         changeOrigin: true,
-        rewrite: (requestPath) => requestPath.replace(/^\/pexels-api/, '/v1'),
+        rewrite: (requestPath) => {
+          if (requestPath.startsWith('/pexels-api/videos')) {
+            return requestPath.replace(/^\/pexels-api/, '');
+          }
+          return requestPath.replace(/^\/pexels-api/, '/v1');
+        },
         configure: (proxy) => {
           proxy.on('proxyReq', (proxyReq) => {
             if (pexelsKey) proxyReq.setHeader('Authorization', pexelsKey);

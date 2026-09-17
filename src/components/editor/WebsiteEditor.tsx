@@ -41,8 +41,8 @@ const NAV_ITEMS = [
   { id: "layers", icon: Layers, label: "Layers" },
   { id: "pages", icon: FileText, label: "Pages" },
   { id: "assets", icon: ImageIcon, label: "Assets" },
-  { id: "design", icon: Palette, label: "Design System" },
-  { id: "history", icon: History, label: "Version History" },
+  { id: "design", icon: Palette, label: "Design" },
+  { id: "history", icon: History, label: "History" },
 ];
 
 function EditorSidebarPanels({ leftNavTab }: { leftNavTab: string }) {
@@ -83,10 +83,10 @@ function NavRailButton({
       aria-label={label}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "flex w-full flex-col items-center gap-0.5 rounded-md px-0.5 py-1 transition-colors",
+        "flex w-full flex-col items-center gap-1 rounded-xl px-1 py-2 transition-colors",
         isActive
-          ? "bg-[#dedfeb] text-[#191b24]"
-          : "text-slate-200 hover:bg-white/10 hover:text-white",
+          ? "bg-white/15 font-semibold text-white"
+          : "text-slate-300 hover:bg-white/10 hover:text-white",
       )}
     >
       <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} />
@@ -107,42 +107,40 @@ function EditorLeftSidebar({
   onClose?: () => void;
 }) {
   return (
-    <div className="h-full w-full flex overflow-hidden bg-white">
-      <div className="flex w-14 shrink-0 flex-col items-center border-r border-white/10 bg-[#131b2e]">
-        <nav className="flex min-h-0 w-full flex-1 flex-col items-center bg-[#0f172a] px-0.5 py-1.5">
-          {onClose && (
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close sidebar"
-              className="mb-1 flex h-7 w-7 items-center justify-center rounded-md text-slate-200 hover:bg-white/10 hover:text-white"
-            >
-              <X className="h-4 w-4" strokeWidth={1.75} />
-            </button>
-          )}
-          <div className="flex w-full flex-col items-center gap-0 overflow-y-auto">
-            {NAV_ITEMS.map((item) => (
-              <NavRailButton
-                key={item.id}
-                id={`tour-nav-${item.id}`}
-                icon={item.icon}
-                label={item.label}
-                isActive={leftNavTab === item.id}
-                onClick={() => setLeftNavTab(item.id)}
-              />
-            ))}
-          </div>
-
-          <div className="mt-auto w-full pt-1">
+    <div className="flex h-full w-full overflow-hidden bg-white">
+      <nav className="flex w-[4.75rem] shrink-0 flex-col items-center border-r border-white/10 bg-[#0F172A] px-1.5 py-3">
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close sidebar"
+            className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+          >
+            <X className="h-[18px] w-[18px]" strokeWidth={1.75} />
+          </button>
+        )}
+        <div className="flex w-full min-h-0 flex-1 flex-col items-center gap-0.5 overflow-y-auto">
+          {NAV_ITEMS.map((item) => (
             <NavRailButton
-              icon={Settings}
-              label="Settings"
-              isActive={leftNavTab === "settings"}
-              onClick={() => setLeftNavTab("settings")}
+              key={item.id}
+              id={`tour-nav-${item.id}`}
+              icon={item.icon}
+              label={item.label}
+              isActive={leftNavTab === item.id}
+              onClick={() => setLeftNavTab(item.id)}
             />
-          </div>
-        </nav>
-      </div>
+          ))}
+        </div>
+
+        <div className="mt-auto w-full border-t border-white/10 pt-2">
+          <NavRailButton
+            icon={Settings}
+            label="Settings"
+            isActive={leftNavTab === "settings"}
+            onClick={() => setLeftNavTab("settings")}
+          />
+        </div>
+      </nav>
 
       <EditorSidebarPanels leftNavTab={leftNavTab} />
     </div>
@@ -152,7 +150,7 @@ function EditorLeftSidebar({
 function EditorContent() {
   const [leftNavTab, setLeftNavTab] = useState("add");
   const store = useBuilderStore();
-  const { editor, setTourState, activeWebsiteId, setEditorState, undo, redo, selectNode, deleteCanvasNode, duplicateCanvasNode, copyCanvasNode, pasteCanvasNode } = store;
+  const { editor, setTourState, activeWebsiteId, setEditorState } = store;
   const { id } = useParams();
   const isCompact = useIsCompact();
 
@@ -169,48 +167,14 @@ function EditorContent() {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || !isCompact) return;
       const target = event.target as HTMLElement;
       if (target.closest("input, textarea, select, [contenteditable='true']")) return;
-
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "z") {
-        event.preventDefault();
-        if (event.shiftKey) redo();
-        else undo();
-        return;
-      }
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "y") {
-        event.preventDefault();
-        redo();
-        return;
-      }
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "d") {
-        event.preventDefault();
-        if (editor.selectedNodeId) duplicateCanvasNode(editor.selectedNodeId);
-        return;
-      }
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "c") {
-        event.preventDefault();
-        copyCanvasNode(editor.selectedNodeId);
-        return;
-      }
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "v") {
-        event.preventDefault();
-        pasteCanvasNode();
-        return;
-      }
-      if ((event.key === "Delete" || event.key === "Backspace") && editor.selectedNodeId && editor.selectedKind !== "navbar") {
-        event.preventDefault();
-        deleteCanvasNode(editor.selectedNodeId);
-        return;
-      }
-      if (event.key === "Escape") {
-        selectNode(null);
-        if (isCompact) setEditorState({ showLeftPanel: false });
-      }
+      setEditorState({ showLeftPanel: false });
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [editor.selectedNodeId, editor.selectedKind, isCompact, undo, redo, selectNode, deleteCanvasNode, duplicateCanvasNode, copyCanvasNode, pasteCanvasNode, setEditorState]);
+  }, [isCompact, setEditorState]);
 
   const showSidebar = !editor.previewMode && editor.showLeftPanel;
   const showRight = !editor.previewMode && editor.showRightPanel && !isCompact;
@@ -250,7 +214,7 @@ function EditorContent() {
                   setLeftNavTab={setLeftNavTab}
                 />
               </ResizablePanel>
-              <ResizableHandle className="w-1 bg-slate-100 hover:bg-primary/30 transition-all border-r border-slate-200" />
+              <ResizableHandle className="w-1 bg-slate-100 hover:bg-[#0F172A]/20 transition-all border-r border-slate-200" />
             </>
           )}
           <ResizablePanel
@@ -278,7 +242,7 @@ function EditorContent() {
           </ResizablePanel>
           {showRight && (
             <>
-              <ResizableHandle className="w-1 bg-slate-100 hover:bg-primary/30 transition-all border-l border-slate-200" />
+              <ResizableHandle className="w-1 bg-slate-100 hover:bg-[#0F172A]/20 transition-all border-l border-slate-200" />
               <ResizablePanel
                 defaultSize={24}
                 minSize={18}
@@ -321,8 +285,8 @@ function EditorContent() {
 
 export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
   const { id } = useParams();
-  const store = useBuilderStore();
-  const { selectWebsite, activeWebsiteId } = store;
+  const activeWebsiteId = useBuilderStore((state) => state.activeWebsiteId);
+  const [hydrated, setHydrated] = useState(() => useBuilderStore.persist.hasHydrated());
 
   useEffect(() => {
     document.documentElement.classList.remove("dark");
@@ -338,12 +302,19 @@ export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
   }, []);
 
   useEffect(() => {
-    if (id) {
-      selectWebsite(id);
-    }
-  }, [id, selectWebsite]);
+    const finish = () => setHydrated(true);
+    const unsub = useBuilderStore.persist.onFinishHydration(finish);
+    if (useBuilderStore.persist.hasHydrated()) finish();
+    return unsub;
+  }, []);
 
-  if (!activeWebsiteId && id) {
+  useEffect(() => {
+    if (hydrated && id) {
+      useBuilderStore.getState().selectWebsite(id);
+    }
+  }, [id, hydrated]);
+
+  if (!hydrated || (!activeWebsiteId && id)) {
     return <Loading fullScreen label="Loading your project" />;
   }
 

@@ -26,6 +26,8 @@ export function DropZone({ parentId, parentKind, index, edge, accepts, label, em
     disabled: false,
   });
 
+  if (!isDragging) return null;
+
   const showLine = isDragging && isOver && !empty;
   const showEmpty = empty;
 
