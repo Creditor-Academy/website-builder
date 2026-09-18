@@ -15,6 +15,12 @@ export type SessionValidationResult = {
 
 let cachedValidation: Promise<SessionValidationResult> | null = null;
 
+function switchBuilderWorkspace(userId: string | null) {
+  return import('@/store/useBuilderStore').then((mod) =>
+    userId ? mod.bindBuilderWorkspace(userId) : mod.resetBuilderWorkspace()
+  );
+}
+
 export function getStoredUser(): AuthUser | null {
   try {
     const raw = localStorage.getItem('user');
@@ -27,14 +33,19 @@ export function getStoredUser(): AuthUser | null {
 }
 
 export function setStoredUser(user: AuthUser) {
+  const previousId = getStoredUser()?.id ?? null;
   localStorage.setItem('user', JSON.stringify(user));
   invalidateSessionCache();
+  if (previousId !== user.id) {
+    return switchBuilderWorkspace(user.id);
+  }
 }
 
 export function clearStoredUser() {
   localStorage.removeItem('user');
   clearCsrfToken();
   invalidateSessionCache();
+  void switchBuilderWorkspace(null);
 }
 
 export function invalidateSessionCache() {
@@ -56,12 +67,15 @@ export async function validateSession(force = false): Promise<SessionValidationR
       const res = await apiClient.get('/users/me');
       const payload = res.data?.user ?? res.data;
       if (payload?.id) {
+        const previousId = getStoredUser()?.id ?? null;
         localStorage.setItem('user', JSON.stringify(payload));
+        if (previousId !== payload.id) {
+          void switchBuilderWorkspace(payload.id);
+        }
         return { valid: true, user: payload as AuthUser };
       }
     } catch {
-      localStorage.removeItem('user');
-      clearCsrfToken();
+      clearStoredUser();
     }
     return { valid: false, user: null };
   })();

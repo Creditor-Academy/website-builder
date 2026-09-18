@@ -259,11 +259,50 @@ export function removeNode(sections: CanvasSection[], id: string): CanvasSection
   });
 }
 
+export function isEmptyCanvasSection(section: CanvasSection): boolean {
+  if ((section.components || []).length > 0) return false;
+  if ((section.children || []).some((container) => (container.children || []).length > 0)) return false;
+  if (section.kind === 'prebuilt') return false;
+  return String(section.type || 'section') === 'section';
+}
+
+export function stripLeadingEmptySections(sections: CanvasSection[]): CanvasSection[] {
+  const firstReal = sections.findIndex((section) => !isEmptyCanvasSection(section));
+  if (firstReal <= 0) return sections;
+  return reindex(sections.slice(firstReal));
+}
+
+export function isPlaceholderCanvasSection(section: CanvasSection): boolean {
+  if (!isEmptyCanvasSection(section)) return false;
+  if (section.properties?.placeholder) return true;
+  return (section.children || []).some((child) => child.name === 'Canvas');
+}
+
+export function stripPlaceholderSections(sections: CanvasSection[]): CanvasSection[] {
+  const next = sections.filter((section) => !isPlaceholderCanvasSection(section));
+  return next.length === sections.length ? sections : reindex(next);
+}
+
 export function insertSection(sections: CanvasSection[], section: CanvasSection, index?: number): CanvasSection[] {
   const next = [...sections];
   const target = index == null ? next.length : Math.max(0, Math.min(index, next.length));
   next.splice(target, 0, { ...section, parentId: section.parentId, order: target });
   return reindex(next);
+}
+
+export function insertSectionReplacingEmpty(
+  sections: CanvasSection[],
+  section: CanvasSection,
+  index?: number
+): CanvasSection[] {
+  const real = sections.filter((item) => !isEmptyCanvasSection(item));
+  if (real.length === 0) {
+    return insertSection([], { ...section, order: 0 }, 0);
+  }
+  const cleaned = stripLeadingEmptySections(sections);
+  const removed = sections.length - cleaned.length;
+  const target = index == null ? cleaned.length : Math.max(0, index - removed);
+  return insertSection(cleaned, section, target);
 }
 
 export function insertContainer(
@@ -439,6 +478,106 @@ export interface LayerTreeNode {
   visible: boolean;
   locked: boolean;
   children: LayerTreeNode[];
+}
+
+export function getSelectionAfterDelete(
+  sections: CanvasSection[],
+  id: string
+): { id: string; kind: NodeKind } | null {
+  const found = findNode(sections, id);
+  if (!found) return null;
+
+  if (found.kind === 'element') {
+    if (found.container) return { id: found.container.id, kind: 'container' };
+    if (found.section) return { id: found.section.id, kind: 'section' };
+    return null;
+  }
+
+  if (found.kind === 'container' && found.section) {
+    return { id: found.section.id, kind: 'section' };
+  }
+
+  if (found.kind === 'section') {
+    const index = sections.findIndex((section) => section.id === id);
+    const nearby = sections[index + 1] || sections[index - 1];
+    return nearby ? { id: nearby.id, kind: 'section' } : null;
+  }
+
+  return null;
+}
+
+export function getKeyboardNeighbor(
+  sections: CanvasSection[],
+  id: string,
+  direction: 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight'
+): { id: string; kind: NodeKind } | null {
+  const found = findNode(sections, id);
+  if (!found) return null;
+
+  if (direction === 'ArrowLeft') {
+    if (found.kind === 'element' && found.container) return { id: found.container.id, kind: 'container' };
+    if (found.kind === 'container' && found.section) return { id: found.section.id, kind: 'section' };
+    return null;
+  }
+
+  if (direction === 'ArrowRight') {
+    if (found.kind === 'section') {
+      const first = sortByOrder((found.node as CanvasSection).children || [])[0];
+      return first ? { id: first.id, kind: 'container' } : null;
+    }
+    if (found.kind === 'container') {
+      const first = sortByOrder((found.node as CanvasContainer).children || [])[0];
+      return first ? { id: first.id, kind: 'element' } : null;
+    }
+    return null;
+  }
+
+  if (found.kind === 'section') {
+    const index = sections.findIndex((section) => section.id === id);
+    const next = direction === 'ArrowDown' ? sections[index + 1] : sections[index - 1];
+    return next ? { id: next.id, kind: 'section' } : null;
+  }
+
+  if (found.kind === 'container' && found.section) {
+    const siblings = sortByOrder(found.section.children || []);
+    const index = siblings.findIndex((container) => container.id === id);
+    const next = direction === 'ArrowDown' ? siblings[index + 1] : siblings[index - 1];
+    return next ? { id: next.id, kind: 'container' } : found.section ? { id: found.section.id, kind: 'section' } : null;
+  }
+
+  if (found.kind === 'element' && found.container) {
+    const siblings = sortByOrder(found.container.children || []);
+    const index = siblings.findIndex((element) => element.id === id);
+    const next = direction === 'ArrowDown' ? siblings[index + 1] : siblings[index - 1];
+    return next ? { id: next.id, kind: 'element' } : { id: found.container.id, kind: 'container' };
+  }
+
+  return null;
+}
+
+export function isFreePositioned(node: { styles?: { position?: string }; properties?: Record<string, unknown> }): boolean {
+  return node.properties?.placement === 'absolute' || node.styles?.position === 'absolute';
+}
+
+export function getFreePosition(node: { properties?: Record<string, unknown>; styles?: { left?: string; top?: string; width?: string; height?: string } }): {
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+  rotation?: number;
+  zIndex?: number;
+} {
+  const stored = node.properties?.freePosition as
+    | { x?: number; y?: number; width?: number; height?: number; rotation?: number; zIndex?: number }
+    | undefined;
+  return {
+    x: stored?.x ?? (parseFloat(String(node.styles?.left || '0')) || 0),
+    y: stored?.y ?? (parseFloat(String(node.styles?.top || '0')) || 0),
+    width: stored?.width,
+    height: stored?.height,
+    rotation: stored?.rotation,
+    zIndex: stored?.zIndex,
+  };
 }
 
 export function collectLayerTree(sections: CanvasSection[], device: DeviceId = 'desktop'): LayerTreeNode[] {

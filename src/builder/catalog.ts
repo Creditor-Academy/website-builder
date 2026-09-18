@@ -51,7 +51,9 @@ export interface CatalogItem {
 }
 
 export const ELEMENT_CATALOG: CatalogItem[] = [
+  { id: 'heading', name: 'Heading', description: 'Page or section title', icon: Type, category: 'Elements', kind: 'element', elementType: 'text' },
   { id: 'text', name: 'Text', description: 'Heading or paragraph', icon: Type, category: 'Elements', kind: 'element', elementType: 'text' },
+  { id: 'paragraph', name: 'Paragraph', description: 'Body copy', icon: Type, category: 'Elements', kind: 'element', elementType: 'text' },
   { id: 'image', name: 'Image', description: 'Responsive image', icon: ImageIcon, category: 'Elements', kind: 'element', elementType: 'image' },
   { id: 'button', name: 'Button', description: 'Call to action', icon: MousePointer2, category: 'Elements', kind: 'element', elementType: 'button' },
   { id: 'icon', name: 'Icon', description: 'Lucide icon', icon: Sparkles, category: 'Elements', kind: 'element', elementType: 'icon' },
@@ -59,6 +61,9 @@ export const ELEMENT_CATALOG: CatalogItem[] = [
   { id: 'divider', name: 'Divider', description: 'Horizontal rule', icon: Minus, category: 'Elements', kind: 'element', elementType: 'divider' },
   { id: 'form', name: 'Form', description: 'Reusable contact form', icon: Mail, category: 'Elements', kind: 'element', elementType: 'form' },
   { id: 'pdf', name: 'PDF Resource', description: 'Downloadable file', icon: FileText, category: 'Elements', kind: 'element', elementType: 'pdf' },
+  { id: 'html', name: 'HTML', description: 'Sanitized custom markup', icon: FileText, category: 'Elements', kind: 'element', elementType: 'html' },
+  { id: 'gallery', name: 'Gallery', description: 'Image grid', icon: ImageIcon, category: 'Elements', kind: 'element', elementType: 'gallery' },
+  { id: 'social', name: 'Social', description: 'Social links', icon: Users, category: 'Elements', kind: 'element', elementType: 'social' },
   { id: 'container', name: 'Container', description: 'Layout wrapper', icon: Square, category: 'Layout', kind: 'container' },
 ];
 

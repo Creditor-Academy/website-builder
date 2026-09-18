@@ -2,6 +2,10 @@ export type DeviceId = 'desktop' | 'tablet' | 'mobile';
 
 export type NodeKind = 'page' | 'section' | 'container' | 'element' | 'navbar' | 'footer';
 
+export const SCHEMA_VERSION = 2;
+
+export const ZOOM_PRESETS = [25, 50, 75, 100, 125, 150, 200] as const;
+
 export type ElementType =
   | 'text'
   | 'image'
@@ -10,7 +14,10 @@ export type ElementType =
   | 'video'
   | 'divider'
   | 'form'
-  | 'pdf';
+  | 'pdf'
+  | 'html'
+  | 'gallery'
+  | 'social';
 
 export type SectionKind = 'canvas' | 'prebuilt';
 
@@ -23,10 +30,20 @@ export type SaveStatus =
   | 'published'
   | 'publish-error';
 
+export interface FreePosition {
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+  rotation?: number;
+  zIndex?: number;
+}
+
 export interface CanvasStyles {
   width?: string;
   height?: string;
   minHeight?: string;
+  minWidth?: string;
   maxWidth?: string;
   padding?: string;
   margin?: string;
@@ -55,6 +72,12 @@ export interface CanvasStyles {
   borderRadius?: string;
   boxShadow?: string;
   position?: string;
+  left?: string;
+  top?: string;
+  right?: string;
+  bottom?: string;
+  zIndex?: number;
+  transform?: string;
   overflow?: string;
   objectFit?: string;
 }
@@ -183,6 +206,8 @@ export const PREBUILT_SECTION_TYPES = new Set([
 export const CANVAS_PARENT_RULES: Record<string, ReadonlySet<string>> = {
   page: new Set(['section']),
   section: new Set(['container']),
-  container: new Set(['text', 'image', 'button', 'icon', 'video', 'divider', 'form', 'pdf']),
+  container: new Set(['text', 'image', 'button', 'icon', 'video', 'divider', 'form', 'pdf', 'html', 'gallery', 'social']),
   element: new Set(),
 };
+
+export const FLOW_ELEMENT_TYPES = CANVAS_PARENT_RULES.container;

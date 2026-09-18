@@ -20,7 +20,7 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from "@/components/ui/use-toast";
-import useBuilderStore from '@/store/useBuilderStore';
+import useBuilderStore, { websitesForCurrentUser } from '@/store/useBuilderStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { SiteThumbnail } from '@/components/dashboard/SiteThumbnail';
@@ -252,7 +252,10 @@ const UserDashboard = () => {
         }
     };
 
-    const siteList = Array.isArray(websites) ? websites : [];
+    const siteList = React.useMemo(
+        () => websitesForCurrentUser(Array.isArray(websites) ? websites : [], user?.id),
+        [websites, user?.id],
+    );
 
     const filteredWebsites = React.useMemo(() => {
         let tempWebsites = siteList.filter((site) =>

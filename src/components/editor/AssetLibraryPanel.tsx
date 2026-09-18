@@ -13,6 +13,7 @@ import type { Asset } from '@/store/useBuilderStore';
 import { useToast } from '@/hooks/use-toast';
 import { DuplicateAssetDialog } from '@/components/ui/DuplicateAssetDialog';
 import { isAdminGlobalAsset, isAssetVisibleToUsers, canDeleteAsset } from '@/lib/assetVisibility';
+import { PexelsStockSection } from '@/components/dashboard/PexelsStockSection';
 
 // ── Shared card used in every tab grid ─────────────────────────────────────
 interface AssetCardProps {
@@ -93,6 +94,8 @@ export function AssetLibraryPanel() {
     const { activeWebsiteId, deleteAsset, fetchAssets, getScopedAssets, uploadAsset, importAssetFromUrl } = useBuilderStore();
     const { toast } = useToast();
     const [search, setSearch] = useState('');
+    const [libraryTab, setLibraryTab] = useState('all');
+    const [importingStockId, setImportingStockId] = useState<string | null>(null);
     const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
     const [urlInput, setUrlInput] = useState('');
     const [urlName, setUrlName] = useState('');
@@ -198,6 +201,28 @@ export function AssetLibraryPanel() {
         }
     };
 
+    const handleAddStockMedia = async (item: { name: string; url: string; media: 'image' | 'video' }) => {
+        if (!activeWebsiteId) return;
+        setImportingStockId(item.url);
+        try {
+            await importAssetFromUrl(item.name, item.url, { websiteId: activeWebsiteId });
+            toast({
+                title: 'Added to assets',
+                description: item.media === 'video'
+                    ? 'This Pexels video is now in this website’s library.'
+                    : 'This Pexels photo is now in this website’s library.',
+            });
+        } catch (error: any) {
+            toast({
+                variant: 'destructive',
+                title: item.media === 'video' ? 'Could not add video' : 'Could not add photo',
+                description: error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to import stock media.',
+            });
+        } finally {
+            setImportingStockId(null);
+        }
+    };
+
     const copyToClipboard = (url: string) => {
         navigator.clipboard.writeText(url);
         // Could add a toast notification here
@@ -255,7 +280,7 @@ export function AssetLibraryPanel() {
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
                     <Input
-                        placeholder="Search assets..."
+                        placeholder={libraryTab === 'pexels' ? 'Search stock photos and videos…' : 'Search assets...'}
                         className="pl-9 h-9 text-xs bg-slate-50 border-slate-100 focus:bg-white transition-all rounded-xl"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -263,15 +288,27 @@ export function AssetLibraryPanel() {
                 </div>
             </div>
 
-            <Tabs defaultValue="all" className="flex-1 flex flex-col min-h-0">
-                <div className="bg-white px-3 border-b border-slate-100">
+            <Tabs value={libraryTab} onValueChange={setLibraryTab} className="flex-1 flex flex-col min-h-0">
+                <div className="bg-white px-3 border-b border-slate-100 overflow-x-auto [scrollbar-width:none]">
                     <TabsList className="bg-transparent h-10 gap-4">
                         <TabsTrigger value="all" className="text-[11px] font-bold data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-[#0F172A] data-[state=active]:border-b-2 data-[state=active]:border-[#0F172A] rounded-none px-0">All</TabsTrigger>
                         <TabsTrigger value="images" className="text-[11px] font-bold data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-[#0F172A] data-[state=active]:border-b-2 data-[state=active]:border-[#0F172A] rounded-none px-0">Images</TabsTrigger>
                         <TabsTrigger value="videos" className="text-[11px] font-bold data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-[#0F172A] data-[state=active]:border-b-2 data-[state=active]:border-[#0F172A] rounded-none px-0">Videos</TabsTrigger>
+                        <TabsTrigger value="pexels" className="text-[11px] font-bold data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-[#0F172A] data-[state=active]:border-b-2 data-[state=active]:border-[#0F172A] rounded-none px-0">Pexels</TabsTrigger>
                     </TabsList>
                 </div>
 
+                {libraryTab === 'pexels' ? (
+                    <div className="flex-1 min-h-0">
+                        <PexelsStockSection
+                            layout="panel"
+                            query={search}
+                            importingId={importingStockId}
+                            onClearQuery={() => setSearch('')}
+                            onAddToLibrary={(item) => void handleAddStockMedia(item)}
+                        />
+                    </div>
+                ) : (
                 <ScrollArea className="flex-1">
                     <div className="p-4">
                         <TabsContent value="all" className="mt-0 outline-none">
@@ -349,6 +386,7 @@ export function AssetLibraryPanel() {
                         </TabsContent>
                     </div>
                 </ScrollArea>
+                )}
             </Tabs>
 
             {/* URL Upload Dialog */}

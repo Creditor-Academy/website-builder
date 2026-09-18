@@ -24,6 +24,7 @@ import contactApi from "@/api/contact";
 import { API_BASE_URL } from "@/api/client";
 import axios from "axios";
 import { useTheme } from "@/hooks/useTheme";
+import { BUILDER_STORAGE_NAME, builderStorageKey, getStoredUserId } from "@/lib/builderStorage";
 
 export default function Contact() {
   const [searchParams] = useSearchParams();
@@ -42,7 +43,8 @@ export default function Contact() {
 
   const getWebsiteIdFromBuilderStorage = () => {
     try {
-      const raw = localStorage.getItem('website-builder-storage');
+      const key = builderStorageKey(getStoredUserId());
+      const raw = localStorage.getItem(key) || localStorage.getItem(BUILDER_STORAGE_NAME);
       if (!raw) return '';
       const parsed = JSON.parse(raw);
       const activeId = parsed?.state?.activeWebsiteId;

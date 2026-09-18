@@ -46,7 +46,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
           <h1 className="text-2xl font-semibold">Something went wrong</h1>
           <button
             className="rounded-md bg-primary px-4 py-2 text-white"
-            onClick={() => this.setState({ hasError: false })}
+            onClick={() => window.location.reload()}
           >
             Try again
           </button>

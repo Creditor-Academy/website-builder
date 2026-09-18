@@ -26,6 +26,8 @@ export function DropZone({ parentId, parentKind, index, edge, accepts, label, em
     disabled: false,
   });
 
+  if (!isDragging && !empty) return null;
+
   const showLine = isDragging && isOver && !empty;
   const showEmpty = empty;
 
@@ -42,7 +44,8 @@ export function DropZone({ parentId, parentKind, index, edge, accepts, label, em
         'select-none',
         showEmpty
           ? cn(
-              'flex min-h-[72px] items-center justify-center rounded-lg border border-dashed text-[11px] font-medium',
+              'pointer-events-auto flex items-center justify-center rounded-lg border border-dashed text-[11px] font-medium',
+              parentKind === 'page' ? 'mx-8 my-10 min-h-[240px]' : 'min-h-[72px]',
               isOver
                 ? 'border-sky-400 bg-sky-50 text-sky-700'
                 : 'border-slate-200 bg-slate-50/70 text-slate-400'

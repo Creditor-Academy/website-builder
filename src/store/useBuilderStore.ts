@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import {
     getBlankPage,
     getBusinessPage,
@@ -11,7 +11,8 @@ import {
     getCoachPage
 } from '@/lib/defaultPageData';
 import { builderWebsiteToTemplatePayload, templateToBuilderWebsite } from '@/lib/templateBuilder';
-import type { DeviceId, DropTarget, ElementType, NodeKind, SaveStatus } from '@/builder/types';
+import type { DeviceId, DropTarget, ElementType, FreePosition, NodeKind, SaveStatus } from '@/builder/types';
+import { SCHEMA_VERSION } from '@/builder/types';
 import type { PaletteDragData } from '@/builder/dnd';
 import {
     addContainerToPage,
@@ -20,16 +21,35 @@ import {
     addPrebuiltAtDropTarget,
     addSectionToPage,
     applyDelete,
+    applyDeleteMany,
     applyDuplicate,
+    applyDuplicateMany,
     applyMove,
     applyNodePatch,
     applyStylePatch,
-    copyNodeToClipboard,
+    applyFreePosition,
+    applyManyFreePositions,
+    applyResize,
+    applyLayerShift,
+    copyNodesToClipboard,
     normalizeActiveSections,
     pasteClipboard,
     type CanvasClipboard,
+    type LayerShift,
 } from '@/builder/documentOps';
-import { findNode } from '@/builder/tree';
+import { findNode, getSelectionAfterDelete } from '@/builder/tree';
+import { readNavbarFlowHeight } from '@/builder/canvas/navbarSlot';
+import { nextSelectedIds, resolveNodeKind, selectedIdsOf, selectionCanJoin, type SelectMode } from '@/builder/selection';
+import { USE_WEBSITE_API } from '@/lib/localMode';
+import {
+    getStoredUserId,
+    migrateLegacyBuilderStorage,
+    pauseBuilderPersist,
+    resumeBuilderPersist,
+    userScopedBuilderStorage,
+} from '@/lib/builderStorage';
+
+export { USE_WEBSITE_API };
 
 let _saveTimer: ReturnType<typeof setTimeout> | null = null;
 const SAVE_DEBOUNCE_MS = 800;
@@ -44,6 +64,21 @@ const TEMPLATE_MAP: Record<string, () => any> = {
     agencies: getAgenciesPage,
     coaching: getCoachPage,
 };
+
+function createLocalWebsite(id: string, name = 'Untitled website', template = 'blank'): Website {
+    const templateFn = TEMPLATE_MAP[template] || TEMPLATE_MAP.blank;
+    const homePage: Page = { ...templateFn(), schemaVersion: SCHEMA_VERSION };
+    return {
+        id,
+        name,
+        lastEdited: new Date().toISOString(),
+        status: 'Draft',
+        pages: [homePage],
+        activePageId: homePage.id,
+        templateId: template,
+        owner_id: getStoredUserId() || undefined,
+    };
+}
 
 export interface Asset {
     id: string;
@@ -124,6 +159,7 @@ export interface Page {
     navbar: any;
     footer: any;
     globalStyles: any;
+    schemaVersion?: number;
 }
 
 export interface Website {
@@ -149,6 +185,7 @@ export interface EditorState {
     selectedSectionId: string | null;
     selectedComponentId: string | null;
     selectedNodeId: string | null;
+    selectedNodeIds: string[];
     selectedKind: NodeKind | null;
     hoveredNodeId: string | null;
     editMode: 'content' | 'style';
@@ -178,6 +215,36 @@ export interface TemplateEditorState {
     scope?: 'GLOBAL' | 'INSTITUTION';
 }
 
+const INITIAL_EDITOR: EditorState = {
+    selectedSectionId: null,
+    selectedComponentId: null,
+    selectedNodeId: null,
+    selectedNodeIds: [],
+    selectedKind: null,
+    hoveredNodeId: null,
+    editMode: 'content',
+    isDragging: false,
+    zoom: 100,
+    device: 'desktop',
+    showGrid: false,
+    previewMode: false,
+    showLeftPanel: true,
+    showRightPanel: true,
+    saveStatus: 'idle',
+    dropTarget: null,
+    showComponentBar: false,
+    tour: {
+        isActive: false,
+        step: 0,
+        isFinished: false,
+    },
+};
+
+export function websitesForCurrentUser(websites: Website[], userId?: string | null): Website[] {
+    if (!userId) return [];
+    return websites.filter((site) => !site.owner_id || site.owner_id === userId);
+}
+
 export interface BuilderStore {
     websites: Website[];
     activeWebsiteId: string | null;
@@ -190,6 +257,7 @@ export interface BuilderStore {
     templateEditor: TemplateEditorState | null;
     clipboard: CanvasClipboard | null;
 
+    resetWorkspace: () => void;
     setWebsites: (websites: Website[]) => void;
     startTemplateEditing: (template: any) => void;
     stopTemplateEditing: () => void;
@@ -234,25 +302,34 @@ export interface BuilderStore {
     setTourState: (updates: Partial<EditorState['tour']>) => void;
     selectSection: (id: string | null) => void;
     selectComponent: (id: string | null) => void;
-    selectNode: (id: string | null, kind?: NodeKind | null) => void;
+    selectNode: (id: string | null, kind?: NodeKind | null, mode?: SelectMode) => void;
+    selectNodes: (ids: string[]) => void;
     setDevice: (device: DeviceId) => void;
     setZoom: (zoom: number) => void;
     setSaveStatus: (status: SaveStatus) => void;
     setDropTarget: (target: DropTarget | null) => void;
-    addCanvasElement: (type: ElementType) => string | null;
+    addCanvasElement: (type: ElementType, catalogId?: string) => string | null;
     addCanvasContainer: () => string | null;
     addCanvasSection: (section?: Record<string, unknown>) => string | null;
     updateCanvasNode: (id: string, patch: Record<string, unknown>) => void;
     updateCanvasStyles: (id: string, patch: Record<string, unknown>) => void;
+    resizeCanvasNode: (id: string, patch: Record<string, unknown>) => void;
+    updateFreePosition: (id: string, position: FreePosition) => void;
+    updateFreePositions: (items: Array<{ id: string; position: FreePosition }>) => void;
     deleteCanvasNode: (id: string) => void;
+    deleteCanvasNodes: (ids: string[]) => void;
     duplicateCanvasNode: (id: string) => string | null;
+    duplicateCanvasNodes: (ids: string[]) => string[];
     moveCanvasNode: (id: string, target: DropTarget) => void;
-    addPaletteItem: (item: PaletteDragData, target: DropTarget | null, prebuilt?: Record<string, unknown>) => string | null;
+    addPaletteItem: (item: PaletteDragData, target: DropTarget | null, prebuilt?: Record<string, unknown>, at?: { x: number; y: number }) => string | null;
     copyCanvasNode: (id?: string | null) => void;
     pasteCanvasNode: () => string | null;
+    shiftCanvasLayer: (id: string, action: LayerShift) => void;
     undo: () => void;
     redo: () => void;
 }
+
+migrateLegacyBuilderStorage();
 
 const useBuilderStore = create<BuilderStore>()(
     persist(
@@ -261,35 +338,26 @@ const useBuilderStore = create<BuilderStore>()(
             websites: [],
             activeWebsiteId: null,
             activePageId: null,
-            editor: {
-                selectedSectionId: null,
-                selectedComponentId: null,
-                selectedNodeId: null,
-                selectedKind: null,
-                hoveredNodeId: null,
-                editMode: 'content',
-                isDragging: false,
-                zoom: 100,
-                device: 'desktop',
-                showGrid: false,
-                previewMode: false,
-                showLeftPanel: true,
-                showRightPanel: true,
-                saveStatus: 'idle',
-                dropTarget: null,
-                showComponentBar: false,
-                tour: {
-                    isActive: false,
-                    step: 0,
-                    isFinished: false,
-                },
-            },
+            editor: { ...INITIAL_EDITOR },
             globalAssets: [],
             websiteAssetsByWebsiteId: {},
             history: [],
             historyIndex: -1,
             templateEditor: null,
             clipboard: null,
+
+            resetWorkspace: () => set({
+                websites: [],
+                activeWebsiteId: null,
+                activePageId: null,
+                editor: { ...INITIAL_EDITOR },
+                globalAssets: [],
+                websiteAssetsByWebsiteId: {},
+                history: [],
+                historyIndex: -1,
+                templateEditor: null,
+                clipboard: null,
+            }),
 
             // Actions
             setWebsites: (websites) => set({ websites }),
@@ -318,6 +386,7 @@ const useBuilderStore = create<BuilderStore>()(
                         selectedSectionId: null,
                         selectedComponentId: null,
                         selectedNodeId: null,
+                        selectedNodeIds: [],
                         selectedKind: null,
                         showLeftPanel: true,
                         showRightPanel: true,
@@ -372,6 +441,8 @@ const useBuilderStore = create<BuilderStore>()(
             },
 
             fetchWebsites: async (institutionId?: string, isAdmin = false) => {
+                if (!USE_WEBSITE_API) return;
+
                 try {
                     const { default: websiteApi } = await import('../api/website');
                     let response;
@@ -442,15 +513,6 @@ const useBuilderStore = create<BuilderStore>()(
                         ...activeWebsites.filter((w: any) => !deletedIds.has(w.id)),
                         ...deletedWebsites,
                     ];
-                    existingById.forEach((site) => {
-                        if (!merged.some((item) => item.id === site.id)) {
-                            merged.push(site);
-                        }
-                    });
-
-                    if (merged.length === 0 && existingById.size > 0) {
-                        return;
-                    }
 
                     set({ websites: merged });
                 } catch (error) {
@@ -459,6 +521,26 @@ const useBuilderStore = create<BuilderStore>()(
             },
 
             createWebsite: async (name, template = 'blank', institutionId?: string) => {
+                if (!USE_WEBSITE_API) {
+                    const newWebsite = createLocalWebsite(uuidv4(), name, template);
+                    set((state) => ({
+                        websites: [...state.websites, newWebsite],
+                        activeWebsiteId: newWebsite.id,
+                        activePageId: newWebsite.activePageId,
+                        history: [newWebsite.pages],
+                        historyIndex: 0,
+                        editor: {
+                            ...state.editor,
+                            tour: {
+                                isActive: true,
+                                step: 0,
+                                isFinished: false,
+                            }
+                        }
+                    }));
+                    return newWebsite.id;
+                }
+
                 const isLocalTemplate = Boolean(TEMPLATE_MAP[template]);
                 const templateFn = TEMPLATE_MAP[template] || TEMPLATE_MAP.blank;
                 const homePage = templateFn();
@@ -525,28 +607,129 @@ const useBuilderStore = create<BuilderStore>()(
                 set((state) => ({
                     websites: state.websites.map(w => w.id === id ? { ...w, ...updates } : w)
                 }));
-                // PATCH /websites/:id disabled — keep canvas changes local only.
-                // if (updates.pages || updates.activePageId || updates.name || updates.status) {
-                //     const { default: websiteApi } = await import('../api/website');
-                //     await websiteApi.updateWebsite(id, { ... });
-                // }
+
+                if (!USE_WEBSITE_API) return;
+                
+                // If the update includes content-affecting fields, sync to backend
+                if (updates.pages || updates.activePageId || updates.name || updates.status) {
+                    try {
+                        const { default: websiteApi } = await import('../api/website');
+                        const website = get().websites.find(w => w.id === id);
+                        if (website) {
+                            await websiteApi.updateWebsite(id, {
+                                name: website.name,
+                                status: website.status,
+                                content: {
+                                    pages: website.pages,
+                                    activePageId: website.activePageId,
+                                    templateId: website.templateId,
+                                    builderMeta: website.builderMeta
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        console.error("Failed to update website on backend:", error);
+                    }
+                }
             },
 
             saveActiveWebsite: async () => {
-                // Autosave API is off until canvas move/resize is finished.
-                // Do not PATCH /websites/:id and do not flip saveStatus (avoids extra renders mid-drag).
+                if (_saveTimer) clearTimeout(_saveTimer);
+                set((state) => ({ editor: { ...state.editor, saveStatus: 'saving' } }));
+                _saveTimer = setTimeout(async () => {
+                const state = get();
+                const activeId = state.activeWebsiteId;
+                if (!activeId) return;
+                
+                const website = state.websites.find(w => w.id === activeId);
+                if (!website) return;
+
+                if (!USE_WEBSITE_API) {
+                    set((current) => ({
+                        websites: current.websites.map((w) =>
+                            w.id === activeId ? { ...w, lastEdited: new Date().toISOString() } : w
+                        ),
+                        editor: { ...current.editor, saveStatus: 'saved' },
+                    }));
+                    return;
+                }
+                
+                try {
+                    if (state.templateEditor && state.templateEditor.id === activeId) {
+                        const { default: templateApi } = await import('../api/templates');
+                        await templateApi.updateWebsiteTemplate(
+                            state.templateEditor.id,
+                            builderWebsiteToTemplatePayload(website, state.templateEditor)
+                        );
+                        set((current) => ({ editor: { ...current.editor, saveStatus: 'saved' } }));
+                        return;
+                    }
+
+                    const { default: websiteApi } = await import('../api/website');
+                    await websiteApi.updateWebsite(activeId, {
+                        name: website.name,
+                        status: website.status,
+                        content: {
+                            pages: website.pages,
+                            activePageId: website.activePageId,
+                            templateId: website.templateId,
+                            builderMeta: website.builderMeta
+                        }
+                    });
+                    set((current) => ({ editor: { ...current.editor, saveStatus: 'saved' } }));
+                } catch (error) {
+                    console.error("Auto-save failed:", error);
+                    set((current) => ({ editor: { ...current.editor, saveStatus: 'error' } }));
+                }
+                }, SAVE_DEBOUNCE_MS);
             },
 
             selectWebsite: async (id) => {
-                const website = get().websites.find(w => w.id === id);
-                // GET /websites/:id is disabled. Opening a project uses the local store
-                // so a stale or empty API payload cannot overwrite canvas changes.
-                // const { default: websiteApi } = await import('../api/website');
-                // const response = await websiteApi.getWebsiteById(id);
+                let website = get().websites.find(w => w.id === id);
+                if (!website) {
+                    if (!USE_WEBSITE_API) {
+                        website = createLocalWebsite(id);
+                        set((state) => ({ websites: [...state.websites, website!] }));
+                    } else {
+                    // Fetch from backend if not in local store
+                    try {
+                        const { default: websiteApi } = await import('../api/website');
+                        const response = await websiteApi.getWebsiteById(id);
+                        const w = response.data?.website || response.data;
+                        if (w) {
+                            website = {
+                                id: w.id,
+                                name: w.name,
+                                status: w.status,
+                                lastEdited: w.updated_at || w.created_at,
+                                pages: w.content?.pages || [],
+                                activePageId: w.content?.activePageId || null,
+                                templateId: w.content?.templateId || 'blank',
+                                publishedUrl: w.content?.builderMeta?.publishedUrl || undefined,
+                                subdomain: w.content?.builderMeta?.subdomain || undefined,
+                                customDomain: w.content?.builderMeta?.customDomain || undefined,
+                                builderMeta: w.content?.builderMeta || undefined,
+                                sourceTemplateId: w.source_template_id || w.content?.sourceTemplateId || undefined,
+                                institution: w.institution,
+                                institution_id: w.institution_id,
+                                owner_id: w.owner_id,
+                                settings: w.settings
+                            };
+                            set((state) => ({ websites: [...state.websites, website!] }));
+                        }
+                    } catch (error) {
+                        console.error("Failed to fetch website:", error);
+                    }
+                    }
+                }
                 if (website) {
+                    const nextPageId = website.activePageId || website.pages[0]?.id;
+                    if (get().activeWebsiteId === id && get().activePageId === nextPageId) {
+                        return;
+                    }
                     set({
                         activeWebsiteId: id,
-                        activePageId: website.activePageId || website.pages[0]?.id,
+                        activePageId: nextPageId,
                         history: [website.pages],
                         historyIndex: 0
                     });
@@ -556,39 +739,45 @@ const useBuilderStore = create<BuilderStore>()(
             },
 
             deleteWebsite: async (id: string) => {
-                try {
-                    const { default: websiteApi } = await import('../api/website');
-                    await websiteApi.deleteWebsite(id);
-                    set((state) => {
-                        const website = state.websites.find(w => w.id === id);
-                        if (website && website.status !== 'DELETED') {
-                            return {
-                                websites: state.websites.map(w => w.id === id ? { ...w, status: 'DELETED' } : w),
-                                activeWebsiteId: state.activeWebsiteId === id ? null : state.activeWebsiteId
-                            };
-                        }
-                        // If it's already DELETED, it means we are hard-deleting it
+                if (USE_WEBSITE_API) {
+                    try {
+                        const { default: websiteApi } = await import('../api/website');
+                        await websiteApi.deleteWebsite(id);
+                    } catch (error) {
+                        console.error("Failed to delete website from backend:", error);
+                        return;
+                    }
+                }
+
+                set((state) => {
+                    const website = state.websites.find(w => w.id === id);
+                    if (website && website.status !== 'DELETED') {
                         return {
-                            websites: state.websites.filter(w => w.id !== id),
+                            websites: state.websites.map(w => w.id === id ? { ...w, status: 'DELETED' } : w),
                             activeWebsiteId: state.activeWebsiteId === id ? null : state.activeWebsiteId
                         };
-                    });
-                } catch (error) {
-                    console.error("Failed to delete website from backend:", error);
-                }
+                    }
+                    return {
+                        websites: state.websites.filter(w => w.id !== id),
+                        activeWebsiteId: state.activeWebsiteId === id ? null : state.activeWebsiteId
+                    };
+                });
             },
 
             restoreWebsite: async (id: string) => {
-                try {
-                    const { default: websiteApi } = await import('../api/website');
-                    await websiteApi.restoreWebsite(id);
-                    set((state) => ({
-                        websites: state.websites.map(w => w.id === id ? { ...w, status: 'Draft' } : w),
-                    }));
-                } catch (error) {
-                    console.error("Failed to restore website from backend:", error);
-                    throw error;
+                if (USE_WEBSITE_API) {
+                    try {
+                        const { default: websiteApi } = await import('../api/website');
+                        await websiteApi.restoreWebsite(id);
+                    } catch (error) {
+                        console.error("Failed to restore website from backend:", error);
+                        throw error;
+                    }
                 }
+
+                set((state) => ({
+                    websites: state.websites.map(w => w.id === id ? { ...w, status: 'Draft' } : w),
+                }));
             },
 
             setActivePage: (pageId) => set({ activePageId: pageId }),
@@ -702,15 +891,20 @@ const useBuilderStore = create<BuilderStore>()(
                 const { activeWebsiteId, history, historyIndex } = get();
                 if (!activeWebsiteId) return;
 
+                const stamped = newPages.map((page) => ({
+                    ...page,
+                    schemaVersion: page.schemaVersion || SCHEMA_VERSION,
+                }));
+
                 let newHistory = history.slice(0, historyIndex + 1);
-                newHistory.push(newPages);
+                newHistory.push(stamped);
                 if (newHistory.length > MAX_HISTORY) {
                     newHistory = newHistory.slice(newHistory.length - MAX_HISTORY);
                 }
 
                 set((state) => ({
                     websites: state.websites.map(w =>
-                        w.id === activeWebsiteId ? { ...w, pages: newPages, lastEdited: new Date().toISOString() } : w
+                        w.id === activeWebsiteId ? { ...w, pages: stamped, lastEdited: new Date().toISOString() } : w
                     ),
                     history: newHistory,
                     historyIndex: newHistory.length - 1
@@ -1100,6 +1294,7 @@ const useBuilderStore = create<BuilderStore>()(
                     selectedSectionId: id,
                     selectedComponentId: null,
                     selectedNodeId: id,
+                    selectedNodeIds: id ? [id] : [],
                     selectedKind: id ? 'section' : null,
                     showComponentBar: false,
                     showRightPanel: id ? true : state.editor.showRightPanel,
@@ -1111,25 +1306,58 @@ const useBuilderStore = create<BuilderStore>()(
                     ...state.editor,
                     selectedComponentId: id,
                     selectedNodeId: id,
+                    selectedNodeIds: id ? [id] : [],
                     selectedKind: id ? 'element' : state.editor.selectedKind,
                     showComponentBar: id ? state.editor.showComponentBar : false,
                     showRightPanel: !!id || state.editor.showRightPanel,
                 }
             })),
 
-            selectNode: (id, kind = null) => set((state) => {
+            selectNode: (id, kind = null, mode = 'replace') => set((state) => {
                 const page = get().getActivePage();
-                const location = page ? findNode(page.sections || [], id) : null;
-                const resolvedKind = kind || location?.kind || null;
+                const sections = page ? normalizeActiveSections(page) : [];
+                const location = findNode(sections, id);
+                const resolvedKind = kind || location?.kind || resolveNodeKind(sections, id || '', null);
+                const currentIds = selectedIdsOf(state.editor);
+                const canJoin = selectionCanJoin(state.editor.selectedKind, resolvedKind, currentIds.length);
+                const ids = nextSelectedIds(currentIds, id, mode, canJoin);
+                const primaryId = id && ids.includes(id) ? id : ids[ids.length - 1] || null;
+                const primaryLocation = primaryId ? findNode(sections, primaryId) : null;
+                const primaryKind = primaryId
+                  ? (primaryId === id ? resolvedKind : primaryLocation?.kind || resolveNodeKind(sections, primaryId, null))
+                  : null;
                 return {
                     editor: {
                         ...state.editor,
-                        selectedNodeId: id,
-                        selectedKind: id ? resolvedKind : null,
-                        selectedSectionId: resolvedKind === 'section'
-                            ? id
-                            : location?.section?.id || (resolvedKind === 'navbar' || resolvedKind === 'footer' ? null : state.editor.selectedSectionId),
-                        selectedComponentId: location?.isFloating ? id : null,
+                        selectedNodeId: primaryId,
+                        selectedNodeIds: ids,
+                        selectedKind: primaryId ? primaryKind : null,
+                        selectedSectionId: primaryKind === 'section'
+                            ? primaryId
+                            : primaryLocation?.section?.id || (primaryKind === 'navbar' || primaryKind === 'footer' ? null : state.editor.selectedSectionId),
+                        selectedComponentId: primaryLocation?.isFloating ? primaryId : null,
+                        showRightPanel: true,
+                    }
+                };
+            }),
+
+            selectNodes: (ids) => set((state) => {
+                const unique = [...new Set(ids.filter(Boolean))];
+                const page = get().getActivePage();
+                const sections = page ? normalizeActiveSections(page) : [];
+                const primaryId = unique[unique.length - 1] || null;
+                const location = primaryId ? findNode(sections, primaryId) : null;
+                const primaryKind = primaryId ? location?.kind || resolveNodeKind(sections, primaryId, null) : null;
+                return {
+                    editor: {
+                        ...state.editor,
+                        selectedNodeId: primaryId,
+                        selectedNodeIds: unique,
+                        selectedKind: primaryKind,
+                        selectedSectionId: primaryKind === 'section'
+                            ? primaryId
+                            : location?.section?.id || (primaryKind === 'navbar' || primaryKind === 'footer' ? null : state.editor.selectedSectionId),
+                        selectedComponentId: location?.isFloating ? primaryId : null,
                         showRightPanel: true,
                     }
                 };
@@ -1151,10 +1379,10 @@ const useBuilderStore = create<BuilderStore>()(
                 editor: { ...state.editor, dropTarget: target }
             })),
 
-            addCanvasElement: (type) => {
+            addCanvasElement: (type, catalogId) => {
                 const page = get().getActivePage();
                 if (!page) return null;
-                const result = addElementToPage(page, get().editor.selectedNodeId, type);
+                const result = addElementToPage(page, get().editor.selectedNodeId, type, catalogId);
                 get().updateCurrentPage({ sections: result.sections });
                 get().saveActiveWebsite();
                 get().selectNode(result.selectId, result.selectKind);
@@ -1199,6 +1427,72 @@ const useBuilderStore = create<BuilderStore>()(
                 get().saveActiveWebsite();
             },
 
+            resizeCanvasNode: (id, patch) => {
+                const page = get().getActivePage();
+                if (!page) return;
+                const found = findNode(normalizeActiveSections(page), id);
+                if (found?.node.locked) return;
+                get().updateCurrentPage({ sections: applyResize(page, id, get().editor.device, patch) });
+                get().saveActiveWebsite();
+            },
+
+            updateFreePosition: (id, position) => {
+                const page = get().getActivePage();
+                if (!page) return;
+                if (id === 'navbar' && page.navbar) {
+                    const flowHeight = readNavbarFlowHeight(page.navbar.styles);
+                    get().updateCurrentPage({
+                        navbar: {
+                            ...page.navbar,
+                            styles: {
+                                ...(page.navbar.styles || {}),
+                                position: 'absolute',
+                                left: `${Math.round(position.x)}px`,
+                                top: `${Math.round(position.y)}px`,
+                                ...(position.width != null ? { width: `${Math.round(position.width)}px` } : {}),
+                                sticky: false,
+                                ...(flowHeight ? { flowHeight } : {}),
+                            },
+                        },
+                    });
+                    get().saveActiveWebsite();
+                    return;
+                }
+                const found = findNode(normalizeActiveSections(page), id);
+                if (found?.node.locked) return;
+                get().updateCurrentPage({ sections: applyFreePosition(page, id, get().editor.device, position) });
+                get().saveActiveWebsite();
+            },
+
+            updateFreePositions: (items) => {
+                const page = get().getActivePage();
+                if (!page || !items.length) return;
+                const navbarItem = items.find((item) => item.id === 'navbar');
+                const others = items.filter((item) => item.id !== 'navbar');
+                const patch: { navbar?: typeof page.navbar; sections?: ReturnType<typeof applyManyFreePositions> } = {};
+                if (navbarItem && page.navbar) {
+                    const flowHeight = readNavbarFlowHeight(page.navbar.styles);
+                    patch.navbar = {
+                        ...page.navbar,
+                        styles: {
+                            ...(page.navbar.styles || {}),
+                            position: 'absolute',
+                            left: `${Math.round(navbarItem.position.x)}px`,
+                            top: `${Math.round(navbarItem.position.y)}px`,
+                            ...(navbarItem.position.width != null ? { width: `${Math.round(navbarItem.position.width)}px` } : {}),
+                            sticky: false,
+                            ...(flowHeight ? { flowHeight } : {}),
+                        },
+                    };
+                }
+                if (others.length) {
+                    patch.sections = applyManyFreePositions(page, get().editor.device, others);
+                }
+                if (!patch.navbar && !patch.sections) return;
+                get().updateCurrentPage(patch);
+                get().saveActiveWebsite();
+            },
+
             deleteCanvasNode: (id) => {
                 if (id === 'footer') {
                     const website = get().getActiveWebsite();
@@ -1210,40 +1504,84 @@ const useBuilderStore = create<BuilderStore>()(
                 }
                 const page = get().getActivePage();
                 if (!page) return;
+                if (id === 'navbar' && page.navbar) {
+                    get().updateCurrentPage({ navbar: null });
+                    get().saveActiveWebsite();
+                    get().selectNode(null);
+                    return;
+                }
+                if (id === 'navbar-logo' && page.navbar) {
+                    get().updateNavbar({ logo: { text: '', imageUrl: '' } });
+                    get().selectNode('navbar', 'navbar');
+                    return;
+                }
+                if (id.startsWith('navbar-link-') && page.navbar) {
+                    const linkId = id.slice('navbar-link-'.length);
+                    get().updateNavbar({
+                        links: (page.navbar.links || []).filter((link: { id: string }) => link.id !== linkId),
+                    });
+                    get().selectNode('navbar', 'navbar');
+                    return;
+                }
                 const found = findNode(normalizeActiveSections(page), id);
                 if (found?.node.locked) return;
+                const remaining = selectedIdsOf(get().editor).filter((item) => item !== id);
                 const next = applyDelete(page, id);
                 if (!next) return;
-                const parentId = found?.kind === 'element' ? found.container?.id : found?.kind === 'container' ? found.section?.id : null;
-                const parentKind = found?.kind === 'element' ? 'container' as const : found?.kind === 'container' ? 'section' as const : null;
                 get().updateCurrentPage({ sections: next });
                 get().saveActiveWebsite();
-                if (parentId && parentKind) {
-                    get().selectNode(parentId, parentKind);
+                if (remaining.length) {
+                    get().selectNodes(remaining);
+                    return;
+                }
+                const nextSelection = getSelectionAfterDelete(normalizeActiveSections(page), id);
+                if (nextSelection) {
+                    get().selectNode(nextSelection.id, nextSelection.kind);
                 } else {
-                    set((state) => ({
-                        editor: {
-                            ...state.editor,
-                            selectedNodeId: null,
-                            selectedKind: null,
-                            selectedSectionId: state.editor.selectedSectionId === id ? null : state.editor.selectedSectionId,
-                            selectedComponentId: state.editor.selectedComponentId === id ? null : state.editor.selectedComponentId,
-                        }
-                    }));
+                    get().selectNode(null);
                 }
             },
 
-            duplicateCanvasNode: (id) => {
+            deleteCanvasNodes: (ids) => {
+                const unique = [...new Set(ids.filter(Boolean))];
+                if (!unique.length) return;
+                if (unique.length === 1) {
+                    get().deleteCanvasNode(unique[0]);
+                    return;
+                }
                 const page = get().getActivePage();
-                if (!page) return null;
-                const found = findNode(normalizeActiveSections(page), id);
-                if (found?.node.locked) return null;
-                const result = applyDuplicate(page, id);
-                if (!result) return null;
+                if (!page) return;
+                get().updateCurrentPage({ sections: applyDeleteMany(page, unique) });
+                get().saveActiveWebsite();
+                get().selectNode(null);
+            },
+
+            duplicateCanvasNode: (id) => {
+                const ids = get().duplicateCanvasNodes([id]);
+                return ids[0] || null;
+            },
+
+            duplicateCanvasNodes: (ids) => {
+                const page = get().getActivePage();
+                if (!page) return [];
+                const unique = [...new Set(ids.filter(Boolean))];
+                if (!unique.length) return [];
+                if (unique.length === 1) {
+                    const found = findNode(normalizeActiveSections(page), unique[0]);
+                    if (found?.node.locked) return [];
+                    const result = applyDuplicate(page, unique[0], get().editor.device);
+                    if (!result) return [];
+                    get().updateCurrentPage({ sections: result.sections });
+                    get().saveActiveWebsite();
+                    get().selectNode(result.newId);
+                    return [result.newId];
+                }
+                const result = applyDuplicateMany(page, unique, get().editor.device);
+                if (!result.newIds.length) return [];
                 get().updateCurrentPage({ sections: result.sections });
                 get().saveActiveWebsite();
-                get().selectNode(result.newId);
-                return result.newId;
+                get().selectNodes(result.newIds);
+                return result.newIds;
             },
 
             moveCanvasNode: (id, target) => {
@@ -1255,12 +1593,12 @@ const useBuilderStore = create<BuilderStore>()(
                 get().saveActiveWebsite();
             },
 
-            addPaletteItem: (item, target, prebuilt) => {
+            addPaletteItem: (item, target, prebuilt, at) => {
                 const page = get().getActivePage();
                 if (!page) return null;
                 const result = prebuilt
                     ? addPrebuiltAtDropTarget(page, prebuilt, target)
-                    : addItemAtDropTarget(page, item, target);
+                    : addItemAtDropTarget(page, item, target, at);
                 get().updateCurrentPage({ sections: result.sections });
                 get().saveActiveWebsite();
                 get().selectNode(result.selectId, result.selectKind);
@@ -1269,9 +1607,10 @@ const useBuilderStore = create<BuilderStore>()(
 
             copyCanvasNode: (id) => {
                 const page = get().getActivePage();
-                const nodeId = id || get().editor.selectedNodeId;
-                if (!page || !nodeId) return;
-                const clipboard = copyNodeToClipboard(page, nodeId);
+                if (!page) return;
+                const selected = selectedIdsOf(get().editor);
+                const ids = id && !selected.includes(id) ? [id] : (selected.length ? selected : id ? [id] : []);
+                const clipboard = copyNodesToClipboard(page, ids);
                 if (clipboard) set({ clipboard });
             },
 
@@ -1279,12 +1618,22 @@ const useBuilderStore = create<BuilderStore>()(
                 const page = get().getActivePage();
                 const clipboard = get().clipboard;
                 if (!page || !clipboard) return null;
-                const result = pasteClipboard(page, clipboard, get().editor.selectedNodeId);
+                const result = pasteClipboard(page, clipboard, get().editor.selectedNodeId, get().editor.device);
                 if (!result) return null;
                 get().updateCurrentPage({ sections: result.sections });
                 get().saveActiveWebsite();
-                get().selectNode(result.selectId, result.selectKind);
+                if (result.selectIds?.length) get().selectNodes(result.selectIds);
+                else get().selectNode(result.selectId, result.selectKind);
                 return result.selectId;
+            },
+
+            shiftCanvasLayer: (id, action) => {
+                const page = get().getActivePage();
+                if (!page || !id) return;
+                const next = applyLayerShift(page, id, action, get().editor.device);
+                if (!next) return;
+                get().updateCurrentPage({ sections: next });
+                get().saveActiveWebsite();
             },
 
             undo: () => {
@@ -1316,6 +1665,7 @@ const useBuilderStore = create<BuilderStore>()(
         }),
         {
             name: 'website-builder-storage',
+            storage: createJSONStorage(() => userScopedBuilderStorage),
             partialize: (state) => ({
                 websites: state.websites,
                 activeWebsiteId: state.activeWebsiteId,
@@ -1326,5 +1676,29 @@ const useBuilderStore = create<BuilderStore>()(
         }
     )
 );
+
+let boundWorkspaceUserId: string | null | undefined = getStoredUserId();
+
+function resetWorkspaceInMemory() {
+    pauseBuilderPersist();
+    try {
+        useBuilderStore.getState().resetWorkspace();
+    } finally {
+        resumeBuilderPersist();
+    }
+}
+
+export function resetBuilderWorkspace() {
+    resetWorkspaceInMemory();
+    boundWorkspaceUserId = getStoredUserId();
+}
+
+export async function bindBuilderWorkspace(userId: string | null) {
+    if (boundWorkspaceUserId === userId) return;
+    resetWorkspaceInMemory();
+    boundWorkspaceUserId = userId;
+    if (!userId) return;
+    await useBuilderStore.persist.rehydrate();
+}
 
 export default useBuilderStore;

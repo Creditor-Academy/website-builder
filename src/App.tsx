@@ -17,7 +17,7 @@ const DashboardAssets = React.lazy(() => import("./pages/DashboardAssets"));
 const DashboardSettings = React.lazy(() => import("./pages/DashboardSettings"));
 const TemplateEditor = React.lazy(() => import("./pages/TemplateEditor"));
 const Organizations = React.lazy(() => import("./pages/dashboard/Organizations"));
-const WebsiteEditor = React.lazy(() => import("./components/editor/WebsiteEditor").then(m => ({ default: m.WebsiteEditor })));
+const WebsiteEditor = React.lazy(() => import("./components/editor/WebsiteEditor"));
 const EditorShell = React.lazy(() => import("./features/editor").then(m => ({ default: m.EditorShell })));
 const Login = React.lazy(() => import("./pages/Login"));
 const ResetPassword = React.lazy(() => import("./pages/ResetPassword"));

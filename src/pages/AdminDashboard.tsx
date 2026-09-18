@@ -488,7 +488,9 @@ const AdminDashboard = () => {
         const allIds = new Set(notifications.map((n: any) => n.id));
         setReadIds(allIds);
         setUnreadCount(0);
-        try { localStorage.setItem('readNotifIds', JSON.stringify([...allIds])); } catch { }
+        try { localStorage.setItem('readNotifIds', JSON.stringify([...allIds])); } catch {
+            // ignore storage access
+        }
     };
 
     const formatActivityLabel = (n: any) => {

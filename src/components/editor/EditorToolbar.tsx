@@ -5,7 +5,7 @@ import {
   Undo2, Redo2, Eye, Download, Play, Share2, Home,
   HelpCircle, Palette, MoreVertical, Monitor, Tablet, Smartphone, Minus, Plus,
 } from 'lucide-react';
-import { DEVICE_WIDTHS } from '@/builder/types';
+import { DEVICE_WIDTHS, ZOOM_PRESETS } from '@/builder/types';
 import { statusLabel } from '@/builder/api';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
@@ -190,7 +190,11 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
           </div>
 
           <div className="hidden items-center rounded-lg bg-white/10 p-0.5 lg:flex">
-            <Button variant="ghost" size="icon" className="h-7 w-7 text-white/70 hover:bg-white/10 hover:text-white sm:h-8 sm:w-8" onClick={() => setZoom((editor.zoom || 100) - 10)}>
+            <Button variant="ghost" size="icon" className="h-7 w-7 text-white/70 hover:bg-white/10 hover:text-white sm:h-8 sm:w-8" onClick={() => {
+              const current = editor.zoom || 100;
+              const prev = [...ZOOM_PRESETS].reverse().find((value) => value < current) ?? 25;
+              setZoom(prev);
+            }}>
               <Minus className="h-3.5 w-3.5" />
             </Button>
             <button
@@ -200,7 +204,11 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
             >
               {Math.round(editor.zoom || 100)}%
             </button>
-            <Button variant="ghost" size="icon" className="h-7 w-7 text-white/70 hover:bg-white/10 hover:text-white sm:h-8 sm:w-8" onClick={() => setZoom((editor.zoom || 100) + 10)}>
+            <Button variant="ghost" size="icon" className="h-7 w-7 text-white/70 hover:bg-white/10 hover:text-white sm:h-8 sm:w-8" onClick={() => {
+              const current = editor.zoom || 100;
+              const next = ZOOM_PRESETS.find((value) => value > current) ?? 200;
+              setZoom(next);
+            }}>
               <Plus className="h-3.5 w-3.5" />
             </Button>
             <Button
@@ -208,10 +216,15 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
               size="icon"
               className="h-7 w-7 text-white/70 hover:bg-white/10 hover:text-white sm:h-8 sm:w-8"
               onClick={() => {
+                const fit = document.querySelector<HTMLButtonElement>('[data-canvas-fit]');
+                if (fit) {
+                  fit.click();
+                  return;
+                }
                 const canvas = document.getElementById('tour-canvas');
                 const width = canvas?.clientWidth || DEVICE_WIDTHS.desktop;
                 const frame = DEVICE_WIDTHS[editor.device] || DEVICE_WIDTHS.desktop;
-                setZoom(Math.floor(((width - 64) / frame) * 100));
+                setZoom(Math.max(25, Math.min(100, Math.floor(((width - 64) / frame) * 100))));
               }}
             >
               <span className="text-[9px] font-bold">Fit</span>
