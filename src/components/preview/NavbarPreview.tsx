@@ -286,7 +286,7 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selected
                 fontSize: 22, fontWeight: 900, fontStyle: 'italic',
                 color: tc, letterSpacing: '-0.02em',
               }}
-              contentEditable={isEditing && selectedItemId === 'navbar-logo'}
+              contentEditable={Boolean(isEditing)}
               suppressContentEditableWarning
               onBlur={(e) => onUpdate({ logo: { ...config.logo, text: e.target.innerText } })}
             >
@@ -309,12 +309,18 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selected
                 data-canvas-node={`navbar-link-${link.id}`}
                 data-canvas-kind="navbar"
                 data-navbar-item={link.id}
-                className="nb-cta"
+                className="nb-cta nb-ce"
                 onClick={(e) => handleNavClick(e, link)}
                 style={{ 
                   background: styles.buttonBg || '#0f172a', 
                   color: styles.buttonText || '#fff',
                   borderRadius: styles.buttonRadius || '2px',
+                }}
+                contentEditable={Boolean(isEditing)}
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  const newLabel = e.currentTarget.innerText;
+                  onUpdate({ links: config.links.map((l) => l.id === link.id ? { ...l, label: newLabel } : l) });
                 }}
               >
                 {link.label}
@@ -332,7 +338,7 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selected
                   color: tc,
                   borderRadius: 4,
                 }}
-                contentEditable={isEditing && selectedItemId === `navbar-link-${link.id}`}
+                contentEditable={Boolean(isEditing)}
                 suppressContentEditableWarning
                 onBlur={(e) => {
                   const newLabel = e.target.innerText;

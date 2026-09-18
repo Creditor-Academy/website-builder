@@ -10,9 +10,13 @@ import {
   cloneNode,
   cloneSection,
   findNode,
+  getFreePosition,
   insertContainer,
   insertElement,
   insertSection,
+  insertSectionReplacingEmpty,
+  isEmptyCanvasSection,
+  isFreePositioned,
   moveNode,
   removeNode,
   updateNodeById,
@@ -24,7 +28,10 @@ import type { CanvasContainer, CanvasElement, CanvasSection, DeviceId, DropTarge
 export interface CanvasClipboard {
   kind: 'section' | 'container' | 'element';
   node: CanvasSection | CanvasContainer | CanvasElement;
+  items?: Array<{ kind: 'section' | 'container' | 'element'; node: CanvasSection | CanvasContainer | CanvasElement }>;
 }
+
+export type LayerShift = 'forward' | 'backward' | 'front' | 'back';
 
 export function normalizeActiveSections(page: { id: string; sections?: unknown[] } | null): CanvasSection[] {
   if (!page) return [];
@@ -65,10 +72,18 @@ export function addElementToPage(
     return { sections: growSurfacesToFit(insertElement(sections, container.id, element)), selectId: element.id, selectKind: 'element' };
   }
 
+  if (!found) {
+    const emptyContainer = sections.find(isEmptyCanvasSection)?.children?.[0];
+    if (emptyContainer) {
+      const element = make(emptyContainer.id, emptyContainer.children || [], emptyContainer.children?.length || 0);
+      return { sections: growSurfacesToFit(insertElement(sections, emptyContainer.id, element)), selectId: element.id, selectKind: 'element' };
+    }
+  }
+
   const index = found?.kind === 'section' ? sections.findIndex((section) => section.id === found.node.id) + 1 : sections.length;
   const section = createCanvasSectionWithCatalog(page.id, catalogId || type, index);
   const elementId = section.children[0]?.children[0]?.id;
-  return { sections: growSurfacesToFit(insertSection(sections, section, index)), selectId: elementId || section.id, selectKind: elementId ? 'element' : 'section' };
+  return { sections: growSurfacesToFit(insertSectionReplacingEmpty(sections, section, index)), selectId: elementId || section.id, selectKind: elementId ? 'element' : 'section' };
 }
 
 export function addContainerToPage(
@@ -103,9 +118,25 @@ export function addContainerToPage(
     return { sections: growSurfacesToFit(insertContainer(sections, found.section.id, container)), selectId: container.id, selectKind: 'container' };
   }
 
+  if (!found) {
+    const empty = sections.find(isEmptyCanvasSection);
+    if (empty) {
+      const container = withFreeContainerPlacement(
+        createContainer(empty.id, empty.children.length),
+        nextFreeOrigin(empty.children || [])
+      );
+      return { sections: growSurfacesToFit(insertContainer(sections, empty.id, container)), selectId: container.id, selectKind: 'container' };
+    }
+  }
+
   const index = found?.kind === 'section' ? sections.findIndex((section) => section.id === found.node.id) + 1 : sections.length;
   const section = createCanvasSection(page.id, index);
-  return { sections: growSurfacesToFit(insertSection(sections, section, index)), selectId: section.children[0].id, selectKind: 'container' };
+  const boxed = withFreeContainerPlacement(createContainer(section.id, section.children.length), nextFreeOrigin(section.children || []));
+  return {
+    sections: growSurfacesToFit(insertSectionReplacingEmpty(sections, { ...section, children: [...(section.children || []), boxed] }, index)),
+    selectId: boxed.id,
+    selectKind: 'container',
+  };
 }
 
 export function addSectionToPage(
@@ -141,7 +172,7 @@ export function addSectionToPage(
         } as CanvasSection)
     : createCanvasSection(page.id, index);
   const firstElement = section.children?.[0]?.children?.[0]?.id;
-  return { sections: growSurfacesToFit(insertSection(sections, section, index)), selectId: firstElement || section.id, selectKind: firstElement ? 'element' : 'section' };
+  return { sections: growSurfacesToFit(insertSectionReplacingEmpty(sections, section, index)), selectId: firstElement || section.id, selectKind: firstElement ? 'element' : 'section' };
 }
 
 export function addItemAtDropTarget(
@@ -183,7 +214,7 @@ export function addItemAtDropTarget(
         const indexAfter = sections.findIndex((entry) => entry.id === target.parentId) + 1;
         const section = createCanvasSectionWithCatalog(page.id, catalogId, indexAfter);
         const elementId = section.children[0]?.children[0]?.id;
-        return { sections: insertSection(sections, section, indexAfter), selectId: elementId || section.id, selectKind: elementId ? 'element' : 'section' };
+        return { sections: insertSectionReplacingEmpty(sections, section, indexAfter), selectId: elementId || section.id, selectKind: elementId ? 'element' : 'section' };
       }
       const existing = found?.section?.children?.[0];
       if (existing) {
@@ -201,7 +232,7 @@ export function addItemAtDropTarget(
     if (target.parentKind === 'page') {
       const section = createCanvasSectionWithCatalog(page.id, catalogId, index);
       const elementId = section.children[0]?.children[0]?.id;
-      return { sections: insertSection(sections, section, index), selectId: elementId || section.id, selectKind: elementId ? 'element' : 'section' };
+      return { sections: insertSectionReplacingEmpty(sections, section, index), selectId: elementId || section.id, selectKind: elementId ? 'element' : 'section' };
     }
     return addElementToPage(page, null, item.elementType, catalogId);
   }
@@ -211,14 +242,14 @@ export function addItemAtDropTarget(
       const found = findNode(sections, target.parentId);
       if (found?.section?.kind === 'prebuilt' && !(found.section.children || []).length) {
         const section = createCanvasSection(page.id, sections.findIndex((entry) => entry.id === target.parentId) + 1);
-        return { sections: insertSection(sections, section, sections.findIndex((entry) => entry.id === target.parentId) + 1), selectId: section.children[0].id, selectKind: 'container' };
+        return { sections: insertSectionReplacingEmpty(sections, section, sections.findIndex((entry) => entry.id === target.parentId) + 1), selectId: section.children[0].id, selectKind: 'container' };
       }
       const container = createContainer(target.parentId, index);
       return { sections: insertContainer(sections, target.parentId, container, index), selectId: container.id, selectKind: 'container' };
     }
     if (target.parentKind === 'page') {
       const section = createCanvasSection(page.id, index);
-      return { sections: insertSection(sections, section, index), selectId: section.children[0].id, selectKind: 'container' };
+      return { sections: insertSectionReplacingEmpty(sections, section, index), selectId: section.children[0].id, selectKind: 'container' };
     }
     return addContainerToPage(page, null);
   }
@@ -259,8 +290,65 @@ export function applyDelete(page: { id: string; sections?: unknown[] }, id: stri
   return removeNode(sections, id);
 }
 
-export function applyDuplicate(page: { id: string; sections?: unknown[] }, id: string): { sections: CanvasSection[]; newId: string } | null {
-  return cloneNode(normalizeActiveSections(page), id, page.id);
+export function applyDeleteMany(page: { id: string; sections?: unknown[] }, ids: string[]): CanvasSection[] {
+  let sections = normalizeActiveSections(page);
+  for (const id of [...new Set(ids)]) {
+    const found = findNode(sections, id);
+    if (!found || found.node.locked) continue;
+    sections = removeNode(sections, id);
+  }
+  return sections;
+}
+
+export const DUPLICATE_OFFSET = { x: 24, y: 48 };
+
+function offsetDuplicatedNode(sections: CanvasSection[], id: string): CanvasSection[] {
+  const found = findNode(sections, id);
+  if (!found || !isFreePositioned(found.node)) return sections;
+  const pos = getFreePosition(found.node);
+  const x = pos.x + DUPLICATE_OFFSET.x;
+  const y = pos.y + DUPLICATE_OFFSET.y;
+  return growSurfacesToFit(
+    updateNodeById(sections, id, {
+      styles: {
+        ...found.node.styles,
+        position: 'absolute',
+        left: `${Math.round(x)}px`,
+        top: `${Math.round(y)}px`,
+      },
+      properties: {
+        ...found.node.properties,
+        placement: 'absolute',
+        freePosition: { ...pos, x, y },
+      },
+    })
+  );
+}
+
+export function applyDuplicate(
+  page: { id: string; sections?: unknown[] },
+  id: string,
+  _device: DeviceId = 'desktop'
+): { sections: CanvasSection[]; newId: string } | null {
+  const result = cloneNode(normalizeActiveSections(page), id, page.id);
+  if (!result) return null;
+  return { sections: offsetDuplicatedNode(result.sections, result.newId), newId: result.newId };
+}
+
+export function applyDuplicateMany(
+  page: { id: string; sections?: unknown[] },
+  ids: string[],
+  _device: DeviceId = 'desktop'
+): { sections: CanvasSection[]; newIds: string[] } {
+  let sections = normalizeActiveSections(page);
+  const newIds: string[] = [];
+  for (const id of ids) {
+    const result = cloneNode(sections, id, page.id);
+    if (!result) continue;
+    sections = offsetDuplicatedNode(result.sections, result.newId);
+    newIds.push(result.newId);
+  }
+  return { sections, newIds };
 }
 
 export function applyMove(
@@ -290,9 +378,22 @@ export function copyNodeToClipboard(
   return { kind: 'element', node: found.node as CanvasElement };
 }
 
-export function pasteClipboard(
+export function copyNodesToClipboard(
   page: { id: string; sections?: unknown[] },
-  clipboard: CanvasClipboard,
+  ids: string[]
+): CanvasClipboard | null {
+  const items = ids
+    .map((id) => copyNodeToClipboard(page, id))
+    .filter((item): item is CanvasClipboard => Boolean(item))
+    .map(({ kind, node }) => ({ kind, node }));
+  if (!items.length) return null;
+  if (items.length === 1) return items[0];
+  return { ...items[0], items };
+}
+
+function pasteClipboardItem(
+  page: { id: string; sections?: unknown[] },
+  clipboard: { kind: CanvasClipboard['kind']; node: CanvasClipboard['node'] },
   selectedId: string | null
 ): { sections: CanvasSection[]; selectId: string; selectKind: NodeKind } | null {
   const sections = normalizeActiveSections(page);
@@ -348,6 +449,90 @@ export function pasteClipboard(
   return null;
 }
 
+export function pasteClipboard(
+  page: { id: string; sections?: unknown[] },
+  clipboard: CanvasClipboard,
+  selectedId: string | null,
+  device: DeviceId = 'desktop'
+): { sections: CanvasSection[]; selectId: string; selectKind: NodeKind; selectIds?: string[] } | null {
+  const items = clipboard.items?.length ? clipboard.items : [{ kind: clipboard.kind, node: clipboard.node }];
+  let sections = normalizeActiveSections(page);
+  let selected = selectedId;
+  const newIds: string[] = [];
+  let lastKind: NodeKind = items[0]?.kind || 'element';
+
+  for (const item of items) {
+    const result = pasteClipboardItem({ ...page, sections }, item, selected);
+    if (!result) continue;
+    sections = result.sections;
+    selected = result.selectId;
+    lastKind = result.selectKind;
+    const loc = findNode(sections, result.selectId);
+    if (loc && isFreePositioned(loc.node)) {
+      const pos = getFreePosition(loc.node);
+      sections = applyFreePosition({ ...page, sections }, result.selectId, device, {
+        ...pos,
+        x: pos.x + 24,
+        y: pos.y + 24,
+      });
+    }
+    newIds.push(result.selectId);
+  }
+
+  if (!newIds.length) return null;
+  return {
+    sections,
+    selectId: newIds[newIds.length - 1],
+    selectKind: lastKind,
+    selectIds: newIds.length > 1 ? newIds : undefined,
+  };
+}
+
+export function applyLayerShift(
+  page: { id: string; sections?: unknown[] },
+  id: string,
+  action: LayerShift,
+  device: DeviceId
+): CanvasSection[] | null {
+  const sections = normalizeActiveSections(page);
+  const found = findNode(sections, id);
+  if (!found || found.node.locked) return null;
+
+  const siblings =
+    found.kind === 'element' && found.container
+      ? [...(found.container.children || [])]
+      : found.kind === 'container' && found.section
+        ? [...(found.section.children || [])]
+        : found.kind === 'section'
+          ? [...sections]
+          : [];
+  if (siblings.length < 2) return null;
+
+  const ranked = siblings
+    .map((node, index) => ({
+      id: node.id,
+      z: Number(node.styles?.zIndex) || index + 1,
+      index,
+    }))
+    .sort((a, b) => a.z - b.z || a.index - b.index);
+
+  const currentIndex = ranked.findIndex((item) => item.id === id);
+  if (currentIndex < 0) return null;
+
+  const next = [...ranked];
+  const [current] = next.splice(currentIndex, 1);
+  if (action === 'backward') next.splice(Math.max(0, currentIndex - 1), 0, current);
+  else if (action === 'forward') next.splice(Math.min(next.length, currentIndex + 1), 0, current);
+  else if (action === 'back') next.unshift(current);
+  else next.push(current);
+
+  let result = sections;
+  next.forEach((item, index) => {
+    result = applyStylePatch({ ...page, sections: result }, item.id, device, { zIndex: index + 1 });
+  });
+  return result;
+}
+
 export function applyResize(
   page: { id: string; sections?: unknown[] },
   id: string,
@@ -367,15 +552,17 @@ export function applyFreePosition(
   const found = findNode(sections, id);
   if (!found) return sections;
 
+  const current = getFreePosition(found.node);
+  const next = { ...current, ...position };
   const stylePatch: Record<string, unknown> = {
     position: 'absolute',
-    left: `${Math.round(position.x)}px`,
-    top: `${Math.round(position.y)}px`,
+    left: `${Math.round(next.x)}px`,
+    top: `${Math.round(next.y)}px`,
   };
-  if (position.width != null) stylePatch.width = `${Math.max(8, Math.round(position.width))}px`;
-  if (position.height != null) stylePatch.height = `${Math.max(8, Math.round(position.height))}px`;
-  if (position.rotation != null) stylePatch.transform = `rotate(${position.rotation}deg)`;
-  if (position.zIndex != null) stylePatch.zIndex = position.zIndex;
+  if (next.width != null) stylePatch.width = `${Math.max(8, Math.round(next.width))}px`;
+  if (next.height != null) stylePatch.height = `${Math.max(8, Math.round(next.height))}px`;
+  if (next.rotation != null) stylePatch.transform = `rotate(${next.rotation}deg)`;
+  if (next.zIndex != null) stylePatch.zIndex = next.zIndex;
 
   const nextStyles = patchResponsiveStyles(found.node.styles || {}, found.node.responsiveStyles || {}, device, stylePatch);
   return growSurfacesToFit(updateNodeById(sections, id, {
@@ -383,7 +570,7 @@ export function applyFreePosition(
     properties: {
       ...found.node.properties,
       placement: 'absolute',
-      freePosition: position,
+      freePosition: next,
     },
   }));
 }

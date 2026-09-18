@@ -158,7 +158,7 @@ export const CanvasElementView = memo(function CanvasElementView({
           loading="lazy"
           decoding="async"
           style={css}
-          className="h-full w-full max-w-full object-cover"
+          className="block h-full w-full max-w-full object-cover"
         />
       );
     case 'button':

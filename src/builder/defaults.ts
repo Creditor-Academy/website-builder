@@ -253,6 +253,22 @@ export function createElementByCatalog(catalogId: string, parentId: string, orde
   return withFreePlacement(element, { x: 64, y: 64 + order * 40 });
 }
 
+export function createLayoutSurface(parentId: string, order = 0): CanvasContainer {
+  const id = uuidv4();
+  return {
+    ...baseNode('Canvas', parentId, order),
+    id,
+    type: 'container',
+    styles: {
+      position: 'relative',
+      width: '100%',
+      minHeight: '800px',
+    },
+    properties: { placement: 'flow', role: 'surface' },
+    children: [],
+  };
+}
+
 export function createContainer(parentId: string, order = 0, elements: CanvasElement[] = []): CanvasContainer {
   const id = uuidv4();
   const children = elements.map((element, index) => ({ ...element, parentId: id, order: index }));
@@ -287,6 +303,7 @@ export function createBlankCanvasSection(pageId: string, order = 0): CanvasSecti
       backgroundColor: '#ffffff',
     },
     content: {},
+    properties: { placeholder: true },
     children: [
       {
         ...baseNode('Canvas', id, 0),
@@ -307,7 +324,7 @@ export function createBlankCanvasSection(pageId: string, order = 0): CanvasSecti
 
 export function createCanvasSection(pageId: string, order = 0, name = 'Section'): CanvasSection {
   const id = uuidv4();
-  const container = createContainer(id, 0);
+  const container = createLayoutSurface(id, 0);
   return {
     ...baseNode(name, pageId, order),
     id,
@@ -319,7 +336,6 @@ export function createCanvasSection(pageId: string, order = 0, name = 'Section')
       position: 'relative',
       width: '100%',
       minHeight: '800px',
-      padding: '24px',
       backgroundColor: '#ffffff',
     },
     content: {},

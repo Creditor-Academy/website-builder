@@ -12,7 +12,6 @@ import {
 import {
   clearStoredUser,
   consumeSessionExpiredFlag,
-  getDashboardPath,
   getStoredUser,
   invalidateSessionCache,
   validateSession,
@@ -114,5 +113,3 @@ export function AuthSessionProvider({ children }: { children: React.ReactNode })
     </AuthSessionContext.Provider>
   );
 }
-
-export { getDashboardPath };

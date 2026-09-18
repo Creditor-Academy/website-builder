@@ -1,11 +1,14 @@
-import { memo, useCallback, type CSSProperties, type ReactNode } from 'react';
+import { memo, useCallback, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
-import { ChevronUp, Copy, EyeOff, GripVertical, Lock, Trash2, Unlock } from 'lucide-react';
+import { ChevronUp, Lock } from 'lucide-react';
+import { RiDragMove2Fill } from 'react-icons/ri';
 import useBuilderStore from '@/store/useBuilderStore';
 import { cn } from '@/lib/utils';
 import type { CanvasContainer, CanvasElement, CanvasSection, DeviceId, NodeKind } from '@/builder/types';
 import { resolveStyles, stylesToCss } from '@/builder/styles';
-import { sortByOrder } from '@/builder/tree';
+import { sortByOrder, isFreePositioned } from '@/builder/tree';
+import { isLayoutSurface } from '@/builder/freeMove';
+import { DRAG_THRESHOLD } from '@/builder/selection';
 import { canvasDragId, ELEMENT_ACCEPTS, type CanvasDragData } from '@/builder/dnd';
 import { DropZone } from '@/builder/components/DropZone';
 import { SectionRenderer } from '@/components/sections/SectionRenderer';
@@ -57,12 +60,11 @@ export const CanvasNodeFrame = memo(function CanvasNodeFrame({
   childCount?: number;
   dragDisabled?: boolean;
 }) {
-  const selected = useBuilderStore((state) => state.editor.selectedNodeId === id);
+  const selectedIds = useBuilderStore((state) => state.editor.selectedNodeIds);
+  const selectedId = useBuilderStore((state) => state.editor.selectedNodeId);
+  const selected = Boolean(selectedIds?.includes(id) || selectedId === id);
   const selectNode = useBuilderStore((state) => state.selectNode);
-  const deleteCanvasNode = useBuilderStore((state) => state.deleteCanvasNode);
-  const duplicateCanvasNode = useBuilderStore((state) => state.duplicateCanvasNode);
-  const updateCanvasNode = useBuilderStore((state) => state.updateCanvasNode);
-  const { hoveredNodeId, setHoveredNodeId, liveGeometryRef } = useCanvasEngine();
+  const { hoveredNodeId, setHoveredNodeId, liveGeometryRef, clickSuppressRef } = useCanvasEngine();
   const live = liveGeometryRef.current[id];
   const mergedStyle = live
     ? {
@@ -72,12 +74,20 @@ export const CanvasNodeFrame = memo(function CanvasNodeFrame({
         top: Math.round(live.top),
         ...(live.width != null ? { width: Math.round(live.width), minWidth: Math.round(live.width), maxWidth: Math.round(live.width) } : {}),
         ...(live.height != null ? { height: Math.round(live.height), minHeight: Math.round(live.height), maxHeight: Math.round(live.height) } : {}),
+        ...(live.rotation != null ? { transform: `rotate(${live.rotation}deg)` } : {}),
       }
     : style;
   const { isDragging } = useCanvasDndState();
+  const multiSelected = Boolean(selected && (selectedIds?.length || 0) > 1);
+  const showMoveHandle = !previewMode && !locked && selected && !multiSelected;
   const slideObject = kind === 'element' || kind === 'container';
   const positioned = style?.position === 'absolute' || Boolean(live);
-  const { onPointerDown: onFreeMove } = useFreePositionDrag(id, Boolean(slideObject && !previewMode && !locked && !dragDisabled));
+  const { onPointerDown: onFreeMove, beginMove } = useFreePositionDrag(
+    id,
+    Boolean(slideObject && !previewMode && !locked && !dragDisabled),
+    { group: multiSelected }
+  );
+  const sectionDragEnabled = !previewMode && !locked && !dragDisabled && !slideObject;
   const { attributes, listeners, setNodeRef: setDragRef, isDragging: nodeDragging } = useDraggable({
     id: canvasDragId(kind, id),
     data: {
@@ -93,7 +103,7 @@ export const CanvasNodeFrame = memo(function CanvasNodeFrame({
       childCount,
       parentKind,
     } satisfies CanvasDragData,
-    disabled: previewMode || locked || dragDisabled || slideObject,
+    disabled: !sectionDragEnabled,
   });
   const { setNodeRef: setDropRef } = useDroppable({
     id: canvasDragId(kind, id),
@@ -137,104 +147,111 @@ export const CanvasNodeFrame = memo(function CanvasNodeFrame({
         hoveredNodeId === id && !selected && !previewMode && 'is-hovered',
         hidden && 'opacity-40',
         nodeDragging && 'opacity-40',
-        slideObject && !previewMode && !locked && 'cursor-move',
+        !previewMode && !locked && 'cursor-pointer',
+        slideObject && !previewMode && !locked && 'touch-none select-none',
+        selected && slideObject && !previewMode && !locked && 'cursor-grab active:cursor-grabbing',
+        'overflow-visible',
         className
       )}
       style={mergedStyle}
-      {...(!previewMode && !locked && !dragDisabled && !slideObject ? attributes : {})}
-      {...(!previewMode && !locked && !dragDisabled && !slideObject ? listeners : {})}
-      onPointerDown={(event) => {
-        event.stopPropagation();
-        if (previewMode || locked || dragDisabled) return;
-        if (slideObject) {
-          onFreeMove(event);
-          return;
-        }
-        listeners.onPointerDown?.(event);
-      }}
       onPointerOver={(event) => {
         if (previewMode) return;
         event.stopPropagation();
         setHoveredNodeId(id);
       }}
+      onPointerDown={(event: ReactPointerEvent<HTMLDivElement>) => {
+        if (previewMode || locked || dragDisabled || !slideObject) return;
+        if (event.button !== 0) return;
+        if ((event.target as HTMLElement).closest('[data-canvas-move], [data-canvas-resize], [data-canvas-rotate], button')) return;
+        const additive = event.shiftKey || event.metaKey || event.ctrlKey;
+        if (!selected && !additive) {
+          selectNode(id, kind, 'replace');
+        }
+        if (selected) event.preventDefault();
+        const startX = event.clientX;
+        const startY = event.clientY;
+        const keys = { shiftKey: event.shiftKey, metaKey: event.metaKey, ctrlKey: event.ctrlKey };
+        let dragging = false;
+
+        const onMove = (moveEvent: PointerEvent) => {
+          if (dragging) return;
+          if (Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) < DRAG_THRESHOLD) return;
+          dragging = true;
+          clickSuppressRef.current = true;
+          window.removeEventListener('pointermove', onMove);
+          window.removeEventListener('pointerup', onUp);
+          window.removeEventListener('pointercancel', onUp);
+          beginMove(startX, startY, keys, { clientX: moveEvent.clientX, clientY: moveEvent.clientY });
+        };
+        const onUp = () => {
+          window.removeEventListener('pointermove', onMove);
+          window.removeEventListener('pointerup', onUp);
+          window.removeEventListener('pointercancel', onUp);
+        };
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+        window.addEventListener('pointercancel', onUp);
+      }}
+      onContextMenu={(event) => {
+        if (previewMode) return;
+        event.preventDefault();
+        event.stopPropagation();
+        if (!selected) selectNode(id, kind, 'replace');
+      }}
       onClick={(event) => {
         if (previewMode) return;
         event.stopPropagation();
-        selectNode(id, kind);
+        if (clickSuppressRef.current) {
+          clickSuppressRef.current = false;
+          return;
+        }
+        if ((event.target as HTMLElement).closest('[data-canvas-move]')) return;
+        const additive = event.shiftKey || event.metaKey || event.ctrlKey;
+        selectNode(id, kind, additive ? 'toggle' : 'replace');
       }}
     >
-      {!previewMode && (
+      {!previewMode && !multiSelected && (
         <div
           className={cn(
             'canvas-node-label pointer-events-none absolute -top-6 left-0 z-20 flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white',
             chromeColor(kind),
             selected || hoveredNodeId === id ? 'opacity-100' : 'opacity-0',
-            selected && 'pointer-events-auto'
+            (selected || hoveredNodeId === id) && 'pointer-events-auto'
           )}
         >
-          {!locked && (
-            <button
-              type="button"
-              className="rounded p-0.5 hover:bg-white/20"
-              aria-label={`Move ${name}`}
-              title="Move"
-              onClick={(event) => event.stopPropagation()}
-              onPointerDown={(event) => {
-                event.stopPropagation();
-                if (slideObject) {
-                  onFreeMove(event);
-                  return;
-                }
-                listeners.onPointerDown?.(event);
-              }}
-            >
-              <GripVertical className="h-3 w-3" />
-            </button>
-          )}
           <span>{name}</span>
           {locked && <Lock className="h-3 w-3 opacity-80" />}
-          {selected && (
-            <span className="ml-1 flex items-center gap-0.5">
-              {onSelectParent && (
-                <button type="button" className="rounded p-0.5 hover:bg-white/20" aria-label="Select parent" title="Select parent" onClick={(event) => { event.stopPropagation(); onSelectParent(); }}>
-                  <ChevronUp className="h-3 w-3" />
-                </button>
-              )}
-              <button
-                type="button"
-                className="rounded p-0.5 hover:bg-white/20"
-                aria-label={locked ? `Unlock ${name}` : `Lock ${name}`}
-                title={locked ? 'Unlock' : 'Lock'}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  updateCanvasNode(id, { locked: !locked });
-                }}
-              >
-                {locked ? <Unlock className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-              </button>
-              <button
-                type="button"
-                className="rounded p-0.5 hover:bg-white/20"
-                aria-label={`Hide ${name}`}
-                title="Hide"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  updateCanvasNode(id, kind === 'section' ? { visible: false } : { visibility: { desktop: false, tablet: false, mobile: false } });
-                }}
-              >
-                <EyeOff className="h-3 w-3" />
-              </button>
-              <button type="button" className="rounded p-0.5 hover:bg-white/20" aria-label={`Duplicate ${name}`} title="Duplicate" disabled={locked} onClick={(event) => { event.stopPropagation(); if (!locked) duplicateCanvasNode(id); }}>
-                <Copy className="h-3 w-3" />
-              </button>
-              <button type="button" className="rounded p-0.5 hover:bg-white/20" aria-label={`Delete ${name}`} title="Delete" disabled={locked} onClick={(event) => { event.stopPropagation(); if (!locked) deleteCanvasNode(id); }}>
-                <Trash2 className="h-3 w-3" />
-              </button>
-            </span>
+          {selected && onSelectParent && (
+            <button type="button" className="rounded p-0.5 hover:bg-white/20" aria-label="Select parent" title="Select parent" onClick={(event) => { event.stopPropagation(); onSelectParent(); }}>
+              <ChevronUp className="h-3 w-3" />
+            </button>
           )}
         </div>
       )}
       {children}
+      {showMoveHandle && !(slideObject && positioned) && (
+        <button
+          type="button"
+          data-canvas-move={id}
+          className="absolute left-1/2 top-full z-30 mt-2 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-md bg-slate-900 text-white shadow-sm cursor-grab active:cursor-grabbing"
+          aria-label={`Move ${name}`}
+          title="Drag to move"
+          {...(sectionDragEnabled ? attributes : {})}
+          {...(sectionDragEnabled ? listeners : {})}
+          onClick={(event) => event.stopPropagation()}
+          onPointerDown={(event) => {
+            event.stopPropagation();
+            if (dragDisabled) return;
+            if (slideObject) {
+              onFreeMove(event);
+              return;
+            }
+            listeners.onPointerDown?.(event);
+          }}
+        >
+          <RiDragMove2Fill className="h-5 w-5" />
+        </button>
+      )}
     </div>
   );
 });
@@ -329,6 +346,37 @@ export const CanvasContainerNode = memo(function CanvasContainerNode({
   const css = stylesToCss(resolveStyles(container.styles, container.responsiveStyles, device));
   const children = sortByOrder(container.children || []);
   const free = Boolean(container.properties?.placement === 'absolute' || container.styles?.position === 'absolute');
+  const surface = isLayoutSurface(container) || !isFreePositioned(container);
+
+  if (surface) {
+    return (
+      <div
+        data-canvas-node={container.id}
+        data-canvas-kind="container"
+        data-canvas-surface="true"
+        data-canvas-parent={parentId}
+        data-canvas-index={index}
+        data-canvas-children={children.length}
+        className={cn('relative w-full overflow-visible', !visible && 'opacity-40')}
+        style={{ ...css, position: 'relative', width: css.width || '100%' }}
+      >
+        {!previewMode && children.length === 0 && (
+          <DropZone parentId={container.id} parentKind="container" index={0} edge="inside" accepts={ELEMENT_ACCEPTS} empty />
+        )}
+        {children.map((element, elementIndex) => (
+          <CanvasElementNode
+            key={element.id}
+            element={element}
+            device={device}
+            previewMode={previewMode}
+            parentId={container.id}
+            index={elementIndex}
+            onSelectParent={onSelectParent}
+          />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <CanvasNodeFrame
@@ -401,8 +449,12 @@ export const CanvasSectionNode = memo(function CanvasSectionNode({
       index={index}
       pageId={pageId}
       childCount={containers.length}
-      style={{ ...css, position: 'relative', minHeight: css.minHeight || '800px' }}
-      className={cn(!previewMode && 'cursor-pointer')}
+      style={{
+        ...css,
+        position: 'relative',
+        minHeight: css.minHeight || '800px',
+        ...(isCanvas ? { padding: 0 } : {}),
+      }}
     >
       {isCanvas ? (
         containers.map((container, containerIndex) => (

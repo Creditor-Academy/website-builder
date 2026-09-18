@@ -6,12 +6,14 @@ export interface CanvasDndState {
   isDragging: boolean;
   active: BuilderDragData | null;
   dropIndicator: CalculatedDrop | null;
+  dropValid: boolean;
 }
 
 export const CanvasDndContext = createContext<CanvasDndState>({
   isDragging: false,
   active: null,
   dropIndicator: null,
+  dropValid: true,
 });
 
 export function useCanvasDndState() {

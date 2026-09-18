@@ -230,6 +230,7 @@ function finalizeDrop(pointer: { x: number; y: number }, over: DropOver, source:
 export function CanvasDndProvider({ children }: { children: ReactNode }) {
   const [active, setActive] = useState<BuilderDragData | null>(null);
   const [dropIndicator, setDropIndicator] = useState<CalculatedDrop | null>(null);
+  const [dropValid, setDropValid] = useState(true);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 6 } }),
@@ -237,8 +238,8 @@ export function CanvasDndProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<CanvasDndState>(
-    () => ({ isDragging: Boolean(active), active, dropIndicator }),
-    [active, dropIndicator]
+    () => ({ isDragging: Boolean(active), active, dropIndicator, dropValid }),
+    [active, dropIndicator, dropValid]
   );
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -254,14 +255,18 @@ export function CanvasDndProvider({ children }: { children: ReactNode }) {
     const over = overFromEvent(event, page?.id);
     if (!pointer || !source || !over || !page) {
       setDropIndicator(null);
+      setDropValid(true);
       return;
     }
     const sections = normalizePageSections(page.sections, page.id);
     const calculated = finalizeDrop(pointer, over, source);
-    if (!calculated || !canDrop(sections, source, calculated)) {
-      setDropIndicator((current) => (current ? null : current));
+    if (!calculated) {
+      setDropIndicator(null);
+      setDropValid(true);
       return;
     }
+    const valid = canDrop(sections, source, calculated);
+    setDropValid(valid);
     setDropIndicator((current) => (sameCalculatedDrop(current, calculated) ? current : calculated));
   };
 
@@ -277,6 +282,7 @@ export function CanvasDndProvider({ children }: { children: ReactNode }) {
       pointer && source && overNow ? finalizeDrop(pointer, overNow, source) : dropIndicator;
     setActive(null);
     setDropIndicator(null);
+    setDropValid(true);
     store.setEditorState({ isDragging: false });
     if (!page) return;
 
@@ -372,6 +378,7 @@ export function CanvasDndProvider({ children }: { children: ReactNode }) {
       onDragCancel={() => {
         setActive(null);
         setDropIndicator(null);
+        setDropValid(true);
         useBuilderStore.getState().setEditorState({ isDragging: false });
       }}
       onDragEnd={handleDragEnd}

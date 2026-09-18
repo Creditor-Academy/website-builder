@@ -61,3 +61,59 @@ export function metricsFromFrame(
     deviceWidth,
   };
 }
+
+export interface OverlaySpace {
+  parent: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    offsetWidth: number;
+    offsetHeight: number;
+    clientLeft?: number;
+    clientTop?: number;
+  };
+  overlay: { left: number; top: number };
+}
+
+export function overlaySpaceFromElements(parent: HTMLElement, overlay: HTMLElement): OverlaySpace {
+  const parentRect = parent.getBoundingClientRect();
+  const overlayRect = overlay.getBoundingClientRect();
+  return {
+    parent: {
+      left: parentRect.left,
+      top: parentRect.top,
+      width: parentRect.width,
+      height: parentRect.height,
+      offsetWidth: parent.offsetWidth,
+      offsetHeight: parent.offsetHeight,
+      clientLeft: parent.clientLeft,
+      clientTop: parent.clientTop,
+    },
+    overlay: { left: overlayRect.left, top: overlayRect.top },
+  };
+}
+
+export function parentLocalToOverlay(local: number, axis: 'x' | 'y', space: OverlaySpace): number {
+  const { parent, overlay } = space;
+  if (axis === 'x') {
+    const scale = parent.offsetWidth ? parent.width / parent.offsetWidth : 1;
+    return parent.left - overlay.left + ((parent.clientLeft || 0) + local) * scale;
+  }
+  const scale = parent.offsetHeight ? parent.height / parent.offsetHeight : 1;
+  return parent.top - overlay.top + ((parent.clientTop || 0) + local) * scale;
+}
+
+export function rectToParentLocal(
+  rect: Pick<DOMRect, 'left' | 'top' | 'width' | 'height'>,
+  parent: OverlaySpace['parent']
+): { x: number; y: number; width: number; height: number } {
+  const scaleX = parent.offsetWidth ? parent.width / parent.offsetWidth : 1;
+  const scaleY = parent.offsetHeight ? parent.height / parent.offsetHeight : 1;
+  return {
+    x: scaleX ? (rect.left - parent.left) / scaleX - (parent.clientLeft || 0) : 0,
+    y: scaleY ? (rect.top - parent.top) / scaleY - (parent.clientTop || 0) : 0,
+    width: scaleX ? rect.width / scaleX : rect.width,
+    height: scaleY ? rect.height / scaleY : rect.height,
+  };
+}

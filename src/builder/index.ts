@@ -6,4 +6,4 @@ export * from './catalog';
 export * from './adapter';
 export * from './api';
 export * from './dnd';
-export * from './documentOps';
+export * from './selection';

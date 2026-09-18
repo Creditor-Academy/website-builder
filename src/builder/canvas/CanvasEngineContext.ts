@@ -13,6 +13,7 @@ export interface LiveGeometry {
   top: number;
   width?: number;
   height?: number;
+  rotation?: number;
 }
 
 export interface CanvasEngineValue {
@@ -33,6 +34,7 @@ export interface CanvasEngineValue {
   setGuides: (guides: AlignmentGuide[]) => void;
   interacting: boolean;
   setInteracting: (value: boolean) => void;
+  clickSuppressRef: MutableRefObject<boolean>;
   liveGeometryRef: MutableRefObject<Record<string, LiveGeometry>>;
 }
 

@@ -259,11 +259,50 @@ export function removeNode(sections: CanvasSection[], id: string): CanvasSection
   });
 }
 
+export function isEmptyCanvasSection(section: CanvasSection): boolean {
+  if ((section.components || []).length > 0) return false;
+  if ((section.children || []).some((container) => (container.children || []).length > 0)) return false;
+  if (section.kind === 'prebuilt') return false;
+  return String(section.type || 'section') === 'section';
+}
+
+export function stripLeadingEmptySections(sections: CanvasSection[]): CanvasSection[] {
+  const firstReal = sections.findIndex((section) => !isEmptyCanvasSection(section));
+  if (firstReal <= 0) return sections;
+  return reindex(sections.slice(firstReal));
+}
+
+export function isPlaceholderCanvasSection(section: CanvasSection): boolean {
+  if (!isEmptyCanvasSection(section)) return false;
+  if (section.properties?.placeholder) return true;
+  return (section.children || []).some((child) => child.name === 'Canvas');
+}
+
+export function stripPlaceholderSections(sections: CanvasSection[]): CanvasSection[] {
+  const next = sections.filter((section) => !isPlaceholderCanvasSection(section));
+  return next.length === sections.length ? sections : reindex(next);
+}
+
 export function insertSection(sections: CanvasSection[], section: CanvasSection, index?: number): CanvasSection[] {
   const next = [...sections];
   const target = index == null ? next.length : Math.max(0, Math.min(index, next.length));
   next.splice(target, 0, { ...section, parentId: section.parentId, order: target });
   return reindex(next);
+}
+
+export function insertSectionReplacingEmpty(
+  sections: CanvasSection[],
+  section: CanvasSection,
+  index?: number
+): CanvasSection[] {
+  const real = sections.filter((item) => !isEmptyCanvasSection(item));
+  if (real.length === 0) {
+    return insertSection([], { ...section, order: 0 }, 0);
+  }
+  const cleaned = stripLeadingEmptySections(sections);
+  const removed = sections.length - cleaned.length;
+  const target = index == null ? cleaned.length : Math.max(0, index - removed);
+  return insertSection(cleaned, section, target);
 }
 
 export function insertContainer(

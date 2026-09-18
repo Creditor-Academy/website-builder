@@ -379,7 +379,7 @@ export default function LoginSignup() {
       setIsLoadingLogin(true);
       const res = await loginUser(loginData);
 
-      setStoredUser(res.data.user);
+      await setStoredUser(res.data.user);
 
       if (rememberMe) {
         localStorage.setItem("rememberedEmail", loginData.email);
@@ -425,7 +425,7 @@ export default function LoginSignup() {
         setIsLoadingLogin(true);
         const res = await googleLogin(tokenResponse.access_token);
 
-        setStoredUser(res.data.user);
+        await setStoredUser(res.data.user);
         localStorage.setItem("rememberMe", "true");
 
         navigate(getDashboardPath(res.data.user));

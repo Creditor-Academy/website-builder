@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { cn } from '@/lib/utils';
 import { DashboardStatCard } from '@/components/dashboard/DashboardCard';
 import { updateUserProfile, deactivateOwnAccount } from "../api/user";
+import { clearStoredUser } from "@/lib/authSession";
 import UserDashboard from './UserDashboard';
 import AdminDashboard from './AdminDashboard';
 
@@ -69,7 +70,7 @@ const SettingsView = () => {
         try {
             setDeactivating(true);
             await deactivateOwnAccount();
-            localStorage.removeItem("user");
+            clearStoredUser();
             toast({ title: "Account deactivated", description: "Your account has been deactivated." });
             navigate("/");
         } catch (error) {

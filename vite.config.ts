@@ -6,7 +6,10 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const pexelsKey = env.PEXELS_API_KEY || env.VITE_PEXELS_API_KEY;
+  const pexelsKey = (env.PEXELS_API_KEY || env.VITE_PEXELS_API_KEY || "").trim();
+  if (!pexelsKey) {
+    console.warn("[pexels] PEXELS_API_KEY is missing. Stock photos will return 401 until you add it to .env.local and restart the dev server.");
+  }
 
   return {
   server: {
@@ -17,6 +20,8 @@ export default defineConfig(({ mode }) => {
       '/pexels-api': {
         target: 'https://api.pexels.com',
         changeOrigin: true,
+        secure: true,
+        headers: pexelsKey ? { Authorization: pexelsKey } : {},
         rewrite: (requestPath) => {
           if (requestPath.startsWith('/pexels-api/videos')) {
             return requestPath.replace(/^\/pexels-api/, '');

@@ -28,6 +28,58 @@ export function measureOverlayBox(nodeId: string | null, overlay: HTMLElement | 
   };
 }
 
+export function useOverlayBoxes(nodeIds: string[]) {
+  const { overlayRef, previewMode, zoom, interacting, viewportRef } = useCanvasEngine();
+  const [boxes, setBoxes] = useState<Record<string, OverlayBox>>({});
+  const key = nodeIds.join('|');
+
+  const measure = useCallback(() => {
+    if (previewMode) {
+      setBoxes((current) => (Object.keys(current).length ? {} : current));
+      return;
+    }
+    const overlay = overlayRef.current;
+    const next: Record<string, OverlayBox> = {};
+    for (const id of nodeIds) {
+      const box = measureOverlayBox(id, overlay);
+      if (box) next[id] = box;
+    }
+    setBoxes((current) => {
+      const currentIds = Object.keys(current);
+      const nextIds = Object.keys(next);
+      if (currentIds.length === nextIds.length && nextIds.every((id) => current[id] && sameBox(current[id], next[id]))) {
+        return current;
+      }
+      return next;
+    });
+  }, [nodeIds, overlayRef, previewMode]);
+
+  useLayoutEffect(() => {
+    measure();
+    if (!nodeIds.length || previewMode) return;
+    const scroller = viewportRef.current;
+    scroller?.addEventListener('scroll', measure, { passive: true });
+    window.addEventListener('resize', measure);
+    window.addEventListener(OVERLAY_MEASURE_EVENT, measure);
+    let frame = 0;
+    if (interacting) {
+      const tick = () => {
+        measure();
+        frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
+    }
+    return () => {
+      scroller?.removeEventListener('scroll', measure);
+      window.removeEventListener('resize', measure);
+      window.removeEventListener(OVERLAY_MEASURE_EVENT, measure);
+      cancelAnimationFrame(frame);
+    };
+  }, [interacting, key, measure, nodeIds.length, previewMode, viewportRef, zoom]);
+
+  return boxes;
+}
+
 function sameBox(a: OverlayBox | null, b: OverlayBox | null): boolean {
   if (a === b) return true;
   if (!a || !b) return false;

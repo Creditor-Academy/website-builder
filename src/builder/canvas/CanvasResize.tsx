@@ -1,12 +1,14 @@
 import { useRef, type PointerEvent as ReactPointerEvent } from 'react';
 import useBuilderStore from '@/store/useBuilderStore';
 import { findNode, isFreePositioned } from '@/builder/tree';
+import { isLayoutSurface } from '@/builder/freeMove';
 import { normalizePageSections } from '@/builder/adapter';
 import { applyResizeDelta, boxToStylePatch, getResizeConfig, type Box, type ResizeHandle } from './resize';
 import { clientDeltaToCanvas } from './coordinates';
 import { useCanvasEngine } from './CanvasEngineContext';
 import { requestOverlayMeasure, useOverlayBox } from './useOverlayBox';
 import { growOffsetParents } from '@/builder/freeMove';
+import { preserveNavbarFlowSlot } from './navbarSlot';
 
 const HANDLE_POSITIONS: Record<ResizeHandle, string> = {
   'top-left': 'left-0 top-0 -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize',
@@ -40,6 +42,7 @@ function applyLiveBox(node: HTMLElement, box: Box, free: boolean) {
   node.style.maxWidth = width;
   node.style.maxHeight = height;
   if (free) {
+    preserveNavbarFlowSlot(node);
     node.style.position = 'absolute';
     node.style.left = `${Math.round(box.x)}px`;
     node.style.top = `${Math.round(box.y)}px`;
@@ -58,6 +61,7 @@ function applyLiveBox(node: HTMLElement, box: Box, free: boolean) {
 export function CanvasResize() {
   const { previewMode, setResizePreview, setInteracting, setGuides, liveGeometryRef } = useCanvasEngine();
   const selectedId = useBuilderStore((state) => state.editor.selectedNodeId);
+  const selectedIds = useBuilderStore((state) => state.editor.selectedNodeIds);
   const selectedKind = useBuilderStore((state) => state.editor.selectedKind);
   const page = useBuilderStore((state) => state.getActivePage());
   const updateCanvasStyles = useBuilderStore((state) => state.updateCanvasStyles);
@@ -78,8 +82,10 @@ export function CanvasResize() {
   const config = getResizeConfig(selectedKind || 'element', location && 'type' in location.node ? String(location.node.type) : undefined, free);
 
   if (previewMode || !selectedId || !box || !config.handles.length || location?.node.locked) return null;
+  if ((selectedIds?.length || 0) > 1) return null;
   if (selectedKind === 'footer' || selectedKind === 'page') return null;
   if (selectedKind === 'navbar' && selectedId !== 'navbar') return null;
+  if (location && isLayoutSurface(location.node)) return null;
 
   const onPointerDown = (handle: ResizeHandle) => (event: ReactPointerEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -108,7 +114,10 @@ export function CanvasResize() {
     setInteracting(true);
     event.currentTarget.setPointerCapture(event.pointerId);
 
-    const onMove = (moveEvent: PointerEvent) => {
+    let frame = 0;
+    let latest: PointerEvent | null = null;
+
+    const applyMove = (moveEvent: PointerEvent) => {
       const drag = dragRef.current;
       if (!drag) return;
       const delta = clientDeltaToCanvas(moveEvent.clientX - drag.origin.x, moveEvent.clientY - drag.origin.y, zoomPercent);
@@ -129,7 +138,19 @@ export function CanvasResize() {
       requestOverlayMeasure();
     };
 
+    const onMove = (moveEvent: PointerEvent) => {
+      moveEvent.preventDefault();
+      latest = moveEvent;
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        if (latest) applyMove(latest);
+      });
+    };
+
     const onUp = () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      if (latest) applyMove(latest);
       const drag = dragRef.current;
       dragRef.current = null;
       delete liveGeometryRef.current[selectedId];
@@ -153,7 +174,7 @@ export function CanvasResize() {
       setResizePreview(null);
     };
 
-    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointermove', onMove, { passive: false });
     window.addEventListener('pointerup', onUp);
   };
 
@@ -168,6 +189,7 @@ export function CanvasResize() {
           type="button"
           aria-label={`Resize ${handle}`}
           className={`pointer-events-auto absolute flex h-4 w-4 items-center justify-center ${HANDLE_POSITIONS[handle]}`}
+          data-canvas-resize={handle}
           onPointerDown={onPointerDown(handle)}
           onClick={(event) => event.stopPropagation()}
         >

@@ -92,6 +92,37 @@ export function CanvasProperties() {
 
   if (!page) return null;
 
+  if ((editor.selectedNodeIds?.length || 0) > 1) {
+    return (
+      <div className="h-full overflow-y-auto bg-white text-[#0F172A]">
+        <div className="border-b border-[#0F172A] px-4 py-3 text-sm font-semibold text-[#0F172A]">
+          {editor.selectedNodeIds.length} objects selected
+        </div>
+        <div className="space-y-3 px-4 py-4">
+          <p className="text-xs leading-relaxed text-slate-500">
+            Drag to move them together, or use Duplicate and Delete on the canvas toolbar.
+          </p>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => useBuilderStore.getState().duplicateCanvasNodes(editor.selectedNodeIds)}>
+              <Copy className="mr-1.5 h-3.5 w-3.5" />
+              Duplicate
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="text-rose-600 hover:text-rose-700"
+              onClick={() => useBuilderStore.getState().deleteCanvasNodes(editor.selectedNodeIds)}
+            >
+              <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+              Delete
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (editor.selectedKind === 'navbar') {
     return (
       <div className="h-full overflow-y-auto bg-white text-[#0F172A]">

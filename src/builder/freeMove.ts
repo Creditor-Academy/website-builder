@@ -4,6 +4,12 @@ import type { CanvasContainer, CanvasElement, CanvasSection, FreePosition } from
 const DEFAULT_ORIGIN = { x: 64, y: 64 };
 export const SURFACE_GROW_PADDING = 80;
 export const MIN_CANVAS_HEIGHT = 800;
+export const MAX_CANVAS_HEIGHT = 20000;
+export const CANVAS_HEIGHT_HANDLE = 36;
+
+export function clampCanvasHeight(height: number): number {
+  return Math.max(MIN_CANVAS_HEIGHT, Math.min(MAX_CANVAS_HEIGHT, Math.round(height)));
+}
 
 function px(value?: string | number): number {
   if (typeof value === 'number' && Number.isFinite(value)) return value;
@@ -177,9 +183,6 @@ export function collectFlowElements(sections: CanvasSection[]): Array<{ id: stri
   const items: Array<{ id: string; containerId: string }> = [];
   for (const section of sections) {
     for (const container of section.children || []) {
-      if (!isFreePositioned(container)) {
-        items.push({ id: container.id, containerId: section.id });
-      }
       for (const element of container.children || []) {
         if (!isFreePositioned(element)) {
           items.push({ id: element.id, containerId: container.id });
@@ -188,4 +191,76 @@ export function collectFlowElements(sections: CanvasSection[]): Array<{ id: stri
     }
   }
   return items;
+}
+
+export function isLayoutSurface(node: { properties?: Record<string, unknown>; styles?: { position?: string } }): boolean {
+  if (node.properties?.role === 'surface') return true;
+  return node.properties?.placement === 'flow' && node.styles?.position !== 'absolute';
+}
+
+export function asLayoutSurface(container: CanvasContainer, children: CanvasElement[] = container.children || []): CanvasContainer {
+  const { left: _left, top: _top, width: _width, height: _height, ...styles } = container.styles || {};
+  return {
+    ...container,
+    name: container.name === 'Container' ? 'Canvas' : container.name,
+    styles: {
+      ...styles,
+      position: 'relative',
+      width: '100%',
+      left: undefined,
+      top: undefined,
+      height: undefined,
+      minHeight: styles.minHeight || `${MIN_CANVAS_HEIGHT}px`,
+    },
+    properties: {
+      ...container.properties,
+      placement: 'flow',
+      role: 'surface',
+      freePosition: undefined,
+    },
+    children,
+  };
+}
+
+export function flattenImplicitContainerBoxes(sections: CanvasSection[]): CanvasSection[] {
+  let changed = false;
+  const next = sections.map((section) => {
+    const containers = section.children || [];
+    if (containers.length !== 1) return section;
+    const box = containers[0];
+    if (isLayoutSurface(box) || !isFreePositioned(box)) return section;
+    const kids = box.children || [];
+    if (!kids.length) return section;
+    const origin = getFreePosition(box);
+    changed = true;
+    return {
+      ...section,
+      children: [
+        asLayoutSurface(
+          box,
+          kids.map((element) => {
+            if (!isFreePositioned(element)) return element;
+            const pos = getFreePosition(element);
+            const x = pos.x + origin.x;
+            const y = pos.y + origin.y;
+            return {
+              ...element,
+              styles: {
+                ...element.styles,
+                position: 'absolute' as const,
+                left: `${Math.round(x)}px`,
+                top: `${Math.round(y)}px`,
+              },
+              properties: {
+                ...element.properties,
+                placement: 'absolute',
+                freePosition: { ...pos, x, y },
+              },
+            };
+          })
+        ),
+      ],
+    };
+  });
+  return changed ? next : sections;
 }

@@ -324,3 +324,5 @@ export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
     </BuilderProvider>
   );
 }
+
+export default WebsiteEditor;

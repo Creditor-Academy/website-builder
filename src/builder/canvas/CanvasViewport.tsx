@@ -2,12 +2,13 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 're
 import useBuilderStore from '@/store/useBuilderStore';
 import { cn } from '@/lib/utils';
 import { DEVICE_WIDTHS } from '@/builder/types';
+import { CANVAS_HEIGHT_HANDLE, MIN_CANVAS_HEIGHT } from '@/builder/freeMove';
 import { useCanvasEngine } from './CanvasEngineContext';
 
 const CANVAS_GUTTER = 32;
 
 export function CanvasViewport({ children }: { children: ReactNode }) {
-  const { previewMode, viewportRef, scalerRef, frameRef, zoom, device, interacting, setHoveredNodeId } = useCanvasEngine();
+  const { previewMode, viewportRef, scalerRef, frameRef, zoom, device, interacting, setHoveredNodeId, clickSuppressRef } = useCanvasEngine();
   const selectNode = useBuilderStore((state) => state.selectNode);
   const setZoom = useBuilderStore((state) => state.setZoom);
   const pageId = useBuilderStore((state) => state.getActivePage()?.id);
@@ -17,9 +18,28 @@ export function CanvasViewport({ children }: { children: ReactNode }) {
 
   const fittedKeyRef = useRef<string | null>(null);
 
+  const selectedId = useBuilderStore((state) => state.editor.selectedNodeId);
+
   useEffect(() => {
     if (viewportRef.current && pageId) viewportRef.current.scrollTo({ top: 0 });
   }, [pageId, viewportRef]);
+
+  useEffect(() => {
+    if (previewMode || !selectedId) return;
+    const scroller = viewportRef.current;
+    if (!scroller) return;
+    const frame = window.requestAnimationFrame(() => {
+      const node = scroller.querySelector(`[data-canvas-node="${selectedId}"]`) as HTMLElement | null;
+      if (!node) return;
+      const scrollerRect = scroller.getBoundingClientRect();
+      const nodeRect = node.getBoundingClientRect();
+      const visible = nodeRect.bottom > scrollerRect.top + 24 && nodeRect.top < scrollerRect.bottom - 24;
+      if (visible) return;
+      const nextTop = nodeRect.top - scrollerRect.top + scroller.scrollTop - 24;
+      scroller.scrollTo({ top: Math.max(0, nextTop), behavior: 'smooth' });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [previewMode, selectedId, viewportRef]);
 
   useLayoutEffect(() => {
     if (!pageId) return;
@@ -51,14 +71,7 @@ export function CanvasViewport({ children }: { children: ReactNode }) {
     const node = frameRef.current;
     if (!node || typeof ResizeObserver === 'undefined') return;
     const syncSize = () => {
-      const zoomPercent = useBuilderStore.getState().editor.zoom || 100;
-      const factor = Math.max(0.25, (zoomPercent || 100) / 100);
-      const rootRect = node.getBoundingClientRect();
-      let height = Math.max(node.scrollHeight, node.offsetHeight);
-      node.querySelectorAll('[data-canvas-kind="element"], [data-canvas-kind="container"]').forEach((child) => {
-        const rect = (child as HTMLElement).getBoundingClientRect();
-        height = Math.max(height, (rect.bottom - rootRect.top) / factor + 48);
-      });
+      const height = Math.max(node.offsetHeight, parseFloat(node.style.minHeight || '') || 0, MIN_CANVAS_HEIGHT) + CANVAS_HEIGHT_HANDLE;
       setContentHeight((current) => (Math.abs(current - height) < 0.5 ? current : height));
     };
     const observer = new ResizeObserver(syncSize);
@@ -162,10 +175,13 @@ export function CanvasViewport({ children }: { children: ReactNode }) {
       id="tour-canvas"
       className={cn('relative z-0 isolate h-full w-full overflow-auto bg-[hsl(var(--builder-panel))]', previewMode && 'is-preview')}
       onClick={() => {
-        if (!previewMode) {
-          selectNode(null);
-          setHoveredNodeId(null);
+        if (previewMode) return;
+        if (clickSuppressRef.current) {
+          clickSuppressRef.current = false;
+          return;
         }
+        selectNode(null);
+        setHoveredNodeId(null);
       }}
     >
       <div

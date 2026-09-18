@@ -30,21 +30,24 @@ function indicatorStyle(drop: CalculatedDrop, overlay: HTMLElement | null) {
 }
 
 export function CanvasDrop() {
-  const { dropIndicator } = useCanvasDndState();
+  const { dropIndicator, dropValid } = useCanvasDndState();
   const { overlayRef, previewMode } = useCanvasEngine();
   useDndMonitor({});
   if (previewMode || !dropIndicator) return null;
   const layout = indicatorStyle(dropIndicator, overlayRef.current);
   if (!layout) return null;
+  const label = dropLabel(dropIndicator, dropValid);
+  const line = dropValid ? 'bg-sky-500' : 'bg-rose-500';
+  const ring = dropValid ? 'border-sky-400/80 bg-sky-400/5' : 'border-rose-400/80 bg-rose-400/5';
 
   if (layout.inside) {
     return (
       <div
-        className="pointer-events-none absolute z-30 rounded-lg border-2 border-dashed border-sky-400/80 bg-sky-400/5"
+        className={`pointer-events-none absolute z-30 rounded-lg border-2 border-dashed ${ring}`}
         style={{ top: layout.top, left: layout.left, width: layout.width, height: layout.height }}
       >
         <div className="absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#0F172A] shadow-sm">
-          {dropLabel(dropIndicator)}
+          {label}
         </div>
       </div>
     );
@@ -55,9 +58,9 @@ export function CanvasDrop() {
       className="pointer-events-none absolute z-30"
       style={{ top: layout.top, left: layout.left, width: layout.width }}
     >
-      <div className="h-0.5 w-full rounded-full bg-sky-500" />
+      <div className={`h-0.5 w-full rounded-full ${line}`} />
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#0F172A] shadow-sm">
-        {dropLabel(dropIndicator)}
+        {label}
       </div>
     </div>
   );

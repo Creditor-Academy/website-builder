@@ -12,6 +12,13 @@ describe('toolbarPosition', () => {
     });
   });
 
+  it('keeps the toolbar at the top of a tall section instead of covering the move handle', () => {
+    const pos = toolbarPosition({ left: 40, top: 4, width: 720, height: 640 }, { width: 800, height: 700 });
+    expect(pos.top).toBeLessThan(40);
+    expect(pos.top).toBeGreaterThanOrEqual(8);
+    expect(pos.transform).toBe('translate(-50%, 0)');
+  });
+
   it('stays above header items at the top of the canvas instead of overlapping them', () => {
     const pos = toolbarPosition({ left: 640, top: 18, width: 120, height: 36 });
     expect(pos.top).toBe(10);

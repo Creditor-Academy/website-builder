@@ -428,7 +428,8 @@ export function calculatedDropToTarget(drop: CalculatedDrop): DropTarget {
   };
 }
 
-export function dropLabel(drop: CalculatedDrop): string {
+export function dropLabel(drop: CalculatedDrop, valid = true): string {
+  if (!valid) return 'Cannot drop here';
   if (drop.edge === 'inside') return 'Drop here';
   if (drop.parentKind === 'page') return 'Drop section here';
   if (drop.parentKind === 'section') return 'Drop container here';

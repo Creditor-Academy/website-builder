@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { canAcceptChild, cloneNode, collectAllIds, findNode, getKeyboardNeighbor, getSelectionAfterDelete, insertElement, insertSection, moveNode, removeNode, validateMove } from './tree';
-import { applyDuplicate, applyMove, copyNodeToClipboard, pasteClipboard } from './documentOps';
-import { createCanvasSection, createTextElement, createButtonElement, createContainer } from './defaults';
-import { insertContainer } from './tree';
+import { canAcceptChild, cloneNode, collectAllIds, findNode, getFreePosition, getKeyboardNeighbor, getSelectionAfterDelete, insertContainer, insertElement, insertSection, insertSectionReplacingEmpty, isEmptyCanvasSection, moveNode, removeNode, stripLeadingEmptySections, stripPlaceholderSections, validateMove } from './tree';
+import { applyDuplicate, applyMove, addSectionToPage, copyNodeToClipboard, copyNodesToClipboard, pasteClipboard, DUPLICATE_OFFSET } from './documentOps';
+import { createBlankCanvasSection, createCanvasSection, createTextElement, createButtonElement, createContainer } from './defaults';
+import { withFreePlacement } from './freeMove';
 import type { CanvasSection } from './types';
 import { parseDragId, resolveDropAction } from './dnd';
 
@@ -169,6 +169,35 @@ describe('document ops', () => {
     expect(pasted).not.toBeNull();
     expect(new Set(collectAllIds(pasted!.sections)).size).toBe(collectAllIds(pasted!.sections).length);
   });
+
+  it('places a duplicated free element below the original', () => {
+    const section = createCanvasSection('page-1', 0);
+    const container = section.children[0];
+    const text = withFreePlacement(createTextElement(container.id, 0), { x: 80, y: 120 });
+    const page = { id: 'page-1', sections: [{ ...section, children: [{ ...container, children: [text] }] }] };
+    const duplicated = applyDuplicate(page, text.id);
+    expect(duplicated).not.toBeNull();
+    const copy = duplicated!.sections[0].children[0].children.find((element) => element.id === duplicated!.newId);
+    expect(copy).toBeTruthy();
+    const pos = getFreePosition(copy!);
+    expect(pos.x).toBe(80 + DUPLICATE_OFFSET.x);
+    expect(pos.y).toBe(120 + DUPLICATE_OFFSET.y);
+    expect(copy!.styles.left).toBe(`${80 + DUPLICATE_OFFSET.x}px`);
+    expect(copy!.styles.top).toBe(`${120 + DUPLICATE_OFFSET.y}px`);
+  });
+
+  it('copies multiple nodes and pastes them with unique ids', () => {
+    const section = createCanvasSection('page-1', 0);
+    const container = section.children[0];
+    const text = createTextElement(container.id, 0);
+    const button = createButtonElement(container.id, 1);
+    const page = { id: 'page-1', sections: [{ ...section, children: [{ ...container, children: [text, button] }] }] };
+    const clipboard = copyNodesToClipboard(page, [text.id, button.id]);
+    expect(clipboard?.items?.length).toBe(2);
+    const pasted = pasteClipboard(page, clipboard!, container.id);
+    expect(pasted?.selectIds?.length).toBe(2);
+    expect(new Set(collectAllIds(pasted!.sections)).size).toBe(collectAllIds(pasted!.sections).length);
+  });
 });
 
 describe('dnd ids', () => {
@@ -201,5 +230,64 @@ describe('dnd ids', () => {
       { source: 'canvas', nodeId: 'el-2', kind: 'element', type: 'text', name: 'Text', parentId: 'box', index: 1 }
     );
     expect(overHit).toMatchObject({ type: 'move', nodeId: 'el-1', target: { parentId: 'box', index: 1, edge: 'after' } });
+  });
+});
+
+describe('empty canvas section placement', () => {
+  it('treats the auto-created blank section as empty', () => {
+    expect(isEmptyCanvasSection(createBlankCanvasSection('page-1', 0))).toBe(true);
+    expect(isEmptyCanvasSection(createCanvasSection('page-1', 0))).toBe(true);
+  });
+
+  it('does not treat a prebuilt or filled section as empty', () => {
+    const filled = createCanvasSection('page-1', 0);
+    filled.children[0].children = [createTextElement(filled.children[0].id, 0)];
+    expect(isEmptyCanvasSection(filled)).toBe(false);
+    expect(isEmptyCanvasSection({ ...createCanvasSection('page-1', 0), type: 'hero', kind: 'prebuilt' })).toBe(false);
+  });
+
+  it('strips leading empty placeholders sitting above real sections', () => {
+    const blank = createBlankCanvasSection('page-1', 0);
+    const hero = { ...createCanvasSection('page-1', 1, 'Hero'), type: 'hero' };
+    hero.children[0].children = [createTextElement(hero.children[0].id, 0)];
+    const stripped = stripLeadingEmptySections([blank, hero]);
+    expect(stripped).toHaveLength(1);
+    expect(stripped[0].id).toBe(hero.id);
+    expect(stripped[0].order).toBe(0);
+  });
+
+  it('removes placeholder-only blank canvas sections from a new page', () => {
+    const blank = createBlankCanvasSection('page-1', 0);
+    expect(stripPlaceholderSections([blank])).toEqual([]);
+    const hero = { ...createCanvasSection('page-1', 1, 'Hero'), type: 'hero' };
+    hero.children[0].children = [createTextElement(hero.children[0].id, 0)];
+    const next = stripPlaceholderSections([blank, hero]);
+    expect(next).toHaveLength(1);
+    expect(next[0].id).toBe(hero.id);
+  });
+
+  it('places a sidebar section at the top of an empty canvas', () => {
+    const blank = createBlankCanvasSection('page-1', 0);
+    const hero = { ...createCanvasSection('page-1', 1, 'Hero'), type: 'hero' };
+    hero.children[0].children = [createTextElement(hero.children[0].id, 0)];
+    const next = insertSectionReplacingEmpty([blank], hero);
+    expect(next).toHaveLength(1);
+    expect(next[0].id).toBe(hero.id);
+    expect(next[0].order).toBe(0);
+  });
+
+  it('adds a hero from the sidebar onto a blank canvas instead of below it', () => {
+    const page = { id: 'page-1', sections: [createBlankCanvasSection('page-1', 0)] };
+    const result = addSectionToPage(page, page.sections[0].id, {
+      type: 'hero',
+      name: 'Hero Section',
+      kind: 'prebuilt',
+      content: { headline: 'Build Beautiful Websites Without Code' },
+      styles: { minHeight: '90vh' },
+      children: [],
+    });
+    expect(result.sections).toHaveLength(1);
+    expect(result.sections[0].type).toBe('hero');
+    expect(isEmptyCanvasSection(result.sections[0])).toBe(false);
   });
 });

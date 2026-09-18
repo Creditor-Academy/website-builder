@@ -17,6 +17,7 @@ export function CanvasEngine({ children }: { children: ReactNode }) {
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const scalerRef = useRef<HTMLDivElement | null>(null);
   const liveGeometryRef = useRef<Record<string, LiveGeometry>>({});
+  const clickSuppressRef = useRef(false);
 
   const setHover = useCallback((id: string | null) => {
     setHoveredNodeId(id);
@@ -42,6 +43,7 @@ export function CanvasEngine({ children }: { children: ReactNode }) {
       interacting,
       setInteracting,
       liveGeometryRef,
+      clickSuppressRef,
     }),
     [previewMode, hoveredNodeId, setHover, editingNodeId, zoom, device, resizePreview, guides, interacting]
   );

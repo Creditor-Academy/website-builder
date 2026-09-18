@@ -58,12 +58,13 @@ function LayerRow({
   onMoveDown?: () => void;
 }) {
   const selectedId = useBuilderStore((state) => state.editor.selectedNodeId);
+  const selectedIds = useBuilderStore((state) => state.editor.selectedNodeIds);
   const selectNode = useBuilderStore((state) => state.selectNode);
   const updateCanvasNode = useBuilderStore((state) => state.updateCanvasNode);
   const deleteCanvasNode = useBuilderStore((state) => state.deleteCanvasNode);
   const duplicateCanvasNode = useBuilderStore((state) => state.duplicateCanvasNode);
   const [open, setOpen] = useState(true);
-  const selected = selectedId === node.id;
+  const selected = selectedId === node.id || Boolean(selectedIds?.includes(node.id));
   const hasChildren = node.children.length > 0;
   const isChrome = node.kind === 'navbar' || node.kind === 'footer';
 
@@ -76,7 +77,7 @@ function LayerRow({
           node.locked && 'opacity-80'
         )}
         style={{ paddingLeft: 6 + depth * 10 }}
-        onClick={() => selectNode(node.id, node.kind)}
+        onClick={(event) => selectNode(node.id, node.kind, event.shiftKey || event.metaKey || event.ctrlKey ? 'toggle' : 'replace')}
       >
         {dragHandleProps ? (
           <div
