@@ -1,20 +1,16 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-
-function isAuthenticated(): boolean {
-  try {
-    const raw = localStorage.getItem('user');
-    if (!raw) return false;
-    const user = JSON.parse(raw);
-    return !!(user && user.id);
-  } catch {
-    return false;
-  }
-}
+import { useAuthSession } from '@/components/auth/AuthSessionProvider';
+import Loading from '@/components/Common/LoadingUI';
 
 export function ProtectedRoute() {
   const location = useLocation();
+  const { isAuthenticated, isLoading } = useAuthSession();
 
-  if (!isAuthenticated()) {
+  if (isLoading) {
+    return <Loading fullScreen label="Checking session" />;
+  }
+
+  if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

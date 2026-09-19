@@ -17,13 +17,11 @@ import {
 } from "@dnd-kit/sortable";
 import { SectionItem } from "./SectionItem";
 import {
-  Plus,
   Layers,
   Sparkles,
   Grid3X3,
   Layout,
   MessageSquare,
-  ChevronDown,
   Quote,
   DollarSign,
   Image as ImageIcon,
@@ -35,25 +33,15 @@ import {
   FileText,
   Info,
   Type,
-  Square,
   Columns as ColumnsIcon,
   MousePointer2,
   Share2,
   Code,
   Search,
-  Settings2,
   X,
-  Palette,
   Globe,
-  ShoppingBag
 } from "lucide-react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   createDefaultHeroSection,
@@ -69,13 +57,7 @@ import {
   createDefaultFAQSection,
   createDefaultLogoCloudSection,
   createDefaultBlogListSection,
-  createDefaultMasonryGallerySection,
   createDefaultAboutSection,
-  createDefaultCaseStudiesSection,
-  getBusinessPage,
-  getPortfolioPage,
-  getEcommercePage,
-  getConsultantPage,
   createDefaultTextOnlySection,
   createDefaultImageTextLeftSection,
   createDefaultImageTextRightSection,
@@ -83,38 +65,10 @@ import {
   createDefaultHeadingTextButtonSection,
   createDefaultTwoColumnSection,
 } from "@/lib/defaultPageData";
-import { Badge } from "@/components/ui/badge";
-
-const SECTION_ICON_MAP = {
-  hero: Sparkles,
-  features: Grid3X3,
-  services: Layout,
-  about: Info,
-  cta: MessageSquare,
-  pricing: DollarSign,
-  testimonials: Quote,
-  contact: Mail,
-  faq: HelpCircle,
-  gallery: ImageIcon,
-  blog: FileText,
-  logocloud: Building2,
-  stats: BarChart2,
-  team: Users,
-  layout: ColumnsIcon,
-  text: Type,
-  button: MousePointer2,
-  image: ImageIcon,
-  grid: Grid3X3,
-  social: Share2,
-  html: Code,
-} as const;
 
 const ELEMENT_CATEGORIES = [
   {
     name: "Sections",
-    color: "from-blue-500/10 to-blue-400/5",
-    borderColor: "border-blue-200/50",
-    badgeColor: "bg-blue-50 text-blue-700",
     items: [
       { type: "hero", name: "Hero", icon: Sparkles, description: "Full-screen hero section with CTA", create: createDefaultHeroSection },
       { type: "features", name: "Features", icon: Grid3X3, description: "Showcase key features", create: createDefaultFeaturesSection },
@@ -142,9 +96,6 @@ const ELEMENT_CATEGORIES = [
   // },
   {
     name: "Media & Info",
-    color: "from-purple-500/10 to-purple-400/5",
-    borderColor: "border-purple-200/50",
-    badgeColor: "bg-purple-50 text-purple-700",
     items: [
       { type: "gallery", name: "Gallery", icon: ImageIcon, description: "Photo gallery layout", create: createDefaultGallerySection },
       { type: "blog", name: "Blog", icon: FileText, description: "Blog post listings", create: createDefaultBlogListSection },
@@ -155,9 +106,6 @@ const ELEMENT_CATEGORIES = [
   },
   {
     name: "Layouts",
-    color: "from-amber-500/10 to-amber-400/5",
-    borderColor: "border-amber-200/50",
-    badgeColor: "bg-amber-50 text-amber-700",
     items: [
       { type: "layout", name: "Text Only", icon: Type, description: "Simple text paragraph layout", create: createDefaultTextOnlySection },
       { type: "layout", name: "Image + Text (Left)", icon: Layout, description: "Image on left, text on right", create: createDefaultImageTextLeftSection },
@@ -169,9 +117,6 @@ const ELEMENT_CATEGORIES = [
   },
   {
     name: "Basic Elements",
-    color: "from-emerald-500/10 to-emerald-400/5",
-    borderColor: "border-emerald-200/50",
-    badgeColor: "bg-emerald-50 text-emerald-700",
     items: [
       { type: "text", name: "Text Block", icon: Type, description: "Rich text content", create: () => ({ id: uuidv4(), type: 'text', name: 'Text Block', content: { text: 'New text block content' }, styles: {} }) },
       { type: "button", name: "Button", icon: MousePointer2, description: "Interactive button", create: () => ({ id: uuidv4(), type: 'button', name: 'Button', content: { text: 'Click me' }, styles: {} }) },
@@ -180,9 +125,6 @@ const ELEMENT_CATEGORIES = [
   },
   {
     name: "Creative Elements",
-    color: "from-amber-500/10 to-amber-400/5",
-    borderColor: "border-amber-200/50",
-    badgeColor: "bg-amber-50 text-amber-700",
     items: [
       {
         type: "floating-text",
@@ -214,9 +156,6 @@ const ELEMENT_CATEGORIES = [
   },
   {
     name: "Advanced",
-    color: "from-rose-500/10 to-rose-400/5",
-    borderColor: "border-rose-200/50",
-    badgeColor: "bg-rose-50 text-rose-700",
     items: [
       { type: "grid", name: "Grid Layout", icon: Grid3X3, description: "Flexible grid system", create: () => ({ id: uuidv4(), type: 'grid', name: 'Grid', content: {}, styles: {} }) },
       { type: "social", name: "Social Links", icon: Share2, description: "Social media links", create: () => ({ id: uuidv4(), type: 'social', name: 'Social', content: {}, styles: {} }) },
@@ -263,10 +202,10 @@ export function SectionsList({ view = "add" }) {
   if (!page) {
     return (
       <div className="h-full flex flex-col items-center justify-center p-8 text-center bg-white">
-        <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
-          <Globe className="w-8 h-8 text-slate-200" />
+        <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center mb-3">
+          <Globe className="w-5 h-5 text-slate-400" />
         </div>
-        <p className="text-slate-400 text-sm font-medium">Please select a page to manage elements.</p>
+        <p className="text-slate-500 text-sm">Please select a page to manage elements.</p>
       </div>
     );
   }
@@ -278,54 +217,32 @@ export function SectionsList({ view = "add" }) {
   });
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-slate-50/80 overflow-hidden">
-      {/* Modern Header */}
-      <div className="relative bg-white border-b border-slate-200/60 shadow-sm">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-50"></div>
-        <div className="relative p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${view === 'add' ? 'from-primary to-primary/80' : 'from-slate-600 to-slate-700'} flex items-center justify-center shadow-lg`}>
-              {view === 'add' ? (
-                <Plus className="w-4 h-4 text-white" />
-              ) : (
-                <Layers className="w-4 h-4 text-white" />
-              )}
-            </div>
-            <div>
-              <h2 className="text-sm font-bold text-slate-900 tracking-tight">
-                {view === 'add' ? 'Add Elements' : 'Layers & Outline'}
-              </h2>
-              <p className="text-[10px] text-slate-500 mt-0.5 font-medium">
-                {view === 'add' ? 'Build your page with components' : 'Manage page structure'}
-              </p>
-            </div>
-          </div>
-          {view === 'layers' && (
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-              <Badge className="text-[10px] font-bold px-2.5 py-1 h-6 bg-emerald-50 text-emerald-700 border-emerald-200 rounded-lg">
-                {page.sections.length} sections
-              </Badge>
-            </div>
-          )}
-        </div>
+    <div className="h-full flex flex-col bg-white overflow-hidden">
+      <div className="h-12 px-4 border-b border-slate-100 flex items-center justify-between shrink-0">
+        <h2 className="text-sm font-semibold text-slate-900">
+          {view === "add" ? "Add Elements" : "Layers"}
+        </h2>
+        {view === "layers" && (
+          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 uppercase tracking-wide">
+            {page.sections.length}
+          </span>
+        )}
       </div>
 
-      {/* Enhanced Search Bar */}
-      <div className="relative bg-white/80 backdrop-blur-sm border-b border-slate-200/60 px-4 py-3">
-        <div className="relative group">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-200"></div>
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary transition-all duration-200" />
+      <div className="px-3 py-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={view === 'add' ? "Search for elements..." : "Find sections..."}
-            className="pl-10 pr-4 h-10 text-xs bg-slate-50/70 border-slate-200 hover:border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary rounded-xl transition-all duration-200 shadow-sm"
+            placeholder={view === "add" ? "Find an element..." : "Find a section..."}
+            className="pl-9 pr-8 h-9 text-xs bg-slate-100 border-transparent rounded-lg shadow-none focus-visible:ring-1 focus-visible:ring-slate-300"
           />
           {query && (
             <button
-              onClick={() => setQuery('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors"
+              type="button"
+              onClick={() => setQuery("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 rounded-md hover:bg-slate-200/80 flex items-center justify-center"
             >
               <X className="w-3 h-3 text-slate-500" />
             </button>
@@ -334,110 +251,64 @@ export function SectionsList({ view = "add" }) {
       </div>
 
       <ScrollArea className="flex-1" id="tour-elements-list">
-        <div className="p-4">
-          {view === 'layers' ? (
-            <div className="space-y-2">
+        <div className="px-2 pb-3">
+          {view === "layers" ? (
+            <div className="space-y-0.5">
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={filteredLayers.map((s) => s.id)} strategy={verticalListSortingStrategy}>
-                  {filteredLayers.length > 0 ? filteredLayers.map((section, index) => (
-                    <SectionItem
-                       key={section.id}
-                       id={section.id}
-                       name={section.name}
-                       type={section.type}
-                       visible={section.visible}
-                       isSelected={editor.selectedSectionId === section.id}
-                       onClick={() => selectSection(section.id)}
-                     />
-                  )) : (
-                    <div className="text-center py-16 border-2 border-dashed border-slate-200 rounded-2xl bg-gradient-to-br from-slate-50/50 to-white">
-                      <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <Layers className="w-8 h-8 text-slate-300" />
-                      </div>
-                      <p className="text-sm text-slate-500 font-medium mb-2">No sections yet</p>
-                      <p className="text-xs text-slate-400">Switch to Add Elements to start building</p>
+                  {filteredLayers.length > 0 ? (
+                    filteredLayers.map((section) => (
+                      <SectionItem
+                        key={section.id}
+                        id={section.id}
+                        name={section.name}
+                        type={section.type}
+                        visible={section.visible}
+                        isSelected={editor.selectedSectionId === section.id}
+                        onClick={() => selectSection(section.id)}
+                      />
+                    ))
+                  ) : (
+                    <div className="text-center py-12">
+                      <Layers className="w-8 h-8 text-slate-200 mx-auto mb-3" />
+                      <p className="text-sm text-slate-500">No sections yet</p>
+                      <p className="text-xs text-slate-400 mt-1">Switch to Add Elements to start building</p>
                     </div>
                   )}
                 </SortableContext>
               </DndContext>
             </div>
           ) : (
-            <div className="space-y-8">
-              {/* Featured Elements */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-1 h-6 rounded-full bg-gradient-to-b from-primary to-primary/50"></div>
-                  <h3 className="text-sm font-bold text-slate-900">Popular Elements</h3>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  {ELEMENT_CATEGORIES[0].items.slice(0, 4).map((item, idx) => (
-                    <button
-                      key={`${item.type}-${item.name}`}
-                      onClick={() => handleAddElement(item)}
-                      className="group relative bg-white border-2 border-slate-200 hover:border-primary hover:shadow-lg rounded-xl p-3 transition-all duration-300 hover:scale-105 active:scale-95"
-                      style={{ animationDelay: `${idx * 50}ms` }}
-                    >
-                      <div className="aspect-square bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
-                        <item.icon className="w-5 h-5 text-primary" />
-                      </div>
-                      <h4 className="text-xs font-bold text-slate-900 text-center">{item.name}</h4>
-                      <p className="text-[8px] text-slate-500 text-center mt-1 line-clamp-2">{item.description}</p>
-                      <div className="absolute -top-2 -right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <Plus className="w-2.5 h-2.5 text-white" />
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* All Categories */}
-              {ELEMENT_CATEGORIES.map((cat, catIndex) => {
-                const filteredItems = cat.items.filter(item =>
-                  item.name.toLowerCase().includes(query.toLowerCase()) ||
-                  item.description?.toLowerCase().includes(query.toLowerCase())
+            <div className="space-y-4">
+              {ELEMENT_CATEGORIES.map((cat) => {
+                const filteredItems = cat.items.filter(
+                  (item) =>
+                    item.name.toLowerCase().includes(query.toLowerCase()) ||
+                    item.description?.toLowerCase().includes(query.toLowerCase())
                 );
 
                 if (filteredItems.length === 0) return null;
 
                 return (
-                  <div key={cat.name} className="space-y-4" style={{ animationDelay: `${catIndex * 100}ms` }}>
-                    {/* Category Header */}
-                    <div className="flex items-center justify-between p-3 bg-gradient-to-r from-slate-50 to-transparent rounded-xl border border-slate-100">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${cat.color} ${cat.borderColor} border flex items-center justify-center`}>
-                          <div className="w-5 h-5 rounded bg-white/80"></div>
-                        </div>
-                        <div>
-                          <h3 className="text-sm font-bold text-slate-900">{cat.name}</h3>
-                          <p className="text-[10px] text-slate-500">{filteredItems.length} element{filteredItems.length !== 1 ? 's' : ''}</p>
-                        </div>
-                      </div>
-                      <Badge className={`text-[9px] font-bold px-2 py-1 h-5 ${cat.badgeColor} border-0 rounded-lg`}>
-                        {filteredItems.length}
-                      </Badge>
-                    </div>
-
-                    {/* Elements Grid */}
+                  <div key={cat.name}>
+                    <h3 className="px-2 pb-1.5 text-[11px] font-semibold text-slate-800 pl-2 uppercase tracking-wider flex items-center justify-start mb-1">
+                      <span className="text-slate-800 px-1 py-0.5 border-b-2 border-slate-800">{cat.name}</span>
+                    </h3>
                     <div className="grid grid-cols-2 gap-2">
-                       {filteredItems.map((item, idx) => (
+                      {filteredItems.map((item) => (
                         <button
                           key={`${cat.name}-${item.type}-${item.name}`}
+                          type="button"
                           onClick={() => handleAddElement(item)}
-                          className="group relative bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md rounded-xl p-3 transition-all duration-200 hover:scale-102 active:scale-98"
-                          style={{ animationDelay: `${(catIndex * 100) + (idx * 30)}ms` }}
+                          className="flex flex-col gap-1.5 p-2.5 rounded-lg border border-slate-100 bg-white text-left hover:shadow-[0_4px_4px_-2px_rgba(8,12,22,0.28)] transition-shadow"
                         >
-                          <div className="flex items-start gap-3">
-                            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${cat.color} ${cat.borderColor} border flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200`}>
-                              <item.icon className="w-4 h-4 text-slate-600" />
+                          <div className="flex items-center gap-2 min-w-0 w-full">
+                            <div className="w-7 h-7 rounded-md bg-[#0F172A] text-white flex items-center justify-center shrink-0">
+                              <item.icon className="w-3.5 h-3.5" strokeWidth={1.75} />
                             </div>
-                            <div className="flex-1 text-left min-w-0">
-                              <h4 className="text-[10px] font-bold text-slate-900 truncate">{item.name}</h4>
-                              <p className="text-[8px] text-slate-500 mt-0.5 line-clamp-2 leading-tight">{item.description}</p>
-                            </div>
+                            <p className="text-xs font-medium text-slate-800 truncate">{item.name}</p>
                           </div>
-                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <Plus className="w-3 h-3 text-primary" />
-                          </div>
+                          <p className="text-[10px] text-slate-400 line-clamp-2 leading-snug">{item.description}</p>
                         </button>
                       ))}
                     </div>
@@ -449,18 +320,12 @@ export function SectionsList({ view = "add" }) {
         </div>
       </ScrollArea>
 
-      {/* Professional Footer */}
-      <div className="relative bg-gradient-to-r from-slate-50 via-white to-slate-50 border-t border-slate-200/60 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
-              <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-            </div>
-            <p className="text-[10px] text-slate-600 font-medium">
-              {view === 'add' ? 'Click any element to add it to your page' : 'Drag to reorder sections'}
-            </p>
-          </div>
-        </div>
+      <div className="px-4 py-3 border-t border-slate-100">
+        <p className="text-[10px] text-slate-400 italic">
+          {view === "add"
+            ? "Tip: Click any element to add it to your page"
+            : "Tip: Drag to reorder sections"}
+        </p>
       </div>
     </div>
   );

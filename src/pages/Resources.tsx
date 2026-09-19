@@ -25,6 +25,7 @@ import {
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/Common/BrandLogo";
 import Footer from "./Footer";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -143,9 +144,10 @@ const Resources = () => {
               : "bg-white/60 border-slate-200/50 shadow-[0_8px_32px_rgba(0,0,0,0.05)]"
           )}
         >
-          <Link to="/" className="flex items-center gap-3 cursor-pointer group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black group-hover:scale-110 transition-transform duration-300 shadow-lg">B</div>
-            <span className={cn("text-xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Buildora</span>
+          <Link to="/" className="flex items-center cursor-pointer group">
+            <BrandLogo
+              imgClassName="h-8 w-8 transition-transform duration-300 group-hover:scale-110"
+            />
           </Link>
 
           <div className="hidden md:flex items-center gap-8 text-sm font-medium">
@@ -167,12 +169,11 @@ const Resources = () => {
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
-            <Link to="/login" className={isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"}>Log in</Link>
-            <Link to="/contact" className={cn(
+            <Link to="/login" className={cn(
               "px-5 py-2.5 rounded-full font-semibold transition-all active:scale-95",
               isDark ? "bg-white text-slate-950 hover:bg-blue-50" : "bg-slate-900 text-white hover:bg-blue-600"
             )}>
-              Get started
+              Login
             </Link>
           </div>
 
@@ -208,16 +209,8 @@ const Resources = () => {
                   </Link>
                 ))}
                 <div className={cn("h-px w-full my-2", isDark ? "bg-slate-800" : "bg-slate-100")} />
-                <Link to="/login" onClick={() => setIsMenuOpen(false)} className={cn("text-lg font-semibold p-2", isDark ? "text-slate-300" : "text-slate-600")}>Log in</Link>
-                <Link
-                  to="/contact"
-                  onClick={() => setIsMenuOpen(false)}
-                  className={cn(
-                    "mt-2 py-4 rounded-2xl text-center font-bold text-lg",
-                    isDark ? "bg-white text-slate-950" : "bg-slate-900 text-white"
-                  )}
-                >
-                  Get started
+                <Link to="/login" onClick={() => setIsMenuOpen(false)} className={cn("mt-2 py-4 rounded-2xl text-center font-bold text-lg", isDark ? "bg-white text-slate-950" : "bg-slate-900 text-white")}>
+                  Login
                 </Link>
               </div>
             </motion.div>
@@ -280,11 +273,11 @@ const Resources = () => {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="flex flex-col sm:flex-row gap-8"
           >
-            <Link to="/templates" className={cn(
+            <Link to="/login" className={cn(
               "h-20 px-10 rounded-full font-black text-xl flex items-center justify-center gap-4 transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-blue-500/20",
               isDark ? "bg-white text-slate-950 hover:bg-blue-50" : "bg-slate-900 text-white hover:bg-blue-600"
             )}>
-              Start Building <ArrowRight className="w-6 h-6" />
+              Explore the Builder <ArrowRight className="w-6 h-6" />
             </Link>
           </motion.div>
         </div>

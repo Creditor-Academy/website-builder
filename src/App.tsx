@@ -7,6 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import React, { Suspense } from "react";
 
 const Index = React.lazy(() => import("./pages/Index"));
+const DashboardLayout = React.lazy(() => import("./layouts/DashboardLayout"));
 const Dashboard = React.lazy(() => import("./pages/Dashboard"));
 const DashboardUsers = React.lazy(() => import("./pages/DashboardUsers"));
 const DashboardWebsites = React.lazy(() => import("./pages/DashboardWebsites"));
@@ -38,11 +39,14 @@ const NotFound = React.lazy(() => import("./pages/NotFound"));
 const GoogleCallback = React.lazy(() => import("./pages/GoogleCallback"));
 const DashboardMessages = React.lazy(() => import("./pages/DashboardMessages"));
 const DashboardAuditLogs = React.lazy(() => import("./pages/DashboardAuditLogs"));
+const DashboardProfile = React.lazy(() => import("./pages/DashboardProfile"));
 
 import { ScrollToTop } from "./components/utils/ScrollToTop";
 import { JumpToTop } from "./components/ui/JumpToTop";
-import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { AuthSessionProvider } from "./components/auth/AuthSessionProvider";
+import Loading from "./components/Common/LoadingUI";
 
 const queryClient = new QueryClient();
 
@@ -54,9 +58,10 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <AuthSessionProvider>
           <ScrollToTop />
           <JumpToTop />
-          <Suspense fallback={<div className="flex h-screen w-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
+          <Suspense fallback={<Loading fullScreen />}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
@@ -64,8 +69,24 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route element={<ProtectedRoute />}>
-              <Route path="/dashboard" element={<Dashboard />}>
-                <Route index element={null} />
+              {/* User dashboard — /dashboard/* */}
+              <Route path="/dashboard" element={<DashboardLayout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="templates" element={<DashboardTemplates />} />
+                <Route path="assets" element={<DashboardAssets />} />
+                <Route path="messages" element={<DashboardMessages />} />
+                {/* <Route path="settings" element={<DashboardSettings />} /> */}
+                <Route path="profile" element={<DashboardProfile />} />
+                {/* Old admin paths — redirect to /admin/* */}
+                <Route path="users" element={<Navigate to="/admin/users" replace />} />
+                <Route path="organizations" element={<Navigate to="/admin/organizations" replace />} />
+                <Route path="websites" element={<Navigate to="/admin/websites" replace />} />
+                <Route path="deployment" element={<Navigate to="/admin/deployment" replace />} />
+                <Route path="audit" element={<Navigate to="/admin/audit" replace />} />
+              </Route>
+              {/* Admin dashboard — /admin/* */}
+              <Route path="/admin" element={<DashboardLayout />}>
+                <Route index element={<Dashboard />} />
                 <Route path="users" element={<DashboardUsers />} />
                 <Route path="organizations" element={<Organizations />} />
                 <Route path="websites" element={<DashboardWebsites />} />
@@ -74,7 +95,7 @@ const App = () => (
                 <Route path="assets" element={<DashboardAssets />} />
                 <Route path="messages" element={<DashboardMessages />} />
                 <Route path="audit" element={<DashboardAuditLogs />} />
-                <Route path="settings" element={<DashboardSettings />} />
+                <Route path="profile" element={<DashboardProfile />} />
               </Route>
               <Route path="/builder/:id" element={<WebsiteEditor />} />
               <Route path="/template-builder/:id" element={<TemplateEditor />} />
@@ -96,6 +117,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
+          </AuthSessionProvider>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

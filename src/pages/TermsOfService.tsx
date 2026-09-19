@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import Footer from "./Footer";
+import { BrandLogo } from "@/components/Common/BrandLogo";
 
 interface TermSection {
   id: string;
@@ -77,13 +78,10 @@ export default function TermsOfService() {
       {/* ================= NAVBAR ================= */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black shadow-lg group-hover:bg-indigo-600 transition-colors">
-              B
-            </div>
-            <span className="text-xl font-black tracking-tighter text-slate-900 uppercase">
-              Buildora
-            </span>
+          <Link to="/" className="group">
+            <BrandLogo
+              imgClassName="h-9 w-9"
+            />
           </Link>
 
           <nav className="hidden md:flex gap-8 text-sm font-bold text-slate-500">

@@ -236,7 +236,7 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate }) {
         color: tc,
         position: styles.sticky ? 'sticky' : 'relative',
         top: styles.sticky ? 0 : undefined,
-        zIndex: 50,
+        zIndex: 10,
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         cursor: isEditing ? 'pointer' : 'default',

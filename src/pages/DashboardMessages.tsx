@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams, useOutletContext } from 'react-router-dom';
+import { useSearchParams, useOutletContext, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
-    MessageSquare, Bell, CheckCircle, ArrowRight, Search, X, Mail, User, Calendar,
-    Clock, Filter, Trash2, Eye
+    MessageSquare, Bell, CheckCircle, Reply, Search, X, Mail, User, Calendar,
+    Clock, Trash2, Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from "@/components/ui/use-toast";
@@ -14,9 +13,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import formsApi from '@/api/forms';
 import websiteApi from '@/api/website';
+import { DashboardPageShell, dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass } from '@/components/dashboard/DashboardPageShell';
+import Loading from '@/components/Common/LoadingUI';
+import {
+  DashboardStatCard,
+  DashboardListCard,
+  DashboardCardSecondaryAction,
+  dashboardCardActionPrimaryClass,
+} from '@/components/dashboard/DashboardCard';
 
 export default function DashboardMessages() {
-    const navigate = useNavigate();
+    const location = useLocation();
+    const basePath = location.pathname.startsWith('/admin') ? '/admin' : '/dashboard';
     const [searchParams, setSearchParams] = useSearchParams();
     const { toast } = useToast();
     const [messages, setMessages] = useState<any[]>([]);
@@ -149,260 +157,187 @@ export default function DashboardMessages() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'unread': return 'bg-amber-100 text-amber-700 border-amber-200';
-            case 'read': return 'bg-green-100 text-green-700 border-green-200';
-            case 'replied': return 'bg-purple-100 text-purple-700 border-purple-200';
-            default: return 'bg-slate-100 text-slate-700 border-slate-200';
+            case 'unread': return 'bg-amber-100 text-amber-800 border-amber-200';
+            case 'read': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+            case 'replied': return 'bg-[#dedfeb] text-[#191b24] border-[#c6c6cd]';
+            default: return 'bg-[#f6f3f5] text-[#45464d] border-[#c6c6cd]';
         }
     };
 
     const getStatusIcon = (status: string) => {
         switch (status) {
-            case 'unread': return <Bell className="w-4 h-4" />;
-            case 'read': return <CheckCircle className="w-4 h-4" />;
-            case 'replied': return <ArrowRight className="w-4 h-4" />;
-            default: return <MessageSquare className="w-4 h-4" />;
+            case 'unread': return <Bell className="w-3 h-3" />;
+            case 'read': return <CheckCircle className="w-3 h-3" />;
+            case 'replied': return <Reply className="w-3 h-3" />;
+            default: return <MessageSquare className="w-3 h-3" />;
         }
     };
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <>
             <Helmet>
                 <title>Messages | Buildora</title>
             </Helmet>
 
-            <div className="max-w-7xl mx-auto p-6">
-                {/* Header */}
-                <div className="mb-8">
-                    <div className="flex items-center gap-4 mb-6">
-                        <Button
-                            variant="ghost"
-                            onClick={() => navigate('/dashboard')}
-                            className="text-slate-600 hover:text-slate-900"
-                        >
-                            <ArrowRight className="w-4 h-4 mr-2 rotate-180" />
-                            Back to Dashboard
-                        </Button>
-                        <div className="h-8 w-px bg-slate-300" />
-                        <h1 className="text-3xl font-bold text-slate-900">Messages</h1>
-                    </div>
-                    <p className="text-slate-600">
-                        Manage contact form submissions from your website visitors. View, respond to, and organize your messages.
-                    </p>
-                </div>
-
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <Card className="hover:shadow-lg transition-shadow">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                            <CardTitle className="text-sm font-medium text-slate-600">Total Messages</CardTitle>
-                            <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
-                                <MessageSquare className="w-5 h-5" />
-                            </div>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                            <div className="text-2xl font-bold text-slate-900">{stats.total || 0}</div>
-                        </CardContent>
-                    </Card>
-                    
-                    <Card className="hover:shadow-lg transition-shadow">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                            <CardTitle className="text-sm font-medium text-slate-600">Unread</CardTitle>
-                            <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center">
-                                <Bell className="w-5 h-5" />
-                            </div>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                            <div className="text-2xl font-bold text-amber-600">{stats.unread || 0}</div>
-                        </CardContent>
-                    </Card>
-                    
-                    <Card className="hover:shadow-lg transition-shadow">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                            <CardTitle className="text-sm font-medium text-slate-600">Read</CardTitle>
-                            <div className="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center">
-                                <CheckCircle className="w-5 h-5" />
-                            </div>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                            <div className="text-2xl font-bold text-green-600">{stats.read || 0}</div>
-                        </CardContent>
-                    </Card>
-                    
-                    <Card className="hover:shadow-lg transition-shadow">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                            <CardTitle className="text-sm font-medium text-slate-600">Replied</CardTitle>
-                            <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center">
-                                <ArrowRight className="w-5 h-5" />
-                            </div>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                            <div className="text-2xl font-bold text-purple-600">{stats.replied || 0}</div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Filters */}
-                <div className="flex flex-col md:flex-row gap-4 mb-6">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <DashboardPageShell
+                basePath={basePath}
+                title="Messages"
+                description="Manage contact form submissions from your website visitors."
+            >
+                <div className="mb-4 flex flex-col gap-3 lg:mb-5 lg:flex-row lg:items-center">
+                    <div className="relative min-w-0 flex-1">
+                        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
                         <Input
-                            placeholder="Search messages by name, email, subject, or message..."
+                            placeholder="Search messages..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-12 h-12 rounded-xl bg-white border-slate-200 shadow-sm"
+                            className={cn(dashboardSearchInputClass, 'h-9 rounded-full pl-9')}
                         />
                     </div>
-                    <div className="flex gap-2">
-                        {['all', 'unread', 'read', 'replied'].map(status => (
-                            <Button
+                    <div className={cn(dashboardFilterScrollClass, 'lg:flex-none')}>
+                        {['all', 'unread', 'read', 'replied'].map((status) => (
+                            <button
                                 key={status}
-                                variant={filterStatus === status ? 'default' : 'outline'}
+                                type="button"
                                 onClick={() => setFilterStatus(status)}
                                 className={cn(
-                                    "rounded-full h-12 px-6 capitalize font-medium transition-all",
-                                    filterStatus === status 
-                                        ? "bg-blue-600 text-white shadow-md shadow-blue-500/30" 
-                                        : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                                    dashboardFilterPillClass(filterStatus === status),
+                                    filterStatus !== status && 'hover:border-[#131924] hover:bg-[#131924] hover:text-white',
+                                    filterStatus === status && 'bg-[#131924] border-transparent',
                                 )}
                             >
-                                {status}
-                            </Button>
+                                {status.charAt(0).toUpperCase() + status.slice(1)}
+                            </button>
                         ))}
                     </div>
-                </div>
-                <div className="mb-6">
-                    <div className="flex items-center gap-3">
-                        <label className="text-sm font-medium text-slate-600">Website</label>
-                        <select
-                            value={selectedWebsiteId}
-                            onChange={(e) => handleWebsiteChange(e.target.value)}
-                            disabled={isLoadingWebsites}
-                            className="h-10 px-3 rounded-lg border border-slate-200 bg-white text-sm text-slate-700"
-                        >
-                            <option value="all">All websites</option>
-                            {websites.map((website) => (
-                                <option key={website.id} value={website.id}>
-                                    {website.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    <select
+                        value={selectedWebsiteId}
+                        onChange={(e) => handleWebsiteChange(e.target.value)}
+                        disabled={isLoadingWebsites}
+                        aria-label="Filter by website"
+                        className="h-9 w-full shrink-0 rounded-full border border-[#c6c6cd] bg-white px-3 text-sm text-[#1b1b1d] lg:w-[200px]"
+                    >
+                        <option value="all">All websites</option>
+                        {websites.map((website) => (
+                            <option key={website.id} value={website.id}>
+                                {website.name}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
-                {/* Messages List */}
-                <div className="space-y-4">
+                <div className="mb-4 grid grid-cols-2 gap-3 lg:mb-5 md:grid-cols-4">
+                    {[
+                        { label: 'Total', value: stats.total || 0, icon: MessageSquare },
+                        { label: 'Unread', value: stats.unread || 0, icon: Bell },
+                        { label: 'Read', value: stats.read || 0, icon: CheckCircle },
+                        { label: 'Replied', value: stats.replied || 0, icon: Reply },
+                    ].map(({ label, value, icon: Icon }) => (
+                        <DashboardStatCard
+                            key={label}
+                            className="rounded-lg border border-[#f3f4f6] bg-[#131924] p-3 sm:p-4"
+                        >
+                            <div className="mb-2 flex items-center justify-between gap-2">
+                                <p className="truncate text-xs font-medium text-white/80 sm:text-sm">{label}</p>
+                                <Icon className="h-3.5 w-3.5 shrink-0 text-white/70" />
+                            </div>
+                            <div className="text-xl font-bold text-white sm:text-2xl">{value}</div>
+                        </DashboardStatCard>
+                    ))}
+                </div>
+
+                <div className="space-y-3">
                     {isLoading ? (
-                        Array.from({ length: 5 }).map((_, i) => (
-                            <Card key={i} className="animate-pulse">
-                                <CardContent className="p-6">
-                                    <div className="space-y-4">
-                                        <div className="h-4 bg-slate-200 rounded-full w-3/4" />
-                                        <div className="h-3 bg-slate-100 rounded-full w-1/2" />
-                                        <div className="h-3 bg-slate-100 rounded-full w-full" />
-                                        <div className="h-3 bg-slate-100 rounded-full w-2/3" />
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))
+                        <Loading label="Loading messages" />
                     ) : filteredMessages.length === 0 ? (
-                        <Card className="border-dashed border-2 border-slate-300 bg-slate-50/50">
-                            <CardContent className="p-12 text-center">
-                                <MessageSquare className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                                <h3 className="text-xl font-semibold text-slate-600 mb-2">
-                                    {searchTerm ? 'No messages found' : 'No messages yet'}
-                                </h3>
-                                <p className="text-slate-400">
-                                    {searchTerm 
-                                        ? 'Try adjusting your search terms or filters' 
-                                        : 'When visitors fill out your contact forms, messages will appear here'
-                                    }
-                                </p>
-                            </CardContent>
-                        </Card>
+                        <div className="flex min-h-[220px] flex-col items-center justify-center rounded-lg border border-dashed border-[#c6c6cd] bg-[#f6f3f5] px-6 py-10 text-center">
+                            <MessageSquare className="mb-3 h-10 w-10 text-[#76777d]" />
+                            <h3 className="text-base font-semibold text-[#1b1b1d]">
+                                {searchTerm ? 'No messages found' : 'No messages yet'}
+                            </h3>
+                            <p className="mt-1 max-w-md text-sm text-[#45464d]">
+                                {searchTerm
+                                    ? 'Try adjusting your search terms or filters'
+                                    : 'When visitors fill out your contact forms, messages will appear here'}
+                            </p>
+                        </div>
                     ) : (
                         filteredMessages.map((message) => (
-                            <Card 
-                                key={message.id} 
+                            <DashboardListCard
+                                key={message.id}
                                 className={cn(
-                                    "cursor-pointer transition-all hover:shadow-lg border-2",
-                                    message.status === 'unread' 
-                                        ? 'border-amber-200 bg-amber-50/30' 
-                                        : 'border-slate-200 bg-white'
+                                    'rounded-lg border border-[#f3f4f6] bg-[#fcf8fa] p-3 sm:p-4',
+                                    message.status === 'unread' && 'border-amber-200 bg-white',
                                 )}
                                 onClick={() => setSelectedMessage(message)}
                             >
-                                <CardContent className="p-6">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-3 mb-2">
-                                                <h4 className="font-semibold text-slate-900">{message.name}</h4>
-                                                <span className="text-sm text-slate-500">{message.email}</span>
-                                                <div className={cn(
-                                                    "px-2 py-1 text-xs font-medium rounded-full flex items-center gap-1.5",
-                                                    getStatusColor(message.status)
-                                                )}>
-                                                    {getStatusIcon(message.status)}
-                                                    {message.status}
-                                                </div>
+                                <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                    <div className="min-w-0 flex-1">
+                                        <div className="mb-1 flex flex-wrap items-center gap-2">
+                                            <h4 className="text-sm font-semibold leading-snug text-[#000000] sm:text-base">
+                                                {message.name}
+                                            </h4>
+                                            <span className="break-all text-xs text-[#45464d]">{message.email}</span>
+                                            <div className={cn(
+                                                'flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
+                                                getStatusColor(message.status),
+                                            )}>
+                                                {getStatusIcon(message.status)}
+                                                {message.status}
                                             </div>
-                                            {message.subject && (
-                                                <p className="font-medium text-slate-700 mb-2">{message.subject}</p>
-                                            )}
-                                            {message.website?.name && (
-                                                <p className="text-sm text-slate-500 mb-2">Website: {message.website.name}</p>
-                                            )}
                                         </div>
-                                        <div className="text-sm text-slate-500 flex items-center gap-1">
-                                            <Calendar className="w-4 h-4" />
-                                            {new Date(message.createdAt).toLocaleDateString()}
-                                        </div>
-                                    </div>
-                                    <p className="text-slate-600 line-clamp-2 mb-4">{message.message}</p>
-                                    
-                                    <div className="flex items-center gap-2 pt-4 border-t border-slate-100">
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setSelectedMessage(message);
-                                            }}
-                                            className="rounded-full"
-                                        >
-                                            <Eye className="w-4 h-4 mr-2" />
-                                            View Details
-                                        </Button>
-                                        {message.status === 'unread' && (
-                                            <Button
-                                                size="sm"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleMarkAsRead(message.id);
-                                                }}
-                                                className="rounded-full"
-                                            >
-                                                Mark as Read
-                                            </Button>
+                                        {message.subject && (
+                                            <p className="truncate text-sm font-medium text-[#1b1b1d]">{message.subject}</p>
                                         )}
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
+                                        {message.website?.name && (
+                                            <p className="mt-0.5 text-xs text-[#45464d]">Website: {message.website.name}</p>
+                                        )}
+                                    </div>
+                                    <div className="flex shrink-0 items-center gap-1 text-xs text-[#45464d]">
+                                        <Calendar className="h-3.5 w-3.5" />
+                                        {new Date(message.createdAt).toLocaleDateString()}
+                                    </div>
+                                </div>
+                                <p className="mb-3 line-clamp-2 text-sm leading-snug text-[#45464d]">{message.message}</p>
+
+                                <div className="flex flex-wrap items-center gap-2 border-t border-[#f3f4f6] pt-2">
+                                    <DashboardCardSecondaryAction
+                                        className="inline-flex h-8 w-auto items-center justify-center gap-1.5 px-0 text-xs"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedMessage(message);
+                                        }}
+                                    >
+                                        <Eye className="h-3.5 w-3.5" /> View
+                                    </DashboardCardSecondaryAction>
+                                    {message.status === 'unread' && (
+                                        <button
+                                            type="button"
+                                            className={cn(dashboardCardActionPrimaryClass, 'h-8 px-3 text-xs')}
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleDelete(message.id);
+                                                void handleMarkAsRead(message.id);
                                             }}
-                                            className="rounded-full text-rose-600 hover:text-rose-700 hover:bg-rose-50"
                                         >
-                                            <Trash2 className="w-4 h-4 mr-2" />
-                                            Delete
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                            Mark as Read
+                                        </button>
+                                    )}
+                                    <button
+                                        type="button"
+                                        className="ml-auto inline-flex h-8 items-center gap-1 text-xs font-medium text-[#ba1a1a] transition-colors hover:text-[#93000a]"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            void handleDelete(message.id);
+                                        }}
+                                    >
+                                        <Trash2 className="h-3.5 w-3.5" /> Delete
+                                    </button>
+                                </div>
+                            </DashboardListCard>
                         ))
                     )}
                 </div>
+            </DashboardPageShell>
 
                 {/* Message Detail Modal */}
                 <AnimatePresence>
@@ -414,74 +349,74 @@ export default function DashboardMessages() {
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 transition={{ duration: 0.2 }}
                             >
-                                <DialogContent className="sm:max-w-3xl rounded-[2rem] p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
-                                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6 sticky top-0 z-10">
-                                        <DialogTitle className="text-2xl font-bold text-white flex items-center justify-between">
+                                <DialogContent className="w-[calc(100vw-2rem)] max-h-[90vh] overflow-hidden rounded-2xl p-0 sm:max-w-2xl">
+                                    <div className="sticky top-0 z-10 bg-[#131924] px-4 py-4 sm:px-6">
+                                        <DialogTitle className="flex items-center justify-between gap-2 text-lg font-semibold text-white">
                                             Message Details
                                             <Button
                                                 variant="ghost"
                                                 onClick={() => setSelectedMessage(null)}
-                                                className="text-white/80 hover:text-white hover:bg-white/20 rounded-full h-8 w-8 p-0"
+                                                className="h-8 w-8 rounded-full p-0 text-white/80 hover:bg-white/10 hover:text-white"
                                             >
-                                                <X className="w-5 h-5" />
+                                                <X className="h-4 w-4" />
                                             </Button>
                                         </DialogTitle>
                                     </div>
-                                    <div className="p-8 space-y-6">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="max-h-[min(70vh,32rem)] space-y-4 overflow-y-auto bg-white p-4 sm:p-6 no-scrollbar">
+                                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                                             <div>
-                                                <label className="text-sm font-medium text-slate-500 flex items-center gap-2 mb-2">
-                                                    <User className="w-4 h-4" />
+                                                <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-[#747781]">
+                                                    <User className="h-3.5 w-3.5" />
                                                     Name
                                                 </label>
-                                                <p className="font-semibold text-slate-900 bg-slate-50 p-3 rounded-lg">{selectedMessage.name}</p>
+                                                <p className="rounded-lg bg-[#F4F4F5] p-2.5 text-sm font-semibold text-[#0F172A]">{selectedMessage.name}</p>
                                             </div>
                                             <div>
-                                                <label className="text-sm font-medium text-slate-500 flex items-center gap-2 mb-2">
-                                                    <Mail className="w-4 h-4" />
+                                                <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-[#747781]">
+                                                    <Mail className="h-3.5 w-3.5" />
                                                     Email
                                                 </label>
-                                                <p className="font-semibold text-slate-900 bg-slate-50 p-3 rounded-lg">{selectedMessage.email}</p>
+                                                <p className="rounded-lg bg-[#F4F4F5] p-2.5 text-sm font-semibold text-[#0F172A]">{selectedMessage.email}</p>
                                             </div>
                                         </div>
                                         {selectedMessage.subject && (
                                             <div>
-                                                <label className="text-sm font-medium text-slate-500 mb-2">Subject</label>
-                                                <p className="font-semibold text-slate-900 bg-slate-50 p-3 rounded-lg">{selectedMessage.subject}</p>
+                                                <label className="mb-1.5 text-xs font-medium text-[#747781]">Subject</label>
+                                                <p className="rounded-lg bg-[#F4F4F5] p-2.5 text-sm font-semibold text-[#0F172A]">{selectedMessage.subject}</p>
                                             </div>
                                         )}
                                         {selectedMessage.website?.name && (
                                             <div>
-                                                <label className="text-sm font-medium text-slate-500 mb-2">Website</label>
-                                                <p className="font-semibold text-slate-900 bg-slate-50 p-3 rounded-lg">{selectedMessage.website.name}</p>
+                                                <label className="mb-1.5 text-xs font-medium text-[#747781]">Website</label>
+                                                <p className="rounded-lg bg-[#F4F4F5] p-2.5 text-sm font-semibold text-[#0F172A]">{selectedMessage.website.name}</p>
                                             </div>
                                         )}
                                         <div>
-                                            <label className="text-sm font-medium text-slate-500 mb-2">Message</label>
-                                            <div className="text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                            <label className="mb-1.5 text-xs font-medium text-[#747781]">Message</label>
+                                            <div className="rounded-lg border border-[#f3f4f6] bg-[#F4F4F5] p-3 text-sm leading-relaxed text-[#0F172A]">
                                                 {selectedMessage.message}
                                             </div>
                                         </div>
-                                        <div className="flex items-center justify-between pt-6 border-t border-slate-100">
-                                            <div className="text-sm text-slate-500 flex items-center gap-2">
-                                                <Clock className="w-4 h-4" />
-                                                Received: {new Date(selectedMessage.createdAt).toLocaleString()}
+                                        <div className="flex flex-col gap-3 border-t border-[#f3f4f6] pt-3 sm:flex-row sm:items-center sm:justify-between">
+                                            <div className="flex items-center gap-1.5 text-xs text-[#747781]">
+                                                <Clock className="h-3.5 w-3.5" />
+                                                {new Date(selectedMessage.createdAt).toLocaleString()}
                                             </div>
                                             <div className="flex gap-2">
                                                 {selectedMessage.status === 'unread' && (
                                                     <Button
-                                                        onClick={() => handleMarkAsRead(selectedMessage.id)}
-                                                        className="rounded-full"
+                                                        onClick={() => void handleMarkAsRead(selectedMessage.id)}
+                                                        className="h-9 rounded-full bg-[#131924] px-4 text-xs hover:bg-[#202838]"
                                                     >
                                                         Mark as Read
                                                     </Button>
                                                 )}
                                                 <Button
                                                     variant="outline"
-                                                    onClick={() => handleDelete(selectedMessage.id)}
-                                                    className="rounded-full text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                                                    onClick={() => void handleDelete(selectedMessage.id)}
+                                                    className="h-9 rounded-full px-4 text-xs text-[#ba1a1a] hover:border-[#ba1a1a] hover:bg-rose-50 hover:text-[#93000a]"
                                                 >
-                                                    <Trash2 className="w-4 h-4 mr-2" />
+                                                    <Trash2 className="mr-1.5 h-3.5 w-3.5" />
                                                     Delete
                                                 </Button>
                                             </div>
@@ -492,7 +427,6 @@ export default function DashboardMessages() {
                         </Dialog>
                     )}
                 </AnimatePresence>
-            </div>
-        </div>
+        </>
     );
 }

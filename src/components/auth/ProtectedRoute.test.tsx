@@ -6,16 +6,11 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
-// Stub localStorage to avoid jsdom SecurityError
-const store: Record<string, string> = {};
-vi.stubGlobal('localStorage', {
-  getItem: (key: string) => store[key] ?? null,
-  setItem: (key: string, value: string) => { store[key] = String(value); },
-  removeItem: (key: string) => { delete store[key]; },
-  clear: () => { for (const k in store) delete store[k]; },
-  get length() { return Object.keys(store).length; },
-  key: (i: number) => Object.keys(store)[i] ?? null,
-});
+const mockUseAuthSession = vi.fn();
+
+vi.mock('@/components/auth/AuthSessionProvider', () => ({
+  useAuthSession: () => mockUseAuthSession(),
+}));
 
 function renderWithRouter(initialEntry: string) {
   return render(
@@ -32,22 +27,32 @@ function renderWithRouter(initialEntry: string) {
 
 describe('ProtectedRoute', () => {
   beforeEach(() => {
-    for (const k in store) delete store[k];
+    mockUseAuthSession.mockReset();
   });
 
-  it('redirects to /login when no user in localStorage', () => {
+  it('shows loading while session is being validated', () => {
+    mockUseAuthSession.mockReturnValue({
+      isAuthenticated: false,
+      isLoading: true,
+    });
+    renderWithRouter('/dashboard');
+    expect(screen.getByLabelText('Checking session')).toBeInTheDocument();
+  });
+
+  it('redirects to /login when not authenticated', () => {
+    mockUseAuthSession.mockReturnValue({
+      isAuthenticated: false,
+      isLoading: false,
+    });
     renderWithRouter('/dashboard');
     expect(screen.getByText('Login Page')).toBeInTheDocument();
   });
 
-  it('redirects when user object has no id', () => {
-    store['user'] = JSON.stringify({ name: 'NoId' });
-    renderWithRouter('/dashboard');
-    expect(screen.getByText('Login Page')).toBeInTheDocument();
-  });
-
-  it('allows access when user has an id', () => {
-    store['user'] = JSON.stringify({ id: '123', name: 'Test' });
+  it('allows access when authenticated', () => {
+    mockUseAuthSession.mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+    });
     renderWithRouter('/dashboard');
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
   });

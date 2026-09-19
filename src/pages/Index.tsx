@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState, MouseEvent } from "react";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue, useInView } from "framer-motion";
-import { ChevronDown, ArrowRight, MousePointer2, Sparkles, Menu, X, Zap, LayoutTemplate, Layers, Palette, MonitorPlay, Move, Sun, Moon } from "lucide-react";
+import { ChevronDown, ArrowRight, MousePointer2, Sparkles, Menu, X, Zap, LayoutTemplate, Layers, Palette, Move, Sun, Moon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import useBuilderStore, { type BuilderStore } from "@/store/useBuilderStore";
 import Footer from "./Footer";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/Common/BrandLogo";
+import Loading from "@/components/Common/LoadingUI";
+import { getDashboardPath, validateSession } from "@/lib/authSession";
 
 import { useTheme } from "@/hooks/useTheme";
 
@@ -60,10 +62,10 @@ const FloatingElement = ({ children, x, y, delay = 0, className, isDark }: any) 
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const createWebsite = useBuilderStore((state: BuilderStore) => state.createWebsite);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
 
   const { theme, setTheme, isDark } = useTheme();
 
@@ -71,6 +73,17 @@ export default function LandingPage() {
   useEffect(() => {
     document.body.style.backgroundColor = isDark ? '#020617' : '#f8fafc'; // slate-950 or slate-50
   }, [isDark]);
+
+  // If session cookie is still valid, go straight to the dashboard
+  useEffect(() => {
+    void validateSession().then(({ valid, user }) => {
+      if (valid && user) {
+        navigate(getDashboardPath(user), { replace: true });
+        return;
+      }
+      setIsCheckingSession(false);
+    });
+  }, [navigate]);
 
   // Scroll Animations
   const { scrollYProgress } = useScroll();
@@ -84,6 +97,12 @@ export default function LandingPage() {
   const springConfig = { damping: 20, stiffness: 100 };
   const smoothX = useSpring(mouseX, springConfig);
   const smoothY = useSpring(mouseY, springConfig);
+  const floatingLayersX = useTransform(smoothX, (v) => v * -2.5);
+  const floatingLayersY = useTransform(smoothY, (v) => v * -2.5);
+  const floatingStylesX = useTransform(smoothX, (v) => v * 1.8);
+  const floatingStylesY = useTransform(smoothY, (v) => v * 1.8);
+  const floatingRightX = useTransform(smoothX, (v) => v * 2.5);
+  const floatingRightY = useTransform(smoothY, (v) => v * -1);
 
   const handleMouseMove = (e: MouseEvent) => {
     const { innerWidth, innerHeight } = window;
@@ -93,9 +112,8 @@ export default function LandingPage() {
     mouseY.set(y);
   };
 
-  const handleSelectTemplate = (templateId: string, title: string) => {
-    const id = createWebsite(`My ${title}`, templateId);
-    navigate(`/builder/${id}`);
+  const handleSelectTemplate = (_templateId: string, _title: string) => {
+    navigate('/login');
   };
 
   // Carousel auto scroll
@@ -133,6 +151,10 @@ export default function LandingPage() {
     };
   }, []);
 
+  if (isCheckingSession) {
+    return <Loading fullScreen label="Checking session" />;
+  }
+
   return (
     <main
       className={cn("w-full overflow-x-hidden selection:bg-blue-500/30 font-sans transition-colors duration-1000", isDark ? "bg-slate-950 text-slate-100 selection:text-white" : "bg-slate-50 text-slate-900 selection:text-black")}
@@ -151,9 +173,10 @@ export default function LandingPage() {
               : "bg-white/60 border border-slate-200/50 shadow-[0_8px_32px_rgba(0,0,0,0.05)] hover:bg-white/80"
           )}
         >
-          <Link to="/" className="flex items-center gap-3 cursor-pointer group pointer-events-auto">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-lg">B</div>
-            <span className={cn("text-xl font-bold tracking-tight transition-colors", isDark ? "text-white group-hover:text-blue-200" : "text-slate-900 group-hover:text-blue-600")}>Buildora</span>
+          <Link to="/" className="flex items-center cursor-pointer group pointer-events-auto">
+            <BrandLogo
+              imgClassName="h-8 w-8 transition-transform duration-300 group-hover:scale-110"
+            />
           </Link>
 
           <div className="hidden md:flex items-center gap-8 text-sm font-medium">
@@ -179,9 +202,8 @@ export default function LandingPage() {
               </AnimatePresence>
             </button>
 
-            <Link to="/login" className={cn("transition-colors", isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900")}>Log in</Link>
-            <Link to="/contact" className={cn("px-5 py-2.5 rounded-full hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all active:scale-95 font-semibold", isDark ? "bg-white text-slate-950 hover:bg-blue-50 hover:text-blue-600" : "bg-slate-900 text-white hover:bg-blue-600")}>
-              Get started
+            <Link to="/login" className={cn("px-5 py-2.5 rounded-full hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all active:scale-95 font-semibold", isDark ? "bg-white text-slate-950 hover:bg-blue-50 hover:text-blue-600" : "bg-slate-900 text-white hover:bg-blue-600")}>
+              Login
             </Link>
           </div>
 
@@ -217,16 +239,8 @@ export default function LandingPage() {
                   </Link>
                 ))}
                 <div className={cn("h-px w-full my-2", isDark ? "bg-slate-800" : "bg-slate-100")} />
-                <Link to="/login" onClick={() => setIsMenuOpen(false)} className={cn("text-lg font-semibold p-2", isDark ? "text-slate-300" : "text-slate-600")}>Log in</Link>
-                <Link
-                  to="/contact"
-                  onClick={() => setIsMenuOpen(false)}
-                  className={cn(
-                    "mt-2 py-4 rounded-2xl text-center font-bold text-lg",
-                    isDark ? "bg-white text-slate-950" : "bg-slate-900 text-white"
-                  )}
-                >
-                  Get started
+                <Link to="/login" onClick={() => setIsMenuOpen(false)} className={cn("mt-2 py-4 rounded-2xl text-center font-bold text-lg", isDark ? "bg-white text-slate-950" : "bg-slate-900 text-white")}>
+                  Login
                 </Link>
               </div>
             </motion.div>
@@ -254,8 +268,8 @@ export default function LandingPage() {
 
         {/* Floating Mock UI Elements for "Builder" Context */}
         <FloatingElement
-          x={useTransform(smoothX, (v) => v * -2.5)}
-          y={useTransform(smoothY, (v) => v * -2.5)}
+          x={floatingLayersX}
+          y={floatingLayersY}
           delay={0.2}
           isDark={isDark}
           className="top-[20%] left-[5%] w-48 z-10"
@@ -272,8 +286,8 @@ export default function LandingPage() {
         </FloatingElement>
 
         <FloatingElement
-          x={useTransform(smoothX, (v) => v * 1.8)}
-          y={useTransform(smoothY, (v) => v * 1.8)}
+          x={floatingStylesX}
+          y={floatingStylesY}
           delay={0.4}
           isDark={isDark}
           className="bottom-[25%] right-[8%] w-56 z-10"
@@ -291,8 +305,8 @@ export default function LandingPage() {
         </FloatingElement>
 
         <FloatingElement
-          x={useTransform(smoothX, (v) => v * 2.5)}
-          y={useTransform(smoothY, (v) => v * -1)}
+          x={floatingRightX}
+          y={floatingRightY}
           delay={0.6}
           isDark={isDark}
           className="top-[30%] right-[10%] w-40 z-10 p-3"
@@ -358,7 +372,7 @@ export default function LandingPage() {
           >
             <motion.button
               whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-              onClick={() => document.getElementById("templates")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() => navigate('/login')}
               className={cn(
                 "h-16 px-10 rounded-full font-bold text-lg flex items-center justify-center gap-3 transition-all duration-300 group shadow-lg pointer-events-auto",
                 isDark
@@ -366,18 +380,7 @@ export default function LandingPage() {
                   : "bg-slate-900 text-white hover:bg-blue-600 hover:shadow-[0_0_40px_rgba(59,130,246,0.4)]"
               )}
             >
-              Start Building <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-              className={cn(
-                "h-16 px-10 backdrop-blur-md border rounded-full font-bold text-lg flex items-center justify-center transition-all duration-300 group shadow-lg pointer-events-auto",
-                isDark
-                  ? "bg-slate-800/50 border-slate-600 text-white hover:bg-slate-700/50 hover:border-blue-400 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]"
-                  : "bg-white/80 border-slate-300 text-slate-900 hover:bg-white hover:border-blue-400 hover:shadow-[0_0_20px_rgba(0,0,0,0.1)]"
-              )}
-            >
-              <MonitorPlay className="w-5 h-5 mr-3 text-blue-500 group-hover:scale-125 transition-transform duration-300" /> Watch Demo
+              Explore Buildora <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
             </motion.button>
           </motion.div>
         </motion.div>
@@ -496,9 +499,9 @@ export default function LandingPage() {
               Start with brilliant <br /><span className="text-blue-400 italic font-serif font-medium">templates.</span>
             </h2>
           </div>
-          <button className={cn("px-8 py-4 rounded-full font-bold transition-all border shadow-lg active:scale-95 duration-1000", isDark ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-600 hover:border-blue-500 hover:shadow-blue-500/20" : "bg-white hover:bg-slate-50 text-slate-950 border-slate-200 hover:border-blue-500 hover:shadow-blue-500/20")}>
+          {/* <button className={cn("px-8 py-4 rounded-full font-bold transition-all border shadow-lg active:scale-95 duration-1000", isDark ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-600 hover:border-blue-500 hover:shadow-blue-500/20" : "bg-white hover:bg-slate-50 text-slate-950 border-slate-200 hover:border-blue-500 hover:shadow-blue-500/20")}>
             View all templates
-          </button>
+          </button> */}
         </div>
 
         {/* Carousel */}
@@ -515,7 +518,7 @@ export default function LandingPage() {
                   onClick={() => navigate('/login')}
                   className="bg-white text-slate-950 py-4 px-6 rounded-2xl font-bold w-full transform translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center gap-3 hover:bg-blue-50 hover:text-blue-600 shadow-xl"
                 >
-                  Start Building <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  Use This Template <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
             </div>
@@ -571,11 +574,11 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-              <Link to="/contact" className={cn(
+              <Link to="/login" className={cn(
                 "h-18 px-12 py-6 items-center justify-center gap-4 font-black rounded-full text-xl hover:scale-105 active:scale-95 transition-all duration-300 group shadow-xl flex",
                 isDark ? "bg-white text-slate-950 hover:bg-blue-50" : "bg-slate-900 text-white hover:bg-slate-800"
               )}>
-                Start Building Now <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
+                Build Your Website <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
               </Link>
             </div>
             

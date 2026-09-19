@@ -1473,16 +1473,17 @@ export function PropertiesPanel() {
           </div>
         )}
 
+        <div className="p-2 space-y-2">
         {variants.length > 0 && (
-          <Collapsible open={layoutOpen} onOpenChange={setLayoutOpen} className="border-b border-slate-100">
-            <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+          <Collapsible open={layoutOpen} onOpenChange={setLayoutOpen}>
+            <CollapsibleTrigger className="w-full p-3 flex items-center justify-between bg-[#0F172A] rounded-lg text-white">
               <div className="flex items-center gap-2">
-                <Layout className="w-4 h-4 text-emerald-500" />
-                <span className="text-sm font-semibold text-slate-700">Layout Variant</span>
+                <Layout className="w-4 h-4 text-white" />
+                <span className="text-sm font-semibold text-white">Layout Variant</span>
               </div>
-              <ChevronDown className={`w-4 h-4 transition-transform text-slate-400 ${layoutOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-4 h-4 transition-transform text-white ${layoutOpen ? 'rotate-180' : ''}`} />
             </CollapsibleTrigger>
-            <CollapsibleContent className="p-4 pt-0">
+            <CollapsibleContent className="p-3 pt-3">
               <Select value={selectedSection.variant || variants[0]?.id} onValueChange={(val) => updateSection(selectedSection.id, { variant: val })}>
                 <SelectTrigger className="bg-slate-50 border-slate-200 text-xs h-9 shadow-sm">
                   <SelectValue />
@@ -1495,28 +1496,28 @@ export function PropertiesPanel() {
           </Collapsible>
         )}
 
-        <Collapsible open={contentOpen} onOpenChange={setContentOpen} className="border-b border-slate-100">
-          <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+        <Collapsible open={contentOpen} onOpenChange={setContentOpen}>
+          <CollapsibleTrigger className="w-full p-3 flex items-center justify-between bg-[#0F172A] rounded-lg text-white">
             <div className="flex items-center gap-2">
-              <Type className="w-4 h-4 text-primary" />
-              <span className="text-sm font-semibold text-slate-700">Content & Assets</span>
+              <Type className="w-4 h-4 text-white" />
+              <span className="text-sm font-semibold text-white">Content & Assets</span>
             </div>
-            <ChevronDown className={`w-4 h-4 transition-transform text-slate-400 ${contentOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 transition-transform text-white ${contentOpen ? 'rotate-180' : ''}`} />
           </CollapsibleTrigger>
-          <CollapsibleContent className="p-4 pt-0 px-6 pb-6">
-            <div className="mt-2">{renderContentFields()}</div>
+          <CollapsibleContent className="p-3 pt-3">
+            <div>{renderContentFields()}</div>
           </CollapsibleContent>
         </Collapsible>
 
-        <Collapsible open={stylesOpen} onOpenChange={setStylesOpen} className="border-b border-slate-100">
-          <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+        <Collapsible open={stylesOpen} onOpenChange={setStylesOpen}>
+          <CollapsibleTrigger className="w-full p-3 flex items-center justify-between bg-[#0F172A] rounded-lg text-white">
             <div className="flex items-center gap-2">
-              <Palette className="w-4 h-4 text-blue-500" />
-              <span className="text-sm font-semibold text-slate-700">Visual Styling</span>
+              <Palette className="w-4 h-4 text-white" />
+              <span className="text-sm font-semibold text-white">Visual Styling</span>
             </div>
-            <ChevronDown className={`w-4 h-4 transition-transform text-slate-400 ${stylesOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 transition-transform text-white ${stylesOpen ? 'rotate-180' : ''}`} />
           </CollapsibleTrigger>
-          <CollapsibleContent className="p-4 pt-0 space-y-6 px-6 pb-6 mt-4">
+          <CollapsibleContent className="p-3 pt-3 space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Background</Label>
@@ -1671,6 +1672,7 @@ export function PropertiesPanel() {
             </div>
           </CollapsibleContent>
         </Collapsible>
+        </div>
       </div>
 
       <div className="p-4 border-t border-slate-200 bg-slate-50">

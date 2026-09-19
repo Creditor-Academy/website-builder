@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Search, Upload, Check, Image as ImageIcon, Video, Link as LinkIcon, Monitor } from 'lucide-react';
+import { Search, Upload, Check, Image as ImageIcon, Video, Link as LinkIcon, Monitor, Globe } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -7,6 +7,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import useBuilderStore from '@/store/useBuilderStore';
+import { useToast } from '@/hooks/use-toast';
+import { DuplicateAssetDialog } from '@/components/ui/DuplicateAssetDialog';
 
 interface MediaLibraryProps {
     open: boolean;
@@ -16,9 +18,12 @@ interface MediaLibraryProps {
 
 export function MediaLibrary({ open, onOpenChange, onSelect }: MediaLibraryProps) {
     const { activeWebsiteId, fetchAssets, getScopedAssets, uploadAsset, importAssetFromUrl } = useBuilderStore();
+    const { toast } = useToast();
     useEffect(() => {
         if (open && activeWebsiteId) {
+            // Fetch both website-scoped assets AND global (dashboard) assets in parallel
             void fetchAssets({ websiteId: activeWebsiteId });
+            void fetchAssets();
         }
     }, [activeWebsiteId, open, fetchAssets]);
 
@@ -29,6 +34,9 @@ export function MediaLibrary({ open, onOpenChange, onSelect }: MediaLibraryProps
     const [urlName, setUrlName] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const assets = activeWebsiteId ? getScopedAssets(activeWebsiteId) : [];
+    // duplicate-name conflict state
+    const [dupFile, setDupFile] = useState<File | null>(null);
+    const [dupConflictName, setDupConflictName] = useState('');
 
     const filteredMedia = assets.filter(item =>
         item.name.toLowerCase().includes(search.toLowerCase())
@@ -56,11 +64,56 @@ export function MediaLibrary({ open, onOpenChange, onSelect }: MediaLibraryProps
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file && activeWebsiteId) {
+        if (!file || !activeWebsiteId) return;
+
+        if (e.target) e.target.value = '';
+
+        // Size guard
+        if (file.size > 100 * 1024 * 1024) {
+            toast({
+                variant: "destructive",
+                title: "File too large",
+                description: `"${file.name}" is ${(file.size / (1024 * 1024)).toFixed(1)} MB. Maximum allowed size is 100 MB.`,
+            });
+            return;
+        }
+
+        // Duplicate name check
+        const incomingBase = file.name.replace(/\.[^/.]+$/, '').toLowerCase();
+        const conflict = assets.find(a => a.name.replace(/\.[^/.]+$/, '').toLowerCase() === incomingBase);
+        if (conflict) {
+            setDupConflictName(conflict.name);
+            setDupFile(file);
+            return;
+        }
+
+        await doUpload(file);
+    };
+
+    const doUpload = async (file: File) => {
+        if (!activeWebsiteId) return;
+        try {
             await uploadAsset(file, { websiteId: activeWebsiteId });
-            if (e.target) e.target.value = '';
+        } catch (error: any) {
+            toast({
+                variant: "destructive",
+                title: "Upload Failed",
+                description: error.response?.data?.message || error.response?.data?.error || "Failed to upload asset.",
+            });
         }
     };
+
+    const handleDupReplace = async (file: File) => {
+        setDupFile(null);
+        await doUpload(file);
+    };
+
+    const handleDupRename = async (file: File, newName: string) => {
+        setDupFile(null);
+        await doUpload(new File([file], newName, { type: file.type }));
+    };
+
+    const handleDupCancel = () => setDupFile(null);
 
     const handleUrlUpload = async () => {
         if (urlInput && activeWebsiteId) {
@@ -140,11 +193,11 @@ export function MediaLibrary({ open, onOpenChange, onSelect }: MediaLibraryProps
                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                                         {filteredMedia.map((item) => {
                                             const isSelected = selectedIds.includes(item.id);
+                                            const isGlobal = !item.websiteId || item.scope === 'GLOBAL' || item.isGlobal;
                                             return (
                                                 <div
                                                     key={item.id}
-                                                    className={`group relative aspect-square rounded-lg border-2 overflow-hidden cursor-pointer transition-all ${isSelected ? 'border-primary shadow-md' : 'border-transparent hover:border-slate-200'
-                                                        }`}
+                                                    className={`group relative aspect-square rounded-lg border-2 overflow-hidden cursor-pointer transition-all ${isSelected ? 'border-primary shadow-md' : 'border-transparent hover:border-slate-200'}`}
                                                     onClick={() => handleSelect(item.id)}
                                                 >
                                                     {item.type === 'image' ? (
@@ -152,6 +205,12 @@ export function MediaLibrary({ open, onOpenChange, onSelect }: MediaLibraryProps
                                                     ) : (
                                                         <div className="w-full h-full bg-slate-900 flex items-center justify-center">
                                                             <Video className="w-8 h-8 text-white/50" />
+                                                        </div>
+                                                    )}
+                                                    {isGlobal && (
+                                                        <div className="absolute top-1.5 left-1.5 flex items-center gap-0.5 bg-amber-400/90 text-amber-900 text-[8px] font-bold px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                                                            <Globe className="w-2.5 h-2.5" />
+                                                            Global
                                                         </div>
                                                     )}
                                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -184,14 +243,20 @@ export function MediaLibrary({ open, onOpenChange, onSelect }: MediaLibraryProps
                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                                         {filteredMedia.filter(m => m.type === 'image').map((item) => {
                                             const isSelected = selectedIds.includes(item.id);
+                                            const isGlobal = !item.websiteId || item.scope === 'GLOBAL' || item.isGlobal;
                                             return (
                                                 <div
                                                     key={item.id}
-                                                    className={`group relative aspect-square rounded-lg border-2 overflow-hidden cursor-pointer transition-all ${isSelected ? 'border-primary shadow-md' : 'border-transparent hover:border-slate-200'
-                                                        }`}
+                                                    className={`group relative aspect-square rounded-lg border-2 overflow-hidden cursor-pointer transition-all ${isSelected ? 'border-primary shadow-md' : 'border-transparent hover:border-slate-200'}`}
                                                     onClick={() => handleSelect(item.id)}
                                                 >
                                                     <img src={item.url} alt={item.name} loading="lazy" className="w-full h-full object-cover" />
+                                                    {isGlobal && (
+                                                        <div className="absolute top-1.5 left-1.5 flex items-center gap-0.5 bg-amber-400/90 text-amber-900 text-[8px] font-bold px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                                                            <Globe className="w-2.5 h-2.5" />
+                                                            Global
+                                                        </div>
+                                                    )}
                                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                                         <span className="text-white text-xs font-medium px-2 py-1 bg-black/60 rounded">
                                                             {isSelected ? 'Deselect' : 'Select'}
@@ -222,16 +287,22 @@ export function MediaLibrary({ open, onOpenChange, onSelect }: MediaLibraryProps
                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                                         {filteredMedia.filter(m => m.type === 'video').map((item) => {
                                             const isSelected = selectedIds.includes(item.id);
+                                            const isGlobal = !item.websiteId || item.scope === 'GLOBAL' || item.isGlobal;
                                             return (
                                                 <div
                                                     key={item.id}
-                                                    className={`group relative aspect-square rounded-lg border-2 overflow-hidden cursor-pointer transition-all ${isSelected ? 'border-primary shadow-md' : 'border-transparent hover:border-slate-200'
-                                                        }`}
+                                                    className={`group relative aspect-square rounded-lg border-2 overflow-hidden cursor-pointer transition-all ${isSelected ? 'border-primary shadow-md' : 'border-transparent hover:border-slate-200'}`}
                                                     onClick={() => handleSelect(item.id)}
                                                 >
                                                     <div className="w-full h-full bg-slate-900 flex items-center justify-center">
                                                         <Video className="w-8 h-8 text-white/50" />
                                                     </div>
+                                                    {isGlobal && (
+                                                        <div className="absolute top-1.5 left-1.5 flex items-center gap-0.5 bg-amber-400/90 text-amber-900 text-[8px] font-bold px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                                                            <Globe className="w-2.5 h-2.5" />
+                                                            Global
+                                                        </div>
+                                                    )}
                                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                                         <span className="text-white text-xs font-medium px-2 py-1 bg-black/60 rounded">
                                                             {isSelected ? 'Deselect' : 'Select'}
@@ -299,6 +370,15 @@ export function MediaLibrary({ open, onOpenChange, onSelect }: MediaLibraryProps
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Duplicate name conflict dialog */}
+            <DuplicateAssetDialog
+                file={dupFile}
+                conflictingName={dupConflictName}
+                onReplace={handleDupReplace}
+                onRename={handleDupRename}
+                onCancel={handleDupCancel}
+            />
         </Dialog>
     );
 }

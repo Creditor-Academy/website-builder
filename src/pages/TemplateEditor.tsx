@@ -4,6 +4,7 @@ import { useToast } from '@/components/ui/use-toast';
 import templateApi from '@/api/templates';
 import useBuilderStore from '@/store/useBuilderStore';
 import { WebsiteEditor } from '@/components/editor/WebsiteEditor';
+import Loading from '@/components/Common/LoadingUI';
 
 export default function TemplateEditor() {
   const { id } = useParams();
@@ -60,25 +61,11 @@ export default function TemplateEditor() {
   }, [id, navigate, startTemplateEditing, stopTemplateEditing, toast]);
 
   if (isLoading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-slate-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-slate-600 font-medium">Loading template editor...</p>
-        </div>
-      </div>
-    );
+    return <Loading fullScreen label="Loading template editor" />;
   }
 
   if (!templateEditor) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-slate-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-slate-600 font-medium">Redirecting...</p>
-        </div>
-      </div>
-    );
+    return <Loading fullScreen label="Redirecting" />;
   }
 
   return <WebsiteEditor />;

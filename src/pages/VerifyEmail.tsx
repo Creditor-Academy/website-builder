@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LayoutTemplate, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle } from "lucide-react";
+import { BrandLogo } from "@/components/Common/BrandLogo";
+import Loading from "@/components/Common/LoadingUI";
 import { verifyEmail } from "../api/auth";
 
 export default function VerifyEmail() {
@@ -31,13 +33,16 @@ export default function VerifyEmail() {
       .finally(() => setLoading(false));
   }, [token]);
 
+  if (loading) {
+    return <Loading fullScreen label="Verifying your email" />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-      <Link to="/" className="flex items-center gap-3 mb-10">
-        <div className="w-10 h-10 bg-slate-950 text-white rounded-2xl flex items-center justify-center">
-          <LayoutTemplate className="w-6 h-6" />
-        </div>
-        <span className="font-bold text-2xl tracking-tight text-slate-900">Buildora</span>
+      <Link to="/" className="mb-10">
+        <BrandLogo
+          imgClassName="h-10 w-10"
+        />
       </Link>
 
       <motion.div
@@ -45,12 +50,7 @@ export default function VerifyEmail() {
         animate={{ opacity: 1, y: 0 }}
         className="bg-white rounded-3xl p-8 w-full max-w-md shadow-xl border border-slate-100 text-center"
       >
-        {loading ? (
-          <div className="py-8">
-            <Loader2 className="w-12 h-12 text-slate-400 animate-spin mx-auto mb-4" />
-            <p className="text-slate-500 text-sm">Verifying your email...</p>
-          </div>
-        ) : success ? (
+        {success ? (
           <div className="py-4">
             <CheckCircle2 className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-slate-900 mb-2">Email Verified!</h2>

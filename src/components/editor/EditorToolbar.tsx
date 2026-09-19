@@ -1,19 +1,30 @@
 import React, { useState } from 'react';
 import { useBuilder } from '@/contexts/BuilderContext';
 import useBuilderStore from '@/store/useBuilderStore';
-import { Undo2, Redo2, Eye, Download, Play, Share2, ChevronRight, Globe, Home, HelpCircle, Palette } from 'lucide-react';
+import {
+  Undo2, Redo2, Eye, Download, Play, Share2, Home,
+  HelpCircle, Palette, MoreVertical,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { PublishDialog } from './PublishDialog';
+import { cn } from '@/lib/utils';
 
-export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websiteId = '', onTabChange = (tab: string) => {} }: any) {
+const iconBtnClass =
+  'h-8 w-8 shrink-0 rounded-lg text-white/70 hover:bg-white/10 hover:text-white sm:h-9 sm:w-9';
+
+export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => {} }: any) {
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const { state, undo, redo, canUndo, canRedo, setPreviewMode, setLeftPanelVisible } = useBuilder();
   const { editor, page } = state;
   const store = useBuilderStore();
   const { setTourState, templateEditor } = store;
   const isTemplateEditor = Boolean(templateEditor);
+  const activeWebsite = store.getActiveWebsite?.() || store.websites?.find((w: { id: string }) => w.id === (websiteId || store.activeWebsiteId));
+  const projectLabel = isTemplateEditor
+    ? templateEditor?.name || 'Template'
+    : activeWebsite?.name || 'Project';
 
   const startTour = () => {
     setTourState({ isActive: true, step: 0, isFinished: false });
@@ -38,21 +49,25 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
     }
   };
 
+  const goDashboard = () => {
+    window.location.href = isTemplateEditor ? '/dashboard/templates' : '/dashboard';
+  };
+
   return (
-    <div className="h-14 md:h-16 px-3 md:px-6 border-b border-slate-200 bg-white sticky top-0 z-50 flex items-center justify-between shadow-sm">
+    <div className="sticky top-0 z-50 flex h-12 shrink-0 items-center gap-1 border-b border-white/10 bg-[#0F172A] px-2 text-white sm:h-14 sm:gap-2 sm:px-3 md:px-4">
       <TooltipProvider delayDuration={0}>
-        {/* LEFT */}
-        <div className="flex items-center gap-2 md:gap-6">
-        
-          <div id="tour-logo" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center shadow-lg shadow-black/20 transition-all duration-300  group-hover:shadow-xl">
-              <span className="text-white font-black text-sm tracking-tighter">B</span>
+        <div className="flex min-w-0 flex-1 items-center gap-1 sm:gap-2">
+          <div id="tour-logo" className="flex min-w-0 items-center gap-2">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 sm:h-9 sm:w-9">
+              <span className="text-xs font-black tracking-tighter text-white sm:text-sm">B</span>
             </div>
-            <div className="hidden sm:flex flex-col">
-              <span className="font-black text-[14px] text-slate-900 leading-none tracking-tight">Buildora</span>
-              <div className="flex items-center gap-2 mt-1">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500/50" />
-                <span className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">{isTemplateEditor ? 'Template Mode' : 'Editing Mode'}</span>
+            <div className="hidden min-w-0 flex-col sm:flex">
+              <span className="text-[13px] font-bold leading-none tracking-tight text-white">Buildora</span>
+              <div className="mt-1 flex items-center gap-1.5">
+                <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-white/50">
+                  {isTemplateEditor ? 'Template Mode' : 'Editing Mode'}
+                </span>
               </div>
             </div>
           </div>
@@ -63,54 +78,44 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
                 variant="ghost"
                 size="icon"
                 onClick={() => setLeftPanelVisible(!editor.showLeftPanel)}
-                className="w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition-all duration-200"
+                className={iconBtnClass}
               >
-                {editor.showLeftPanel ? <Globe className="w-4 h-4 hidden" /> : null}
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="bg-slate-800 text-white border-slate-700">
+            <TooltipContent side="bottom" className="border-[#1e293b] bg-[#0F172A] text-white">
               <div className="text-xs font-medium">Toggle Sidebar</div>
             </TooltipContent>
           </Tooltip>
 
-          <Separator orientation="vertical" className="h-8" />
-  {/* Dashboard Button */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => window.location.href = isTemplateEditor ? '/dashboard/templates' : '/dashboard'}
-                className="w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition-all duration-200 border border-transparent hover:border-slate-200"
+                onClick={goDashboard}
+                className={cn(iconBtnClass, 'hidden sm:inline-flex')}
               >
-                <Home className="w-4.5 h-4.5" />
+                <Home className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="bg-slate-800 text-white border-slate-700">
+            <TooltipContent side="bottom" className="border-[#1e293b] bg-[#0F172A] text-white">
               <div className="text-xs font-medium">Dashboard</div>
-              <div className="text-xs opacity-70">Go to dashboard</div>
             </TooltipContent>
           </Tooltip>
 
-
-          <div className="hidden md:flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 hover:border-primary/50 transition-all duration-200">
-            <Globe className="w-4 h-4 text-slate-600" />
-            <span className="text-[11px] font-bold text-slate-700">{isTemplateEditor ? templateEditor?.name || 'Template' : websiteId || store.activeWebsiteId || 'Project'}</span>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-[11px] font-black text-slate-900">{page?.name || 'Page'}</span>
+          <div className="hidden min-w-0 max-w-[14rem] items-center rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 lg:flex xl:max-w-xs">
+            <span className="truncate text-[11px] font-semibold text-white">{projectLabel}</span>
           </div>
 
-          <div className="hidden lg:flex items-center gap-2 ml-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] text-slate-600 font-medium">Auto-saved</span>
+          <div className="hidden items-center gap-1.5 xl:flex">
+            <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <span className="text-[10px] font-medium text-white/50">Auto-saved</span>
           </div>
         </div>
 
-        {/* RIGHT */}
-        <div className="flex items-center gap-1 md:gap-3">
-          {/* UNDO / REDO */}
-          <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+        <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+          <div className="flex items-center rounded-lg bg-white/10 p-0.5">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -118,12 +123,12 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
                   size="icon"
                   onClick={undo}
                   disabled={!canUndo}
-                  className="w-8 h-8 rounded-md hover:bg-white hover:text-blue-500 hover:shadow-sm transition-all duration-200"
+                  className="h-7 w-7 rounded-md text-white/70 hover:bg-white/10 hover:text-white disabled:text-white/25 sm:h-8 sm:w-8"
                 >
-                  <Undo2 className="w-4 h-4" />
+                  <Undo2 className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom">Undo</TooltipContent>
+              <TooltipContent side="bottom" className="border-[#1e293b] bg-[#0F172A] text-white">Undo</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -132,48 +137,46 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
                   size="icon"
                   onClick={redo}
                   disabled={!canRedo}
-                  className="w-8 h-8 rounded-md hover:bg-white hover:text-blue-500 hover:shadow-sm transition-all duration-200"
+                  className="h-7 w-7 rounded-md text-white/70 hover:bg-white/10 hover:text-white disabled:text-white/25 sm:h-8 sm:w-8"
                 >
-                  <Redo2 className="w-4 h-4" />
+                  <Redo2 className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom">Redo</TooltipContent>
+              <TooltipContent side="bottom" className="border-[#1e293b] bg-[#0F172A] text-white">Redo</TooltipContent>
             </Tooltip>
           </div>
 
-          <Separator orientation="vertical" className="hidden sm:block h-6 mx-2" />
-
-          {/* PREVIEW */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setPreviewMode(!editor.previewMode)}
-                className={`w-9 h-9 rounded-lg transition-all duration-200 ${editor.previewMode ? 'bg-primary/10 text-primary shadow-md shadow-primary/20' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-800'}`}
+                className={cn(
+                  iconBtnClass,
+                  editor.previewMode && 'bg-white/15 text-white',
+                )}
               >
-                <Eye className="w-4 h-4" />
+                <Eye className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom">Preview Mode</TooltipContent>
+            <TooltipContent side="bottom" className="border-[#1e293b] bg-[#0F172A] text-white">Preview Mode</TooltipContent>
           </Tooltip>
 
-          {/* EXPORT - hidden on mobile */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleExport}
-                className="hidden sm:flex w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition-all duration-200"
+                className={cn(iconBtnClass, 'hidden md:inline-flex')}
               >
-                <Download className="w-4 h-4" />
+                <Download className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom">Export JSON</TooltipContent>
+            <TooltipContent side="bottom" className="border-[#1e293b] bg-[#0F172A] text-white">Export JSON</TooltipContent>
           </Tooltip>
 
-          {/* PALETTE - hidden on mobile */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -181,15 +184,14 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
                 size="icon"
                 id="tour-palette"
                 onClick={handleDesignTab}
-                className="hidden sm:flex w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-indigo-600 transition-all duration-200"
+                className={cn(iconBtnClass, 'hidden md:inline-flex')}
               >
-                <Palette className="w-4 h-4" />
+                <Palette className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom">Switch Palette</TooltipContent>
+            <TooltipContent side="bottom" className="border-[#1e293b] bg-[#0F172A] text-white">Switch Palette</TooltipContent>
           </Tooltip>
 
-          {/* SHARE / GLOBAL FX - hidden on mobile */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -197,38 +199,66 @@ export function EditorToolbar({ theme = 'light', onToggleTheme = () => {}, websi
                 size="icon"
                 id="tour-global-fx"
                 onClick={handleDesignTab}
-                className="hidden sm:flex w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-amber-500 transition-all duration-200"
+                className={cn(iconBtnClass, 'hidden lg:inline-flex')}
               >
-                <Share2 className="w-4 h-4" />
+                <Share2 className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom">Share Project / Global FX</TooltipContent>
+            <TooltipContent side="bottom" className="border-[#1e293b] bg-[#0F172A] text-white">Share Project / Global FX</TooltipContent>
           </Tooltip>
 
-          <Separator orientation="vertical" className="hidden sm:block h-6 mx-2" />
-
-          {/* TOUR - hidden on mobile */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={startTour}
-                className="hidden sm:flex w-9 h-9 rounded-lg text-slate-600 hover:bg-amber-50 hover:text-amber-600 hover:shadow-md hover:shadow-amber-100 transition-all duration-200"
+                className={cn(iconBtnClass, 'hidden lg:inline-flex')}
               >
-                <HelpCircle className="w-4 h-4" />
+                <HelpCircle className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom">Start Tour</TooltipContent>
+            <TooltipContent side="bottom" className="border-[#1e293b] bg-[#0F172A] text-white">Start Tour</TooltipContent>
           </Tooltip>
 
-          <Separator orientation="vertical" className="hidden sm:block h-6 mx-2" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="More actions"
+                className={cn(iconBtnClass, 'lg:hidden')}
+              >
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 rounded-xl border-white/10 bg-[#0F172A] p-1.5 text-white">
+              <DropdownMenuItem className="cursor-pointer gap-2 rounded-lg focus:bg-white/10 focus:text-white sm:hidden" onClick={goDashboard}>
+                <Home className="h-4 w-4" /> Dashboard
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer gap-2 rounded-lg focus:bg-white/10 focus:text-white md:hidden" onClick={handleExport}>
+                <Download className="h-4 w-4" /> Export JSON
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer gap-2 rounded-lg focus:bg-white/10 focus:text-white md:hidden" onClick={handleDesignTab}>
+                <Palette className="h-4 w-4" /> Switch Palette
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer gap-2 rounded-lg focus:bg-white/10 focus:text-white" onClick={handleDesignTab}>
+                <Share2 className="h-4 w-4" /> Global FX
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer gap-2 rounded-lg focus:bg-white/10 focus:text-white" onClick={startTour}>
+                <HelpCircle className="h-4 w-4" /> Start Tour
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-          {/* PUBLISH */}
           {!isTemplateEditor && (
-            <Button id="tour-publish" onClick={() => setShowPublishDialog(true)} className="h-10 gap-2 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white rounded-xl px-6 text-xs font-bold shadow-lg shadow-primary/25 transition-all duration-200 hover:shadow-xl hover:shadow-primary/30 active:scale-95">
-              <Play className="w-4 h-4 fill-current" />
-              <span className="hidden sm:inline font-medium">Publish Site</span>
+            <Button
+              id="tour-publish"
+              onClick={() => setShowPublishDialog(true)}
+              className="ml-0.5 h-8 shrink-0 gap-1.5 rounded-full bg-white px-2.5 text-[11px] font-semibold text-[#0F172A] shadow-none hover:bg-slate-100 hover:text-[#0F172A] sm:ml-1 sm:h-9 sm:px-4 sm:text-xs"
+            >
+              <Play className="h-3.5 w-3.5 fill-current" />
+              <span className="hidden sm:inline">Publish Site</span>
             </Button>
           )}
         </div>

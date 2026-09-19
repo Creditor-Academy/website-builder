@@ -61,7 +61,7 @@ export function CanvasPreview() {
     <div
       ref={canvasRef}
       id="tour-canvas"
-      className="h-full overflow-y-auto scrollbar-thin bg-[hsl(var(--builder-panel))] w-full max-w-full overflow-x-hidden relative"
+      className="h-full overflow-y-auto scrollbar-thin bg-[hsl(var(--builder-panel))] w-full max-w-full overflow-x-hidden relative isolate z-0"
       onClick={handleCanvasClick}
     >
       <style dangerouslySetInnerHTML={{ __html: sanitizeHTML(`

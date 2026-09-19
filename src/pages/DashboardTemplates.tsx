@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -10,18 +8,49 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, ArrowRight, ArrowLeft, LayoutTemplate, Search, Trash2, RotateCcw, Building2, Loader2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Plus, ArrowLeft, LayoutTemplate, Search, Trash2, RotateCcw, Building2, Loader2, AlertTriangle } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import useBuilderStore from '@/store/useBuilderStore';
 import { cn } from '@/lib/utils';
 import templateApi from '@/api/templates';
+import Loading from '@/components/Common/LoadingUI';
 import { useToast } from '@/components/ui/use-toast';
-import GradientButton from '@/components/ui/GradientButton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import TemplateFormDialog from '@/components/dashboard/TemplateFormDialog';
-
+import { DashboardPageShell, dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass, dashboardToolbarClass } from '@/components/dashboard/DashboardPageShell';
+import { dashboardHeroPrimaryClass, dashboardHeroSecondaryClass } from '@/components/dashboard/DashboardHeroHeader';
+import {
+  DashboardCard,
+  DashboardCardMedia,
+  DashboardCardBody,
+  DashboardCardTitle,
+  DashboardCardFooter,
+  DashboardCardBadge,
+  DashboardCardMeta,
+  DashboardCardPrimaryAction,
+  DashboardCardSecondaryAction,
+  DashboardCardDashed,
+  dashboardCardGridClass,
+  dashboardCardTagClass,
+  dashboardCardTitleClass,
+  dashboardCardDescriptionClass,
+  formatDashboardCardDate,
+  getDashboardPublishStatus,
+} from '@/components/dashboard/DashboardCard';
 
 export default function DashboardTemplates() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.startsWith('/admin') ? '/admin' : '/dashboard';
   const { toast } = useToast();
   const createWebsite = useBuilderStore(state => state.createWebsite);
 
@@ -39,6 +68,8 @@ export default function DashboardTemplates() {
   // Admin create/edit dialog
   const [formOpen, setFormOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<any | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Trash toggle (admin only)
   const [showTrash, setShowTrash] = useState(false);
@@ -71,17 +102,14 @@ export default function DashboardTemplates() {
       const res = await templateApi.getWebsiteTemplates({ signal });
       const raw = res.data?.data || res.data || [];
 
-      // Flatten if grouped by category (object) or already an array
       let flat: any[] = Array.isArray(raw) ? raw : Object.values(raw).flat();
 
-      // Regular users only see non-deleted; admins see everything
       if (!isAdminUser) {
         flat = flat.filter((t: any) => !t.deletedAt);
       }
 
       setTemplates(flat);
 
-      // Build dynamic category list
       const cats = Array.from(new Set(flat.map((t: any) => t.category).filter(Boolean)));
       setCategories(['All', ...(cats as string[])]);
     } catch (err: any) {
@@ -105,7 +133,6 @@ export default function DashboardTemplates() {
   // ─── Filter + search ──────────────────────────────────────────────────────
   const filtered = useMemo(() => {
     return templates.filter((t: any) => {
-      // Separate active vs trash
       const inTrash = Boolean(t.deletedAt);
       if (showTrash !== inTrash) return false;
 
@@ -114,10 +141,8 @@ export default function DashboardTemplates() {
         t.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         t.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
-      // Scope filter
       const matchScope = scopeFilter === 'all' || t.scope === scopeFilter;
 
-      // Institution filter (super admin)
       const matchInstitution = institutionFilter === 'all' ||
         (institutionFilter === 'none' && !t.institution_id) ||
         t.institution_id === institutionFilter;
@@ -128,7 +153,7 @@ export default function DashboardTemplates() {
 
   const trashedCount = useMemo(() => templates.filter(t => t.deletedAt).length, [templates]);
 
-  // ─── Use template: clones into new website, original template untouched ───
+  // ─── Use template ─────────────────────────────────────────────────────────
   const handleUseTemplate = async (template: any) => {
     if (creatingId) return;
     try {
@@ -169,13 +194,18 @@ export default function DashboardTemplates() {
     navigate(`/template-builder/${template.id}`);
   };
 
-  const handleDeleteTemplate = async (template: any) => {
+  const handleDeleteTemplate = async () => {
+    if (!deleteTarget?.id || isDeleting) return;
     try {
-      await templateApi.deleteWebsiteTemplate(template.id);
-      setTemplates(prev => prev.map(t => t.id === template.id ? { ...t, deletedAt: new Date().toISOString() } : t));
-      toast({ title: 'Template deleted' });
+      setIsDeleting(true);
+      await templateApi.deleteWebsiteTemplate(deleteTarget.id);
+      setTemplates(prev => prev.map(t => t.id === deleteTarget.id ? { ...t, deletedAt: new Date().toISOString() } : t));
+      toast({ title: 'Template deleted', description: `"${deleteTarget.name}" has been moved to trash.` });
+      setDeleteTarget(null);
     } catch (err: any) {
       toast({ title: 'Failed to delete template', description: err?.response?.data?.message || err?.message, variant: 'destructive' });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -190,180 +220,127 @@ export default function DashboardTemplates() {
   };
 
   return (
-    <Card className="rounded-3xl shadow-xl shadow-slate-200/50 p-8 min-h-[80vh] relative">
-      {/* Full-screen creating overlay */}
-      {creatingId && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm rounded-3xl">
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-xl shadow-purple-500/30">
-                <Loader2 className="w-8 h-8 text-white animate-spin" />
-              </div>
-            </div>
-            <div className="text-center">
-              <h3 className="text-xl font-bold text-slate-900">Creating your site...</h3>
-              <p className="text-sm text-slate-500 mt-1">Setting up your new project from the template</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Breadcrumbs */}
-      <div className="mb-4 text-sm text-slate-500">
-        <a href="/dashboard" className="hover:underline">Dashboard</a> /{' '}
-        <span className="font-semibold text-slate-700">
-          Templates {showTrash && <span className="text-rose-500 font-black ml-1">/ Trash</span>}
-        </span>
-      </div>
-
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
-        <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-            {showTrash ? 'Templates Trash' : 'Templates Library'}
-          </h2>
-          <p className="text-slate-500 mt-1">
-            {showTrash 
-              ? 'Manage and restore deleted templates.' 
-              : 'Choose a professional starting point for your next digital venture.'}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Search */}
-          <div className="relative w-full md:w-64">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              placeholder="Search templates..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="pl-10 h-11 rounded-full bg-white border-slate-200 shadow-md focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            />
-          </div>
-
-          {/* ADMIN ONLY: Trash toggle */}
-          {isAdminUser && (
+    <DashboardPageShell
+      basePath={basePath}
+      title={showTrash ? 'Templates Trash' : 'Templates'}
+      pageLabel="Templates"
+      description={
+        showTrash
+          ? 'Manage and restore deleted templates.'
+          : 'Start your next project with a professionally designed, fully customizable template.'
+      }
+      actions={
+        isAdminUser ? (
+          <>
             <Button
-              variant={showTrash ? 'default' : 'outline'}
+              variant="outline"
               onClick={() => setShowTrash(!showTrash)}
               className={cn(
-                'rounded-full h-11 px-5 text-sm font-semibold gap-2 transition-all duration-200',
-                showTrash
-                  ? 'bg-rose-600 text-white hover:bg-rose-700 shadow-md shadow-rose-500/20'
-                  : 'bg-white text-slate-600 border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200'
+                dashboardHeroSecondaryClass,
+                showTrash && 'border-rose-400/40 bg-rose-500/20 text-white hover:bg-rose-500/30',
               )}
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="mr-1.5 h-4 w-4 shrink-0" />
               Trash{trashedCount > 0 && ` (${trashedCount})`}
             </Button>
-          )}
-
-          {/* ADMIN ONLY: Scope filter */}
-          {isAdminUser && (
-            <Select value={scopeFilter} onValueChange={(v) => setScopeFilter(v as any)}>
-              <SelectTrigger className="w-[140px] h-11 rounded-full border-slate-200">
-                <SelectValue placeholder="All Scopes" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Scopes</SelectItem>
-                <SelectItem value="GLOBAL">Global</SelectItem>
-                <SelectItem value="INSTITUTION">Institution</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-
-          {/* SUPER ADMIN ONLY: Institution filter */}
-          {isSuperAdmin && institutions.length > 0 && (
-            <Select value={institutionFilter} onValueChange={setInstitutionFilter}>
-              <SelectTrigger className="w-[180px] h-11 rounded-full border-slate-200">
-                <Building2 className="w-4 h-4 mr-2 text-slate-400" />
-                <SelectValue placeholder="All Orgs" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Organizations</SelectItem>
-                <SelectItem value="none">No Organization</SelectItem>
-                {institutions.map((org) => (
-                  <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-
-          {/* ADMIN ONLY: New Template button */}
-          {isAdminUser && !showTrash && (
-            <GradientButton
-              icon={<Plus className="w-5 h-5" />}
-              onClick={handleOpenCreate}
-              className="whitespace-nowrap"
-            >
-              New Template
-            </GradientButton>
-          )}
+            {isAdminUser && !showTrash && (
+              <Button onClick={handleOpenCreate} className={dashboardHeroPrimaryClass}>
+                <Plus className="mr-1.5 h-4 w-4 shrink-0" />
+                New Template
+              </Button>
+            )}
+          </>
+        ) : undefined
+      }
+    >
+      {creatingId && (
+        <div className="fixed inset-0 z-50">
+          <Loading fullScreen label="Creating your site" />
         </div>
-      </div>
+      )}
 
       {/* Trash banner */}
       {showTrash && (
-        <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 rounded-3xl bg-rose-50 border border-rose-100 shadow-sm animate-in slide-in-from-top-4 duration-300">
+        <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 rounded-lg bg-[#ffdad6]/30 border border-[#ffdad6] shadow-sm">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-2xl bg-rose-100 flex items-center justify-center text-rose-600 shadow-inner">
+            <div className="w-10 h-10 rounded-lg bg-[#ffdad6] flex items-center justify-center text-[#93000a]">
               <Trash2 className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-base font-bold text-rose-900">Trash Management</p>
-              <p className="text-xs text-rose-600/80 font-medium">Viewing deleted templates. Restore items to make them public again.</p>
+              <p className="text-base font-bold text-[#93000a]">Trash Management</p>
+              <p className="text-xs text-[#93000a]/80 font-medium">Viewing deleted templates. Restore items to make them public again.</p>
             </div>
           </div>
-         <Button 
-  variant="outline" 
-  className="rounded-2xl border-rose-200 bg-white text-rose-700 hover:text-black hover:bg-rose-100 hover:border-rose-300 transition-all font-bold px-6 shadow-sm group/back-btn"
-  onClick={() => setShowTrash(false)}
->
-  <ArrowLeft className="w-4 h-4 mr-2 group-hover/back-btn:-translate-x-1 transition-transform" />
-  Back to Library
-</Button>
-
+          <Button
+            variant="outline"
+            className="rounded-lg border-[#c6c6cd] bg-white text-[#1b1b1d] hover:bg-[#eae7e9] transition-all font-semibold px-6 shadow-sm"
+            onClick={() => setShowTrash(false)}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Library
+          </Button>
         </div>
       )}
 
-      {/* Category pills */}
-      <div className="flex items-center gap-2 flex-wrap mb-8">
+      <div className={dashboardToolbarClass}>
+        <div className="relative min-w-0 flex-1">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
+          <Input
+            placeholder="Search templates..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className={cn(dashboardSearchInputClass, 'h-9 rounded-full pl-9')}
+          />
+        </div>
+        {isAdminUser && (
+          <Select value={scopeFilter} onValueChange={(v) => setScopeFilter(v as any)}>
+            <SelectTrigger className="w-full sm:w-[140px] h-9 rounded-full border-[#c6c6cd] bg-white text-[#1b1b1d]">
+              <SelectValue placeholder="All Scopes" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Scopes</SelectItem>
+              <SelectItem value="GLOBAL">Global</SelectItem>
+              <SelectItem value="INSTITUTION">Institution</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
+        {isSuperAdmin && institutions.length > 0 && (
+          <Select value={institutionFilter} onValueChange={setInstitutionFilter}>
+            <SelectTrigger className="w-full sm:w-[180px] h-9 rounded-full border-[#c6c6cd] bg-white text-[#1b1b1d]">
+              <Building2 className="w-4 h-4 mr-2 text-[#76777d]" />
+              <SelectValue placeholder="All Orgs" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Organizations</SelectItem>
+              <SelectItem value="none">No Organization</SelectItem>
+              {institutions.map((org) => (
+                <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+
+      <div className={cn(dashboardFilterScrollClass, 'mb-6 sm:mb-8 no-scrollbar')}>
         {categories.map(cat => (
-          <Button
+          <button
             key={cat}
-            variant={activeCategory === cat ? 'default' : 'outline'}
-            className={cn(
-              'rounded-full h-10 px-4 text-sm font-semibold transition-all duration-200',
-              activeCategory === cat
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 hover:bg-blue-700'
-                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-indigo-700'
-            )}
             onClick={() => setActiveCategory(cat)}
+            className={dashboardFilterPillClass(activeCategory === cat)}
           >
             {cat}
-          </Button>
+          </button>
         ))}
       </div>
 
       {/* Loading shimmer */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="rounded-2xl overflow-hidden border border-slate-100 bg-white shadow-md animate-pulse">
-              <div className="aspect-[4/3] bg-slate-100" />
-              <div className="p-6 space-y-3">
-                <div className="h-3 w-1/3 bg-slate-100 rounded-full" />
-                <div className="h-5 w-2/3 bg-slate-100 rounded-full" />
-                <div className="h-3 w-full bg-slate-100 rounded-full" />
-              </div>
-            </div>
-          ))}
-        </div>
+        <Loading label="Loading templates" />
       ) : filtered.length === 0 ? (
         /* Empty state */
-        <div className="h-64 flex flex-col items-center justify-center gap-4 border-2 border-dashed border-slate-200 rounded-[2rem]">
-          <LayoutTemplate className="w-12 h-12 text-slate-200" />
-          <p className="text-slate-400 text-sm font-medium text-center px-8">
+        <div className="h-64 flex flex-col items-center justify-center gap-4 border border-dashed border-[#c6c6cd] rounded-lg bg-[#f6f3f5]">
+          <LayoutTemplate className="w-12 h-12 text-[#76777d]" />
+          <p className="text-[#45464d] text-sm font-medium text-center px-8">
             {showTrash
               ? 'Trash is empty. No deleted templates.'
               : templates.length === 0
@@ -375,147 +352,136 @@ export default function DashboardTemplates() {
           {isAdminUser && !showTrash && templates.filter(t => !t.deletedAt).length === 0 && (
             <Button
               onClick={handleOpenCreate}
-              className="rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 h-10 text-sm font-semibold shadow-lg"
+              className="rounded-lg bg-[#131b2e] text-white px-6 h-10 text-sm font-semibold shadow-md hover:bg-[#252f4a]"
             >
-              <Plus className="w-4 h-4 mr-2" /> Create First Template
+              <Plus className="mr-2 h-4 w-4" /> Create First Template
             </Button>
           )}
         </div>
       ) : (
-        /* Template grid */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        /* Templates Grid scaled dynamically for wide screen sizes */
+        <div className={dashboardCardGridClass}>
           {filtered.map((template: any) => (
-            <Card
+            <DashboardCard
               key={template.id}
+              interactive
               onClick={() => {
-                if (template.deletedAt) {
-                  return;
-                }
-
+                if (template.deletedAt) return;
                 if (isAdminUser) {
                   handleOpenEdit(template);
                   return;
                 }
-
                 void handleUseTemplate(template);
               }}
-              className={cn(
-                "group/template-card overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer bg-white",
-                showTrash && "opacity-75"
-              )}
+              className={cn('h-full', showTrash && 'opacity-75')}
             >
-              {/* Preview image */}
-              <div className="aspect-[4/3] bg-slate-50 relative overflow-hidden rounded-t-2xl">
+              <DashboardCardMedia>
                 {template.image ? (
                   <img
                     src={template.image}
                     alt={template.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover/template-card:scale-105"
+                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50">
-                    <LayoutTemplate className="w-12 h-12 text-indigo-200" />
-                    <p className="text-xs text-indigo-300 font-medium mt-2">{template.category}</p>
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-[#eae7e9]">
+                    <LayoutTemplate className="w-12 h-12 text-[#76777d]" />
+                    <p className="text-xs text-[#76777d] font-medium mt-2">{template.category}</p>
                   </div>
                 )}
 
-                {/* Deleted badge — trash view */}
-                {showTrash && (
-                  <Badge className="absolute top-4 left-4 bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                {showTrash ? (
+                  <DashboardCardBadge position="top-left" className="bg-[#ba1a1a] text-white border-transparent">
                     Deleted
-                  </Badge>
+                  </DashboardCardBadge>
+                ) : (
+                  <DashboardCardBadge position="top-left">
+                    {template.category || 'Portfolio'}
+                  </DashboardCardBadge>
                 )}
+              </DashboardCardMedia>
 
-                {/* Gradient overlay on hover */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover/template-card:opacity-100 transition-opacity duration-300" />
-
-                {/* Hover action buttons */}
-                <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover/template-card:opacity-100 transition-all duration-300 z-20">
-                  {showTrash ? (
-                    /* Trash view: Restore only */
-                    <Button
-                      className="bg-emerald-600 text-white font-semibold rounded-full px-5 h-10 text-sm shadow-lg shadow-emerald-500/30 hover:bg-emerald-700 hover:scale-105 transition-all duration-200"
-                      onClick={e => { e.stopPropagation(); handleRestoreTemplate(template); }}
-                    >
-                      <RotateCcw className="w-4 h-4 mr-1.5" /> Restore
-                    </Button>
-                  ) : (
-                    /* Active view: Use + Design + Delete */
-                    <>
-                      <Button
-                        className="bg-blue-600 text-white font-semibold rounded-full px-5 h-10 text-sm shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:scale-105 transition-all duration-200"
-                        disabled={!!creatingId}
-                        onClick={e => { e.stopPropagation(); handleUseTemplate(template); }}
-                      >
-                        {creatingId === template.id
-                          ? <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Creating...</>
-                          : <><Plus className="w-4 h-4 mr-1.5" /> Use</>}
-                      </Button>
-
-                      {isAdminUser && (
-                        <Button
-                          className="bg-white text-slate-800 font-semibold rounded-full px-5 h-10 text-sm shadow-lg hover:bg-slate-50 hover:scale-105 transition-all duration-200"
-                          onClick={e => { e.stopPropagation(); handleOpenEdit(template); }}
-                        >
-                          Edit Template
-                        </Button>
-                      )}
-
-                      {isAdminUser && (
-                        <Button
-                          className="bg-rose-600 text-white font-semibold rounded-full px-4 h-10 text-sm shadow-lg shadow-rose-500/30 hover:bg-rose-700 hover:scale-105 transition-all duration-200"
-                          onClick={e => { e.stopPropagation(); handleDeleteTemplate(template); }}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </>
+              <DashboardCardBody>
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <DashboardCardTitle className="mb-0 line-clamp-2 min-h-[2.75rem]">{template.name}</DashboardCardTitle>
+                  {template.scope === 'INSTITUTION' && (
+                    <span className={dashboardCardTagClass}>Institution</span>
                   )}
                 </div>
-              </div>
+                <DashboardCardMeta
+                  date={formatDashboardCardDate(
+                    template.updatedAt || template.updated_at || template.createdAt || template.created_at
+                  )}
+                  status={getDashboardPublishStatus({
+                    status: template.status,
+                    deleted: Boolean(template.deletedAt),
+                    isTemplate: true,
+                  })}
+                />
 
-              {/* Card body */}
-              <div className="p-6 pt-4 pb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <Badge className="bg-blue-100 text-blue-700 font-medium px-3 py-1 rounded-full text-xs">
-                    {template.category || 'General'}
-                  </Badge>
-                  <div className="flex items-center gap-1.5">
-                    {template.scope === 'INSTITUTION' && template.institution?.name && (
-                      <Badge className="bg-slate-100 text-slate-600 font-medium px-2 py-0.5 rounded-full text-[10px]">
-                        <Building2 className="w-3 h-3 mr-1 inline" />
-                        {template.institution.name}
-                      </Badge>
+                <DashboardCardFooter>
+                  <div className="flex min-w-0 justify-between gap-1 ">
+                    <DashboardCardSecondaryAction
+                      className="gap-1.5"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (showTrash) {
+                          void handleRestoreTemplate(template);
+                          return;
+                        }
+                        if (isAdminUser) handleOpenEdit(template);
+                        else handleUseTemplate(template);
+                      }}
+                    >
+                      {showTrash ? (
+                        <>
+                          <RotateCcw className="h-4 w-4" />
+                          Restore
+                        </>
+                      ) : isAdminUser ? (
+                        'Configure'
+                      ) : (
+                        'Preview'
+                      )}
+                    </DashboardCardSecondaryAction>
+                    {isAdminUser && !showTrash && (
+                      <button
+                        type="button"
+                        title="Delete template"
+                        aria-label="Delete template"
+                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded text-[#ba1a1a] transition-colors hover:text-[#93000a]"
+                        onClick={(e) => { e.stopPropagation(); setDeleteTarget(template); }}
+                      >
+                        <Trash2 className="h-4 w-4" strokeWidth={2} />
+                      </button>
                     )}
-                    <Badge className={cn(
-                      'font-medium px-3 py-1 rounded-full text-[10px]',
-                      template.scope === 'INSTITUTION'
-                        ? 'bg-amber-100 text-amber-700'
-                        : 'bg-emerald-100 text-emerald-700'
-                    )}>
-                      {template.scope === 'INSTITUTION' ? 'Institution' : 'Global'}
-                    </Badge>
                   </div>
-                </div>
-                <h4 className="font-bold text-xl text-slate-900 leading-tight mt-1">{template.name}</h4>
-                <p className="text-sm text-slate-500 leading-relaxed line-clamp-2 mt-1">
-                  {template.description}
-                </p>
-
-                <div className={cn(
-                  "mt-4 pt-4 border-t border-slate-100 flex items-center justify-between font-semibold text-xs uppercase tracking-wider transition-all",
-                  showTrash ? 'text-rose-500 group-hover/template-card:text-rose-600' : 'text-blue-600 group-hover/template-card:text-blue-700'
-                )}>
-                  <span>{showTrash ? 'In Trash' : isAdminUser ? 'Design or Use' : 'Use Template'}</span>
-                  {showTrash ? <RotateCcw className="w-3 h-3" /> : <ArrowRight className="w-3 h-3" />}
-                </div>
-              </div>
-            </Card>
+                  <DashboardCardPrimaryAction
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!template.deletedAt) handleUseTemplate(template);
+                    }}
+                  >
+                    Use Template
+                  </DashboardCardPrimaryAction>
+                </DashboardCardFooter>
+              </DashboardCardBody>
+            </DashboardCard>
           ))}
+
+          {isAdminUser && !showTrash && (
+            <DashboardCardDashed onClick={handleOpenCreate} className="min-h-[380px]">
+              <div className="w-16 h-16 rounded-full bg-[#e4e2e4] flex items-center justify-center mb-4 group-hover:bg-[#000000] group-hover:text-white transition-colors text-[#45464d] shadow-sm">
+                <Plus className="w-8 h-8" />
+              </div>
+              <h3 className={cn(dashboardCardTitleClass, 'mb-2')}>Start from Scratch</h3>
+              <p className={cn(dashboardCardDescriptionClass, 'text-center max-w-xs mb-0')}>
+                Build your vision from the ground up using our blank canvas.
+              </p>
+            </DashboardCardDashed>
+          )}
         </div>
       )}
 
-      {/* Create / Edit dialog — rendered only for admins */}
       {isAdminUser && (
         <TemplateFormDialog
           open={formOpen}
@@ -525,6 +491,41 @@ export default function DashboardTemplates() {
         />
       )}
 
-    </Card>
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open && !isDeleting) setDeleteTarget(null); }}>
+        <AlertDialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl p-5 sm:p-6">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-[#0F172A]">
+              <AlertTriangle className="h-5 w-5 shrink-0 text-rose-500" />
+              Delete template?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will move “{deleteTarget?.name}” to trash. You can restore it later from Trash.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <AlertDialogCancel disabled={isDeleting} className="mt-0 w-full sm:w-auto">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void handleDeleteTemplate();
+              }}
+              disabled={isDeleting}
+              className="w-full bg-rose-600 text-white hover:bg-rose-700 sm:w-auto"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting…
+                </>
+              ) : (
+                'Delete'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </DashboardPageShell>
   );
 }

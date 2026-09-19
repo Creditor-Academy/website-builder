@@ -1,15 +1,5 @@
 import apiClient from './client';
 
-// Auth token injection
-apiClient.interceptors.request.use((config) => {
-  const user = JSON.parse(localStorage.getItem("user") || 'null');
-  const token = user?.token || user?.accessToken || user?.jwt;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-}, (error) => Promise.reject(error));
-
 // ─── User List & Admin Management ───────────────────────────────────────────
 
 /**
@@ -52,12 +42,16 @@ export const updateUserRole = (id, role) => apiClient.patch(`/users/${id}/role`,
 export const updateUserStatus = (id, active) => apiClient.patch(`/users/${id}/status`, { active });
 
 /**
+ * DELETE /users/:id — Hard delete a user (Admin only)
+ * @param {string} id - User ID
+ */
+export const deleteUser = (id) => apiClient.delete(`/users/${id}`);
+
+/**
  * POST /users/:id/restore — Restore a deleted/deactivated user (Admin / Institution Admin only)
  * @param {string} id - User ID
  */
 export const restoreUser = (id) => apiClient.post(`/users/${id}/restore`);
-
-// ─── Own Profile ─────────────────────────────────────────────────────────────
 
 /**
  * GET /users/me — Get own profile

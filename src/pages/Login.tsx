@@ -1,10 +1,17 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Eye, LayoutTemplate } from "lucide-react";
+import { ArrowLeft, Eye } from "lucide-react";
+import Loading from "@/components/Common/LoadingUI";
 import loginbg from "../assets/login.png";
 import { useGoogleLogin } from "@react-oauth/google";
 import { loginUser, registerUser, forgotPassword, googleLogin } from "../api/auth";
+import {
+  getDashboardPath,
+  setStoredUser,
+  validateSession,
+} from "@/lib/authSession";
+import { BrandLogo } from "@/components/Common/BrandLogo";
 
 // ── Moved outside so React never sees a new component type on re-render ────────
 
@@ -165,6 +172,26 @@ interface SignupFormProps {
   onGoogleLogin: () => void;
 }
 
+// ── Password strength helper ────────────────────────────────────────────────
+type PasswordStrength = { level: 0 | 1 | 2 | 3; label: string; color: string; bars: string; textColor: string };
+
+function getPasswordStrength(password: string): PasswordStrength {
+  if (!password) return { level: 0, label: "", color: "", bars: "", textColor: "" };
+
+  // Count digits in the password
+  const digitCount = (password.match(/[0-9]/g) || []).length;
+  // Effective length: actual chars + extra credit for digits
+  const effectiveLength = password.length + digitCount;
+
+  if (effectiveLength < 8) {
+    return { level: 1, label: "Weak",   color: "bg-red-400",    bars: "w-1/3", textColor: "text-red-400" };
+  } else if (effectiveLength < 12) {
+    return { level: 2, label: "Good",   color: "bg-yellow-400", bars: "w-2/3", textColor: "text-yellow-500" };
+  } else {
+    return { level: 3, label: "Strong", color: "bg-green-500",  bars: "w-full", textColor: "text-green-500" };
+  }
+}
+
 const SignupForm = ({
   signupData,
   setSignupData,
@@ -180,6 +207,8 @@ const SignupForm = ({
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleSignup();
   };
+
+  const passwordStrength = getPasswordStrength(signupData.password);
 
   return (
     <div className="w-full max-w-[400px] flex flex-col justify-center h-full mx-auto">
@@ -241,6 +270,20 @@ const SignupForm = ({
             />
           </div>
 
+          {/* Password strength indicator */}
+          {signupData.password && (
+            <div className="mt-2 space-y-1">
+              <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${passwordStrength.color} ${passwordStrength.bars}`}
+                />
+              </div>
+              <p className={`text-xs font-medium ${passwordStrength.textColor}`}>
+                {passwordStrength.label} password
+              </p>
+            </div>
+          )}
+
           {signupError && (
             <p className="text-red-500 text-xs font-medium mt-2 flex items-center gap-1">
               <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="currentColor">
@@ -287,6 +330,8 @@ export default function LoginSignup() {
   const [signupData, setSignupData] = useState({ name: "", email: "", password: "" });
   const [isSignup, setIsSignup] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [isLoadingLogin, setIsLoadingLogin] = useState(false);
   const [isLoadingSignup, setIsLoadingSignup] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -299,23 +344,34 @@ export default function LoginSignup() {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotMsg, setForgotMsg] = useState("");
   const [forgotError, setForgotError] = useState("");
-
-  // ── On mount: restore remembered email + skip login if session exists ────────
+  // Restore remembered email + validate cookie session on open
   useEffect(() => {
-    // Auto-fill email if user previously checked Remember Me
+    let active = true;
+
     const savedEmail = localStorage.getItem("rememberedEmail");
     if (savedEmail) {
       setLoginData((prev) => ({ ...prev, email: savedEmail }));
       setRememberMe(true);
     }
 
-    // If user is already logged in and chose Remember Me, go straight to dashboard
-    const savedUser = localStorage.getItem("user");
-    const wasRemembered = localStorage.getItem("rememberMe") === "true";
-    if (savedUser && wasRemembered) {
-      navigate("/dashboard");
-    }
-  }, [navigate]);
+    void validateSession().then(({ valid, user }) => {
+      if (!active) return;
+      if (valid && user) {
+        const from = (location.state as { from?: { pathname?: string } })?.from?.pathname;
+        const redirectTo =
+          from && (from.startsWith('/dashboard') || from.startsWith('/builder'))
+            ? from
+            : getDashboardPath(user);
+        navigate(redirectTo, { replace: true });
+        return;
+      }
+      setIsCheckingSession(false);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [location.state, navigate]);
 
   const handleLogin = async () => {
     setLoginError("");
@@ -323,20 +379,17 @@ export default function LoginSignup() {
       setIsLoadingLogin(true);
       const res = await loginUser(loginData);
 
-      // Always save the user session
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      setStoredUser(res.data.user);
 
       if (rememberMe) {
-        // Save email for auto-fill + flag to skip login next visit
         localStorage.setItem("rememberedEmail", loginData.email);
         localStorage.setItem("rememberMe", "true");
       } else {
-        // User didn't check Remember Me — clear any saved data
         localStorage.removeItem("rememberedEmail");
         localStorage.removeItem("rememberMe");
       }
 
-      navigate("/dashboard");
+      navigate(getDashboardPath(res.data.user));
     } catch (err) {
       console.error(err);
       setLoginError(err.response?.data?.message || err.response?.data?.error || "Incorrect email or password.");
@@ -371,15 +424,11 @@ export default function LoginSignup() {
       try {
         setIsLoadingLogin(true);
         const res = await googleLogin(tokenResponse.access_token);
-        
-        // Save user session
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-        
-        // Google auth doesn't have a "Remember me" option technically, 
-        // but we can just set it to skip login next time
+
+        setStoredUser(res.data.user);
         localStorage.setItem("rememberMe", "true");
-        
-        navigate("/dashboard");
+
+        navigate(getDashboardPath(res.data.user));
       } catch (err: any) {
         console.error(err);
         setLoginError(err.response?.data?.message || err.response?.data?.error || "Google login failed.");
@@ -441,6 +490,10 @@ export default function LoginSignup() {
     onGoogleLogin: handleGoogleLogin,
   };
 
+  if (isCheckingSession) {
+    return <Loading fullScreen label="Checking session" />;
+  }
+
   return (
     <div className="relative min-h-[100svh] w-full flex overflow-hidden bg-slate-950">
 
@@ -455,11 +508,10 @@ export default function LoginSignup() {
 
       <div className={`absolute top-8 left-8 right-8 z-50 flex items-center justify-between pointer-events-none ${isSignup ? "md:justify-end" : "md:justify-start"}`}>
         <motion.div layout transition={{ type: "spring", stiffness: 220, damping: 28 }} className="flex items-center justify-between w-full md:w-auto">
-          <Link to="/" className="flex items-center gap-3 text-white pointer-events-auto hover:opacity-80 transition-opacity drop-shadow-lg">
-            <div className="w-10 h-10 bg-white text-blue-600 rounded-2xl flex items-center justify-center">
-              <LayoutTemplate className="w-6 h-6" />
-            </div>
-            <span className="font-bold text-2xl tracking-tight">Buildora</span>
+          <Link to="/" className="flex items-center text-white pointer-events-auto hover:opacity-80 transition-opacity drop-shadow-lg">
+            <BrandLogo
+              imgClassName="h-10 w-10"
+            />
           </Link>
           <Link to="/" className="md:ml-20 flex items-center justify-end gap-2 text-white/80 hover:text-white transition-colors text-sm font-medium pointer-events-auto drop-shadow-md">
             <ArrowLeft className="w-4 h-4" /> Back to Website

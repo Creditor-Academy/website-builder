@@ -17,20 +17,23 @@ import {
   Rocket,
   CheckCircle,
   AlertCircle,
-  Clock,
   ExternalLink,
   Loader2,
   Settings,
-  Zap
+  Zap,
 } from 'lucide-react';
 import useBuilderStore from '@/store/useBuilderStore';
 import { publishService } from '@/services/publishService';
+import { cn } from '@/lib/utils';
+
+const fieldClass =
+  'h-11 border-slate-200 bg-white text-[#0F172A] focus-visible:border-[#0F172A] focus-visible:ring-2 focus-visible:ring-[#0F172A]/15';
 
 export function PublishDialog({ open, onOpenChange, websiteId }) {
   const { websites, updateWebsite } = useBuilderStore();
   const website = websites.find(w => w.id === websiteId);
   const [isPublishing, setIsPublishing] = useState(false);
-  const [publishStatus, setPublishStatus] = useState('idle'); // idle, publishing, success, error
+  const [publishStatus, setPublishStatus] = useState('idle');
   const [publishedUrl, setPublishedUrl] = useState('');
   const [customDomain, setCustomDomain] = useState('');
   const [subdomain, setSubdomain] = useState('');
@@ -40,7 +43,6 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
       let initialSubdomain = website.subdomain;
       let initialCustomDomain = website.customDomain;
 
-      // Fallback for older websites that only have publishedUrl
       if (!initialSubdomain && !initialCustomDomain && website.publishedUrl) {
         try {
           const urlObj = new URL(website.publishedUrl);
@@ -49,7 +51,7 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
           } else {
             initialCustomDomain = urlObj.hostname;
           }
-        } catch (e) {
+        } catch {
           // ignore invalid URLs
         }
       }
@@ -57,7 +59,7 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
       if (initialSubdomain) setSubdomain(initialSubdomain);
       if (initialCustomDomain) setCustomDomain(initialCustomDomain);
       if (website.publishedUrl) setPublishedUrl(website.publishedUrl);
-      
+
       if (website.status === 'Published') setPublishStatus('success');
       else setPublishStatus('idle');
     }
@@ -66,22 +68,22 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
   const handlePublish = async () => {
     setIsPublishing(true);
     setPublishStatus('publishing');
-    
+
     try {
       const response = await publishService.publishWebsite({
         websiteId,
         subdomain: subdomain || undefined,
-        customDomain: customDomain || undefined
+        customDomain: customDomain || undefined,
       });
-      
+
       if (response.success) {
         setPublishStatus('success');
         setPublishedUrl(response.url);
-        updateWebsite(websiteId, { 
-          status: 'Published', 
+        updateWebsite(websiteId, {
+          status: 'Published',
           publishedUrl: response.url,
           customDomain: customDomain,
-          subdomain: subdomain 
+          subdomain: subdomain,
         });
       } else {
         setPublishStatus('error');
@@ -97,43 +99,52 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
   const getStatusIcon = () => {
     switch (publishStatus) {
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
+        return <CheckCircle className="h-5 w-5 text-emerald-600" />;
       case 'error':
-        return <AlertCircle className="w-5 h-5 text-red-600" />;
+        return <AlertCircle className="h-5 w-5 text-rose-600" />;
       case 'publishing':
-        return <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />;
+        return <Loader2 className="h-5 w-5 animate-spin text-[#0F172A]" />;
       default:
-        return <Rocket className="w-5 h-5 text-slate-600" />;
+        return <Rocket className="h-5 w-5 text-[#0F172A]" />;
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Rocket className="w-5 h-5" />
+      <DialogContent
+        className={cn(
+          'flex max-h-[min(92dvh,40rem)] w-[calc(100vw-1.5rem)] flex-col gap-0 overflow-hidden p-0',
+          'rounded-2xl border-slate-200 bg-white text-[#0F172A] shadow-2xl sm:max-w-2xl',
+          '[&>button]:right-3 [&>button]:top-3 [&>button]:text-[#0F172A] [&>button]:hover:bg-slate-100',
+          '[&>button>svg]:mr-0 [&>button>svg]:h-5 [&>button>svg]:w-5',
+        )}
+      >
+        <DialogHeader className="shrink-0 space-y-1 border-b border-slate-100 px-5 py-4 pr-12 sm:px-6">
+          <DialogTitle className="flex items-center gap-2 text-base font-semibold text-[#0F172A] sm:text-lg">
+            <Rocket className="h-5 w-5 text-[#0F172A]" />
             Publish Your Website
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm text-slate-500">
             Make your website live and accessible to the world
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Current Status */}
-          <div className={`rounded-lg border p-4 ${
-            publishStatus === 'success' ? 'border-green-200 bg-green-50' :
-            publishStatus === 'error' ? 'border-red-200 bg-red-50' :
-            publishStatus === 'publishing' ? 'border-blue-200 bg-blue-50' :
-            'border-slate-200 bg-slate-50'
-          }`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-5 sm:px-6">
+          <div
+            className={cn(
+              'rounded-xl border p-4',
+              publishStatus === 'success' && 'border-emerald-200 bg-emerald-50',
+              publishStatus === 'error' && 'border-rose-200 bg-rose-50',
+              publishStatus === 'publishing' && 'border-slate-200 bg-slate-50',
+              publishStatus === 'idle' && 'border-slate-200 bg-slate-50',
+            )}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
                 {getStatusIcon()}
-                <div>
-                  <p className="font-medium">Publish Status</p>
-                  <p className="text-sm text-slate-600">
+                <div className="min-w-0">
+                  <p className="font-medium text-[#0F172A]">Publish Status</p>
+                  <p className="text-sm text-slate-500">
                     {publishStatus === 'idle' && 'Ready to publish'}
                     {publishStatus === 'publishing' && 'Publishing your website...'}
                     {publishStatus === 'success' && 'Website published successfully!'}
@@ -142,70 +153,79 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
                 </div>
               </div>
               {website?.status === 'Published' && (
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                <Badge className="shrink-0 border-transparent bg-[#0F172A] text-white hover:bg-[#0F172A]">
                   Published
                 </Badge>
               )}
             </div>
 
-            {/* Published URL Display */}
             {publishStatus === 'success' && publishedUrl && (
-              <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-900 mb-1">Your website is live at:</p>
-                    <p className="text-sm font-mono text-green-600 break-all">{publishedUrl}</p>
+              <div className="mt-3 rounded-lg border border-slate-200 bg-white p-3 sm:p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="mb-1 text-sm font-medium text-[#0F172A]">Your website is live at:</p>
+                    <p className="break-all font-mono text-sm text-slate-600">{publishedUrl}</p>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => window.open(publishedUrl, '_blank')}
-                    >
-                      <ExternalLink className="w-4 h-4 mr-1" />
-                      Visit
-                    </Button>
-                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => window.open(publishedUrl, '_blank')}
+                    className="h-9 shrink-0 border-slate-200 text-[#0F172A] hover:bg-slate-50 hover:text-[#0F172A]"
+                  >
+                    <ExternalLink className="mr-1 h-4 w-4" />
+                    Visit
+                  </Button>
                 </div>
               </div>
             )}
           </div>
 
           <Tabs defaultValue="settings" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="settings">Publish Settings</TabsTrigger>
-              <TabsTrigger value="domain">Domain</TabsTrigger>
+            <TabsList className="grid h-10 w-full grid-cols-2 rounded-lg bg-slate-100 p-1">
+              <TabsTrigger
+                value="settings"
+                className="rounded-md text-slate-500 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] data-[state=active]:shadow-sm"
+              >
+                Publish Settings
+              </TabsTrigger>
+              <TabsTrigger
+                value="domain"
+                className="rounded-md text-slate-500 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] data-[state=active]:shadow-sm"
+              >
+                Domain
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="settings" className="space-y-4">
+            <TabsContent value="settings" className="mt-4 space-y-4">
               <div>
-                <Label htmlFor="subdomain" className="flex items-center gap-2 text-slate-900 font-medium">
-                  <Globe className="w-4 h-4 text-blue-600" />
+                <Label htmlFor="subdomain" className="flex items-center gap-2 font-medium text-[#0F172A]">
+                  <Globe className="h-4 w-4 text-[#0F172A]" />
                   Buildora Subdomain
                 </Label>
-                <div className="flex mt-1">
+                <div className="mt-1.5 flex">
                   <Input
                     id="subdomain"
                     placeholder="my-awesome-site"
                     value={subdomain}
                     onChange={(e) => setSubdomain(e.target.value)}
-                    className="rounded-r-none border-r-0"
+                    className={cn(fieldClass, 'rounded-r-none border-r-0')}
                   />
-                  <div className="flex items-center px-3 bg-slate-100 border border-l-0 border-slate-300 rounded-r-md">
-                    <span className="text-sm text-slate-600">.buildora.lmsathena.com</span>
+                  <div className="flex items-center rounded-r-md border border-l-0 border-slate-200 bg-slate-50 px-3">
+                    <span className="whitespace-nowrap text-sm text-slate-500">.buildora.lmsathena.com</span>
                   </div>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  Get instant free hosting with SSL certificate. Your site will be live at <span className="font-mono text-blue-600">{subdomain || 'your-site'}.buildora.lmsathena.com</span>
+                <p className="mt-1.5 text-xs text-slate-500">
+                  Get instant free hosting with SSL certificate. Your site will be live at{' '}
+                  <span className="font-mono text-[#0F172A]">{subdomain || 'your-site'}.buildora.lmsathena.com</span>
                 </p>
               </div>
 
-              <div className="p-4 bg-blue-50 rounded-lg">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <div className="flex items-start gap-3">
-                  <Zap className="w-5 h-5 text-blue-600 mt-0.5" />
+                  <Zap className="mt-0.5 h-5 w-5 shrink-0 text-[#0F172A]" />
                   <div>
-                    <p className="font-medium text-blue-900">Free Hosting</p>
-                    <p className="text-sm text-blue-700">
+                    <p className="font-medium text-[#0F172A]">Free Hosting</p>
+                    <p className="text-sm text-slate-500">
                       Your website will be hosted on Buildora's infrastructure with SSL certificate and CDN included.
                     </p>
                   </div>
@@ -213,35 +233,35 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
               </div>
             </TabsContent>
 
-            <TabsContent value="domain" className="space-y-4">
+            <TabsContent value="domain" className="mt-4 space-y-4">
               <div>
-                <Label htmlFor="custom-domain" className="flex items-center gap-2 text-slate-900 font-medium">
-                  <Globe className="w-4 h-4 text-purple-600" />
+                <Label htmlFor="custom-domain" className="flex items-center gap-2 font-medium text-[#0F172A]">
+                  <Globe className="h-4 w-4 text-[#0F172A]" />
                   Custom Domain
-                  <span className="text-xs text-slate-500">(Optional)</span>
+                  <span className="text-xs font-normal text-slate-500">(Optional)</span>
                 </Label>
                 <Input
                   id="custom-domain"
                   placeholder="www.yourdomain.com"
                   value={customDomain}
                   onChange={(e) => setCustomDomain(e.target.value)}
-                  className="mt-1"
+                  className={cn(fieldClass, 'mt-1.5')}
                 />
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="mt-1.5 text-xs text-slate-500">
                   Use your own domain for professional branding. Includes automatic SSL certificate.
                 </p>
               </div>
 
               {customDomain && (
-                <div className="p-4 bg-amber-50 rounded-lg">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                   <div className="flex items-start gap-3">
-                    <Settings className="w-5 h-5 text-amber-600 mt-0.5" />
+                    <Settings className="mt-0.5 h-5 w-5 shrink-0 text-[#0F172A]" />
                     <div>
-                      <p className="font-medium text-amber-900">DNS Configuration</p>
-                      <p className="text-sm text-amber-700">
+                      <p className="font-medium text-[#0F172A]">DNS Configuration</p>
+                      <p className="text-sm text-slate-500">
                         After publishing, update your DNS settings to point to Buildora's servers.
                       </p>
-                      <div className="mt-2 p-2 bg-amber-100 rounded text-xs font-mono">
+                      <div className="mt-2 rounded-lg bg-white p-2 font-mono text-xs text-[#0F172A]">
                         A Record: 192.168.1.1<br />
                         CNAME: www.buildora.lmsathena.com
                       </div>
@@ -253,25 +273,27 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
           </Tabs>
         </div>
 
-        <DialogFooter className="flex-col sm:flex-row gap-3">
-          <Button 
-            variant="outline" 
+        <DialogFooter className="flex-col gap-2 border-t border-slate-100 bg-white px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+          <Button
+            variant="outline"
             onClick={() => onOpenChange(false)}
+            className="h-10 w-full border-slate-200 text-[#0F172A] hover:bg-slate-50 hover:text-[#0F172A] sm:w-auto"
           >
             Cancel
           </Button>
           <Button
             onClick={handlePublish}
             disabled={isPublishing || (!subdomain && !customDomain)}
+            className="h-10 w-full bg-[#0F172A] text-white hover:bg-[#1e293b] sm:w-auto"
           >
             {isPublishing ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Publishing...
               </>
             ) : (
               <>
-                <Rocket className="w-4 h-4 mr-2" />
+                <Rocket className="mr-2 h-4 w-4" />
                 Publish Website
               </>
             )}
