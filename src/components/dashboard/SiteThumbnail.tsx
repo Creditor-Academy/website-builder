@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, Component, ErrorInfo, ReactNode } from 'react';
+import React, { useRef, useEffect, useState, Component, type CSSProperties, type ReactNode } from 'react';
 import { HeroSection } from '@/components/sections/HeroSection';
 import { FeaturesSection } from '@/components/sections/FeaturesSection';
 import { GallerySection } from '@/components/sections/GallerySection';
@@ -9,8 +9,12 @@ import { TeamSection } from '@/components/sections/TeamSection';
 import { LogoCloudSection } from '@/components/sections/LogoCloudSection';
 import { ContentSection } from '@/components/sections/ContentSection';
 import { CaseStudiesSection } from '@/components/sections/CaseStudiesSection';
+import { CanvasElementView } from '@/builder/components/CanvasPrimitives';
+import { isCanvasSection, unpackNodeStyles } from '@/builder/adapter';
+import { resolveStyles, stylesToCss } from '@/builder/styles';
+import { sortByOrder } from '@/builder/tree';
+import type { CanvasContainer, CanvasElement, CanvasSection } from '@/builder/types';
 
-// ── Error boundary so a crashing section never brings down the dashboard ──
 class PreviewErrorBoundary extends Component<{ children: ReactNode }, { crashed: boolean }> {
     state = { crashed: false };
     static getDerivedStateFromError() { return { crashed: true }; }
@@ -29,6 +33,23 @@ interface SiteThumbnailProps {
 }
 
 const RENDER_W = 1440;
+
+export function unpackPageTheme(globalStyles: unknown): Record<string, string | number | undefined> {
+    const unpacked = unpackNodeStyles(globalStyles, {});
+    return (unpacked.styles || {}) as Record<string, string | number | undefined>;
+}
+
+export function navbarBrand(navbar: unknown): string {
+    if (!navbar || typeof navbar !== 'object') return '';
+    const record = navbar as { brand?: unknown; logo?: unknown };
+    if (typeof record.logo === 'object' && record.logo && 'text' in record.logo) {
+        const text = (record.logo as { text?: unknown }).text;
+        if (typeof text === 'string' && text.trim()) return text;
+    }
+    if (typeof record.brand === 'string' && record.brand.trim()) return record.brand;
+    if (typeof record.logo === 'string' && record.logo.trim()) return record.logo;
+    return '';
+}
 
 /**
  * Only renders section types that are safe outside BuilderContext.
@@ -55,17 +76,16 @@ function PreviewSection({ section, isAlternate }: { section: any; isAlternate: b
         case 'logocloud':       return <LogoCloudSection {...base} />;
         case 'content':         return <ContentSection {...base} />;
         case 'casestudies':     return <CaseStudiesSection {...base} />;
-        // Skip types that require BuilderContext (services, cta, about, faq, layout, pricing, testimonials, contact)
         default:                return null;
     }
 }
 
-/** Lightweight navbar strip — pure inline styles, no BuilderContext needed */
-function MiniNavbar({ navbar, globalStyles }: { navbar: any; globalStyles: any }) {
+function MiniNavbar({ navbar, globalStyles }: { navbar: any; globalStyles: Record<string, string | number | undefined> }) {
     if (!navbar) return null;
-    const bg = navbar.styles?.backgroundColor || globalStyles?.primaryColor || '#0f172a';
-    const color = navbar.styles?.textColor || '#ffffff';
-    const brand = navbar.brand || '';
+    const navStyles = unpackNodeStyles(navbar.styles, {}).styles as Record<string, string | undefined>;
+    const bg = navStyles.backgroundColor || String(globalStyles.primaryColor || '#0f172a');
+    const color = navStyles.textColor || '#ffffff';
+    const brand = navbarBrand(navbar);
     const links: string[] = (navbar.links || []).map((l: any) => l.label || l.text || String(l));
 
     return (
@@ -90,21 +110,101 @@ function MiniNavbar({ navbar, globalStyles }: { navbar: any; globalStyles: any }
     );
 }
 
+function ThumbnailCanvasElement({ element }: { element: CanvasElement }) {
+    if (element.visibility?.desktop === false) return null;
+    const css = stylesToCss(resolveStyles(element.styles, element.responsiveStyles, 'desktop'));
+    const free = element.properties?.placement === 'absolute' || element.styles?.position === 'absolute';
+    const wrapperStyle: CSSProperties = free ? { ...css, position: 'absolute' } : css;
+    const innerCss: CSSProperties = {
+        ...css,
+        position: 'relative',
+        left: undefined,
+        top: undefined,
+        ...(free
+            ? {
+                width: '100%',
+                height: element.type === 'image' ? 'auto' : '100%',
+                maxWidth: '100%',
+                maxHeight: element.type === 'image' ? undefined : '100%',
+                boxSizing: 'border-box',
+            }
+            : {}),
+    };
+
+    if (element.type === 'video') {
+        return (
+            <div style={wrapperStyle} className="overflow-hidden bg-slate-800">
+                <div className="flex h-full min-h-[120px] w-full items-center justify-center text-sm text-white/80">
+                    Video
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div style={wrapperStyle}>
+            <CanvasElementView element={element} css={innerCss} />
+        </div>
+    );
+}
+
+function ThumbnailCanvasContainer({ container }: { container: CanvasContainer }) {
+    if (container.visibility?.desktop === false) return null;
+    const css = stylesToCss(resolveStyles(container.styles, container.responsiveStyles, 'desktop'));
+    const free = container.properties?.placement === 'absolute' || container.styles?.position === 'absolute';
+    return (
+        <div
+            style={{
+                ...css,
+                position: free ? 'absolute' : (css.position as CSSProperties['position']) || 'relative',
+                width: css.width || '100%',
+            }}
+        >
+            {sortByOrder(container.children || []).map((element) => (
+                <ThumbnailCanvasElement key={element.id} element={element} />
+            ))}
+        </div>
+    );
+}
+
+function ThumbnailCanvasSection({ section }: { section: CanvasSection }) {
+    const css = stylesToCss(resolveStyles(section.styles, section.responsiveStyles, 'desktop'));
+    return (
+        <div
+            style={{
+                ...css,
+                position: 'relative',
+                width: '100%',
+                minHeight: css.minHeight || 400,
+            }}
+        >
+            {sortByOrder(section.children || []).map((container) => (
+                <ThumbnailCanvasContainer key={container.id} container={container} />
+            ))}
+        </div>
+    );
+}
+
+function ThumbnailSection({ section, isAlternate }: { section: CanvasSection; isAlternate: boolean }) {
+    if (isCanvasSection(section)) {
+        return <ThumbnailCanvasSection section={section} />;
+    }
+    return <PreviewSection section={section} isAlternate={isAlternate} />;
+}
+
 /**
- * Renders the full website (all safe sections) at 1440px width, then scales down
- * to fill the card thumbnail. Whatever fits in the container is visible —
- * exactly like a browser screenshot crop from the top.
+ * Renders the full website (canvas elements + safe prebuilt sections) at 1440px
+ * width, then scales down to fill the card thumbnail.
  */
 export function SiteThumbnail({ site, className = '' }: SiteThumbnailProps) {
     const outerRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(0.22);
-    const [crashed, setCrashed] = useState(false);
 
     const firstPage = site?.pages?.[0];
-    const sections: any[] = (firstPage?.sections || []).filter((s: any) => s.visible !== false);
+    const sections: CanvasSection[] = (firstPage?.sections || []).filter((s: CanvasSection) => s.visible !== false);
     const navbar = firstPage?.navbar;
-    const globalStyles = firstPage?.globalStyles || {};
-    const bgColor = globalStyles.backgroundColor || '#ffffff';
+    const globalStyles = unpackPageTheme(firstPage?.globalStyles);
+    const bgColor = String(globalStyles.backgroundColor || '#ffffff');
 
     useEffect(() => {
         const el = outerRef.current;
@@ -169,7 +269,7 @@ export function SiteThumbnail({ site, className = '' }: SiteThumbnailProps) {
             >
                 <MiniNavbar navbar={navbar} globalStyles={globalStyles} />
                 {sections.map((section, idx) => (
-                    <PreviewSection
+                    <ThumbnailSection
                         key={section.id || idx}
                         section={section}
                         isAlternate={idx % 2 === 1}

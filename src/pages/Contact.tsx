@@ -156,8 +156,8 @@ export default function Contact() {
       isDark ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-800"
     )}>
       <Helmet>
-        <title>Contact Us - Webstudio</title>
-        <meta name="description" content="Get in touch with the Webstudio team for support, partnerships, or any questions." />
+        <title>Contact Us - Web Studio</title>
+        <meta name="description" content="Get in touch with the Web Studio team for support, partnerships, or any questions." />
       </Helmet>
 
       {/* BACKGROUND IMAGE OVERLAY */}

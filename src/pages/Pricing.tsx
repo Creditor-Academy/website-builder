@@ -6,7 +6,7 @@ const Pricing = () => {
   return (
     <>
       <Helmet>
-        <title>Pricing - SiteBuilder</title>
+        <title>Pricing - Web Studio</title>
         <meta name="description" content="Pricing plans" />
       </Helmet>
       <WebsiteEditor initialPage={createPricingPage()} />

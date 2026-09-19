@@ -17,7 +17,7 @@ import {
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import useBuilderStore from '@/store/useBuilderStore';
-import { ELEMENT_CATALOG, PREBUILT_CATALOG } from '@/builder/catalog';
+import { ELEMENT_CATALOG, PREBUILT_CATALOG, navbarFromCatalog } from '@/builder/catalog';
 import { createDefaultFooter } from '@/lib/defaultPageData';
 import { findNode, isFreePositioned } from '@/builder/tree';
 import { normalizePageSections } from '@/builder/adapter';
@@ -104,7 +104,7 @@ function sourceFromActive(active: BuilderDragData | null, parsedKind?: string, p
     const item = active as PaletteDragData;
     return {
       source: 'elements-panel',
-      kind: item.itemKind === 'prebuilt' ? 'prebuilt' : item.itemKind === 'container' ? 'container' : item.itemKind === 'footer' ? 'footer' : 'element',
+      kind: item.itemKind === 'prebuilt' ? 'prebuilt' : item.itemKind === 'container' ? 'container' : item.itemKind === 'footer' ? 'footer' : item.itemKind === 'navbar' ? 'navbar' : 'element',
       type: item.elementType || item.itemKind,
       elementType: item.elementType,
     };
@@ -286,15 +286,17 @@ export function CanvasDndProvider({ children }: { children: ReactNode }) {
     store.setEditorState({ isDragging: false });
     if (!page) return;
 
-    if (calculated && source && !canDrop(normalizePageSections(page.sections, page.id), source, calculated)) {
-      return;
-    }
+    if (source?.kind !== 'footer' && source?.kind !== 'navbar') {
+      if (calculated && source && !canDrop(normalizePageSections(page.sections, page.id), source, calculated)) {
+        return;
+      }
 
-    if (source?.kind === 'element' || source?.nodeId) {
-      const found = source.nodeId
-        ? findNode(normalizePageSections(page.sections, page.id), source.nodeId)
-        : null;
-      if (source.kind === 'element' || source.kind === 'container' || (found && isFreePositioned(found.node))) return;
+      if (source?.kind === 'element' || source?.nodeId) {
+        const found = source.nodeId
+          ? findNode(normalizePageSections(page.sections, page.id), source.nodeId)
+          : null;
+        if (source.kind === 'element' || source.kind === 'container' || (found && isFreePositioned(found.node))) return;
+      }
     }
 
     const target = calculated ? calculatedDropToTarget(calculated) : null;
@@ -313,6 +315,13 @@ export function CanvasDndProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    if (action.type === 'navbar') {
+      const catalog = [...ELEMENT_CATALOG, ...PREBUILT_CATALOG].find((item) => item.id === action.catalogId);
+      const preset = catalog?.createNavbar?.() || navbarFromCatalog(action.catalogId);
+      store.updateNavbar({ ...preset, id: page.navbar?.id || preset.id });
+      store.selectNode('navbar', 'navbar');
+      return;
+    }
     if (action.type === 'footer') {
       if (!page.footer) store.updateFooter(createDefaultFooter());
       store.selectNode('footer', 'footer');
@@ -325,6 +334,12 @@ export function CanvasDndProvider({ children }: { children: ReactNode }) {
     }
     if (action.type === 'palette') {
       const catalog = [...ELEMENT_CATALOG, ...PREBUILT_CATALOG].find((item) => item.id === action.item.catalogId);
+      if (catalog?.kind === 'navbar') {
+        const preset = catalog.createNavbar?.() || navbarFromCatalog(catalog.id);
+        store.updateNavbar({ ...preset, id: page.navbar?.id || preset.id });
+        store.selectNode('navbar', 'navbar');
+        return;
+      }
       if (catalog?.kind === 'footer') {
         if (!page.footer) store.updateFooter(createDefaultFooter());
         store.selectNode('footer', 'footer');

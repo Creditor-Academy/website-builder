@@ -15,7 +15,7 @@ export interface DropRect {
 
 export interface DropSource {
   source: 'elements-panel' | 'canvas' | 'layers' | 'palette' | 'layer';
-  kind: NodeKind | 'element' | 'container' | 'section' | 'prebuilt' | 'footer';
+  kind: NodeKind | 'element' | 'container' | 'section' | 'prebuilt' | 'footer' | 'navbar';
   type?: string;
   nodeId?: string;
   parentId?: string;
@@ -253,7 +253,7 @@ export function canDrop(sections: CanvasSection[], source: DropSource, target: D
   const resolvedParentKind = edge === 'inside' && 'kind' in target ? target.kind : parentKind;
   const resolvedParentId = edge === 'inside' && 'id' in target ? target.id : parentId;
 
-  if (source.kind === 'footer') return false;
+  if (source.kind === 'footer' || source.kind === 'navbar') return false;
   if (ELEMENT_ACCEPTS.includes(childType) && (resolvedParentKind === 'section' || resolvedParentKind === 'page' || resolvedParentKind === 'container')) {
     if (source.nodeId && isDescendant(sections, source.nodeId, resolvedParentId)) return false;
     return true;

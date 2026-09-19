@@ -41,10 +41,10 @@ export function setStoredUser(user: AuthUser) {
   }
 }
 
-export function clearStoredUser() {
+export function clearStoredUser(options?: { keepCache?: boolean }) {
   localStorage.removeItem('user');
   clearCsrfToken();
-  invalidateSessionCache();
+  if (!options?.keepCache) invalidateSessionCache();
   void switchBuilderWorkspace(null);
 }
 
@@ -64,7 +64,7 @@ export async function validateSession(force = false): Promise<SessionValidationR
 
   cachedValidation = (async () => {
     try {
-      const res = await apiClient.get('/users/me');
+      const res = await apiClient.get('/users/me', { skipAuthRedirect: true });
       const payload = res.data?.user ?? res.data;
       if (payload?.id) {
         const previousId = getStoredUser()?.id ?? null;
@@ -75,7 +75,8 @@ export async function validateSession(force = false): Promise<SessionValidationR
         return { valid: true, user: payload as AuthUser };
       }
     } catch {
-      clearStoredUser();
+      // Keep this failed result cached so a public page does not re-probe and 401-loop.
+      clearStoredUser({ keepCache: true });
     }
     return { valid: false, user: null };
   })();

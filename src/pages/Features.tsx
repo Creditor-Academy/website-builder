@@ -119,8 +119,8 @@ const FeaturesPage = () => {
       isDark ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-800"
     )}>
       <Helmet>
-        <title>Features - Webstudio</title>
-        <meta name="description" content="Explore Webstudio's powerful features: Drag & Drop, Templates, and Smart Components." />
+        <title>Features - Web Studio</title>
+        <meta name="description" content="Explore Web Studio's powerful features: Drag & Drop, Templates, and Smart Components." />
       </Helmet>
 
       {/* ================= NAVBAR ================= */}
@@ -276,7 +276,7 @@ const FeaturesPage = () => {
             transition={{ delay: 0.2 }}
             className={cn("text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed mb-12 font-medium", isDark ? "text-slate-400" : "text-slate-600")}
           >
-            Webstudio combines professional-grade tools with an intuitive interface, making it simple for anyone to build high-performance websites.
+            Web Studio combines professional-grade tools with an intuitive interface, making it simple for anyone to build high-performance websites.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -496,7 +496,7 @@ const FeaturesPage = () => {
           </div>
           <h2 className="text-5xl md:text-8xl font-black mb-8 relative z-10 tracking-tighter">Ready to start?</h2>
           <p className={cn("text-xl md:text-2xl mb-12 relative z-10 font-medium leading-relaxed", isDark ? "text-slate-200" : "text-slate-700")}>
-            Join thousands of creators using Webstudio and launch your masterpiece today.
+            Join thousands of creators on Web Studio and launch your masterpiece today.
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center relative z-10">
             <Link to="/login" className={cn(

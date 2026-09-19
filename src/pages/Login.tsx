@@ -510,6 +510,7 @@ export default function LoginSignup() {
         <motion.div layout transition={{ type: "spring", stiffness: 220, damping: 28 }} className="flex items-center justify-between w-full md:w-auto">
           <Link to="/" className="flex items-center text-white pointer-events-auto hover:opacity-80 transition-opacity drop-shadow-lg">
             <BrandLogo
+              className="text-white"
               imgClassName="h-10 w-10"
             />
           </Link>

@@ -58,10 +58,23 @@ export function CanvasContextMenu() {
 
   if (previewMode || !menu || !selectedId) return null;
 
+  const isFooter = selectedId === 'footer';
   const multi = selectedIds.length > 1;
   const store = useBuilderStore.getState();
 
-  const menuNode = (
+  const menuNode = isFooter ? (
+    <div
+      data-canvas-context-menu
+      className="pointer-events-auto fixed z-[80] min-w-[180px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+      style={{ left: menu.x, top: menu.y }}
+      onClick={(event) => event.stopPropagation()}
+    >
+      <MenuItem icon={<Trash2 className="h-3.5 w-3.5" />} label="Delete" danger onClick={() => {
+        store.deleteCanvasNode('footer');
+        setMenu(null);
+      }} />
+    </div>
+  ) : (
     <div
       data-canvas-context-menu
       className="pointer-events-auto fixed z-[80] min-w-[180px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg"

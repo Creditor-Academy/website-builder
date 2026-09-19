@@ -9,6 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { isProtectedAppPath } from '@/lib/authPaths';
 import {
   clearStoredUser,
   consumeSessionExpiredFlag,
@@ -65,10 +66,9 @@ export function AuthSessionProvider({ children }: { children: React.ReactNode })
 
     const onSessionExpired = () => {
       signOutLocal();
+      if (!isProtectedAppPath(window.location.pathname)) return;
       setSessionExpiredOpen(true);
-      if (window.location.pathname !== '/login') {
-        navigate('/login', { replace: true });
-      }
+      navigate('/login', { replace: true });
     };
 
     window.addEventListener('auth:session-expired', onSessionExpired);

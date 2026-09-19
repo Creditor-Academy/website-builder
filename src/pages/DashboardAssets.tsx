@@ -25,6 +25,7 @@ import {
   rememberAssetVisibleToUsers,
   setUserVisibleAssetIds,
   canDeleteAsset,
+  visibleAssetIdsFromMeta,
 } from '@/lib/assetVisibility';
 import {
   DashboardCard,
@@ -44,7 +45,7 @@ export default function DashboardAssets() {
     const basePath = location.pathname.startsWith('/admin') ? '/admin' : '/dashboard';
     const isAdmin = basePath === '/admin';
     const uploadScope = isAdmin ? { scope: 'GLOBAL' as const } : { scope: 'USER' as const };
-    const { deleteAsset, fetchAssets, getScopedAssets, uploadAsset, importAssetFromUrl } = useBuilderStore();
+    const { deleteAsset, fetchAssets, getScopedAssets, uploadAsset, importAssetFromUrl, importStockAsset } = useBuilderStore();
 
     const [isFetching, setIsFetching] = useState(true);
     const [uploadingCount, setUploadingCount] = useState(0);
@@ -83,7 +84,9 @@ export default function DashboardAssets() {
     useEffect(() => {
         if (!manageOpen) return;
         const saved = getUserVisibleAssetIds();
-        setDraftVisibleIds(new Set(saved ?? allAssetIds.split(',').filter(Boolean)));
+        const fromMeta = visibleAssetIdsFromMeta(allAssets);
+        const hasPersistedMeta = allAssets.some((asset) => asset.meta && (asset.meta.userVisible != null || asset.meta.hidden != null));
+        setDraftVisibleIds(new Set(hasPersistedMeta ? fromMeta : (saved ?? fromMeta)));
     }, [manageOpen, allAssetIds]);
 
     const { toast } = useToast();
@@ -169,16 +172,16 @@ export default function DashboardAssets() {
         }
     };
 
-    const handleAddStockMedia = async (item: { name: string; url: string; media: 'image' | 'video' }) => {
+    const handleAddStockMedia = async (item: { name: string; url: string; media: 'image' | 'video'; provider?: string; providerId?: string | number }) => {
         setImportingStockId(item.url);
         try {
-            const asset = await importAssetFromUrl(item.name, item.url, uploadScope);
+            const asset = await importStockAsset(item, uploadScope);
             if (isAdmin && asset?.id) rememberAssetVisibleToUsers(asset.id);
             toast({
                 title: 'Added to your assets',
                 description: item.media === 'video'
-                  ? 'This Pexels video is now in your library. Open Videos to use it, or keep browsing stock.'
-                  : 'This Pexels photo is now in your library. Open Images to use it, or keep browsing stock.',
+                  ? 'This stock video is now in your library. Open Videos to use it, or keep browsing stock.'
+                  : 'This stock photo is now in your library. Open Images to use it, or keep browsing stock.',
             });
         } catch (error: any) {
             toast({
@@ -240,17 +243,22 @@ export default function DashboardAssets() {
         setUserVisibleAssetIds(ids);
         try {
             await assetApi.setVisibleAssets(ids);
-        } catch {
-            // Visibility is stored locally even if the API is unavailable.
-        } finally {
-            setSavingVisibility(false);
-            setManageOpen(false);
+            await Promise.all([fetchAssets(), fetchAssets({ scope: 'GLOBAL' })]);
             toast({
                 title: 'User library updated',
                 description: ids.length
                     ? `${ids.length} asset${ids.length === 1 ? '' : 's'} will be visible on the user side.`
                     : 'No assets will be visible on the user side.',
             });
+        } catch {
+            toast({
+                variant: 'destructive',
+                title: 'Could not save visibility',
+                description: 'The selection was saved locally, but the server could not persist it.',
+            });
+        } finally {
+            setSavingVisibility(false);
+            setManageOpen(false);
         }
     };
 

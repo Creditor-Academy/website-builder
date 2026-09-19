@@ -205,6 +205,11 @@ export const CanvasRenderer = memo(function CanvasRenderer({
           user-select: text;
           cursor: text;
         }
+        .canvas-edit:not(.is-preview) [data-canvas-kind="navbar"] [data-navbar-go] {
+          pointer-events: auto;
+          cursor: pointer;
+          user-select: none;
+        }
         .canvas-edit:not(.is-preview) iframe,
         .canvas-edit:not(.is-preview) video {
           pointer-events: none;

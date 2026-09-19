@@ -575,7 +575,7 @@ export function DashboardSidebar({
               <BrandLogo showWordmark={false} imgClassName="h-8 w-8" />
             ) : (
               <BrandLogo
-                className="min-w-0"
+                className="min-w-0 text-white"
                 imgClassName="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10"
               />
             )}

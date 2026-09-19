@@ -3,7 +3,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import useBuilderStore from '@/store/useBuilderStore';
-import { CATALOG_CATEGORIES, ELEMENT_CATALOG, PREBUILT_CATALOG, type CatalogItem } from '@/builder/catalog';
+import { CATALOG_CATEGORIES, ELEMENT_CATALOG, PREBUILT_CATALOG, navbarFromCatalog, type CatalogItem } from '@/builder/catalog';
 import { paletteDragId, type PaletteDragData } from '@/builder/dnd';
 import { createDefaultFooter } from '@/lib/defaultPageData';
 import { cn } from '@/lib/utils';
@@ -62,6 +62,7 @@ export function ElementsPanel() {
   const addCanvasContainer = useBuilderStore((state) => state.addCanvasContainer);
   const addCanvasSection = useBuilderStore((state) => state.addCanvasSection);
   const updateFooter = useBuilderStore((state) => state.updateFooter);
+  const updateNavbar = useBuilderStore((state) => state.updateNavbar);
   const selectNode = useBuilderStore((state) => state.selectNode);
   const getActivePage = useBuilderStore((state) => state.getActivePage);
   const [query, setQuery] = useState('');
@@ -84,6 +85,13 @@ export function ElementsPanel() {
     }
     if (item.kind === 'container') {
       addCanvasContainer();
+      return;
+    }
+    if (item.kind === 'navbar') {
+      const page = getActivePage();
+      const preset = item.createNavbar?.() || navbarFromCatalog(item.id);
+      updateNavbar({ ...preset, id: page?.navbar?.id || preset.id });
+      selectNode('navbar', 'navbar');
       return;
     }
     if (item.kind === 'footer') {

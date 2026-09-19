@@ -176,7 +176,7 @@ export default function DashboardMessages() {
     return (
         <>
             <Helmet>
-                <title>Messages | Webstudio</title>
+                <title>Messages | Web Studio</title>
             </Helmet>
 
             <DashboardPageShell

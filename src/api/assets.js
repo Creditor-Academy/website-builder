@@ -32,6 +32,11 @@ const assetApi = {
     ...data,
     ...toUploadScope(scope),
   }),
+  searchStock: (params) => apiClient.get('/assets/stock/search', { params }),
+  importStock: (data, scope = {}) => apiClient.post('/assets/stock/import', {
+    ...data,
+    ...toUploadScope(scope),
+  }),
   deleteAsset: (id, scope = {}) => apiClient.delete(`/assets/${id}`, { params: toParams(scope) }),
   setVisibleAssets: (assetIds) => apiClient.put('/assets/visibility', { asset_ids: assetIds }),
 };

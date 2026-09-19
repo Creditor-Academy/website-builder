@@ -1,4 +1,5 @@
-import { DEFAULT_VISIBILITY, PREBUILT_SECTION_TYPES, type CanvasContainer, type CanvasElement, type CanvasSection, type DeviceVisibility } from './types';
+import type { CanvasContainer, CanvasElement, CanvasSection, CanvasStyles, DeviceVisibility, ResponsiveStyles } from './types';
+import { PREBUILT_SECTION_TYPES } from './types';
 
 function visibilityOf(value: unknown): DeviceVisibility {
   const raw = value as Partial<DeviceVisibility> | undefined;
@@ -9,16 +10,59 @@ function visibilityOf(value: unknown): DeviceVisibility {
   };
 }
 
+const BREAKPOINT_KEYS = ['base', 'desktop', 'tablet', 'mobile'] as const;
+
+export function isBreakpointStyles(value: unknown): boolean {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const record = value as Record<string, unknown>;
+  return BREAKPOINT_KEYS.some((key) => record[key] != null && typeof record[key] === 'object' && !Array.isArray(record[key]));
+}
+
+export function unpackNodeStyles(
+  styles: unknown,
+  responsive: unknown
+): { styles: CanvasStyles; responsiveStyles: ResponsiveStyles } {
+  const existingResponsive = (responsive && typeof responsive === 'object' && !Array.isArray(responsive)
+    ? responsive
+    : {}) as ResponsiveStyles;
+
+  if (!isBreakpointStyles(styles)) {
+    return {
+      styles: (styles as CanvasStyles) || {},
+      responsiveStyles: existingResponsive,
+    };
+  }
+
+  const record = styles as Record<string, CanvasStyles | undefined>;
+  const base = { ...(record.base || record.desktop || {}) };
+  return {
+    styles: base,
+    responsiveStyles: {
+      ...existingResponsive,
+      ...(record.tablet ? { tablet: { ...(existingResponsive.tablet || {}), ...record.tablet } } : {}),
+      ...(record.mobile ? { mobile: { ...(existingResponsive.mobile || {}), ...record.mobile } } : {}),
+    },
+  };
+}
+
+function normalizeElementContent(type: CanvasElement['type'], content: Record<string, unknown>): Record<string, unknown> {
+  if (type !== 'image') return content;
+  const src = content.src || content.imageUrl || content.url;
+  return src ? { ...content, src } : content;
+}
+
 function normalizeElement(element: Partial<CanvasElement>, parentId: string, order: number): CanvasElement {
+  const unpacked = unpackNodeStyles(element.styles, element.responsiveStyles);
+  const type = (element.type as CanvasElement['type']) || 'text';
   return {
     id: element.id as string,
-    type: (element.type as CanvasElement['type']) || 'text',
+    type,
     parentId,
     name: element.name || String(element.type || 'Element'),
     order: element.order ?? order,
-    content: (element.content as Record<string, unknown>) || {},
-    styles: element.styles || {},
-    responsiveStyles: element.responsiveStyles || {},
+    content: normalizeElementContent(type, (element.content as Record<string, unknown>) || {}),
+    styles: unpacked.styles,
+    responsiveStyles: unpacked.responsiveStyles,
     properties: element.properties || {},
     visibility: visibilityOf(element.visibility),
     locked: Boolean(element.locked),
@@ -28,7 +72,8 @@ function normalizeElement(element: Partial<CanvasElement>, parentId: string, ord
 
 function normalizeContainer(container: Partial<CanvasContainer>, parentId: string, order: number): CanvasContainer {
   const id = (container.id as string) || parentId;
-  const free = container.properties?.placement === 'absolute' || container.styles?.position === 'absolute';
+  const unpacked = unpackNodeStyles(container.styles, container.responsiveStyles);
+  const free = container.properties?.placement === 'absolute' || unpacked.styles?.position === 'absolute';
   return {
     id,
     type: 'container',
@@ -37,14 +82,14 @@ function normalizeContainer(container: Partial<CanvasContainer>, parentId: strin
     order: container.order ?? order,
     content: (container.content as Record<string, unknown>) || {},
     styles: free
-      ? { ...(container.styles || {}), position: 'absolute' }
+      ? { ...unpacked.styles, position: 'absolute' }
       : {
-          ...(container.styles || {}),
-          position: container.styles?.position || 'relative',
-          width: container.styles?.width || '100%',
-          minHeight: container.styles?.minHeight || '320px',
+          ...unpacked.styles,
+          position: unpacked.styles?.position || 'relative',
+          width: unpacked.styles?.width || '100%',
+          minHeight: unpacked.styles?.minHeight || '320px',
         },
-    responsiveStyles: container.responsiveStyles || {},
+    responsiveStyles: unpacked.responsiveStyles,
     properties: container.properties || {},
     visibility: visibilityOf(container.visibility),
     locked: Boolean(container.locked),
@@ -65,6 +110,7 @@ export function normalizeSection(section: Record<string, unknown>, pageId: strin
   const type = String(section.type || 'section');
   const children = Array.isArray(section.children) ? (section.children as CanvasContainer[]) : [];
   const kind = section.kind === 'canvas' || children.length > 0 ? 'canvas' : PREBUILT_SECTION_TYPES.has(type) ? 'prebuilt' : 'prebuilt';
+  const unpacked = unpackNodeStyles(section.styles, section.responsiveStyles);
 
   return {
     ...(section as unknown as CanvasSection),
@@ -77,8 +123,8 @@ export function normalizeSection(section: Record<string, unknown>, pageId: strin
     visible: section.visible !== false,
     locked: Boolean(section.locked),
     content: (section.content as Record<string, unknown>) || {},
-    styles: (section.styles as CanvasSection['styles']) || {},
-    responsiveStyles: (section.responsiveStyles as CanvasSection['responsiveStyles']) || {},
+    styles: unpacked.styles,
+    responsiveStyles: unpacked.responsiveStyles,
     properties: (section.properties as Record<string, unknown>) || {},
     visibility: visibilityOf(section.visibility),
     children: children.map((container, index) => normalizeContainer(container, String(section.id), index)),
