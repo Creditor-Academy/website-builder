@@ -1,22 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Briefcase,
   Check,
-  Cpu,
   Film,
   ExternalLink,
   Image as ImageIcon,
-  Images,
-  Layers,
   Loader2,
-  Mountain,
   Play,
   Plus,
-  Trees,
-  Users,
-  UtensilsCrossed,
+  Search,
   X,
-  type LucideIcon,
 } from 'lucide-react';
 import {
   getCuratedPexelsPhotos,
@@ -36,7 +28,9 @@ import {
   type PexelsVideoFilters,
 } from '@/api/pexels';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { dashboardSearchInputClass } from '@/components/dashboard/DashboardPageShell';
 import { cn } from '@/lib/utils';
 
 const PAGE_SIZE = 20;
@@ -74,15 +68,15 @@ const MEDIA_TYPES: { id: PexelsMediaType; label: string }[] = [
   { id: 'videos', label: 'Videos' },
 ];
 
-const CATEGORIES: { id: string; label: string; count: string; preview: string; icon: LucideIcon }[] = [
-  { id: '', label: 'All Images', count: '8,000+', preview: 'linear-gradient(135deg, #f5d0fe, #e0e7ff)', icon: Images },
-  { id: 'nature', label: 'Nature', count: '2.4k', preview: 'linear-gradient(135deg, #0f172a, #334155)', icon: Trees },
-  { id: 'landscape', label: 'Landscape', count: '1.8k', preview: 'linear-gradient(135deg, #f8fafc, #e2e8f0)', icon: Mountain },
-  { id: 'people', label: 'People', count: '1.2k', preview: 'linear-gradient(135deg, #1e293b, #64748b)', icon: Users },
-  { id: 'office', label: 'Office', count: '980', preview: 'linear-gradient(135deg, #ecfccb, #fef9c3)', icon: Briefcase },
-  { id: 'food', label: 'Food', count: '760', preview: 'linear-gradient(135deg, #fff7ed, #fed7aa)', icon: UtensilsCrossed },
-  { id: 'technology', label: 'Technology', count: '650', preview: 'linear-gradient(135deg, #e0f2fe, #bae6fd)', icon: Cpu },
-  { id: 'texture', label: 'Texture', count: '520', preview: 'linear-gradient(135deg, #0ea5e9, #22c55e)', icon: Layers },
+const CATEGORIES: { id: string; label: string }[] = [
+  { id: '', label: 'All Images' },
+  { id: 'nature', label: 'Nature' },
+  { id: 'landscape', label: 'Landscape' },
+  { id: 'people', label: 'People' },
+  { id: 'office', label: 'Office' },
+  { id: 'food', label: 'Food' },
+  { id: 'technology', label: 'Technology' },
+  { id: 'texture', label: 'Texture' },
 ];
 
 function photoName(photo: PexelsPhoto) {
@@ -94,9 +88,7 @@ function photoUrl(photo: PexelsPhoto) {
 }
 
 function photoSrc(photo: PexelsPhoto) {
-  if (photo.height > photo.width) return photo.src.portrait || photo.src.medium || photo.src.large;
-  if (photo.width === photo.height) return photo.src.medium || photo.src.large;
-  return photo.src.landscape || photo.src.large || photo.src.medium;
+  return photo.src.medium || photo.src.small || photo.src.large;
 }
 
 function formatDuration(seconds: number) {
@@ -128,6 +120,8 @@ function VideoThumb({ video, className }: { video: PexelsVideo; className?: stri
     <img
       src={src}
       alt={videoName(video)}
+      loading="lazy"
+      decoding="async"
       referrerPolicy="no-referrer"
       className={className}
       onError={() => setIndex((current) => (current < sources.length - 1 ? current + 1 : current))}
@@ -165,17 +159,13 @@ function pillClass(active: boolean) {
 const filterScrollClass =
   'flex gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:overflow-visible';
 
-function formatCount(total: number) {
-  if (total >= 1000) return `${Math.floor(total / 100) / 10}k`.replace('.0k', 'k');
-  return String(total);
-}
-
 export function PexelsStockSection({
   query,
   importingId,
   onClearQuery,
   onAddToLibrary,
   layout = 'page',
+  filtersOpen = true,
 }: {
   query: string;
   importingId: string | null;
@@ -183,6 +173,7 @@ export function PexelsStockSection({
   onCopy?: (id: string, url: string) => void;
   onAddToLibrary: (item: { name: string; url: string; media: 'image' | 'video' }) => void | Promise<void>;
   layout?: 'page' | 'panel';
+  filtersOpen?: boolean;
 }) {
   const [mediaType, setMediaType] = useState<PexelsMediaType>('images');
   const [photos, setPhotos] = useState<PexelsPhoto[]>([]);
@@ -347,10 +338,12 @@ export function PexelsStockSection({
   };
 
   return (
-    <div className={cn(!isPanel && 'min-w-0 space-y-4 pb-24 sm:space-y-5', isPanel && 'flex h-full min-h-0 flex-col')}>
-      <div className={cn(isPanel ? 'min-h-0 flex-1 space-y-3 overflow-y-auto p-3' : 'contents')}>
-      <div className={cn('rounded-2xl border border-slate-200 bg-white px-3 py-3 shadow-sm', !isPanel && 'sm:rounded-[28px] sm:px-5 sm:py-4')}>
-        <div className="flex min-w-0 flex-wrap items-end gap-x-5 gap-y-3">
+    <div className={cn(!isPanel && 'min-w-0 space-y-3 pb-24', isPanel && 'flex h-full min-h-0 flex-col')}>
+      <div className={cn(isPanel ? 'min-h-0 flex-1 space-y-3 overflow-y-auto p-3' : 'min-w-0 space-y-3')}>
+      {(!isPanel || filtersOpen) && (
+      <div className={cn('rounded-2xl bg-white px-3 py-3 sm:px-4 sm:py-3.5', isPanel && 'animate-in fade-in slide-in-from-top-2 duration-200')}>
+        <div className="flex min-w-0 flex-col gap-3">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-3">
           <div className="min-w-0">
             <p className="mb-1.5 text-[11px] font-medium text-slate-400">Type</p>
             <div className={filterScrollClass}>
@@ -408,84 +401,44 @@ export function PexelsStockSection({
           <button
             type="button"
             onClick={clearFilters}
-            className="ml-auto shrink-0 pb-1.5 text-xs font-medium text-slate-400 hover:text-slate-700"
+            className="ml-auto shrink-0 text-xs font-medium text-slate-400 hover:text-slate-700"
           >
             Clear all filters
           </button>
         </div>
-      </div>
-
-      <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0 flex-1">
-          <p className={cn('break-words font-semibold tracking-tight text-[#111827]', isPanel ? 'text-sm' : 'text-lg sm:text-2xl')}>{total.toLocaleString()}+ results</p>
-          {(term || category) && (
-            <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2 text-xs text-slate-500 sm:text-sm">
-              <span className="shrink-0">Filtered for</span>
-              {term && (
-                <button type="button" onClick={onClearQuery} className="inline-flex min-h-8 max-w-full items-center gap-1 truncate rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-                  <span className="truncate">“{term}”</span> <X className="h-3 w-3 shrink-0" />
-                </button>
-              )}
-              {category && (
-                <button type="button" onClick={() => setCategory('')} className="inline-flex min-h-8 max-w-full items-center gap-1 truncate rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-                  <span className="truncate">“{category}”</span> <X className="h-3 w-3 shrink-0" />
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-        {!isPanel && (
-        <p className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-400 sm:text-xs">
-          Most Relevant
-        </p>
-        )}
-      </div>
-
-      {isPanel ? (
-        <div className="flex min-w-0 flex-wrap gap-1.5">
-          {CATEGORIES.map((item) => {
-            const active = category === item.id;
-            return (
+        <div className="min-w-0">
+          <p className="mb-1.5 text-[11px] font-medium text-slate-400">Category</p>
+          <div className={cn(filterScrollClass, 'gap-1.5')}>
+            {CATEGORIES.map((item) => (
               <button
                 key={item.id || 'all'}
                 type="button"
                 onClick={() => setCategory(item.id)}
-                className={pillClass(active)}
+                className={pillClass(category === item.id)}
               >
                 {item.id === '' ? (isVideo ? 'All Videos' : 'All Images') : item.label}
               </button>
-            );
-          })}
+            ))}
+          </div>
         </div>
-      ) : (
-      <div className="grid min-w-0 grid-cols-2 gap-2 min-[480px]:grid-cols-3 sm:grid-cols-4 sm:gap-3 lg:grid-cols-6 xl:grid-cols-8">
-        {CATEGORIES.map((item) => {
-          const active = category === item.id;
-          return (
-            <button
-              key={item.id || 'all'}
-              type="button"
-              onClick={() => setCategory(item.id)}
-              className="flex min-w-0 w-full flex-col rounded-2xl border border-slate-200 bg-white p-1.5 text-left shadow-sm transition hover:shadow-md sm:p-2"
-            >
-              <div className="relative mb-1.5 aspect-[16/9] w-full overflow-hidden rounded-xl sm:mb-2" style={{ backgroundImage: item.preview, backgroundSize: 'cover' }}>
-                <span className="absolute inset-0 flex items-center justify-center bg-black/25">
-                  <item.icon className="h-6 w-6 text-white drop-shadow-md sm:h-7 sm:w-7" strokeWidth={1.75} />
-                </span>
-                {active && (
-                  <span className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-md bg-white text-[#111827] shadow">
-                    <Check className="h-3 w-3" />
-                  </span>
-                )}
-              </div>
-              <p className="truncate text-[11px] font-semibold text-[#111827] sm:text-sm">
-                {item.id === '' ? (isVideo ? 'All Videos' : 'All Images') : item.label}
-              </p>
-              <p className="truncate text-[10px] text-slate-400 sm:text-[11px]">{item.id && category === item.id ? `${formatCount(total)}` : item.count}</p>
-            </button>
-          );
-        })}
+        </div>
       </div>
+      )}
+
+      {(term || category) && (
+        <div className="flex min-w-0 flex-wrap items-center gap-2 text-xs text-slate-500 sm:text-sm">
+          <span className="shrink-0">Filtered for</span>
+          {term && (
+            <button type="button" onClick={onClearQuery} className="inline-flex min-h-8 max-w-full items-center gap-1 truncate rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+              <span className="truncate">“{term}”</span> <X className="h-3 w-3 shrink-0" />
+            </button>
+          )}
+          {category && (
+            <button type="button" onClick={() => setCategory('')} className="inline-flex min-h-8 max-w-full items-center gap-1 truncate rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+              <span className="truncate">“{category}”</span> <X className="h-3 w-3 shrink-0" />
+            </button>
+          )}
+        </div>
       )}
 
       {loading && itemsCount === 0 ? (
@@ -494,19 +447,19 @@ export function PexelsStockSection({
           <p className="text-sm font-medium">{isVideo ? 'Loading stock videos…' : 'Loading stock photos…'}</p>
         </div>
       ) : error && itemsCount === 0 ? (
-        <div className="flex h-[280px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 text-center">
+        <div className="flex h-[280px] flex-col items-center justify-center gap-2 rounded-2xl bg-slate-50 px-6 text-center">
           {isVideo ? <Film className="h-8 w-8 opacity-40" /> : <ImageIcon className="h-8 w-8 opacity-40" />}
           <p className="text-sm font-bold text-[#111827]">{isVideo ? 'Stock videos unavailable' : 'Stock photos unavailable'}</p>
           <p className="max-w-md text-xs text-slate-500">{error}. Add PEXELS_API_KEY to .env.local and restart the app.</p>
         </div>
       ) : itemsCount === 0 ? (
-        <div className="flex h-[280px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50 text-center">
+        <div className="flex h-[280px] flex-col items-center justify-center gap-2 rounded-2xl bg-slate-50 text-center">
           <p className="text-sm font-bold text-[#111827]">No {isVideo ? 'videos' : 'photos'} match these filters</p>
           <p className="text-xs text-slate-500">Clear a filter or try another search term.</p>
         </div>
       ) : (
         <>
-          <div className={cn(isPanel ? 'grid grid-cols-1 gap-3' : 'columns-1 gap-2.5 sm:columns-2 sm:gap-3 lg:columns-3 xl:columns-4 2xl:columns-5')}>
+          <div className={cn(isPanel ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5')}>
             {isVideo
               ? videos.map((video) => {
                   const id = String(video.id);
@@ -525,8 +478,7 @@ export function PexelsStockSection({
                         }
                       }}
                       className={cn(
-                        'group relative mb-2.5 inline-block w-full cursor-pointer break-inside-avoid overflow-hidden rounded-2xl bg-slate-100 sm:mb-3',
-                        isPanel && 'mb-0 sm:mb-0',
+                        'group relative w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-100',
                         selected && 'ring-2 ring-emerald-500 ring-offset-2'
                       )}
                       style={{ aspectRatio: cardAspect(video, isPanel) }}
@@ -564,8 +516,7 @@ export function PexelsStockSection({
                     }
                   }}
                   className={cn(
-                    'group relative mb-2.5 inline-block w-full cursor-pointer break-inside-avoid overflow-hidden rounded-2xl bg-slate-100 sm:mb-3',
-                    isPanel && 'mb-0 sm:mb-0',
+                    'group relative w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-100',
                     selected && 'ring-2 ring-emerald-500 ring-offset-2'
                   )}
                   style={{ aspectRatio: cardAspect(photo, isPanel) }}
@@ -573,6 +524,8 @@ export function PexelsStockSection({
                   <img
                     src={photoSrc(photo)}
                     alt={photo.alt || photoName(photo)}
+                    loading="lazy"
+                    decoding="async"
                     className={cn('h-full w-full', portrait ? 'object-cover object-center' : 'object-cover')}
                   />
                   <span className="absolute left-2.5 bottom-2.5 rounded-md bg-black/45 px-1.5 py-0.5 text-[10px] font-medium text-white">
@@ -593,7 +546,7 @@ export function PexelsStockSection({
         </>
       )}
 
-      <div className="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <p className="text-center text-xs text-slate-400 sm:text-left">
           Showing {itemsCount.toLocaleString()} of {total.toLocaleString()} {isVideo ? 'videos' : 'photos'}
         </p>
@@ -602,7 +555,7 @@ export function PexelsStockSection({
 
       {selectedIds.size > 0 && !preview && (
         isPanel ? (
-          <div className="shrink-0 border-t border-slate-200 bg-white p-2">
+          <div className="shrink-0 bg-white p-2">
             <div className="flex items-center gap-2 rounded-full bg-[#111827] px-2 py-1.5 text-white">
               <span className="min-w-0 flex-1 truncate px-2 text-[11px] font-medium">
                 Add to assets {selectedIds.size}
@@ -638,14 +591,15 @@ export function PexelsStockSection({
 
       <Dialog open={Boolean(preview)} onOpenChange={(open) => { if (!open) setPreview(null); }}>
         <DialogContent
+          overlayClassName="z-[260]"
           className={cn(
-            'flex max-h-[min(92dvh,52rem)] w-[calc(100vw-1.5rem)] flex-col gap-0 overflow-hidden p-0',
-            'rounded-2xl border-[#c6c6cd] bg-white shadow-2xl sm:max-w-4xl',
+            'z-[261] flex max-h-[min(92dvh,52rem)] w-[calc(100vw-1.5rem)] flex-col gap-0 overflow-hidden p-0',
+            'rounded-2xl border-0 bg-white shadow-2xl sm:max-w-4xl',
             '[&>button]:right-3 [&>button]:top-3 [&>button]:text-[#0F172A] [&>button]:hover:bg-slate-100',
             '[&>button>svg]:mr-0 [&>button>svg]:h-5 [&>button>svg]:w-5',
           )}
         >
-          <DialogHeader className="shrink-0 border-b border-[#c6c6cd] px-4 py-3 pr-12 sm:px-5 sm:py-4">
+          <DialogHeader className="shrink-0 px-4 py-3 pr-12 sm:px-5 sm:py-4">
             <DialogTitle className="truncate text-left text-sm font-semibold text-[#0F172A] sm:text-base">
               {preview?.kind === 'video'
                 ? videoName(preview.video)
@@ -677,7 +631,7 @@ export function PexelsStockSection({
           </div>
 
           {preview && (
-            <div className="flex shrink-0 flex-col gap-3 border-t border-[#c6c6cd] bg-[#fcf8fa] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <div className="flex shrink-0 flex-col gap-3 bg-[#fcf8fa] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
               <p className="min-w-0 truncate text-[11px] text-[#76777d] sm:text-xs">
                 <span className="uppercase tracking-wider">{preview.kind === 'video' ? 'Video' : 'Image'}</span>
                 <span className="mx-1">·</span>
@@ -710,6 +664,59 @@ export function PexelsStockSection({
           )}
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+export function PexelsStockBrowser({
+  query,
+  onQueryChange,
+  importingId,
+  onAddToLibrary,
+  onCopy,
+  onClose,
+}: {
+  query: string;
+  onQueryChange: (value: string) => void;
+  importingId: string | null;
+  onAddToLibrary: (item: { name: string; url: string; media: 'image' | 'video' }) => void | Promise<void>;
+  onCopy?: (id: string, url: string) => void;
+  onClose?: () => void;
+}) {
+  return (
+    <div className="flex h-full min-h-0 min-w-0 flex-col">
+      <div className="sticky top-0 z-20 shrink-0 bg-white px-4 pb-3 pt-4 sm:px-5">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="relative min-w-0 flex-1">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
+            <Input
+              placeholder="Search stock photos and videos…"
+              className={cn(dashboardSearchInputClass, 'h-9 rounded-full pl-9')}
+              value={query}
+              onChange={(event) => onQueryChange(event.target.value)}
+            />
+          </div>
+          {onClose && (
+            <button
+              type="button"
+              aria-label="Close Pexels"
+              onClick={onClose}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#0F172A] hover:bg-slate-100"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:px-5">
+        <PexelsStockSection
+          query={query}
+          importingId={importingId}
+          onClearQuery={() => onQueryChange('')}
+          onCopy={onCopy}
+          onAddToLibrary={onAddToLibrary}
+        />
+      </div>
     </div>
   );
 }
