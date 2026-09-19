@@ -12,7 +12,7 @@ export function BrandLogo({
   className,
   imgClassName,
   showWordmark = true,
-  alt = 'Buildora',
+  alt = 'Webstudio',
 }: BrandLogoProps) {
   return (
     <span className={cn('inline-flex min-w-0 items-center gap-2.5', className)}>
@@ -23,7 +23,7 @@ export function BrandLogo({
       />
       {showWordmark && (
         <span className="truncate text-xl font-bold leading-snug tracking-tight text-slate-200 sm:text-2xl">
-          Buildora
+          Webstudio
         </span>
       )}
     </span>

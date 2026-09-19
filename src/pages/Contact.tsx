@@ -137,7 +137,7 @@ export default function Contact() {
     { 
       icon: <Mail className="w-6 h-6" />, 
       title: "Email Us", 
-      value: "hello@buildora.com",
+      value: "hello@webstudio.lmsathena.com",
       description: "Our friendly team is here to help.",
       color: "indigo"
     },
@@ -156,8 +156,8 @@ export default function Contact() {
       isDark ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-800"
     )}>
       <Helmet>
-        <title>Contact Us - Buildora</title>
-        <meta name="description" content="Get in touch with the Buildora team for support, partnerships, or any questions." />
+        <title>Contact Us - Webstudio</title>
+        <meta name="description" content="Get in touch with the Webstudio team for support, partnerships, or any questions." />
       </Helmet>
 
       {/* BACKGROUND IMAGE OVERLAY */}

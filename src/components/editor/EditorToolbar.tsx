@@ -64,7 +64,7 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
               <span className="text-xs font-black tracking-tighter text-white sm:text-sm">B</span>
             </div>
             <div className="hidden min-w-0 flex-col sm:flex">
-              <span className="text-[13px] font-bold leading-none tracking-tight text-white">Buildora</span>
+              <span className="text-[13px] font-bold leading-none tracking-tight text-white">Webstudio</span>
               <div className="mt-1 flex items-center gap-1.5">
                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-white/50">

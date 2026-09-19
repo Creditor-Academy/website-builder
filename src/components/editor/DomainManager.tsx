@@ -370,7 +370,7 @@ export function DomainManager({ open, onOpenChange, websiteId }) {
                 <CardContent className="space-y-4">
                   {/* Subdomain section */}
                   <div className="p-4 bg-slate-50 rounded-lg">
-                    <h4 className="font-medium mb-1">Platform Subdomains (e.g. myschool.buildora.lmsathena.com)</h4>
+                    <h4 className="font-medium mb-1">Platform Subdomains (e.g. myschool.webstudio.lmsathena.com)</h4>
                     <p className="text-sm text-slate-600">No DNS action required. Subdomains are active immediately with automatic SSL coverage.</p>
                   </div>
 

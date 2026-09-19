@@ -94,7 +94,7 @@ const Resources = () => {
     {
       icon: <Eye className="w-6 h-6" />,
       title: "Web design inspiration",
-      description: "Explore designs by other Buildora users."
+      description: "Explore designs by other Webstudio users."
     },
     {
       icon: <Wrench className="w-6 h-6" />,
@@ -128,8 +128,8 @@ const Resources = () => {
       isDark ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-800"
     )}>
       <Helmet>
-        <title>Resources - Buildora</title>
-        <meta name="description" content="Explore Buildora's collection of resources, tools, and guides to help you build better websites." />
+        <title>Resources - Webstudio</title>
+        <meta name="description" content="Explore Webstudio's collection of resources, tools, and guides to help you build better websites." />
       </Helmet>
 
       {/* ================= NAVBAR ================= */}
@@ -297,7 +297,7 @@ const Resources = () => {
         <div className="max-w-7xl mx-auto text-center mb-20">
           <h2 className="text-4xl md:text-7xl font-black mb-8 tracking-tight">Predefined Creative Assets</h2>
           <p className={cn("text-xl md:text-2xl max-w-2xl mx-auto font-medium", isDark ? "text-slate-400" : "text-slate-600")}>
-            Access thousands of professionally curated assets directly within the Buildora editor.
+            Access thousands of professionally curated assets directly within the Webstudio editor.
           </p>
         </div>
 
@@ -468,7 +468,7 @@ const Resources = () => {
           
           <h2 className="text-5xl md:text-6xl font-black mb-8 relative z-10 tracking-tight leading-[1.1]">Ready to scale?</h2>
           <p className={cn("text-xl mb-12 relative z-10 leading-relaxed max-w-2xl mx-auto font-medium", isDark ? "text-slate-300" : "text-slate-600")}>
-            Join 50k+ creators using Buildora's resources to launch their professional businesses today.
+            Join 50k+ creators using Webstudio's resources to launch their professional businesses today.
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center relative z-10">
             <Link to="/contact" className={cn(

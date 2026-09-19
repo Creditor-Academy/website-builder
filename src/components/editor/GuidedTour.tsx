@@ -7,7 +7,7 @@ const TOUR_STEPS = [
   {
     id: 'welcome',
     title: "Hi! I'm Buildy",
-    message: "Welcome to Buildora! Let me show you how to build your masterpiece in just a few minutes.",
+    message: "Welcome to Webstudio! Let me show you how to build your masterpiece in just a few minutes.",
     target: '#tour-logo',
     mascotState: 'neutral',
     position: 'center'

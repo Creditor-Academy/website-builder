@@ -22,7 +22,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import websiteApi from '@/api/website';
-
+import { SITE_HOST } from '@/api/client';
 export function SiteSettings() {
     const { state } = useBuilder();
     const { activeWebsite } = state;
@@ -55,9 +55,9 @@ export function SiteSettings() {
         }
         setIsConnecting(true);
         try {
-            const isSubdomain = domain.endsWith('.buildora.lmsathena.com');
+            const isSubdomain = domain.endsWith(`.${SITE_HOST}`);
             const res = isSubdomain
-                ? await websiteApi.addSubdomain(activeWebsite.id, domain.replace('.buildora.lmsathena.com', ''))
+                ? await websiteApi.addSubdomain(activeWebsite.id, domain.replace(`.${SITE_HOST}`, '').replace(SITE_HOST, ''))
                 : await websiteApi.addDomain(activeWebsite.id, domain);
 
             const newDomain = res.data?.domain || res.data;
