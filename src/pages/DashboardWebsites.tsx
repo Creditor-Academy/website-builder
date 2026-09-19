@@ -40,6 +40,7 @@ import Loading from '@/components/Common/LoadingUI';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import useBuilderStore from '@/store/useBuilderStore';
+import { SITE_HOST } from '@/api/client';
 
 interface Website {
   id: string;
@@ -156,7 +157,7 @@ export default function DashboardWebsites() {
     setEditingWebsite({
       id: website.id,
       name: website.name,
-      domain: website.domain || `${website.id.slice(0, 8)}.buildora.lmsathena.com`,
+      domain: website.domain || `${website.id.slice(0, 8)}.${SITE_HOST}`,
       status: website.status || 'Draft',
       lastUpdated: formatDate(website.lastEdited)
     });

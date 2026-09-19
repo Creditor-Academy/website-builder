@@ -25,7 +25,7 @@ import {
 import useBuilderStore from '@/store/useBuilderStore';
 import { publishService } from '@/services/publishService';
 import { cn } from '@/lib/utils';
-
+import { SITE_HOST } from '@/api/client';
 const fieldClass =
   'h-11 border-slate-200 bg-white text-[#0F172A] focus-visible:border-[#0F172A] focus-visible:ring-2 focus-visible:ring-[#0F172A]/15';
 
@@ -46,7 +46,7 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
       if (!initialSubdomain && !initialCustomDomain && website.publishedUrl) {
         try {
           const urlObj = new URL(website.publishedUrl);
-          if (urlObj.hostname.includes('.buildora.lmsathena.com')) {
+          if (urlObj.hostname.includes(`.${SITE_HOST}`) || urlObj.hostname.endsWith(SITE_HOST)) {
             initialSubdomain = urlObj.hostname.split('.')[0];
           } else {
             initialCustomDomain = urlObj.hostname;
@@ -215,12 +215,12 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
                     className={cn(fieldClass, 'rounded-r-none border-r-0')}
                   />
                   <div className="flex items-center rounded-r-md border border-l-0 border-slate-200 bg-slate-50 px-3">
-                    <span className="whitespace-nowrap text-sm text-slate-500">.buildora.lmsathena.com</span>
+                    <span className="whitespace-nowrap text-sm text-slate-500">.{SITE_HOST}</span>
                   </div>
                 </div>
                 <p className="mt-1.5 text-xs text-slate-500">
                   Get instant free hosting with SSL certificate. Your site will be live at{' '}
-                  <span className="font-mono text-[#0F172A]">{subdomain || 'your-site'}.buildora.lmsathena.com</span>
+                  <span className="font-mono text-[#0F172A]">{subdomain || 'your-site'}.{SITE_HOST}</span>
                 </p>
               </div>
 
@@ -267,7 +267,7 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
                       </p>
                       <div className="mt-2 rounded-lg bg-white p-2 font-mono text-xs text-[#0F172A]">
                         A Record: 192.168.1.1<br />
-                        CNAME: www.buildora.lmsathena.com
+                        CNAME: www.{SITE_HOST}
                       </div>
                     </div>
                   </div>

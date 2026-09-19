@@ -137,7 +137,7 @@ export default function Contact() {
     { 
       icon: <Mail className="w-6 h-6" />, 
       title: "Email Us", 
-      value: "hello@buildora.com",
+      value: "hello@webstudio.lmsathena.com",
       description: "Our friendly team is here to help.",
       color: "indigo"
     },

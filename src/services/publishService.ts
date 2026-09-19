@@ -1,5 +1,5 @@
 import websiteApi from '@/api/website';
-
+import { SITE_HOST } from '@/api/client';
 export interface PublishRequest {
   websiteId: string;
   subdomain?: string;
@@ -78,9 +78,9 @@ class PublishService {
 
   async addDomain(websiteId: string, domain: string): Promise<DomainConfig> {
     try {
-      const isSubdomain = domain.endsWith('.buildora.lmsathena.com');
+      const isSubdomain = domain.endsWith(`.${SITE_HOST}`);
       const response = isSubdomain 
-        ? await websiteApi.addSubdomain(websiteId, domain.replace('.buildora.lmsathena.com', ''))
+        ? await websiteApi.addSubdomain(websiteId, domain.replace(`.${SITE_HOST}`, '').replace(SITE_HOST, ''))
         : await websiteApi.addDomain(websiteId, domain);
       return response.data.domain || response.data;
     } catch (error) {
