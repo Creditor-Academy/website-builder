@@ -64,6 +64,7 @@ function LayerRow({
   const deleteCanvasNode = useBuilderStore((state) => state.deleteCanvasNode);
   const duplicateCanvasNode = useBuilderStore((state) => state.duplicateCanvasNode);
   const [open, setOpen] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
   const selected = selectedId === node.id || Boolean(selectedIds?.includes(node.id));
   const hasChildren = node.children.length > 0;
   const isChrome = node.kind === 'navbar' || node.kind === 'footer';
@@ -118,7 +119,7 @@ function LayerRow({
           </p>
           <p className="text-[9px] uppercase tracking-wide text-slate-400">{node.type}</p>
         </div>
-        <div className={cn('absolute right-0.5 top-1 hidden items-center rounded-md shadow-sm group-hover:flex', selected ? 'bg-slate-100' : 'bg-slate-50')}>
+        <div className={cn('absolute right-0.5 top-1 items-center rounded-md shadow-sm', menuOpen ? 'flex' : 'hidden group-hover:flex', selected || menuOpen ? 'bg-slate-100' : 'bg-slate-50')}>
           {(onMoveUp || onMoveDown) && (
             <>
               <Button
@@ -151,13 +152,13 @@ function LayerRow({
               </Button>
             </>
           )}
-          <DropdownMenu>
+          <DropdownMenu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-5 w-5 shrink-0" aria-label={`${node.name} actions`} onClick={(event) => event.stopPropagation()}>
                 <MoreVertical className="h-3 w-3 text-slate-400" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuContent align="end" side="bottom" sideOffset={4} className="z-[80] w-40">
               {!isChrome && (
                 <DropdownMenuItem onClick={() => updateCanvasNode(node.id, node.kind === 'section' ? { visible: !node.visible } : { visibility: { desktop: !node.visible, tablet: !node.visible, mobile: !node.visible } })}>
                   {node.visible ? <Eye className="mr-2 h-4 w-4" /> : <EyeOff className="mr-2 h-4 w-4" />}
