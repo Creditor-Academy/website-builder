@@ -421,6 +421,10 @@ export function AssetLibraryPanel() {
                             importingId={importingStockId}
                             onCopy={handleCopy}
                             onAddToLibrary={(item) => void handleAddStockMedia(item)}
+                            onClose={() => {
+                                setPexelsOpen(false);
+                                setPexelsQuery('');
+                            }}
                         />
                     </div>
                 </div>,

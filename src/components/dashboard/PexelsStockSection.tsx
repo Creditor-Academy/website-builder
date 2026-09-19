@@ -674,24 +674,38 @@ export function PexelsStockBrowser({
   importingId,
   onAddToLibrary,
   onCopy,
+  onClose,
 }: {
   query: string;
   onQueryChange: (value: string) => void;
   importingId: string | null;
   onAddToLibrary: (item: { name: string; url: string; media: 'image' | 'video' }) => void | Promise<void>;
   onCopy?: (id: string, url: string) => void;
+  onClose?: () => void;
 }) {
   return (
     <div className="flex h-full min-h-0 min-w-0 flex-col">
       <div className="sticky top-0 z-20 shrink-0 bg-white px-4 pb-3 pt-4 sm:px-5">
-        <div className="relative min-w-0">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
-          <Input
-            placeholder="Search stock photos and videos…"
-            className={cn(dashboardSearchInputClass, 'h-9 rounded-full pl-9')}
-            value={query}
-            onChange={(event) => onQueryChange(event.target.value)}
-          />
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="relative min-w-0 flex-1">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
+            <Input
+              placeholder="Search stock photos and videos…"
+              className={cn(dashboardSearchInputClass, 'h-9 rounded-full pl-9')}
+              value={query}
+              onChange={(event) => onQueryChange(event.target.value)}
+            />
+          </div>
+          {onClose && (
+            <button
+              type="button"
+              aria-label="Close Pexels"
+              onClick={onClose}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#0F172A] hover:bg-slate-100"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
         </div>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:px-5">
