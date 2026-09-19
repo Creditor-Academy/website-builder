@@ -10,7 +10,7 @@ describe('Pexels search filters', () => {
       size: 'large',
       color: 'blue',
     });
-    expect(params.get('query')).toBe('office');
+    expect(params.get('q')).toBe('office');
     expect(params.get('page')).toBe('2');
     expect(params.get('orientation')).toBe('landscape');
     expect(params.get('size')).toBe('large');
@@ -31,7 +31,7 @@ describe('Pexels search filters', () => {
       orientation: 'portrait',
       size: 'medium',
     });
-    expect(params.get('query')).toBe('city');
+    expect(params.get('q')).toBe('city');
     expect(params.get('orientation')).toBe('portrait');
     expect(params.get('size')).toBe('medium');
     expect(params.has('color')).toBe(false);

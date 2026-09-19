@@ -4,7 +4,7 @@ if (!key) {
   process.exit(1);
 }
 
-const url = 'https://api.pexels.com/v1/search?query=office&per_page=2';
+const url = 'https://api.pexels.com/v1/search?q=office&per_page=2';
 const response = await fetch(url, { headers: { Authorization: key } });
 const body = await response.json().catch(() => null);
 

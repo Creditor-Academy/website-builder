@@ -105,7 +105,7 @@ async function pexelsFetch<T>(url: string): Promise<T> {
 
 export function buildPexelsSearchParams(query: string, options: PexelsPhotoFilters = {}): URLSearchParams {
   const params = new URLSearchParams({
-    query,
+    q: query,
     page: String(options.page || 1),
     per_page: String(options.perPage || 8),
   });
@@ -117,7 +117,7 @@ export function buildPexelsSearchParams(query: string, options: PexelsPhotoFilte
 
 export function buildPexelsVideoSearchParams(query: string, options: PexelsVideoFilters = {}): URLSearchParams {
   const params = new URLSearchParams({
-    query,
+    q: query,
     page: String(options.page || 1),
     per_page: String(options.perPage || 8),
   });
