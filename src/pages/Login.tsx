@@ -403,7 +403,7 @@ export default function LoginSignup() {
     try {
       setIsLoadingSignup(true);
       await registerUser(signupData);
-      alert("Registered! Check your email.");
+      alert("Registered!");
       setIsSignup(false);
     } catch (err) {
       console.error(err);
