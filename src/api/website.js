@@ -3,17 +3,41 @@ import { USE_WEBSITE_API } from '@/lib/localMode';
 
 const ok = (data) => Promise.resolve({ data });
 
+/** Builder UI uses Draft/Published; API uses DRAFT/PUBLISHED/DELETED. */
+export const toApiWebsiteStatus = (status) => {
+  if (status == null || status === '') return undefined;
+  const key = String(status).trim().toUpperCase();
+  if (key === 'ARCHIVED') return 'DELETED';
+  if (key === 'DRAFT' || key === 'PUBLISHED' || key === 'DELETED') return key;
+  return undefined;
+};
+
+const withApiStatus = (data) => {
+  if (!data || typeof data !== 'object' || !('status' in data)) return data;
+  const next = { ...data };
+  const mapped = toApiWebsiteStatus(next.status);
+  if (mapped) next.status = mapped;
+  else delete next.status;
+  return next;
+};
+
 const websiteApi = {
   getWebsites: (params) =>
-    USE_WEBSITE_API ? apiClient.get('/websites', { params }) : ok({ websites: [] }),
+    USE_WEBSITE_API
+      ? apiClient.get('/websites', { params: withApiStatus(params) })
+      : ok({ websites: [] }),
   getWebsiteById: (id) =>
     USE_WEBSITE_API ? apiClient.get(`/websites/${id}`) : ok({ website: null }),
   createWebsite: (data) =>
     USE_WEBSITE_API ? apiClient.post('/websites', data) : ok({ website: data }),
   updateWebsite: (id, data) =>
-    USE_WEBSITE_API ? apiClient.patch(`/websites/${id}`, data) : ok({ website: { id, ...data } }),
+    USE_WEBSITE_API
+      ? apiClient.patch(`/websites/${id}`, withApiStatus(data))
+      : ok({ website: { id, ...data } }),
   getWebsitesAll: (params) =>
-    USE_WEBSITE_API ? apiClient.get('/websites/all', { params }) : ok({ websites: [] }),
+    USE_WEBSITE_API
+      ? apiClient.get('/websites/all', { params: withApiStatus(params) })
+      : ok({ websites: [] }),
   deleteWebsite: (id) =>
     USE_WEBSITE_API ? apiClient.delete(`/websites/${id}`) : ok({ ok: true }),
   restoreWebsite: (id) =>

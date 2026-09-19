@@ -458,10 +458,15 @@ const useBuilderStore = create<BuilderStore>()(
                     
                     const existingById = new Map(get().websites.map((site) => [site.id, site]));
                     const mapWebsite = (w: any) => {
+                        const apiStatus = String(w.status || 'DRAFT').toUpperCase();
+                        const uiStatus =
+                            apiStatus === 'PUBLISHED' ? 'Published'
+                            : apiStatus === 'DELETED' || apiStatus === 'ARCHIVED' ? 'DELETED'
+                            : 'Draft';
                         const mapped = {
                             id: w.id,
                             name: w.name,
-                            status: w.status,
+                            status: uiStatus,
                             lastEdited: w.updated_at || w.created_at,
                             pages: w.content?.pages || [],
                             activePageId: w.content?.activePageId || null,
