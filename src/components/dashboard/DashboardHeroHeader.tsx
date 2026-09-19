@@ -1,7 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { motionTransition } from '@/lib/motion';
 
 /** Equal inset used by the page-name bar and the dashboard sidebar. */
 export const dashboardPanelInsetClass = 'p-5 sm:p-6';
@@ -29,10 +27,7 @@ export function DashboardHeroHeader({
   className,
 }: DashboardHeroHeaderProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={motionTransition}
+    <div
       className={cn(
         'relative mb-6 shrink-0 overflow-hidden rounded-3xl bg-[#131924]',
         dashboardPanelInsetClass,
@@ -57,6 +52,6 @@ export function DashboardHeroHeader({
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }

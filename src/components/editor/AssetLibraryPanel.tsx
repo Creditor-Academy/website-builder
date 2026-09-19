@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { Search, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Plus, Globe, X, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -13,7 +12,8 @@ import type { Asset } from '@/store/useBuilderStore';
 import { useToast } from '@/hooks/use-toast';
 import { DuplicateAssetDialog } from '@/components/ui/DuplicateAssetDialog';
 import { isAdminGlobalAsset, isAssetVisibleToUsers, canDeleteAsset } from '@/lib/assetVisibility';
-import { PexelsStockSection } from '@/components/dashboard/PexelsStockSection';
+import { PexelsStockBrowser } from '@/components/dashboard/PexelsStockSection';
+import { cn } from '@/lib/utils';
 
 // ── Shared card used in every tab grid ─────────────────────────────────────
 interface AssetCardProps {
@@ -39,7 +39,7 @@ function AssetCard({ item, copiedId, onCopy, onDelete, onPreview }: AssetCardPro
                     onPreview(item);
                 }
             }}
-            className="group relative aspect-square rounded-xl border border-slate-100 overflow-hidden bg-slate-50 hover:border-primary/30 hover:shadow-lg transition-all duration-300 cursor-pointer"
+            className="group relative aspect-square rounded-xl overflow-hidden bg-slate-50 hover:shadow-lg transition-all duration-300 cursor-pointer"
         >
             {item.type === 'image' ? (
                 <img src={item.url} alt={item.name} loading="lazy" className="w-full h-full object-cover" />
@@ -95,6 +95,8 @@ export function AssetLibraryPanel() {
     const { toast } = useToast();
     const [search, setSearch] = useState('');
     const [libraryTab, setLibraryTab] = useState('all');
+    const [pexelsOpen, setPexelsOpen] = useState(false);
+    const [pexelsQuery, setPexelsQuery] = useState('');
     const [importingStockId, setImportingStockId] = useState<string | null>(null);
     const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
     const [urlInput, setUrlInput] = useState('');
@@ -235,17 +237,23 @@ export function AssetLibraryPanel() {
     };
 
     useEffect(() => {
-        if (!previewAsset) return;
+        if (!previewAsset && !pexelsOpen) return;
         const onKey = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') setPreviewAsset(null);
+            if (e.key !== 'Escape') return;
+            if (previewAsset) {
+                setPreviewAsset(null);
+                return;
+            }
+            setPexelsOpen(false);
+            setPexelsQuery('');
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, [previewAsset]);
+    }, [previewAsset, pexelsOpen]);
 
     return (
-        <div className="h-full flex flex-col bg-white animate-in slide-in-from-left duration-300">
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="h-full flex flex-col overflow-hidden bg-white animate-in slide-in-from-left duration-300">
+            <div className="p-4 flex items-center justify-between bg-slate-50/50">
                 <div>
                     <h2 className="text-sm font-bold text-slate-900 tracking-tight">Asset Library</h2>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">This website + global assets</p>
@@ -276,11 +284,11 @@ export function AssetLibraryPanel() {
                 </div>
             </div>
 
-            <div className="p-3 border-b border-slate-100 bg-white">
+            <div className="p-3 bg-white">
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
                     <Input
-                        placeholder={libraryTab === 'pexels' ? 'Search stock photos and videos…' : 'Search assets...'}
+                        placeholder="Search assets..."
                         className="pl-9 h-9 text-xs bg-slate-50 border-slate-100 focus:bg-white transition-all rounded-xl"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -288,28 +296,32 @@ export function AssetLibraryPanel() {
                 </div>
             </div>
 
-            <Tabs value={libraryTab} onValueChange={setLibraryTab} className="flex-1 flex flex-col min-h-0">
-                <div className="bg-white px-3 border-b border-slate-100 overflow-x-auto [scrollbar-width:none]">
-                    <TabsList className="bg-transparent h-10 gap-4">
+            <Tabs
+                value={libraryTab}
+                onValueChange={setLibraryTab}
+                className="flex-1 flex flex-col min-h-0"
+            >
+                <div className="flex items-center gap-4 bg-white px-3">
+                    <TabsList className="h-10 min-w-0 justify-start gap-4 overflow-x-auto bg-transparent [scrollbar-width:none]">
                         <TabsTrigger value="all" className="text-[11px] font-bold data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-[#0F172A] data-[state=active]:border-b-2 data-[state=active]:border-[#0F172A] rounded-none px-0">All</TabsTrigger>
                         <TabsTrigger value="images" className="text-[11px] font-bold data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-[#0F172A] data-[state=active]:border-b-2 data-[state=active]:border-[#0F172A] rounded-none px-0">Images</TabsTrigger>
                         <TabsTrigger value="videos" className="text-[11px] font-bold data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-[#0F172A] data-[state=active]:border-b-2 data-[state=active]:border-[#0F172A] rounded-none px-0">Videos</TabsTrigger>
-                        <TabsTrigger value="pexels" className="text-[11px] font-bold data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-[#0F172A] data-[state=active]:border-b-2 data-[state=active]:border-[#0F172A] rounded-none px-0">Pexels</TabsTrigger>
                     </TabsList>
+                    <button
+                        type="button"
+                        onClick={() => setPexelsOpen(true)}
+                        className={cn(
+                            'mb-px h-10 shrink-0 border-b-2 px-0 text-[11px] font-bold transition-colors',
+                            pexelsOpen
+                                ? 'border-[#0F172A] text-[#0F172A]'
+                                : 'border-transparent text-muted-foreground hover:text-[#0F172A]'
+                        )}
+                    >
+                        Pexels
+                    </button>
                 </div>
 
-                {libraryTab === 'pexels' ? (
-                    <div className="flex-1 min-h-0">
-                        <PexelsStockSection
-                            layout="panel"
-                            query={search}
-                            importingId={importingStockId}
-                            onClearQuery={() => setSearch('')}
-                            onAddToLibrary={(item) => void handleAddStockMedia(item)}
-                        />
-                    </div>
-                ) : (
-                <ScrollArea className="flex-1">
+                <div className="flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                     <div className="p-4">
                         <TabsContent value="all" className="mt-0 outline-none">
                             {filteredMedia.length === 0 ? (
@@ -385,9 +397,35 @@ export function AssetLibraryPanel() {
                             )}
                         </TabsContent>
                     </div>
-                </ScrollArea>
-                )}
+                </div>
             </Tabs>
+
+            {pexelsOpen && createPortal(
+                <div
+                    className="fixed inset-0 z-[220] flex items-center justify-center bg-black/50 p-3 sm:p-6"
+                    onClick={() => {
+                        setPexelsOpen(false);
+                        setPexelsQuery('');
+                    }}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Pexels"
+                >
+                    <div
+                        className="flex h-[min(92dvh,56rem)] w-full max-w-[80rem] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <PexelsStockBrowser
+                            query={pexelsQuery}
+                            onQueryChange={setPexelsQuery}
+                            importingId={importingStockId}
+                            onCopy={handleCopy}
+                            onAddToLibrary={(item) => void handleAddStockMedia(item)}
+                        />
+                    </div>
+                </div>,
+                document.body
+            )}
 
             {/* URL Upload Dialog */}
             <Dialog open={isUrlDialogOpen} onOpenChange={setIsUrlDialogOpen}>
