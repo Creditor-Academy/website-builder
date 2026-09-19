@@ -455,7 +455,7 @@ export function PexelsStockSection({
         <div className="flex h-[280px] flex-col items-center justify-center gap-2 rounded-2xl bg-slate-50 px-6 text-center">
           {isVideo ? <Film className="h-8 w-8 opacity-40" /> : <ImageIcon className="h-8 w-8 opacity-40" />}
           <p className="text-sm font-bold text-[#111827]">{isVideo ? 'Stock videos unavailable' : 'Stock photos unavailable'}</p>
-          <p className="max-w-md text-xs text-slate-500">{error}. Add PEXELS_API_KEY to .env.local and restart the app.</p>
+          <p className="max-w-md text-xs text-slate-500">{error}. Ensure the API is reachable and PEXELS_API_KEY is set on the backend server.</p>
         </div>
       ) : itemsCount === 0 ? (
         <div className="flex h-[280px] flex-col items-center justify-center gap-2 rounded-2xl bg-slate-50 text-center">
