@@ -32,7 +32,7 @@ export default function Footer({ isDark = true }: { isDark?: boolean }) {
         </div>
       </div>
       <div className={cn("max-w-7xl mx-auto mt-16 flex flex-col md:flex-row justify-between items-center text-base font-bold gap-8 transition-colors duration-1000", isDark ? "text-slate-600" : "text-blue-200")}>
-        <p>© {new Date().getFullYear()} Buildora Inc. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Webstudio Inc. All rights reserved.</p>
         <p className="flex items-center gap-2">Powered by <a href="https://lmsathena.com/" className={cn("transition-colors text-white", isDark ? "text-blue-500 hover:text-white" : "hover:text-blue-100")}>Athena LMS</a></p>
       </div>
     </footer>

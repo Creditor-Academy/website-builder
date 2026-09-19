@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Search, Upload, Check, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Trash2, Copy, Loader2, Globe, SlidersHorizontal } from 'lucide-react';
+import { Search, Upload, Check, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Trash2, Copy, Loader2, Globe, SlidersHorizontal, Save } from 'lucide-react';
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Tabs, TabsContent } from "../components/ui/tabs";
@@ -21,7 +21,10 @@ import Loading from '@/components/Common/LoadingUI';
 import {
   filterAssetsVisibleToUsers,
   getUserVisibleAssetIds,
+  isAdminGlobalAsset,
+  rememberAssetVisibleToUsers,
   setUserVisibleAssetIds,
+  canDeleteAsset,
 } from '@/lib/assetVisibility';
 import {
   DashboardCard,
@@ -33,13 +36,14 @@ import {
   DashboardCardBadge,
   dashboardCardBadgeClass,
 } from '@/components/dashboard/DashboardCard';
+import { PexelsStockSection } from '@/components/dashboard/PexelsStockSection';
 
 
 export default function DashboardAssets() {
     const location = useLocation();
     const basePath = location.pathname.startsWith('/admin') ? '/admin' : '/dashboard';
     const isAdmin = basePath === '/admin';
-    const uploadScope = isAdmin ? { scope: 'GLOBAL' as const } : {};
+    const uploadScope = isAdmin ? { scope: 'GLOBAL' as const } : { scope: 'USER' as const };
     const { deleteAsset, fetchAssets, getScopedAssets, uploadAsset, importAssetFromUrl } = useBuilderStore();
 
     const [isFetching, setIsFetching] = useState(true);
@@ -51,14 +55,16 @@ export default function DashboardAssets() {
 
     useEffect(() => {
         setIsFetching(true);
-        void fetchAssets().finally(() => setIsFetching(false));
+        void Promise.all([fetchAssets(), fetchAssets({ scope: 'GLOBAL' })]).finally(() => setIsFetching(false));
     }, [fetchAssets]);
 
     const [search, setSearch] = useState('');
+    const [activeTab, setActiveTab] = useState('stock');
     const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
     const [urlInput, setUrlInput] = useState('');
     const [urlName, setUrlName] = useState('');
     const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [importingStockId, setImportingStockId] = useState<string | null>(null);
     const [previewAsset, setPreviewAsset] = useState<Asset | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const allAssets = getScopedAssets();
@@ -114,7 +120,8 @@ export default function DashboardAssets() {
     const doUpload = async (file: File) => {
         setUploadingCount(c => c + 1);
         try {
-            await uploadAsset(file, uploadScope);
+            const asset = await uploadAsset(file, uploadScope);
+            if (isAdmin && asset?.id) rememberAssetVisibleToUsers(asset.id);
             toast({ title: "Asset Uploaded", description: "Your asset has been successfully uploaded." });
         } catch (error: any) {
             toast({
@@ -144,7 +151,8 @@ export default function DashboardAssets() {
         if (urlInput) {
             setUploadingCount(c => c + 1);
             try {
-                await importAssetFromUrl(urlName || 'Imported Asset', urlInput, uploadScope);
+                const asset = await importAssetFromUrl(urlName || 'Imported Asset', urlInput, uploadScope);
+                if (isAdmin && asset?.id) rememberAssetVisibleToUsers(asset.id);
                 toast({ title: "Asset Imported", description: "Your asset has been successfully imported." });
                 setUrlInput('');
                 setUrlName('');
@@ -158,6 +166,47 @@ export default function DashboardAssets() {
             } finally {
                 setUploadingCount(c => c - 1);
             }
+        }
+    };
+
+    const handleAddStockMedia = async (item: { name: string; url: string; media: 'image' | 'video' }) => {
+        setImportingStockId(item.url);
+        try {
+            const asset = await importAssetFromUrl(item.name, item.url, uploadScope);
+            if (isAdmin && asset?.id) rememberAssetVisibleToUsers(asset.id);
+            toast({
+                title: 'Added to your assets',
+                description: item.media === 'video'
+                  ? 'This Pexels video is now in your library. Open Videos to use it, or keep browsing stock.'
+                  : 'This Pexels photo is now in your library. Open Images to use it, or keep browsing stock.',
+            });
+        } catch (error: any) {
+            toast({
+                variant: 'destructive',
+                title: item.media === 'video' ? 'Could not add video' : 'Could not add photo',
+                description: error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to import stock media.',
+            });
+        } finally {
+            setImportingStockId(null);
+        }
+    };
+
+    const handleSaveToPersonal = async (item: { name: string; url: string; media?: 'image' | 'video' }) => {
+        setImportingStockId(item.url);
+        try {
+            await importAssetFromUrl(item.name, item.url, { scope: 'USER' });
+            toast({
+                title: 'Saved to your assets',
+                description: 'This file is now in your personal library. Open Saved Assets to use it.',
+            });
+        } catch (error: any) {
+            toast({
+                variant: 'destructive',
+                title: 'Could not save asset',
+                description: error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to save to your personal library.',
+            });
+        } finally {
+            setImportingStockId(null);
         }
     };
 
@@ -206,6 +255,17 @@ export default function DashboardAssets() {
     };
 
     const handleDelete = async (id: string) => {
+        const target = allAssets.find((asset) => asset.id === id);
+        if (!target || !canDeleteAsset(target)) {
+            toast({
+                variant: 'destructive',
+                title: 'Cannot delete this asset',
+                description: isAdminGlobalAsset(target || {})
+                    ? 'Global admin assets cannot be deleted from a user account.'
+                    : 'You can only delete assets you uploaded.',
+            });
+            return;
+        }
         setDeletingIds(prev => new Set(prev).add(id));
         try {
             await deleteAsset(id);
@@ -226,8 +286,6 @@ export default function DashboardAssets() {
         }
     };
 
-    const [activeTab, setActiveTab] = useState('all');
-
     return (
     <DashboardPageShell
       basePath={basePath}
@@ -247,9 +305,9 @@ export default function DashboardAssets() {
               <PopoverContent
                 align="end"
                 sideOffset={10}
-                className="w-[min(22rem,calc(100vw-2rem))] rounded-2xl border border-slate-200 p-0 shadow-xl"
+                className="w-[min(22rem,calc(100vw-2rem))] rounded-2xl border-0 p-0 shadow-xl"
               >
-                <div className="border-b border-slate-100 px-4 py-3">
+                <div className="px-4 py-3">
                   <p className="text-sm font-semibold text-[#0F172A]">Visible to users</p>
                   <p className="mt-0.5 text-xs text-slate-500">
                     Choose which library assets appear on the user dashboard.
@@ -301,7 +359,7 @@ export default function DashboardAssets() {
                     ))
                   )}
                 </div>
-                <div className="border-t border-slate-100 p-3">
+                <div className="p-3">
                   <Button
                     type="button"
                     disabled={savingVisibility}
@@ -360,41 +418,53 @@ export default function DashboardAssets() {
         </>
       }
     >
-            <div className={dashboardToolbarClass}>
+            <div className={cn(activeTab === 'stock' && 'flex flex-col gap-3')}>
+            <div className={cn(dashboardToolbarClass, activeTab === 'stock' && '!mb-0')}>
               <div className="relative min-w-0 flex-1">
                 <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
                 <Input
-                  placeholder="Search assets..."
+                  placeholder={activeTab === 'stock' ? 'Search stock photos and videos…' : 'Search assets...'}
                   className={cn(dashboardSearchInputClass, 'h-9 rounded-full pl-9')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
-              <div className={cn(dashboardFilterScrollClass, 'flex-1')}>
-              {['all', 'images', 'videos'].map(tab => (
+              <div className={cn(dashboardFilterScrollClass, 'flex-1', activeTab === 'stock' && 'pb-0')}>
+              {['stock', 'all', 'images', 'videos'].map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={dashboardFilterPillClass(activeTab === tab)}
                 >
-                  {tab === 'all' ? 'All Assets' : tab === 'images' ? 'Images' : 'Videos'}
+                  {tab === 'stock' ? 'Stock' : tab === 'all' ? 'Saved Assets' : tab === 'images' ? 'Images' : 'Videos'}
                 </button>
               ))}
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-[#f6f3f5] rounded-full text-[#45464d] border border-[#c6c6cd] font-semibold text-xs uppercase tracking-wider shrink-0 self-start sm:self-auto">
+              {activeTab !== 'stock' && (
+              <div className="hidden items-center gap-1.5 self-start rounded-full bg-[#f6f3f5] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#45464d] sm:flex sm:self-auto">
                 Total: <span className="text-[#1b1b1d] font-bold">{filteredMedia.length}</span>
               </div>
+              )}
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <div className="min-h-[400px]">
-                   {isFetching ? (
+                   {activeTab === 'stock' ? (
+                      <PexelsStockSection
+                        query={search}
+                        importingId={importingStockId}
+                        onClearQuery={() => setSearch('')}
+                        onCopy={handleCopy}
+                        onAddToLibrary={(item) => void handleAddStockMedia(item)}
+                        onSaveToLibrary={(item) => void handleSaveToPersonal(item)}
+                      />
+                   ) : isFetching ? (
                       <Loading label="Loading assets" />
                    ) : (
                    ['all', 'images', 'videos'].map(tabType => (
                       <TabsContent key={tabType} value={tabType} className="mt-0 outline-none">
                          {filteredMedia.filter(m => tabType === 'all' || m.type === tabType.slice(0, -1)).length === 0 && uploadingCount === 0 ? (
-                            <div className="h-[400px] flex flex-col items-center justify-center text-[#76777d] gap-4 border border-dashed border-[#c6c6cd] rounded-lg bg-[#f6f3f5]">
+                            <div className="h-[400px] flex flex-col items-center justify-center text-[#76777d] gap-4 rounded-lg bg-[#f6f3f5]">
                                 <div className="w-20 h-20 rounded-lg bg-[#eae7e9] flex items-center justify-center">
                                    {tabType === 'videos' ? <Video className="w-8 h-8 opacity-40" /> : <ImageIcon className="w-8 h-8 opacity-40" />}
                                 </div>
@@ -404,11 +474,11 @@ export default function DashboardAssets() {
                                 </div>
                             </div>
                          ) : (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
+                            <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 sm:gap-4">
 
                                 {/* ── Upload skeleton placeholders ── */}
                                 {uploadingCount > 0 && Array.from({ length: uploadingCount }).map((_, i) => (
-                                   <div key={`uploading-${i}`} className="flex flex-col rounded-lg border border-[#c6c6cd] bg-[#fcf8fa] overflow-hidden animate-pulse">
+                                   <div key={`uploading-${i}`} className="flex flex-col rounded-lg bg-[#fcf8fa] overflow-hidden animate-pulse">
                                       <div className="aspect-square bg-[#eae7e9] flex flex-col items-center justify-center gap-2">
                                          <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
                                          <span className="text-[10px] font-semibold text-slate-400">Uploading…</span>
@@ -425,14 +495,14 @@ export default function DashboardAssets() {
                                         key={item.id}
                                         interactive
                                         className={cn(
-                                            'hover:shadow-md',
+                                            'border-0 hover:shadow-md',
                                             deletingIds.has(item.id) && 'opacity-60 scale-[0.97] pointer-events-none'
                                         )}
                                         onClick={() => setPreviewAsset(item)}
                                     >
                                         <DashboardCardMedia aspect className="aspect-square">
                                            {item.type === 'image' ? (
-                                               <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
+                                               <img src={item.url} alt={item.name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                                            ) : (
                                                <div className="w-full h-full bg-[#131b2e] flex items-center justify-center">
                                                    <Video className="w-8 h-8 text-white/40" />
@@ -443,7 +513,7 @@ export default function DashboardAssets() {
                                               <DashboardCardBadge position="top-left" className="static px-1.5 py-0.5 text-[10px] capitalize">
                                                  {item.type || 'File'}
                                               </DashboardCardBadge>
-                                              {(item.scope === 'GLOBAL' || item.isGlobal) && (
+                                              {(isAdminGlobalAsset(item)) && (
                                               <span className={cn(dashboardCardBadgeClass, 'static inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] bg-[#dedfeb]')}>
                                                  <Globe className="w-2.5 h-2.5" />
                                                  Global
@@ -466,13 +536,13 @@ export default function DashboardAssets() {
                                             </DashboardCardDescription>
 
                                             {deletingIds.has(item.id) ? (
-                                                <div className="mt-2 flex items-center justify-center gap-1.5 border-t border-[#c6c6cd] pt-2 text-[#ba1a1a]">
+                                                <div className="mt-2 flex items-center justify-center gap-1.5 pt-2 text-[#ba1a1a]">
                                                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
                                                     <span className="text-[11px] font-medium">Deleting…</span>
                                                 </div>
                                             ) : (
                                                 <DashboardCardFooter
-                                                    className="mt-2 flex-row items-center gap-1.5 border-t border-[#c6c6cd] pt-2"
+                                                    className="mt-2 flex-row items-center gap-1.5 pt-2"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
                                                     <button
@@ -495,6 +565,7 @@ export default function DashboardAssets() {
                                                             </>
                                                         )}
                                                     </button>
+                                                    {canDeleteAsset(item) && (
                                                     <button
                                                         type="button"
                                                         className="inline-flex h-7 flex-1 items-center justify-center gap-1 rounded-md border border-rose-100 bg-white px-2 text-[11px] font-medium text-[#ba1a1a] hover:bg-rose-50"
@@ -506,6 +577,7 @@ export default function DashboardAssets() {
                                                         <Trash2 className="h-3 w-3" />
                                                         Delete
                                                     </button>
+                                                    )}
                                                 </DashboardCardFooter>
                                             )}
                                         </DashboardCardBody>
@@ -518,17 +590,18 @@ export default function DashboardAssets() {
                    )}
                 </div>
             </Tabs>
+            </div>
 
             <Dialog open={!!previewAsset} onOpenChange={(open) => { if (!open) setPreviewAsset(null); }}>
                 <DialogContent
                     className={cn(
-                        'flex max-h-[min(92dvh,52rem)] w-[calc(100vw-1.5rem)] flex-col gap-0 overflow-hidden p-0',
-                        'rounded-2xl border-[#c6c6cd] bg-white shadow-2xl sm:max-w-4xl',
+                        'flex max-h-[min(92dvh,52rem)] w-[calc(100vw-1.5rem)] flex-col gap-0 overflow-hidden border-0 p-0',
+                        'rounded-2xl bg-white shadow-2xl sm:max-w-4xl',
                         '[&>button]:right-3 [&>button]:top-3 [&>button]:text-[#0F172A] [&>button]:hover:bg-slate-100',
                         '[&>button>svg]:mr-0 [&>button>svg]:h-5 [&>button>svg]:w-5',
                     )}
                 >
-                    <DialogHeader className="shrink-0 border-b border-[#c6c6cd] px-4 py-3 pr-12 sm:px-5 sm:py-4">
+                    <DialogHeader className="shrink-0 px-4 py-3 pr-12 sm:px-5 sm:py-4">
                         <DialogTitle className="truncate text-left text-sm font-semibold text-[#0F172A] sm:text-base">
                             {previewAsset?.name || 'Asset preview'}
                         </DialogTitle>
@@ -553,7 +626,7 @@ export default function DashboardAssets() {
                     </div>
 
                     {previewAsset && (
-                        <div className="flex shrink-0 flex-col gap-3 border-t border-[#c6c6cd] bg-[#fcf8fa] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                        <div className="flex shrink-0 flex-col gap-3 bg-[#fcf8fa] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                             <p className="min-w-0 truncate text-[11px] text-[#76777d] sm:text-xs">
                                 <span className="uppercase tracking-wider">{previewAsset.size || previewAsset.type}</span>
                                 <span className="mx-1">·</span>
@@ -562,6 +635,21 @@ export default function DashboardAssets() {
                                 </span>
                             </p>
                             <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    disabled={Boolean(importingStockId)}
+                                    className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md bg-[#131924] px-3 text-xs font-medium text-white hover:bg-[#202838] disabled:opacity-60 sm:flex-none"
+                                    onClick={() => void handleSaveToPersonal({
+                                        name: previewAsset.name,
+                                        url: previewAsset.url,
+                                        media: previewAsset.type === 'video' ? 'video' : 'image',
+                                    })}
+                                >
+                                    {importingStockId === previewAsset.url
+                                        ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                        : <Save className="h-3.5 w-3.5" />}
+                                    Save
+                                </button>
                                 <button
                                     type="button"
                                     className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md border border-[#c6c6cd] bg-white px-3 text-xs font-medium text-[#0F172A] hover:bg-[#eae7e9] sm:flex-none"
@@ -573,6 +661,7 @@ export default function DashboardAssets() {
                                         <><Copy className="h-3.5 w-3.5" /> Copy</>
                                     )}
                                 </button>
+                                {canDeleteAsset(previewAsset) && (
                                 <button
                                     type="button"
                                     className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md border border-rose-100 bg-white px-3 text-xs font-medium text-[#ba1a1a] hover:bg-rose-50 sm:flex-none"
@@ -581,6 +670,7 @@ export default function DashboardAssets() {
                                     <Trash2 className="h-3.5 w-3.5" />
                                     Delete
                                 </button>
+                                )}
                             </div>
                         </div>
                     )}
@@ -588,10 +678,10 @@ export default function DashboardAssets() {
             </Dialog>
 
             <Dialog open={isUrlDialogOpen} onOpenChange={setIsUrlDialogOpen}>
-                <DialogContent className="sm:max-w-md rounded-lg p-0 overflow-hidden border-[#c6c6cd] shadow-2xl">
-                    <div className="p-8 pb-4">
+                <DialogContent className="w-[calc(100vw-1.5rem)] overflow-hidden rounded-lg border-0 p-0 shadow-2xl sm:max-w-md">
+                    <div className="p-5 pb-4 sm:p-8 sm:pb-4">
                        <DialogHeader>
-                           <DialogTitle className="text-2xl font-black text-[#0F172A] tracking-tight flex items-center gap-3">
+                           <DialogTitle className="flex items-center gap-3 text-xl font-black tracking-tight text-[#0F172A] sm:text-2xl">
                               <div className="w-10 h-10 rounded-2xl bg-[#F4F4F5] text-[#0F172A] flex items-center justify-center">
                                  <LinkIcon className="w-5 h-5" />
                               </div>
@@ -622,7 +712,7 @@ export default function DashboardAssets() {
                            </div>
                        </div>
                     </div>
-                    <div className="p-6 bg-slate-50 flex justify-end gap-3 border-t border-slate-200/60">
+                    <div className="p-6 bg-slate-50 flex justify-end gap-3">
                         <Button variant="ghost" onClick={() => setIsUrlDialogOpen(false)} className="rounded-xl font-black text-slate-500 text-xs px-6 h-11 tracking-widest uppercase hover:bg-slate-100">Cancel</Button>
                         <Button onClick={handleUrlUpload} disabled={!urlInput} className="rounded-lg font-semibold text-sm px-8 h-11 bg-[#131b2e] hover:bg-[#252f4a]">Import Asset</Button>
                     </div>

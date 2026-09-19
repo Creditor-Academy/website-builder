@@ -409,7 +409,7 @@ const Organizations = () => {
                     Organization Name *
                   </label>
                   <Input
-                    placeholder="e.g. Buildora Global"
+                    placeholder="e.g. Webstudio Global"
                     value={newOrg.name}
                     onChange={e => setField('name', e.target.value)}
                     disabled={isSubmitting}
@@ -927,7 +927,7 @@ const Organizations = () => {
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Organization Name *</label>
               <Input
-                placeholder="e.g. Buildora Global"
+                placeholder="e.g. Webstudio Global"
                 value={editForm.name}
                 onChange={e => handleEditField('name', e.target.value)}
                 disabled={isSavingEdit}

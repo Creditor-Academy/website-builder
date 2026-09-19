@@ -19,7 +19,9 @@ function getInitialTheme(): 'dark' | 'light' {
       applyTheme(saved);
       return saved;
     }
-  } catch {}
+  } catch {
+    // ignore storage access
+  }
   // Default to light if nothing saved
   applyTheme('light');
   return 'light';
@@ -32,7 +34,9 @@ export function useTheme() {
     applyTheme(theme);
     try {
       localStorage.setItem(STORAGE_KEY, theme);
-    } catch {}
+    } catch {
+      // ignore storage access
+    }
   }, [theme]);
 
   const setTheme = (next: 'dark' | 'light') => {

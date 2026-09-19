@@ -152,24 +152,24 @@ export function FooterSettings({ footer, pages = [], onUpdate, isExpanded = true
   return (
     <Collapsible open={expanded} onOpenChange={setExpanded}>
       <CollapsibleTrigger className="w-full">
-        <div className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors cursor-pointer">
+        <div className="flex items-center justify-between p-4 hover:bg-[#0F172A]/5 transition-colors cursor-pointer">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center shadow-sm shadow-black/5">
+            <div className="w-8 h-8 rounded-lg bg-[#0F172A] flex items-center justify-center">
               <Settings className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-slate-700">Footer Settings</h3>
-              <p className="text-xs text-slate-500">Manage footer links and appearance</p>
+              <h3 className="text-sm font-semibold text-[#0F172A]">Footer Settings</h3>
+              <p className="text-xs text-[#0F172A]/60">Manage footer links and appearance</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">Global</span>
-            <ChevronDown className={`w-4 h-4 transition-transform text-slate-400 ${expanded ? 'rotate-180' : ''}`} />
+            <span className="text-xs text-[#0F172A] bg-[#0F172A]/5 px-2 py-1 rounded">Global</span>
+            <ChevronDown className={`w-4 h-4 transition-transform text-[#0F172A] ${expanded ? 'rotate-180' : ''}`} />
           </div>
         </div>
       </CollapsibleTrigger>
       
-      <CollapsibleContent className="border-t border-slate-100">
+      <CollapsibleContent className="border-t border-[#0F172A]">
         <div className="p-4 space-y-6">
           {/* Footer Logo */}
           <div className="space-y-3">

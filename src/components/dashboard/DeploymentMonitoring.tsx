@@ -35,12 +35,20 @@ import {
 import {
   CheckCircle, XCircle, Hourglass, FileText, RefreshCw, MoreVertical, RotateCcw, Clock, Search, ListFilter, Loader2, AlertCircle
 } from 'lucide-react';
+import { format } from 'date-fns';
 import DeploymentLogViewer from './DeploymentLogViewer';
 import Loading from '@/components/Common/LoadingUI';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import websiteApi from '@/api/website';
 import deploymentsApi from '@/api/deployments';
+
+function formatPublishedAt(value?: string) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return format(date, 'dd/MM/yyyy, hh:mm:ss a');
+}
 
 interface DeploymentRecord {
   id: string;
@@ -314,7 +322,7 @@ export default function DeploymentMonitoring() {
                       </TableCell>
                       <TableCell className="px-4 py-3">
                         <span className="inline-flex items-center rounded-full border border-[#E5E7EB] bg-[#F4F4F5] px-2.5 py-1 text-xs font-medium text-[#0F172A]">
-                          {new Date(dep.publishedAt).toLocaleString()}
+                          {formatPublishedAt(dep.publishedAt)}
                         </span>
                       </TableCell>
                       <TableCell className="px-4 py-3 text-sm text-[#747781]">

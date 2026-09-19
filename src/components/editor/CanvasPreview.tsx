@@ -169,11 +169,13 @@ export function CanvasPreview() {
             </div>
           )}
 
+          {page.footer && (
           <FooterPreview
             config={page.footer}
             isEditing={!editor.previewMode}
             onUpdate={(updates) => updateFooter(updates)}
           />
+          )}
         </div>
       </div>
 

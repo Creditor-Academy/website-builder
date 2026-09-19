@@ -14,6 +14,7 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import { getProfile, updateUserProfile, changePassword, deactivateOwnAccount } from '@/api/user';
+import { clearStoredUser } from '@/lib/authSession';
 import { DashboardPageShell } from '@/components/dashboard/DashboardPageShell';
 import Loading from '@/components/Common/LoadingUI';
 
@@ -141,7 +142,7 @@ export default function DashboardProfile() {
         setDeleting(true);
         try {
             await deactivateOwnAccount();
-            localStorage.removeItem('user');
+            clearStoredUser();
             navigate('/');
         } catch (e: any) {
             toast({ title: 'Failed', description: e?.message, variant: 'destructive' });

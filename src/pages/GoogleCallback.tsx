@@ -20,8 +20,8 @@ export default function GoogleCallback() {
     }
 
     googleLogin(accessToken)
-      .then((res) => {
-        setStoredUser(res.data.user);
+      .then(async (res) => {
+        await setStoredUser(res.data.user);
         navigate(getDashboardPath(res.data.user));
       })
       .catch((err) => {

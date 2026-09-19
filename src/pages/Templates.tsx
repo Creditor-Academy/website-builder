@@ -101,7 +101,7 @@ const Templates = () => {
       isDark ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-800"
     )}>
       <Helmet>
-        <title>Templates - Buildora</title>
+        <title>Templates - Webstudio</title>
         <meta name="description" content="Choose from hundreds of premium, professionally designed website templates." />
       </Helmet>
 

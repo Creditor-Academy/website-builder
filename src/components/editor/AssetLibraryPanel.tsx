@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Search, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Plus, Globe, X, Trash2 } from 'lucide-react';
+import { Search, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Plus, Globe, X, Trash2, Save, Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -12,7 +11,9 @@ import useBuilderStore from '@/store/useBuilderStore';
 import type { Asset } from '@/store/useBuilderStore';
 import { useToast } from '@/hooks/use-toast';
 import { DuplicateAssetDialog } from '@/components/ui/DuplicateAssetDialog';
-import { isAssetVisibleToUsers } from '@/lib/assetVisibility';
+import { isAdminGlobalAsset, isAssetVisibleToUsers, canDeleteAsset } from '@/lib/assetVisibility';
+import { PexelsStockBrowser } from '@/components/dashboard/PexelsStockSection';
+import { cn } from '@/lib/utils';
 
 // ── Shared card used in every tab grid ─────────────────────────────────────
 interface AssetCardProps {
@@ -25,7 +26,8 @@ interface AssetCardProps {
 }
 
 function AssetCard({ item, copiedId, onCopy, onDelete, onPreview }: AssetCardProps) {
-    const isGlobal = !item.websiteId || item.scope === 'GLOBAL' || item.isGlobal;
+    const isGlobal = isAdminGlobalAsset(item);
+    const canDelete = canDeleteAsset(item);
     return (
         <div
             role="button"
@@ -37,7 +39,7 @@ function AssetCard({ item, copiedId, onCopy, onDelete, onPreview }: AssetCardPro
                     onPreview(item);
                 }
             }}
-            className="group relative aspect-square rounded-xl border border-slate-100 overflow-hidden bg-slate-50 hover:border-primary/30 hover:shadow-lg transition-all duration-300 cursor-pointer"
+            className="group relative aspect-square rounded-xl overflow-hidden bg-slate-50 hover:shadow-lg transition-all duration-300 cursor-pointer"
         >
             {item.type === 'image' ? (
                 <img src={item.url} alt={item.name} loading="lazy" className="w-full h-full object-cover" />
@@ -54,7 +56,7 @@ function AssetCard({ item, copiedId, onCopy, onDelete, onPreview }: AssetCardPro
                 </div>
             )}
 
-            {!isGlobal && (
+            {canDelete && (
                 <button
                     type="button"
                     aria-label="Delete asset"
@@ -92,6 +94,10 @@ export function AssetLibraryPanel() {
     const { activeWebsiteId, deleteAsset, fetchAssets, getScopedAssets, uploadAsset, importAssetFromUrl } = useBuilderStore();
     const { toast } = useToast();
     const [search, setSearch] = useState('');
+    const [libraryTab, setLibraryTab] = useState('all');
+    const [pexelsOpen, setPexelsOpen] = useState(false);
+    const [pexelsQuery, setPexelsQuery] = useState('');
+    const [importingStockId, setImportingStockId] = useState<string | null>(null);
     const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
     const [urlInput, setUrlInput] = useState('');
     const [urlName, setUrlName] = useState('');
@@ -109,6 +115,7 @@ export function AssetLibraryPanel() {
         // Fetch both website-scoped assets AND global (dashboard) assets in parallel
         void fetchAssets({ websiteId: activeWebsiteId });
         void fetchAssets();
+        void fetchAssets({ scope: 'GLOBAL' });
     }, [activeWebsiteId, fetchAssets]);
 
     const assets = activeWebsiteId ? getScopedAssets(activeWebsiteId) : [];
@@ -122,7 +129,13 @@ export function AssetLibraryPanel() {
     const isAdminUser = ['ADMIN', 'SUPER_ADMIN', 'INSTITUTION_ADMIN'].includes(user?.role);
     const visibleAssets = isAdminUser
         ? assets
-        : assets.filter((item) => item.websiteId === activeWebsiteId || item.scope === 'WEBSITE' || isAssetVisibleToUsers(item.id));
+        : assets.filter((item) => item.websiteId === activeWebsiteId || item.scope === 'WEBSITE' || isAdminGlobalAsset(item) || isAssetVisibleToUsers(item.id, item));
+
+    const handleDeleteLibraryAsset = (id: string) => {
+        const item = assets.find((asset) => asset.id === id);
+        if (!activeWebsiteId || !item || !canDeleteAsset(item)) return;
+        void deleteAsset(id, { websiteId: activeWebsiteId });
+    };
 
     const filteredMedia = visibleAssets.filter(item =>
         item.name.toLowerCase().includes(search.toLowerCase())
@@ -190,6 +203,47 @@ export function AssetLibraryPanel() {
         }
     };
 
+    const handleAddStockMedia = async (item: { name: string; url: string; media: 'image' | 'video' }) => {
+        if (!activeWebsiteId) return;
+        setImportingStockId(item.url);
+        try {
+            await importAssetFromUrl(item.name, item.url, { websiteId: activeWebsiteId });
+            toast({
+                title: 'Added to assets',
+                description: item.media === 'video'
+                    ? 'This Pexels video is now in this website’s library.'
+                    : 'This Pexels photo is now in this website’s library.',
+            });
+        } catch (error: any) {
+            toast({
+                variant: 'destructive',
+                title: item.media === 'video' ? 'Could not add video' : 'Could not add photo',
+                description: error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to import stock media.',
+            });
+        } finally {
+            setImportingStockId(null);
+        }
+    };
+
+    const handleSaveToPersonal = async (item: { name: string; url: string; media?: 'image' | 'video' }) => {
+        setImportingStockId(item.url);
+        try {
+            await importAssetFromUrl(item.name, item.url, { scope: 'USER' });
+            toast({
+                title: 'Saved to your assets',
+                description: 'This file is now in your personal library.',
+            });
+        } catch (error: any) {
+            toast({
+                variant: 'destructive',
+                title: 'Could not save asset',
+                description: error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to save to your personal library.',
+            });
+        } finally {
+            setImportingStockId(null);
+        }
+    };
+
     const copyToClipboard = (url: string) => {
         navigator.clipboard.writeText(url);
         // Could add a toast notification here
@@ -202,17 +256,23 @@ export function AssetLibraryPanel() {
     };
 
     useEffect(() => {
-        if (!previewAsset) return;
+        if (!previewAsset && !pexelsOpen) return;
         const onKey = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') setPreviewAsset(null);
+            if (e.key !== 'Escape') return;
+            if (previewAsset) {
+                setPreviewAsset(null);
+                return;
+            }
+            setPexelsOpen(false);
+            setPexelsQuery('');
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, [previewAsset]);
+    }, [previewAsset, pexelsOpen]);
 
     return (
-        <div className="h-full flex flex-col bg-white animate-in slide-in-from-left duration-300">
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="h-full flex flex-col overflow-hidden bg-white animate-in slide-in-from-left duration-300">
+            <div className="p-4 flex items-center justify-between bg-slate-50/50">
                 <div>
                     <h2 className="text-sm font-bold text-slate-900 tracking-tight">Asset Library</h2>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">This website + global assets</p>
@@ -243,7 +303,7 @@ export function AssetLibraryPanel() {
                 </div>
             </div>
 
-            <div className="p-3 border-b border-slate-100 bg-white">
+            <div className="p-3 bg-white">
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
                     <Input
@@ -255,16 +315,32 @@ export function AssetLibraryPanel() {
                 </div>
             </div>
 
-            <Tabs defaultValue="all" className="flex-1 flex flex-col min-h-0">
-                <div className="bg-white px-3 border-b border-slate-100">
-                    <TabsList className="bg-transparent h-10 gap-4">
+            <Tabs
+                value={libraryTab}
+                onValueChange={setLibraryTab}
+                className="flex-1 flex flex-col min-h-0"
+            >
+                <div className="flex items-center gap-4 bg-white px-3">
+                    <TabsList className="h-10 min-w-0 justify-start gap-4 overflow-x-auto bg-transparent [scrollbar-width:none]">
                         <TabsTrigger value="all" className="text-[11px] font-bold data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-[#0F172A] data-[state=active]:border-b-2 data-[state=active]:border-[#0F172A] rounded-none px-0">All</TabsTrigger>
                         <TabsTrigger value="images" className="text-[11px] font-bold data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-[#0F172A] data-[state=active]:border-b-2 data-[state=active]:border-[#0F172A] rounded-none px-0">Images</TabsTrigger>
                         <TabsTrigger value="videos" className="text-[11px] font-bold data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-[#0F172A] data-[state=active]:border-b-2 data-[state=active]:border-[#0F172A] rounded-none px-0">Videos</TabsTrigger>
                     </TabsList>
+                    <button
+                        type="button"
+                        onClick={() => setPexelsOpen(true)}
+                        className={cn(
+                            'mb-px h-10 shrink-0 border-b-2 px-0 text-[11px] font-bold transition-colors',
+                            pexelsOpen
+                                ? 'border-[#0F172A] text-[#0F172A]'
+                                : 'border-transparent text-muted-foreground hover:text-[#0F172A]'
+                        )}
+                    >
+                        Pexels
+                    </button>
                 </div>
 
-                <ScrollArea className="flex-1">
+                <div className="flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                     <div className="p-4">
                         <TabsContent value="all" className="mt-0 outline-none">
                             {filteredMedia.length === 0 ? (
@@ -283,7 +359,7 @@ export function AssetLibraryPanel() {
                                             copiedId={copiedId}
                                             activeWebsiteId={activeWebsiteId}
                                             onCopy={handleCopy}
-                                            onDelete={(id) => activeWebsiteId ? void deleteAsset(id, { websiteId: activeWebsiteId }) : undefined}
+                                            onDelete={handleDeleteLibraryAsset}
                                             onPreview={setPreviewAsset}
                                         />
                                     ))}
@@ -307,7 +383,7 @@ export function AssetLibraryPanel() {
                                             copiedId={copiedId}
                                             activeWebsiteId={activeWebsiteId}
                                             onCopy={handleCopy}
-                                            onDelete={(id) => activeWebsiteId ? void deleteAsset(id, { websiteId: activeWebsiteId }) : undefined}
+                                            onDelete={handleDeleteLibraryAsset}
                                             onPreview={setPreviewAsset}
                                         />
                                     ))}
@@ -332,7 +408,7 @@ export function AssetLibraryPanel() {
                                             copiedId={copiedId}
                                             activeWebsiteId={activeWebsiteId}
                                             onCopy={handleCopy}
-                                            onDelete={(id) => activeWebsiteId ? void deleteAsset(id, { websiteId: activeWebsiteId }) : undefined}
+                                            onDelete={handleDeleteLibraryAsset}
                                             onPreview={setPreviewAsset}
                                         />
                                     ))}
@@ -340,8 +416,40 @@ export function AssetLibraryPanel() {
                             )}
                         </TabsContent>
                     </div>
-                </ScrollArea>
+                </div>
             </Tabs>
+
+            {pexelsOpen && createPortal(
+                <div
+                    className="fixed inset-0 z-[220] flex items-center justify-center bg-black/50 p-3 sm:p-6"
+                    onClick={() => {
+                        setPexelsOpen(false);
+                        setPexelsQuery('');
+                    }}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Pexels"
+                >
+                    <div
+                        className="flex h-[min(92dvh,56rem)] w-full max-w-[80rem] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <PexelsStockBrowser
+                            query={pexelsQuery}
+                            onQueryChange={setPexelsQuery}
+                            importingId={importingStockId}
+                            onCopy={handleCopy}
+                            onAddToLibrary={(item) => void handleAddStockMedia(item)}
+                            onSaveToLibrary={(item) => void handleSaveToPersonal(item)}
+                            onClose={() => {
+                                setPexelsOpen(false);
+                                setPexelsQuery('');
+                            }}
+                        />
+                    </div>
+                </div>,
+                document.body
+            )}
 
             {/* URL Upload Dialog */}
             <Dialog open={isUrlDialogOpen} onOpenChange={setIsUrlDialogOpen}>
@@ -421,9 +529,29 @@ export function AssetLibraryPanel() {
                             />
                         )}
                     </div>
-                    <p className="absolute bottom-5 left-1/2 -translate-x-1/2 text-xs font-medium text-white/80 truncate max-w-[90vw] px-4 text-center">
-                        {previewAsset.name}
-                    </p>
+                    <div className="absolute bottom-5 left-1/2 z-[201] flex w-[min(90vw,28rem)] -translate-x-1/2 flex-col items-center gap-2">
+                        <p className="max-w-full truncate px-4 text-center text-xs font-medium text-white/80">
+                            {previewAsset.name}
+                        </p>
+                        <button
+                            type="button"
+                            disabled={Boolean(importingStockId)}
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                void handleSaveToPersonal({
+                                    name: previewAsset.name,
+                                    url: previewAsset.url,
+                                    media: previewAsset.type === 'video' ? 'video' : 'image',
+                                });
+                            }}
+                            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-white px-4 text-xs font-semibold text-[#0F172A] hover:bg-slate-100 disabled:opacity-60"
+                        >
+                            {importingStockId === previewAsset.url
+                                ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                : <Save className="h-3.5 w-3.5" />}
+                            Save
+                        </button>
+                    </div>
                 </div>,
                 document.body
             )}

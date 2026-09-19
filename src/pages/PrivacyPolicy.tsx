@@ -98,7 +98,7 @@ export default function PrivacyPolicy() {
             </h1>
             <p className="text-lg text-slate-600 leading-relaxed">
               Last updated: <span className="text-slate-900 font-semibold">March 2024</span>. 
-              We value your trust. This policy explains how Buildora handles your data with the highest standards of security.
+              We value your trust. This policy explains how Webstudio handles your data with the highest standards of security.
             </p>
           </motion.div>
         </div>
@@ -116,7 +116,7 @@ export default function PrivacyPolicy() {
             </div>
             <div className="prose prose-slate prose-lg max-w-none text-slate-600">
               <p>
-                Buildora provides high-end residential and commercial
+                Webstudio provides high-end residential and commercial
                 landscape care and digital architecture solutions. Your privacy isn't just a legal requirement for us—it's a core value.
               </p>
             </div>

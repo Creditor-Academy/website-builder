@@ -1,9 +1,7 @@
 import React from 'react';
 import { format } from 'date-fns';
-import { motion, type HTMLMotionProps } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
-import { cardMotion } from '@/lib/motion';
 
 export type DashboardPublishStatus = 'Draft' | 'Published' | 'Deleted';
 
@@ -43,7 +41,7 @@ export function getDashboardPublishStatus({
 
 export const dashboardCardClass =
 
-  'group relative @container bg-[#fcf8fa] border border-[#f3f4f6] rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-500 ease-out flex flex-col min-w-0';
+  'group relative @container bg-[#fcf8fa] border border-[#f3f4f6] rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-150 ease-out flex flex-col min-w-0';
 
 
 
@@ -175,19 +173,15 @@ export const dashboardCardTagClass =
 
 type DivProps = React.ComponentProps<'div'>;
 
-type MotionDivProps = HTMLMotionProps<'div'>;
-
 type ButtonProps = React.ComponentProps<'button'>;
 
 
 
-export function DashboardCard({ className, interactive, ...props }: MotionDivProps & { interactive?: boolean }) {
+export function DashboardCard({ className, interactive, ...props }: DivProps & { interactive?: boolean }) {
 
   return (
 
-    <motion.div
-
-      {...cardMotion}
+    <div
 
       className={cn(interactive ? dashboardCardInteractiveClass : dashboardCardClass, className)}
 
@@ -347,13 +341,11 @@ export function DashboardCardSecondaryAction({ className, ...props }: ButtonProp
 
 
 
-export function DashboardCardDashed({ className, ...props }: MotionDivProps) {
+export function DashboardCardDashed({ className, ...props }: DivProps) {
 
   return (
 
-    <motion.div
-
-      {...cardMotion}
+    <div
 
       className={cn(dashboardCardDashedClass, className)}
 
@@ -367,13 +359,11 @@ export function DashboardCardDashed({ className, ...props }: MotionDivProps) {
 
 
 
-export function DashboardStatCard({ className, ...props }: MotionDivProps) {
+export function DashboardStatCard({ className, ...props }: DivProps) {
 
   return (
 
-    <motion.div
-
-      {...cardMotion}
+    <div
 
       className={cn(dashboardStatCardClass, className)}
 
@@ -387,13 +377,11 @@ export function DashboardStatCard({ className, ...props }: MotionDivProps) {
 
 
 
-export function DashboardListCard({ className, ...props }: MotionDivProps) {
+export function DashboardListCard({ className, ...props }: DivProps) {
 
   return (
 
-    <motion.div
-
-      {...cardMotion}
+    <div
 
       className={cn(dashboardListCardClass, className)}
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,11 +12,17 @@ interface NavbarSettingsProps {
   pages: any[];
   onUpdate: (updates: any) => void;
   isExpanded?: boolean;
+  selectedItemId?: string | null;
 }
 
-export function NavbarSettings({ navbar, pages = [], onUpdate, isExpanded = true }: NavbarSettingsProps) {
+export function NavbarSettings({ navbar, pages = [], onUpdate, isExpanded = true, selectedItemId }: NavbarSettingsProps) {
   const [expanded, setExpanded] = useState(isExpanded);
-  const [editingLink, setEditingLink] = useState<string | null>(null);
+  const selectedLinkId = selectedItemId?.startsWith('navbar-link-') ? selectedItemId.slice('navbar-link-'.length) : null;
+  const [editingLink, setEditingLink] = useState<string | null>(selectedLinkId);
+
+  useEffect(() => {
+    if (selectedLinkId) setEditingLink(selectedLinkId);
+  }, [selectedLinkId]);
 
   if (!navbar) return null;
 
@@ -52,11 +58,11 @@ export function NavbarSettings({ navbar, pages = [], onUpdate, isExpanded = true
   };
 
   return (
-    <Collapsible open={expanded} onOpenChange={setExpanded} className="border-b border-slate-100">
-      <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+    <Collapsible open={expanded} onOpenChange={setExpanded} className="border-b border-[#0F172A]">
+      <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-[#0F172A]/5 transition-colors">
         <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 text-blue-600" />
-          <span className="text-sm font-semibold text-slate-700">Navbar Settings</span>
+          <Zap className="w-4 h-4 text-[#0F172A]" />
+          <span className="text-sm font-semibold text-[#0F172A]">Navbar Settings</span>
         </div>
       </CollapsibleTrigger>
       
