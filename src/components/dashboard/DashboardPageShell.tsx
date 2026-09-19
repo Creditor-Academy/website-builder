@@ -7,7 +7,7 @@ export const dashboardSearchInputClass =
 
 export const dashboardFilterPillClass = (active: boolean) =>
   cn(
-    'py-1.5 px-3 sm:px-4 rounded-full text-xs sm:text-sm font-medium transition-all duration-500 ease-out border whitespace-nowrap shrink-0',
+    'py-1.5 px-3 sm:px-4 rounded-full text-xs sm:text-sm font-medium transition-colors duration-150 ease-out border whitespace-nowrap shrink-0',
     active
       ? 'bg-[#131b2e] text-white border-transparent'
       : 'bg-[#f6f3f5] text-[#45464d] border-[#c6c6cd] hover:bg-[#eae7e9]'

@@ -5,7 +5,7 @@
 ![Vite](https://img.shields.io/badge/Vite-5.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-Welcome to the **Frontend Repository** for **Buildora** (codename *Athena*), a multi-tenant SaaS website builder platform. This application allows institutions, universities, and individuals to build, publish, and manage professional websites seamlessly without writing a single line of code.
+Welcome to the **Frontend Repository** for **Buildora** (codename _Athena_), a multi-tenant SaaS website builder platform. This application allows institutions, universities, and individuals to build, publish, and manage professional websites seamlessly without writing a single line of code.
 
 ---
 
@@ -19,15 +19,15 @@ Welcome to the **Frontend Repository** for **Buildora** (codename *Athena*), a m
 
 ## 🛠️ Technology Stack
 
-| Layer | Technology | Description |
-|---|---|---|
-| **Core Framework** | **React 18** | Built with Strict Mode and modern Hooks. |
-| **Build Tool** | **Vite** | Blazing fast HMR and optimized production bundling. |
-| **Language** | **TypeScript 5+** | End-to-end type safety. |
-| **Styling** | **Tailwind CSS** | Utility-first styling with custom themes. |
-| **UI Components** | **shadcn/ui** | Accessible, customizable radix-ui based components. |
-| **State Management** | **Zustand** | Lightweight, fast global state management. |
-| **Routing** | **React Router v6** | Client-side routing with protected routes. |
+| Layer                | Technology          | Description                                         |
+| -------------------- | ------------------- | --------------------------------------------------- |
+| **Core Framework**   | **React 18**        | Built with Strict Mode and modern Hooks.            |
+| **Build Tool**       | **Vite**            | Blazing fast HMR and optimized production bundling. |
+| **Language**         | **TypeScript 5+**   | End-to-end type safety.                             |
+| **Styling**          | **Tailwind CSS**    | Utility-first styling with custom themes.           |
+| **UI Components**    | **shadcn/ui**       | Accessible, customizable radix-ui based components. |
+| **State Management** | **Zustand**         | Lightweight, fast global state management.          |
+| **Routing**          | **React Router v6** | Client-side routing with protected routes.          |
 
 ---
 
@@ -36,6 +36,7 @@ Welcome to the **Frontend Repository** for **Buildora** (codename *Athena*), a m
 ### Prerequisites
 
 Ensure you have the following installed:
+
 - **Node.js** (v18 or higher recommended)
 - **npm** (v9 or higher)
 
@@ -58,6 +59,7 @@ cp .env.example .env.local
 ```
 
 Ensure the following critical variables are set:
+
 ```env
 VITE_API_BASE_URL=http://localhost:5000/api/v1  # Points to your local or staging backend
 VITE_SITE_HOST=https://webstudio.lmsathena.com   # Platform host domain
@@ -106,19 +108,22 @@ To build and run the frontend as an Nginx-served Docker container for staging or
 ```bash
 docker-compose up --build -d
 ```
+
 The application will be served on port `80` inside the container, mapped according to your `docker-compose.yml`.
 
 ---
 
 ## 🚢 Production Deployment
 
-This project is configured for an AWS 3-tier architecture (S3 + CloudFront + ACM). 
+This project is configured for an AWS 3-tier architecture (S3 + CloudFront + ACM).
 
 To create a production-ready optimized build:
+
 ```bash
 npm run build
 ```
-This generates the `dist/` directory, containing the highly minified, chunked static assets ready to be synced to the AWS S3 origin bucket. 
+
+This generates the `dist/` directory, containing the highly minified, chunked static assets ready to be synced to the AWS S3 origin bucket.
 
 > **Note on CI/CD:** A `Jenkinsfile` is utilized for automated testing, linting, and deployment to the AWS environment.
 

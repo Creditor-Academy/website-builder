@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Search, Upload, Check, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Trash2, Copy, Loader2, Globe, SlidersHorizontal } from 'lucide-react';
+import { Search, Upload, Check, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Trash2, Copy, Loader2, Globe, SlidersHorizontal, Save } from 'lucide-react';
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Tabs, TabsContent } from "../components/ui/tabs";
@@ -191,6 +191,25 @@ export default function DashboardAssets() {
         }
     };
 
+    const handleSaveToPersonal = async (item: { name: string; url: string; media?: 'image' | 'video' }) => {
+        setImportingStockId(item.url);
+        try {
+            await importAssetFromUrl(item.name, item.url, { scope: 'USER' });
+            toast({
+                title: 'Saved to your assets',
+                description: 'This file is now in your personal library. Open Saved Assets to use it.',
+            });
+        } catch (error: any) {
+            toast({
+                variant: 'destructive',
+                title: 'Could not save asset',
+                description: error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to save to your personal library.',
+            });
+        } finally {
+            setImportingStockId(null);
+        }
+    };
+
     const handleCopy = async (id: string, url: string) => {
         try {
             await navigator.clipboard.writeText(url);
@@ -286,9 +305,9 @@ export default function DashboardAssets() {
               <PopoverContent
                 align="end"
                 sideOffset={10}
-                className="w-[min(22rem,calc(100vw-2rem))] rounded-2xl border border-slate-200 p-0 shadow-xl"
+                className="w-[min(22rem,calc(100vw-2rem))] rounded-2xl border-0 p-0 shadow-xl"
               >
-                <div className="border-b border-slate-100 px-4 py-3">
+                <div className="px-4 py-3">
                   <p className="text-sm font-semibold text-[#0F172A]">Visible to users</p>
                   <p className="mt-0.5 text-xs text-slate-500">
                     Choose which library assets appear on the user dashboard.
@@ -340,7 +359,7 @@ export default function DashboardAssets() {
                     ))
                   )}
                 </div>
-                <div className="border-t border-slate-100 p-3">
+                <div className="p-3">
                   <Button
                     type="button"
                     disabled={savingVisibility}
@@ -399,7 +418,8 @@ export default function DashboardAssets() {
         </>
       }
     >
-            <div className={dashboardToolbarClass}>
+            <div className={cn(activeTab === 'stock' && 'flex flex-col gap-3')}>
+            <div className={cn(dashboardToolbarClass, activeTab === 'stock' && '!mb-0')}>
               <div className="relative min-w-0 flex-1">
                 <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#787778]" />
                 <Input
@@ -409,20 +429,22 @@ export default function DashboardAssets() {
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
-              <div className={cn(dashboardFilterScrollClass, 'flex-1')}>
+              <div className={cn(dashboardFilterScrollClass, 'flex-1', activeTab === 'stock' && 'pb-0')}>
               {['stock', 'all', 'images', 'videos'].map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={dashboardFilterPillClass(activeTab === tab)}
                 >
-                  {tab === 'stock' ? 'Stock' : tab === 'all' ? 'All Assets' : tab === 'images' ? 'Images' : 'Videos'}
+                  {tab === 'stock' ? 'Stock' : tab === 'all' ? 'Saved Assets' : tab === 'images' ? 'Images' : 'Videos'}
                 </button>
               ))}
               </div>
-              <div className="hidden items-center gap-1.5 self-start rounded-full border border-[#c6c6cd] bg-[#f6f3f5] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#45464d] sm:flex sm:self-auto">
-                Total: <span className="text-[#1b1b1d] font-bold">{activeTab === 'stock' ? 'Pexels' : filteredMedia.length}</span>
+              {activeTab !== 'stock' && (
+              <div className="hidden items-center gap-1.5 self-start rounded-full bg-[#f6f3f5] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#45464d] sm:flex sm:self-auto">
+                Total: <span className="text-[#1b1b1d] font-bold">{filteredMedia.length}</span>
               </div>
+              )}
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -434,6 +456,7 @@ export default function DashboardAssets() {
                         onClearQuery={() => setSearch('')}
                         onCopy={handleCopy}
                         onAddToLibrary={(item) => void handleAddStockMedia(item)}
+                        onSaveToLibrary={(item) => void handleSaveToPersonal(item)}
                       />
                    ) : isFetching ? (
                       <Loading label="Loading assets" />
@@ -441,7 +464,7 @@ export default function DashboardAssets() {
                    ['all', 'images', 'videos'].map(tabType => (
                       <TabsContent key={tabType} value={tabType} className="mt-0 outline-none">
                          {filteredMedia.filter(m => tabType === 'all' || m.type === tabType.slice(0, -1)).length === 0 && uploadingCount === 0 ? (
-                            <div className="h-[400px] flex flex-col items-center justify-center text-[#76777d] gap-4 border border-dashed border-[#c6c6cd] rounded-lg bg-[#f6f3f5]">
+                            <div className="h-[400px] flex flex-col items-center justify-center text-[#76777d] gap-4 rounded-lg bg-[#f6f3f5]">
                                 <div className="w-20 h-20 rounded-lg bg-[#eae7e9] flex items-center justify-center">
                                    {tabType === 'videos' ? <Video className="w-8 h-8 opacity-40" /> : <ImageIcon className="w-8 h-8 opacity-40" />}
                                 </div>
@@ -455,7 +478,7 @@ export default function DashboardAssets() {
 
                                 {/* ── Upload skeleton placeholders ── */}
                                 {uploadingCount > 0 && Array.from({ length: uploadingCount }).map((_, i) => (
-                                   <div key={`uploading-${i}`} className="flex flex-col rounded-lg border border-[#c6c6cd] bg-[#fcf8fa] overflow-hidden animate-pulse">
+                                   <div key={`uploading-${i}`} className="flex flex-col rounded-lg bg-[#fcf8fa] overflow-hidden animate-pulse">
                                       <div className="aspect-square bg-[#eae7e9] flex flex-col items-center justify-center gap-2">
                                          <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
                                          <span className="text-[10px] font-semibold text-slate-400">Uploading…</span>
@@ -472,14 +495,14 @@ export default function DashboardAssets() {
                                         key={item.id}
                                         interactive
                                         className={cn(
-                                            'hover:shadow-md',
+                                            'border-0 hover:shadow-md',
                                             deletingIds.has(item.id) && 'opacity-60 scale-[0.97] pointer-events-none'
                                         )}
                                         onClick={() => setPreviewAsset(item)}
                                     >
                                         <DashboardCardMedia aspect className="aspect-square">
                                            {item.type === 'image' ? (
-                                               <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
+                                               <img src={item.url} alt={item.name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                                            ) : (
                                                <div className="w-full h-full bg-[#131b2e] flex items-center justify-center">
                                                    <Video className="w-8 h-8 text-white/40" />
@@ -513,13 +536,13 @@ export default function DashboardAssets() {
                                             </DashboardCardDescription>
 
                                             {deletingIds.has(item.id) ? (
-                                                <div className="mt-2 flex items-center justify-center gap-1.5 border-t border-[#c6c6cd] pt-2 text-[#ba1a1a]">
+                                                <div className="mt-2 flex items-center justify-center gap-1.5 pt-2 text-[#ba1a1a]">
                                                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
                                                     <span className="text-[11px] font-medium">Deleting…</span>
                                                 </div>
                                             ) : (
                                                 <DashboardCardFooter
-                                                    className="mt-2 flex-row items-center gap-1.5 border-t border-[#c6c6cd] pt-2"
+                                                    className="mt-2 flex-row items-center gap-1.5 pt-2"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
                                                     <button
@@ -567,17 +590,18 @@ export default function DashboardAssets() {
                    )}
                 </div>
             </Tabs>
+            </div>
 
             <Dialog open={!!previewAsset} onOpenChange={(open) => { if (!open) setPreviewAsset(null); }}>
                 <DialogContent
                     className={cn(
-                        'flex max-h-[min(92dvh,52rem)] w-[calc(100vw-1.5rem)] flex-col gap-0 overflow-hidden p-0',
-                        'rounded-2xl border-[#c6c6cd] bg-white shadow-2xl sm:max-w-4xl',
+                        'flex max-h-[min(92dvh,52rem)] w-[calc(100vw-1.5rem)] flex-col gap-0 overflow-hidden border-0 p-0',
+                        'rounded-2xl bg-white shadow-2xl sm:max-w-4xl',
                         '[&>button]:right-3 [&>button]:top-3 [&>button]:text-[#0F172A] [&>button]:hover:bg-slate-100',
                         '[&>button>svg]:mr-0 [&>button>svg]:h-5 [&>button>svg]:w-5',
                     )}
                 >
-                    <DialogHeader className="shrink-0 border-b border-[#c6c6cd] px-4 py-3 pr-12 sm:px-5 sm:py-4">
+                    <DialogHeader className="shrink-0 px-4 py-3 pr-12 sm:px-5 sm:py-4">
                         <DialogTitle className="truncate text-left text-sm font-semibold text-[#0F172A] sm:text-base">
                             {previewAsset?.name || 'Asset preview'}
                         </DialogTitle>
@@ -602,7 +626,7 @@ export default function DashboardAssets() {
                     </div>
 
                     {previewAsset && (
-                        <div className="flex shrink-0 flex-col gap-3 border-t border-[#c6c6cd] bg-[#fcf8fa] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                        <div className="flex shrink-0 flex-col gap-3 bg-[#fcf8fa] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                             <p className="min-w-0 truncate text-[11px] text-[#76777d] sm:text-xs">
                                 <span className="uppercase tracking-wider">{previewAsset.size || previewAsset.type}</span>
                                 <span className="mx-1">·</span>
@@ -611,6 +635,21 @@ export default function DashboardAssets() {
                                 </span>
                             </p>
                             <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    disabled={Boolean(importingStockId)}
+                                    className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md bg-[#131924] px-3 text-xs font-medium text-white hover:bg-[#202838] disabled:opacity-60 sm:flex-none"
+                                    onClick={() => void handleSaveToPersonal({
+                                        name: previewAsset.name,
+                                        url: previewAsset.url,
+                                        media: previewAsset.type === 'video' ? 'video' : 'image',
+                                    })}
+                                >
+                                    {importingStockId === previewAsset.url
+                                        ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                        : <Save className="h-3.5 w-3.5" />}
+                                    Save
+                                </button>
                                 <button
                                     type="button"
                                     className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md border border-[#c6c6cd] bg-white px-3 text-xs font-medium text-[#0F172A] hover:bg-[#eae7e9] sm:flex-none"
@@ -639,7 +678,7 @@ export default function DashboardAssets() {
             </Dialog>
 
             <Dialog open={isUrlDialogOpen} onOpenChange={setIsUrlDialogOpen}>
-                <DialogContent className="w-[calc(100vw-1.5rem)] overflow-hidden rounded-lg border-[#c6c6cd] p-0 shadow-2xl sm:max-w-md">
+                <DialogContent className="w-[calc(100vw-1.5rem)] overflow-hidden rounded-lg border-0 p-0 shadow-2xl sm:max-w-md">
                     <div className="p-5 pb-4 sm:p-8 sm:pb-4">
                        <DialogHeader>
                            <DialogTitle className="flex items-center gap-3 text-xl font-black tracking-tight text-[#0F172A] sm:text-2xl">
@@ -673,7 +712,7 @@ export default function DashboardAssets() {
                            </div>
                        </div>
                     </div>
-                    <div className="p-6 bg-slate-50 flex justify-end gap-3 border-t border-slate-200/60">
+                    <div className="p-6 bg-slate-50 flex justify-end gap-3">
                         <Button variant="ghost" onClick={() => setIsUrlDialogOpen(false)} className="rounded-xl font-black text-slate-500 text-xs px-6 h-11 tracking-widest uppercase hover:bg-slate-100">Cancel</Button>
                         <Button onClick={handleUrlUpload} disabled={!urlInput} className="rounded-lg font-semibold text-sm px-8 h-11 bg-[#131b2e] hover:bg-[#252f4a]">Import Asset</Button>
                     </div>
