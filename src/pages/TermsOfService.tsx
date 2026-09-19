@@ -105,7 +105,7 @@ export default function TermsOfService() {
               Terms of <span className="text-slate-900">Service</span>
             </h1>
             <p className="text-xl text-slate-600 leading-relaxed">
-              By using the Buildora platform, you are agreeing to the following terms. Please read them carefully to understand your rights and obligations.
+              By using the Web Studio platform, you are agreeing to the following terms. Please read them carefully to understand your rights and obligations.
             </p>
           </motion.div>
         </div>
@@ -125,7 +125,7 @@ export default function TermsOfService() {
                <h2 className="text-3xl font-black text-slate-900 tracking-tight">1. Acceptance of Terms</h2>
             </div>
             <p className="text-slate-600 text-lg leading-relaxed pl-16">
-              By accessing Buildora, you confirm that you are at least 18 years old and agree to be bound by these Terms of Service. If you are using the services on behalf of an organization, you represent that you have the authority to bind that entity to these terms.
+              By accessing Web Studio, you confirm that you are at least 18 years old and agree to be bound by these Terms of Service. If you are using the services on behalf of an organization, you represent that you have the authority to bind that entity to these terms.
             </p>
           </div>
 
@@ -138,7 +138,7 @@ export default function TermsOfService() {
             </div>
             <div className="pl-16 space-y-4">
               <p className="text-slate-600 text-lg leading-relaxed">
-                You may use Buildora only for lawful purposes. You agree not to:
+                You may use Web Studio only for lawful purposes. You agree not to:
               </p>
               <ul className="grid md:grid-cols-2 gap-3">
                 {["Misuse the platform", "Interfere with operation", "Scrape content", "Unauthorized access"].map((item) => (
@@ -167,7 +167,7 @@ export default function TermsOfService() {
               <BookOpen className="text-indigo-600" /> 4. Intellectual Property
             </h2>
             <p className="text-slate-600 text-lg leading-relaxed">
-              All content, templates, designs, and software provided by Buildora are owned by or licensed to us. You are granted a limited, non-exclusive license to use the templates for your personal or business website, but copying the "Buildora Engine" or reselling our core assets is strictly prohibited.
+              All content, templates, designs, and software provided by Web Studio are owned by or licensed to us. You are granted a limited, non-exclusive license to use the templates for your personal or business website, but copying the "Web Studio Engine" or reselling our core assets is strictly prohibited.
             </p>
           </div>
 
@@ -181,7 +181,7 @@ export default function TermsOfService() {
             <div className="pl-16 p-8 bg-indigo-900 rounded-[2.5rem] text-white shadow-xl shadow-indigo-100 relative overflow-hidden">
                <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -mr-10 -mt-10 blur-2xl" />
                <p className="leading-relaxed mb-4 text-indigo-100">
-                 Paid plans are billed according to the pricing displayed at purchase. Buildora reserves the right to change pricing with 30-day prior notice. 
+                 Paid plans are billed according to the pricing displayed at purchase. Web Studio reserves the right to change pricing with 30-day prior notice. 
                </p>
                <div className="text-xs font-bold uppercase tracking-widest text-indigo-400">Auto-renewal applies to all monthly/annual plans.</div>
             </div>
@@ -197,7 +197,7 @@ export default function TermsOfService() {
           <div id="liability" className="scroll-mt-32 border-t border-slate-200 pt-16">
              <h2 className="text-3xl font-black text-slate-900 mb-6 tracking-tight ">7. Limitation of Liability</h2>
              <p className="text-slate-500 text-lg leading-relaxed pl-16 italic">
-               Buildora is provided "as is". We shall not be liable for any indirect, incidental, or consequential damages resulting from your use of the platform.
+               Web Studio is provided "as is". We shall not be liable for any indirect, incidental, or consequential damages resulting from your use of the platform.
              </p>
           </div>
 

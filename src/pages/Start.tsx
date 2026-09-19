@@ -6,7 +6,7 @@ const Start = () => {
   return (
     <>
       <Helmet>
-        <title>Get Started - SiteBuilder</title>
+        <title>Get Started - Web Studio</title>
         <meta name="description" content="Get started" />
       </Helmet>
       <WebsiteEditor initialPage={createStartPage()} />

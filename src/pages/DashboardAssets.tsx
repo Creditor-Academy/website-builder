@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Search, Upload, Check, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Trash2, Copy, Loader2, Globe, SlidersHorizontal } from 'lucide-react';
+import { Search, Upload, Check, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Trash2, Copy, Loader2, Globe, SlidersHorizontal, Save } from 'lucide-react';
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Tabs, TabsContent } from "../components/ui/tabs";
@@ -188,6 +188,25 @@ export default function DashboardAssets() {
                 variant: 'destructive',
                 title: item.media === 'video' ? 'Could not add video' : 'Could not add photo',
                 description: error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to import stock media.',
+            });
+        } finally {
+            setImportingStockId(null);
+        }
+    };
+
+    const handleSaveToPersonal = async (item: { name: string; url: string; media?: 'image' | 'video' }) => {
+        setImportingStockId(item.url);
+        try {
+            await importAssetFromUrl(item.name, item.url, { scope: 'USER' });
+            toast({
+                title: 'Saved to your assets',
+                description: 'This file is now in your personal library. Open Saved Assets to use it.',
+            });
+        } catch (error: any) {
+            toast({
+                variant: 'destructive',
+                title: 'Could not save asset',
+                description: error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to save to your personal library.',
             });
         } finally {
             setImportingStockId(null);
@@ -445,6 +464,7 @@ export default function DashboardAssets() {
                         onClearQuery={() => setSearch('')}
                         onCopy={handleCopy}
                         onAddToLibrary={(item) => void handleAddStockMedia(item)}
+                        onSaveToLibrary={(item) => void handleSaveToPersonal(item)}
                       />
                    ) : isFetching ? (
                       <Loading label="Loading assets" />
@@ -623,6 +643,21 @@ export default function DashboardAssets() {
                                 </span>
                             </p>
                             <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    disabled={Boolean(importingStockId)}
+                                    className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md bg-[#131924] px-3 text-xs font-medium text-white hover:bg-[#202838] disabled:opacity-60 sm:flex-none"
+                                    onClick={() => void handleSaveToPersonal({
+                                        name: previewAsset.name,
+                                        url: previewAsset.url,
+                                        media: previewAsset.type === 'video' ? 'video' : 'image',
+                                    })}
+                                >
+                                    {importingStockId === previewAsset.url
+                                        ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                        : <Save className="h-3.5 w-3.5" />}
+                                    Save
+                                </button>
                                 <button
                                     type="button"
                                     className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md border border-[#c6c6cd] bg-white px-3 text-xs font-medium text-[#0F172A] hover:bg-[#eae7e9] sm:flex-none"

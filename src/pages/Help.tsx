@@ -6,7 +6,7 @@ const Help = () => {
   return (
     <>
       <Helmet>
-        <title>Help - SiteBuilder</title>
+        <title>Help - Web Studio</title>
         <meta name="description" content="Help center" />
       </Helmet>
       <WebsiteEditor initialPage={createHelpPage()} />

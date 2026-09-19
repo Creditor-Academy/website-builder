@@ -208,6 +208,7 @@ export interface EditorState {
     showGrid: boolean;
     previewMode: boolean;
     showLeftPanel: boolean;
+    leftNavTab: string;
     showRightPanel: boolean;
     saveStatus: SaveStatus;
     dropTarget: DropTarget | null;
@@ -242,6 +243,7 @@ const INITIAL_EDITOR: EditorState = {
     showGrid: false,
     previewMode: false,
     showLeftPanel: true,
+    leftNavTab: 'add',
     showRightPanel: true,
     saveStatus: 'idle',
     dropTarget: null,
@@ -779,6 +781,7 @@ const useBuilderStore = create<BuilderStore>()(
                 const website = websites.find(w => w.id === activeWebsiteId);
                 if (!website) return;
 
+                const source = website.pages.find((page) => page.id === get().activePageId) || website.pages[0];
                 const newPage: Page = {
                     id: uuidv4(),
                     name: pageData.name || 'New Page',
@@ -788,9 +791,9 @@ const useBuilderStore = create<BuilderStore>()(
                         title: pageData.name || 'New Page',
                         description: ''
                     },
-                    navbar: website.pages[0].navbar,
-                    footer: website.pages[0].footer,
-                    globalStyles: website.pages[0].globalStyles,
+                    navbar: source?.navbar,
+                    footer: 'footer' in pageData ? pageData.footer : null,
+                    globalStyles: source?.globalStyles,
                 };
 
                 const newPages = [...website.pages, newPage];
@@ -1256,7 +1259,9 @@ const useBuilderStore = create<BuilderStore>()(
                     },
                     sections: (p.sections || []).map(clearSectionColors),
                     navbar: { ...(p.navbar || {}), styles: { ...((p.navbar as any)?.styles || {}), backgroundColor: undefined, textColor: undefined } },
-                    footer: { ...(p.footer || {}), styles: { ...((p.footer as any)?.styles || {}), backgroundColor: undefined, textColor: undefined } }
+                    footer: p.footer
+                        ? { ...p.footer, styles: { ...((p.footer as any)?.styles || {}), backgroundColor: undefined, textColor: undefined } }
+                        : p.footer,
                 }));
                 get().updateWebsitePages(newPages);
                 get().saveActiveWebsite();
@@ -1296,13 +1301,11 @@ const useBuilderStore = create<BuilderStore>()(
             },
 
             updateFooter: (updates) => {
-                const website = get().getActiveWebsite();
-                if (!website) return;
-                const newPages = website.pages.map(p => ({
-                    ...p,
-                    footer: { ...(p.footer || {}), ...updates }
-                }));
-                get().updateWebsitePages(newPages);
+                const page = get().getActivePage();
+                if (!page) return;
+                get().updateCurrentPage({
+                    footer: updates == null ? null : { ...(page.footer || {}), ...updates },
+                });
                 get().saveActiveWebsite();
             },
 
@@ -1524,9 +1527,9 @@ const useBuilderStore = create<BuilderStore>()(
 
             deleteCanvasNode: (id) => {
                 if (id === 'footer') {
-                    const website = get().getActiveWebsite();
-                    if (!website) return;
-                    get().updateWebsitePages(website.pages.map((page) => ({ ...page, footer: null })));
+                    const page = get().getActivePage();
+                    if (!page) return;
+                    get().updateCurrentPage({ footer: null });
                     get().saveActiveWebsite();
                     get().selectNode(null);
                     return;

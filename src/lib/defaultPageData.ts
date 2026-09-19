@@ -386,35 +386,99 @@ export const createDefaultMasonryGallerySection = () => ({
 
 // --- Fallback Global Creators ---
 
-export const createDefaultNavbar = () => ({
-  id: uuidv4(),
-  style: 'minimal',
-  logo: {
-    text: 'SiteBuilder',
-  },
-  links: [
-    { id: uuidv4(), label: 'Home', href: '/' },
-    { id: uuidv4(), label: 'About', href: '/about' },
-    { id: uuidv4(), label: 'Services', href: '/services' },
-    { id: uuidv4(), label: 'Pricing', href: '/pricing' },
-    { id: uuidv4(), label: 'Contact', href: '/contact' },
-    { id: uuidv4(), label: 'Get Started', href: '/start', isButton: true },
-  ],
-  styles: {
-    backgroundColor: 'transparent',
-    textColor: '#000000',
-    sticky: true,
-    buttonBg: '#0f172a',
-    buttonText: '#ffffff',
-    buttonRadius: '2px',
-  },
-});
+function navbarLink(label: string, href: string, isButton = false) {
+  return { id: uuidv4(), label, href, isButton };
+}
+
+function navbarBase(style: string, styles: Record<string, unknown>, links: ReturnType<typeof navbarLink>[]) {
+  return {
+    id: uuidv4(),
+    style,
+    logo: { text: 'Web Studio' },
+    links,
+    styles: {
+      sticky: true,
+      buttonBg: '#0f172a',
+      buttonText: '#ffffff',
+      buttonRadius: '999px',
+      ...styles,
+    },
+  };
+}
+
+/** Logo + links, outline Contact pill on the right. */
+export const createSimpleNavbar = () =>
+  navbarBase(
+    'simple',
+    {
+      backgroundColor: 'transparent',
+      textColor: '#0f172a',
+      buttonBg: 'transparent',
+      buttonText: '#0f172a',
+      buttonBorder: '1.5px solid #0f172a',
+      buttonRadius: '999px',
+    },
+    [
+      navbarLink('Home', '/'),
+      navbarLink('About', '/about'),
+      navbarLink('Contact', '/contact', true),
+    ]
+  );
+
+/** Solid bar with full nav and a Get Started pill. */
+export const createClassicNavbar = () =>
+  navbarBase(
+    'classic',
+    { backgroundColor: '#ffffff', textColor: '#0f172a', buttonRadius: '999px' },
+    [
+      navbarLink('Home', '/'),
+      navbarLink('About', '/about'),
+      navbarLink('Services', '/services'),
+      navbarLink('Pricing', '/pricing'),
+      navbarLink('Contact', '/contact'),
+      navbarLink('Get Started', '/start', true),
+    ]
+  );
+
+/** Links on the left, logo in the center, Contact pill on the right. */
+export const createCenteredNavbar = () =>
+  navbarBase(
+    'centered',
+    { backgroundColor: '#ffffff', textColor: '#0f172a', buttonRadius: '999px' },
+    [
+      navbarLink('Work', '/'),
+      navbarLink('About', '/about'),
+      navbarLink('Journal', '/blog'),
+      navbarLink('Contact', '/contact', true),
+    ]
+  );
+
+/** Dark bar: logo left, links centered, white pill CTA. */
+export const createSplitNavbar = () =>
+  navbarBase(
+    'split',
+    {
+      backgroundColor: '#0f172a',
+      textColor: '#ffffff',
+      buttonBg: '#ffffff',
+      buttonText: '#0f172a',
+      buttonRadius: '999px',
+    },
+    [
+      navbarLink('Home', '/'),
+      navbarLink('Services', '/services'),
+      navbarLink('Pricing', '/pricing'),
+      navbarLink('Start', '/start', true),
+    ]
+  );
+
+export const createDefaultNavbar = () => createClassicNavbar();
 
 export const createDefaultFooter = () => ({
   id: uuidv4(),
   style: 'columns',
   logo: {
-    text: 'SiteBuilder',
+    text: 'Web Studio',
   },
   columns: [
     {
@@ -451,7 +515,7 @@ export const createDefaultFooter = () => ({
     { id: uuidv4(), platform: 'instagram', href: 'https://instagram.com/yourusername' },
     { id: uuidv4(), platform: 'linkedin', href: 'https://linkedin.com/in/yourprofile' },
   ],
-  copyright: '© 2024 SiteBuilder. All rights reserved.',
+  copyright: '© 2024 Web Studio. All rights reserved.',
   styles: {
     backgroundColor: '#0f172a',
     textColor: '#94a3b8',
@@ -778,7 +842,7 @@ export const getDefaultPage = () => ({
   name: 'Home',
   slug: '/',
   meta: {
-    title: 'My Website - Built with SiteBuilder',
+    title: 'My Website - Built with Web Studio',
     description: 'A beautiful website created with the no-code website builder.',
   },
   navbar: createDefaultNavbar(),

@@ -6,7 +6,7 @@ const About = () => {
   return (
     <>
       <Helmet>
-        <title>About - SiteBuilder</title>
+        <title>About - Web Studio</title>
         <meta name="description" content="About us" />
       </Helmet>
       <WebsiteEditor initialPage={createAboutPage()} />

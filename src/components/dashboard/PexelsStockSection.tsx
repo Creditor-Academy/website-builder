@@ -7,6 +7,7 @@ import {
   Loader2,
   Play,
   Plus,
+  Save,
   Search,
   X,
 } from 'lucide-react';
@@ -166,6 +167,7 @@ export function PexelsStockSection({
   importingId,
   onClearQuery,
   onAddToLibrary,
+  onSaveToLibrary,
   layout = 'page',
   filtersOpen = true,
 }: {
@@ -174,6 +176,7 @@ export function PexelsStockSection({
   onClearQuery?: () => void;
   onCopy?: (id: string, url: string) => void;
   onAddToLibrary: (item: { name: string; url: string; media: 'image' | 'video'; provider?: string; providerId?: string | number }) => void | Promise<void>;
+  onSaveToLibrary?: (item: { name: string; url: string; media: 'image' | 'video'; provider?: string; providerId?: string | number }) => void | Promise<void>;
   layout?: 'page' | 'panel';
   filtersOpen?: boolean;
 }) {
@@ -649,19 +652,36 @@ export function PexelsStockSection({
                   </>
                 )}
               </p>
-              <button
-                type="button"
-                className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-[#c6c6cd] bg-white px-3 text-xs font-medium text-[#0F172A] hover:bg-[#eae7e9]"
-                onClick={() => {
-                  const url = preview.kind === 'video'
-                    ? videoFileUrl(preview.video)
-                    : preview.photo.src.original || photoUrl(preview.photo);
-                  if (url) window.open(url, '_blank', 'noopener,noreferrer');
-                }}
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-                Preview
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-[#c6c6cd] bg-white px-3 text-xs font-medium text-[#0F172A] hover:bg-[#eae7e9]"
+                  onClick={() => {
+                    const url = preview.kind === 'video'
+                      ? videoFileUrl(preview.video)
+                      : preview.photo.src.original || photoUrl(preview.photo);
+                    if (url) window.open(url, '_blank', 'noopener,noreferrer');
+                  }}
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  Preview
+                </button>
+                <button
+                  type="button"
+                  disabled={Boolean(importingId)}
+                  className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-[#131924] px-3 text-xs font-medium text-white hover:bg-[#202838] disabled:opacity-60"
+                  onClick={() => {
+                    const item = preview.kind === 'video'
+                      ? { name: videoName(preview.video), url: videoFileUrl(preview.video), media: 'video' as const, provider: 'pexels', providerId: preview.video.id }
+                      : { name: photoName(preview.photo), url: preview.photo.src.original || photoUrl(preview.photo), media: 'image' as const, provider: 'pexels', providerId: preview.photo.id };
+                    if (!item.url) return;
+                    void (onSaveToLibrary || onAddToLibrary)(item);
+                  }}
+                >
+                  {importingId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                  Save
+                </button>
+              </div>
             </div>
           )}
         </DialogContent>
@@ -675,13 +695,15 @@ export function PexelsStockBrowser({
   onQueryChange,
   importingId,
   onAddToLibrary,
+  onSaveToLibrary,
   onCopy,
   onClose,
 }: {
   query: string;
   onQueryChange: (value: string) => void;
   importingId: string | null;
-  onAddToLibrary: (item: { name: string; url: string; media: 'image' | 'video' }) => void | Promise<void>;
+  onAddToLibrary: (item: { name: string; url: string; media: 'image' | 'video'; provider?: string; providerId?: string | number }) => void | Promise<void>;
+  onSaveToLibrary?: (item: { name: string; url: string; media: 'image' | 'video'; provider?: string; providerId?: string | number }) => void | Promise<void>;
   onCopy?: (id: string, url: string) => void;
   onClose?: () => void;
 }) {
@@ -717,6 +739,7 @@ export function PexelsStockBrowser({
           onClearQuery={() => onQueryChange('')}
           onCopy={onCopy}
           onAddToLibrary={onAddToLibrary}
+          onSaveToLibrary={onSaveToLibrary}
         />
       </div>
     </div>

@@ -6,7 +6,7 @@ const Blog = () => {
   return (
     <>
       <Helmet>
-        <title>Blog - SiteBuilder</title>
+        <title>Blog - Web Studio</title>
         <meta name="description" content="Blog" />
       </Helmet>
       <WebsiteEditor initialPage={createBlogPage()} />

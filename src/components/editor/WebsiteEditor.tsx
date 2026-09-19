@@ -148,9 +148,10 @@ function EditorLeftSidebar({
 }
 
 function EditorContent() {
-  const [leftNavTab, setLeftNavTab] = useState("add");
   const store = useBuilderStore();
   const { editor, setTourState, activeWebsiteId, setEditorState } = store;
+  const leftNavTab = editor.leftNavTab || "add";
+  const setLeftNavTab = (id: string) => setEditorState({ leftNavTab: id, showLeftPanel: true });
   const { id } = useParams();
   const isCompact = useIsCompact();
 

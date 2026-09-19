@@ -170,10 +170,10 @@ export function NavbarSettings({ navbar, pages = [], onUpdate, isExpanded = true
             <div className="space-y-2">
               <Label className="text-[10px] font-semibold text-slate-500">Radius</Label>
               <Input
-                value={styles.buttonRadius || '2px'}
+                value={styles.buttonRadius || '999px'}
                 onChange={(e) => handleUpdateStyles({ buttonRadius: e.target.value })}
                 className="bg-slate-50 border-slate-200 font-mono text-[9px] h-8"
-                placeholder="2px"
+                placeholder="999px"
               />
             </div>
           </div>

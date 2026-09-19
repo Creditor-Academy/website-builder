@@ -145,7 +145,8 @@ function dropTargetFromOver(overId: string, overData: unknown, pageId?: string):
 export type DropAction =
   | { type: 'move'; nodeId: string; target: DropTarget }
   | { type: 'palette'; item: PaletteDragData; target: DropTarget | null }
-  | { type: 'footer' };
+  | { type: 'footer' }
+  | { type: 'navbar'; catalogId: string };
 
 export function resolveDropAction(
   activeId: string,
@@ -160,6 +161,9 @@ export function resolveDropAction(
 
   if (activeParsed.origin === 'palette') {
     const item = (activeData || {}) as PaletteDragData;
+    if (item.itemKind === 'navbar' || activeParsed.itemKind === 'navbar') {
+      return { type: 'navbar', catalogId: item.catalogId || activeParsed.catalogId };
+    }
     if (item.itemKind === 'footer' || activeParsed.itemKind === 'footer') return { type: 'footer' };
     const paletteItem: PaletteDragData = {
       source: 'palette',

@@ -204,7 +204,7 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
               <div>
                 <Label htmlFor="subdomain" className="flex items-center gap-2 font-medium text-[#0F172A]">
                   <Globe className="h-4 w-4 text-[#0F172A]" />
-                  Buildora Subdomain
+                  Web Studio Subdomain
                 </Label>
                 <div className="mt-1.5 flex">
                   <Input
@@ -230,7 +230,7 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
                   <div>
                     <p className="font-medium text-[#0F172A]">Free Hosting</p>
                     <p className="text-sm text-slate-500">
-                      Your website will be hosted on Buildora's infrastructure with SSL certificate and CDN included.
+                      Your website will be hosted on Web Studio's infrastructure with SSL certificate and CDN included.
                     </p>
                   </div>
                 </div>
@@ -263,7 +263,7 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
                     <div>
                       <p className="font-medium text-[#0F172A]">DNS Configuration</p>
                       <p className="text-sm text-slate-500">
-                        After publishing, update your DNS settings to point to Buildora's servers.
+                        After publishing, update your DNS settings to point to Web Studio's servers.
                       </p>
                       <div className="mt-2 rounded-lg bg-white p-2 font-mono text-xs text-[#0F172A]">
                         A Record: 192.168.1.1<br />

@@ -6,7 +6,7 @@ const Services = () => {
   return (
     <>
       <Helmet>
-        <title>Services - SiteBuilder</title>
+        <title>Services - Web Studio</title>
         <meta name="description" content="Services we provide" />
       </Helmet>
       <WebsiteEditor initialPage={createServicesPage()} />

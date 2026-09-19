@@ -176,7 +176,7 @@ export default function DashboardMessages() {
     return (
         <>
             <Helmet>
-                <title>Messages | Buildora</title>
+                <title>Messages | Web Studio</title>
             </Helmet>
 
             <DashboardPageShell

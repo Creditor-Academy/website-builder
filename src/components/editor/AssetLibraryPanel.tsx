@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Search, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Plus, Globe, X, Trash2 } from 'lucide-react';
+import { Search, Image as ImageIcon, Video, Monitor, Link as LinkIcon, Plus, Globe, X, Trash2, Save, Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -225,6 +225,25 @@ export function AssetLibraryPanel() {
         }
     };
 
+    const handleSaveToPersonal = async (item: { name: string; url: string; media?: 'image' | 'video' }) => {
+        setImportingStockId(item.url);
+        try {
+            await importAssetFromUrl(item.name, item.url, { scope: 'USER' });
+            toast({
+                title: 'Saved to your assets',
+                description: 'This file is now in your personal library.',
+            });
+        } catch (error: any) {
+            toast({
+                variant: 'destructive',
+                title: 'Could not save asset',
+                description: error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to save to your personal library.',
+            });
+        } finally {
+            setImportingStockId(null);
+        }
+    };
+
     const copyToClipboard = (url: string) => {
         navigator.clipboard.writeText(url);
         // Could add a toast notification here
@@ -421,6 +440,7 @@ export function AssetLibraryPanel() {
                             importingId={importingStockId}
                             onCopy={handleCopy}
                             onAddToLibrary={(item) => void handleAddStockMedia(item)}
+                            onSaveToLibrary={(item) => void handleSaveToPersonal(item)}
                             onClose={() => {
                                 setPexelsOpen(false);
                                 setPexelsQuery('');
@@ -509,9 +529,29 @@ export function AssetLibraryPanel() {
                             />
                         )}
                     </div>
-                    <p className="absolute bottom-5 left-1/2 -translate-x-1/2 text-xs font-medium text-white/80 truncate max-w-[90vw] px-4 text-center">
-                        {previewAsset.name}
-                    </p>
+                    <div className="absolute bottom-5 left-1/2 z-[201] flex w-[min(90vw,28rem)] -translate-x-1/2 flex-col items-center gap-2">
+                        <p className="max-w-full truncate px-4 text-center text-xs font-medium text-white/80">
+                            {previewAsset.name}
+                        </p>
+                        <button
+                            type="button"
+                            disabled={Boolean(importingStockId)}
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                void handleSaveToPersonal({
+                                    name: previewAsset.name,
+                                    url: previewAsset.url,
+                                    media: previewAsset.type === 'video' ? 'video' : 'image',
+                                });
+                            }}
+                            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-white px-4 text-xs font-semibold text-[#0F172A] hover:bg-slate-100 disabled:opacity-60"
+                        >
+                            {importingStockId === previewAsset.url
+                                ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                : <Save className="h-3.5 w-3.5" />}
+                            Save
+                        </button>
+                    </div>
                 </div>,
                 document.body
             )}
