@@ -77,6 +77,7 @@ export function CanvasToolbar() {
       !navbarLink
   );
 
+  const isFooter = selectedKind === 'footer' || selectedId === 'footer';
   const pos = box
     ? toolbarPosition(box, overlay ? { width: overlay.clientWidth, height: overlay.clientHeight } : null)
     : null;
@@ -90,6 +91,8 @@ export function CanvasToolbar() {
       style={{ left: pos.left, top: pos.top, transform: pos.transform }}
       onClick={(event) => event.stopPropagation()}
     >
+      {!isFooter && (
+        <>
       {multi && (
         <span className="px-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">{selectedIds.length} selected</span>
       )}
@@ -148,7 +151,7 @@ export function CanvasToolbar() {
         type="button"
         className="rounded p-1.5 text-slate-600 hover:bg-slate-100"
         title="Duplicate"
-        disabled={locked || selectedKind === 'footer' || selectedId === 'navbar' || selectedId === 'navbar-logo'}
+        disabled={locked || selectedId === 'navbar' || selectedId === 'navbar-logo'}
         onClick={() => {
           if (navbarLink && page?.navbar) {
             const links = page.navbar.links || [];
@@ -168,12 +171,18 @@ export function CanvasToolbar() {
       >
         <Copy className="h-3.5 w-3.5" />
       </button>
+        </>
+      )}
       <button
         type="button"
         className="rounded p-1.5 text-rose-500 hover:bg-rose-50"
         title="Delete"
         disabled={locked}
         onClick={() => {
+          if (isFooter) {
+            deleteCanvasNode('footer');
+            return;
+          }
           if (multi) deleteCanvasNodes(selectedIds);
           else deleteCanvasNode(selectedId);
         }}

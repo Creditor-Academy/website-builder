@@ -6,7 +6,7 @@ const Status = () => {
   return (
     <>
       <Helmet>
-        <title>Status - SiteBuilder</title>
+        <title>Status - Web Studio</title>
         <meta name="description" content="System status" />
       </Helmet>
       <WebsiteEditor initialPage={createStatusPage()} />

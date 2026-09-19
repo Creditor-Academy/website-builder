@@ -12,10 +12,12 @@ import {
   X,
 } from 'lucide-react';
 import {
-  getCuratedPexelsPhotos,
-  getPopularPexelsVideos,
-  searchPexelsPhotos,
-  searchPexelsVideos,
+  getCuratedStockPhotos,
+  getPopularStockVideos,
+  searchStockPhotos,
+  searchStockVideos,
+} from '@/api/stock';
+import {
   videoFileUrl,
   videoName,
   videoThumb,
@@ -173,8 +175,8 @@ export function PexelsStockSection({
   importingId: string | null;
   onClearQuery?: () => void;
   onCopy?: (id: string, url: string) => void;
-  onAddToLibrary: (item: { name: string; url: string; media: 'image' | 'video' }) => void | Promise<void>;
-  onSaveToLibrary?: (item: { name: string; url: string; media: 'image' | 'video' }) => void | Promise<void>;
+  onAddToLibrary: (item: { name: string; url: string; media: 'image' | 'video'; provider?: string; providerId?: string | number }) => void | Promise<void>;
+  onSaveToLibrary?: (item: { name: string; url: string; media: 'image' | 'video'; provider?: string; providerId?: string | number }) => void | Promise<void>;
   layout?: 'page' | 'panel';
   filtersOpen?: boolean;
 }) {
@@ -206,14 +208,14 @@ export function PexelsStockSection({
     if (isVideo) {
       const options: PexelsVideoFilters = { page: nextPage, perPage: PAGE_SIZE, orientation, size };
       const result = searchQuery || orientation || size
-        ? await searchPexelsVideos(searchQuery || 'nature', options)
-        : await getPopularPexelsVideos({ page: nextPage, perPage: PAGE_SIZE });
+        ? await searchStockVideos(searchQuery || 'nature', options)
+        : await getPopularStockVideos({ page: nextPage, perPage: PAGE_SIZE });
       return { items: result.videos || [], total: result.total_results || result.videos?.length || 0, next: result.next_page };
     }
     const options: PexelsPhotoFilters = { page: nextPage, perPage: PAGE_SIZE, orientation, size, color: isPanel ? '' : color };
     const result = searchQuery || hasFilters
-      ? await searchPexelsPhotos(searchQuery || 'photo', options)
-      : await getCuratedPexelsPhotos({ page: nextPage, perPage: PAGE_SIZE });
+      ? await searchStockPhotos(searchQuery || 'photo', options)
+      : await getCuratedStockPhotos({ page: nextPage, perPage: PAGE_SIZE });
     return { items: result.photos || [], total: result.total_results || result.photos?.length || 0, next: result.next_page };
   };
 
@@ -330,11 +332,11 @@ export function PexelsStockSection({
     if (isVideo) {
       for (const video of selectedVideos) {
         const url = videoFileUrl(video);
-        if (url) await onAddToLibrary({ name: videoName(video), url, media: 'video' });
+        if (url) await onAddToLibrary({ name: videoName(video), url, media: 'video', provider: 'pexels', providerId: video.id });
       }
     } else {
       for (const photo of selectedPhotos) {
-        await onAddToLibrary({ name: photoName(photo), url: photoUrl(photo), media: 'image' });
+        await onAddToLibrary({ name: photoName(photo), url: photoUrl(photo), media: 'image', provider: 'pexels', providerId: photo.id });
       }
     }
     setSelectedIds(new Set());
@@ -670,8 +672,8 @@ export function PexelsStockSection({
                   className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-[#131924] px-3 text-xs font-medium text-white hover:bg-[#202838] disabled:opacity-60"
                   onClick={() => {
                     const item = preview.kind === 'video'
-                      ? { name: videoName(preview.video), url: videoFileUrl(preview.video), media: 'video' as const }
-                      : { name: photoName(preview.photo), url: preview.photo.src.original || photoUrl(preview.photo), media: 'image' as const };
+                      ? { name: videoName(preview.video), url: videoFileUrl(preview.video), media: 'video' as const, provider: 'pexels', providerId: preview.video.id }
+                      : { name: photoName(preview.photo), url: preview.photo.src.original || photoUrl(preview.photo), media: 'image' as const, provider: 'pexels', providerId: preview.photo.id };
                     if (!item.url) return;
                     void (onSaveToLibrary || onAddToLibrary)(item);
                   }}
@@ -700,8 +702,8 @@ export function PexelsStockBrowser({
   query: string;
   onQueryChange: (value: string) => void;
   importingId: string | null;
-  onAddToLibrary: (item: { name: string; url: string; media: 'image' | 'video' }) => void | Promise<void>;
-  onSaveToLibrary?: (item: { name: string; url: string; media: 'image' | 'video' }) => void | Promise<void>;
+  onAddToLibrary: (item: { name: string; url: string; media: 'image' | 'video'; provider?: string; providerId?: string | number }) => void | Promise<void>;
+  onSaveToLibrary?: (item: { name: string; url: string; media: 'image' | 'video'; provider?: string; providerId?: string | number }) => void | Promise<void>;
   onCopy?: (id: string, url: string) => void;
   onClose?: () => void;
 }) {

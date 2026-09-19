@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { ArrowUpRight, X } from 'lucide-react';
 import { useBuilder } from '@/contexts/BuilderContext';
-import { useNavigate } from 'react-router-dom';
+import useBuilderStore from '@/store/useBuilderStore';
 import {
-  createDefaultHeroSection, createDefaultCTASection, createDefaultFooter,
-  createDefaultNavbar, createFeaturesPage, createServicesPage, createPricingPage,
-  createContactPage, createStartPage, createTemplatesPage, createAboutPage,
-  createBlogPage, createCareersPage, createHelpPage, createStatusPage,
-  createPrivacyPolicyPage, createTermsOfServicePage
-} from '@/lib/defaultPageData';
-import { v4 as uuidv4 } from 'uuid';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -50,18 +52,73 @@ const STYLES = `
   .nb-link:hover::after { transform: scaleX(1); transform-origin: left; }
   .nb-link:hover { opacity: 0.65; }
 
-  /* CTA button */
+  /* CTA button — label is optically centered in the pill */
   .nb-cta {
-    font-family: 'Geist', sans-serif;
-    font-size: 11px; font-weight: 600;
-    letter-spacing: 0.14em; text-transform: uppercase;
+    font-family: 'Geist', sans-serif, system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
     text-decoration: none;
-    padding: 10px 20px;
-    border-radius: 2px;
-    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
-    display: inline-flex; align-items: center; gap: 6px;
+    height: 36px;
+    min-width: 108px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1;
+    white-space: nowrap;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.14);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
   }
-  .nb-cta:hover { opacity: 0.88; transform: translateY(-1px); }
+  .nb-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(15, 23, 42, 0.16); }
+  .nb-cta-ghost { box-shadow: none; }
+  .nb-cta-ghost:hover { box-shadow: none; background: rgba(15, 23, 42, 0.06) !important; }
+  .nb-hit {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+  .nb-go {
+    position: absolute;
+    top: -9px;
+    right: -9px;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: #0f172a;
+    color: #fff;
+    border: 2px solid #fff;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 40;
+    padding: 0;
+    line-height: 0;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.22);
+  }
+  .nb-hit:hover .nb-go { display: inline-flex; }
+  .nb-go:hover { background: #1d4ed8; }
+  .nb-cta-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    margin-right: -0.06em;
+    padding-top: 1px;
+    white-space: nowrap;
+  }
+  .nb-cta.nb-ce[contenteditable="true"],
+  .nb-cta .nb-ce[contenteditable="true"] {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+  }
 
   /* Mobile menu link */
   .nb-mob-link {
@@ -95,7 +152,7 @@ const STYLES = `
     max-width: 1240px;
     margin: 0 auto;
     padding: 0 40px;
-    height: 68px;
+    height: 72px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -109,41 +166,40 @@ const STYLES = `
 `;
 
 function InjectStyles() {
-  if (typeof document !== 'undefined' && !document.getElementById('navbar-preview-styles')) {
-    const el = document.createElement('style');
+  if (typeof document === 'undefined') return null;
+  let el = document.getElementById('navbar-preview-styles');
+  if (!el) {
+    el = document.createElement('style');
     el.id = 'navbar-preview-styles';
-    el.textContent = STYLES;
     document.head.appendChild(el);
   }
+  if (el.textContent !== STYLES) el.textContent = STYLES;
   return null;
 }
 
-// ─── Page factory helper (original switch logic) ──────────────────────────
-function buildPage(slug, label) {
-  switch (slug) {
-    case '/about':    return createAboutPage();
-    case '/services': return createServicesPage();
-    case '/pricing':  return createPricingPage();
-    case '/contact':  return createContactPage();
-    case '/start':    return createStartPage();
-    case '/templates':return createTemplatesPage();
-    case '/features': return createFeaturesPage();
-    case '/blog':     return createBlogPage();
-    case '/careers':  return createCareersPage();
-    case '/help':     return createHelpPage();
-    case '/status':   return createStatusPage();
-    case '/privacy':  return createPrivacyPolicyPage();
-    case '/terms':    return createTermsOfServicePage();
-    default:
-      return {
-        id: uuidv4(),
-        name: label || slug.replace('/', '') || 'New Page',
-        slug,
-        navbar: createDefaultNavbar(),
-        sections: [createDefaultHeroSection(), createDefaultCTASection()],
-        footer: createDefaultFooter(),
-      };
+function isExternalHref(href: string) {
+  return /^(https?:|mailto:|tel:)/i.test(href);
+}
+
+function normalizePageSlug(href?: string, label?: string) {
+  const raw = String(href || '').trim();
+  if (!raw || raw === '#') {
+    const fromLabel = String(label || 'new-page')
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
+    return `/${fromLabel || 'new-page'}`;
   }
+  if (isExternalHref(raw)) return raw;
+  const path = raw.split(/[?#]/)[0];
+  const slug = path.startsWith('/') ? path : `/${path}`;
+  return slug.replace(/\/+$/, '') || '/';
+}
+
+function findPageForHref(pages: Array<{ id: string; slug?: string }>, href: string, label?: string) {
+  const slug = normalizePageSlug(href, label).toLowerCase();
+  return pages.find((page) => normalizePageSlug(page.slug).toLowerCase() === slug) || null;
 }
 
 export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selectedItemId, onSelectItem }) {
@@ -154,19 +210,56 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selected
     styles: rawConfig.styles || {},
   };
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { pages, setActivePage, updatePageName, createPage, state } = useBuilder();
-  const navigate = useNavigate();
-  const { editor } = state;
+  const [pendingLink, setPendingLink] = useState(null);
+  const { pages, setActivePage, updatePageName, createPage } = useBuilder();
+  const setEditorState = useBuilderStore((store) => store.setEditorState);
 
   const styles = config.styles;
   const navBg =
-    styles.backgroundColor && styles.backgroundColor !== 'transparent'
-      ? styles.backgroundColor
-      : 'var(--theme-bg, #ffffff)';
+    styles.backgroundColor === 'transparent'
+      ? 'transparent'
+      : (styles.backgroundColor || 'var(--theme-bg, #ffffff)');
 
   const tc = styles.textColor || 'var(--theme-text, #0f172a)';
 
-  // ── Enhanced handleNavClick logic with preview mode support ──────────────────────────
+  const openPagesSidebar = () => setEditorState({ leftNavTab: 'pages', showLeftPanel: true });
+
+  const goToExistingPage = (pageId: string) => {
+    setActivePage(pageId);
+    setMobileMenuOpen(false);
+    openPagesSidebar();
+  };
+
+  const openLinkTarget = (link) => {
+    const href = String(link?.href || '').trim();
+    if (isExternalHref(href)) {
+      window.open(href, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    const target = findPageForHref(pages, href, link?.label);
+    if (target) {
+      goToExistingPage(target.id);
+      return;
+    }
+    setPendingLink(link);
+  };
+
+  const confirmCreatePage = () => {
+    if (!pendingLink) return;
+    const slug = normalizePageSlug(pendingLink.href, pendingLink.label);
+    const name = String(pendingLink.label || slug.replace(/^\//, '') || 'New Page').trim();
+    const existing = findPageForHref(pages, slug, name);
+    if (existing) {
+      goToExistingPage(existing.id);
+      setPendingLink(null);
+      return;
+    }
+    createPage({ name, slug, sections: [] });
+    openPagesSidebar();
+    setPendingLink(null);
+    setMobileMenuOpen(false);
+  };
+
   const handleNavClick = (e, link) => {
     if (isEditing && onSelectItem) {
       e.preventDefault();
@@ -175,54 +268,15 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selected
       return;
     }
 
-    // Scroll to top on any navigation click
+    e.preventDefault();
+    e.stopPropagation();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    
-    // If in preview mode, handle navigation differently
-    if (editor.previewMode) {
-      const targetPage = pages.find((p) => p.slug === link.href);
-      if (targetPage) {
-        e.preventDefault();
-        setActivePage(targetPage.id);
-        setMobileMenuOpen(false);
-        return;
-      }
-      // If page doesn't exist, create it in preview mode
-      if (link.href && link.href.startsWith('/')) {
-        e.preventDefault();
-        createPage(buildPage(link.href, link.label));
-        setMobileMenuOpen(false);
-        return;
-      }
-      // For external links, allow default behavior
-      return;
-    }
-    
-    // Original editing mode logic
-    if (isEditing) {
-      const targetPage = pages.find((p) => p.slug === link.href);
-      if (targetPage) {
-        e.preventDefault(); setActivePage(targetPage.id); setMobileMenuOpen(false); return;
-      }
-      if (link.href && link.href.startsWith('/')) {
-        e.preventDefault();
-        createPage(buildPage(link.href, link.label));
-        setMobileMenuOpen(false);
-      }
-      return;
-    }
-    if (link.href && link.href.startsWith('/')) {
-      // Check if this slug exists in the builder's internal pages
-      const targetPage = pages.find((p) => p.slug === link.href);
-      if (targetPage) { setActivePage(targetPage.id); setMobileMenuOpen(false); return; }
-      createPage(buildPage(link.href, link.label));
-      setMobileMenuOpen(false);
-    }
+    openLinkTarget(link);
   };
 
   const handleNavbarClick = (e) => {
     if (!isEditing) return;
-    if (e.target.closest('[data-navbar-item]')) return;
+    if (e.target.closest('[data-navbar-item], [data-navbar-go]')) return;
     e.stopPropagation();
     onSelectItem?.('navbar');
   };
@@ -237,37 +291,107 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selected
     return (r * 299 + g * 587 + b * 114) / 1000 > 128;
   })();
 
-  return (
-    <nav
-      style={{
-        backgroundColor: navBg,
-        color: tc,
-        position: styles.sticky ? 'sticky' : 'relative',
-        top: styles.sticky ? 0 : undefined,
-        zIndex: 10,
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        cursor: isEditing ? 'pointer' : 'default',
-        borderBottom: `1px solid ${isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.07)'}`,
-        animation: 'nb-down 0.4s ease both',
-      }}
-      onClick={handleNavbarClick}
-    >
-      <InjectStyles />
+  const variant = String(config.style || 'classic');
+  const navLinks = config.links.filter((link) => !link.isButton);
+  const ctaLinks = config.links.filter((link) => link.isButton);
+  const isCentered = variant === 'centered';
+  const isSplit = variant === 'split';
 
-      <div className="nb-inner">
+  const buttonRadius = !styles.buttonRadius || styles.buttonRadius === '2px' ? '999px' : styles.buttonRadius;
+  const isGhostCta = styles.buttonBg === 'transparent';
+  const ctaStyle = {
+    background: isGhostCta ? 'transparent' : (styles.buttonBg || '#0f172a'),
+    color: styles.buttonText || '#fff',
+    borderRadius: buttonRadius,
+    border: styles.buttonBorder || 'none',
+  };
 
-        {/* ── Logo ─────────────────────────────────────────────── */}
+  const wrapNavItem = (link, node) => (
+    <div key={link.id} className="nb-hit">
+      {node}
+      {isEditing ? (
+        <button
+          type="button"
+          data-navbar-go=""
+          className="nb-go"
+          title={
+            findPageForHref(pages, link.href, link.label)
+              ? `Open ${link.label}`
+              : `Create page for ${link.label}`
+          }
+          aria-label={`Go to ${link.label}`}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            openLinkTarget(link);
+          }}
+        >
+          <ArrowUpRight size={12} strokeWidth={2.5} />
+        </button>
+      ) : null}
+    </div>
+  );
+
+  const renderLink = (link) =>
+    wrapNavItem(
+      link,
+      link.isButton ? (
+      <a
+        href={link.href}
+        data-canvas-node={`navbar-link-${link.id}`}
+        data-canvas-kind="navbar"
+        data-navbar-item={link.id}
+        className={`nb-cta ${isGhostCta ? 'nb-cta-ghost' : ''}`}
+        onClick={(e) => handleNavClick(e, link)}
+        style={ctaStyle}
+      >
+        <span
+          className="nb-cta-label nb-ce"
+          contentEditable={Boolean(isEditing)}
+          suppressContentEditableWarning
+          onBlur={(e) => {
+            const newLabel = e.currentTarget.innerText.trim();
+            onUpdate({ links: config.links.map((l) => l.id === link.id ? { ...l, label: newLabel } : l) });
+          }}
+        >
+          {link.label}
+        </span>
+      </a>
+    ) : (
+      <a
+        href={link.href}
+        data-canvas-node={`navbar-link-${link.id}`}
+        data-canvas-kind="navbar"
+        data-navbar-item={link.id}
+        className={`nb-link nb-ce ${isLight ? '' : 'nb-ce-inv'}`}
+        onClick={(e) => handleNavClick(e, link)}
+        style={{ color: tc, borderRadius: 4 }}
+        contentEditable={Boolean(isEditing)}
+        suppressContentEditableWarning
+        onBlur={(e) => {
+          const newLabel = e.target.innerText;
+          onUpdate({ links: config.links.map((l) => l.id === link.id ? { ...l, label: newLabel } : l) });
+          if (link.href && link.href.startsWith('/')) updatePageName(link.href, newLabel);
+        }}
+      >
+        {link.label}
+      </a>
+    )
+    );
+
+  const logoMark = (
         <div
           data-canvas-node="navbar-logo"
           data-canvas-kind="navbar"
           data-navbar-item="logo"
+          className={isCentered ? 'nb-logo-center' : undefined}
           style={{
             flexShrink: 0,
             display: 'flex',
             alignItems: 'center',
             borderRadius: 4,
             cursor: isEditing ? 'pointer' : 'default',
+            ...(isCentered ? { position: 'absolute', left: '50%', transform: 'translateX(-50%)' } : {}),
           }}
           onClick={(e) => {
             if (!isEditing) return;
@@ -294,63 +418,69 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selected
             </span>
           )}
         </div>
+  );
 
-        {/* ── Desktop links ─────────────────────────────────────── */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 36,
-        }}
-          className="nb-desktop-links"
-        >
-          {config.links.map((link) =>
-            link.isButton ? (
-              <a
-                key={link.id}
-                href={link.href}
-                data-canvas-node={`navbar-link-${link.id}`}
-                data-canvas-kind="navbar"
-                data-navbar-item={link.id}
-                className="nb-cta nb-ce"
-                onClick={(e) => handleNavClick(e, link)}
-                style={{ 
-                  background: styles.buttonBg || '#0f172a', 
-                  color: styles.buttonText || '#fff',
-                  borderRadius: styles.buttonRadius || '2px',
-                }}
-                contentEditable={Boolean(isEditing)}
-                suppressContentEditableWarning
-                onBlur={(e) => {
-                  const newLabel = e.currentTarget.innerText;
-                  onUpdate({ links: config.links.map((l) => l.id === link.id ? { ...l, label: newLabel } : l) });
-                }}
-              >
-                {link.label}
-              </a>
-            ) : (
-              <a
-                key={link.id}
-                href={link.href}
-                data-canvas-node={`navbar-link-${link.id}`}
-                data-canvas-kind="navbar"
-                data-navbar-item={link.id}
-                className={`nb-link nb-ce ${isLight ? '' : 'nb-ce-inv'}`}
-                onClick={(e) => handleNavClick(e, link)}
-                style={{
-                  color: tc,
-                  borderRadius: 4,
-                }}
-                contentEditable={Boolean(isEditing)}
-                suppressContentEditableWarning
-                onBlur={(e) => {
-                  const newLabel = e.target.innerText;
-                  onUpdate({ links: config.links.map((l) => l.id === link.id ? { ...l, label: newLabel } : l) });
-                  if (link.href && link.href.startsWith('/')) updatePageName(link.href, newLabel);
-                }}
-              >
-                {link.label}
-              </a>
-            )
-          )}
-        </div>
+  return (
+    <>
+    <nav
+      style={{
+        backgroundColor: navBg,
+        color: tc,
+        position: styles.sticky ? 'sticky' : 'relative',
+        top: styles.sticky ? 0 : undefined,
+        zIndex: 10,
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        cursor: isEditing ? 'pointer' : 'default',
+        borderBottom: variant === 'simple' ? 'none' : `1px solid ${isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.08)'}`,
+        boxShadow: variant === 'simple' ? 'none' : variant === 'split' ? '0 8px 24px rgba(15,23,42,0.18)' : '0 1px 2px rgba(15,23,42,0.04)',
+        animation: 'nb-down 0.4s ease both',
+      }}
+      onClick={handleNavbarClick}
+    >
+      <InjectStyles />
+
+      <div className="nb-inner" style={{ position: 'relative' }}>
+        {isCentered ? (
+          <>
+            <div className="nb-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+              {navLinks.map(renderLink)}
+            </div>
+            {logoMark}
+            <div className="nb-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: 16, marginLeft: 'auto' }}>
+              {ctaLinks.map(renderLink)}
+            </div>
+          </>
+        ) : isSplit ? (
+          <>
+            {logoMark}
+            <div className="nb-desktop-links" style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', gap: 32 }}>
+              {navLinks.map(renderLink)}
+            </div>
+            <div className="nb-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {ctaLinks.map(renderLink)}
+            </div>
+          </>
+        ) : variant === 'simple' ? (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 28, minWidth: 0 }}>
+              {logoMark}
+              <div className="nb-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+                {navLinks.map(renderLink)}
+              </div>
+            </div>
+            <div className="nb-desktop-links" style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}>
+              {ctaLinks.map(renderLink)}
+            </div>
+          </>
+        ) : (
+          <>
+            {logoMark}
+            <div className="nb-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: 36, marginLeft: 'auto' }}>
+              {config.links.map(renderLink)}
+            </div>
+          </>
+        )}
 
         {/* ── Mobile hamburger ──────────────────────────────────── */}
         <button
@@ -390,19 +520,16 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selected
                 key={link.id}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link)}
+                className={`nb-cta ${isGhostCta ? 'nb-cta-ghost' : ''}`}
                 style={{
-                  display: 'block', marginTop: 16,
-                  background: styles.buttonBg || '#0f172a', 
-                  color: styles.buttonText || '#fff',
-                  padding: '13px 20px', 
-                  borderRadius: styles.buttonRadius || '2px',
-                  fontFamily: "'Geist', sans-serif",
-                  fontSize: 11, fontWeight: 600,
-                  letterSpacing: '0.14em', textTransform: 'uppercase',
-                  textAlign: 'center', textDecoration: 'none',
+                  ...ctaStyle,
+                  display: 'flex',
+                  width: '100%',
+                  marginTop: 16,
+                  height: 44,
                 }}
               >
-                {link.label}
+                <span className="nb-cta-label">{link.label}</span>
               </a>
             ) : (
               <a
@@ -430,8 +557,26 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selected
           #nb-hamburger { display: flex !important; }
           #nb-mobile-menu { display: block !important; }
           .nb-desktop-links { display: none !important; }
+          .nb-logo-center { position: static !important; transform: none !important; }
         }
       `}</style>
     </nav>
+    <AlertDialog open={Boolean(pendingLink)} onOpenChange={(open) => { if (!open) setPendingLink(null); }}>
+      <AlertDialogContent className="max-w-md rounded-2xl">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Create this page?</AlertDialogTitle>
+          <AlertDialogDescription>
+            {pendingLink
+              ? `"${pendingLink.label || normalizePageSlug(pendingLink.href, pendingLink.label)}" is not in this site yet. Create an empty page and open it?`
+              : 'This page is not in this site yet. Create an empty page and open it?'}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={confirmCreatePage}>Create page</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

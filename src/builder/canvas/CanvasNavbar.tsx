@@ -54,7 +54,7 @@ export function CanvasNavbar({
     if (previewMode) return;
     if (event.button !== 0) return;
     const target = event.target as HTMLElement;
-    if (target.closest('[data-canvas-move], [data-canvas-resize]')) return;
+    if (target.closest('[data-canvas-move], [data-canvas-resize], [data-navbar-go]')) return;
     if (target.closest('[contenteditable="true"]') && document.activeElement === target.closest('[contenteditable="true"]')) return;
 
     const startX = event.clientX;
@@ -120,7 +120,7 @@ export function CanvasNavbar({
             clickSuppressRef.current = false;
             return;
           }
-          if ((event.target as HTMLElement).closest('[data-navbar-item], [data-canvas-move]')) return;
+          if ((event.target as HTMLElement).closest('[data-navbar-item], [data-canvas-move], [data-navbar-go]')) return;
           selectNode('navbar', 'navbar');
         }}
       >

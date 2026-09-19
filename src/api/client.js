@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { isProtectedAppPath } from '@/lib/authPaths';
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
 /** Platform host for published subdomains (no protocol). */
@@ -58,9 +59,8 @@ const notifySessionExpired = () => {
 
 const redirectToLogin = () => {
   const { pathname } = window.location;
-  if (pathname !== '/login') {
-    window.location.href = '/login';
-  }
+  if (!isProtectedAppPath(pathname)) return;
+  window.location.href = '/login';
 };
 
 apiClient.interceptors.request.use(async (config) => {
@@ -97,10 +97,14 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      const skipRedirect = Boolean(originalRequest.skipAuthRedirect) || !isProtectedAppPath(window.location.pathname);
+
       // Don't retry refresh or login requests
       if (originalRequest.url?.includes('/auth/refresh-token') || originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/google')) {
-        notifySessionExpired();
-        redirectToLogin();
+        if (!skipRedirect) {
+          notifySessionExpired();
+          redirectToLogin();
+        }
         return Promise.reject(error);
       }
 
@@ -119,8 +123,10 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError);
-        notifySessionExpired();
-        redirectToLogin();
+        if (!skipRedirect) {
+          notifySessionExpired();
+          redirectToLogin();
+        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

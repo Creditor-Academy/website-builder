@@ -91,7 +91,7 @@ function AssetCard({ item, copiedId, onCopy, onDelete, onPreview }: AssetCardPro
 }
 
 export function AssetLibraryPanel() {
-    const { activeWebsiteId, deleteAsset, fetchAssets, getScopedAssets, uploadAsset, importAssetFromUrl } = useBuilderStore();
+    const { activeWebsiteId, deleteAsset, fetchAssets, getScopedAssets, uploadAsset, importAssetFromUrl, importStockAsset } = useBuilderStore();
     const { toast } = useToast();
     const [search, setSearch] = useState('');
     const [libraryTab, setLibraryTab] = useState('all');
@@ -203,16 +203,16 @@ export function AssetLibraryPanel() {
         }
     };
 
-    const handleAddStockMedia = async (item: { name: string; url: string; media: 'image' | 'video' }) => {
+    const handleAddStockMedia = async (item: { name: string; url: string; media: 'image' | 'video'; provider?: string; providerId?: string | number }) => {
         if (!activeWebsiteId) return;
         setImportingStockId(item.url);
         try {
-            await importAssetFromUrl(item.name, item.url, { websiteId: activeWebsiteId });
+            await importStockAsset(item, { websiteId: activeWebsiteId });
             toast({
                 title: 'Added to assets',
                 description: item.media === 'video'
-                    ? 'This Pexels video is now in this website’s library.'
-                    : 'This Pexels photo is now in this website’s library.',
+                    ? 'This stock video is now in this website’s library.'
+                    : 'This stock photo is now in this website’s library.',
             });
         } catch (error: any) {
             toast({

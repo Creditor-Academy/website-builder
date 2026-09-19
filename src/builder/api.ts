@@ -2,8 +2,10 @@ import websiteApi from '@/api/website';
 import { USE_WEBSITE_API } from '@/lib/localMode';
 import useBuilderStore from '@/store/useBuilderStore';
 import type { SaveStatus } from './types';
+import { patchWebsiteDocument, type WebsiteRecord, toWebsiteSavePayload } from './websiteDocument';
 
 export interface CanvasPagePayload {
+  schemaVersion?: number;
   pages: unknown[];
   activePageId: string | null;
   templateId?: string;
@@ -13,7 +15,12 @@ export interface CanvasPagePayload {
 export interface CanvasSavePayload {
   name?: string;
   status?: string;
+  revision?: number;
   content: CanvasPagePayload;
+}
+
+export function websiteSavePayload(website: WebsiteRecord, includeContent = true) {
+  return toWebsiteSavePayload(website, { includeContent });
 }
 
 export const canvasApi = {
@@ -29,7 +36,7 @@ export const canvasApi = {
     if (!USE_WEBSITE_API) {
       return { data: { ok: true, id, payload } };
     }
-    return websiteApi.updateWebsite(id, payload);
+    return patchWebsiteDocument(id, { ...payload } as Record<string, unknown>);
   },
 
   publishWebsite: (id: string, data: { subdomain?: string; customDomain?: string }) =>

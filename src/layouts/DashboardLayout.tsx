@@ -123,7 +123,7 @@ const DashboardLayout = () => {
                 isCompact ? 'p-2 sm:p-3' : 'gap-2 p-2 sm:gap-3 sm:p-3 lg:gap-4 lg:p-4',
             )}>
                 <Helmet>
-                    <title>Dashboard | Buildora</title>
+                    <title>Web Studio</title>
                 </Helmet>
 
                 <DashboardSidebar
@@ -172,7 +172,7 @@ const DashboardLayout = () => {
                         <AlertDialogHeader>
                             <AlertDialogTitle>Log out?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                Are you sure you want to log out of your Buildora account?
+                                Do you want to log out of your Web Studio account?
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter className="gap-2 sm:gap-0">

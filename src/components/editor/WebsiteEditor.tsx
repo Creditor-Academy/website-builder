@@ -148,9 +148,10 @@ function EditorLeftSidebar({
 }
 
 function EditorContent() {
-  const [leftNavTab, setLeftNavTab] = useState("add");
   const store = useBuilderStore();
   const { editor, setTourState, activeWebsiteId, setEditorState } = store;
+  const leftNavTab = editor.leftNavTab || "add";
+  const setLeftNavTab = (id: string) => setEditorState({ leftNavTab: id, showLeftPanel: true });
   const { id } = useParams();
   const isCompact = useIsCompact();
 
@@ -287,6 +288,7 @@ export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
   const { id } = useParams();
   const activeWebsiteId = useBuilderStore((state) => state.activeWebsiteId);
   const [hydrated, setHydrated] = useState(() => useBuilderStore.persist.hasHydrated());
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.remove("dark");
@@ -309,12 +311,18 @@ export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
   }, []);
 
   useEffect(() => {
-    if (hydrated && id) {
-      useBuilderStore.getState().selectWebsite(id);
-    }
+    if (!hydrated || !id) return;
+    let cancelled = false;
+    setReady(false);
+    useBuilderStore.getState().selectWebsite(id).finally(() => {
+      if (!cancelled) setReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [id, hydrated]);
 
-  if (!hydrated || (!activeWebsiteId && id)) {
+  if (!hydrated || !ready || (id && activeWebsiteId !== id)) {
     return <Loading fullScreen label="Loading your project" />;
   }
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from 'react-router-dom';
 import { useBuilder } from '@/contexts/BuilderContext';
+import useBuilderStore from '@/store/useBuilderStore';
 import { createDefaultHeroSection, createDefaultCTASection, createDefaultFooter, createDefaultNavbar, createFeaturesPage, createServicesPage, createPricingPage, createContactPage, createStartPage, createTemplatesPage, createAboutPage, createBlogPage, createCareersPage, createHelpPage, createStatusPage, createPrivacyPolicyPage, createTermsOfServicePage, createMarketingPage, createDesignPage, createDevPage, createExecutiveStrategyPage, createRevenueGrowthPage, createMarketExpansionPage } from '@/lib/defaultPageData';
 import {
   Facebook, Twitter, Instagram, Linkedin, Youtube,
@@ -82,7 +83,7 @@ function InjectStyles() {
 
 export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
   const navigate = useNavigate();
-  const { updatePageName, pages, setActivePage, createPage, selectSection, state } = useBuilder();
+  const { updatePageName, pages, setActivePage, createPage, state } = useBuilder();
   const { editor } = state;
 
   if (!rawConfig) return null;
@@ -101,10 +102,10 @@ export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
   const tc = styles.textColor || 'var(--theme-text, #f8fafc)';
 
   const handleFooterClick = (e) => {
-    if (isEditing && e.target.closest('a, button') === null) {
-      e.stopPropagation();
-      selectSection(null);
-    }
+    if (!isEditing) return;
+    if (e.target.closest('a, button')) return;
+    e.stopPropagation();
+    useBuilderStore.getState().selectNode('footer', 'footer');
   };
 
   // ── Enhanced link click handler with preview mode support ──────────────────────

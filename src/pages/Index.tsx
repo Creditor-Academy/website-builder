@@ -377,7 +377,7 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.6 }}
             className={cn("text-lg md:text-2xl max-w-3xl mx-auto leading-relaxed mb-12 font-medium transition-colors duration-1000", isDark ? "text-slate-300" : "text-slate-600")}
           >
-            Webstudio is an advanced website builder giving you absolute creative freedom.
+            Web Studio is an advanced website builder giving you absolute creative freedom.
             Drag, drop, and publish professional, stunning websites in minutes.
           </motion.p>
 
@@ -397,7 +397,7 @@ export default function LandingPage() {
                   : "bg-slate-900 text-white hover:bg-blue-600 hover:shadow-[0_0_40px_rgba(59,130,246,0.4)]"
               )}
             >
-              Explore Webstudio <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
+              Explore Web Studio <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
             </motion.button>
           </motion.div>
         </motion.div>

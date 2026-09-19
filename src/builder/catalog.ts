@@ -20,8 +20,14 @@ import {
   Info,
   Columns,
   PanelBottom,
+  PanelTop,
+  AlignCenter,
 } from 'lucide-react';
 import {
+  createCenteredNavbar,
+  createClassicNavbar,
+  createSimpleNavbar,
+  createSplitNavbar,
   createDefaultAboutSection,
   createDefaultBlogListSection,
   createDefaultContactSection,
@@ -45,9 +51,10 @@ export interface CatalogItem {
   description: string;
   icon: LucideIcon;
   category: string;
-  kind: 'element' | 'container' | 'prebuilt' | 'footer';
+  kind: 'element' | 'container' | 'prebuilt' | 'footer' | 'navbar';
   elementType?: ElementType;
   createPrebuilt?: () => Record<string, unknown>;
+  createNavbar?: () => Record<string, unknown>;
 }
 
 export const ELEMENT_CATALOG: CatalogItem[] = [
@@ -68,6 +75,10 @@ export const ELEMENT_CATALOG: CatalogItem[] = [
 ];
 
 export const PREBUILT_CATALOG: CatalogItem[] = [
+  { id: 'header-simple', name: 'Simple Header', description: 'Logo, links, and outline CTA', icon: PanelTop, category: 'Header', kind: 'navbar', createNavbar: () => createSimpleNavbar() },
+  { id: 'header-classic', name: 'Classic Header', description: 'White bar with a Get Started pill', icon: Layout, category: 'Header', kind: 'navbar', createNavbar: () => createClassicNavbar() },
+  { id: 'header-centered', name: 'Centered Header', description: 'Logo in the middle, Contact pill', icon: AlignCenter, category: 'Header', kind: 'navbar', createNavbar: () => createCenteredNavbar() },
+  { id: 'header-split', name: 'Split Header', description: 'Dark bar with a white pill CTA', icon: Columns, category: 'Header', kind: 'navbar', createNavbar: () => createSplitNavbar() },
   { id: 'hero', name: 'Hero', description: 'Headline, media, and CTA', icon: Sparkles, category: 'Hero', kind: 'prebuilt', createPrebuilt: () => createDefaultHeroSection() },
   { id: 'features', name: 'Features', description: 'Feature grid', icon: Grid3X3, category: 'Features', kind: 'prebuilt', createPrebuilt: () => createDefaultFeaturesSection() },
   { id: 'about', name: 'About', description: 'Story and image', icon: Info, category: 'About', kind: 'prebuilt', createPrebuilt: () => createDefaultAboutSection() },
@@ -86,9 +97,15 @@ export const PREBUILT_CATALOG: CatalogItem[] = [
   { id: 'footer', name: 'Footer', description: 'Links, social, and copyright', icon: PanelBottom, category: 'Footer', kind: 'footer' },
 ];
 
+export function navbarFromCatalog(id: string) {
+  const item = PREBUILT_CATALOG.find((entry) => entry.id === id && entry.kind === 'navbar');
+  return item?.createNavbar?.() || createClassicNavbar();
+}
+
 export const CATALOG_CATEGORIES = [
   'Elements',
   'Layout',
+  'Header',
   'Hero',
   'Features',
   'About',
