@@ -22,6 +22,7 @@ export type StockMediaItem = {
 };
 
 type StockSearchParams = {
+  q?: string;
   query?: string;
   page?: number;
   per_page?: number;
@@ -179,7 +180,12 @@ export function normalizeStockSearchResponse(data: unknown, mediaType: 'images' 
 }
 
 async function searchBackendStock(params: StockSearchParams) {
-  const response = await assetApi.searchStock(params);
+  const q = (params.q || params.query || '').trim();
+  const response = await assetApi.searchStock({
+    ...params,
+    q,
+    query: q,
+  });
   return response.data;
 }
 
@@ -189,6 +195,7 @@ export async function searchStockPhotos(
 ): Promise<PexelsSearchResponse> {
   try {
     const data = await searchBackendStock({
+      q: query,
       query,
       page: options.page || 1,
       per_page: options.perPage || 8,
@@ -206,8 +213,12 @@ export async function searchStockPhotos(
       next_page: mapped.next,
       photos: mapped.photos,
     };
-  } catch {
-    return searchPexelsPhotos(query, options);
+  } catch (error) {
+    // Direct browser Pexels is a local/dev fallback only (needs VITE_PEXELS_API_KEY).
+    if (import.meta.env.DEV) {
+      return searchPexelsPhotos(query, options);
+    }
+    throw error;
   }
 }
 
@@ -216,8 +227,11 @@ export async function getCuratedStockPhotos(
 ): Promise<PexelsSearchResponse> {
   try {
     return await searchStockPhotos('photo', options);
-  } catch {
-    return getCuratedPexelsPhotos(options);
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      return getCuratedPexelsPhotos(options);
+    }
+    throw error;
   }
 }
 
@@ -227,6 +241,7 @@ export async function searchStockVideos(
 ): Promise<PexelsVideoSearchResponse> {
   try {
     const data = await searchBackendStock({
+      q: query,
       query,
       page: options.page || 1,
       per_page: options.perPage || 8,
@@ -243,8 +258,11 @@ export async function searchStockVideos(
       next_page: mapped.next,
       videos: mapped.videos,
     };
-  } catch {
-    return searchPexelsVideos(query, options);
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      return searchPexelsVideos(query, options);
+    }
+    throw error;
   }
 }
 
@@ -253,7 +271,10 @@ export async function getPopularStockVideos(
 ): Promise<PexelsVideoSearchResponse> {
   try {
     return await searchStockVideos('nature', options);
-  } catch {
-    return getPopularPexelsVideos(options);
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      return getPopularPexelsVideos(options);
+    }
+    throw error;
   }
 }
