@@ -102,6 +102,7 @@ export interface FormField {
   id: string;
   type:
     | 'text'
+    | 'textarea'
     | 'email'
     | 'phone'
     | 'checkbox'

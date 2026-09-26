@@ -5,8 +5,10 @@ import useBuilderStore from '@/store/useBuilderStore';
 import { createDefaultHeroSection, createDefaultCTASection, createDefaultFooter, createDefaultNavbar, createFeaturesPage, createServicesPage, createPricingPage, createContactPage, createStartPage, createTemplatesPage, createAboutPage, createBlogPage, createCareersPage, createHelpPage, createStatusPage, createPrivacyPolicyPage, createTermsOfServicePage, createMarketingPage, createDesignPage, createDevPage, createExecutiveStrategyPage, createRevenueGrowthPage, createMarketExpansionPage } from '@/lib/defaultPageData';
 import {
   Facebook, Twitter, Instagram, Linkedin, Youtube,
-  Github, Mail, Phone, MapPin, Globe, MessageCircle, ArrowUpRight,
+  Github, Mail, Phone, MapPin, Globe, MessageCircle,
 } from "lucide-react";
+import { FooterVariant } from './FooterVariants';
+import { FooterEditRoot, FooterLinkHit, MovablePiece, useFooterLinkOpen } from './footerChrome';
 
 const socialIcons = {
   facebook: Facebook, twitter: Twitter, instagram: Instagram,
@@ -55,6 +57,91 @@ const STYLES = `
     gap: 0 56px;
   }
 
+  .ft-minimal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px 32px;
+    flex-wrap: wrap;
+  }
+  .ft-inline-links, .ft-link-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .ft-inline-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+  }
+  .ft-link-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .ft-ink {
+    color: inherit;
+    text-decoration: none;
+    opacity: 0.72;
+  }
+  .ft-ink:hover { opacity: 1; }
+  .ft-hit {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+  }
+  .ft-go {
+    position: absolute;
+    top: -22px;
+    right: -4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: #0f172a;
+    color: #fff;
+    border: 2px solid #fff;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 40;
+    padding: 0;
+    line-height: 0;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.22);
+  }
+  .ft-hit:hover .ft-go { display: inline-flex; }
+  .ft-go:hover { background: #1d4ed8; }
+  .ft-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 18px;
+  }
+  .ft-news, .ft-contact {
+    display: grid;
+    gap: 48px;
+    align-items: start;
+  }
+  .ft-news { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+  .ft-contact { grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.9fr); }
+  .ft-split-cols, .ft-mega-cols, .ft-band-grid {
+    display: grid;
+    gap: 28px;
+  }
+  .ft-split-cols { grid-template-columns: 1fr 1fr; }
+  .ft-mega-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 32px;
+    margin-bottom: 48px;
+  }
+  .ft-mega-cols { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .ft-band-card { border-radius: 28px; padding: 40px 40px 32px; }
+  .ft-band-grid { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr); }
+
   @media (max-width: 768px) {
     .ft-grid {
       grid-template-columns: 1fr;
@@ -68,16 +155,22 @@ const STYLES = `
       padding-right: 20px !important;
       padding-top: 40px !important;
     }
+    .ft-news, .ft-contact, .ft-split-cols, .ft-mega-cols, .ft-band-grid {
+      grid-template-columns: 1fr;
+    }
+    .ft-mega-top { flex-direction: column; align-items: flex-start; }
   }
 `;
 
 function InjectStyles() {
-  if (typeof document !== 'undefined' && !document.getElementById('footer-preview-styles')) {
-    const el = document.createElement('style');
+  if (typeof document === 'undefined') return null;
+  let el = document.getElementById('footer-preview-styles');
+  if (!el) {
+    el = document.createElement('style');
     el.id = 'footer-preview-styles';
-    el.textContent = STYLES;
     document.head.appendChild(el);
   }
+  if (el.textContent !== STYLES) el.textContent = STYLES;
   return null;
 }
 
@@ -237,9 +330,41 @@ export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
     }
   };
 
+  const variant = String(config.style || 'columns');
+  const variantLayouts = new Set(['minimal', 'centered', 'newsletter', 'contact', 'mega', 'band']);
+  if (variantLayouts.has(variant)) {
+    return (
+      <FooterEditRoot isEditing={Boolean(isEditing)} onUpdate={onUpdate} placements={config.placements}>
+      <footer
+        data-footer-root=""
+        style={{
+          backgroundColor: variant === 'band' ? (styles.surface || '#eef2f7') : bg,
+          color: tc,
+          position: 'relative',
+        }}
+        className={isEditing ? 'cursor-pointer' : ''}
+        onClick={handleFooterClick}
+      >
+        <InjectStyles />
+        <FooterVariant
+          variant={variant}
+          config={config}
+          isEditing={isEditing}
+          onUpdate={onUpdate}
+          textColor={tc}
+          backgroundColor={bg}
+          onLinkClick={handleLinkClick}
+        />
+      </footer>
+      </FooterEditRoot>
+    );
+  }
+
   return (
+    <FooterEditRoot isEditing={Boolean(isEditing)} onUpdate={onUpdate} placements={config.placements}>
     <footer
-      style={{ backgroundColor: bg, color: tc, position: 'relative', overflow: 'hidden' }}
+      data-footer-root=""
+      style={{ backgroundColor: bg, color: tc, position: 'relative', overflow: 'visible' }}
       className={isEditing ? 'cursor-pointer' : ''}
       onClick={handleFooterClick}
     >
@@ -257,7 +382,7 @@ export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
         background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.12) 30%, rgba(255,255,255,0.12) 70%, transparent)',
       }} />
 
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '48px 24px 0', position: 'relative' }} className="ft-wrapper">
+      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '48px 24px 0' }} className="ft-wrapper">
 
         {/* ── Main grid ─────────────────────────────────────────────── */}
         <div className="ft-grid" style={{ marginBottom: 64 }}>
@@ -266,6 +391,7 @@ export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
           <div className="ft-brand" style={{ paddingRight: 40 }}>
             {/* Logo */}
             <div style={{ marginBottom: 24 }}>
+              <MovablePiece id="logo">
               {config.logo.imageUrl ? (
                 <img src={config.logo.imageUrl} alt="Logo" style={{ height: 36 }} />
               ) : (
@@ -283,6 +409,7 @@ export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
                   {config.logo.text}
                 </span>
               )}
+              </MovablePiece>
             </div>
 
             {/* Thin rule */}
@@ -293,6 +420,7 @@ export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
             }} />
 
             {/* Description */}
+            <MovablePiece id="description" block>
             <p
               className="ft-ce"
               style={{
@@ -306,8 +434,10 @@ export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
             >
               {config.description}
             </p>
+            </MovablePiece>
 
             {/* Social icons */}
+            <MovablePiece id="social">
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {config.socialLinks.map((social) => {
                 const Icon = socialIcons[social.platform] || Globe;
@@ -348,12 +478,14 @@ export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
                 </div>
               )}
             </div>
+            </MovablePiece>
           </div>
 
           {/* ── Nav columns ─────────────────────────────────────── */}
           {config.columns.map((column, colIdx) => (
             <div key={column.id}>
               {/* Column title */}
+              <MovablePiece id={`column-${column.id}`} block>
               <h4
                 className="ft-ce"
                 style={{
@@ -375,24 +507,16 @@ export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
               >
                 {column.title}
               </h4>
+              </MovablePiece>
 
               {/* Links */}
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {column.links.map((link) => (
                   <li key={link.id}>
-                    <a
-                      href={link.href}
-                      className="ft-link ft-ce"
-                      style={{
-                        fontFamily: "'Geist', sans-serif",
-                        fontSize: 14, color: tc,
-                        textDecoration: 'none',
-                      }}
-                      onClick={(e) => handleLinkClick(e, link, column)}
-                      contentEditable={isEditing}
-                      suppressContentEditableWarning
-                      onBlur={(e) => {
-                        const newLabel = e.target.innerText;
+                    <DefaultFooterLink
+                      link={link}
+                      isEditing={Boolean(isEditing)}
+                      onLabel={(newLabel) => {
                         onUpdate({
                           columns: config.columns.map((c) =>
                             c.id === column.id
@@ -404,9 +528,7 @@ export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
                           updatePageName(link.href, newLabel);
                         }
                       }}
-                    >
-                      {link.label}
-                    </a>
+                    />
                   </li>
                 ))}
               </ul>
@@ -425,6 +547,7 @@ export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
   flexWrap: 'wrap',
 }}>
   {/* Copyright */}
+  <MovablePiece id="copyright">
   <p
     className="ft-ce"
     style={{
@@ -442,10 +565,46 @@ export function FooterPreview({ config: rawConfig, isEditing, onUpdate }) {
   >
     {config.copyright}
   </p>
+  </MovablePiece>
 </div>
 
 
       </div>
     </footer>
+    </FooterEditRoot>
+  );
+}
+
+function DefaultFooterLink({
+  link,
+  isEditing,
+  onLabel,
+}: {
+  link: { id: string; label: string; href: string };
+  isEditing: boolean;
+  onLabel: (label: string) => void;
+}) {
+  const openLinkTarget = useFooterLinkOpen();
+  return (
+    <MovablePiece id={`link-${link.id}`}>
+      <FooterLinkHit link={link}>
+        <a
+          href={link.href}
+          className="ft-link ft-ce"
+          style={{ fontFamily: "'Geist', sans-serif", fontSize: 14, textDecoration: 'none' }}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (isEditing) return;
+            openLinkTarget(link);
+          }}
+          contentEditable={isEditing}
+          suppressContentEditableWarning
+          onBlur={(event) => onLabel(event.currentTarget.innerText)}
+        >
+          {link.label}
+        </a>
+      </FooterLinkHit>
+    </MovablePiece>
   );
 }

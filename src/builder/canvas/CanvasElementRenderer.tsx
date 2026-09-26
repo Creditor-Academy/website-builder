@@ -7,12 +7,14 @@ export const CanvasElementRenderer = memo(function CanvasElementRenderer({
   element,
   css,
   editing = false,
+  editingCanvas = false,
   onSaveText,
   onCancelEdit,
 }: {
   element: CanvasElement;
   css: CSSProperties;
   editing?: boolean;
+  editingCanvas?: boolean;
   onSaveText?: (html: string) => void;
   onCancelEdit?: () => void;
 }) {
@@ -21,6 +23,7 @@ export const CanvasElementRenderer = memo(function CanvasElementRenderer({
       element={element}
       css={css}
       editing={editing}
+      editingCanvas={editingCanvas}
       onSaveText={onSaveText}
       onCancelEdit={onCancelEdit}
     />

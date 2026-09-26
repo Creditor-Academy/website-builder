@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Web Studio User Guide</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; color: #0f172a; line-height: 1.55; max-width: 820px; margin: 40px auto; padding: 0 24px 80px; }
+    h1 { font-size: 32px; margin-bottom: 4px; }
+    h2 { font-size: 22px; margin-top: 36px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; }
+    h3 { font-size: 17px; margin-top: 24px; }
+    p, li { font-size: 15px; }
+    .meta { color: #64748b; font-size: 14px; }
+    .shot { border: 2px dashed #94a3b8; background: #f8fafc; padding: 16px 18px; margin: 14px 0 22px; }
+    .shot strong { display: block; color: #0f172a; margin-bottom: 4px; }
+    .shot span { color: #475569; font-size: 14px; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; }
+    th, td { border: 1px solid #cbd5e1; text-align: left; padding: 8px 10px; font-size: 14px; vertical-align: top; }
+    th { background: #f1f5f9; }
+    .note { background: #f8fafc; border-left: 4px solid #0f172a; padding: 10px 14px; margin: 14px 0; }
+  </style>
+</head>
+<body>
+
+<h1>Web Studio User Guide</h1>
+<p class="meta">Step-by-step guide for the launched product<br />
+Document status: Draft for product owners<br />
+Date: September 2026</p>
+
+<div class="note">
+  <strong>How to open this in Google Docs</strong>
+  <ol>
+    <li>Go to Google Drive.</li>
+    <li>Click <strong>New</strong>, then <strong>File upload</strong>, and upload this file.</li>
+    <li>Right-click the uploaded file and choose <strong>Open with &gt; Google Docs</strong>.</li>
+    <li>Use <strong>File &gt; Save as Google Docs</strong> if Drive still shows it as HTML.</li>
+  </ol>
+  <p>Each gray box is a place for a screenshot. Click inside the box, delete the instruction text, and use <strong>Insert &gt; Image</strong>. Then add a one-line caption under the image. A full shot list is at the end of this guide.</p>
+</div>
+
+<h2>1. What this product does</h2>
+<p>Web Studio is a website builder. You create a project, design pages on a canvas, and publish the site to a live address. You do not write code.</p>
+<p>With Web Studio you can:</p>
+<ul>
+  <li>Start from a blank project or a template.</li>
+  <li>Add headers, page sections, text, images, buttons, video, forms, and footers.</li>
+  <li>Edit the words on the page by clicking them.</li>
+  <li>Move pieces around the page.</li>
+  <li>Check the layout on desktop, tablet, and mobile.</li>
+  <li>Publish the site on a Web Studio address, or connect your own domain.</li>
+</ul>
+
+<div class="shot">
+  <strong>Screenshot 1 — Product home or login</strong>
+  <span>Capture the first screen a new user sees. Caption: Web Studio, the place where you build and publish a website.</span>
+</div>
+
+<h2>2. Create an account and sign in</h2>
+<ol>
+  <li>Open the Web Studio site.</li>
+  <li>Click the sign-in option.</li>
+  <li>Sign in with your email and password, or choose <strong>Continue with Google</strong>.</li>
+  <li>If you are new, switch to sign up, enter your name, email, and password, and create the account.</li>
+  <li>If you forget the password, use <strong>Forgot password</strong> and follow the email.</li>
+</ol>
+<p>After a successful sign-in you land on the Dashboard.</p>
+
+<div class="shot">
+  <strong>Screenshot 2 — Sign in</strong>
+  <span>Show the email field, password field, Google button, and the link to create an account.</span>
+</div>
+<div class="shot">
+  <strong>Screenshot 3 — Create account</strong>
+  <span>Show the sign-up form.</span>
+</div>
+
+<h2>3. The dashboard</h2>
+<p>The dashboard lists your projects. From here you create a site, open one, search, filter, or delete a project.</p>
+<ol>
+  <li>Read the greeting at the top. It confirms you are signed in.</li>
+  <li>Use the search box to find a project by name.</li>
+  <li>Use the filter to show all projects, or only one status.</li>
+  <li>Use sort to order projects by recent activity or by name.</li>
+  <li>Click a project card to open it in the editor.</li>
+</ol>
+
+<div class="shot">
+  <strong>Screenshot 4 — Dashboard with projects</strong>
+  <span>Show the project cards, the New Project button, search, and filters.</span>
+</div>
+<div class="shot">
+  <strong>Screenshot 5 — Empty dashboard</strong>
+  <span>Optional. Show the empty state before the first project exists.</span>
+</div>
+
+<h3>Delete a project</h3>
+<ol>
+  <li>On the project card, choose delete.</li>
+  <li>Confirm the name in the dialog.</li>
+  <li>The project is removed from your list.</li>
+</ol>
+
+<div class="shot">
+  <strong>Screenshot 6 — Delete confirmation</strong>
+  <span>Show the dialog that asks you to confirm deletion.</span>
+</div>
+
+<h2>4. Create a project</h2>
+<ol>
+  <li>On the dashboard, click <strong>New Project</strong>.</li>
+  <li>Type a project name. The name can be up to 100 characters.</li>
+  <li>Choose <strong>Blank</strong> to start empty, or choose a template.</li>
+  <li>Click the create button.</li>
+  <li>Web Studio opens the editor for that project.</li>
+</ol>
+
+<div class="shot">
+  <strong>Screenshot 7 — New Project dialog</strong>
+  <span>Show the name field and the template choices, including Blank.</span>
+</div>
+
+<h2>5. The editor screen</h2>
+<p>The editor has four areas.</p>
+<table>
+  <tr><th>Area</th><th>Where it is</th><th>What you use it for</th></tr>
+  <tr><td>Top bar</td><td>Dark bar across the top</td><td>Project name, undo, redo, screen size, zoom, preview, and Publish Site</td></tr>
+  <tr><td>Left rail</td><td>Icons on the far left</td><td>Elements, Layers, Pages, Assets, Design, and History</td></tr>
+  <tr><td>Canvas</td><td>Center</td><td>The page you are building</td></tr>
+  <tr><td>Properties</td><td>Right side, when something is selected</td><td>Size, color, font, link, and image settings for the selected piece</td></tr>
+</table>
+<p>The top bar also shows a save status. A green dot means the latest change is saved. An amber dot means saving is in progress.</p>
+<p>Click the <strong>W</strong> logo area’s home icon to return to the dashboard. Click the question-mark icon to start the short product tour.</p>
+
+<div class="shot">
+  <strong>Screenshot 8 — Full editor</strong>
+  <span>Label the top bar, left icons, canvas, and properties panel. This is the main shot for the guide.</span>
+</div>
+<div class="shot">
+  <strong>Screenshot 9 — Left icon rail</strong>
+  <span>Close-up of Elements, Layers, Pages, Assets, Design, and History.</span>
+</div>
+
+<h2>6. Add sections and elements</h2>
+<ol>
+  <li>Click <strong>Elements</strong> on the left.</li>
+  <li>Scroll the list, or type in the search box.</li>
+  <li>Click an item to drop it onto the page, or drag it onto the canvas.</li>
+</ol>
+<p>The catalog is grouped like this:</p>
+<table>
+  <tr><th>Group</th><th>What you can add</th></tr>
+  <tr><td>Elements</td><td>Heading, text, paragraph, image, button, icon, video, divider, form, PDF, HTML, gallery, social</td></tr>
+  <tr><td>Layout</td><td>Container</td></tr>
+  <tr><td>Header</td><td>Simple, Classic, Centered, and Split headers</td></tr>
+  <tr><td>Hero, Features, About, and more</td><td>Ready-made page sections such as Hero, Features, About, Services, Testimonials, Pricing, FAQ, Team, Gallery, Call to action, Contact, Stats, Logo cloud, and Blog list</td></tr>
+  <tr><td>Footer</td><td>Standard footer, Minimal bar, Centered stack, Newsletter, Contact row, Mega columns, and Card band</td></tr>
+</table>
+<p>Clicking a header replaces the current header. Clicking a footer replaces the current footer. Other sections are added to the page.</p>
+
+<div class="shot">
+  <strong>Screenshot 10 — Elements panel</strong>
+  <span>Show the search box and a few groups, including Header and Footer.</span>
+</div>
+<div class="shot">
+  <strong>Screenshot 11 — Section on the canvas</strong>
+  <span>Show a Hero or Features section after it has been added.</span>
+</div>
+
+<h2>7. Edit text</h2>
+<ol>
+  <li>Click any text on the canvas. A formatting bar appears above the text.</li>
+  <li>Use the bar to change bold, italic, font, size, and color.</li>
+  <li>Double-click the text to type. Change the words, then click away to finish.</li>
+  <li>Click an empty area of the canvas to hide the formatting bar.</li>
+</ol>
+<p>The same steps work for headings, paragraphs, button labels, header links, and footer text.</p>
+
+<div class="shot">
+  <strong>Screenshot 12 — Formatting bar</strong>
+  <span>Click a heading so the bar is visible. Show font, size, and color.</span>
+</div>
+<div class="shot">
+  <strong>Screenshot 13 — Typing in a text box</strong>
+  <span>Show the cursor inside a paragraph while you edit it.</span>
+</div>
+
+<h2>8. Images</h2>
+<ol>
+  <li>Add an <strong>Image</strong> from Elements, or select an image that is already on the page.</li>
+  <li>Open the properties panel on the right.</li>
+  <li>Paste an image address, or choose an image from <strong>Assets</strong>.</li>
+  <li>Drag the image to move it. Drag a corner to resize it.</li>
+</ol>
+
+<div class="shot">
+  <strong>Screenshot 14 — Selected image and properties</strong>
+  <span>Show the image selected and the image address field on the right.</span>
+</div>
+
+<h2>9. Buttons and links</h2>
+<ol>
+  <li>Add a <strong>Button</strong>, or select a button that is already on the page.</li>
+  <li>Double-click the label to change the words.</li>
+  <li>In the properties panel, set the link. Use a page path such as <strong>/about</strong>, or a full web address.</li>
+</ol>
+<p>Header and footer links have a shortcut:</p>
+<ol>
+  <li>Hover the link.</li>
+  <li>Click the arrow that appears above it.</li>
+  <li>If that page already exists, Web Studio opens it.</li>
+  <li>If it does not exist, a dialog asks whether to create the page. Confirm to add an empty page and open it.</li>
+</ol>
+
+<div class="shot">
+  <strong>Screenshot 15 — Button properties</strong>
+  <span>Show the label and the link field.</span>
+</div>
+<div class="shot">
+  <strong>Screenshot 16 — Header link arrow</strong>
+  <span>Hover a header link so the arrow is visible.</span>
+</div>
+<div class="shot">
+  <strong>Screenshot 17 — Create this page dialog</strong>
+  <span>Click a link whose page does not exist yet.</span>
+</div>
+
+<h2>10. Video</h2>
+<ol>
+  <li>Add a <strong>Video</strong> from Elements.</li>
+  <li>In properties, paste a YouTube address or a video file address.</li>
+  <li>To play or pause, click the center of the video.</li>
+  <li>To select and move the video, click and drag the area around the center, not the center itself.</li>
+</ol>
+
+<div class="shot">
+  <strong>Screenshot 18 — Video on the canvas</strong>
+  <span>Show a video block. If you can, show it playing.</span>
+</div>
+
+<h2>11. Header</h2>
+<ol>
+  <li>Open <strong>Elements</strong> and choose a header: Simple, Classic, Centered, or Split.</li>
+  <li>The new header replaces the one on the page.</li>
+  <li>Click the logo text or a menu label and type the new words.</li>
+  <li>Drag a header piece if you want to adjust its place.</li>
+  <li>Use the arrow on a menu item to open or create the linked page.</li>
+</ol>
+
+<div class="shot">
+  <strong>Screenshot 19 — Header styles</strong>
+  <span>Show the four header cards in the Elements panel.</span>
+</div>
+<div class="shot">
+  <strong>Screenshot 20 — Header on the page</strong>
+  <span>Show the logo, menu, and button after editing.</span>
+</div>
+
+<h2>12. Footer</h2>
+<ol>
+  <li>Open <strong>Elements</strong> and choose a footer.</li>
+  <li>The new footer replaces the current footer.</li>
+  <li>Click any text in the footer to edit it: logo, description, column titles, links, contact lines, and copyright.</li>
+  <li>Drag a footer piece to move it.</li>
+  <li>Hover a footer link or the subscribe button and use the arrow the same way as in the header.</li>
+</ol>
+<p>Footer choices:</p>
+<ul>
+  <li><strong>Footer</strong> — columns of links, social icons, and copyright.</li>
+  <li><strong>Minimal bar</strong> — logo, a short row of links, and copyright.</li>
+  <li><strong>Centered stack</strong> — brand, links, and social icons centered.</li>
+  <li><strong>Newsletter</strong> — a subscribe line plus link columns.</li>
+  <li><strong>Contact row</strong> — email, phone, and address.</li>
+  <li><strong>Mega columns</strong> — brand row and four link groups.</li>
+  <li><strong>Card band</strong> — a dark card on a light page.</li>
+</ul>
+
+<div class="shot">
+  <strong>Screenshot 21 — Footer choices</strong>
+  <span>Show the footer cards in the Elements panel.</span>
+</div>
+<div class="shot">
+  <strong>Screenshot 22 — Footer on the page</strong>
+  <span>Show one footer with text selected, or with the link arrow visible.</span>
+</div>
+
+<h2>13. Move and resize</h2>
+<ol>
+  <li>Click an item to select it. A frame appears around it.</li>
+  <li>Drag the item to a new place.</li>
+  <li>Drag a handle on the frame to change the width or height.</li>
+  <li>Use the properties panel for an exact size, color, spacing, or alignment.</li>
+  <li>Click <strong>Undo</strong> in the top bar if the move is wrong. Click <strong>Redo</strong> to put it back.</li>
+</ol>
+
+<div class="shot">
+  <strong>Screenshot 23 — Selected element</strong>
+  <span>Show the selection frame and resize handles.</span>
+</div>
+
+<h2>14. Pages</h2>
+<ol>
+  <li>Click <strong>Pages</strong> on the left.</li>
+  <li>Click a page name to open it on the canvas. The current page is highlighted.</li>
+  <li>Click the plus button to add a page. Type a title such as Services or Our Story, then click <strong>Create Page</strong>.</li>
+  <li>New pages use the same header and footer as the rest of the site.</li>
+  <li>Open the menu on a page (the three dots) to set it active, set it as the home page, rename it, or duplicate it.</li>
+  <li>Delete is available for every page except the home page. The home page address stays <strong>/</strong>.</li>
+</ol>
+
+<div class="shot">
+  <strong>Screenshot 24 — Pages list</strong>
+  <span>Show Home and at least one other page.</span>
+</div>
+<div class="shot">
+  <strong>Screenshot 25 — New Page dialog</strong>
+  <span>Show the page title field.</span>
+</div>
+<div class="shot">
+  <strong>Screenshot 26 — Page menu</strong>
+  <span>Show Set as Home, Rename, Duplicate, and Delete.</span>
+</div>
+
+<h2>15. Desktop, tablet, and mobile</h2>
+<ol>
+  <li>In the top bar, click the monitor icon for desktop, the tablet icon for tablet, or the phone icon for mobile.</li>
+  <li>The canvas changes to that screen width.</li>
+  <li>Adjust position and size while that icon is selected. Those adjustments are kept for that screen size.</li>
+  <li>Switch back to desktop to confirm the wide layout is unchanged.</li>
+  <li>Use the minus and plus buttons to zoom. Click the percentage to return to 100%. Click <strong>Fit</strong> to fit the page in the window.</li>
+</ol>
+<p>Check all three sizes before you publish.</p>
+
+<div class="shot">
+  <strong>Screenshot 27 — Desktop view</strong>
+  <span>Show the monitor icon selected and a wide page.</span>
+</div>
+<div class="shot">
+  <strong>Screenshot 28 — Tablet view</strong>
+  <span>Show the same page on the tablet width.</span>
+</div>
+<div class="shot">
+  <strong>Screenshot 29 — Mobile view</strong>
+  <span>Show the same page on the phone width.</span>
+</div>
+
+<h2>16. Layers</h2>
+<ol>
+  <li>Click <strong>Layers</strong> on the left.</li>
+  <li>The list shows the structure of the current page.</li>
+  <li>Click a name in the list to select that item on the canvas.</li>
+</ol>
+
+<div class="shot">
+  <strong>Screenshot 30 — Layers panel</strong>
+  <span>Show the outline of a page that has a few sections.</span>
+</div>
+
+<h2>17. Assets</h2>
+<ol>
+  <li>Click <strong>Assets</strong> on the left.</li>
+  <li>Upload your own image or video, or browse stock photos.</li>
+  <li>Open an asset and copy its address, or use it on the selected image.</li>
+  <li>You can delete assets that belong to your project. Shared library items stay in the library.</li>
+</ol>
+
+<div class="shot">
+  <strong>Screenshot 31 — Assets panel</strong>
+  <span>Show uploaded images or the stock photo browser.</span>
+</div>
+
+<h2>18. Design</h2>
+<ol>
+  <li>Click <strong>Design</strong> on the left, or the palette icon in the top bar.</li>
+  <li>Choose a color palette. The choice applies across the pages of the project.</li>
+  <li>Choose a style preset if you want rounder corners, sharper corners, or a different shadow.</li>
+</ol>
+
+<div class="shot">
+  <strong>Screenshot 32 — Design panel</strong>
+  <span>Show the color palettes.</span>
+</div>
+
+<h2>19. Preview</h2>
+<ol>
+  <li>Click the eye icon in the top bar.</li>
+  <li>The editing frames hide so you can read the page as a visitor would.</li>
+  <li>Click the eye icon again to return to editing.</li>
+</ol>
+<p>Preview is not the live site. Visitors see the site only after you publish.</p>
+
+<div class="shot">
+  <strong>Screenshot 33 — Preview mode</strong>
+  <span>Show the page with the eye icon active and the side panels hidden.</span>
+</div>
+
+<h2>20. Version history</h2>
+<ol>
+  <li>Click <strong>History</strong> on the left.</li>
+  <li>Review the saved versions.</li>
+  <li>Choose <strong>Restore</strong> on an older version if you need to go back.</li>
+  <li>Confirm before you restore. Restoring replaces the pages with that saved copy.</li>
+</ol>
+
+<div class="shot">
+  <strong>Screenshot 34 — Version history</strong>
+  <span>Show at least one saved version and the restore action. If the list is empty, capture the empty state and note that versions appear after saves.</span>
+</div>
+
+<h2>21. Site settings</h2>
+<ol>
+  <li>Open <strong>Site Settings</strong> from the editor.</li>
+  <li>Change the project name if needed, then save.</li>
+  <li>To use your own domain, type the domain, such as <strong>mysite.com</strong>, and click <strong>Connect</strong>.</li>
+  <li>Copy the DNS records shown on screen and add them at the company where you bought the domain.</li>
+  <li>Return to Web Studio and verify the domain. It stays pending until the DNS records are active.</li>
+</ol>
+
+<div class="shot">
+  <strong>Screenshot 35 — Site settings</strong>
+  <span>Show the project name and the custom domain field.</span>
+</div>
+<div class="shot">
+  <strong>Screenshot 36 — DNS records</strong>
+  <span>Show the records the user must copy. Hide any private account details.</span>
+</div>
+
+<h2>22. Publish the site</h2>
+<ol>
+  <li>Review the page on desktop, tablet, and mobile.</li>
+  <li>Click <strong>Publish Site</strong> in the top bar.</li>
+  <li>On <strong>Publish Settings</strong>, type a subdomain. The live address will look like <strong>your-name</strong> followed by the Web Studio host.</li>
+  <li>Optional: open the <strong>Domain</strong> tab and enter a custom domain.</li>
+  <li>Click the publish button. Wait until the status says the website published successfully.</li>
+  <li>Copy the live address, or click <strong>Visit</strong> to open it in a new tab.</li>
+</ol>
+<p>You need a subdomain or a custom domain before publish is available. Publishing includes hosting and an SSL certificate on the Web Studio address.</p>
+<p>If publishing fails, read the message in the dialog, check that the subdomain is filled in, and try again. If it still fails, contact support and include the project name.</p>
+
+<div class="shot">
+  <strong>Screenshot 37 — Publish dialog before publish</strong>
+  <span>Show the subdomain field and the publish button.</span>
+</div>
+<div class="shot">
+  <strong>Screenshot 38 — Publish success</strong>
+  <span>Show the live address and the Visit button.</span>
+</div>
+<div class="shot">
+  <strong>Screenshot 39 — Live site</strong>
+  <span>Open the published address in a browser and capture the home page.</span>
+</div>
+
+<h2>23. Update a site that is already live</h2>
+<ol>
+  <li>Open the project from the dashboard.</li>
+  <li>Change the pages.</li>
+  <li>Wait until the save status in the top bar is settled.</li>
+  <li>Click <strong>Publish Site</strong> again.</li>
+  <li>Visit the live address and refresh the page to confirm the new version.</li>
+</ol>
+<p>Changes in the editor are not public until you publish again.</p>
+
+<div class="shot">
+  <strong>Screenshot 40 — Republish</strong>
+  <span>Show Publish Site on a project that already has a live address.</span>
+</div>
+
+<h2>24. Your profile</h2>
+<ol>
+  <li>Open your profile from the dashboard.</li>
+  <li>Update your name and save.</li>
+  <li>The email address is shown but cannot be changed on this screen.</li>
+  <li>Use <strong>Log out</strong> when you are finished on a shared computer.</li>
+</ol>
+
+<div class="shot">
+  <strong>Screenshot 41 — Profile</strong>
+  <span>Show the name field and the disabled email field.</span>
+</div>
+<div class="shot">
+  <strong>Screenshot 42 — Log out</strong>
+  <span>Show the confirmation that asks if you want to log out of Web Studio.</span>
+</div>
+
+<h2>25. A short path from zero to a live site</h2>
+<ol>
+  <li>Sign in.</li>
+  <li>Click <strong>New Project</strong>, name it, and choose Blank or a template.</li>
+  <li>Add a header, a hero section, and a footer.</li>
+  <li>Click the text and replace the sample words with your own.</li>
+  <li>Add the other pages you need, and point the menu links at them.</li>
+  <li>Check desktop, tablet, and mobile.</li>
+  <li>Click <strong>Publish Site</strong>, set the subdomain, and publish.</li>
+  <li>Open the live address and confirm the pages.</li>
+</ol>
+
+<h2>26. Quick reference</h2>
+<table>
+  <tr><th>I want to…</th><th>Do this</th></tr>
+  <tr><td>Start a site</td><td>Dashboard → New Project</td></tr>
+  <tr><td>Add a block</td><td>Elements → click or drag the item</td></tr>
+  <tr><td>Change words</td><td>Click the text, then double-click to type</td></tr>
+  <tr><td>Change a font or color</td><td>Click the text and use the formatting bar, or use the properties panel</td></tr>
+  <tr><td>Open another page</td><td>Pages → click the page name</td></tr>
+  <tr><td>Make a menu link</td><td>Hover the header or footer link and click the arrow</td></tr>
+  <tr><td>See a phone layout</td><td>Top bar → phone icon</td></tr>
+  <tr><td>Hide editing frames</td><td>Top bar → eye icon</td></tr>
+  <tr><td>Undo a change</td><td>Top bar → undo arrow</td></tr>
+  <tr><td>Put the site online</td><td>Publish Site → subdomain → publish</td></tr>
+  <tr><td>Leave the editor</td><td>Home icon in the top bar</td></tr>
+</table>
+
+<h2>27. Screenshot checklist</h2>
+<p>Tick these off as you paste images into the Google Doc.</p>
+<table>
+  <tr><th>Done</th><th>No.</th><th>Shot</th></tr>
+  <tr><td></td><td>1</td><td>Home or login</td></tr>
+  <tr><td></td><td>2</td><td>Sign in</td></tr>
+  <tr><td></td><td>3</td><td>Create account</td></tr>
+  <tr><td></td><td>4</td><td>Dashboard with projects</td></tr>
+  <tr><td></td><td>5</td><td>Empty dashboard</td></tr>
+  <tr><td></td><td>6</td><td>Delete confirmation</td></tr>
+  <tr><td></td><td>7</td><td>New Project dialog</td></tr>
+  <tr><td></td><td>8</td><td>Full editor</td></tr>
+  <tr><td></td><td>9</td><td>Left icon rail</td></tr>
+  <tr><td></td><td>10</td><td>Elements panel</td></tr>
+  <tr><td></td><td>11</td><td>Section on the canvas</td></tr>
+  <tr><td></td><td>12</td><td>Formatting bar</td></tr>
+  <tr><td></td><td>13</td><td>Typing in a text box</td></tr>
+  <tr><td></td><td>14</td><td>Selected image</td></tr>
+  <tr><td></td><td>15</td><td>Button properties</td></tr>
+  <tr><td></td><td>16</td><td>Header link arrow</td></tr>
+  <tr><td></td><td>17</td><td>Create this page dialog</td></tr>
+  <tr><td></td><td>18</td><td>Video</td></tr>
+  <tr><td></td><td>19</td><td>Header styles</td></tr>
+  <tr><td></td><td>20</td><td>Header on the page</td></tr>
+  <tr><td></td><td>21</td><td>Footer choices</td></tr>
+  <tr><td></td><td>22</td><td>Footer on the page</td></tr>
+  <tr><td></td><td>23</td><td>Selected element</td></tr>
+  <tr><td></td><td>24</td><td>Pages list</td></tr>
+  <tr><td></td><td>25</td><td>New Page dialog</td></tr>
+  <tr><td></td><td>26</td><td>Page menu</td></tr>
+  <tr><td></td><td>27</td><td>Desktop view</td></tr>
+  <tr><td></td><td>28</td><td>Tablet view</td></tr>
+  <tr><td></td><td>29</td><td>Mobile view</td></tr>
+  <tr><td></td><td>30</td><td>Layers</td></tr>
+  <tr><td></td><td>31</td><td>Assets</td></tr>
+  <tr><td></td><td>32</td><td>Design</td></tr>
+  <tr><td></td><td>33</td><td>Preview</td></tr>
+  <tr><td></td><td>34</td><td>Version history</td></tr>
+  <tr><td></td><td>35</td><td>Site settings</td></tr>
+  <tr><td></td><td>36</td><td>DNS records</td></tr>
+  <tr><td></td><td>37</td><td>Publish dialog</td></tr>
+  <tr><td></td><td>38</td><td>Publish success</td></tr>
+  <tr><td></td><td>39</td><td>Live site</td></tr>
+  <tr><td></td><td>40</td><td>Republish</td></tr>
+  <tr><td></td><td>41</td><td>Profile</td></tr>
+  <tr><td></td><td>42</td><td>Log out</td></tr>
+</table>
+
+<p class="meta">End of draft. Replace the screenshot boxes, then delete this line and the import note at the top before you share the guide.</p>
+
+</body>
+</html>

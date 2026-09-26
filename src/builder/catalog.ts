@@ -28,6 +28,13 @@ import {
   createClassicNavbar,
   createSimpleNavbar,
   createSplitNavbar,
+  createBandFooter,
+  createCenteredFooter,
+  createContactFooter,
+  createDefaultFooter,
+  createMegaFooter,
+  createMinimalFooter,
+  createNewsletterFooter,
   createDefaultAboutSection,
   createDefaultBlogListSection,
   createDefaultContactSection,
@@ -55,6 +62,7 @@ export interface CatalogItem {
   elementType?: ElementType;
   createPrebuilt?: () => Record<string, unknown>;
   createNavbar?: () => Record<string, unknown>;
+  createFooter?: () => Record<string, unknown>;
 }
 
 export const ELEMENT_CATALOG: CatalogItem[] = [
@@ -94,12 +102,23 @@ export const PREBUILT_CATALOG: CatalogItem[] = [
   { id: 'logocloud', name: 'Logo cloud', description: 'Partner logos', icon: Building2, category: 'Features', kind: 'prebuilt', createPrebuilt: () => createDefaultLogoCloudSection() },
   { id: 'blog', name: 'Blog list', description: 'Article cards', icon: FileText, category: 'Features', kind: 'prebuilt', createPrebuilt: () => createDefaultBlogListSection() },
   { id: 'footer-note', name: 'Two column', description: 'Split layout section', icon: Columns, category: 'Features', kind: 'prebuilt', createPrebuilt: () => createDefaultAboutSection() },
-  { id: 'footer', name: 'Footer', description: 'Links, social, and copyright', icon: PanelBottom, category: 'Footer', kind: 'footer' },
+  { id: 'footer', name: 'Footer', description: 'Links, social, and copyright', icon: PanelBottom, category: 'Footer', kind: 'footer', createFooter: () => createDefaultFooter() },
+  { id: 'footer-minimal', name: 'Minimal bar', description: 'Logo, inline links, and copyright', icon: Minus, category: 'Footer', kind: 'footer', createFooter: () => createMinimalFooter() },
+  { id: 'footer-centered', name: 'Centered stack', description: 'Centered brand, links, and social', icon: AlignCenter, category: 'Footer', kind: 'footer', createFooter: () => createCenteredFooter() },
+  { id: 'footer-newsletter', name: 'Newsletter', description: 'Subscribe line with link columns', icon: Mail, category: 'Footer', kind: 'footer', createFooter: () => createNewsletterFooter() },
+  { id: 'footer-contact', name: 'Contact row', description: 'Email, phone, and address', icon: Building2, category: 'Footer', kind: 'footer', createFooter: () => createContactFooter() },
+  { id: 'footer-mega', name: 'Mega columns', description: 'Brand row and four link groups', icon: Columns, category: 'Footer', kind: 'footer', createFooter: () => createMegaFooter() },
+  { id: 'footer-band', name: 'Card band', description: 'Dark card on a light page', icon: Layout, category: 'Footer', kind: 'footer', createFooter: () => createBandFooter() },
 ];
 
 export function navbarFromCatalog(id: string) {
   const item = PREBUILT_CATALOG.find((entry) => entry.id === id && entry.kind === 'navbar');
   return item?.createNavbar?.() || createClassicNavbar();
+}
+
+export function footerFromCatalog(id: string) {
+  const item = PREBUILT_CATALOG.find((entry) => entry.id === id && entry.kind === 'footer');
+  return item?.createFooter?.() || createDefaultFooter();
 }
 
 export const CATALOG_CATEGORIES = [

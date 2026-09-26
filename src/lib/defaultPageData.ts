@@ -522,6 +522,195 @@ export const createDefaultFooter = () => ({
   },
 });
 
+function footerLink(label: string, href: string) {
+  return { id: uuidv4(), label, href };
+}
+
+function footerColumn(title: string, links: Array<[string, string]>) {
+  return {
+    id: uuidv4(),
+    title,
+    links: links.map(([label, href]) => footerLink(label, href)),
+  };
+}
+
+function footerSocial(platform: string, href: string) {
+  return { id: uuidv4(), platform, href };
+}
+
+/** Single row: logo, inline links, copyright. */
+export const createMinimalFooter = () => ({
+  id: uuidv4(),
+  style: 'minimal',
+  logo: { text: 'Northwind' },
+  description: '',
+  columns: [
+    footerColumn('Explore', [
+      ['Home', '/'],
+      ['Work', '/about'],
+      ['Journal', '/blog'],
+      ['Contact', '/contact'],
+    ]),
+  ],
+  socialLinks: [],
+  copyright: '© 2026 Northwind',
+  styles: {
+    backgroundColor: '#ffffff',
+    textColor: '#0f172a',
+  },
+});
+
+/** Stacked, centered brand with a short line and social icons. */
+export const createCenteredFooter = () => ({
+  id: uuidv4(),
+  style: 'centered',
+  logo: { text: 'Atelier' },
+  description: 'A small studio for brands that want a quieter web.',
+  columns: [
+    footerColumn('Visit', [
+      ['Projects', '/about'],
+      ['Services', '/services'],
+      ['Notes', '/blog'],
+      ['Start a project', '/contact'],
+    ]),
+  ],
+  socialLinks: [
+    footerSocial('instagram', 'https://instagram.com'),
+    footerSocial('linkedin', 'https://linkedin.com'),
+  ],
+  copyright: '© 2026 Atelier Studio',
+  styles: {
+    backgroundColor: '#faf7f2',
+    textColor: '#1c1917',
+  },
+});
+
+/** Brand and subscribe action on the left, link columns on the right. */
+export const createNewsletterFooter = () => ({
+  id: uuidv4(),
+  style: 'newsletter',
+  logo: { text: 'Field Notes' },
+  description: 'A short letter on design, product, and the work in between.',
+  cta: { label: 'Subscribe', href: '/contact' },
+  columns: [
+    footerColumn('Journal', [
+      ['Latest', '/blog'],
+      ['Archive', '/blog'],
+      ['Topics', '/features'],
+    ]),
+    footerColumn('Studio', [
+      ['About', '/about'],
+      ['Contact', '/contact'],
+      ['Privacy', '/privacy'],
+    ]),
+  ],
+  socialLinks: [
+    footerSocial('twitter', 'https://twitter.com'),
+    footerSocial('linkedin', 'https://linkedin.com'),
+  ],
+  copyright: '© 2026 Field Notes',
+  styles: {
+    backgroundColor: '#111827',
+    textColor: '#e5e7eb',
+  },
+});
+
+/** Brand copy plus editable email, phone, and address. */
+export const createContactFooter = () => ({
+  id: uuidv4(),
+  style: 'contact',
+  logo: { text: 'Harbor & Co' },
+  description: 'We reply within one business day.',
+  columns: [
+    footerColumn('Company', [
+      ['About', '/about'],
+      ['Services', '/services'],
+      ['Careers', '/careers'],
+      ['Privacy', '/privacy'],
+    ]),
+  ],
+  socialLinks: [
+    footerSocial('email', 'hello@harbor.co'),
+    footerSocial('phone', '+1 415 555 0198'),
+    footerSocial('location', '88 Market Street, San Francisco'),
+  ],
+  copyright: '© 2026 Harbor & Co',
+  styles: {
+    backgroundColor: '#ffffff',
+    textColor: '#0f172a',
+  },
+});
+
+/** Wide brand row, then four link columns. */
+export const createMegaFooter = () => ({
+  id: uuidv4(),
+  style: 'mega',
+  logo: { text: 'Lumen' },
+  description: 'Tools for teams who publish every week.',
+  columns: [
+    footerColumn('Product', [
+      ['Overview', '/features'],
+      ['Pricing', '/pricing'],
+      ['Templates', '/templates'],
+    ]),
+    footerColumn('Company', [
+      ['About', '/about'],
+      ['Careers', '/careers'],
+      ['Blog', '/blog'],
+    ]),
+    footerColumn('Resources', [
+      ['Help Center', '/help'],
+      ['Status', '/status'],
+      ['Contact', '/contact'],
+    ]),
+    footerColumn('Legal', [
+      ['Privacy', '/privacy'],
+      ['Terms', '/terms'],
+    ]),
+  ],
+  socialLinks: [
+    footerSocial('twitter', 'https://twitter.com'),
+    footerSocial('linkedin', 'https://linkedin.com'),
+    footerSocial('youtube', 'https://youtube.com'),
+  ],
+  copyright: '© 2026 Lumen',
+  styles: {
+    backgroundColor: '#020617',
+    textColor: '#cbd5e1',
+  },
+});
+
+/** Dark rounded card on a light page. */
+export const createBandFooter = () => ({
+  id: uuidv4(),
+  style: 'band',
+  logo: { text: 'Orbit' },
+  description: 'Build, publish, and look after the site in one place.',
+  columns: [
+    footerColumn('Product', [
+      ['Features', '/features'],
+      ['Pricing', '/pricing'],
+      ['Templates', '/templates'],
+    ]),
+    footerColumn('Company', [
+      ['About', '/about'],
+      ['Blog', '/blog'],
+      ['Contact', '/contact'],
+    ]),
+  ],
+  socialLinks: [
+    footerSocial('instagram', 'https://instagram.com'),
+    footerSocial('twitter', 'https://twitter.com'),
+    footerSocial('linkedin', 'https://linkedin.com'),
+  ],
+  copyright: '© 2026 Orbit',
+  styles: {
+    backgroundColor: '#0f172a',
+    textColor: '#e2e8f0',
+    surface: '#eef2f7',
+  },
+});
+
 export const createFeaturesPage = () => ({
   id: uuidv4(),
   name: 'Features',

@@ -142,7 +142,7 @@ export function defaultFormFields(): FormField[] {
   return [
     { id: uuidv4(), type: 'text', label: 'Name', placeholder: 'Your name', required: true },
     { id: uuidv4(), type: 'email', label: 'Email', placeholder: 'you@example.com', required: true },
-    { id: uuidv4(), type: 'text', label: 'Message', placeholder: 'How can we help?', required: false },
+    { id: uuidv4(), type: 'textarea', label: 'Message', placeholder: 'How can we help?....', required: false },
     { id: uuidv4(), type: 'consent', label: 'I agree to be contacted', required: true },
   ];
 }

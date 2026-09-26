@@ -23,6 +23,11 @@ function chromeColor(kind: NodeKind) {
   return 'bg-sky-600';
 }
 
+function isFormFieldTarget(target: EventTarget | null) {
+  const node = target as HTMLElement | null;
+  return Boolean(node?.closest?.('input, textarea, select, option, label, [data-canvas-form-field]'));
+}
+
 export const CanvasNodeFrame = memo(function CanvasNodeFrame({
   id,
   kind,
@@ -162,7 +167,8 @@ export const CanvasNodeFrame = memo(function CanvasNodeFrame({
       onPointerDown={(event: ReactPointerEvent<HTMLDivElement>) => {
         if (previewMode || locked || dragDisabled || !slideObject) return;
         if (event.button !== 0) return;
-        if ((event.target as HTMLElement).closest('[data-canvas-move], [data-canvas-resize], [data-canvas-rotate], button')) return;
+        if ((event.target as HTMLElement).closest('[data-canvas-move], [data-canvas-resize], [data-canvas-rotate], video, iframe, button')) return;
+        if (isFormFieldTarget(event.target)) return;
         const additive = event.shiftKey || event.metaKey || event.ctrlKey;
         if (!selected && !additive) {
           selectNode(id, kind, 'replace');
@@ -205,7 +211,8 @@ export const CanvasNodeFrame = memo(function CanvasNodeFrame({
           clickSuppressRef.current = false;
           return;
         }
-        if ((event.target as HTMLElement).closest('[data-canvas-move]')) return;
+        if ((event.target as HTMLElement).closest('[data-canvas-move], video, iframe')) return;
+        if (isFormFieldTarget(event.target)) return;
         const additive = event.shiftKey || event.metaKey || event.ctrlKey;
         selectNode(id, kind, additive ? 'toggle' : 'replace');
       }}
@@ -315,6 +322,7 @@ export const CanvasElementNode = memo(function CanvasElementNode({
             ...(free ? { width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%', boxSizing: 'border-box' } : {}),
           }}
           editing={editing}
+          editingCanvas={!previewMode}
           onSaveText={(html) => {
             updateCanvasNode(element.id, { content: { ...element.content, text: html } });
             setEditingNodeId(null);

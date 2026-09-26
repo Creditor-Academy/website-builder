@@ -89,7 +89,7 @@ function dropTargetFromOver(overId: string, overData: unknown, pageId?: string):
   const data = overData as BuilderDragData | undefined;
 
   if (parsed?.origin === 'drop') {
-    if (data && 'type' in data && data.type === 'dropzone') return data.target;
+    if (data && 'type' in data && data.type === 'dropzone' && 'target' in data) return data.target;
     return {
       parentId: parsed.parentId,
       parentKind: parsed.parentKind,
@@ -128,7 +128,7 @@ function dropTargetFromOver(overId: string, overData: unknown, pageId?: string):
         accepts: ELEMENT_ACCEPTS,
       };
     }
-    if (parsed.kind === 'section' || canvas?.kind === 'section') {
+    if (parsed.kind === 'page' || canvas?.kind === 'page') {
       return {
         parentId: canvas?.pageId || pageId || '',
         parentKind: 'page',
@@ -145,7 +145,7 @@ function dropTargetFromOver(overId: string, overData: unknown, pageId?: string):
 export type DropAction =
   | { type: 'move'; nodeId: string; target: DropTarget }
   | { type: 'palette'; item: PaletteDragData; target: DropTarget | null }
-  | { type: 'footer' }
+  | { type: 'footer'; catalogId: string }
   | { type: 'navbar'; catalogId: string };
 
 export function resolveDropAction(
@@ -164,7 +164,9 @@ export function resolveDropAction(
     if (item.itemKind === 'navbar' || activeParsed.itemKind === 'navbar') {
       return { type: 'navbar', catalogId: item.catalogId || activeParsed.catalogId };
     }
-    if (item.itemKind === 'footer' || activeParsed.itemKind === 'footer') return { type: 'footer' };
+    if (item.itemKind === 'footer' || activeParsed.itemKind === 'footer') {
+      return { type: 'footer', catalogId: item.catalogId || activeParsed.catalogId };
+    }
     const paletteItem: PaletteDragData = {
       source: 'palette',
       itemKind: item.itemKind || activeParsed.itemKind,

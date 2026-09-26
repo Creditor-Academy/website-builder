@@ -3,9 +3,8 @@ import { useDraggable } from '@dnd-kit/core';
 import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import useBuilderStore from '@/store/useBuilderStore';
-import { CATALOG_CATEGORIES, ELEMENT_CATALOG, PREBUILT_CATALOG, navbarFromCatalog, type CatalogItem } from '@/builder/catalog';
+import { CATALOG_CATEGORIES, ELEMENT_CATALOG, PREBUILT_CATALOG, footerFromCatalog, navbarFromCatalog, type CatalogItem } from '@/builder/catalog';
 import { paletteDragId, type PaletteDragData } from '@/builder/dnd';
-import { createDefaultFooter } from '@/lib/defaultPageData';
 import { cn } from '@/lib/utils';
 
 function CatalogCard({ item, onAdd }: { item: CatalogItem; onAdd: (item: CatalogItem) => void }) {
@@ -47,8 +46,8 @@ function CatalogCard({ item, onAdd }: { item: CatalogItem; onAdd: (item: Catalog
       }}
     >
       <div className="flex w-full min-w-0 items-center gap-2">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#0F172A] text-white">
-          <item.icon className="h-3.5 w-3.5" strokeWidth={1.75} />
+        <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-md bg-[#0F172A] text-white">
+          <item.icon className="h-2.5 w-2.5" strokeWidth={1.75} />
         </div>
         <p className="truncate text-xs font-medium text-slate-800">{item.name}</p>
       </div>
@@ -96,9 +95,8 @@ export function ElementsPanel() {
     }
     if (item.kind === 'footer') {
       const page = getActivePage();
-      if (!page?.footer) {
-        updateFooter(createDefaultFooter());
-      }
+      const preset = item.createFooter?.() || footerFromCatalog(item.id);
+      updateFooter({ ...preset, id: page?.footer?.id || preset.id });
       selectNode('footer', 'footer');
       return;
     }

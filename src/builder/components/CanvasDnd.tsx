@@ -17,8 +17,7 @@ import {
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import useBuilderStore from '@/store/useBuilderStore';
-import { ELEMENT_CATALOG, PREBUILT_CATALOG, navbarFromCatalog } from '@/builder/catalog';
-import { createDefaultFooter } from '@/lib/defaultPageData';
+import { ELEMENT_CATALOG, PREBUILT_CATALOG, footerFromCatalog, navbarFromCatalog } from '@/builder/catalog';
 import { findNode, isFreePositioned } from '@/builder/tree';
 import { normalizePageSections } from '@/builder/adapter';
 import { parseDragId, resolveDropAction, type BuilderDragData, type CanvasDragData, type PaletteDragData } from '@/builder/dnd';
@@ -323,7 +322,8 @@ export function CanvasDndProvider({ children }: { children: ReactNode }) {
       return;
     }
     if (action.type === 'footer') {
-      if (!page.footer) store.updateFooter(createDefaultFooter());
+      const preset = footerFromCatalog(action.catalogId);
+      store.updateFooter({ ...preset, id: page.footer?.id || preset.id });
       store.selectNode('footer', 'footer');
       return;
     }
@@ -341,7 +341,8 @@ export function CanvasDndProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (catalog?.kind === 'footer') {
-        if (!page.footer) store.updateFooter(createDefaultFooter());
+        const preset = catalog.createFooter?.() || footerFromCatalog(catalog.id);
+        store.updateFooter({ ...preset, id: page.footer?.id || preset.id });
         store.selectNode('footer', 'footer');
         return;
       }

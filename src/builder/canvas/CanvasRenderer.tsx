@@ -163,6 +163,7 @@ export const CanvasRenderer = memo(function CanvasRenderer({
       onClick={(event) => {
         if (previewMode) return;
         const target = event.target as HTMLElement;
+        if (target.closest('video, iframe')) return;
         if (target.closest('a, button, [href]')) event.preventDefault();
       }}
       onSubmit={(event) => {
@@ -210,9 +211,13 @@ export const CanvasRenderer = memo(function CanvasRenderer({
           cursor: pointer;
           user-select: none;
         }
-        .canvas-edit:not(.is-preview) iframe,
-        .canvas-edit:not(.is-preview) video {
-          pointer-events: none;
+        .canvas-edit:not(.is-preview) [data-canvas-kind="footer"] [contenteditable],
+        .canvas-edit:not(.is-preview) [data-canvas-kind="footer"] [data-footer-go] {
+          pointer-events: auto;
+          cursor: pointer;
+        }
+        .canvas-edit:not(.is-preview) [data-canvas-kind="footer"] [contenteditable] {
+          cursor: text;
         }
         .canvas-edit:not(.is-preview) img {
           -webkit-user-drag: none;
@@ -222,6 +227,15 @@ export const CanvasRenderer = memo(function CanvasRenderer({
         .canvas-edit:not(.is-preview) textarea,
         .canvas-edit:not(.is-preview) select {
           pointer-events: none;
+        }
+        .canvas-edit:not(.is-preview) [data-canvas-form] input,
+        .canvas-edit:not(.is-preview) [data-canvas-form] textarea,
+        .canvas-edit:not(.is-preview) [data-canvas-form] select,
+        .canvas-edit:not(.is-preview) [data-canvas-form] label {
+          pointer-events: auto;
+          user-select: text;
+          -webkit-user-select: text;
+          cursor: text;
         }
       `),
         }}

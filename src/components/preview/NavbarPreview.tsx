@@ -85,8 +85,8 @@ const STYLES = `
   }
   .nb-go {
     position: absolute;
-    top: -9px;
-    right: -9px;
+    top: -22px;
+    right: -4px;
     width: 22px;
     height: 22px;
     border-radius: 999px;

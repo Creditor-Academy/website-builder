@@ -34,29 +34,36 @@ export function TextFormattingToolbar() {
   // Store the active selection range to restore it when color picker steals focus
   const savedRangeRef = useRef<Range | null>(null);
 
+  const activeEditableRef = useRef<HTMLElement | null>(null);
+  const dismissedRef = useRef(false);
+
   useEffect(() => {
+    const editableFromNode = (start: Node | null) => {
+      let node = start;
+      while (node && node !== document.body) {
+        if (node instanceof HTMLElement && node.getAttribute('contenteditable') === 'true') return node;
+        node = node.parentNode;
+      }
+      return null;
+    };
+
     const handleSelectionChange = () => {
+      if (dismissedRef.current) {
+        setIsVisible(false);
+        return;
+      }
       const selection = window.getSelection();
       if (selection && selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
-        const selectedText = range.toString();
-        
-        // Ensure the selection is within our editable content area
-        let node = selection.anchorNode;
-        let isEditable = false;
-        while (node && node !== document.body) {
-          if (node instanceof HTMLElement && node.getAttribute('contenteditable') === 'true') {
-            isEditable = true;
-            break;
-          }
-          node = node.parentNode;
-        }
+        const editable = editableFromNode(selection.anchorNode);
 
-        if (selectedText.trim() && isEditable) {
+        if (editable) {
+          activeEditableRef.current = editable;
           savedRangeRef.current = range.cloneRange();
-          const rect = range.getBoundingClientRect();
-          const viewportHeight = window.innerHeight;
-          const toolbarHeight = 60; // approximate height
+          const clientRects = range.getClientRects();
+          const caret = clientRects.length > 0 ? clientRects[0] : range.getBoundingClientRect();
+          const rect = caret.width > 0 || caret.height > 0 ? caret : editable.getBoundingClientRect();
+          const toolbarHeight = 60;
 
           let top = rect.top - toolbarHeight - 10;
           if (top < 10) {
@@ -65,7 +72,6 @@ export function TextFormattingToolbar() {
 
           setPosition({
             top: Math.max(10, top),
-            // Center the toolbar above the selection
             left: Math.max(10, Math.min(rect.left + (rect.width / 2) - 300, window.innerWidth - 650))
           });
           
@@ -115,11 +121,30 @@ export function TextFormattingToolbar() {
 
           setIsVisible(true);
         } else if (!isInteractingRef.current) {
+          activeEditableRef.current = null;
           setIsVisible(false);
         }
-      } else {
+      } else if (!isInteractingRef.current) {
+        activeEditableRef.current = null;
         setIsVisible(false);
       }
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (isInteractingRef.current) return;
+      const target = event.target;
+      const element = target instanceof Element ? target : target instanceof Node ? target.parentElement : null;
+      if (!element) return;
+      if (toolbarRef.current?.contains(element)) return;
+      if (element.closest('[data-text-toolbar], [data-radix-popper-content-wrapper], [data-radix-select-content]')) return;
+      if (element.closest('[contenteditable="true"]')) {
+        dismissedRef.current = false;
+        return;
+      }
+      dismissedRef.current = true;
+      activeEditableRef.current = null;
+      window.getSelection()?.removeAllRanges();
+      setIsVisible(false);
     };
 
     const handleScroll = () => {
@@ -129,11 +154,13 @@ export function TextFormattingToolbar() {
     };
 
     document.addEventListener('selectionchange', handleSelectionChange);
+    document.addEventListener('pointerdown', handlePointerDown, true);
     window.addEventListener('scroll', handleScroll, true);
     window.addEventListener('resize', handleSelectionChange);
 
     return () => {
       document.removeEventListener('selectionchange', handleSelectionChange);
+      document.removeEventListener('pointerdown', handlePointerDown, true);
       window.removeEventListener('scroll', handleScroll, true);
       window.removeEventListener('resize', handleSelectionChange);
     };
@@ -250,6 +277,7 @@ export function TextFormattingToolbar() {
   return (
     <div
       ref={toolbarRef}
+      data-text-toolbar=""
       className="fixed z-50 animate-in fade-in slide-in-from-bottom-2 duration-200"
       style={{ top: position.top, left: position.left }}
       onMouseDown={(e) => {
