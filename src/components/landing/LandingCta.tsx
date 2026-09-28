@@ -80,7 +80,7 @@ export default function HeroCTASection() {
       <div className="font-sans antialiased bg-slate-950 text-slate-800 min-h-0 flex items-center justify-center p-0 m-0 overflow-x-hidden selection:bg-indigo-500 selection:text-white">
         {/* BEGIN: MainHeroCTASection */}
         <main
-          className="relative flex min-h-[min(100vh,900px)] w-full max-w-full items-center justify-center overflow-hidden bg-slate-950 py-12 sm:py-16 md:py-24"
+          className="relative flex min-h-0 w-full max-w-full items-center justify-center overflow-hidden bg-slate-950 py-12 sm:py-16 md:min-h-[min(100vh,900px)] md:py-24"
           data-purpose="cta-showcase-container"
         >
           {/* Atmospheric Photography Background with rich depth */}
@@ -121,7 +121,7 @@ export default function HeroCTASection() {
               <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-gradient-to-b from-white/40 to-transparent blur-xl pointer-events-none" />
 
               {/* Optional Top Navigation Corner Utility */}
-              <div className="absolute top-3 right-3 sm:top-7 sm:right-7 flex items-center gap-2" data-purpose="window-controls">
+              <div className="absolute top-3 right-3 hidden items-center gap-2 sm:top-7 sm:right-7 sm:flex" data-purpose="window-controls">
                 <button
                   aria-label="Dismiss view"
                   className="p-2 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors"
@@ -148,7 +148,7 @@ export default function HeroCTASection() {
 
               {/* BEGIN: Headline & Typographic Treatment */}
               <div className="mb-5 space-y-1 sm:mb-6" data-purpose="hero-title-block">
-                <h1 className="text-slate-950 dark:text-white font-extrabold tracking-tight text-[1.75rem] sm:text-5xl md:text-6xl leading-[1.15]">
+                <h1 className="text-slate-950 dark:text-white font-extrabold tracking-tight text-[1.65rem] leading-[1.15] sm:text-4xl md:text-5xl lg:text-6xl px-1">
                   Publish to a{' '}
                   <span className="inline italic font-black bg-gradient-to-r from-blue-600 via-indigo-500 to-fuchsia-500 animated-gradient-text animate-text-shimmer drop-shadow-sm">
                     live address.

@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Menu, Moon, Move, Sun, X } from "lucide-react";
+import { motion } from "framer-motion";
+import { Move } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { BrandLogo } from "@/components/Common/BrandLogo";
 import Footer from "./Footer";
 import { useTheme } from "@/hooks/useTheme";
-import { pageFrameClass } from "@/components/landing/pageFrame";
+import { pageFrameClass, sectionYClass } from "@/components/landing/pageFrame";
+import MarketingReveal from "@/components/landing/MarketingReveal";
 import LandingCta from "@/components/landing/LandingCta";
+import MarketingNav from "@/components/landing/MarketingNav";
 
 import dragDropImg from "../assets/drag_drop.png";
 import templatesImg from "../assets/templates_showcase.png";
@@ -24,7 +25,6 @@ const heroScrollImages = [dragDropImg, templatesImg, uiShowcase1, componentsImg]
 const featureCardImages = [featureImg1, featureImg2, featureImg3, featureImg4, featureImg5] as const;
 
 export default function FeaturesPage() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { setTheme, isDark } = useTheme();
 
   useEffect(() => {
@@ -66,182 +66,34 @@ export default function FeaturesPage() {
         />
       </Helmet>
 
-      {/* ================= NAVBAR (homepage-aligned) ================= */}
-      <nav className="pointer-events-none fixed inset-x-0 top-0 z-[100] pt-3 sm:pt-6">
-        <div className={cn(pageFrameClass, "relative")}>
-          <motion.div
-            initial={{ y: -50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className={cn(
-              "pointer-events-auto flex w-full min-w-0 items-center justify-between rounded-full px-3.5 py-2.5 backdrop-blur-2xl transition-all duration-500 sm:px-6 sm:py-3",
-              isDark
-                ? "border border-slate-700/50 bg-slate-900/80 shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
-                : "border border-slate-200/50 bg-white/90 shadow-[0_8px_32px_rgba(0,0,0,0.05)]",
-            )}
-          >
-            <Link to="/" className="group pointer-events-auto flex min-w-0 shrink cursor-pointer items-center">
-              <BrandLogo imgClassName="h-7 w-7 transition-transform duration-300 group-hover:scale-110 sm:h-8 sm:w-8" />
-            </Link>
-
-            <div className="hidden items-center gap-8 text-sm font-medium md:flex">
-              {["Features", "Templates", "Resources"].map((item) => (
-                <Link
-                  key={item}
-                  to={`/${item.toLowerCase()}`}
-                  className={cn(
-                    "relative group transition-colors",
-                    isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900",
-                  )}
-                >
-                  {item}
-                  <span
-                    className={cn(
-                      "absolute -bottom-1 left-0 h-[2px] rounded-full bg-blue-500 transition-all",
-                      item === "Features" ? "w-full" : "w-0 group-hover:w-full",
-                    )}
-                  />
-                </Link>
-              ))}
-              <div className={cn("h-4 w-px", isDark ? "bg-slate-600/50" : "bg-slate-300")} />
-
-              <button
-                type="button"
-                onClick={() => setTheme(isDark ? "light" : "dark")}
-                className={cn(
-                  "rounded-full p-2 transition-colors",
-                  isDark ? "text-slate-300 hover:bg-slate-800" : "text-slate-600 hover:bg-slate-200",
-                )}
-              >
-                <AnimatePresence mode="wait">
-                  {isDark ? (
-                    <motion.div
-                      key="sun"
-                      initial={{ rotate: -90, opacity: 0 }}
-                      animate={{ rotate: 0, opacity: 1 }}
-                      exit={{ rotate: 90, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Sun className="h-4 w-4" />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="moon"
-                      initial={{ rotate: -90, opacity: 0 }}
-                      animate={{ rotate: 0, opacity: 1 }}
-                      exit={{ rotate: 90, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Moon className="h-4 w-4" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </button>
-
-              <Link
-                to="/login"
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold transition-all active:scale-95",
-                  isDark
-                    ? "bg-white text-slate-950 hover:bg-slate-100"
-                    : "bg-[#0F172A] text-white hover:bg-[#1e293b]",
-                )}
-              >
-                Login <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-
-            <div className="flex items-center gap-0.5 md:hidden">
-              <button
-                type="button"
-                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-                onClick={() => setTheme(isDark ? "light" : "dark")}
-                className={cn("pointer-events-auto rounded-full p-2", isDark ? "text-slate-300" : "text-slate-600")}
-              >
-                {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              </button>
-              <button
-                type="button"
-                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-                aria-expanded={isMenuOpen}
-                className={cn("pointer-events-auto p-2", isDark ? "text-white" : "text-slate-900")}
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </button>
-            </div>
-          </motion.div>
-
-          <AnimatePresence>
-            {isMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className={cn(
-                  "pointer-events-auto absolute left-0 right-0 top-[calc(100%+0.75rem)] max-h-[min(70vh,28rem)] overflow-y-auto rounded-2xl border p-4 backdrop-blur-3xl sm:rounded-3xl sm:p-6 md:hidden",
-                  isDark
-                    ? "border-slate-700 bg-slate-900/95 shadow-2xl"
-                    : "border-slate-200 bg-white/95 shadow-xl",
-                )}
-              >
-                <div className="flex flex-col gap-2">
-                  {["Features", "Templates", "Resources"].map((item) => (
-                    <Link
-                      key={item}
-                      to={`/${item.toLowerCase()}`}
-                      onClick={() => setIsMenuOpen(false)}
-                      className={cn(
-                        "rounded-xl px-4 py-3 text-sm font-semibold transition-colors",
-                        isDark ? "text-slate-200 hover:bg-white/5" : "text-slate-700 hover:bg-slate-100",
-                      )}
-                    >
-                      {item}
-                    </Link>
-                  ))}
-                  <Link
-                    to="/login"
-                    onClick={() => setIsMenuOpen(false)}
-                    className={cn(
-                      "mt-2 rounded-2xl py-4 text-center text-lg font-bold",
-                      isDark ? "bg-white text-slate-950" : "bg-slate-900 text-white",
-                    )}
-                  >
-                    Login
-                  </Link>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </nav>
+      <MarketingNav isDark={isDark} setTheme={setTheme} activeItem="Features" />
 
       <main className="w-full">
         {/* ================= HERO ================= */}
-        <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden bg-slate-950">
+        <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden bg-slate-950 px-0 pb-12 pt-28 sm:pb-16 sm:pt-32">
           {/* Tilted scrolling image columns */}
           <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
             <motion.div
               animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.4, 0.2] }}
               transition={{ duration: 10, repeat: Infinity }}
-              className="absolute top-1/2 left-1/2 h-[800px] w-[1200px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-400/30 blur-[150px]"
+              className="absolute top-1/2 left-1/2 h-[min(800px,90vw)] w-[min(1200px,140vw)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-400/30 blur-[150px]"
             />
-            <div className="absolute top-1/2 left-1/2 flex h-[150vh] w-[150vw] -translate-x-1/2 -translate-y-1/2 -rotate-[12deg] skew-x-[12deg] items-center justify-center gap-8 opacity-70 md:opacity-90">
-              <div className="animate-infinite-scroll-vertical flex flex-col gap-8">
+            <div className="absolute top-1/2 left-1/2 flex h-[150vh] w-[120vw] max-w-none -translate-x-1/2 -translate-y-1/2 -rotate-[12deg] skew-x-[12deg] items-center justify-center gap-4 opacity-70 sm:w-[150vw] sm:gap-8 md:opacity-90">
+              <div className="animate-infinite-scroll-vertical flex flex-col gap-4 sm:gap-8">
                 {[...heroScrollImages, ...heroScrollImages].map((img, i) => (
                   <div
                     key={`col-a-${i}`}
-                    className="aspect-video w-[220px] overflow-hidden rounded-3xl bg-slate-900 shadow-2xl sm:w-[320px] md:w-[420px]"
+                    className="aspect-video w-[160px] overflow-hidden rounded-2xl bg-slate-900 shadow-2xl xs:w-[200px] sm:w-[320px] sm:rounded-3xl md:w-[420px]"
                   >
                     <img src={img} alt="" className="h-full w-full object-cover" />
                   </div>
                 ))}
               </div>
-              <div className="animate-infinite-scroll-vertical-reverse mt-40 flex flex-col gap-8">
+              <div className="animate-infinite-scroll-vertical-reverse mt-24 hidden flex-col gap-4 sm:mt-40 sm:flex sm:gap-8">
                 {[...heroScrollImages].reverse().concat([...heroScrollImages].reverse()).map((img, i) => (
                   <div
                     key={`col-b-${i}`}
-                    className="aspect-video w-[220px] overflow-hidden rounded-3xl bg-slate-900 shadow-2xl sm:w-[320px] md:w-[420px]"
+                    className="aspect-video w-[200px] overflow-hidden rounded-2xl bg-slate-900 shadow-2xl sm:w-[320px] sm:rounded-3xl md:w-[420px]"
                   >
                     <img src={img} alt="" className="h-full w-full object-cover" />
                   </div>
@@ -262,9 +114,11 @@ export default function FeaturesPage() {
           </div>
 
           <div className={cn(pageFrameClass, "relative z-10 flex flex-col items-center text-center")}>
-            <h1 className="mb-4 max-w-4xl text-[2rem] font-bold leading-[1.08] tracking-tight text-white drop-shadow-sm sm:text-5xl md:text-[3.5rem]">
-              Everything you need to design, build, and publish.{" "}
-              <span className="text-slate-400">Without writing a single line of code.</span>
+            <h1 className="mb-5 max-w-4xl text-[1.75rem] font-bold leading-[1.2] tracking-tight text-white drop-shadow-sm sm:mb-6 sm:text-4xl sm:leading-[1.18] md:text-[3.25rem] md:leading-[1.15]">
+              Everything you need to design, build, and publish.
+              <span className="mt-2 block text-slate-400 sm:mt-3">
+                Without writing a single line of code.
+              </span>
             </h1>
 
             <p className="mb-10 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">
@@ -272,17 +126,17 @@ export default function FeaturesPage() {
               edge publishing together into one seamless studio.
             </p>
 
-            <div className="flex flex-wrap items-center justify-center gap-4">
+            <div className="flex w-full flex-col flex-wrap items-center justify-center gap-3 sm:flex-row sm:gap-4">
               <a
                 href="#canvas"
-                className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-slate-950 shadow-xl transition-all hover:bg-slate-200"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-slate-950 shadow-xl transition-all hover:bg-slate-200 sm:w-auto"
               >
                 Explore Architecture
                 <span className="material-symbols-outlined text-[18px]">south</span>
               </a>
               <Link
                 to="/login"
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white shadow-sm backdrop-blur-md transition-all hover:bg-white/20"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white shadow-sm backdrop-blur-md transition-all hover:bg-white/20 sm:w-auto"
               >
                 <span className="material-symbols-outlined text-[18px]">rocket_launch</span>
                 Open Web Studio Free
@@ -292,7 +146,7 @@ export default function FeaturesPage() {
         </section>
 
         {/* Drag & Drop bento */}
-        <section className="relative w-full bg-slate-950 pb-16 pt-4 sm:pb-20 sm:pt-6">
+        <section className={cn("relative w-full bg-slate-950", sectionYClass)}>
           <div className={pageFrameClass}>
             <div className="mx-auto w-full max-w-5xl overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-900/80 text-left shadow-2xl backdrop-blur-xl sm:rounded-[2rem]">
               <div className="flex flex-col items-stretch gap-0 md:flex-row">
@@ -332,15 +186,16 @@ export default function FeaturesPage() {
 
         <div className="flex w-full flex-col">
           {/* FEATURE 1 — Visual Canvas */}
-          <section className="w-full bg-[#f8fafc] py-16 sm:py-20" id="canvas">
+          <section className={cn("w-full bg-[#f8fafc]", sectionYClass)} id="canvas">
             <div className={pageFrameClass}>
-              <div className="group relative overflow-hidden rounded-3xl border border-white/25 bg-gradient-to-br from-[#1a1f4a] via-[#252b68] to-[#3530a0] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_16px_50px_rgba(255,255,255,0.12)] transition-all duration-300 hover:-translate-y-2 sm:p-10 lg:p-12">
+              <MarketingReveal>
+              <div className="marketing-surface group relative overflow-hidden rounded-2xl border border-white/25 bg-gradient-to-br from-[#1a1f4a] via-[#252b68] to-[#3530a0] p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_16px_50px_rgba(255,255,255,0.12)] transition-all duration-300 hover:-translate-y-2 sm:rounded-3xl sm:p-10 lg:p-12">
                 <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-indigo-400/25 blur-3xl" />
                 <div className="pointer-events-none absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-purple-400/20 blur-3xl" />
                 <div className="relative z-10 grid grid-cols-1 items-stretch gap-8 lg:grid-cols-12 lg:gap-12">
                   <div className="flex flex-col justify-between space-y-6 lg:col-span-5">
                     <div>
-                      <h2 className="text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-4xl lg:text-[40px]">
+                      <h2 className="text-2xl font-bold leading-[1.15] tracking-tight text-white sm:text-3xl md:text-4xl lg:text-[40px]">
                         The Infinite Visual Canvas &amp; Dynamic Layers Hierarchy
                       </h2>
                       <p className="mt-4 text-base leading-relaxed text-slate-300/85">
@@ -369,7 +224,7 @@ export default function FeaturesPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 pt-2">
+                    <div className="flex flex-wrap items-center gap-2 pt-2 sm:gap-3">
                       <span className="inline-flex items-center rounded-md border border-indigo-400/40 bg-indigo-500/25 px-3 py-1 font-mono text-xs text-indigo-200">
                         Auto-Fit Zoom
                       </span>
@@ -390,13 +245,15 @@ export default function FeaturesPage() {
                   </div>
                 </div>
               </div>
+            </MarketingReveal>
             </div>
           </section>
 
           {/* FEATURE 2 */}
-          <section className="w-full bg-slate-950 py-16 sm:py-20" id="components">
+          <section className={cn("w-full bg-slate-950", sectionYClass)} id="components">
             <div className={pageFrameClass}>
-              <div className="group relative overflow-hidden rounded-3xl border border-white/25 bg-gradient-to-br from-[#0d2f2e] via-[#14524a] to-[#1a6b5e] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_16px_50px_rgba(255,255,255,0.12)] transition-all duration-300 hover:-translate-y-2 sm:p-10 lg:p-12">
+              <MarketingReveal>
+              <div className="marketing-surface group relative overflow-hidden rounded-2xl border border-white/25 bg-gradient-to-br from-[#0d2f2e] sm:rounded-3xl via-[#14524a] to-[#1a6b5e] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_16px_50px_rgba(255,255,255,0.12)] transition-all duration-300 hover:-translate-y-2 sm:p-10 lg:p-12">
                 <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-emerald-400/20 blur-3xl" />
                 <div className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-teal-400/20 blur-3xl" />
                 <div className="relative z-10 grid grid-cols-1 items-stretch gap-8 lg:grid-cols-12 lg:gap-12">
@@ -412,7 +269,7 @@ export default function FeaturesPage() {
 
                   <div className="order-1 flex flex-col justify-between space-y-6 lg:order-2 lg:col-span-5">
                     <div>
-                      <h2 className="text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-4xl lg:text-[40px]">
+                      <h2 className="text-2xl font-bold leading-[1.15] tracking-tight text-white sm:text-3xl md:text-4xl lg:text-[40px]">
                         120+ Modular Blocks &amp; Smart Section Swapping
                       </h2>
                       <p className="mt-4 text-base leading-relaxed text-slate-300/85">
@@ -445,7 +302,7 @@ export default function FeaturesPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 pt-2">
+                    <div className="flex flex-wrap items-center gap-2 pt-2 sm:gap-3">
                       <span className="inline-flex items-center rounded-md border border-emerald-400/40 bg-emerald-500/25 px-3 py-1 font-mono text-xs text-emerald-200">
                         Auto-Token Binding
                       </span>
@@ -456,19 +313,21 @@ export default function FeaturesPage() {
                   </div>
                 </div>
               </div>
+            </MarketingReveal>
             </div>
           </section>
 
           {/* FEATURE 3 */}
-          <section className="w-full bg-[#f8fafc] py-16 sm:py-20" id="typography">
+          <section className={cn("w-full bg-[#f8fafc]", sectionYClass)} id="typography">
             <div className={pageFrameClass}>
-              <div className="group relative overflow-hidden rounded-3xl border border-white/25 bg-gradient-to-br from-[#0f2744] via-[#163a5c] to-[#1d4f78] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_16px_50px_rgba(255,255,255,0.12)] transition-all duration-300 hover:-translate-y-2 sm:p-10 lg:p-12">
+              <MarketingReveal>
+              <div className="marketing-surface group relative overflow-hidden rounded-2xl border border-white/25 bg-gradient-to-br from-[#0f2744] sm:rounded-3xl via-[#163a5c] to-[#1d4f78] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_16px_50px_rgba(255,255,255,0.12)] transition-all duration-300 hover:-translate-y-2 sm:p-10 lg:p-12">
                 <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-sky-400/25 blur-3xl" />
                 <div className="pointer-events-none absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
                 <div className="relative z-10 grid grid-cols-1 items-stretch gap-8 lg:grid-cols-12 lg:gap-12">
                   <div className="flex flex-col justify-between space-y-6 lg:col-span-5">
                     <div>
-                      <h2 className="text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-4xl lg:text-[40px]">
+                      <h2 className="text-2xl font-bold leading-[1.15] tracking-tight text-white sm:text-3xl md:text-4xl lg:text-[40px]">
                         Real-Time Inline Typography &amp; Media Engine
                       </h2>
                       <p className="mt-4 text-base leading-relaxed text-slate-300/85">
@@ -501,7 +360,7 @@ export default function FeaturesPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 pt-2">
+                    <div className="flex flex-wrap items-center gap-2 pt-2 sm:gap-3">
                       <span className="inline-flex items-center rounded-md border border-sky-400/40 bg-sky-500/25 px-3 py-1 font-mono text-xs text-sky-200">
                         Auto Srcset Generation
                       </span>
@@ -522,13 +381,15 @@ export default function FeaturesPage() {
                   </div>
                 </div>
               </div>
+            </MarketingReveal>
             </div>
           </section>
 
           {/* FEATURE 4 */}
-          <section className="w-full bg-slate-950 py-16 sm:py-20" id="tokens">
+          <section className={cn("w-full bg-slate-950", sectionYClass)} id="tokens">
             <div className={pageFrameClass}>
-              <div className="group relative overflow-hidden rounded-3xl border border-white/25 bg-gradient-to-br from-[#3a280c] via-[#4e3612] to-[#6a4a18] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_16px_50px_rgba(255,255,255,0.12)] transition-all duration-300 hover:-translate-y-2 sm:p-10 lg:p-12">
+              <MarketingReveal>
+              <div className="marketing-surface group relative overflow-hidden rounded-2xl border border-white/25 bg-gradient-to-br from-[#3a280c] sm:rounded-3xl via-[#4e3612] to-[#6a4a18] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_16px_50px_rgba(255,255,255,0.12)] transition-all duration-300 hover:-translate-y-2 sm:p-10 lg:p-12">
                 <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-amber-400/20 blur-3xl" />
                 <div className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-orange-400/20 blur-3xl" />
                 <div className="relative z-10 grid grid-cols-1 items-stretch gap-8 lg:grid-cols-12 lg:gap-12">
@@ -544,7 +405,7 @@ export default function FeaturesPage() {
 
                   <div className="order-1 flex flex-col justify-between space-y-6 lg:order-2 lg:col-span-5">
                     <div>
-                      <h2 className="text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-4xl lg:text-[40px]">
+                      <h2 className="text-2xl font-bold leading-[1.15] tracking-tight text-white sm:text-3xl md:text-4xl lg:text-[40px]">
                         Global Design Tokens &amp; Dynamic Viewports
                       </h2>
                       <p className="mt-4 text-base leading-relaxed text-slate-300/85">
@@ -577,7 +438,7 @@ export default function FeaturesPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 pt-2">
+                    <div className="flex flex-wrap items-center gap-2 pt-2 sm:gap-3">
                       <span className="inline-flex items-center rounded-md border border-amber-400/40 bg-amber-500/25 px-3 py-1 font-mono text-xs text-amber-200">
                         Auto-Stacked Breakpoints
                       </span>
@@ -588,19 +449,21 @@ export default function FeaturesPage() {
                   </div>
                 </div>
               </div>
+            </MarketingReveal>
             </div>
           </section>
 
           {/* FEATURE 5 */}
-          <section className="w-full bg-[#f8fafc] py-16 sm:py-20" id="publishing">
+          <section className={cn("w-full bg-[#f8fafc]", sectionYClass)} id="publishing">
             <div className={pageFrameClass}>
-              <div className="group relative overflow-hidden rounded-3xl border border-white/25 bg-gradient-to-br from-[#321848] via-[#42205e] to-[#5a2a7a] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_16px_50px_rgba(255,255,255,0.12)] transition-all duration-300 hover:-translate-y-2 sm:p-10 lg:p-12">
+              <MarketingReveal>
+              <div className="marketing-surface group relative overflow-hidden rounded-2xl border border-white/25 bg-gradient-to-br from-[#321848] sm:rounded-3xl via-[#42205e] to-[#5a2a7a] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_16px_50px_rgba(255,255,255,0.12)] transition-all duration-300 hover:-translate-y-2 sm:p-10 lg:p-12">
                 <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-purple-400/25 blur-3xl" />
                 <div className="pointer-events-none absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-pink-400/20 blur-3xl" />
                 <div className="relative z-10 grid grid-cols-1 items-stretch gap-8 lg:grid-cols-12 lg:gap-12">
                   <div className="flex flex-col justify-between space-y-6 lg:col-span-5">
                     <div>
-                      <h2 className="text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-4xl lg:text-[40px]">
+                      <h2 className="text-2xl font-bold leading-[1.15] tracking-tight text-white sm:text-3xl md:text-4xl lg:text-[40px]">
                         Version Snapshots &amp; Enterprise Cloud Publishing
                       </h2>
                       <p className="mt-4 text-base leading-relaxed text-slate-300/85">
@@ -633,7 +496,7 @@ export default function FeaturesPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 pt-2">
+                    <div className="flex flex-wrap items-center gap-2 pt-2 sm:gap-3">
                       <span className="inline-flex items-center rounded-md border border-purple-400/40 bg-purple-500/25 px-3 py-1 font-mono text-xs text-purple-200">
                         99.9% Cloud SLA
                       </span>
@@ -654,26 +517,27 @@ export default function FeaturesPage() {
                   </div>
                 </div>
               </div>
+            </MarketingReveal>
             </div>
           </section>
 
           {/* QUICKSTART 8-STEP WORKFLOW BANNER */}
-          <section className="w-full bg-slate-950 py-16 sm:py-20" id="pipeline">
-            <div className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 sm:px-8 lg:px-10">
+          <section className={cn("w-full bg-slate-950", sectionYClass)} id="pipeline">
+            <MarketingReveal className={cn(pageFrameClass, "flex flex-col gap-12")}>
               <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-                <h2 className="text-[36px] font-bold text-white">
+                <h2 className="text-2xl font-bold text-white sm:text-3xl md:text-[36px]">
                   Zero to Live in{' '}
                   <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-violet-400 bg-clip-text text-transparent">
                     8 Precision Milestones
                   </span>
                 </h2>
-                <p className="mt-3 text-[16px] text-slate-300">
+                <p className="mt-3 text-sm text-slate-300 sm:text-[16px]">
                   The chronological engineering workflow from initial authentication to edge cache replication and live apex domain routing.
                 </p>
               </div>
 
               {/* 8-Step Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6 lg:grid-cols-4">
                 {/* Step 01 */}
                 <div className="group flex flex-col justify-between rounded-2xl border border-[#c6c6cd]/50 bg-white p-5 transition-all duration-300 hover:-translate-y-1.5 hover:border-cyan-500/50 hover:shadow-lg">
                   <div>
@@ -682,7 +546,7 @@ export default function FeaturesPage() {
                     </div>
                     <h4 className="text-[18px] text-[#1b1b1d] font-semibold mb-2">Auth &amp; Identity</h4>
                     <div className="my-3 p-2.5 rounded-xl bg-slate-900 text-white shadow-inner border border-white/10 space-y-2">
-                      <div className="flex items-center justify-between gap-1 text-[11px]">
+                      <div className="flex flex-wrap items-center justify-between gap-1 text-[10px] sm:text-[11px]">
                         <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-white/10 border border-white/10 font-mono">
                           <span className="w-3.5 h-3.5 rounded-full bg-red-500/90 text-[9px] font-bold flex items-center justify-center text-white">G</span>
                           <span>Google Auth</span>
@@ -958,7 +822,7 @@ export default function FeaturesPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </MarketingReveal>
           </section>
 
           <LandingCta />

@@ -9,7 +9,7 @@ export default function TemplateShowcaseSection() {
     typeof window !== 'undefined' ? window.innerWidth : 1200
   );
 
-  const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isDraggingRef = useRef(false);
   const startXRef = useRef(0);
   const currentXRef = useRef(0);
@@ -96,7 +96,19 @@ export default function TemplateShowcaseSection() {
       } else {
         nextSlide();
       }
+    } else if (!hasMovedRef.current) {
+      // Click left/right half of the stage (mousedown preventDefault blocks click)
+      const rect = stageRef.current?.getBoundingClientRect();
+      if (rect) {
+        const mid = rect.left + rect.width / 2;
+        if (startXRef.current < mid) {
+          prevSlide();
+        } else {
+          nextSlide();
+        }
+      }
     }
+    hasMovedRef.current = false;
     startAutoPlay();
   };
 
@@ -105,49 +117,63 @@ export default function TemplateShowcaseSection() {
     const isMobile = windowWidth < 640;
     const isTablet = windowWidth < 1024;
 
-    const xSpacing = isMobile ? 180 : isTablet ? 260 : 330;
-    const zOffset = isMobile ? -140 : -200;
-    const rotateYDeg = isMobile ? 24 : 32;
+    // Only center + immediate left/right neighbors are shown, fully in-frame
+    const cardW = isMobile ? 300 : isTablet ? 340 : 380;
+    const sideScale = 0.9;
+    const stagePad = isMobile ? 20 : 40;
+    const maxSideX = Math.max(
+      120,
+      windowWidth / 2 - stagePad - (cardW * sideScale) / 2,
+    );
+    const xSpacing = Math.min(
+      isMobile ? 135 : isTablet ? 190 : 260,
+      maxSideX,
+    );
+    const zOffset = isMobile ? -100 : isTablet ? -140 : -180;
+    const rotateYDeg = isMobile ? 14 : isTablet ? 20 : 24;
 
     const diff = index - activeIndex;
     const absDiff = Math.abs(diff);
 
+    if (absDiff > 1) {
+      return {
+        transform: `translateX(${diff * xSpacing}px) translateZ(${absDiff * zOffset}px) rotateY(0deg) scale(0.75)`,
+        zIndex: 0,
+        opacity: 0,
+        visibility: "hidden" as const,
+        pointerEvents: "none",
+        filter: "none",
+        boxShadow: "none",
+      };
+    }
+
     if (diff === 0) {
       return {
-        transform: 'translateX(0px) translateZ(60px) rotateY(0deg) scale(1.04)',
+        transform: "translateX(0px) translateZ(48px) rotateY(0deg) scale(1.02)",
         zIndex: 30,
         opacity: 1,
-        filter: 'none',
-        boxShadow: '0 28px 60px -18px rgba(15, 23, 42, 0.45)',
-        pointerEvents: 'auto',
+        visibility: "visible" as const,
+        filter: "none",
+        boxShadow: "0 28px 60px -18px rgba(15, 23, 42, 0.45)",
+        pointerEvents: "none",
       };
     }
 
     const xPos = diff * xSpacing;
     const zPos = absDiff * zOffset;
     const rotY = diff < 0 ? rotateYDeg : -rotateYDeg;
-    const scale = Math.max(0.78, 1 - absDiff * 0.1);
-    const opacity = absDiff > 2 ? 0 : absDiff === 2 ? 0.5 : 0.88;
 
     return {
-      transform: `translateX(${xPos}px) translateZ(${zPos}px) rotateY(${rotY}deg) scale(${scale})`,
-      zIndex: 20 - absDiff,
-      opacity,
-      filter: absDiff >= 2 ? 'brightness(0.72) blur(0.4px)' : 'brightness(0.88)',
-      boxShadow: '0 18px 40px -16px rgba(15, 23, 42, 0.35)',
-      pointerEvents: 'auto',
+      transform: `translateX(${xPos}px) translateZ(${zPos}px) rotateY(${rotY}deg) scale(${sideScale})`,
+      zIndex: 20,
+      opacity: 0.92,
+      visibility: "visible" as const,
+      filter: "brightness(0.9)",
+      boxShadow: "0 18px 40px -16px rgba(15, 23, 42, 0.35)",
+      pointerEvents: "none",
     };
   };
 
-  const handleCardClick = (index: number, e: React.MouseEvent) => {
-    if (hasMovedRef.current) {
-      e.preventDefault();
-      e.stopPropagation();
-      hasMovedRef.current = false;
-      return;
-    }
-    setActiveIndex(index);
-  };
 
   return (
     <>
@@ -207,7 +233,8 @@ export default function TemplateShowcaseSection() {
                       opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), 
                       box-shadow 0.65s cubic-bezier(0.16, 1, 0.3, 1),
                       filter 0.55s cubic-bezier(0.16, 1, 0.3, 1),
-                      border-color 0.4s ease;
+                      border-color 0.4s ease,
+                      visibility 0.55s;
           will-change: transform, opacity, filter;
           transform-style: preserve-3d;
           backface-visibility: hidden;
@@ -253,7 +280,7 @@ export default function TemplateShowcaseSection() {
       <div className="bg-[#f8fafc] text-slate-900 antialiased overflow-x-hidden selection:bg-indigo-500 selection:text-white font-sans">
         {/* BEGIN: TemplateShowcaseSection */}
         <section
-          className="relative min-h-screen py-16 md:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-grid-dots"
+          className="relative overflow-hidden bg-grid-dots px-4 py-12 sm:px-6 sm:py-16 md:py-24 lg:px-8"
           id="templates-section"
         >
           {/* Ambient Mesh Radial Glows (Buildora Aura) */}
@@ -269,54 +296,18 @@ export default function TemplateShowcaseSection() {
           {/* Maximum Width Container */}
           <div className="max-w-7xl mx-auto">
             {/* BEGIN: SectionHeader */}
-            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 lg:mb-16">
-              {/* Left: Main Section Title */}
-              <div className="space-y-2 max-w-2xl">
-                <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.08]">
+            <header className="mb-12 flex flex-col gap-6 lg:mb-16 md:flex-row md:items-end md:justify-between">
+              <div className="max-w-2xl space-y-2">
+                <h2 className="text-3xl font-extrabold leading-[1.08] tracking-tight text-slate-900 sm:text-4xl lg:text-5xl xl:text-6xl">
                   Start from a template
                   <br />
                   <span className="italic font-bold shimmer-gradient-text animate-text-shimmer">
                     or a blank canvas.
                   </span>
                 </h2>
-                <p className="text-slate-600 text-base sm:text-lg max-w-xl pt-1 leading-relaxed">
+                <p className="max-w-xl pt-1 text-base leading-relaxed text-slate-600 sm:text-lg">
                   Jumpstart your workflow with hand-crafted, fully reactive compositions or orchestrate every layout element from ground zero in spatial freeform.
                 </p>
-              </div>
-
-              {/* Right: Glassmorphic Carousel Controls & Counter Indicator */}
-              <div className="flex items-center gap-4 self-start md:self-end">
-                <div className="flex items-center gap-2">
-                  <button
-                    aria-label="Previous template"
-                    className="w-10 h-10 rounded-full bg-white/80 hover:bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:text-indigo-600 transition-all hover:scale-105 active:scale-95"
-                    onClick={() => {
-                      prevSlide();
-                      startAutoPlay();
-                    }}
-                    type="button"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                    </svg>
-                  </button>
-                  <span className="text-xs font-mono font-bold text-slate-500 px-1">
-                    0{activeIndex + 1} / 0{TOTAL_CARDS}
-                  </span>
-                  <button
-                    aria-label="Next template"
-                    className="w-10 h-10 rounded-full bg-white/80 hover:bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:text-indigo-600 transition-all hover:scale-105 active:scale-95"
-                    onClick={() => {
-                      nextSlide();
-                      startAutoPlay();
-                    }}
-                    type="button"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                    </svg>
-                  </button>
-                </div>
               </div>
             </header>
             {/* END: SectionHeader */}
@@ -324,7 +315,7 @@ export default function TemplateShowcaseSection() {
             {/* BEGIN: 3D Coverflow Deck Stage */}
             <div
               ref={stageRef}
-              className="relative w-full perspective-stage pb-8 pt-4 select-none"
+              className="perspective-stage relative w-full max-w-full select-none overflow-hidden pb-6 pt-2 sm:pb-8 sm:pt-4"
               id="carousel-stage"
               onMouseEnter={stopAutoPlay}
               onMouseLeave={() => {
@@ -333,7 +324,7 @@ export default function TemplateShowcaseSection() {
             >
               {/* Track Container */}
               <div
-                className="relative w-full h-[580px] sm:h-[640px] md:h-[680px] flex items-center justify-center touch-pan-y"
+                className="relative flex h-[min(480px,70svh)] w-full max-w-full cursor-ew-resize touch-pan-y items-center justify-center px-2 sm:h-[580px] sm:px-4 md:h-[640px] lg:h-[680px]"
                 id="carousel-track"
                 onMouseDown={(e) => {
                   e.preventDefault();
@@ -358,10 +349,9 @@ export default function TemplateShowcaseSection() {
               >
                 {/* CARD 0: Blank Canvas */}
                 <div
-                  className="carousel-card group absolute h-[520px] w-[82vw] max-w-[340px] cursor-pointer overflow-hidden rounded-[1.75rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:max-w-[380px] sm:h-[580px] md:max-w-[400px] md:h-[620px]"
+                  className="carousel-card group absolute h-[min(440px,62svh)] w-[78vw] max-w-[300px] cursor-pointer overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:h-[520px] sm:max-w-[340px] sm:rounded-[1.75rem] md:max-w-[380px] md:h-[580px] lg:max-w-[400px] lg:h-[620px]"
                   data-index="0"
                   data-purpose="template-card"
-                  onClick={(e) => handleCardClick(0, e)}
                   style={getCardStyle(0)}
                 >
                   <div className="pointer-events-none relative flex h-full w-full flex-col overflow-hidden bg-slate-950">
@@ -408,10 +398,9 @@ export default function TemplateShowcaseSection() {
 
                 {/* CARD 1: Portfolio */}
                 <div
-                  className="carousel-card group absolute h-[520px] w-[82vw] max-w-[340px] cursor-pointer overflow-hidden rounded-[1.75rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:max-w-[380px] sm:h-[580px] md:max-w-[400px] md:h-[620px]"
+                  className="carousel-card group absolute h-[min(440px,62svh)] w-[78vw] max-w-[300px] cursor-pointer overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:h-[520px] sm:max-w-[340px] sm:rounded-[1.75rem] md:max-w-[380px] md:h-[580px] lg:max-w-[400px] lg:h-[620px]"
                   data-index="1"
                   data-purpose="template-card"
-                  onClick={(e) => handleCardClick(1, e)}
                   style={getCardStyle(1)}
                 >
                   <div className="pointer-events-none relative flex h-full w-full flex-col overflow-hidden bg-[#0b0f19]">
@@ -475,7 +464,6 @@ export default function TemplateShowcaseSection() {
                   className="carousel-card group absolute h-[520px] w-[82vw] max-w-[340px] cursor-pointer overflow-hidden rounded-[1.75rem] bg-white shadow-[0_28px_70px_-18px_rgba(15,23,42,0.4)] sm:max-w-[380px] sm:h-[580px] md:max-w-[400px] md:h-[620px]"
                   data-index="2"
                   data-purpose="template-card"
-                  onClick={(e) => handleCardClick(2, e)}
                   style={getCardStyle(2)}
                 >
                   <div className="pointer-events-none relative flex h-full w-full flex-col overflow-hidden bg-white">
@@ -566,10 +554,9 @@ export default function TemplateShowcaseSection() {
 
                 {/* CARD 3: Business & Agency */}
                 <div
-                  className="carousel-card group absolute h-[520px] w-[82vw] max-w-[340px] cursor-pointer overflow-hidden rounded-[1.75rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:max-w-[380px] sm:h-[580px] md:max-w-[400px] md:h-[620px]"
+                  className="carousel-card group absolute h-[min(440px,62svh)] w-[78vw] max-w-[300px] cursor-pointer overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:h-[520px] sm:max-w-[340px] sm:rounded-[1.75rem] md:max-w-[380px] md:h-[580px] lg:max-w-[400px] lg:h-[620px]"
                   data-index="3"
                   data-purpose="template-card"
-                  onClick={(e) => handleCardClick(3, e)}
                   style={getCardStyle(3)}
                 >
                   <div className="pointer-events-none relative flex h-full w-full flex-col overflow-hidden bg-[#051332]">
@@ -625,10 +612,9 @@ export default function TemplateShowcaseSection() {
 
                 {/* CARD 4: Cafe & Bistro */}
                 <div
-                  className="carousel-card group absolute h-[520px] w-[82vw] max-w-[340px] cursor-pointer overflow-hidden rounded-[1.75rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:max-w-[380px] sm:h-[580px] md:max-w-[400px] md:h-[620px]"
+                  className="carousel-card group absolute h-[min(440px,62svh)] w-[78vw] max-w-[300px] cursor-pointer overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:h-[520px] sm:max-w-[340px] sm:rounded-[1.75rem] md:max-w-[380px] md:h-[580px] lg:max-w-[400px] lg:h-[620px]"
                   data-index="4"
                   data-purpose="template-card"
-                  onClick={(e) => handleCardClick(4, e)}
                   style={getCardStyle(4)}
                 >
                   <div className="pointer-events-none relative flex h-full w-full flex-col overflow-hidden bg-[#f5efe6]">
@@ -681,10 +667,9 @@ export default function TemplateShowcaseSection() {
 
                 {/* CARD 5: Chronicle Blog */}
                 <div
-                  className="carousel-card group absolute h-[520px] w-[82vw] max-w-[340px] cursor-pointer overflow-hidden rounded-[1.75rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:max-w-[380px] sm:h-[580px] md:max-w-[400px] md:h-[620px]"
+                  className="carousel-card group absolute h-[min(440px,62svh)] w-[78vw] max-w-[300px] cursor-pointer overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:h-[520px] sm:max-w-[340px] sm:rounded-[1.75rem] md:max-w-[380px] md:h-[580px] lg:max-w-[400px] lg:h-[620px]"
                   data-index="5"
                   data-purpose="template-card"
-                  onClick={(e) => handleCardClick(5, e)}
                   style={getCardStyle(5)}
                 >
                   <div className="pointer-events-none relative flex h-full w-full flex-col overflow-hidden bg-[#121214]">
@@ -759,16 +744,16 @@ export default function TemplateShowcaseSection() {
                   />
                 ))}
               </div>
-              <div className="w-full flex items-center justify-end gap-4">
+              <div className="flex w-full flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4">
                 <a
-                  className="text-xs sm:text-sm font-semibold text-slate-700 hover:text-indigo-600 transition-colors flex items-center gap-1.5 group"
+                  className="flex items-center justify-center gap-1.5 text-center text-xs font-semibold text-slate-700 transition-colors hover:text-indigo-600 group sm:justify-start sm:text-left sm:text-sm"
                   href="#templates-library"
                 >
                   Browse All 120+ Templates{' '}
-                  <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  <span className="transition-transform group-hover:translate-x-1">→</span>
                 </a>
                 <button
-                  className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-semibold text-xs sm:text-sm shadow-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="rounded-xl bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:scale-[1.02] hover:bg-indigo-600 active:scale-[0.98] sm:text-sm"
                   type="button"
                 >
                   Use Active Blueprint
