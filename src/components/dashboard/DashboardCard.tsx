@@ -1,5 +1,6 @@
 import React from 'react';
 import { format } from 'date-fns';
+import { ExternalLink } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -31,6 +32,34 @@ export function getDashboardPublishStatus({
   if (publishedUrl || publishedVersionId) return 'Published';
   if (normalized === 'draft') return 'Draft';
   return isTemplate ? 'Published' : 'Draft';
+}
+
+type DashboardDomain = {
+  domain?: string;
+  status?: string;
+  primary?: boolean;
+};
+
+function toVisitUrl(value?: string | null): string | null {
+  const trimmed = String(value || '').trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed.replace(/^\/+/, '')}`;
+}
+
+export function getDashboardVisitUrl(site?: {
+  publishedUrl?: string | null;
+  customDomain?: string | null;
+  builderMeta?: { domains?: DashboardDomain[]; publishedUrl?: string } | null;
+} | null): string | null {
+  const domains = site?.builderMeta?.domains;
+  if (Array.isArray(domains)) {
+    const usable = domains.filter((entry) => entry?.domain && String(entry.status || 'active').toLowerCase() !== 'error');
+    const chosen = usable.find((entry) => entry.primary) || usable[0];
+    const fromDomain = toVisitUrl(chosen?.domain);
+    if (fromDomain) return fromDomain;
+  }
+  return toVisitUrl(site?.publishedUrl) || toVisitUrl(site?.customDomain) || toVisitUrl(site?.builderMeta?.publishedUrl);
 }
 
 
@@ -337,6 +366,29 @@ export function DashboardCardSecondaryAction({ className, ...props }: ButtonProp
 
   return <button type="button" className={cn(dashboardCardSecondaryBtnClass, className)} {...props} />;
 
+}
+
+export function DashboardCardVisitAction({
+  href,
+  className,
+  children = 'Visit',
+}: {
+  href: string;
+  className?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn(dashboardCardSecondaryBtnClass, 'gap-1.5', className)}
+      onClick={(event) => event.stopPropagation()}
+    >
+      <ExternalLink className="h-4 w-4 shrink-0" />
+      {children}
+    </a>
+  );
 }
 
 

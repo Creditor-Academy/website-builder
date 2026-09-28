@@ -27,6 +27,8 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
   const projectLabel = isTemplateEditor
     ? templateEditor?.name || 'Template'
     : activeWebsite?.name || 'Project';
+  const siteIsPublished =
+    String(activeWebsite?.status || '').toLowerCase() === 'published' || Boolean(activeWebsite?.publishedUrl);
 
   const startTour = () => {
     setTourState({ isActive: true, step: 0, isFinished: false });
@@ -343,7 +345,7 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
               className="ml-0.5 h-8 shrink-0 gap-1.5 rounded-full bg-white px-2.5 text-[11px] font-semibold text-[#0F172A] shadow-none hover:bg-slate-100 hover:text-[#0F172A] sm:ml-1 sm:h-9 sm:px-4 sm:text-xs"
             >
               <Play className="h-3.5 w-3.5 fill-current" />
-              <span className="hidden sm:inline">Publish Site</span>
+              <span className="hidden sm:inline">{siteIsPublished ? 'Update Site' : 'Publish Site'}</span>
             </Button>
           )}
         </div>

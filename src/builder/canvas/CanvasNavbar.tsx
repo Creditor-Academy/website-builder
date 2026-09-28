@@ -55,7 +55,7 @@ export function CanvasNavbar({
     if (event.button !== 0) return;
     const target = event.target as HTMLElement;
     if (target.closest('[data-canvas-move], [data-canvas-resize], [data-navbar-go]')) return;
-    if (target.closest('[contenteditable="true"]') && document.activeElement === target.closest('[contenteditable="true"]')) return;
+    if (target.closest('[contenteditable="true"], input, textarea, select')) return;
 
     const startX = event.clientX;
     const startY = event.clientY;

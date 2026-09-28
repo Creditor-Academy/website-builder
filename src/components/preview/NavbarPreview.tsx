@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { ArrowUpRight, X } from 'lucide-react';
 import { useBuilder } from '@/contexts/BuilderContext';
 import useBuilderStore from '@/store/useBuilderStore';
@@ -164,6 +164,53 @@ const STYLES = `
     }
   }
 `;
+
+function NavLabel({
+  as: Tag = 'span',
+  value,
+  editing,
+  className,
+  style,
+  onSave,
+}: {
+  as?: 'span' | 'a';
+  value: string;
+  editing: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+  onSave: (next: string) => void;
+}) {
+  const ref = useRef<HTMLElement>(null);
+
+  useLayoutEffect(() => {
+    const node = ref.current;
+    if (!node || document.activeElement === node) return;
+    if (node.innerText !== value) node.innerText = value || '';
+  }, [value]);
+
+  return (
+    <Tag
+      ref={ref as never}
+      className={className}
+      style={style}
+      contentEditable={editing || undefined}
+      suppressContentEditableWarning
+      onMouseDown={(event) => {
+        if (!editing) return;
+        event.stopPropagation();
+      }}
+      onClick={(event) => {
+        if (!editing) return;
+        event.preventDefault();
+        event.stopPropagation();
+      }}
+      onBlur={(event) => {
+        if (!editing) return;
+        onSave(event.currentTarget.innerText);
+      }}
+    />
+  );
+}
 
 function InjectStyles() {
   if (typeof document === 'undefined') return null;
@@ -345,17 +392,14 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selected
         onClick={(e) => handleNavClick(e, link)}
         style={ctaStyle}
       >
-        <span
+        <NavLabel
+          value={link.label}
+          editing={Boolean(isEditing)}
           className="nb-cta-label nb-ce"
-          contentEditable={Boolean(isEditing)}
-          suppressContentEditableWarning
-          onBlur={(e) => {
-            const newLabel = e.currentTarget.innerText.trim();
-            onUpdate({ links: config.links.map((l) => l.id === link.id ? { ...l, label: newLabel } : l) });
+          onSave={(newLabel) => {
+            onUpdate({ links: config.links.map((l) => l.id === link.id ? { ...l, label: newLabel.trim() } : l) });
           }}
-        >
-          {link.label}
-        </span>
+        />
       </a>
     ) : (
       <a
@@ -363,18 +407,19 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selected
         data-canvas-node={`navbar-link-${link.id}`}
         data-canvas-kind="navbar"
         data-navbar-item={link.id}
-        className={`nb-link nb-ce ${isLight ? '' : 'nb-ce-inv'}`}
+        className={`nb-link ${isLight ? '' : 'nb-ce-inv'}`}
         onClick={(e) => handleNavClick(e, link)}
         style={{ color: tc, borderRadius: 4 }}
-        contentEditable={Boolean(isEditing)}
-        suppressContentEditableWarning
-        onBlur={(e) => {
-          const newLabel = e.target.innerText;
-          onUpdate({ links: config.links.map((l) => l.id === link.id ? { ...l, label: newLabel } : l) });
-          if (link.href && link.href.startsWith('/')) updatePageName(link.href, newLabel);
-        }}
       >
-        {link.label}
+        <NavLabel
+          value={link.label}
+          editing={Boolean(isEditing)}
+          className={`nb-ce ${isLight ? '' : 'nb-ce-inv'}`}
+          onSave={(newLabel) => {
+            onUpdate({ links: config.links.map((l) => l.id === link.id ? { ...l, label: newLabel } : l) });
+            if (link.href && link.href.startsWith('/')) updatePageName(link.href, newLabel);
+          }}
+        />
       </a>
     )
     );
@@ -403,19 +448,17 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selected
           {config.logo.imageUrl ? (
             <img src={config.logo.imageUrl} alt="Logo" style={{ height: 34 }} />
           ) : (
-            <span
+            <NavLabel
+              value={config.logo.text || ''}
+              editing={Boolean(isEditing)}
               className={`nb-ce ${isLight ? '' : 'nb-ce-inv'}`}
               style={{
                 fontFamily: "'Fraunces', serif",
                 fontSize: 22, fontWeight: 900, fontStyle: 'italic',
                 color: tc, letterSpacing: '-0.02em',
               }}
-              contentEditable={Boolean(isEditing)}
-              suppressContentEditableWarning
-              onBlur={(e) => onUpdate({ logo: { ...config.logo, text: e.target.innerText } })}
-            >
-              {config.logo.text}
-            </span>
+              onSave={(text) => onUpdate({ logo: { ...config.logo, text } })}
+            />
           )}
         </div>
   );
@@ -535,16 +578,18 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selected
               <a
                 key={link.id}
                 href={link.href}
-                className="nb-mob-link nb-ce"
+                className="nb-mob-link"
                 onClick={(e) => handleNavClick(e, link)}
                 style={{ color: tc, animationDelay: `${i * 0.04}s` }}
-                contentEditable={isEditing}
-                suppressContentEditableWarning
-                onBlur={(e) =>
-                  onUpdate({ links: config.links.map((l) => l.id === link.id ? { ...l, label: e.target.innerText } : l) })
-                }
               >
-                {link.label}
+                <NavLabel
+                  value={link.label}
+                  editing={Boolean(isEditing)}
+                  className="nb-ce"
+                  onSave={(newLabel) =>
+                    onUpdate({ links: config.links.map((l) => l.id === link.id ? { ...l, label: newLabel } : l) })
+                  }
+                />
               </a>
             )
           )}

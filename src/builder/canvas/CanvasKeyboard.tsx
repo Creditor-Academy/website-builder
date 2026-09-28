@@ -6,8 +6,20 @@ import { useCanvasEngine } from './CanvasEngineContext';
 
 function isTypingTarget(target: EventTarget | null) {
   const node = target as HTMLElement | null;
-  if (!node) return false;
+  if (!node?.closest) return false;
   return Boolean(node.closest("input, textarea, select, [contenteditable='true']"));
+}
+
+function hasTextSelection() {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return false;
+  return selection.toString().length > 0;
+}
+
+function isChromeTarget(target: EventTarget | null) {
+  const node = target as HTMLElement | null;
+  if (!node?.closest) return false;
+  return Boolean(node.closest("[role='dialog'], [role='alertdialog'], [role='menu'], [data-radix-popper-content-wrapper]"));
 }
 
 export function CanvasKeyboard() {
@@ -23,6 +35,7 @@ export function CanvasKeyboard() {
         }
         return;
       }
+      if (hasTextSelection() || isChromeTarget(event.target)) return;
 
       const store = useBuilderStore.getState();
       const { editor, undo, redo, selectNode, deleteCanvasNode, deleteCanvasNodes, duplicateCanvasNode, duplicateCanvasNodes, copyCanvasNode, pasteCanvasNode, shiftCanvasLayer } = store;

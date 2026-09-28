@@ -39,9 +39,11 @@ import {
     DashboardCardMeta,
     DashboardCardPrimaryAction,
     DashboardCardSecondaryAction,
+    DashboardCardVisitAction,
     dashboardCardGridClass,
     formatDashboardCardDate,
     getDashboardPublishStatus,
+    getDashboardVisitUrl,
 } from '@/components/dashboard/DashboardCard';
 import { templatesList } from '@/lib/templates';
 import templateApi from '@/api/templates';
@@ -63,6 +65,7 @@ const WebsiteCard = ({ site, onDelete, onEdit, onViewMessages, dbTemplates = [] 
         publishedUrl: site.publishedUrl,
         publishedVersionId: site.builderMeta?.currentPublishedVersionId,
     });
+    const visitUrl = publishStatus === 'Published' ? getDashboardVisitUrl(site) : null;
 
     return (
         <DashboardCard interactive className="h-full" onClick={onEdit}>
@@ -102,6 +105,9 @@ const WebsiteCard = ({ site, onDelete, onEdit, onViewMessages, dbTemplates = [] 
                             <MessageSquare className="h-4 w-4 shrink-0" />
                             Messages
                         </DashboardCardSecondaryAction>
+                        {visitUrl && (
+                            <DashboardCardVisitAction href={visitUrl} />
+                        )}
                         <button
                             type="button"
                             title="Delete project"
