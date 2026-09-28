@@ -1,90 +1,182 @@
-import { useEffect, useRef, useState, MouseEvent } from "react";
-import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue, useInView } from "framer-motion";
-import { ChevronDown, ArrowRight, MousePointer2, Sparkles, Menu, X, Zap, LayoutTemplate, Layers, Palette, Move, Sun, Moon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { ArrowRight, Menu, X, LayoutTemplate, Layers, Palette, Sun, Moon, Play, Check, Image as ImageIcon, Settings, Plus, MousePointer2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "./Footer";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/Common/BrandLogo";
 import Loading from "@/components/Common/LoadingUI";
 import { getDashboardPath, validateSession } from "@/lib/authSession";
-
+import FeaturesCards from "@/components/ui/feature-shader-cards";
+import ProductVideo from "@/components/ui/productvideo";
+import TemplatesScroll from "@/components/landing/TemplatesScroll";
+import LandingCta from "@/components/landing/LandingCta";
+import { pageFrameClass } from "@/components/landing/pageFrame";
 import { useTheme } from "@/hooks/useTheme";
 
 // Assets
-import brand from "../assets/brand.mp4";
 import business from "../assets/Bussiness.jpg";
-import create from "../assets/create.mp4";
-import library from "../assets/Libaray.mp4";
-import Drag from "../assets/Drag.gif";
 import Ecommerce from "../assets/Ecomm.jpg";
 import Portfolio from "../assets/Portfolio.jpg";
 import school from "../assets/School.jpg";
-import CTA from "../assets/CTA.png";
-import Learning from "../assets/Learning.jpg";
+
+function HeroProductMockup({ isDark }: { isDark: boolean }) {
+  const thumbs = [business, Portfolio, school, Ecommerce];
+  const rail = [
+    { icon: Plus, label: "Add" },
+    { icon: Layers, label: "Layers" },
+    { icon: LayoutTemplate, label: "Pages" },
+    { icon: ImageIcon, label: "Assets" },
+    { icon: Palette, label: "Design" },
+    { icon: Settings, label: "Settings" },
+  ];
+  return (
+    <div className="relative mx-auto h-full w-full max-w-full overflow-hidden sm:overflow-visible">
+      <motion.div
+        initial={{ opacity: 0, y: 24, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+        className={cn(
+          "relative z-10 flex h-full min-h-[18rem] flex-col overflow-hidden rounded-[22px] border border-white shadow-[0_40px_80px_rgba(15,23,42,0.22)] sm:min-h-[22rem] sm:rounded-[30px] lg:min-h-0",
+          isDark ? "border-white/10 bg-slate-900" : "border-white bg-white",
+        )}
+      >
+        <div className={cn("flex items-center border-b px-3 py-2.5 sm:px-5 sm:py-3.5", isDark ? "border-white/10" : "border-slate-100")}>
+          <div className="flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-[#FF5F57]" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#FEBC2E]" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#28C840]" />
+          </div>
+        </div>
+
+        <div className="flex min-h-0 flex-1">
+          <div className="flex w-12 shrink-0 flex-col items-center gap-0.5 bg-[#0F172A] px-1 py-3 sm:w-[4.75rem] sm:gap-1 sm:px-1.5 sm:py-4">
+            {rail.map((item, i) => (
+              <span
+                key={item.label}
+                className={cn(
+                  "flex w-full flex-col items-center gap-0.5 rounded-lg px-0.5 py-1.5 sm:gap-1 sm:rounded-xl sm:px-1 sm:py-2",
+                  i === 0 ? "bg-white/15 text-white" : "text-slate-300",
+                )}
+              >
+                <item.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" strokeWidth={1.75} />
+                <span className="hidden text-[8px] font-medium leading-none tracking-wide sm:block">{item.label}</span>
+              </span>
+            ))}
+          </div>
+
+          <div className={cn("relative flex min-h-0 min-w-0 flex-1 flex-col", isDark ? "bg-slate-950" : "bg-white")}>
+            <div className="flex shrink-0 items-center justify-between gap-2 bg-[#0B1220] px-2.5 py-2.5 text-[10px] text-white sm:gap-3 sm:px-5 sm:py-3 sm:text-[11px]">
+              <span className="flex min-w-0 items-center gap-1.5 font-semibold tracking-tight sm:gap-2">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white/10 text-[9px] font-bold sm:h-6 sm:w-6 sm:text-[10px]">A</span>
+                <span className="truncate">Apex</span>
+              </span>
+              <span className="hidden items-center gap-4 text-white/75 sm:flex">
+                <span className="font-semibold text-white underline decoration-white/80 underline-offset-4">Home</span>
+                <span>About</span>
+                <span>Services</span>
+                <span className="hidden md:inline">Portfolio</span>
+                <span className="hidden lg:inline">Contact</span>
+              </span>
+              <span className="shrink-0 rounded-full bg-white px-2 py-1 text-[9px] font-semibold text-[#0F172A] sm:px-3 sm:py-1.5 sm:text-[10px]">
+                Get started
+              </span>
+            </div>
+            <div className="relative min-h-0 flex-1">
+              <img src={business} alt="" className="absolute inset-0 h-full w-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/75 via-[#0F172A]/10 to-transparent" />
+              <div className="absolute bottom-4 left-3 right-3 text-white sm:bottom-6 sm:left-6 sm:right-6">
+                <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-white/75 sm:text-[11px] sm:tracking-[0.22em]">Explore the World</p>
+              </div>
+              <div className="absolute left-[32%] top-[36%] h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-lg border-2 border-dashed border-sky-400 bg-sky-400/10 sm:h-10 sm:w-10" />
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Floating Image drag chip — clipped on small screens via parent overflow */}
+      <motion.div
+        initial={{ opacity: 0, x: -12 }}
+        animate={{
+          x: [0, 0, 12, 168, 168, 0],
+          y: [0, 0, 0, -24, -24, 0],
+          scale: [1, 1, 0.95, 1, 1, 1],
+        }}
+        transition={{ duration: 4.8, repeat: Infinity, times: [0, 0.22, 0.34, 0.62, 0.78, 1], ease: "easeInOut" }}
+        className={cn(
+          "absolute left-2 top-[46%] z-20 hidden items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-slate-800 shadow-xl sm:left-0 sm:flex md:-left-6",
+        )}
+      >
+        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-500/15 text-sky-600">
+          <ImageIcon className="h-4 w-4" />
+        </span>
+        <span className="text-xs font-semibold">Image</span>
+      </motion.div>
+
+      <motion.div
+        aria-hidden
+        animate={{
+          x: [18, 18, 36, 196, 196, 18],
+          y: [18, 18, 16, -8, -8, 18],
+          opacity: [0, 1, 1, 1, 0, 0],
+        }}
+        transition={{ duration: 4.8, repeat: Infinity, times: [0, 0.12, 0.34, 0.62, 0.78, 1], ease: "easeInOut" }}
+        className="pointer-events-none absolute left-2 top-[46%] z-30 hidden text-[#0F172A] sm:left-0 sm:block md:-left-6"
+      >
+        <MousePointer2 className="h-5 w-5" />
+      </motion.div>
+
+      <motion.div
+        aria-hidden
+        animate={{ scale: [0.2, 0.2, 1.7, 1.7], opacity: [0, 0, 0.55, 0] }}
+        transition={{ duration: 4.8, repeat: Infinity, times: [0, 0.58, 0.72, 1] }}
+        className="pointer-events-none absolute left-[34%] top-[38%] z-20 hidden h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-400/70 blur-md sm:block"
+      />
 
 
+      {/* Asset tray */}
+      <motion.div
+        animate={{ y: [0, -8, 0] }}
+        transition={{ duration: 4.6, repeat: Infinity, ease: "easeInOut" }}
+        className={cn(
+          "absolute bottom-2 left-1/2 z-20 flex max-w-[calc(100%-1rem)] -translate-x-1/2 gap-1.5 rounded-2xl border border-white p-1.5 shadow-xl sm:bottom-4 sm:left-10 sm:max-w-none sm:translate-x-0 sm:gap-2 sm:p-2",
+          isDark ? "border-white/40 bg-slate-900" : "bg-white",
+        )}
+      >
+        {thumbs.map((src, i) => (
+          <img key={i} src={src} alt="" className="h-9 w-9 shrink-0 rounded-lg object-cover sm:h-12 sm:w-12 sm:rounded-xl" />
+        ))}
+      </motion.div>
 
-interface Template {
-  id: string;
-  title: string;
-  image: string;
+      {/* Published toast */}
+      <motion.div
+        animate={{ y: [0, -8, 0] }}
+        transition={{ duration: 5.2, repeat: Infinity, ease: "easeInOut" }}
+        className={cn(
+          "absolute bottom-14 right-2 z-30 flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 shadow-lg sm:bottom-6 sm:right-2 sm:gap-2 sm:px-3 sm:py-2",
+          isDark ? "border-emerald-400/20 bg-slate-900 text-emerald-300" : "border-emerald-100 bg-white text-emerald-700",
+        )}
+      >
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white">
+          <Check className="h-3 w-3" strokeWidth={3} />
+        </span>
+        <span className="text-[10px] font-semibold sm:text-[11px]">Published</span>
+      </motion.div>
+    </div>
+  );
 }
-
-
-
-const templates: Template[] = [
-  { id: "ecommerce", title: "eCommerce", image: Ecommerce },
-  { id: "portfolio", title: "Portfolio", image: Portfolio },
-  { id: "business", title: "Business", image: business },
-  { id: "consultant", title: "Consultant", image: CTA }, 
-  { id: "agencies", title: "Agencies", image: Learning },
-  { id: "coaching", title: "Coaching", image: school },
-  { id: "blank", title: "Blank Canvas", image: Ecommerce },
-];
-
-const LazyVideo = ({ src, className }: { src: string; className?: string }) => {
-  const ref = useRef<HTMLVideoElement>(null);
-  const inView = useInView(ref, { once: true, margin: "200px" });
-  return (
-    <video
-      ref={ref}
-      src={inView ? src : undefined}
-      autoPlay={inView}
-      muted
-      loop
-      playsInline
-      preload="none"
-      className={className}
-    />
-  );
-};
-
-const FloatingElement = ({ children, x, y, delay = 0, className, isDark }: any) => {
-  return (
-    <motion.div
-      initial={{ y: 50, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 80, damping: 24, delay }}
-      style={{ x, y }}
-      className={cn(
-        "absolute hidden lg:flex flex-col gap-2 p-4 backdrop-blur-2xl border rounded-2xl shadow-2xl transition-colors duration-1000",
-        isDark ? "bg-white/5 border-white/10" : "bg-white/70 border-slate-200/50 shadow-[0_20px_40px_rgba(0,0,0,0.05)]",
-        className
-      )}
-    >
-      {children}
-    </motion.div>
-  );
-};
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const carouselRef = useRef<HTMLDivElement>(null);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
 
-  const { theme, setTheme, isDark } = useTheme();
+  const { setTheme, isDark } = useTheme();
+  const tiltX = useMotionValue(0);
+  const tiltY = useMotionValue(0);
+  const rotateX = useSpring(useTransform(tiltY, [-0.5, 0.5], [5, -5]), { stiffness: 140, damping: 18 });
+  const rotateY = useSpring(useTransform(tiltX, [-0.5, 0.5], [-5, 5]), { stiffness: 140, damping: 18 });
 
   // Toggle Body Background based on Theme
   useEffect(() => {
@@ -102,97 +194,36 @@ export default function LandingPage() {
     });
   }, [navigate]);
 
-  // Scroll Animations
-  const { scrollYProgress } = useScroll();
-  const opacityHero = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
-  const scaleHero = useTransform(scrollYProgress, [0, 0.2], [1, 0.9]);
-
-  // Magnetic Parallax for Hero
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  const springConfig = { damping: 20, stiffness: 100 };
-  const smoothX = useSpring(mouseX, springConfig);
-  const smoothY = useSpring(mouseY, springConfig);
-  const floatingLayersX = useTransform(smoothX, (v) => v * -2.5);
-  const floatingLayersY = useTransform(smoothY, (v) => v * -2.5);
-  const floatingStylesX = useTransform(smoothX, (v) => v * 1.8);
-  const floatingStylesY = useTransform(smoothY, (v) => v * 1.8);
-  const floatingRightX = useTransform(smoothX, (v) => v * 2.5);
-  const floatingRightY = useTransform(smoothY, (v) => v * -1);
-
-  const handleMouseMove = (e: MouseEvent) => {
-    const { innerWidth, innerHeight } = window;
-    const x = (e.clientX - innerWidth / 2) / 15; // Increased sensitivity
-    const y = (e.clientY - innerHeight / 2) / 15;
-    mouseX.set(x);
-    mouseY.set(y);
-  };
-
-  const handleSelectTemplate = (_templateId: string, _title: string) => {
-    navigate('/login');
-  };
-
-  // Carousel auto scroll
-  useEffect(() => {
-    let rafId: number;
-    let scrollAmount = 0;
-    let isHovered = false;
-    const el = carouselRef.current;
-
-    if (!el) return;
-
-    const handleEnter = () => { isHovered = true; };
-    const handleLeave = () => { isHovered = false; };
-
-    el.addEventListener("mouseenter", handleEnter);
-    el.addEventListener("mouseleave", handleLeave);
-
-    const autoScroll = () => {
-      if (!isHovered && el) {
-        scrollAmount += 1;
-        el.scrollLeft = scrollAmount;
-        if (scrollAmount >= el.scrollWidth / 2) {
-          scrollAmount = 0;
-        }
-      }
-      rafId = requestAnimationFrame(autoScroll);
-    };
-
-    autoScroll();
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      el.removeEventListener("mouseenter", handleEnter);
-      el.removeEventListener("mouseleave", handleLeave);
-    };
-  }, []);
-
   if (isCheckingSession) {
     return <Loading fullScreen label="Checking session" />;
   }
 
   return (
     <main
-      className={cn("w-full overflow-x-hidden selection:bg-blue-500/30 font-sans transition-colors duration-1000", isDark ? "bg-slate-950 text-slate-100 selection:text-white" : "bg-slate-50 text-slate-900 selection:text-black")}
-      onMouseMove={handleMouseMove}
+      className={cn(
+        "w-full overflow-x-hidden font-sans transition-colors duration-1000",
+        isDark
+          ? "bg-slate-950 text-slate-100 selection:bg-white/20 selection:text-white"
+          : "bg-slate-50 text-slate-900 selection:bg-[#131924]/15 selection:text-black",
+      )}
     >
       {/* ================= NAVBAR ================= */}
-      <nav className="fixed top-0 w-full z-[100] px-6 py-6 flex justify-center pointer-events-none">
+      <nav className="pointer-events-none fixed inset-x-0 top-0 z-[100] pt-3 sm:pt-6">
+        <div className={cn(pageFrameClass, "relative")}>
         <motion.div
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
           className={cn(
-            "w-full max-w-6xl pointer-events-auto backdrop-blur-2xl rounded-full px-6 py-3 flex items-center justify-between transition-all duration-500",
+            "pointer-events-auto flex w-full min-w-0 items-center justify-between rounded-full px-3.5 py-2.5 backdrop-blur-2xl transition-all duration-500 sm:px-6 sm:py-3",
             isDark
-              ? "bg-slate-900/60 border border-slate-700/50 shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:bg-slate-900/80"
-              : "bg-white/60 border border-slate-200/50 shadow-[0_8px_32px_rgba(0,0,0,0.05)] hover:bg-white/80"
+              ? "bg-slate-900/80 border border-slate-700/50 shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+              : "bg-white/90 border border-slate-200/50 shadow-[0_8px_32px_rgba(0,0,0,0.05)]"
           )}
         >
-          <Link to="/" className="flex items-center cursor-pointer group pointer-events-auto">
+          <Link to="/" className="flex min-w-0 shrink items-center cursor-pointer group pointer-events-auto">
             <BrandLogo
-              imgClassName="h-8 w-8 transition-transform duration-300 group-hover:scale-110"
+              imgClassName="h-7 w-7 sm:h-8 sm:w-8 transition-transform duration-300 group-hover:scale-110"
             />
           </Link>
 
@@ -219,14 +250,33 @@ export default function LandingPage() {
               </AnimatePresence>
             </button>
 
-            <Link to="/login" className={cn("px-5 py-2.5 rounded-full hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all active:scale-95 font-semibold", isDark ? "bg-white text-slate-950 hover:bg-blue-50 hover:text-blue-600" : "bg-slate-900 text-white hover:bg-blue-600")}>
-              Login
+            <Link to="/login" className={cn(
+              "inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold transition-all active:scale-95",
+              isDark ? "bg-white text-slate-950 hover:bg-slate-100" : "bg-[#0F172A] text-white hover:bg-[#1e293b]",
+            )}>
+              Login <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
 
-          <button className={cn("md:hidden p-2 mt-1 pointer-events-auto", isDark ? "text-white" : "text-slate-900")} onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          <div className="flex items-center gap-0.5 md:hidden">
+            <button
+              type="button"
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              onClick={() => setTheme(isDark ? "light" : "dark")}
+              className={cn("pointer-events-auto rounded-full p-2", isDark ? "text-slate-300" : "text-slate-600")}
+            >
+              {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
+            <button
+              type="button"
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMenuOpen}
+              className={cn("pointer-events-auto p-2", isDark ? "text-white" : "text-slate-900")}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </motion.div>
 
         {/* Mobile Menu Overlay */}
@@ -237,372 +287,146 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               className={cn(
-                "absolute top-24 left-6 right-6 p-6 rounded-3xl border backdrop-blur-3xl md:hidden pointer-events-auto",
-                isDark ? "bg-slate-900/90 border-slate-700 shadow-2xl" : "bg-white/90 border-slate-200 shadow-xl"
+                "pointer-events-auto absolute left-0 right-0 top-[calc(100%+0.75rem)] max-h-[min(70vh,28rem)] overflow-y-auto rounded-2xl border p-4 backdrop-blur-3xl sm:rounded-3xl sm:p-6 md:hidden",
+                isDark ? "bg-slate-900/95 border-slate-700 shadow-2xl" : "bg-white/95 border-slate-200 shadow-xl"
               )}
             >
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
                 {["Features", "Templates", "Resources"].map((item) => (
                   <Link
                     key={item}
                     to={`/${item.toLowerCase()}`}
                     onClick={() => setIsMenuOpen(false)}
                     className={cn(
-                      "text-lg font-semibold p-2 rounded-xl transition-colors",
+                      "rounded-xl p-3 text-base font-semibold transition-colors sm:text-lg",
                       isDark ? "text-slate-300 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                     )}
                   >
                     {item}
                   </Link>
                 ))}
-                <div className={cn("h-px w-full my-2", isDark ? "bg-slate-800" : "bg-slate-100")} />
-                <Link to="/login" onClick={() => setIsMenuOpen(false)} className={cn("mt-2 py-4 rounded-2xl text-center font-bold text-lg", isDark ? "bg-white text-slate-950" : "bg-slate-900 text-white")}>
+                <div className={cn("my-2 h-px w-full", isDark ? "bg-slate-800" : "bg-slate-100")} />
+                <Link
+                  to="/login"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={cn(
+                    "mt-1 w-full rounded-2xl py-3.5 text-center text-base font-bold sm:py-4 sm:text-lg",
+                    isDark ? "bg-white text-slate-950" : "bg-slate-900 text-white",
+                  )}
+                >
                   Login
                 </Link>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
+        </div>
       </nav>
 
       {/* ================= HERO ================= */}
-      <section className="relative min-h-[100svh] flex flex-col items-center justify-center overflow-hidden pt-20">
-        <div className={cn("absolute inset-0 z-0 flex items-center justify-center pointer-events-none transition-opacity duration-1000", isDark ? "opacity-100 mix-blend-screen" : "opacity-100 mix-blend-multiply")}>
-          {/* Animated Background Orbs */}
-          <motion.div
-            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className={cn("w-[1000px] h-[1000px] rounded-full blur-[150px]", isDark ? "bg-blue-600/30" : "bg-blue-400/40")}
-          />
-          <motion.div
-            animate={{ scale: [1, 1.3, 1], x: [0, 100, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            className={cn("w-[800px] h-[800px] rounded-full blur-[120px] absolute -top-40 -left-20", isDark ? "bg-indigo-500/30" : "bg-purple-300/40")}
-          />
-          <motion.div
-            animate={{ scale: [1, 1.1, 1], y: [0, -100, 0] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-            className={cn("w-[600px] h-[600px] rounded-full blur-[120px] absolute bottom-0 right-0", isDark ? "bg-purple-600/30" : "bg-blue-300/40")}
-          />
+      <section
+        className={cn(
+          "relative min-h-[100svh] overflow-visible",
+          isDark ? "bg-slate-950" : "bg-[#F4F7FC]",
+        )}
+        onMouseMove={(event) => {
+          const rect = event.currentTarget.getBoundingClientRect();
+          tiltX.set((event.clientX - rect.left) / rect.width - 0.5);
+          tiltY.set((event.clientY - rect.top) / rect.height - 0.5);
+        }}
+        onMouseLeave={() => {
+          tiltX.set(0);
+          tiltY.set(0);
+        }}
+      >
+        {/* Soft atmosphere blobs */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+          <div className={cn("absolute -right-24 top-10 h-[min(28rem,70vw)] w-[min(28rem,70vw)] rounded-full blur-3xl", isDark ? "bg-sky-500/15" : "bg-sky-300/40")} />
+          <div className={cn("absolute bottom-0 right-1/4 h-[min(22rem,55vw)] w-[min(22rem,55vw)] rounded-full blur-3xl", isDark ? "bg-violet-500/10" : "bg-violet-300/30")} />
+          <div className={cn("absolute left-[-8%] top-1/3 h-48 w-48 rounded-full blur-3xl sm:h-64 sm:w-64", isDark ? "bg-blue-500/10" : "bg-blue-200/35")} />
         </div>
 
-        {/* Floating Mock UI Elements for "Builder" Context */}
-        <FloatingElement
-          x={floatingLayersX}
-          y={floatingLayersY}
-          delay={0.2}
-          isDark={isDark}
-          className="top-[20%] left-[5%] w-48 z-10"
-        >
-          <div className={cn("flex items-center gap-2 mb-2 pb-2 border-b", isDark ? "border-white/10" : "border-slate-200")}>
-            <Layers className="w-4 h-4 text-blue-500" />
-            <span className={cn("text-xs font-semibold", isDark ? "text-slate-300" : "text-slate-700")}>Layers</span>
-          </div>
-          <div className="space-y-2">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className={cn("h-6 w-full rounded-md border opacity-80", isDark ? "bg-white/5 border-white/5" : "bg-slate-100 border-slate-200")} />
-            ))}
-          </div>
-        </FloatingElement>
-
-        <FloatingElement
-          x={floatingStylesX}
-          y={floatingStylesY}
-          delay={0.4}
-          isDark={isDark}
-          className="bottom-[25%] right-[8%] w-56 z-10"
-        >
-          <div className={cn("flex items-center gap-2 mb-2 pb-2 border-b", isDark ? "border-white/10" : "border-slate-200")}>
-            <Palette className="w-4 h-4 text-purple-500" />
-            <span className={cn("text-xs font-semibold", isDark ? "text-slate-300" : "text-slate-700")}>Styles</span>
-          </div>
-          <div className="grid grid-cols-4 gap-2 mb-2">
-            {['bg-blue-500', 'bg-purple-500', 'bg-emerald-500', 'bg-orange-500'].map((color, i) => (
-              <div key={i} className={`h-8 w-full rounded-md ${color} shadow-sm`} />
-            ))}
-          </div>
-          <div className={cn("h-2 w-full rounded-full mt-3", isDark ? "bg-white/10" : "bg-slate-200")} />
-        </FloatingElement>
-
-        <FloatingElement
-          x={floatingRightX}
-          y={floatingRightY}
-          delay={0.6}
-          isDark={isDark}
-          className="top-[30%] right-[10%] w-40 z-10 p-3"
-        >
-          <span className={cn("text-xs font-semibold block mb-2", isDark ? "text-slate-400" : "text-slate-500")}>Typography</span>
-          <div className={cn("text-2xl font-black leading-none", isDark ? "text-white" : "text-slate-900")}>Inter</div>
-          <div className={cn("text-sm font-medium mt-1", isDark ? "text-slate-400" : "text-slate-500")}>Weight: 800</div>
-        </FloatingElement>
-
-        <motion.div
-          style={{ opacity: opacityHero, scale: scaleHero }}
-          className="relative z-20 max-w-5xl mx-auto px-6 text-center flex flex-col items-center"
-        >
+        <div className={cn(pageFrameClass, "relative z-10 grid min-w-0 items-stretch gap-8 pb-4 pt-24 sm:gap-10 sm:pb-5 sm:pt-28 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:grid-rows-[auto_auto] lg:gap-x-12 lg:gap-y-8 lg:pb-6 lg:pt-32")}>
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            whileHover={{ scale: 1.05 }}
-            className={cn(
-              "inline-flex items-center gap-2 px-6 py-3 rounded-full border text-xs font-bold mb-8 backdrop-blur-xl transition-all cursor-pointer group shadow-[0_0_20px_rgba(0,0,0,0.1)]",
-              isDark
-                ? "bg-slate-800/60 border-slate-600/50 text-blue-200 hover:shadow-[0_0_30px_rgba(59,130,246,0.2)] hover:border-blue-500/50"
-                : "bg-white/80 border-blue-200 text-blue-800 hover:shadow-[0_0_30px_rgba(59,130,246,0.3)] hover:border-blue-400"
-            )}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+            className="flex min-w-0 flex-col items-start self-start"
           >
-            <Sparkles className="w-4 h-4 text-blue-500 group-hover:text-indigo-500 transition-colors" />
-            <span className={cn("bg-clip-text text-transparent", isDark ? "bg-gradient-to-r from-blue-200 to-indigo-200" : "bg-gradient-to-r from-blue-700 to-indigo-700")}>Defining the future of web creation</span>
-          </motion.div>
+            <h1 className={cn("w-full max-w-full", isDark ? "text-white" : "text-[#111827]")}>
+              <span className="block text-[2.5rem] font-bold leading-[0.95] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+                Design.<br />Build.<br />Publish.
+              </span>
+              <span className={cn("relative mt-3 inline-block max-w-full font-['Caveat',cursive] text-[1.85rem] font-bold leading-none sm:text-4xl md:text-5xl", isDark ? "text-slate-100" : "text-[#182848]")}>
+                All in one studio.
+                <svg className="pointer-events-none absolute -bottom-2 left-0 h-3 w-[108%] max-w-none text-[#3DB7FF]" viewBox="0 0 240 14" preserveAspectRatio="none" aria-hidden>
+                  <motion.path
+                    d="M2 11 C 70 12, 120 4, 238 3"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="5"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
+                  />
+                </svg>
+              </span>
+            </h1>
 
-          <motion.h1
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className={cn("text-5xl sm:text-7xl md:text-[7.5rem] font-bold tracking-tighter leading-[0.95] md:leading-[0.9] mb-8 transition-colors duration-1000", isDark ? "text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]" : "text-slate-900 drop-shadow-xl")}
-          >
-            Design exactly <br />
-            <span className={cn("italic font-serif font-light relative", isDark ? "text-blue-200" : "text-blue-900")}>
-              what you imagine.
-              <svg className="absolute w-[110%] h-6 -bottom-4 -left-[5%] text-blue-500 opacity-70 drop-shadow-lg" viewBox="0 0 100 20" preserveAspectRatio="none">
-                <motion.path
-                  initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 1, ease: "easeOut" }}
-                  d="M0 10 Q50 20 100 10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"
-                />
-              </svg>
-            </span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className={cn("text-lg md:text-2xl max-w-3xl mx-auto leading-relaxed mb-12 font-medium transition-colors duration-1000", isDark ? "text-slate-300" : "text-slate-600")}
-          >
-            Web Studio is an advanced website builder giving you absolute creative freedom.
-            Drag, drop, and publish professional, stunning websites in minutes.
-          </motion.p>
-
-          <motion.div
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="flex flex-col sm:flex-row gap-6 w-full sm:w-auto z-50 relative"
-          >
-            <motion.button
-              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/login')}
-              className={cn(
-                "h-16 px-10 rounded-full font-bold text-lg flex items-center justify-center gap-3 transition-all duration-300 group shadow-lg pointer-events-auto",
-                isDark
-                  ? "bg-white text-slate-950 hover:bg-blue-50 hover:text-blue-600 hover:shadow-[0_0_40px_rgba(59,130,246,0.6)]"
-                  : "bg-slate-900 text-white hover:bg-blue-600 hover:shadow-[0_0_40px_rgba(59,130,246,0.4)]"
-              )}
-            >
-              Explore Web Studio <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
-            </motion.button>
-          </motion.div>
-        </motion.div>
-
-        {/* Interactive Scroll Indicator */}
-        <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5, duration: 1 }}
-          className={cn("absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 transition-opacity duration-1000", isDark ? "opacity-60" : "opacity-40")}
-        >
-          <motion.div
-            animate={{ y: [0, 8, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-            className={cn("w-1 h-12 rounded-full overflow-hidden", isDark ? "bg-white/20" : "bg-slate-900/20")}
-          >
-            <motion.div
-              animate={{ y: [-24, 48] }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-              className={cn("w-full h-1/2 rounded-full", isDark ? "bg-white" : "bg-slate-900")}
-            />
-          </motion.div>
-        </motion.div>
-      </section>
-
-      {/* ================= BENTO GRID FEATURES ================= */}
-      <section id="features" className={cn("py-24 relative z-10 transition-colors duration-1000", isDark ? "bg-slate-950/50" : "bg-slate-100")}>
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="mb-20 text-center md:text-left">
-            <h2 className={cn("text-4xl md:text-6xl font-bold tracking-tight mb-6 drop-shadow-md transition-colors duration-1000", isDark ? "text-white" : "text-slate-900")}>Limitless possibilities. <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-500">Zero compromises.</span></h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 auto-rows-[280px] md:auto-rows-[400px] gap-6">
-            {/* Feature 1 (Large) */}
-            <motion.div
-              initial={{ opacity: 1, y: 0 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }}
-              className="md:col-span-2 relative rounded-[2.5rem] border border-slate-700/50 bg-slate-900 backdrop-blur-xl overflow-hidden group flex flex-col hover:border-blue-500/50 transition-colors duration-500 shadow-2xl"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="p-10 pb-0 z-10 relative">
-                <div className="w-14 h-14 rounded-2xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-                  <Move className="w-7 h-7 text-blue-400" />
-                </div>
-                <h3 className="text-3xl font-bold mb-3 text-white">Absolute Freedom</h3>
-                <p className="text-white text-lg max-w-sm font-medium">Drag and drop elements anywhere on the canvas with pixel-perfect control.</p>
-              </div>
-              <div className="flex-1 mt-6 relative w-full translate-y-8 group-hover:translate-y-2 group-hover:scale-[1.02] transition-all duration-700 ease-out">
-                <img src={Drag} alt="Drag Interface" loading="lazy" decoding="async" className="absolute right-0 bottom-0 w-[90%] md:w-[75%] rounded-tl-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)] border-t border-l border-slate-600 opacity-90 group-hover:opacity-100" />
-              </div>
-            </motion.div>
-
-            {/* Feature 2 (Small) */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ delay: 0.1 }}
-              className="relative rounded-[2.5rem] border border-slate-700/50 bg-slate-900 backdrop-blur-xl overflow-hidden group flex flex-col hover:border-purple-500/50 transition-colors duration-500 shadow-2xl"
-            >
-              <div className="absolute inset-0 bg-gradient-to-bl from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="p-8 z-10 relative flex flex-col h-full">
-                <div className="w-14 h-14 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_15px_rgba(168,85,247,0.5)]">
-                  <Layers className="w-7 h-7 text-purple-400" />
-                </div>
-                <h3 className="text-2xl font-bold mb-3 text-white">Smart Library</h3>
-                <p className="text-slate-300 font-medium leading-relaxed">Pre-designed sections and blocks that adapt to your brand automatically.</p>
-                <div className="mt-auto relative w-full h-44 rounded-2xl overflow-hidden border border-slate-700 shadow-lg translate-y-8 group-hover:translate-y-0 transition-transform duration-700">
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent z-10 opacity-50" />
-                  <LazyVideo src={library} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-700" />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Feature 3 (Small) */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }}
-              className="relative rounded-[2.5rem] border border-slate-700/50 bg-slate-900 backdrop-blur-xl overflow-hidden group flex flex-col hover:border-emerald-500/50 transition-colors duration-500 shadow-2xl"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="p-8 z-10 relative flex flex-col h-full">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]">
-                  <LayoutTemplate className="w-7 h-7 text-emerald-400" />
-                </div>
-                <h3 className="text-2xl font-bold mb-3 text-white">Visual Editing</h3>
-                <p className="text-slate-300 font-medium leading-relaxed">Edit content directly in place. WYSIWYG re-imagined for the modern era.</p>
-                <div className="mt-auto relative w-full h-44 rounded-2xl overflow-hidden border border-slate-700 shadow-lg translate-y-8 group-hover:translate-y-0 transition-transform duration-700">
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent z-10 opacity-50" />
-                  <LazyVideo src={create} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-700" />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Feature 4 (Large) */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ delay: 0.1 }}
-              className="md:col-span-2 relative rounded-[2.5rem] border border-slate-700/50 bg-slate-900/60 backdrop-blur-xl overflow-hidden group flex flex-col md:flex-row hover:border-orange-500/50 transition-colors duration-500 shadow-2xl"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/80 to-transparent z-10" /> 
-              <LazyVideo src={brand} className={cn("absolute right-0 top-0 h-full w-[70%] object-cover transition-opacity duration-700", isDark ? "opacity-20 group-hover:opacity-80 mix-blend-screen" : "opacity-30 group-hover:opacity-50 mix-blend-multiply")} />
-
-              <div className="p-10 z-20 relative flex flex-col justify-center max-w-md h-full">
-                <div className="w-14 h-14 rounded-2xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_15px_rgba(249,115,22,0.5)]">
-                  <Palette className="w-7 h-7 text-orange-400" />
-                </div>
-                <h3 className="text-3xl font-bold mb-4 text-white">Define your brand</h3>
-                <p className="text-slate-300 text-lg font-medium">Set up global styles, tokens, and typography once. Keep everything perfectly consistent across your entire site.</p>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-
-      {/* ================= TEMPLATES SCROLL ================= */}
-      <section id="templates" className={cn("py-32 relative overflow-hidden transition-colors duration-1000", isDark ? "bg-slate-950" : "bg-white")}>
-        <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
-          <div className="w-[1000px] h-[500px] bg-indigo-600 rounded-full blur-[150px]" />
-        </div>
-
-        <div className="max-w-7xl mx-auto px-6 mb-20 flex flex-col md:flex-row justify-between items-end gap-6 relative z-10">
-          <div>
-            <h2 className={cn("text-5xl md:text-7xl font-bold tracking-tight transition-colors duration-1000", isDark ? "text-white" : "text-slate-900")}>
-              Start with brilliant <br /><span className="text-blue-400 italic font-serif font-medium">templates.</span>
-            </h2>
-          </div>
-          {/* <button className={cn("px-8 py-4 rounded-full font-bold transition-all border shadow-lg active:scale-95 duration-1000", isDark ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-600 hover:border-blue-500 hover:shadow-blue-500/20" : "bg-white hover:bg-slate-50 text-slate-950 border-slate-200 hover:border-blue-500 hover:shadow-blue-500/20")}>
-            View all templates
-          </button> */}
-        </div>
-
-        {/* Carousel */}
-        <div
-          className="flex gap-10 overflow-x-hidden px-6 lg:px-[max(1.5rem,calc((100vw-80rem)/2))] pb-16 relative z-10"
-          ref={carouselRef}
-        >
-          {templates.concat(templates).map((tpl, i) => (
-            <div key={i} className="relative shrink-0 w-[85vw] md:w-[450px] aspect-[4/5] group rounded-[3rem] overflow-hidden border border-slate-700 bg-slate-900 shadow-2xl hover:shadow-[0_20px_50px_rgba(59,130,246,0.2)] hover:border-blue-500/50 transition-all duration-500 cursor-pointer">
-              <img src={tpl.image} alt={tpl.title} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 opacity-100" />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent flex flex-col justify-end p-10">
-                <h3 className="text-4xl font-bold mb-6 text-white transform translate-y-6 group-hover:translate-y-0 transition-transform duration-500">{tpl.title}</h3>
-                <button
-                  onClick={() => navigate('/login')}
-                  className="bg-white text-slate-950 py-4 px-6 rounded-2xl font-bold w-full transform translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center gap-3 hover:bg-blue-50 hover:text-blue-600 shadow-xl"
-                >
-                  Use This Template <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-
-      <section className={cn("relative py-40 flex items-center justify-center text-center px-6 overflow-hidden transition-colors duration-1000", isDark ? "bg-slate-950" : "bg-slate-50")}>
-        {/* Restored Background Image */}
-        <div className="absolute inset-0 z-0">
-          <img src={CTA} alt="CTA" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-60 scale-105 filter blur-[1px]" />
-          <div className={cn("absolute inset-0 bg-gradient-to-t transition-colors duration-1000", isDark ? "from-slate-950 via-slate-950/40 to-transparent" : "from-slate-50 via-slate-50/40 to-transparent")} />
-          <div className={cn("absolute inset-0 bg-gradient-to-b transition-colors duration-1000", isDark ? "from-slate-950 via-transparent to-slate-950" : "from-slate-50 via-transparent to-slate-50")} />
-        </div>
-
-        {/* Animated Background Orbs */}
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <motion.div 
-            animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
-            transition={{ duration: 15, repeat: Infinity }}
-            className="absolute -top-[20%] -right-[10%] w-[600px] h-[600px] bg-blue-500/20 blur-[100px] rounded-full" 
-          />
-        </div>
-
-        <motion.div 
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className={cn(
-            "relative z-10 max-w-4xl mx-auto backdrop-blur-3xl border p-8 md:p-24 rounded-[2.5rem] md:rounded-[4rem] shadow-[0_40px_100px_rgba(59,130,246,0.2)] overflow-hidden group",
-            isDark ? "bg-slate-900/40 border-white/5" : "bg-white/90 border-slate-200"
-          )}
-        >
-          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-blue-500/5 via-transparent to-transparent pointer-events-none" />
-          
-          <div className="relative z-10">
-            <motion.div
-              className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 font-bold text-[10px] tracking-[0.3em] uppercase mb-10"
-            >
-              <Sparkles className="w-3 h-3 fill-current" />
-              Creative Freedom
-            </motion.div>
-
-            <h2 className={cn("text-5xl md:text-6xl font-black tracking-tight mb-8 leading-[1.1] transition-colors duration-1000", isDark ? "text-white" : "text-slate-900")}>
-              Ready to build<br />
-              <span className="font-serif italic font-light text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500">your masterpiece?</span>
-            </h2>
-            
-            <p className={cn("text-lg mb-12 max-w-2xl mx-auto leading-relaxed transition-colors duration-1000", isDark ? "text-slate-300" : "text-slate-600")}>
-              Join a new generation of creators building high-performance websites with absolute creative control and zero code.
+            <p className={cn("mt-4 max-w-md text-[0.95rem] leading-relaxed sm:mt-5 sm:text-lg", isDark ? "text-slate-400" : "text-slate-500")}>
+              Create a project, design pages on a visual canvas, and publish to a live address without writing code.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-              <Link to="/login" className={cn(
-                "h-18 px-12 py-6 items-center justify-center gap-4 font-black rounded-full text-xl hover:scale-105 active:scale-95 transition-all duration-300 group shadow-xl flex",
-                isDark ? "bg-white text-slate-950 hover:bg-blue-50" : "bg-slate-900 text-white hover:bg-slate-800"
-              )}>
-                Build Your Website <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
+            <div className="mt-5 flex w-full max-w-md flex-col gap-3 sm:mt-6 sm:max-w-none sm:flex-row sm:items-center">
+              <Link
+                to="/login"
+                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#007AFF] to-[#4DA3FF] px-7 text-sm font-semibold text-white transition-shadow hover:shadow-[0_10px_25px_rgba(0,122,255,0.3)] sm:h-14 sm:w-auto"
+              >
+                Start Building
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                to="/features"
+                className={cn(
+                  "inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border px-6 text-sm font-semibold transition-colors sm:w-auto",
+                  isDark
+                    ? "border-white/15 bg-white/5 text-slate-200 hover:bg-white/10"
+                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
+                )}
+              >
+                <Play className="h-3.5 w-3.5 fill-current" />
+                Watch quick tour
               </Link>
             </div>
-            
-           
+          </motion.div>
+          
+
+          <div className="relative min-h-[18rem] min-w-0 w-full max-w-full sm:min-h-[22rem] lg:col-start-2 lg:row-start-1 lg:h-auto lg:min-h-0 lg:self-stretch">
+            <motion.div
+              style={{ rotateX, rotateY, transformPerspective: 1000 }}
+              className="h-full max-w-full [transform-style:preserve-3d] lg:absolute lg:inset-0"
+            >
+              <HeroProductMockup isDark={isDark} />
+            </motion.div>
           </div>
-        </motion.div>
+
+
+          <div className="min-w-0 max-w-full lg:col-span-2 lg:row-start-2">
+            <ProductVideo />
+          </div>
+        </div>
+
+        {/* Features — same horizontal padding as hero / pageFrame */}
+        <div className={cn(pageFrameClass, "relative z-10 pb-8 sm:pb-10 lg:pb-12")}>
+          <FeaturesCards />
+        </div>
       </section>
+
+
+      <TemplatesScroll />
+
+      <LandingCta />
 
       <Footer isDark={isDark} />
     </main>
