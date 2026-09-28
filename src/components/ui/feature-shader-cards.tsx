@@ -1,4 +1,5 @@
 import React, { useRef, MouseEvent } from "react";
+import { Link } from "react-router-dom";
 import { Monitor, Smartphone, Tablet } from "lucide-react";
 import CanvasBentoFeatures from "@/components/landing/CanvasBentoFeatures";
 import { FeatureFlipShell } from "@/components/landing/FeatureFlipShell";
@@ -25,7 +26,6 @@ interface FeatureCardProps {
   title: string;
   description: string;
   subText: string;
-  ctaText: string;
   theme: CardTheme;
   brief: FeatureFlipBrief;
 }
@@ -58,7 +58,6 @@ const SpotlightCard: React.FC<FeatureCardProps> = ({
   title,
   description,
   subText,
-  ctaText,
   theme,
   brief,
 }) => {
@@ -87,14 +86,14 @@ const SpotlightCard: React.FC<FeatureCardProps> = ({
             style={{ background: theme.meshBackground }}
           />
 
-          <div className="relative z-10 flex items-start justify-between gap-4">
+          <div className="relative z-10 flex flex-wrap items-start justify-between gap-3 sm:gap-4">
             <div
-              className={`flex h-14 min-w-14 w-auto items-center justify-center rounded-2xl px-3 py-3.5 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 ${theme.iconBgBorder}`}
+              className={`flex h-12 min-w-12 w-auto shrink-0 items-center justify-center rounded-2xl px-2.5 py-3 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 sm:h-14 sm:min-w-14 sm:px-3 sm:py-3.5 ${theme.iconBgBorder}`}
             >
               {icon}
             </div>
             <span
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold tracking-wide backdrop-blur-md ${theme.badgeBgTextBorder}`}
+              className={`inline-flex max-w-[55%] shrink-0 items-center gap-1.5 truncate rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wide backdrop-blur-md sm:max-w-none sm:px-3 sm:text-xs ${theme.badgeBgTextBorder}`}
             >
               {heroBadge && (
                 <svg className="h-3.5 w-3.5 text-purple-300" fill="currentColor" viewBox="0 0 24 24">
@@ -115,16 +114,10 @@ const SpotlightCard: React.FC<FeatureCardProps> = ({
           </div>
 
           <div
-            className={`relative z-10 mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-4 text-xs font-medium sm:mt-6 sm:pt-5 ${theme.footerText}`}
+            className={`relative z-10 mt-5 flex flex-wrap items-center gap-2 border-t border-white/10 pt-4 text-xs font-medium sm:mt-6 sm:pt-5 ${theme.footerText}`}
           >
             <span className="min-w-0 break-words">{subText}</span>
-            <span className="flex shrink-0 items-center gap-1 text-white transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1">
-              {ctaText} →
-            </span>
           </div>
-          <p className="relative z-10 mt-3 text-[10px] font-medium tracking-wide text-white/40 uppercase sm:text-[11px]">
-            Click card for details
-          </p>
         </article>
       }
     />
@@ -171,9 +164,6 @@ function ReadyToLiveCard() {
                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
               </svg>
             </div>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-400/30 bg-blue-500/20 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-blue-200 backdrop-blur-md sm:px-3 sm:text-xs">
-              Free Tier Available
-            </span>
           </div>
           <div className="relative z-10 mt-6 flex flex-col justify-between gap-4 sm:mt-10 sm:gap-6 md:flex-row md:items-end">
             <div className="min-w-0 max-w-lg space-y-2">
@@ -189,29 +179,17 @@ function ReadyToLiveCard() {
               onClick={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
             >
-              <button
-                type="button"
-                className="w-full cursor-pointer rounded-xl bg-white px-6 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-white/10 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.03] hover:bg-slate-100 active:scale-95 sm:w-auto"
+              <Link
+                to="/login"
+                className="inline-flex w-full cursor-pointer items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-white/10 transition-all duration-300 ease-out hover:scale-[1.03] hover:bg-slate-100 active:scale-95 sm:w-auto"
               >
                 Launch Editor Now
-              </button>
-              <button
-                type="button"
-                className="w-full cursor-pointer rounded-xl border border-white/20 px-5 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-white/10 sm:w-auto"
-              >
-                View Live Demos
-              </button>
+              </Link>
             </div>
           </div>
-          <div className="relative z-10 mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-4 text-xs text-white/70 sm:mt-6 sm:pt-5">
+          <div className="relative z-10 mt-5 flex flex-wrap items-center gap-2 border-t border-white/10 pt-4 text-xs text-white/70 sm:mt-6 sm:pt-5">
             <span>Start instantly in browser</span>
-            <span className="flex items-center gap-1 text-white transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1">
-              Open Studio →
-            </span>
           </div>
-          <p className="relative z-10 mt-3 text-[10px] font-medium tracking-wide text-white/40 uppercase sm:text-[11px]">
-            Click card for details
-          </p>
         </article>
       }
     />
@@ -303,7 +281,7 @@ export default function FeaturesShowcase() {
       {/* Main Full-Width Wrapper — overflow visible so hover lift/scale isn't clipped */}
       <main
         id="features"
-        className="relative w-full max-w-full min-w-0 overflow-visible bg-gradient-to-b from-slate-50 via-slate-100/70 to-slate-50 bg-grid-pattern py-6 text-slate-900 antialiased sm:py-8 lg:py-10"
+        className="relative w-full max-w-full min-w-0 overflow-x-hidden bg-gradient-to-b from-slate-50 via-slate-100/70 to-slate-50 bg-grid-pattern py-6 text-slate-900 antialiased sm:py-8 lg:py-10"
       >
         {/* Animated Background Blobs (clipped so they don't spill the page) */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
@@ -318,8 +296,8 @@ export default function FeaturesShowcase() {
         <div className="relative mx-auto w-full min-w-0 max-w-full">
           {/* Header — same typography as TemplatesScroll, right-aligned */}
           <header className="mb-8 flex flex-col items-end sm:mb-10 lg:mb-12">
-            <div className="w-full max-w-2xl min-w-0 space-y-2 text-right">
-              <h2 className="text-[1.75rem] font-extrabold leading-[1.12] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+            <div className="w-full max-w-2xl min-w-0 space-y-2 text-left sm:text-right">
+              <h2 className="text-[1.65rem] font-extrabold leading-[1.12] tracking-tight text-slate-900 sm:text-4xl md:text-5xl lg:text-6xl">
                 Design on a canvas.
                 <br />
                 <span className="italic font-bold shimmer-gradient-text">
@@ -327,7 +305,7 @@ export default function FeaturesShowcase() {
                 </span>
               </h2>
               <p className="ml-auto max-w-xl pt-1 text-sm leading-relaxed text-slate-600 sm:text-lg">
-                Precision layout, unified design, and frictionless publishing—all on one canvas.
+                Precision layout, unified design, and frictionless publishing-all on one canvas.
               </p>
             </div>
           </header>
@@ -348,7 +326,6 @@ export default function FeaturesShowcase() {
               title="Blank canvas or templates"
               description="Start from a blank canvas or jumpstart with designer-crafted templates. Tailor every pixel instantly or let your brand identity guide the foundation."
               subText="Unlimited canvas versatility"
-              ctaText="Explore library"
               icon={
                 <svg
                   className="w-7 h-7 text-purple-400"
@@ -384,7 +361,6 @@ export default function FeaturesShowcase() {
               title="Desktop, tablet, and mobile"
               description="Preview each viewport and adjust layout, spacing, and sizing. Breakpoint overrides save selectively for each precise screen size."
               subText="Pixel-perfect responsiveness"
-              ctaText="Explore"
               icon={
                 <div className="flex items-center gap-1 text-amber-300" aria-hidden>
                   <Monitor className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={2} />
@@ -414,7 +390,6 @@ export default function FeaturesShowcase() {
               title="Assets and stock"
               description="Upload PNG, JPG, SVG, and MP4 files, or search millions of curated royalty-free stock assets and apply them directly to your project canvas."
               subText="Global CDN asset optimization"
-              ctaText="Explore"
               icon={
                 <svg
                   className="w-6 h-6 text-blue-300"
@@ -450,7 +425,6 @@ export default function FeaturesShowcase() {
               title="Publish to a live address"
               description="Deploy to a free Web Studio subdomain or connect your own domain instantly with automatic SSL certificates and edge routing included."
               subText="Edge SSL & zero-config hosting"
-              ctaText="Explore"
               icon={
                 <svg
                   className="w-6 h-6 text-rose-300"

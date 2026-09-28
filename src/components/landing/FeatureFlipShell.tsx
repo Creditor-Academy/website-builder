@@ -1,5 +1,4 @@
 import { useState, type KeyboardEvent, type ReactNode } from "react";
-import { RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { FeatureFlipBrief } from "@/components/landing/featureFlipBriefs";
 
@@ -71,10 +70,6 @@ export function FeatureFlipShell({
                 {brief.tip}
               </p>
             ) : null}
-            <p className="mt-4 flex items-center gap-1.5 text-xs font-medium text-slate-400">
-              <RotateCcw className="h-3.5 w-3.5" />
-              Click to flip back
-            </p>
           </div>
         </div>
       </div>

@@ -2,10 +2,6 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
-  Menu,
-  X,
-  Sun,
-  Moon,
   Sparkles,
   Zap,
   Palette,
@@ -15,10 +11,12 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
-import { BrandLogo } from "@/components/Common/BrandLogo";
 import Footer from "./Footer";
 import { useTheme } from "@/hooks/useTheme";
-import { pageFrameClass } from "@/components/landing/pageFrame";
+import { pageFrameClass, sectionYClass } from "@/components/landing/pageFrame";
+import MarketingReveal from "@/components/landing/MarketingReveal";
+import MarketingNav from "@/components/landing/MarketingNav";
+import LandingCta from "@/components/landing/LandingCta";
 
 // Assets
 import Ecommerce from "../assets/Ecomm.jpg";
@@ -30,7 +28,6 @@ import templatesImg from "../assets/templates_showcase.png";
 
 const Templates = () => {
   const navigate = useNavigate();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { setTheme, isDark } = useTheme();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
@@ -99,12 +96,10 @@ const Templates = () => {
       : templates.filter((t) => t.category === selectedCategory);
 
   return (
-    <main
+    <div
       className={cn(
-        "w-full overflow-x-hidden font-sans transition-colors duration-1000",
-        isDark
-          ? "bg-slate-950 text-slate-100 selection:bg-white/20 selection:text-white"
-          : "bg-slate-50 text-slate-900 selection:bg-[#131924]/15 selection:text-black",
+        "w-full overflow-x-hidden font-sans antialiased transition-colors duration-1000",
+        isDark ? "bg-slate-950 text-slate-100" : "bg-[#f8fafc] text-[#1b1b1d]",
       )}
     >
       <Helmet>
@@ -115,248 +110,65 @@ const Templates = () => {
         />
       </Helmet>
 
-      {/* ================= NAVBAR ================= */}
-      <nav className="pointer-events-none fixed inset-x-0 top-0 z-[100] pt-3 sm:pt-6">
-        <div className={cn(pageFrameClass, "relative")}>
-          <motion.div
-            initial={{ y: -50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className={cn(
-              "pointer-events-auto flex w-full min-w-0 items-center justify-between rounded-full px-3.5 py-2.5 backdrop-blur-2xl transition-all duration-500 sm:px-6 sm:py-3",
-              isDark
-                ? "border border-slate-700/50 bg-slate-900/80 shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
-                : "border border-slate-200/50 bg-white/90 shadow-[0_8px_32px_rgba(0,0,0,0.05)]",
-            )}
-          >
-            <Link to="/" className="group pointer-events-auto flex min-w-0 shrink cursor-pointer items-center">
-              <BrandLogo imgClassName="h-7 w-7 sm:h-8 sm:w-8 transition-transform duration-300 group-hover:scale-110" />
-            </Link>
+      <MarketingNav isDark={isDark} setTheme={setTheme} activeItem="Templates" />
 
-            <div className="hidden items-center gap-8 text-sm font-medium md:flex">
-              {["Features", "Templates", "Resources"].map((item) => (
-                <Link
-                  key={item}
-                  to={`/${item.toLowerCase()}`}
-                  className={cn(
-                    "relative group transition-colors",
-                    isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900",
-                  )}
-                >
-                  {item}
-                  <span
-                    className={cn(
-                      "absolute -bottom-1 left-0 h-[2px] rounded-full bg-blue-500 transition-all",
-                      item === "Templates" ? "w-full" : "w-0 group-hover:w-full",
-                    )}
-                  />
-                </Link>
-              ))}
-              <div className={cn("h-4 w-px", isDark ? "bg-slate-600/50" : "bg-slate-300")} />
-
-              <button
-                type="button"
-                onClick={() => setTheme(isDark ? "light" : "dark")}
-                className={cn(
-                  "rounded-full p-2 transition-colors",
-                  isDark ? "text-slate-300 hover:bg-slate-800" : "text-slate-600 hover:bg-slate-200",
-                )}
-              >
-                <AnimatePresence mode="wait">
-                  {isDark ? (
-                    <motion.div
-                      key="sun"
-                      initial={{ rotate: -90, opacity: 0 }}
-                      animate={{ rotate: 0, opacity: 1 }}
-                      exit={{ rotate: 90, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Sun className="h-4 w-4" />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="moon"
-                      initial={{ rotate: -90, opacity: 0 }}
-                      animate={{ rotate: 0, opacity: 1 }}
-                      exit={{ rotate: 90, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Moon className="h-4 w-4" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </button>
-
-              <Link
-                to="/login"
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold transition-all active:scale-95",
-                  isDark
-                    ? "bg-white text-slate-950 hover:bg-slate-100"
-                    : "bg-[#0F172A] text-white hover:bg-[#1e293b]",
-                )}
-              >
-                Login <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-
-            <div className="flex items-center gap-0.5 md:hidden">
-              <button
-                type="button"
-                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-                onClick={() => setTheme(isDark ? "light" : "dark")}
-                className={cn(
-                  "pointer-events-auto rounded-full p-2",
-                  isDark ? "text-slate-300" : "text-slate-600",
-                )}
-              >
-                {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              </button>
-              <button
-                type="button"
-                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-                aria-expanded={isMenuOpen}
-                className={cn("pointer-events-auto p-2", isDark ? "text-white" : "text-slate-900")}
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </button>
-            </div>
-          </motion.div>
-
-          <AnimatePresence>
-            {isMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className={cn(
-                  "pointer-events-auto absolute left-0 right-0 top-[calc(100%+0.75rem)] max-h-[min(70vh,28rem)] overflow-y-auto rounded-2xl border p-4 backdrop-blur-3xl sm:rounded-3xl sm:p-6 md:hidden",
-                  isDark
-                    ? "border-slate-700 bg-slate-900/95 shadow-2xl"
-                    : "border-slate-200 bg-white/95 shadow-xl",
-                )}
-              >
-                <div className="flex flex-col gap-2">
-                  {["Features", "Templates", "Resources"].map((item) => (
-                    <Link
-                      key={item}
-                      to={`/${item.toLowerCase()}`}
-                      onClick={() => setIsMenuOpen(false)}
-                      className={cn(
-                        "rounded-xl p-3 text-base font-semibold transition-colors sm:text-lg",
-                        isDark
-                          ? "text-slate-300 hover:bg-white/5 hover:text-white"
-                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
-                      )}
-                    >
-                      {item}
-                    </Link>
-                  ))}
-                  <div className={cn("my-2 h-px w-full", isDark ? "bg-slate-800" : "bg-slate-100")} />
-                  <Link
-                    to="/login"
-                    onClick={() => setIsMenuOpen(false)}
-                    className={cn(
-                      "mt-1 w-full rounded-2xl py-3.5 text-center text-base font-bold sm:py-4 sm:text-lg",
-                      isDark ? "bg-white text-slate-950" : "bg-[#0F172A] text-white",
-                    )}
-                  >
-                    Login
-                  </Link>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </nav>
-
+      <main className="w-full">
       {/* ================= HERO SECTION ================= */}
-      <section className="relative flex min-h-[70svh] flex-col items-center justify-center overflow-hidden pb-16 pt-28 sm:min-h-[75vh] sm:pb-20 sm:pt-32">
-        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+      <section className="relative flex min-h-[70svh] items-center justify-center overflow-hidden bg-slate-950 pb-16 pt-28 sm:min-h-[75svh] sm:pb-20 sm:pt-32">
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
           <img
             src={templatesImg}
             alt=""
-            className="h-full w-full object-cover opacity-40 transition-opacity duration-1000"
+            className="h-full w-full object-cover opacity-35"
           />
-          <div
-            className={cn(
-              "absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 opacity-20 blur-[150px]",
-              isDark ? "bg-sky-500/15" : "bg-sky-300/30",
-            )}
+          <motion.div
+            animate={{ scale: [1, 1.08, 1], opacity: [0.25, 0.4, 0.25] }}
+            transition={{ duration: 10, repeat: Infinity }}
+            className="absolute left-1/2 top-1/2 h-[700px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-400/25 blur-[140px]"
           />
-          <div
-            className={cn(
-              "absolute inset-0 bg-gradient-to-b transition-colors duration-1000",
-              isDark
-                ? "from-slate-950/10 via-slate-950/40 to-slate-950"
-                : "from-slate-50/10 via-slate-50/40 to-slate-50",
-            )}
-          />
-          <div
-            className={cn(
-              "absolute inset-0 bg-gradient-to-r transition-colors duration-1000",
-              isDark
-                ? "from-slate-950/20 via-transparent to-slate-950/20"
-                : "from-slate-50/20 via-transparent to-slate-50/20",
-            )}
-          />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/50 via-slate-950/70 to-slate-950" />
         </div>
 
-        <div className={cn(pageFrameClass, "relative z-10 text-center")}>
+        <div className={cn(pageFrameClass, "relative z-10 flex flex-col items-center text-center")}>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-            className={cn(
-              "mx-auto max-w-4xl text-[2.5rem] font-bold leading-[0.95] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl",
-              isDark ? "text-white" : "text-[#111827]",
-            )}
+            className="mb-5 max-w-4xl text-[1.75rem] font-bold leading-[1.2] tracking-tight text-white drop-shadow-sm sm:mb-6 sm:text-4xl sm:leading-[1.18] md:text-[3.25rem] md:leading-[1.15]"
           >
-            Start with a <br />
-            <span
-              className={cn(
-                "relative inline-block font-semibold italic",
-                isDark ? "text-slate-200" : "text-[#182848]",
-              )}
-            >
-              blank canvas or template.
-              <svg
-                className="pointer-events-none absolute -bottom-2 left-0 h-3 w-[108%] max-w-none text-[#3DB7FF] opacity-80"
-                viewBox="0 0 240 14"
-                preserveAspectRatio="none"
-                aria-hidden
-              >
-                <motion.path
-                  d="M2 11 C 70 12, 120 4, 238 3"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="5"
-                  strokeLinecap="round"
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-                />
-              </svg>
+            Start with a blank canvas or template.
+            <span className="mt-2 block text-slate-400 sm:mt-3">
+              Customize and publish without writing code.
             </span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className={cn(
-              "mx-auto mt-5 max-w-2xl text-[0.95rem] leading-relaxed sm:mt-6 sm:text-lg",
-              isDark ? "text-slate-400" : "text-slate-500",
-            )}
+            className="mb-10 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg"
           >
             Create a project, pick Blank or a pre-built template, design on the visual canvas, and
-            publish to a Web Studio subdomain—or connect your own domain—without writing code.
+            publish to a Web Studio subdomain—or connect your own domain.
           </motion.p>
+          <div className="flex w-full flex-col flex-wrap items-center justify-center gap-3 sm:flex-row sm:gap-4">
+            <a
+              href="#templates-grid"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-slate-950 shadow-xl transition-all hover:bg-slate-200 sm:w-auto"
+            >
+              Browse templates <ArrowRight className="h-4 w-4" />
+            </a>
+            <Link
+              to="/login"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white shadow-sm backdrop-blur-md transition-all hover:bg-white/20 sm:w-auto"
+            >
+              Open Web Studio Free
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* ================= CATEGORY FILTER ================= */}
-      <section className="py-16 sm:py-20">
+      <section id="templates-grid" className={cn(sectionYClass, isDark ? "bg-slate-950" : "bg-[#f8fafc]")}>
         <div className={pageFrameClass}>
           <div className="mb-12 flex flex-wrap justify-center gap-2 sm:mb-16 sm:gap-3">
             {categories.map((cat) => (
@@ -391,7 +203,7 @@ const Templates = () => {
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.4, delay: idx * 0.05 }}
                   className={cn(
-                    "group/card relative min-w-0 overflow-hidden rounded-[22px] border transition-all duration-500 sm:rounded-[30px]",
+                    "marketing-surface group/card relative min-w-0 overflow-hidden rounded-[22px] border transition-all duration-500 sm:rounded-[30px]",
                     isDark
                       ? "border-slate-800 bg-slate-900 hover:border-slate-700"
                       : "border-[#E5E7EB] bg-white shadow-[0_8px_32px_rgba(15,23,42,0.06)] hover:shadow-[0_20px_40px_rgba(15,23,42,0.1)]",
@@ -449,8 +261,9 @@ const Templates = () => {
       </section>
 
       {/* ================= TECHNOLOGY SECTION ================= */}
-      <section className={cn("py-16 sm:py-24", isDark ? "bg-slate-900/40" : "bg-[#F8FAFC]")}>
+      <section className={cn(sectionYClass, isDark ? "bg-slate-900/50" : "bg-white")}>
         <div className={pageFrameClass}>
+          <MarketingReveal>
           <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
             <div className="min-w-0">
               <h2
@@ -484,7 +297,7 @@ const Templates = () => {
                     key={i}
                     whileHover={{ x: 6 }}
                     className={cn(
-                      "group/feature flex gap-4 rounded-2xl border p-4 transition-all duration-300 sm:gap-5 sm:rounded-3xl sm:p-5",
+                      "marketing-surface group/feature flex gap-4 rounded-2xl border p-4 transition-all duration-300 sm:gap-5 sm:rounded-3xl sm:p-5",
                       isDark
                         ? "border-slate-800 bg-slate-900/50 hover:border-slate-600"
                         : "border-[#E5E7EB] bg-white hover:border-slate-300 shadow-sm",
@@ -536,12 +349,14 @@ const Templates = () => {
               />
             </div>
           </div>
+          </MarketingReveal>
         </div>
       </section>
 
       {/* ================= ONE-CLICK TRANSFORMATIONS ================= */}
-      <section className={cn("py-16 sm:py-24", isDark ? "bg-slate-950" : "bg-white")}>
+      <section className={cn(sectionYClass, isDark ? "bg-slate-950" : "bg-[#f8fafc]")}>
         <div className={pageFrameClass}>
+          <MarketingReveal>
           <div className="relative z-10 mb-12 text-center sm:mb-16">
             <h2
               className={cn(
@@ -563,7 +378,7 @@ const Templates = () => {
             </p>
           </div>
 
-          <div className="relative z-10 grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-3">
+          <div className="relative z-10 grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[
               {
                 icon: <Palette />,
@@ -597,7 +412,7 @@ const Templates = () => {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
                 className={cn(
-                  "group/transformation relative min-w-0 overflow-hidden rounded-[22px] border p-6 text-center transition-all duration-500 sm:rounded-[30px] sm:p-8",
+                  "marketing-surface group/transformation relative min-w-0 overflow-hidden rounded-[22px] border p-6 text-center transition-all duration-500 sm:rounded-[30px] sm:p-8",
                   hoveredFeature !== null && hoveredFeature !== i
                     ? "scale-[0.98] opacity-40"
                     : "opacity-100",
@@ -639,63 +454,15 @@ const Templates = () => {
               </motion.div>
             ))}
           </div>
+          </MarketingReveal>
         </div>
       </section>
 
-      {/* ================= FINAL CTA ================= */}
-      <section className="relative overflow-hidden py-16 text-center sm:py-24">
-        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[280px] w-[min(100%,40rem)] -translate-x-1/2 -translate-y-1/2 bg-sky-500/10 blur-[100px]" />
-
-        <div className={pageFrameClass}>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.97 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className={cn(
-              "group/cta relative mx-auto max-w-4xl overflow-hidden rounded-[22px] border p-8 sm:rounded-[30px] sm:p-12 md:p-16",
-              isDark
-                ? "border-white/10 bg-slate-900"
-                : "border-[#E5E7EB] bg-white shadow-[0_20px_50px_rgba(15,23,42,0.08)]",
-            )}
-          >
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-sky-500/10 to-transparent" />
-            <h2
-              className={cn(
-                "relative z-10 mb-4 text-3xl font-bold tracking-tight sm:mb-6 sm:text-4xl md:text-5xl lg:text-6xl",
-                isDark ? "text-white" : "text-[#0F172A]",
-              )}
-            >
-              Prefer a blank start?
-            </h2>
-            <p
-              className={cn(
-                "relative z-10 mx-auto mb-8 max-w-xl text-[0.95rem] font-medium leading-relaxed sm:mb-10 sm:text-lg",
-                isDark ? "text-slate-300" : "text-slate-600",
-              )}
-            >
-              On the dashboard, click New Project, name your site, select Blank, and Web Studio
-              opens the canvas editor so you can add Header, Hero, body sections, and Footer from
-              Elements.
-            </p>
-            <div className="relative z-10 flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
-              <Link
-                to="/login"
-                className={cn(
-                  "inline-flex h-12 items-center justify-center gap-2 rounded-full px-7 text-sm font-semibold transition-all sm:h-14 sm:px-8",
-                  isDark
-                    ? "bg-white text-slate-950 hover:bg-slate-100"
-                    : "bg-[#0F172A] text-white hover:bg-[#1e293b]",
-                )}
-              >
-                Start with Blank Canvas <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      <LandingCta />
+      </main>
 
       <Footer isDark={isDark} />
-    </main>
+    </div>
   );
 };
 

@@ -216,9 +216,6 @@ export default function CanvasBentoFeatures() {
             </div>
           </div>
         </div>
-        <p className="relative z-10 mt-4 text-[10px] font-medium tracking-wide text-white/40 uppercase sm:text-[11px]">
-          Click card for details
-        </p>
       </BentoFlipCard>
 
       {/* Elements — fuchsia */}
@@ -277,9 +274,7 @@ export default function CanvasBentoFeatures() {
             Input::Newsletter
           </div>
         </div>
-        <p className="relative z-10 mt-4 text-[10px] font-medium tracking-wide text-white/40 uppercase sm:text-[11px]">
-          Click card for details
-        </p>
+
       </BentoFlipCard>
 
       {/* Inline edit & drag-drop — emerald */}
@@ -348,9 +343,7 @@ export default function CanvasBentoFeatures() {
             </div>
           </div>
         </div>
-        <p className="relative z-10 mt-4 text-[10px] font-medium tracking-wide text-white/40 uppercase sm:text-[11px]">
-          Click card for details
-        </p>
+
       </BentoFlipCard>
 
       {/* Design system — sky */}
@@ -431,9 +424,7 @@ export default function CanvasBentoFeatures() {
             </span>
           </div>
         </div>
-        <p className="relative z-10 mt-4 text-[10px] font-medium tracking-wide text-white/40 uppercase sm:text-[11px]">
-          Click card for details
-        </p>
+
       </BentoFlipCard>
     </section>
   );

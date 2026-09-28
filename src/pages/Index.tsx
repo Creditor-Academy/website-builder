@@ -31,7 +31,7 @@ function HeroProductMockup({ isDark }: { isDark: boolean }) {
     { icon: Settings, label: "Settings" },
   ];
   return (
-    <div className="relative mx-auto h-full w-full max-w-full overflow-hidden sm:overflow-visible">
+    <div className="relative mx-auto h-full w-full max-w-full overflow-hidden">
       <motion.div
         initial={{ opacity: 0, y: 24, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -153,7 +153,7 @@ function HeroProductMockup({ isDark }: { isDark: boolean }) {
         animate={{ y: [0, -8, 0] }}
         transition={{ duration: 5.2, repeat: Infinity, ease: "easeInOut" }}
         className={cn(
-          "absolute bottom-14 right-2 z-30 flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 shadow-lg sm:bottom-6 sm:right-2 sm:gap-2 sm:px-3 sm:py-2",
+          "absolute bottom-20 right-2 z-30 flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 shadow-lg sm:bottom-6 sm:right-2 sm:gap-2 sm:px-3 sm:py-2",
           isDark ? "border-emerald-400/20 bg-slate-900 text-emerald-300" : "border-emerald-100 bg-white text-emerald-700",
         )}
       >
@@ -227,7 +227,7 @@ export default function LandingPage() {
             />
           </Link>
 
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium">
+          <div className="hidden lg:flex items-center gap-5 text-sm font-medium xl:gap-8">
             {["Features", "Templates", "Resources"].map((item) => (
               <Link key={item} to={`/${item.toLowerCase()}`} className={cn(
                 "relative group transition-colors",
@@ -258,7 +258,7 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          <div className="flex items-center gap-0.5 md:hidden">
+          <div className="flex items-center gap-0.5 lg:hidden">
             <button
               type="button"
               aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
@@ -287,7 +287,7 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               className={cn(
-                "pointer-events-auto absolute left-0 right-0 top-[calc(100%+0.75rem)] max-h-[min(70vh,28rem)] overflow-y-auto rounded-2xl border p-4 backdrop-blur-3xl sm:rounded-3xl sm:p-6 md:hidden",
+                "pointer-events-auto absolute left-0 right-0 top-[calc(100%+0.75rem)] max-h-[min(70vh,28rem)] overflow-y-auto rounded-2xl border p-4 backdrop-blur-3xl sm:rounded-3xl sm:p-6 lg:hidden",
                 isDark ? "bg-slate-900/95 border-slate-700 shadow-2xl" : "bg-white/95 border-slate-200 shadow-xl"
               )}
             >
@@ -326,7 +326,7 @@ export default function LandingPage() {
       {/* ================= HERO ================= */}
       <section
         className={cn(
-          "relative min-h-[100svh] overflow-visible",
+          "relative min-h-[100svh] overflow-x-hidden",
           isDark ? "bg-slate-950" : "bg-[#F4F7FC]",
         )}
         onMouseMove={(event) => {
@@ -354,12 +354,12 @@ export default function LandingPage() {
             className="flex min-w-0 flex-col items-start self-start"
           >
             <h1 className={cn("w-full max-w-full", isDark ? "text-white" : "text-[#111827]")}>
-              <span className="block text-[2.5rem] font-bold leading-[0.95] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+              <span className="block text-[2.15rem] font-bold leading-[0.95] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
                 Design.<br />Build.<br />Publish.
               </span>
-              <span className={cn("relative mt-3 inline-block max-w-full font-['Caveat',cursive] text-[1.85rem] font-bold leading-none sm:text-4xl md:text-5xl", isDark ? "text-slate-100" : "text-[#182848]")}>
+              <span className={cn("relative mt-3 inline-block max-w-full font-['Caveat',cursive] text-[1.65rem] font-bold leading-none sm:text-4xl md:text-5xl", isDark ? "text-slate-100" : "text-[#182848]")}>
                 All in one studio.
-                <svg className="pointer-events-none absolute -bottom-2 left-0 h-3 w-[108%] max-w-none text-[#3DB7FF]" viewBox="0 0 240 14" preserveAspectRatio="none" aria-hidden>
+                <svg className="pointer-events-none absolute -bottom-2 left-0 right-0 h-3 w-full text-[#3DB7FF]" viewBox="0 0 240 14" preserveAspectRatio="none" aria-hidden>
                   <motion.path
                     d="M2 11 C 70 12, 120 4, 238 3"
                     fill="none"

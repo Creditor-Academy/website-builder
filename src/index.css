@@ -155,6 +155,16 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
 }
 
 @layer utilities {
@@ -260,6 +270,17 @@
 
   .section-hover:hover::before {
     @apply border-primary/50;
+  }
+
+  /* Even, GPU-friendly marketing panel rendering */
+  .marketing-surface {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .marketing-section {
+    @apply py-16 sm:py-20 lg:py-24;
   }
 
   /* Custom scrollbar */
