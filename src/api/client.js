@@ -97,11 +97,21 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      const hasStoredUser = Boolean(localStorage.getItem('user'));
       const skipRedirect = Boolean(originalRequest.skipAuthRedirect) || !isProtectedAppPath(window.location.pathname);
 
-      // Don't retry refresh or login requests
-      if (originalRequest.url?.includes('/auth/refresh-token') || originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/google')) {
-        if (!skipRedirect) {
+      // Don't retry refresh if:
+      // 1) The client has no stored user (unauthenticated visitor / already logged out)
+      // 2) The request explicitly opted out of auth refresh
+      // 3) The failed request is already a refresh or login request
+      if (
+        !hasStoredUser ||
+        Boolean(originalRequest.skipAuthRefresh) ||
+        originalRequest.url?.includes('/auth/refresh-token') ||
+        originalRequest.url?.includes('/auth/login') ||
+        originalRequest.url?.includes('/auth/google')
+      ) {
+        if (!skipRedirect && hasStoredUser) {
           notifySessionExpired();
           redirectToLogin();
         }
@@ -123,6 +133,7 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError);
+        clearStoredUserLocal();
         if (!skipRedirect) {
           notifySessionExpired();
           redirectToLogin();

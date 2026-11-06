@@ -40,10 +40,15 @@ export function useAuthSession() {
 export function AuthSessionProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const [user, setUser] = useState<AuthUser | null>(() => getStoredUser());
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => Boolean(getStoredUser()));
   const [sessionExpiredOpen, setSessionExpiredOpen] = useState(false);
 
   const runValidation = useCallback(async (force = false) => {
+    if (!force && !getStoredUser()) {
+      setIsLoading(false);
+      setUser(null);
+      return false;
+    }
     setIsLoading(true);
     const result = await validateSession(force);
     setUser(result.user);
@@ -58,7 +63,11 @@ export function AuthSessionProvider({ children }: { children: React.ReactNode })
   }, []);
 
   useEffect(() => {
-    void runValidation();
+    if (getStoredUser()) {
+      void runValidation();
+    } else {
+      setIsLoading(false);
+    }
 
     if (consumeSessionExpiredFlag()) {
       setSessionExpiredOpen(true);

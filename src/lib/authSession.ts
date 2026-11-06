@@ -62,6 +62,13 @@ export async function validateSession(force = false): Promise<SessionValidationR
     return cachedValidation;
   }
 
+  // If there is no stored user locally and force is not requested, the visitor is unauthenticated.
+  // Avoid probing /users/me unnecessarily on public routes (prevents 401 console errors).
+  if (!force && !getStoredUser()) {
+    cachedValidation = Promise.resolve({ valid: false, user: null });
+    return cachedValidation;
+  }
+
   cachedValidation = (async () => {
     try {
       const res = await apiClient.get('/users/me', { skipAuthRedirect: true });
