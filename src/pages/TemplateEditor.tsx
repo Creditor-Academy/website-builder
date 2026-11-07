@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import templateApi from '@/api/templates';
 import useBuilderStore from '@/store/useBuilderStore';
@@ -9,11 +9,16 @@ import Loading from '@/components/Common/LoadingUI';
 export default function TemplateEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const previewOnly = searchParams.get('preview') === '1';
   const { toast } = useToast();
   const startTemplateEditing = useBuilderStore((state) => state.startTemplateEditing);
   const stopTemplateEditing = useBuilderStore((state) => state.stopTemplateEditing);
+  const setEditorState = useBuilderStore((state) => state.setEditorState);
+  const createWebsite = useBuilderStore((state) => state.createWebsite);
   const templateEditor = useBuilderStore((state) => state.templateEditor);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -34,13 +39,21 @@ export default function TemplateEditor() {
         }
 
         startTemplateEditing(template);
+        if (previewOnly) {
+          setEditorState({
+            previewMode: true,
+            showLeftPanel: false,
+            showRightPanel: false,
+            tour: { isActive: false, step: 0, isFinished: true },
+          });
+        }
       } catch (error: any) {
         if (!isMounted) {
           return;
         }
 
         toast({
-          title: 'Could not open template editor',
+          title: previewOnly ? 'Could not preview template' : 'Could not open template editor',
           description: error?.response?.data?.message || error?.message || 'Please try again.',
           variant: 'destructive',
         });
@@ -56,9 +69,30 @@ export default function TemplateEditor() {
 
     return () => {
       isMounted = false;
+      if (previewOnly) {
+        setEditorState({ previewMode: false, showLeftPanel: true, showRightPanel: true });
+      }
       stopTemplateEditing();
     };
-  }, [id, navigate, startTemplateEditing, stopTemplateEditing, toast]);
+  }, [id, navigate, previewOnly, setEditorState, startTemplateEditing, stopTemplateEditing, toast]);
+
+  const handleUseTemplate = async () => {
+    if (!templateEditor || isCreating) return;
+    try {
+      setIsCreating(true);
+      const websiteId = await createWebsite(`${templateEditor.name} Site`, templateEditor.id);
+      setEditorState({ previewMode: false, showLeftPanel: true, showRightPanel: true });
+      navigate(`/builder/${websiteId}`);
+    } catch (error: any) {
+      toast({
+        title: 'Could not use template',
+        description: error?.response?.data?.message || error?.message || 'Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   if (isLoading) {
     return <Loading fullScreen label="Loading template editor" />;
@@ -68,5 +102,13 @@ export default function TemplateEditor() {
     return <Loading fullScreen label="Redirecting" />;
   }
 
-  return <WebsiteEditor />;
+  return previewOnly
+    ? (
+      <WebsiteEditor
+        previewOnly
+        isUsingTemplate={isCreating}
+        onUseTemplate={() => void handleUseTemplate()}
+      />
+    )
+    : <WebsiteEditor />;
 }

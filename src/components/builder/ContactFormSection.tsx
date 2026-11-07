@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Send, Mail, User, MessageSquare, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import contactApi from '@/api/contact';
+import formsApi from '@/api/forms';
 
 interface ContactFormSectionProps {
   websiteId: string;
@@ -55,24 +55,23 @@ export default function ContactFormSection({
     try {
       setIsSubmitting(true);
 
-      const response = await contactApi.submitContactForm({
-        websiteId,
-        name: formData.name,
-        email: formData.email,
-        subject: formData.subject,
-        message: formData.message
+      await formsApi.submitForm({
+        website_id: websiteId,
+        form_name: 'contact',
+        data: {
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+        },
       });
 
-      if (response.data?.success) {
-        setIsSubmitted(true);
-        onSuccess?.('Message sent successfully!');
-        setFormData({ name: '', email: '', subject: '', message: '' });
-        
-        // Reset success state after 5 seconds
-        setTimeout(() => setIsSubmitted(false), 5000);
-      } else {
-        onError?.(response.data?.message || 'Failed to send message. Please try again.');
-      }
+      setIsSubmitted(true);
+      onSuccess?.('Message sent successfully!');
+      setFormData({ name: '', email: '', subject: '', message: '' });
+
+      // Reset success state after 5 seconds
+      setTimeout(() => setIsSubmitted(false), 5000);
     } catch (error: any) {
       console.error('Contact form submission error:', error);
       const errorMessage = error?.response?.data?.message || error?.message || 'Failed to send message';

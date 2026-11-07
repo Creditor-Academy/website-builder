@@ -182,6 +182,11 @@ export default function DashboardTemplates() {
     }
   };
 
+  const handlePreviewTemplate = (template: any) => {
+    if (creatingId) return;
+    navigate(`/template-builder/${template.id}?preview=1`);
+  };
+
   // ─── Admin form callbacks ─────────────────────────────────────────────────
   const handleFormSuccess = (result: any, isEdit: boolean) => {
     if (isEdit) {
@@ -382,7 +387,7 @@ export default function DashboardTemplates() {
                   handleOpenEdit(template);
                   return;
                 }
-                void handleUseTemplate(template);
+                handlePreviewTemplate(template);
               }}
               className={cn('h-full', showTrash && 'opacity-75')}
             >
@@ -440,7 +445,7 @@ export default function DashboardTemplates() {
                           return;
                         }
                         if (isAdminUser) handleOpenEdit(template);
-                        else handleUseTemplate(template);
+                        else handlePreviewTemplate(template);
                       }}
                     >
                       {showTrash ? (

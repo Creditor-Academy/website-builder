@@ -38,6 +38,7 @@ import {
   dashboardCardBadgeClass,
 } from '@/components/dashboard/DashboardCard';
 import { PexelsStockSection } from '@/components/dashboard/PexelsStockSection';
+import { getAssetUploadSizeError } from '@/lib/assetUpload';
 
 
 export default function DashboardAssets() {
@@ -97,12 +98,12 @@ export default function DashboardAssets() {
 
         if (e.target) e.target.value = ''; // reset input immediately so the same file can be re-picked
 
-        // Size guard
-        if (file.size > 100 * 1024 * 1024) {
+        const sizeError = getAssetUploadSizeError(file);
+        if (sizeError) {
             toast({
                 variant: "destructive",
                 title: "File too large",
-                description: `"${file.name}" is ${(file.size / (1024 * 1024)).toFixed(1)} MB. Maximum allowed size is 100 MB.`,
+                description: sizeError,
             });
             return;
         }

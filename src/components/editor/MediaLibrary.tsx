@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import useBuilderStore from '@/store/useBuilderStore';
 import { useToast } from '@/hooks/use-toast';
 import { DuplicateAssetDialog } from '@/components/ui/DuplicateAssetDialog';
+import { getAssetUploadSizeError } from '@/lib/assetUpload';
 
 interface MediaLibraryProps {
     open: boolean;
@@ -68,12 +69,12 @@ export function MediaLibrary({ open, onOpenChange, onSelect }: MediaLibraryProps
 
         if (e.target) e.target.value = '';
 
-        // Size guard
-        if (file.size > 100 * 1024 * 1024) {
+        const sizeError = getAssetUploadSizeError(file);
+        if (sizeError) {
             toast({
                 variant: "destructive",
                 title: "File too large",
-                description: `"${file.name}" is ${(file.size / (1024 * 1024)).toFixed(1)} MB. Maximum allowed size is 100 MB.`,
+                description: sizeError,
             });
             return;
         }

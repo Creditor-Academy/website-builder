@@ -1,6 +1,7 @@
 import React, { useRef, MouseEvent } from "react";
 import { Link } from "react-router-dom";
 import { Monitor, Smartphone, Tablet } from "lucide-react";
+import { cn } from "@/lib/utils";
 import CanvasBentoFeatures from "@/components/landing/CanvasBentoFeatures";
 import { FeatureFlipShell } from "@/components/landing/FeatureFlipShell";
 import { featureFlipBriefs, type FeatureFlipBrief } from "@/components/landing/featureFlipBriefs";
@@ -197,7 +198,7 @@ function ReadyToLiveCard() {
 }
 
 // Main Component
-export default function FeaturesShowcase() {
+export default function FeaturesShowcase({ isDark = false }: { isDark?: boolean }) {
   return (
     <>
       {/* Inline Styles & Keyframe Injection for Spotlights & Blobs */}
@@ -223,6 +224,18 @@ export default function FeaturesShowcase() {
           background-image:
             linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
             linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+        }
+        .bg-grid-pattern-dark {
+          background-size: 32px 32px;
+          background-image:
+            linear-gradient(to right, rgba(148, 163, 184, 0.1) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(148, 163, 184, 0.1) 1px, transparent 1px);
+        }
+        .shimmer-gradient-text {
+          background: linear-gradient(110deg, #3b82f6 0%, #06b6d4 28%, #8b5cf6 55%, #3b82f6 85%, #06b6d4 100%);
+          background-size: 250% 100%;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
         }
         .spotlight-card {
           transition:
@@ -281,7 +294,12 @@ export default function FeaturesShowcase() {
       {/* Main Full-Width Wrapper — overflow visible so hover lift/scale isn't clipped */}
       <main
         id="features"
-        className="relative w-full max-w-full min-w-0 overflow-x-hidden bg-gradient-to-b from-slate-50 via-slate-100/70 to-slate-50 bg-grid-pattern py-6 text-slate-900 antialiased sm:py-8 lg:py-10"
+        className={cn(
+          "relative w-full max-w-full min-w-0 overflow-x-hidden py-6 antialiased sm:py-8 lg:py-10",
+          isDark
+            ? "bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 bg-grid-pattern-dark text-slate-100"
+            : "bg-gradient-to-b from-slate-50 via-slate-100/70 to-slate-50 bg-grid-pattern text-slate-900",
+        )}
       >
         {/* Animated Background Blobs (clipped so they don't spill the page) */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
@@ -297,14 +315,24 @@ export default function FeaturesShowcase() {
           {/* Header — same typography as TemplatesScroll, right-aligned */}
           <header className="mb-8 flex flex-col items-end sm:mb-10 lg:mb-12">
             <div className="w-full max-w-2xl min-w-0 space-y-2 text-left sm:text-right">
-              <h2 className="text-[1.65rem] font-extrabold leading-[1.12] tracking-tight text-slate-900 sm:text-4xl md:text-5xl lg:text-6xl">
+              <h2
+                className={cn(
+                  "text-[1.65rem] font-extrabold leading-[1.12] tracking-tight sm:text-4xl md:text-5xl lg:text-6xl",
+                  isDark ? "text-white" : "text-slate-900",
+                )}
+              >
                 Design on a canvas.
                 <br />
                 <span className="italic font-bold shimmer-gradient-text">
                   Publish live.
                 </span>
               </h2>
-              <p className="ml-auto max-w-xl pt-1 text-sm leading-relaxed text-slate-600 sm:text-lg">
+              <p
+                className={cn(
+                  "ml-auto max-w-xl pt-1 text-sm leading-relaxed sm:text-lg",
+                  isDark ? "text-slate-400" : "text-slate-600",
+                )}
+              >
                 Precision layout, unified design, and frictionless publishing-all on one canvas.
               </p>
             </div>

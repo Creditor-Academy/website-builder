@@ -14,6 +14,7 @@ import { DuplicateAssetDialog } from '@/components/ui/DuplicateAssetDialog';
 import { isAdminGlobalAsset, isAssetVisibleToUsers, canDeleteAsset } from '@/lib/assetVisibility';
 import { PexelsStockBrowser } from '@/components/dashboard/PexelsStockSection';
 import { cn } from '@/lib/utils';
+import { getAssetUploadSizeError } from '@/lib/assetUpload';
 
 // ── Shared card used in every tab grid ─────────────────────────────────────
 interface AssetCardProps {
@@ -147,12 +148,12 @@ export function AssetLibraryPanel() {
 
         if (e.target) e.target.value = '';
 
-        // Size guard
-        if (file.size > 100 * 1024 * 1024) {
+        const sizeError = getAssetUploadSizeError(file);
+        if (sizeError) {
             toast({
                 variant: "destructive",
                 title: "File too large",
-                description: `"${file.name}" is ${(file.size / (1024 * 1024)).toFixed(1)} MB. Maximum allowed size is 100 MB.`,
+                description: sizeError,
             });
             return;
         }
@@ -558,5 +559,4 @@ export function AssetLibraryPanel() {
         </div>
     );
 }
-
 

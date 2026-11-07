@@ -170,7 +170,7 @@ export function normalizeStockSearchResponse(data: unknown, mediaType: 'images' 
         .filter((item) => {
           const record = asRecord(item);
           const kind = pickString(record.media_type, record.type, record.kind).toLowerCase();
-          return kind === 'video' || kind === 'videos';
+          return !kind || kind === 'video' || kind === 'videos';
         })
         .map(mapStockVideo);
 

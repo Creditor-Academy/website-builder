@@ -49,6 +49,7 @@ import {
     userScopedBuilderStorage,
 } from '@/lib/builderStorage';
 import type { AssetVisibilityMeta } from '@/lib/assetVisibility';
+import { getAssetUploadSizeError } from '@/lib/assetUpload';
 import {
     mapWebsiteFromApi,
     mapWebsiteStatus,
@@ -1071,6 +1072,9 @@ const useBuilderStore = create<BuilderStore>()(
 
             uploadAsset: async (file, scope = {}) => {
                 try {
+                    const sizeError = getAssetUploadSizeError(file);
+                    if (sizeError) throw new Error(sizeError);
+
                     const { default: assetApi } = await import('../api/assets');
                     const response = await assetApi.uploadAsset(file, scope);
                     const asset = attachCurrentOwner(normalizeAsset(response.data.asset, scope));

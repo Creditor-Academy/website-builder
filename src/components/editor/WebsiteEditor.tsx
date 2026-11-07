@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { BuilderProvider } from "@/contexts/BuilderContext";
 import useBuilderStore from "@/store/useBuilderStore";
 import { useIsCompact } from "@/hooks/use-mobile";
@@ -23,6 +23,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { Button } from "@/components/ui/button";
 import {
   Layers,
   FileText,
@@ -147,26 +148,43 @@ function EditorLeftSidebar({
   );
 }
 
-function EditorContent() {
+function EditorContent({
+  previewOnly = false,
+  onUseTemplate,
+  isUsingTemplate = false,
+}: {
+  previewOnly?: boolean;
+  onUseTemplate?: () => void;
+  isUsingTemplate?: boolean;
+}) {
   const store = useBuilderStore();
   const { editor, setTourState, activeWebsiteId, setEditorState } = store;
   const leftNavTab = editor.leftNavTab || "add";
   const setLeftNavTab = (id: string) => setEditorState({ leftNavTab: id, showLeftPanel: true });
   const { id } = useParams();
+  const navigate = useNavigate();
   const isCompact = useIsCompact();
 
   useEffect(() => {
-    setEditorState({ showLeftPanel: !isCompact, showRightPanel: !isCompact });
-  }, [isCompact, setEditorState]);
-
-  useEffect(() => {
-    if (isCompact && editor.selectedNodeId) {
-      setLeftNavTab("edit");
-      setEditorState({ showLeftPanel: true });
+    if (previewOnly) {
+      setEditorState({
+        previewMode: true,
+        showLeftPanel: false,
+        showRightPanel: false,
+      });
+      return;
     }
-  }, [editor.selectedNodeId, isCompact, setEditorState]);
+    setEditorState({ showLeftPanel: !isCompact, showRightPanel: !isCompact });
+  }, [isCompact, previewOnly, setEditorState]);
 
   useEffect(() => {
+    if (!previewOnly && isCompact && editor.selectedNodeId) {
+      setEditorState({ leftNavTab: "edit", showLeftPanel: true });
+    }
+  }, [editor.selectedNodeId, isCompact, previewOnly, setEditorState]);
+
+  useEffect(() => {
+    if (previewOnly) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || !isCompact) return;
       const target = event.target as HTMLElement;
@@ -175,11 +193,38 @@ function EditorContent() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isCompact, setEditorState]);
+  }, [isCompact, previewOnly, setEditorState]);
 
   const showSidebar = !editor.previewMode && editor.showLeftPanel;
   const showRight = !editor.previewMode && editor.showRightPanel && !isCompact;
   const closeSidebar = () => setEditorState({ showLeftPanel: false });
+
+  if (previewOnly) {
+    return (
+      <div className="flex h-screen flex-col overflow-hidden bg-white font-sans">
+        <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 px-4 sm:px-6">
+          <button
+            type="button"
+            onClick={() => navigate('/dashboard/templates')}
+            className="text-sm font-medium text-slate-600 hover:text-slate-900"
+          >
+            Back to templates
+          </button>
+          <span className="truncate px-3 text-sm font-semibold text-slate-900">
+            {store.templateEditor?.name || 'Template preview'}
+          </span>
+          <Button type="button" onClick={onUseTemplate} disabled={!onUseTemplate || isUsingTemplate}>
+            {isUsingTemplate ? 'Creating site…' : 'Use Template'}
+          </Button>
+        </header>
+        <div className="relative min-h-0 flex-1 overflow-hidden bg-slate-100">
+          <CanvasDndProvider>
+            <BuilderCanvas />
+          </CanvasDndProvider>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden font-sans">
@@ -284,9 +329,20 @@ function EditorContent() {
   );
 }
 
-export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
+export function WebsiteEditor({
+  initialPage,
+  previewOnly = false,
+  onUseTemplate,
+  isUsingTemplate = false,
+}: {
+  initialPage?: any;
+  previewOnly?: boolean;
+  onUseTemplate?: () => void;
+  isUsingTemplate?: boolean;
+}) {
   const { id } = useParams();
   const activeWebsiteId = useBuilderStore((state) => state.activeWebsiteId);
+  const templateEditorId = useBuilderStore((state) => state.templateEditor?.id);
   const [hydrated, setHydrated] = useState(() => useBuilderStore.persist.hasHydrated());
   const [ready, setReady] = useState(false);
 
@@ -312,6 +368,10 @@ export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
 
   useEffect(() => {
     if (!hydrated || !id) return;
+    if (templateEditorId === id) {
+      setReady(true);
+      return;
+    }
     let cancelled = false;
     setReady(false);
     useBuilderStore.getState().selectWebsite(id).finally(() => {
@@ -320,7 +380,7 @@ export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
     return () => {
       cancelled = true;
     };
-  }, [id, hydrated]);
+  }, [id, hydrated, templateEditorId]);
 
   if (!hydrated || !ready || (id && activeWebsiteId !== id)) {
     return <Loading fullScreen label="Loading your project" />;
@@ -328,7 +388,11 @@ export function WebsiteEditor({ initialPage }: { initialPage?: any }) {
 
   return (
     <BuilderProvider initialPage={initialPage}>
-      <EditorContent />
+      <EditorContent
+        previewOnly={previewOnly}
+        onUseTemplate={onUseTemplate}
+        isUsingTemplate={isUsingTemplate}
+      />
     </BuilderProvider>
   );
 }

@@ -419,12 +419,12 @@ export default function LandingPage() {
 
         {/* Features — same horizontal padding as hero / pageFrame */}
         <div className={cn(pageFrameClass, "relative z-10 pb-8 sm:pb-10 lg:pb-12")}>
-          <FeaturesCards />
+          <FeaturesCards isDark={isDark} />
         </div>
       </section>
 
 
-      <TemplatesScroll />
+      <TemplatesScroll isDark={isDark} />
 
       <LandingCta />
 

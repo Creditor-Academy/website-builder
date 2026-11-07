@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const TOTAL_CARDS = 6;
 const AUTO_PLAY_DELAY = 3600;
 
-export default function TemplateShowcaseSection() {
+export default function TemplateShowcaseSection({ isDark = false }: { isDark?: boolean }) {
   const [activeIndex, setActiveIndex] = useState(2);
   const [windowWidth, setWindowWidth] = useState<number>(
     typeof window !== 'undefined' ? window.innerWidth : 1200
@@ -207,6 +209,10 @@ export default function TemplateShowcaseSection() {
           background-image: radial-gradient(rgba(100, 116, 139, 0.16) 1.25px, transparent 1.25px);
           background-size: 24px 24px;
         }
+        .bg-grid-dots-dark {
+          background-image: radial-gradient(rgba(148, 163, 184, 0.14) 1.25px, transparent 1.25px);
+          background-size: 24px 24px;
+        }
 
         /* Gradient animated title */
         .shimmer-gradient-text {
@@ -220,11 +226,11 @@ export default function TemplateShowcaseSection() {
         .perspective-stage {
           perspective: 1600px;
           perspective-origin: center 45%;
-          cursor: grab;
+          cursor: default;
           user-select: none;
         }
         .perspective-stage:active {
-          cursor: grabbing;
+          cursor: default;
         }
 
         /* Smooth 3D transforms transition */
@@ -277,37 +283,105 @@ export default function TemplateShowcaseSection() {
         }
       `}</style>
 
-      <div className="bg-[#f8fafc] text-slate-900 antialiased overflow-x-hidden selection:bg-indigo-500 selection:text-white font-sans">
+      <div
+        className={cn(
+          "overflow-x-hidden font-sans antialiased selection:bg-indigo-500 selection:text-white",
+          isDark ? "bg-slate-950 text-slate-100" : "bg-[#f8fafc] text-slate-900",
+        )}
+      >
         {/* BEGIN: TemplateShowcaseSection */}
         <section
-          className="relative overflow-hidden bg-grid-dots px-4 py-12 sm:px-6 sm:py-16 md:py-24 lg:px-8"
+          className={cn(
+            "relative overflow-hidden bg-grid-dots px-4 py-12 sm:px-6 sm:py-16 md:py-24 lg:px-8",
+            isDark && "bg-grid-dots-dark",
+          )}
           id="templates-section"
         >
           {/* Ambient Mesh Radial Glows (Buildora Aura) */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 overflow-hidden flex items-center justify-center -z-10"
+            className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center overflow-hidden"
           >
-            <div className="absolute top-1/4 -left-20 w-[550px] h-[550px] bg-blue-400/20 rounded-full blur-[120px] mix-blend-multiply animate-pulse-glow" />
-            <div className="absolute top-1/3 -right-20 w-[600px] h-[600px] bg-purple-400/25 rounded-full blur-[140px] mix-blend-multiply" />
-            <div className="absolute bottom-10 left-1/3 w-[650px] h-[450px] bg-indigo-300/20 rounded-full blur-[130px]" />
+            <div
+              className={cn(
+                "absolute -left-20 top-1/4 h-[550px] w-[550px] rounded-full blur-[120px] animate-pulse-glow",
+                isDark ? "bg-blue-500/15" : "bg-blue-400/20 mix-blend-multiply",
+              )}
+            />
+            <div
+              className={cn(
+                "absolute -right-20 top-1/3 h-[600px] w-[600px] rounded-full blur-[140px]",
+                isDark ? "bg-purple-500/15" : "bg-purple-400/25 mix-blend-multiply",
+              )}
+            />
+            <div
+              className={cn(
+                "absolute bottom-10 left-1/3 h-[450px] w-[650px] rounded-full blur-[130px]",
+                isDark ? "bg-indigo-500/10" : "bg-indigo-300/20",
+              )}
+            />
           </div>
 
           {/* Maximum Width Container */}
-          <div className="max-w-7xl mx-auto">
+          <div className="mx-auto max-w-7xl">
             {/* BEGIN: SectionHeader */}
-            <header className="mb-12 flex flex-col gap-6 lg:mb-16 md:flex-row md:items-end md:justify-between">
+            <header className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between lg:mb-16">
               <div className="max-w-2xl space-y-2">
-                <h2 className="text-3xl font-extrabold leading-[1.08] tracking-tight text-slate-900 sm:text-4xl lg:text-5xl xl:text-6xl">
+                <h2
+                  className={cn(
+                    "text-3xl font-extrabold leading-[1.15] tracking-tight sm:text-4xl lg:text-5xl xl:text-6xl",
+                    isDark ? "text-white" : "text-slate-900",
+                  )}
+                >
                   Start from a template
                   <br />
                   <span className="italic font-bold shimmer-gradient-text animate-text-shimmer">
                     or a blank canvas.
                   </span>
                 </h2>
-                <p className="max-w-xl pt-1 text-base leading-relaxed text-slate-600 sm:text-lg">
+                <p
+                  className={cn(
+                    "max-w-xl pt-1 text-base leading-relaxed sm:text-lg",
+                    isDark ? "text-slate-400" : "text-slate-600",
+                  )}
+                >
                   Jumpstart your workflow with hand-crafted, fully reactive compositions or orchestrate every layout element from ground zero in spatial freeform.
                 </p>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-2 self-start md:self-end">
+                <button
+                  type="button"
+                  aria-label="Previous template"
+                  onClick={() => {
+                    prevSlide();
+                    startAutoPlay();
+                  }}
+                  className={cn(
+                    "inline-flex h-11 w-11 items-center justify-center rounded-full border transition-colors",
+                    isDark
+                      ? "border-slate-700 bg-slate-900 text-slate-200 hover:border-slate-500 hover:bg-slate-800"
+                      : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50",
+                  )}
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next template"
+                  onClick={() => {
+                    nextSlide();
+                    startAutoPlay();
+                  }}
+                  className={cn(
+                    "inline-flex h-11 w-11 items-center justify-center rounded-full border transition-colors",
+                    isDark
+                      ? "border-slate-700 bg-slate-900 text-slate-200 hover:border-slate-500 hover:bg-slate-800"
+                      : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50",
+                  )}
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
               </div>
             </header>
             {/* END: SectionHeader */}
@@ -324,7 +398,7 @@ export default function TemplateShowcaseSection() {
             >
               {/* Track Container */}
               <div
-                className="relative flex h-[min(480px,70svh)] w-full max-w-full cursor-ew-resize touch-pan-y items-center justify-center px-2 sm:h-[580px] sm:px-4 md:h-[640px] lg:h-[680px]"
+                className="relative flex h-[min(480px,70svh)] w-full max-w-full cursor-default touch-pan-y items-center justify-center px-2 sm:h-[580px] sm:px-4 md:h-[640px] lg:h-[680px]"
                 id="carousel-track"
                 onMouseDown={(e) => {
                   e.preventDefault();
@@ -349,7 +423,7 @@ export default function TemplateShowcaseSection() {
               >
                 {/* CARD 0: Blank Canvas */}
                 <div
-                  className="carousel-card group absolute h-[min(440px,62svh)] w-[78vw] max-w-[300px] cursor-pointer overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:h-[520px] sm:max-w-[340px] sm:rounded-[1.75rem] md:max-w-[380px] md:h-[580px] lg:max-w-[400px] lg:h-[620px]"
+                  className="carousel-card group absolute h-[min(440px,62svh)] w-[78vw] max-w-[300px] cursor-default overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:h-[520px] sm:max-w-[340px] sm:rounded-[1.75rem] md:max-w-[380px] md:h-[580px] lg:max-w-[400px] lg:h-[620px]"
                   data-index="0"
                   data-purpose="template-card"
                   style={getCardStyle(0)}
@@ -398,7 +472,7 @@ export default function TemplateShowcaseSection() {
 
                 {/* CARD 1: Portfolio */}
                 <div
-                  className="carousel-card group absolute h-[min(440px,62svh)] w-[78vw] max-w-[300px] cursor-pointer overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:h-[520px] sm:max-w-[340px] sm:rounded-[1.75rem] md:max-w-[380px] md:h-[580px] lg:max-w-[400px] lg:h-[620px]"
+                  className="carousel-card group absolute h-[min(440px,62svh)] w-[78vw] max-w-[300px] cursor-default overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:h-[520px] sm:max-w-[340px] sm:rounded-[1.75rem] md:max-w-[380px] md:h-[580px] lg:max-w-[400px] lg:h-[620px]"
                   data-index="1"
                   data-purpose="template-card"
                   style={getCardStyle(1)}
@@ -461,7 +535,7 @@ export default function TemplateShowcaseSection() {
 
                 {/* CARD 2: eCommerce — matches screenshot exactly */}
                 <div
-                  className="carousel-card group absolute h-[520px] w-[82vw] max-w-[340px] cursor-pointer overflow-hidden rounded-[1.75rem] bg-white shadow-[0_28px_70px_-18px_rgba(15,23,42,0.4)] sm:max-w-[380px] sm:h-[580px] md:max-w-[400px] md:h-[620px]"
+                  className="carousel-card group absolute h-[520px] w-[82vw] max-w-[340px] cursor-default overflow-hidden rounded-[1.75rem] bg-white shadow-[0_28px_70px_-18px_rgba(15,23,42,0.4)] sm:max-w-[380px] sm:h-[580px] md:max-w-[400px] md:h-[620px]"
                   data-index="2"
                   data-purpose="template-card"
                   style={getCardStyle(2)}
@@ -554,7 +628,7 @@ export default function TemplateShowcaseSection() {
 
                 {/* CARD 3: Business & Agency */}
                 <div
-                  className="carousel-card group absolute h-[min(440px,62svh)] w-[78vw] max-w-[300px] cursor-pointer overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:h-[520px] sm:max-w-[340px] sm:rounded-[1.75rem] md:max-w-[380px] md:h-[580px] lg:max-w-[400px] lg:h-[620px]"
+                  className="carousel-card group absolute h-[min(440px,62svh)] w-[78vw] max-w-[300px] cursor-default overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:h-[520px] sm:max-w-[340px] sm:rounded-[1.75rem] md:max-w-[380px] md:h-[580px] lg:max-w-[400px] lg:h-[620px]"
                   data-index="3"
                   data-purpose="template-card"
                   style={getCardStyle(3)}
@@ -612,7 +686,7 @@ export default function TemplateShowcaseSection() {
 
                 {/* CARD 4: Cafe & Bistro */}
                 <div
-                  className="carousel-card group absolute h-[min(440px,62svh)] w-[78vw] max-w-[300px] cursor-pointer overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:h-[520px] sm:max-w-[340px] sm:rounded-[1.75rem] md:max-w-[380px] md:h-[580px] lg:max-w-[400px] lg:h-[620px]"
+                  className="carousel-card group absolute h-[min(440px,62svh)] w-[78vw] max-w-[300px] cursor-default overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:h-[520px] sm:max-w-[340px] sm:rounded-[1.75rem] md:max-w-[380px] md:h-[580px] lg:max-w-[400px] lg:h-[620px]"
                   data-index="4"
                   data-purpose="template-card"
                   style={getCardStyle(4)}
@@ -667,7 +741,7 @@ export default function TemplateShowcaseSection() {
 
                 {/* CARD 5: Chronicle Blog */}
                 <div
-                  className="carousel-card group absolute h-[min(440px,62svh)] w-[78vw] max-w-[300px] cursor-pointer overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:h-[520px] sm:max-w-[340px] sm:rounded-[1.75rem] md:max-w-[380px] md:h-[580px] lg:max-w-[400px] lg:h-[620px]"
+                  className="carousel-card group absolute h-[min(440px,62svh)] w-[78vw] max-w-[300px] cursor-default overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] sm:h-[520px] sm:max-w-[340px] sm:rounded-[1.75rem] md:max-w-[380px] md:h-[580px] lg:max-w-[400px] lg:h-[620px]"
                   data-index="5"
                   data-purpose="template-card"
                   style={getCardStyle(5)}
@@ -720,7 +794,7 @@ export default function TemplateShowcaseSection() {
             {/* END: 3D Coverflow Deck Stage */}
 
             {/* BEGIN: Carousel Navigation Indicators (Pills & CTA) */}
-            <div className="mt-8 flex flex-col items-center gap-6 border-t border-slate-200/70 pt-8">
+            <div className={cn("mt-8 flex flex-col items-center gap-6 border-t pt-8", isDark ? "border-slate-800" : "border-slate-200/70")}>
               <div
                 aria-label="Template slides"
                 className="flex items-center justify-center gap-2.5 mx-auto"
@@ -734,7 +808,9 @@ export default function TemplateShowcaseSection() {
                     className={`rounded-full transition-all duration-300 ${
                       idx === activeIndex
                         ? 'h-2.5 bg-indigo-600 w-8 shadow-sm shadow-indigo-500/50'
-                        : 'h-2 bg-slate-300 w-2 hover:bg-slate-400'
+                        : isDark
+                          ? 'h-2 w-2 bg-slate-600 hover:bg-slate-500'
+                          : 'h-2 bg-slate-300 w-2 hover:bg-slate-400'
                     }`}
                     onClick={() => {
                       setActiveIndex(idx);
@@ -746,7 +822,7 @@ export default function TemplateShowcaseSection() {
               </div>
               <div className="flex w-full flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4">
                 <a
-                  className="flex items-center justify-center gap-1.5 text-center text-xs font-semibold text-slate-700 transition-colors hover:text-indigo-600 group sm:justify-start sm:text-left sm:text-sm"
+                  className={cn("group flex items-center justify-center gap-1.5 text-center text-xs font-semibold transition-colors sm:justify-start sm:text-left sm:text-sm", isDark ? "text-slate-300 hover:text-indigo-400" : "text-slate-700 hover:text-indigo-600")}
                   href="#templates-library"
                 >
                   Browse All 120+ Templates{' '}
