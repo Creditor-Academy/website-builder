@@ -62,7 +62,7 @@ class PublishService {
       return response.data;
     } catch (error) {
       console.error('Publishing failed:', error);
-      throw new Error('Failed to publish website');
+      throw error;
     }
   }
 
