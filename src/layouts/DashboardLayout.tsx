@@ -155,6 +155,8 @@ const DashboardLayout = () => {
                                     <Menu className="h-5 w-5" />
                                 </button>
                                 <BrandLogo
+                                    showIcon={false}
+                                    className="text-white"
                                     imgClassName="h-7 w-7"
                                 />
                             </div>

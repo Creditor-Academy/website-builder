@@ -7,6 +7,9 @@ export type AssetVisibilityMeta = {
   userVisible?: boolean;
   hidden?: boolean;
   visibilityUpdatedAt?: string;
+  filename?: string;
+  description?: string;
+  tags?: string[] | string;
 };
 
 export function getUserVisibleAssetIds(): string[] | null {

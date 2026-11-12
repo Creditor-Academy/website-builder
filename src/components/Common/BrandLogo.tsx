@@ -1,9 +1,9 @@
 import { cn } from '@/lib/utils';
-import newLogo from '@/buildora.webp';
 
 type BrandLogoProps = {
   className?: string;
   imgClassName?: string;
+  showIcon?: boolean;
   showWordmark?: boolean;
   alt?: string;
 };
@@ -11,6 +11,7 @@ type BrandLogoProps = {
 export function BrandLogo({
   className,
   imgClassName,
+  showIcon = true,
   showWordmark = true,
   alt = 'Web Studio',
 }: BrandLogoProps) {
@@ -21,11 +22,13 @@ export function BrandLogo({
         className,
       )}
     >
-      {/* <img
-        src={newLogo}
-        alt={showWordmark ? '' : alt}
-        className={cn('h-8 w-8 shrink-0 object-contain rounded-lg', imgClassName)}
-      /> */}
+      {showIcon && (
+        <img
+          src="/assets/logo.png"
+          alt={showWordmark ? '' : alt}
+          className={cn('h-10 w-10 shrink-0 object-contain', imgClassName)}
+        />
+      )}
       {showWordmark && (
         <span className="truncate text-xl font-bold leading-snug tracking-tight text-current sm:text-2xl">
           Web Studio

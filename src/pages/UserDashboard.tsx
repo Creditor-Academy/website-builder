@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import type { DashboardOutletContext } from '@/layouts/DashboardLayout';
 import {
     Plus, Globe, Trash2, Search, MessageSquare, Pencil,
@@ -48,6 +48,7 @@ import {
 import { templatesList } from '@/lib/templates';
 import templateApi from '@/api/templates';
 import { updateUserProfile } from "../api/user";
+import { parseStockSearchQuery } from '@/lib/stockSearch';
 
 const WebsiteCard = ({ site, onDelete, onEdit, onViewMessages, dbTemplates = [] }: any) => {
     const activeTemplateId = site.templateId || site.sourceTemplateId || 'blank';
@@ -157,6 +158,7 @@ const WEBSITE_NAME_MAX_LENGTH = 100;
 
 const UserDashboard = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const websites = useBuilderStore((state) => state.websites) ?? [];
     const fetchWebsites = useBuilderStore((state) => state.fetchWebsites);
     const createWebsite = useBuilderStore((state) => state.createWebsite);
@@ -282,6 +284,18 @@ const UserDashboard = () => {
 
         return tempWebsites;
     }, [siteList, searchQuery, sortBy, filterStatus]);
+
+    const handleProjectSearch = (query: string) => {
+        const { requestsVideos, term } = parseStockSearchQuery(query);
+        if (requestsVideos) {
+            const params = new URLSearchParams({ tab: 'videos' });
+            if (term) params.set('search', term);
+            const basePath = location.pathname.startsWith('/admin') ? '/admin' : '/dashboard';
+            navigate(`${basePath}/assets?${params.toString()}`);
+            return;
+        }
+        setSearchQuery(query);
+    };
 
     const handleConfirmDelete = async () => {
         if (!deleteTarget?.id || isDeleting) return;
@@ -556,6 +570,12 @@ const UserDashboard = () => {
                         className="h-11 w-full rounded-full border-slate-200 bg-white pl-10 text-sm shadow-sm focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/10"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleProjectSearch(searchQuery);
+                            }
+                        }}
                     />
                 </div>
 

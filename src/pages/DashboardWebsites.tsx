@@ -41,6 +41,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import useBuilderStore from '@/store/useBuilderStore';
 import { SITE_HOST } from '@/api/client';
+import { parseStockSearchQuery } from '@/lib/stockSearch';
 
 interface Website {
   id: string;
@@ -141,6 +142,17 @@ export default function DashboardWebsites() {
       return dateB - dateA;
     });
   }, [websites, searchTerm, filterStatus, sortBy]);
+
+  const handleWebsiteSearch = (query: string) => {
+    const { requestsVideos, term } = parseStockSearchQuery(query);
+    if (requestsVideos) {
+      const params = new URLSearchParams({ tab: 'videos' });
+      if (term) params.set('search', term);
+      navigate(`/admin/assets?${params.toString()}`);
+      return;
+    }
+    setSearchTerm(query);
+  };
 
   const formatDate = (dateString: string | undefined): string => {
     if (!dateString) return '---';
@@ -314,6 +326,12 @@ export default function DashboardWebsites() {
             placeholder="Search websites by name or domain..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleWebsiteSearch(searchTerm);
+              }
+            }}
             className="h-9 w-full rounded-full border-[#E5E7EB] bg-white pl-9 text-sm text-[#0F172A] shadow-sm focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/10"
           />
         </div>

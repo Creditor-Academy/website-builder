@@ -39,6 +39,7 @@ import {
 } from '@/components/dashboard/DashboardCard';
 import { PexelsStockSection } from '@/components/dashboard/PexelsStockSection';
 import { getAssetUploadSizeError } from '@/lib/assetUpload';
+import { matchesAssetSearch } from '@/lib/assetSearch';
 
 
 export default function DashboardAssets() {
@@ -60,8 +61,9 @@ export default function DashboardAssets() {
         void Promise.all([fetchAssets(), fetchAssets({ scope: 'GLOBAL' })]).finally(() => setIsFetching(false));
     }, [fetchAssets]);
 
-    const [search, setSearch] = useState('');
-    const [activeTab, setActiveTab] = useState('stock');
+    const initialSearchParams = new URLSearchParams(location.search);
+    const [search, setSearch] = useState(initialSearchParams.get('search') || '');
+    const [activeTab, setActiveTab] = useState(initialSearchParams.get('tab') === 'videos' ? 'videos' : 'stock');
     const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
     const [urlInput, setUrlInput] = useState('');
     const [urlName, setUrlName] = useState('');
@@ -72,9 +74,10 @@ export default function DashboardAssets() {
     const allAssets = getScopedAssets();
     const assets = isAdmin ? allAssets : filterAssetsVisibleToUsers(allAssets);
 
-    const filteredMedia = assets.filter(item =>
-        item.name.toLowerCase().includes(search.toLowerCase())
-    );
+    const filteredMedia = assets.filter(item => {
+        const matchesTabType = activeTab !== 'videos' || item.type === 'video';
+        return matchesTabType && matchesAssetSearch(item, search);
+    });
 
     const [manageOpen, setManageOpen] = useState(false);
     const [draftVisibleIds, setDraftVisibleIds] = useState<Set<string>>(new Set());

@@ -24,6 +24,7 @@ import useBuilderStore from '@/store/useBuilderStore';
 import { publishService } from '@/services/publishService';
 import { cn } from '@/lib/utils';
 import { SITE_HOST } from '@/api/client';
+import { extractApiErrorMessage } from '@/utils/errorUtils';
 const fieldClass =
   'h-11 border border-slate-200 bg-white text-sm text-[#0F172A] shadow-none hover:border-slate-300 hover:shadow-none focus:border-[#0F172A] focus:shadow-none focus-visible:border-[#0F172A] focus-visible:ring-2 focus-visible:ring-[#0F172A]/15';
 
@@ -38,6 +39,7 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
   const [savedSubdomain, setSavedSubdomain] = useState('');
   const [dialogMode, setDialogMode] = useState<'publish' | 'update'>('publish');
   const [statusNote, setStatusNote] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [editingSubdomain, setEditingSubdomain] = useState(false);
   const initializedFor = useRef<string | null>(null);
   const subdomainInputRef = useRef<HTMLInputElement>(null);
@@ -78,15 +80,33 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
     setCustomDomain(initialCustomDomain);
     setPublishedUrl(website.publishedUrl || '');
     setStatusNote('');
+    setErrorMessage('');
     setEditingSubdomain(false);
     setDialogMode(alreadyLive ? 'update' : 'publish');
     setPublishStatus(alreadyLive ? 'success' : 'idle');
   }, [open, website]);
 
+  const handleSubdomainChange = (val: string) => {
+    setSubdomain(val);
+    if (publishStatus === 'error') {
+      setPublishStatus('idle');
+      setErrorMessage('');
+    }
+  };
+
+  const handleCustomDomainChange = (val: string) => {
+    setCustomDomain(val);
+    if (publishStatus === 'error') {
+      setPublishStatus('idle');
+      setErrorMessage('');
+    }
+  };
+
   const handlePublish = async () => {
     setIsPublishing(true);
     setPublishStatus('publishing');
     setSaveStatus('publishing');
+    setErrorMessage('');
 
     try {
       const response = await publishService.publishWebsite({
@@ -101,7 +121,10 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
         setPublishedUrl(response.url);
         setSavedSubdomain(subdomain);
         setEditingSubdomain(false);
-        setStatusNote(isUpdate ? 'Subdomain updated.' : 'Website published successfully!');
+        const note = isUpdate
+          ? (subdomainChanged ? 'Subdomain updated & site published!' : 'Website updated successfully!')
+          : 'Website published successfully!';
+        setStatusNote(note);
         updateWebsite(websiteId, {
           status: 'Published',
           publishedUrl: response.url,
@@ -111,10 +134,16 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
       } else {
         setPublishStatus('error');
         setSaveStatus('publish-error');
+        setErrorMessage(
+          response.message ||
+            (isUpdate ? 'Could not update the website. Try again.' : 'Publishing failed. Try again.')
+        );
       }
-    } catch (error) {
+    } catch (error: any) {
       setPublishStatus('error');
       setSaveStatus('publish-error');
+      const fallback = isUpdate ? 'Could not update the website. Try again.' : 'Publishing failed. Try again.';
+      setErrorMessage(extractApiErrorMessage(error, fallback));
       console.error('Publishing failed:', error);
     } finally {
       setIsPublishing(false);
@@ -138,12 +167,12 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
         <DialogHeader className="shrink-0 space-y-0 border-b border-slate-100 px-5 py-4 pr-12 sm:px-6">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0F172A] text-white">
-              {isUpdate ? <Globe className="h-5 w-5" /> : <Rocket className="h-5 w-5" />}
+              {isUpdate ? (subdomainChanged ? <Globe className="h-5 w-5" /> : <Rocket className="h-5 w-5" />) : <Rocket className="h-5 w-5" />}
             </div>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <DialogTitle className="text-base font-semibold text-[#0F172A] sm:text-lg">
-                  {isUpdate ? 'Update subdomain' : 'Publish website'}
+                  {isUpdate ? (subdomainChanged ? 'Update subdomain' : 'Update website') : 'Publish website'}
                 </DialogTitle>
                 {isUpdate && (
                   <Badge className="border-transparent bg-emerald-50 text-emerald-700 hover:bg-emerald-50">
@@ -152,7 +181,9 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
                 )}
               </div>
               <DialogDescription className="mt-0.5 text-sm text-slate-500">
-                {isUpdate ? 'Your site is live. Change the address when you need to.' : 'Choose an address and publish for the first time.'}
+                {isUpdate
+                  ? 'Your site is live. Publish your latest changes or update the address.'
+                  : 'Choose an address and publish for the first time.'}
               </DialogDescription>
             </div>
           </div>
@@ -162,14 +193,16 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
           {publishStatus === 'error' && (
             <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-sm text-rose-700">
               <AlertCircle className="h-4 w-4 shrink-0" />
-              {isUpdate ? 'Could not update the subdomain. Try again.' : 'Publishing failed. Try again.'}
+              <span>{errorMessage || (isUpdate ? 'Could not update the website. Try again.' : 'Publishing failed. Try again.')}</span>
             </div>
           )}
 
           {publishStatus === 'publishing' && (
             <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-600">
               <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
-              {isUpdate ? 'Updating subdomain…' : 'Publishing your website…'}
+              {isUpdate
+                ? (subdomainChanged ? 'Updating subdomain & publishing…' : 'Publishing latest changes to live site…')
+                : 'Publishing your website…'}
             </div>
           )}
 
@@ -222,11 +255,12 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
                   value={subdomain}
                   readOnly={subdomainLocked}
                   tabIndex={subdomainLocked ? -1 : 0}
-                  onChange={(e) => setSubdomain(e.target.value)}
+                  onChange={(e) => handleSubdomainChange(e.target.value)}
                   className={cn(
                     fieldClass,
                     'min-w-0 flex-1 rounded-lg',
                     subdomainLocked && 'pointer-events-none bg-slate-50 text-slate-600',
+                    publishStatus === 'error' && errorMessage.toLowerCase().includes('subdomain') && 'border-rose-400 focus:border-rose-500 focus-visible:ring-rose-500/15',
                   )}
                 />
                 <div className="flex h-11 shrink-0 items-center rounded-lg border border-slate-200 bg-slate-50 px-3">
@@ -263,8 +297,10 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
                 {isUpdate && editingSubdomain && subdomainChanged && (
                   <>Moves from <span className="font-mono text-[#0F172A]">{liveHost}</span> to <span className="font-mono text-[#0F172A]">{nextHost}</span>.</>
                 )}
-                {isUpdate && editingSubdomain && !subdomainChanged && 'Type a new name, then save it below.'}
-                {isUpdate && !editingSubdomain && 'Click Update to edit this address. Hosting and SSL stay included.'}
+                {isUpdate && editingSubdomain && !subdomainChanged && 'Type a new name, then click Update Domain & Publish below.'}
+                {isUpdate && !editingSubdomain && (
+                  <>Your website is live at <span className="font-mono text-[#0F172A]">{liveHost}</span>. Click Update to edit address, or Update Website below to publish changes.</>
+                )}
                 {!isUpdate && (
                   <>Free hosting and SSL. It will be live at <span className="font-mono text-[#0F172A]">{nextHost}</span>.</>
                 )}
@@ -279,8 +315,11 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
                 id="custom-domain"
                 placeholder="www.yourdomain.com"
                 value={customDomain}
-                onChange={(e) => setCustomDomain(e.target.value)}
-                className={fieldClass}
+                onChange={(e) => handleCustomDomainChange(e.target.value)}
+                className={cn(
+                  fieldClass,
+                  publishStatus === 'error' && errorMessage.toLowerCase().includes('domain') && !errorMessage.toLowerCase().includes('subdomain') && 'border-rose-400 focus:border-rose-500 focus-visible:ring-rose-500/15',
+                )}
               />
               <p className="text-xs leading-5 text-slate-500">
                 Point your domain at Web Studio after publishing. SSL is included.
@@ -306,18 +345,18 @@ export function PublishDialog({ open, onOpenChange, websiteId }) {
           </Button>
           <Button
             onClick={handlePublish}
-            disabled={isPublishing || (isUpdate ? !subdomainChanged && !customDomainChanged : !subdomain && !customDomain)}
+            disabled={isPublishing || (!subdomain?.trim() && !customDomain?.trim())}
             className="h-10 w-full bg-[#0F172A] text-white hover:bg-[#1e293b] sm:w-auto"
           >
             {isPublishing ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {isUpdate ? 'Updating...' : 'Publishing...'}
+                {isUpdate ? (subdomainChanged ? 'Updating domain…' : 'Updating website…') : 'Publishing…'}
               </>
             ) : isUpdate ? (
               <>
-                <Globe className="mr-2 h-4 w-4" />
-                Update Subdomain
+                {subdomainChanged ? <Globe className="mr-2 h-4 w-4" /> : <Rocket className="mr-2 h-4 w-4" />}
+                {subdomainChanged ? 'Update Domain & Publish' : 'Update Website'}
               </>
             ) : (
               <>

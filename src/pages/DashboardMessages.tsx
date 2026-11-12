@@ -12,6 +12,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import formsApi from '@/api/forms';
+import messagesApi from '@/api/messages';
 import websiteApi from '@/api/website';
 import { DashboardPageShell, dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass } from '@/components/dashboard/DashboardPageShell';
 import Loading from '@/components/Common/LoadingUI';
@@ -64,7 +65,7 @@ export default function DashboardMessages() {
                 limit: 50
             };
             const [messagesRes, statsRes] = await Promise.all([
-                formsApi.getUserSubmissions(params),
+                messagesApi.getMessages(params),
                 formsApi.getStats({ websiteId: params.websiteId })
             ]);
 

@@ -1,6 +1,6 @@
 import apiClient from './client';
 
-function mapSubmission(raw) {
+export function mapSubmission(raw) {
   if (!raw || typeof raw !== 'object') return raw;
   const isRead = raw.is_read ?? raw.isRead ?? (raw.status === 'read' || raw.status === 'replied');
   const status = raw.status || (isRead ? 'read' : 'unread');

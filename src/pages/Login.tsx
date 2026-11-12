@@ -8,6 +8,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { loginUser, registerUser, forgotPassword, googleLogin } from "../api/auth";
 import {
   getDashboardPath,
+  getStoredUser,
   setStoredUser,
   validateSession,
 } from "@/lib/authSession";
@@ -331,7 +332,7 @@ export default function LoginSignup() {
   const [isSignup, setIsSignup] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [isCheckingSession, setIsCheckingSession] = useState(() => Boolean(getStoredUser()));
   const [isLoadingLogin, setIsLoadingLogin] = useState(false);
   const [isLoadingSignup, setIsLoadingSignup] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -352,6 +353,11 @@ export default function LoginSignup() {
     if (savedEmail) {
       setLoginData((prev) => ({ ...prev, email: savedEmail }));
       setRememberMe(true);
+    }
+
+    if (!getStoredUser()) {
+      setIsCheckingSession(false);
+      return;
     }
 
     void validateSession().then(({ valid, user }) => {

@@ -6,7 +6,7 @@ import Footer from "./Footer";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/Common/BrandLogo";
 import Loading from "@/components/Common/LoadingUI";
-import { getDashboardPath, validateSession } from "@/lib/authSession";
+import { getDashboardPath, getStoredUser, validateSession } from "@/lib/authSession";
 import FeaturesCards from "@/components/ui/feature-shader-cards";
 import ProductVideo from "@/components/ui/productvideo";
 import TemplatesScroll from "@/components/landing/TemplatesScroll";
@@ -170,7 +170,7 @@ export default function LandingPage() {
   const navigate = useNavigate();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [isCheckingSession, setIsCheckingSession] = useState(() => Boolean(getStoredUser()));
 
   const { setTheme, isDark } = useTheme();
   const tiltX = useMotionValue(0);
@@ -185,6 +185,10 @@ export default function LandingPage() {
 
   // If session cookie is still valid, go straight to the dashboard
   useEffect(() => {
+    if (!getStoredUser()) {
+      setIsCheckingSession(false);
+      return;
+    }
     void validateSession().then(({ valid, user }) => {
       if (valid && user) {
         navigate(getDashboardPath(user), { replace: true });
@@ -223,7 +227,7 @@ export default function LandingPage() {
         >
           <Link to="/" className="flex min-w-0 shrink items-center cursor-pointer group pointer-events-auto">
             <BrandLogo
-              imgClassName="h-7 w-7 sm:h-8 sm:w-8 transition-transform duration-300 group-hover:scale-110"
+              imgClassName="h-12 w-12 sm:h-14 sm:w-14 transition-transform duration-300 group-hover:scale-110"
             />
           </Link>
 

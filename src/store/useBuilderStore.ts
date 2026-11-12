@@ -96,6 +96,9 @@ export interface Asset {
     name: string;
     type: 'image' | 'video' | 'file';
     url: string;
+    filename?: string;
+    description?: string;
+    tags?: string[] | string;
     size?: string;
     date: string;
     scope?: 'GLOBAL' | 'WEBSITE' | 'USER';
@@ -117,6 +120,9 @@ function normalizeAsset(raw: any, uploadScope: AssetScope = {}): Asset {
         name: raw.name,
         type: raw.type,
         url: raw.url,
+        filename: raw.filename,
+        description: raw.description,
+        tags: raw.tags,
         size: raw.size,
         date: raw.date ?? raw.created_at ?? raw.createdAt ?? new Date().toISOString(),
         scope: typeof raw.scope === 'string' ? raw.scope.toUpperCase() : raw.scope,
@@ -1129,21 +1135,40 @@ const useBuilderStore = create<BuilderStore>()(
 
             importStockAsset: async (item, scope = {}) => {
                 try {
-                    const { default: assetApi } = await import('../api/assets');
+                    const { default: assetApi, isWebsiteMissingError } = await import('../api/assets');
+                    const payload = {
+                        name: item.name,
+                        url: item.url,
+                        media_type: item.media === 'video' ? 'video' : 'photo',
+                        type: item.media === 'video' ? 'video' : 'photo',
+                        provider: item.provider,
+                        provider_id: item.providerId,
+                    };
+
+                    const importWithScope = async (nextScope: AssetScope) => {
+                        try {
+                            return await assetApi.importStock(payload, nextScope);
+                        } catch (stockError) {
+                            // Older backends may only expose import-url for remote media.
+                            return await assetApi.importAssetFromUrl({ name: item.name, url: item.url }, nextScope);
+                        }
+                    };
+
+                    let usedScope: AssetScope = scope;
                     let response;
                     try {
-                        response = await assetApi.importStock({
-                            name: item.name,
-                            url: item.url,
-                            media_type: item.media === 'video' ? 'video' : 'photo',
-                            type: item.media === 'video' ? 'video' : 'photo',
-                            provider: item.provider,
-                            provider_id: item.providerId,
-                        }, scope);
-                    } catch {
-                        response = await assetApi.importAssetFromUrl({ name: item.name, url: item.url }, scope);
+                        response = await importWithScope(scope);
+                    } catch (primaryError) {
+                        // Stock import sometimes rejects website scope; personal library still works.
+                        if (scope.websiteId && isWebsiteMissingError(primaryError)) {
+                            usedScope = { scope: 'USER' };
+                            response = await importWithScope(usedScope);
+                        } else {
+                            throw primaryError;
+                        }
                     }
-                    const asset = attachCurrentOwner(normalizeAsset(response.data.asset || response.data, scope));
+
+                    const asset = attachCurrentOwner(normalizeAsset(response.data.asset || response.data, usedScope));
 
                     if (scope.websiteId) {
                         set((state) => ({
@@ -1153,7 +1178,8 @@ const useBuilderStore = create<BuilderStore>()(
                                     asset,
                                     ...(state.websiteAssetsByWebsiteId[scope.websiteId as string] || []).filter((row) => row.id !== asset.id),
                                 ],
-                            }
+                            },
+                            globalAssets: [asset, ...state.globalAssets.filter((row) => row.id !== asset.id)],
                         }));
                         return asset;
                     }

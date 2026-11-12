@@ -35,6 +35,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { dashboardSearchInputClass } from '@/components/dashboard/DashboardPageShell';
 import { cn } from '@/lib/utils';
+import { parseStockSearchQuery } from '@/lib/stockSearch';
 
 const PAGE_SIZE = 20;
 
@@ -198,11 +199,11 @@ export function PexelsStockSection({
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadLockRef = useRef(false);
   const isPanel = layout === 'panel';
-  const term = query.trim();
+  const { requestsVideos, term } = parseStockSearchQuery(query);
   const searchQuery = [term, category].filter(Boolean).join(' ');
-  const isVideo = mediaType === 'videos';
+  const isVideo = requestsVideos || mediaType === 'videos';
   const hasFilters = Boolean(orientation || size || (!isPanel && !isVideo && color));
-  const filterKey = `${mediaType}|${searchQuery}|${orientation}|${size}|${isPanel || isVideo ? '' : color}`;
+  const filterKey = `${isVideo ? 'videos' : mediaType}|${searchQuery}|${orientation}|${size}|${isPanel || isVideo ? '' : color}`;
 
   const fetchPage = async (nextPage: number) => {
     if (isVideo) {
@@ -353,7 +354,7 @@ export function PexelsStockSection({
             <p className="mb-1.5 text-[11px] font-medium text-slate-400">Type</p>
             <div className={filterScrollClass}>
               {MEDIA_TYPES.map((option) => (
-                <button key={option.id} type="button" onClick={() => setMediaType(option.id)} className={pillClass(mediaType === option.id)}>
+                <button key={option.id} type="button" onClick={() => setMediaType(option.id)} className={pillClass((isVideo ? 'videos' : mediaType) === option.id)}>
                   {option.label}
                 </button>
               ))}

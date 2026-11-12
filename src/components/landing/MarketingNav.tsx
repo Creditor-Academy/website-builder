@@ -38,7 +38,7 @@ export default function MarketingNav({
           )}
         >
           <Link to="/" className="group pointer-events-auto flex min-w-0 shrink cursor-pointer items-center">
-            <BrandLogo imgClassName="h-7 w-7 transition-transform duration-300 group-hover:scale-110 sm:h-8 sm:w-8" />
+            <BrandLogo imgClassName="h-10 w-10 transition-transform duration-300 group-hover:scale-110" />
           </Link>
 
           <div className="hidden items-center gap-5 text-sm font-medium lg:flex xl:gap-8">
