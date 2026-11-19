@@ -157,8 +157,12 @@ export default function Contact() {
     )}>
       <Helmet>
         <title>Contact Us - Web Studio</title>
+        <meta
+          name="description"
+          content="Contact Athena Web Studio for assistance, website-building support, inquiries, and information about creating and managing your professional website."
+        />
+        <meta name="keywords" content="contact Web Studio" />
         <link rel="canonical" href="https://webstudio.lmsathena.com/contact/" />
-        <meta name="description" content="Get in touch with the Web Studio team for support, partnerships, or any questions." />
       </Helmet>
 
       {/* BACKGROUND IMAGE OVERLAY */}

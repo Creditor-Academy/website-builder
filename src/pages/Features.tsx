@@ -60,6 +60,11 @@ export default function FeaturesPage() {
     >
       <Helmet>
         <title>Features — Web Studio</title>
+        <meta
+          name="description"
+          content="Explore Web Studio features to build, customize, and manage professional websites with powerful tools, flexible design options, and easy website creation."
+        />
+        <meta name="keywords" content="website builder features" />
         <link rel="canonical" href="https://webstudio.lmsathena.com/features/" />
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"

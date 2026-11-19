@@ -214,6 +214,10 @@ export default function LandingPage() {
     >
       <Helmet>
         <title>Athena Web Studio – AI-Powered Website Creation Platform</title>
+        <meta name="description" content="Create a professional website with Athena Web Studio. Explore easy website building, customizable designs, and templates to grow your online presence." />
+        <meta name="keywords" content="website builder" />
+        <meta property="og:title" content="Athena Web Studio – AI-Powered Website Creation Platform" />
+        <meta property="og:description" content="Create a professional website with Athena Web Studio. Explore easy website building, customizable designs, and templates to grow your online presence." />
         <link rel="canonical" href="https://webstudio.lmsathena.com/" />
       </Helmet>
       {/* ================= NAVBAR ================= */}
