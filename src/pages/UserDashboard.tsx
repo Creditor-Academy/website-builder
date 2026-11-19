@@ -3,12 +3,20 @@ import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import type { DashboardOutletContext } from '@/layouts/DashboardLayout';
 import {
     Plus, Globe, Trash2, Search, MessageSquare, Pencil,
-    ArrowRight, LayoutTemplate, ListFilter, CheckCircle, Loader2, AlertTriangle
+    ArrowRight, LayoutTemplate, ListFilter, CheckCircle, Loader2, AlertTriangle,
+    Copy, MoreVertical
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogFooter } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -50,7 +58,7 @@ import templateApi from '@/api/templates';
 import { updateUserProfile } from "../api/user";
 import { parseStockSearchQuery } from '@/lib/stockSearch';
 
-const WebsiteCard = ({ site, onDelete, onEdit, onViewMessages, dbTemplates = [] }: any) => {
+const WebsiteCard = ({ site, onDelete, onEdit, onViewMessages, onRename, onDuplicate, isDuplicating, dbTemplates = [] }: any) => {
     const activeTemplateId = site.templateId || site.sourceTemplateId || 'blank';
     const localTemplate = templatesList.find((t) => t.id === activeTemplateId);
     const dbTemplate = dbTemplates.find(
@@ -109,15 +117,41 @@ const WebsiteCard = ({ site, onDelete, onEdit, onViewMessages, dbTemplates = [] 
                         {visitUrl && (
                             <DashboardCardVisitAction href={visitUrl} />
                         )}
-                        <button
-                            type="button"
-                            title="Delete project"
-                            aria-label="Delete project"
-                            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded text-[#ba1a1a] transition-colors hover:text-[#93000a]"
-                            onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                        >
-                            <Trash2 className="h-4 w-4" strokeWidth={2} />
-                        </button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button
+                                    type="button"
+                                    title="More options"
+                                    aria-label="More options"
+                                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <MoreVertical className="h-4 w-4" />
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-44 rounded-xl p-1 bg-white border border-slate-200 shadow-xl">
+                                <DropdownMenuItem
+                                    onClick={(e) => { e.stopPropagation(); onRename?.(); }}
+                                    className="cursor-pointer gap-2 rounded-lg text-slate-700 hover:text-slate-900 focus:bg-slate-50"
+                                >
+                                    <Pencil className="h-4 w-4" /> Rename
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    disabled={isDuplicating}
+                                    onClick={(e) => { e.stopPropagation(); onDuplicate?.(); }}
+                                    className="cursor-pointer gap-2 rounded-lg text-slate-700 hover:text-slate-900 focus:bg-slate-50"
+                                >
+                                    {isDuplicating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Copy className="h-4 w-4" />} Duplicate
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                    onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                                    className="cursor-pointer gap-2 rounded-lg text-rose-600 hover:text-rose-700 focus:bg-rose-50 focus:text-rose-700"
+                                >
+                                    <Trash2 className="h-4 w-4" /> Delete
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </DashboardCardFooter>
             </DashboardCardBody>
@@ -163,6 +197,8 @@ const UserDashboard = () => {
     const fetchWebsites = useBuilderStore((state) => state.fetchWebsites);
     const createWebsite = useBuilderStore((state) => state.createWebsite);
     const deleteWebsite = useBuilderStore((state) => state.deleteWebsite);
+    const updateWebsite = useBuilderStore((state) => state.updateWebsite);
+    const duplicateWebsite = useBuilderStore((state) => state.duplicateWebsite);
     const user = (() => {
         try {
             return JSON.parse(localStorage.getItem("user") || 'null');
@@ -197,6 +233,10 @@ const UserDashboard = () => {
     const [isCreatingSite, setIsCreatingSite] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [renameTarget, setRenameTarget] = useState<any | null>(null);
+    const [renameName, setRenameName] = useState('');
+    const [isRenaming, setIsRenaming] = useState(false);
+    const [isDuplicating, setIsDuplicating] = useState<string | null>(null);
     const [isLoadingSites, setIsLoadingSites] = useState(true);
 
     // Γ£à Listen for userUpdated event (userName itself is kept in sync by DashboardLayout)
@@ -312,6 +352,42 @@ const UserDashboard = () => {
             });
         } finally {
             setIsDeleting(false);
+        }
+    };
+
+    const handleConfirmRename = async () => {
+        if (!renameTarget?.id || !renameName.trim() || isRenaming) return;
+        try {
+            setIsRenaming(true);
+            await updateWebsite(renameTarget.id, { name: renameName.trim() });
+            await fetchWebsites(undefined, isAdmin);
+            toast({ title: 'Project renamed', description: `Renamed to "${renameName.trim()}".` });
+            setRenameTarget(null);
+        } catch (err: any) {
+            toast({
+                title: 'Could not rename project',
+                description: err?.message || 'Please try again.',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsRenaming(false);
+        }
+    };
+
+    const handleDuplicate = async (site: any) => {
+        if (!site?.id || isDuplicating) return;
+        try {
+            setIsDuplicating(site.id);
+            await duplicateWebsite(site.id);
+            toast({ title: 'Project duplicated', description: `Created a copy of "${site.name}".` });
+        } catch (err: any) {
+            toast({
+                title: 'Could not duplicate project',
+                description: err?.message || 'Please try again.',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsDuplicating(null);
         }
     };
 
@@ -634,12 +710,66 @@ const UserDashboard = () => {
                             index={index}
                             dbTemplates={dbTemplates}
                             onDelete={() => setDeleteTarget(site)}
+                            onRename={() => { setRenameTarget(site); setRenameName(site.name); }}
+                            onDuplicate={() => void handleDuplicate(site)}
+                            isDuplicating={isDuplicating === site.id}
                             onEdit={() => navigate(`/builder/${site.id}`)}
                             onViewMessages={() => navigate(`/dashboard/messages?websiteId=${site.id}`)}
                         />
                     ))}
                 </div>
             )}
+
+            <Dialog open={!!renameTarget} onOpenChange={(open) => { if (!open && !isRenaming) setRenameTarget(null); }}>
+                <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl p-5 sm:p-6 bg-white border border-slate-200 shadow-xl">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-[#0F172A] text-lg font-semibold">
+                            <Pencil className="h-5 w-5 shrink-0 text-slate-700" />
+                            Rename project
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="py-4 space-y-2">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Project Name</label>
+                        <Input
+                            value={renameName}
+                            onChange={(e) => setRenameName(e.target.value)}
+                            placeholder="Enter project name"
+                            className="h-10 rounded-lg border-slate-200"
+                            autoFocus
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    void handleConfirmRename();
+                                }
+                            }}
+                        />
+                    </div>
+                    <DialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                        <Button
+                            variant="ghost"
+                            disabled={isRenaming}
+                            onClick={() => setRenameTarget(null)}
+                            className="w-full sm:w-auto"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={() => void handleConfirmRename()}
+                            disabled={isRenaming || !renameName.trim()}
+                            className="w-full bg-[#131924] text-white hover:bg-[#202838] sm:w-auto"
+                        >
+                            {isRenaming ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Renaming…
+                                </>
+                            ) : (
+                                'Save'
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open && !isDeleting) setDeleteTarget(null); }}>
                 <AlertDialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl p-5 sm:p-6">

@@ -85,6 +85,8 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
                 size="icon"
                 onClick={() => setLeftPanelVisible(!editor.showLeftPanel)}
                 className={iconBtnClass}
+                title="Toggle Sidebar"
+                aria-label="Toggle Sidebar"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
               </Button>
@@ -101,6 +103,8 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
                 size="icon"
                 onClick={() => setEditorState({ showRightPanel: !editor.showRightPanel })}
                 className={cn(iconBtnClass, 'hidden sm:inline-flex')}
+                title="Toggle Properties"
+                aria-label="Toggle Properties"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/></svg>
               </Button>
@@ -116,6 +120,8 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
                 size="icon"
                 onClick={goDashboard}
                 className={cn(iconBtnClass, 'hidden sm:inline-flex')}
+                title="Dashboard"
+                aria-label="Dashboard"
               >
                 <Home className="h-4 w-4" />
               </Button>
@@ -146,6 +152,8 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
                   onClick={undo}
                   disabled={!canUndo}
                   className="h-7 w-7 rounded-md text-white/70 hover:bg-white/10 hover:text-white disabled:text-white/25 sm:h-8 sm:w-8"
+                  title="Undo"
+                  aria-label="Undo"
                 >
                   <Undo2 className="h-4 w-4" />
                 </Button>
@@ -160,6 +168,8 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
                   onClick={redo}
                   disabled={!canRedo}
                   className="h-7 w-7 rounded-md text-white/70 hover:bg-white/10 hover:text-white disabled:text-white/25 sm:h-8 sm:w-8"
+                  title="Redo"
+                  aria-label="Redo"
                 >
                   <Redo2 className="h-4 w-4" />
                 </Button>
@@ -180,6 +190,8 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
                     variant="ghost"
                     size="icon"
                     onClick={() => setDevice(device)}
+                    title={device.charAt(0).toUpperCase() + device.slice(1)}
+                    aria-label={device.charAt(0).toUpperCase() + device.slice(1)}
                     className={cn(
                       'h-7 w-7 rounded-md text-white/70 hover:bg-white/10 hover:text-white sm:h-8 sm:w-8',
                       editor.device === device && 'bg-white/15 text-white',
@@ -194,31 +206,49 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
           </div>
 
           <div className="hidden items-center rounded-lg bg-white/10 p-0.5 lg:flex">
-            <Button variant="ghost" size="icon" className="h-7 w-7 text-white/70 hover:bg-white/10 hover:text-white sm:h-8 sm:w-8" onClick={() => {
-              const current = editor.zoom || 100;
-              const prev = [...ZOOM_PRESETS].reverse().find((value) => value < current) ?? 25;
-              setZoom(prev);
-            }}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-white/70 hover:bg-white/10 hover:text-white sm:h-8 sm:w-8"
+              title="Zoom out"
+              aria-label="Zoom out"
+              onClick={() => {
+                const current = editor.zoom || 100;
+                const prev = [...ZOOM_PRESETS].reverse().find((value) => value < current) ?? 25;
+                setZoom(prev);
+              }}
+            >
               <Minus className="h-3.5 w-3.5" />
             </Button>
             <button
               type="button"
               className="min-w-[3rem] text-center text-[11px] font-semibold text-white/80"
+              title="Reset Zoom to 100%"
+              aria-label="Reset Zoom to 100%"
               onClick={() => setZoom(100)}
             >
               {Math.round(editor.zoom || 100)}%
             </button>
-            <Button variant="ghost" size="icon" className="h-7 w-7 text-white/70 hover:bg-white/10 hover:text-white sm:h-8 sm:w-8" onClick={() => {
-              const current = editor.zoom || 100;
-              const next = ZOOM_PRESETS.find((value) => value > current) ?? 200;
-              setZoom(next);
-            }}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-white/70 hover:bg-white/10 hover:text-white sm:h-8 sm:w-8"
+              title="Zoom in"
+              aria-label="Zoom in"
+              onClick={() => {
+                const current = editor.zoom || 100;
+                const next = ZOOM_PRESETS.find((value) => value > current) ?? 200;
+                setZoom(next);
+              }}
+            >
               <Plus className="h-3.5 w-3.5" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               className="h-7 w-7 text-white/70 hover:bg-white/10 hover:text-white sm:h-8 sm:w-8"
+              title="Fit to screen"
+              aria-label="Fit to screen"
               onClick={() => {
                 const fit = document.querySelector<HTMLButtonElement>('[data-canvas-fit]');
                 if (fit) {
@@ -241,6 +271,8 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
                 variant="ghost"
                 size="icon"
                 onClick={() => setPreviewMode(!editor.previewMode)}
+                title="Preview Mode"
+                aria-label="Preview Mode"
                 className={cn(
                   iconBtnClass,
                   editor.previewMode && 'bg-white/15 text-white',
@@ -258,6 +290,8 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
                 variant="ghost"
                 size="icon"
                 onClick={handleExport}
+                title="Export JSON"
+                aria-label="Export JSON"
                 className={cn(iconBtnClass, 'hidden md:inline-flex')}
               >
                 <Download className="h-4 w-4" />
@@ -273,6 +307,8 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
                 size="icon"
                 id="tour-palette"
                 onClick={handleDesignTab}
+                title="Switch Palette"
+                aria-label="Switch Palette"
                 className={cn(iconBtnClass, 'hidden md:inline-flex')}
               >
                 <Palette className="h-4 w-4" />
@@ -288,6 +324,8 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
                 size="icon"
                 id="tour-global-fx"
                 onClick={handleDesignTab}
+                title="Global FX"
+                aria-label="Global FX"
                 className={cn(iconBtnClass, 'hidden lg:inline-flex')}
               >
                 <Share2 className="h-4 w-4" />
@@ -302,6 +340,8 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
                 variant="ghost"
                 size="icon"
                 onClick={startTour}
+                title="Start Tour"
+                aria-label="Start Tour"
                 className={cn(iconBtnClass, 'hidden lg:inline-flex')}
               >
                 <HelpCircle className="h-4 w-4" />
@@ -315,6 +355,7 @@ export function EditorToolbar({ websiteId = '', onTabChange = (_tab: string) => 
               <Button
                 variant="ghost"
                 size="icon"
+                title="More actions"
                 aria-label="More actions"
                 className={cn(iconBtnClass, 'lg:hidden')}
               >

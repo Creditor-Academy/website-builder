@@ -363,6 +363,7 @@ export function TextFormattingToolbar() {
           size="icon" 
           className="h-8 w-8 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg ml-1"
           title="Clear Formatting"
+          aria-label="Clear Formatting"
           onClick={() => {
             applyCommand('removeFormat');
             setFormats([]);
@@ -376,7 +377,12 @@ export function TextFormattingToolbar() {
         {/* Color Picker Popover embedded inside toolbar */}
         <Popover onOpenChange={(open) => { isInteractingRef.current = open; }}>
           <PopoverTrigger asChild>
-            <Button variant="ghost" className="h-8 px-2 bg-slate-50 hover:bg-slate-100 rounded-lg gap-2 cursor-pointer border border-transparent hover:border-slate-200 group">
+            <Button
+              variant="ghost"
+              className="h-8 px-2 bg-slate-50 hover:bg-slate-100 rounded-lg gap-2 cursor-pointer border border-transparent hover:border-slate-200 group"
+              title="Text Color"
+              aria-label="Text Color"
+            >
               <div className="w-4 h-4 rounded-full border border-slate-200 shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: selectedColor }} />
               <Palette className="w-3.5 h-3.5 text-slate-500" />
             </Button>
@@ -433,6 +439,7 @@ export function TextFormattingToolbar() {
             size="icon" 
             className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg ml-1"
             title="Delete Selected Text/Node"
+            aria-label="Delete Selected Text/Node"
             onClick={() => {
               restoreSelection();
               const selection = window.getSelection();

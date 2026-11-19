@@ -321,11 +321,15 @@ export function BlogListSection({ section, isSelected, isEditing, onContentChang
                     />
 
                     {/* Read more link */}
-                    <div style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      borderTop: '1px solid rgba(0,0,0,0.07)',
-                      paddingTop: 16,
-                    }}>
+                    <a
+                      href={post.url || '#'}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        borderTop: '1px solid rgba(0,0,0,0.07)',
+                        paddingTop: 16,
+                        textDecoration: 'none',
+                      }}
+                    >
                       <span style={{
                         fontFamily: "'Outfit', sans-serif",
                         fontSize: 11, fontWeight: 600,
@@ -337,7 +341,7 @@ export function BlogListSection({ section, isSelected, isEditing, onContentChang
                       <div className="bl-arrow">
                         <ArrowUpRight size={16} style={{ color: accent }} />
                       </div>
-                    </div>
+                    </a>
                   </div>
                 </article>
               );
@@ -785,11 +789,15 @@ export function BlogListSection({ section, isSelected, isEditing, onContentChang
                     />
 
                     {/* Read more link */}
-                    <div style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      borderTop: '1px solid rgba(0,0,0,0.07)',
-                      paddingTop: 16,
-                    }}>
+                    <a
+                      href={post.url || '#'}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        borderTop: '1px solid rgba(0,0,0,0.07)',
+                        paddingTop: 16,
+                        textDecoration: 'none',
+                      }}
+                    >
                       <span style={{
                         fontFamily: "'Outfit', sans-serif",
                         fontSize: 11, fontWeight: 600,
@@ -801,7 +809,7 @@ export function BlogListSection({ section, isSelected, isEditing, onContentChang
                       <div className="bl-arrow">
                         <ArrowUpRight size={16} style={{ color: accent }} />
                       </div>
-                    </div>
+                    </a>
                   </div>
                 </article>
               );

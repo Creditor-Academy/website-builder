@@ -213,7 +213,7 @@ export default function LandingPage() {
       )}
     >
       <Helmet>
-        <title>Web Studio</title>
+        <title>Athena Web Studio – AI-Powered Website Creation Platform</title>
         <link rel="canonical" href="https://webstudio.lmsathena.com/" />
       </Helmet>
       {/* ================= NAVBAR ================= */}

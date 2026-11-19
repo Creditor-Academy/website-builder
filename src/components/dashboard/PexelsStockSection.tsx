@@ -677,6 +677,7 @@ export function PexelsStockSection({
                       : { name: photoName(preview.photo), url: preview.photo.src.original || photoUrl(preview.photo), media: 'image' as const, provider: 'pexels', providerId: preview.photo.id };
                     if (!item.url) return;
                     void (onSaveToLibrary || onAddToLibrary)(item);
+                    setPreview(null);
                   }}
                 >
                   {importingId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
