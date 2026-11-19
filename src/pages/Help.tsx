@@ -7,6 +7,7 @@ const Help = () => {
     <>
       <Helmet>
         <title>Help - Web Studio</title>
+        <link rel="canonical" href="https://webstudio.lmsathena.com/help" />
         <meta name="description" content="Help center" />
       </Helmet>
       <WebsiteEditor initialPage={createHelpPage()} />

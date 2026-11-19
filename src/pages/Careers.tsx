@@ -7,6 +7,7 @@ const Careers = () => {
     <>
       <Helmet>
         <title>Careers - Web Studio</title>
+        <link rel="canonical" href="https://webstudio.lmsathena.com/careers" />
         <meta name="description" content="Careers" />
       </Helmet>
       <WebsiteEditor initialPage={createCareersPage()} />

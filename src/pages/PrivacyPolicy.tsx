@@ -77,6 +77,7 @@ export default function PrivacyPolicy() {
     >
       <Helmet>
         <title>Privacy Policy — Web Studio</title>
+        <link rel="canonical" href="https://webstudio.lmsathena.com/privacy-policy" />
       </Helmet>
 
       <MarketingNav isDark={isDark} setTheme={setTheme} />

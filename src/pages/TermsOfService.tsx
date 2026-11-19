@@ -85,6 +85,7 @@ export default function TermsOfService() {
     >
       <Helmet>
         <title>Terms of Service — Web Studio</title>
+        <link rel="canonical" href="https://webstudio.lmsathena.com/terms-of-service" />
       </Helmet>
 
       <motion.div

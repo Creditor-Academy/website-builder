@@ -7,6 +7,7 @@ const Start = () => {
     <>
       <Helmet>
         <title>Get Started - Web Studio</title>
+        <link rel="canonical" href="https://webstudio.lmsathena.com/start" />
         <meta name="description" content="Get started" />
       </Helmet>
       <WebsiteEditor initialPage={createStartPage()} />
