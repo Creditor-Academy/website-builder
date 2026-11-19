@@ -281,7 +281,9 @@ export function DesignSystemPanel() {
                             styles: {
                                 ...page.navbar.styles,
                                 backgroundColor: undefined,
-                                textColor: undefined
+                                textColor: undefined,
+                                buttonBg: undefined,
+                                buttonText: undefined
                             }
                         };
 

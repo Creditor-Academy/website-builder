@@ -25,6 +25,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import TemplateFormDialog from '@/components/dashboard/TemplateFormDialog';
 import { DashboardPageShell, dashboardFilterPillClass, dashboardSearchInputClass, dashboardFilterScrollClass, dashboardToolbarClass } from '@/components/dashboard/DashboardPageShell';
 import { dashboardHeroPrimaryClass, dashboardHeroSecondaryClass } from '@/components/dashboard/DashboardHeroHeader';
@@ -76,6 +83,8 @@ export default function DashboardTemplates() {
 
   // Creating state — tracks which template is being used
   const [creatingId, setCreatingId] = useState<string | null>(null);
+  const [selectedTemplateForUse, setSelectedTemplateForUse] = useState<any | null>(null);
+  const [siteNameInput, setSiteNameInput] = useState('');
 
   // Scope filter (admin only)
   const [scopeFilter, setScopeFilter] = useState<'all' | 'GLOBAL' | 'INSTITUTION'>('all');
@@ -154,12 +163,21 @@ export default function DashboardTemplates() {
   const trashedCount = useMemo(() => templates.filter(t => t.deletedAt).length, [templates]);
 
   // ─── Use template ─────────────────────────────────────────────────────────
-  const handleUseTemplate = async (template: any) => {
+  const handleOpenUseTemplate = (template: any) => {
     if (creatingId) return;
+    setSelectedTemplateForUse(template);
+    setSiteNameInput(`${template.name} Site`);
+  };
+
+  const handleConfirmUseTemplate = async () => {
+    if (!selectedTemplateForUse || !siteNameInput.trim() || creatingId) return;
+    const template = selectedTemplateForUse;
+    const siteName = siteNameInput.trim();
     const editorTab = window.open('about:blank', '_blank');
     try {
       setCreatingId(template.id);
-      const id = await createWebsite(`${template.name} Site`, template.id);
+      const id = await createWebsite(siteName, template.id);
+      setSelectedTemplateForUse(null);
       const builderUrl = `${window.location.origin}/builder/${id}`;
       if (editorTab) {
         editorTab.opener = null;
@@ -180,6 +198,10 @@ export default function DashboardTemplates() {
     } finally {
       setCreatingId(null);
     }
+  };
+
+  const handleUseTemplate = (template: any) => {
+    handleOpenUseTemplate(template);
   };
 
   const handlePreviewTemplate = (template: any) => {
@@ -506,6 +528,48 @@ export default function DashboardTemplates() {
           onSuccess={handleFormSuccess}
         />
       )}
+
+      <Dialog open={Boolean(selectedTemplateForUse)} onOpenChange={(open) => { if (!open && !creatingId) setSelectedTemplateForUse(null); }}>
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl p-5 sm:p-6">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold text-[#0F172A] sm:text-lg">
+              Create Website from Template
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-2">
+            <label className="text-xs font-semibold text-slate-700 block mb-1.5">Website Name</label>
+            <Input
+              value={siteNameInput}
+              onChange={(e) => setSiteNameInput(e.target.value)}
+              placeholder="e.g. My Portfolio"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && siteNameInput.trim()) {
+                  void handleConfirmUseTemplate();
+                }
+              }}
+            />
+          </div>
+          <DialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setSelectedTemplateForUse(null)}
+              disabled={Boolean(creatingId)}
+              className="mt-0 w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => void handleConfirmUseTemplate()}
+              disabled={!siteNameInput.trim() || Boolean(creatingId)}
+              className="w-full bg-[#0F172A] text-white hover:bg-slate-800 sm:w-auto"
+            >
+              {creatingId ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Create Website
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open && !isDeleting) setDeleteTarget(null); }}>
         <AlertDialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-2xl p-5 sm:p-6">

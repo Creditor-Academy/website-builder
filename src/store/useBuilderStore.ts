@@ -289,6 +289,7 @@ export interface BuilderStore {
     updateWebsite: (id: string, updates: Partial<Website>) => Promise<void>;
     selectWebsite: (id: string) => Promise<void>;
     deleteWebsite: (id: string) => Promise<void>;
+    duplicateWebsite: (id: string) => Promise<void>;
     restoreWebsite: (id: string) => Promise<void>;
     setActivePage: (pageId: string) => void;
     addPage: (pageData: Partial<Page>) => void;
@@ -763,6 +764,19 @@ const useBuilderStore = create<BuilderStore>()(
                 });
             },
 
+            duplicateWebsite: async (id: string) => {
+                if (USE_WEBSITE_API) {
+                    try {
+                        const { default: websiteApi } = await import('../api/website');
+                        await websiteApi.duplicateWebsite(id);
+                        await get().fetchWebsites();
+                    } catch (error) {
+                        console.error("Failed to duplicate website:", error);
+                        throw error;
+                    }
+                }
+            },
+
             restoreWebsite: async (id: string) => {
                 if (USE_WEBSITE_API) {
                     try {
@@ -789,22 +803,51 @@ const useBuilderStore = create<BuilderStore>()(
                 if (!website) return;
 
                 const source = website.pages.find((page) => page.id === get().activePageId) || website.pages[0];
+                const pageName = pageData.name || 'New Page';
+                const pageSlug = pageData.slug || `/${pageName.toLowerCase().replace(/\s+/g, '-')}`;
+
                 const newPage: Page = {
                     id: uuidv4(),
-                    name: pageData.name || 'New Page',
-                    slug: pageData.slug || '/new-page',
+                    name: pageName,
+                    slug: pageSlug,
                     sections: pageData.sections || [],
                     meta: {
-                        title: pageData.name || 'New Page',
+                        title: pageName,
                         description: ''
                     },
                     navbar: source?.navbar,
-                    footer: 'footer' in pageData ? pageData.footer : null,
+                    footer: 'footer' in pageData ? pageData.footer : (source?.footer || null),
                     globalStyles: source?.globalStyles,
                 };
 
-                const newPages = [...website.pages, newPage];
-                get().updateWebsitePages(newPages);
+                let updatedPages = [...website.pages, newPage];
+
+                // Auto-add new page to all navbars if not already present
+                if (source?.navbar?.links && Array.isArray(source.navbar.links)) {
+                    const hasLink = source.navbar.links.some((l: any) => (l.href || l.url) === pageSlug);
+                    if (!hasLink) {
+                        const newLink = { id: uuidv4(), label: pageName, href: pageSlug };
+                        const links = source.navbar.links;
+                        const insertIdx = links.length > 1 && links[links.length - 1]?.isButton
+                            ? links.length - 1
+                            : links.length;
+
+                        updatedPages = updatedPages.map(p => {
+                            if (!p.navbar) return p;
+                            const currentLinks = [...(p.navbar.links || [])];
+                            currentLinks.splice(insertIdx, 0, newLink);
+                            return {
+                                ...p,
+                                navbar: {
+                                    ...p.navbar,
+                                    links: currentLinks,
+                                },
+                            };
+                        });
+                    }
+                }
+
+                get().updateWebsitePages(updatedPages);
                 set({ activePageId: newPage.id });
                 get().saveActiveWebsite();
             },
@@ -1288,7 +1331,7 @@ const useBuilderStore = create<BuilderStore>()(
                         selectedPalette: palette.name
                     },
                     sections: (p.sections || []).map(clearSectionColors),
-                    navbar: { ...(p.navbar || {}), styles: { ...((p.navbar as any)?.styles || {}), backgroundColor: undefined, textColor: undefined } },
+                    navbar: { ...(p.navbar || {}), styles: { ...((p.navbar as any)?.styles || {}), backgroundColor: undefined, textColor: undefined, buttonBg: undefined, buttonText: undefined } },
                     footer: p.footer
                         ? { ...p.footer, styles: { ...((p.footer as any)?.styles || {}), backgroundColor: undefined, textColor: undefined } }
                         : p.footer,

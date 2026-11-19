@@ -202,6 +202,7 @@ export default function DashboardAssets() {
         setImportingStockId(item.url);
         try {
             await importAssetFromUrl(item.name, item.url, { scope: 'USER' });
+            setPreviewAsset(null);
             toast({
                 title: 'Saved to your assets',
                 description: 'This file is now in your personal library. Open Saved Assets to use it.',

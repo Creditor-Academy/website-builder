@@ -157,10 +157,25 @@ const STYLES = `
     align-items: center;
     justify-content: space-between;
   }
+  .nb-ham {
+    display: none;
+  }
+  #nb-mobile-menu {
+    display: none;
+  }
   @media (max-width: 768px) {
     .nb-inner {
       padding: 0 20px;
       height: 60px;
+    }
+    .nb-desktop-links {
+      display: none !important;
+    }
+    .nb-ham {
+      display: flex !important;
+    }
+    #nb-mobile-menu {
+      display: block !important;
     }
   }
 `;
@@ -528,7 +543,7 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selected
         {/* ── Mobile hamburger ──────────────────────────────────── */}
         <button
           className="nb-ham"
-          style={{ color: tc, display: 'none' }}
+          style={{ color: tc }}
           id="nb-hamburger"
           onClick={(e) => { e.stopPropagation(); setMobileMenuOpen((o) => !o); }}
           aria-label="Toggle menu"
@@ -552,7 +567,6 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selected
           maxHeight: mobileMenuOpen ? 600 : 0,
           opacity: mobileMenuOpen ? 1 : 0,
           transition: 'max-height 0.32s ease, opacity 0.25s ease',
-          display: 'none',
         }}
         id="nb-mobile-menu"
       >
