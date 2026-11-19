@@ -157,6 +157,7 @@ export default function Contact() {
     )}>
       <Helmet>
         <title>Contact Us - Web Studio</title>
+        <link rel="canonical" href="https://webstudio.lmsathena.com/contact" />
         <meta name="description" content="Get in touch with the Web Studio team for support, partnerships, or any questions." />
       </Helmet>
 

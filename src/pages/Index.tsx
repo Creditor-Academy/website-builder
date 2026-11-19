@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { ArrowRight, Menu, X, LayoutTemplate, Layers, Palette, Sun, Moon, Play, Check, Image as ImageIcon, Settings, Plus, MousePointer2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -211,6 +212,10 @@ export default function LandingPage() {
           : "bg-slate-50 text-slate-900 selection:bg-[#131924]/15 selection:text-black",
       )}
     >
+      <Helmet>
+        <title>Web Studio</title>
+        <link rel="canonical" href="https://webstudio.lmsathena.com/" />
+      </Helmet>
       {/* ================= NAVBAR ================= */}
       <nav className="pointer-events-none fixed inset-x-0 top-0 z-[100] pt-3 sm:pt-6">
         <div className={cn(pageFrameClass, "relative")}>

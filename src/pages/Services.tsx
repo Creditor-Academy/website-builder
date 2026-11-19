@@ -7,6 +7,7 @@ const Services = () => {
     <>
       <Helmet>
         <title>Services - Web Studio</title>
+        <link rel="canonical" href="https://webstudio.lmsathena.com/services" />
         <meta name="description" content="Services we provide" />
       </Helmet>
       <WebsiteEditor initialPage={createServicesPage()} />

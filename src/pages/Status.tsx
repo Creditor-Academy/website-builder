@@ -7,6 +7,7 @@ const Status = () => {
     <>
       <Helmet>
         <title>Status - Web Studio</title>
+        <link rel="canonical" href="https://webstudio.lmsathena.com/status" />
         <meta name="description" content="System status" />
       </Helmet>
       <WebsiteEditor initialPage={createStatusPage()} />

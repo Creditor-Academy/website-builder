@@ -7,6 +7,7 @@ const About = () => {
     <>
       <Helmet>
         <title>About - Web Studio</title>
+        <link rel="canonical" href="https://webstudio.lmsathena.com/about" />
         <meta name="description" content="About us" />
       </Helmet>
       <WebsiteEditor initialPage={createAboutPage()} />

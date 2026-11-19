@@ -170,6 +170,7 @@ const Resources = () => {
     >
       <Helmet>
         <title>Resources - Web Studio</title>
+        <link rel="canonical" href="https://webstudio.lmsathena.com/resources" />
         <meta
           name="description"
           content="Web Studio product guides: quickstart, elements catalog, assets, design system, preview, version history, and publishing."

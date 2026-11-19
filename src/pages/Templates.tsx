@@ -104,6 +104,7 @@ const Templates = () => {
     >
       <Helmet>
         <title>Templates - Web Studio</title>
+        <link rel="canonical" href="https://webstudio.lmsathena.com/templates" />
         <meta
           name="description"
           content="Start from a blank canvas or choose a pre-built Web Studio template, then customize and publish without writing code."

@@ -7,6 +7,7 @@ const Pricing = () => {
     <>
       <Helmet>
         <title>Pricing - Web Studio</title>
+        <link rel="canonical" href="https://webstudio.lmsathena.com/pricing" />
         <meta name="description" content="Pricing plans" />
       </Helmet>
       <WebsiteEditor initialPage={createPricingPage()} />
