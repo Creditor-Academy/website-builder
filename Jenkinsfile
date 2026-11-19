@@ -1,10 +1,16 @@
 pipeline {
     agent any
 
+    options {
+        timeout(time: 15, unit: 'MINUTES')
+        disableConcurrentBuilds()
+        timestamps()
+    }
+
     stages {
         stage('Install') {
             steps {
-                sh 'npm install'
+                sh 'npm ci'
             }
         }
 
@@ -19,23 +25,20 @@ pipeline {
                 sh '''
                     set -e
 
-                    # Create temporary deployment directory
-                    sudo mkdir -p /tmp/webstudio-deploy
+                    # Make sure build output exists before touching the live site
+                    if [ ! -d dist ] || [ -z "$(ls -A dist)" ]; then
+                        echo "dist/ is missing or empty. Aborting deploy."
+                        exit 1
+                    fi
 
-                    # Clean temporary directory
-                    sudo rm -rf /tmp/webstudio-deploy/*
-
-                    # Copy new build
-                    sudo cp -r dist/* /tmp/webstudio-deploy/
-
-                    # Replace old website
-                    sudo rm -rf /var/www/html/*
-                    sudo cp -r /tmp/webstudio-deploy/* /var/www/html/
+                    # Sync new build to live site (only changes files, removes old ones)
+                    sudo rsync -a --delete dist/ /var/www/html/
 
                     # Set ownership
                     sudo chown -R www-data:www-data /var/www/html
 
-                    # Reload Nginx
+                    # Test Nginx config, then reload
+                    sudo nginx -t
                     sudo systemctl reload nginx
                 '''
             }
@@ -48,7 +51,11 @@ pipeline {
         }
 
         failure {
-            echo 'Deployment Failed'
+            echo 'Deployment Failed. Check the stage logs above.'
+        }
+
+        always {
+            cleanWs()
         }
     }
 }
