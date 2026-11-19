@@ -3,7 +3,7 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Eye } from "lucide-react";
 import Loading from "@/components/Common/LoadingUI";
-import loginbg from "../assets/login.png";
+import loginbg from "../assets/login.webp";
 import { useGoogleLogin } from "@react-oauth/google";
 import { loginUser, registerUser, forgotPassword, googleLogin } from "../api/auth";
 import {
@@ -511,9 +511,17 @@ export default function LoginSignup() {
         initial={{ scale: 1 }}
         animate={{ scale: 1.05 }}
         transition={{ duration: 20, repeat: Infinity, repeatType: "mirror" }}
-        className="absolute inset-0 bg-no-repeat bg-center bg-cover opacity-90"
-        style={{ backgroundImage: `url(${loginbg})` }}
-      />
+        className="absolute inset-0 overflow-hidden"
+      >
+        <img
+          src={loginbg}
+          alt=""
+          width={1408}
+          height={768}
+          decoding="async"
+          className="h-full w-full object-cover opacity-90"
+        />
+      </motion.div>
       <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-slate-950/20" />
 
       <div className={`absolute top-8 left-8 right-8 z-50 flex items-center justify-between pointer-events-none ${isSignup ? "md:justify-end" : "md:justify-start"}`}>

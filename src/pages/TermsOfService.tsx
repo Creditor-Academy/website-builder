@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import {
   Scale,
   ShieldAlert,
@@ -83,16 +82,6 @@ export default function TermsOfService() {
         isDark ? "bg-slate-950 text-slate-100" : "bg-[#f8fafc] text-[#1b1b1d]",
       )}
     >
-      <Helmet>
-        <title>Terms of Service — Web Studio</title>
-        <meta
-          name="description"
-          content="Review Web Studio's Terms of Service to understand the rules, conditions, and guidelines for using our website-building platform and services."
-        />
-        <meta name="keywords" content="Web Studio terms of service" />
-        <link rel="canonical" href="https://webstudio.lmsathena.com/terms-of-service" />
-      </Helmet>
-
       <motion.div
         className="fixed left-0 right-0 top-0 z-[110] h-1 origin-left bg-sky-500"
         style={{ scaleX }}
