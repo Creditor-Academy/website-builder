@@ -539,7 +539,10 @@ export function DashboardSidebar({
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = React.useState(() => {
     try {
-      return localStorage.getItem("buildora-sidebar-collapsed") === "1";
+      return (
+        localStorage.getItem("webstudio-sidebar-collapsed") === "1" ||
+        localStorage.getItem("buildora-sidebar-collapsed") === "1"
+      );
     } catch {
       return false;
     }
@@ -549,7 +552,7 @@ export function DashboardSidebar({
     setCollapsed((prev) => {
       const next = !prev;
       try {
-        localStorage.setItem("buildora-sidebar-collapsed", next ? "1" : "0");
+        localStorage.setItem("webstudio-sidebar-collapsed", next ? "1" : "0");
       } catch { /* ignore */ }
       return next;
     });

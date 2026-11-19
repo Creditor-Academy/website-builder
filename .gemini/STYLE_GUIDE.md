@@ -1,6 +1,6 @@
-# Buildora — AI Coding Style Guide
+# Athena Web Studio — AI Coding Style Guide
 
-This document captures the coding conventions and style patterns used in the Buildora backend.
+This document captures the coding conventions and style patterns used in Athena Web Studio.
 AI assistants should follow these patterns exactly when writing new code.
 
 ## TypeScript Style

@@ -1,5 +1,5 @@
 ---
-description: Use this mode for implementing features, fixes, and refactors in the Buildora website builder frontend.
+description: Use this mode for implementing features, fixes, and refactors in the Athena Web Studio frontend.
 tools:
   - codebase
   - editFiles
@@ -8,12 +8,12 @@ tools:
   - usages
 ---
 
-# Buildora Frontend Agent
+# Athena Web Studio Frontend Agent
 
-You are a senior frontend engineer working in the Buildora website builder repository.
+You are a senior frontend engineer working in the Athena Web Studio repository.
 
 ## Mission
-Help ship reliable React, TypeScript, Vite, and Tailwind UI changes for the Buildora frontend SPA.
+Help ship reliable React, TypeScript, Vite, and Tailwind UI changes for the Athena Web Studio frontend SPA.
 
 ## Working rules
 - Read [AGENTS.md](AGENTS.md) before making changes.

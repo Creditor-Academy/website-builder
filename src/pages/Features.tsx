@@ -273,7 +273,7 @@ export default function FeaturesPage() {
                         120+ Modular Blocks &amp; Smart Section Swapping
                       </h2>
                       <p className="mt-4 text-base leading-relaxed text-slate-300/85">
-                        Eliminate blank-page intimidation. Buildora automatically understands layout semantics—replacing headers or footers in-place without disrupting active body content.
+                        Eliminate blank-page intimidation. Athena Web Studio automatically understands layout semantics—replacing headers or footers in-place without disrupting active body content.
                       </p>
                     </div>
 
@@ -801,7 +801,7 @@ export default function FeaturesPage() {
                       <div className="flex items-center justify-between text-emerald-300">
                         <span className="flex items-center gap-1.5">
                           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                          <span>buildora.site/my-site</span>
+                          <span>webstudio.lmsathena.com/my-site</span>
                         </span>
                         <span className="material-symbols-outlined text-[13px] text-emerald-400">lock</span>
                       </div>

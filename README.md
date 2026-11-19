@@ -1,11 +1,11 @@
-# 🏗️ Buildora (Athena) - Frontend Application
+# 🏗️ Athena Web Studio - Frontend Application
 
 ![React](https://img.shields.io/badge/React-18.x-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-5.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-Welcome to the **Frontend Repository** for **Buildora** (codename _Athena_), a multi-tenant SaaS website builder platform. This application allows institutions, universities, and individuals to build, publish, and manage professional websites seamlessly without writing a single line of code.
+Welcome to the **Frontend Repository** for **Athena Web Studio**, a multi-tenant SaaS website builder platform. This application allows institutions, universities, and individuals to build, publish, and manage professional websites seamlessly without writing a single line of code.
 
 ---
 

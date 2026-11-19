@@ -1,6 +1,7 @@
 import { getStoredUser } from '@/lib/authSession';
 
-const STORAGE_KEY = 'buildora-user-visible-asset-ids';
+const STORAGE_KEY = 'webstudio-user-visible-asset-ids';
+const LEGACY_STORAGE_KEY = 'buildora-user-visible-asset-ids';
 const ADMIN_ROLES = ['ADMIN', 'SUPER_ADMIN', 'INSTITUTION_ADMIN'];
 
 export type AssetVisibilityMeta = {
@@ -14,7 +15,7 @@ export type AssetVisibilityMeta = {
 
 export function getUserVisibleAssetIds(): string[] | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed.filter((id) => typeof id === 'string') : null;

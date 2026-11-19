@@ -1,11 +1,11 @@
 ---
 name: buildora-frontend
-description: Repo-specific agent for the Buildora website builder frontend.
+description: Repo-specific agent for the Athena Web Studio frontend.
 ---
 
-# Buildora Frontend Agent
+# Athena Web Studio Frontend Agent
 
-Use this agent for frontend implementation work in the Buildora website builder repository.
+Use this agent for frontend implementation work in the Athena Web Studio repository.
 
 Responsibilities:
 - Implement React and TypeScript features in the SPA.

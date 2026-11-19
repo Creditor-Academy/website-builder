@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 
-const STORAGE_KEY = 'buildora-theme';
+const STORAGE_KEY = 'webstudio-theme';
+const LEGACY_STORAGE_KEY = 'buildora-theme';
 
 function applyTheme(theme: 'dark' | 'light') {
   const root = document.documentElement;
@@ -13,7 +14,7 @@ function applyTheme(theme: 'dark' | 'light') {
 
 function getInitialTheme(): 'dark' | 'light' {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
     if (saved === 'dark' || saved === 'light') {
       // Apply immediately before first paint to avoid flash
       applyTheme(saved);
