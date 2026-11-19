@@ -85,6 +85,11 @@ export default function TermsOfService() {
     >
       <Helmet>
         <title>Terms of Service — Web Studio</title>
+        <meta
+          name="description"
+          content="Review Web Studio's Terms of Service to understand the rules, conditions, and guidelines for using our website-building platform and services."
+        />
+        <meta name="keywords" content="Web Studio terms of service" />
         <link rel="canonical" href="https://webstudio.lmsathena.com/terms-of-service" />
       </Helmet>
 
