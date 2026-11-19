@@ -44,4 +44,11 @@
   </url>
 
 
+  <url>
+    <loc>https://webstudio.lmsathena.com/contact</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+
 </urlset>
