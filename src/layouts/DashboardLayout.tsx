@@ -62,7 +62,7 @@ const DashboardLayout = () => {
         return () => {
             document.body.style.backgroundColor = '';
             try {
-                const saved = localStorage.getItem('buildora-theme');
+                const saved = localStorage.getItem('webstudio-theme') || localStorage.getItem('buildora-theme');
                 if (saved === 'dark') document.documentElement.classList.add('dark');
             } catch { /* ignore */ }
         };

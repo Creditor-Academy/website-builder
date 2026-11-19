@@ -204,7 +204,7 @@ export default function TemplateShowcaseSection({ isDark = false }: { isDark?: b
           animation: pulseGlow 4s ease-in-out infinite alternate;
         }
 
-        /* Subtle dot grid matrix backdrop matching Buildora Bento UI */
+        /* Subtle dot grid matrix backdrop matching Athena Web Studio Bento UI */
         .bg-grid-dots {
           background-image: radial-gradient(rgba(100, 116, 139, 0.16) 1.25px, transparent 1.25px);
           background-size: 24px 24px;
@@ -297,7 +297,7 @@ export default function TemplateShowcaseSection({ isDark = false }: { isDark?: b
           )}
           id="templates-section"
         >
-          {/* Ambient Mesh Radial Glows (Buildora Aura) */}
+          {/* Ambient Mesh Radial Glows (Athena Aura) */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center overflow-hidden"

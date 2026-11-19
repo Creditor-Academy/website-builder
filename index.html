@@ -26,7 +26,7 @@
   <script>
     (function () {
       try {
-        var t = localStorage.getItem('buildora-theme');
+        var t = localStorage.getItem('webstudio-theme') || localStorage.getItem('buildora-theme');
         if (t === 'dark') document.documentElement.classList.add('dark');
         else document.documentElement.classList.remove('dark');
       } catch (e) { }

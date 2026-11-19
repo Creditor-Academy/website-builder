@@ -1,4 +1,4 @@
-# AGENTS.md — Buildora Website Builder (Frontend)
+# AGENTS.md — Athena Web Studio (Frontend)
 
 > This file provides context for AI coding assistants (Antigravity, Gemini, Copilot, Cursor, etc.)
 > working on the Frontend repository. Read this before making any changes.
@@ -7,11 +7,11 @@
 
 ## Project Overview
 
-**Product:** Buildora (codename Athena) — A multi-tenant SaaS website builder platform
+**Product:** Athena Web Studio — A multi-tenant SaaS website builder platform
 **Stage:** Alpha — core editor and dashboard functional.
 **Focus Area:** Frontend development (React + Vite + TypeScript + Tailwind CSS)
 
-Buildora lets institutions (universities, colleges) and individuals build, publish, and manage professional websites without code. This repository contains the Frontend Single Page Application (SPA).
+Athena Web Studio lets institutions (universities, colleges) and individuals build, publish, and manage professional websites without code. This repository contains the Frontend Single Page Application (SPA).
 
 ---
 

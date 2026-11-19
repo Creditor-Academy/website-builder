@@ -20,17 +20,17 @@ pipeline {
                     set -e
 
                     # Create temporary deployment directory
-                    sudo mkdir -p /tmp/buildora-deploy
+                    sudo mkdir -p /tmp/webstudio-deploy
 
                     # Clean temporary directory
-                    sudo rm -rf /tmp/buildora-deploy/*
+                    sudo rm -rf /tmp/webstudio-deploy/*
 
                     # Copy new build
-                    sudo cp -r dist/* /tmp/buildora-deploy/
+                    sudo cp -r dist/* /tmp/webstudio-deploy/
 
                     # Replace old website
                     sudo rm -rf /var/www/html/*
-                    sudo cp -r /tmp/buildora-deploy/* /var/www/html/
+                    sudo cp -r /tmp/webstudio-deploy/* /var/www/html/
 
                     # Set ownership
                     sudo chown -R www-data:www-data /var/www/html

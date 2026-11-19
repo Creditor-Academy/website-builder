@@ -1,5 +1,5 @@
 ---
-name: Buildora System
+name: Athena Web Studio System
 colors:
   surface: '#fcf8fa'
   surface-dim: '#dcd9db'
