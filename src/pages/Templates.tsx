@@ -121,7 +121,7 @@ const Templates = () => {
         <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
           <img
             src={templatesImg}
-            alt=""
+            alt="Website template previews"
             width={640}
             height={640}
             decoding="async"
@@ -355,7 +355,7 @@ const Templates = () => {
               />
               <img
                 src={templatesImg}
-                alt="Editor"
+                alt="Website template shown in the editor"
                 width={640}
                 height={640}
                 loading="lazy"

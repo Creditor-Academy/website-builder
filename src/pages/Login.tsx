@@ -515,7 +515,7 @@ export default function LoginSignup() {
       >
         <img
           src={loginbg}
-          alt=""
+          alt="Background behind the Athena Web Studio sign-in form"
           width={1408}
           height={768}
           decoding="async"
