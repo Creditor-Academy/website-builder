@@ -22,6 +22,12 @@ import featureImg4 from "../assets/4.webp";
 import featureImg5 from "../assets/5.webp";
 
 const heroScrollImages = [dragDropImg, templatesImg, uiShowcase1, componentsImg] as const;
+const heroScrollAlt: Record<string, string> = {
+  [dragDropImg]: "Hand arranging a button on the editor canvas",
+  [templatesImg]: "Website template previews in the editor",
+  [uiShowcase1]: "Page layout open in the editor",
+  [componentsImg]: "Component list in the editor",
+};
 const featureCardImages = [featureImg1, featureImg2, featureImg3, featureImg4, featureImg5] as const;
 
 export default function FeaturesPage() {
@@ -84,7 +90,7 @@ export default function FeaturesPage() {
                     key={`col-a-${i}`}
                     className="aspect-video w-[160px] overflow-hidden rounded-2xl bg-slate-900 shadow-2xl xs:w-[200px] sm:w-[320px] sm:rounded-3xl md:w-[420px]"
                   >
-                    <img src={img} alt="" width={640} height={640} decoding="async" className="h-full w-full object-cover" />
+                    <img src={img} alt={heroScrollAlt[img] ?? "Athena Web Studio editor"} width={640} height={640} decoding="async" className="h-full w-full object-cover" />
                   </div>
                 ))}
               </div>
@@ -94,7 +100,7 @@ export default function FeaturesPage() {
                     key={`col-b-${i}`}
                     className="aspect-video w-[200px] overflow-hidden rounded-2xl bg-slate-900 shadow-2xl sm:w-[320px] sm:rounded-3xl md:w-[420px]"
                   >
-                    <img src={img} alt="" width={640} height={640} decoding="async" className="h-full w-full object-cover" />
+                    <img src={img} alt={heroScrollAlt[img] ?? "Athena Web Studio editor"} width={640} height={640} decoding="async" className="h-full w-full object-cover" />
                   </div>
                 ))}
               </div>
@@ -104,7 +110,7 @@ export default function FeaturesPage() {
                     key={`col-c-${i}`}
                     className="aspect-video w-[420px] overflow-hidden rounded-3xl bg-slate-900 shadow-2xl"
                   >
-                    <img src={img} alt="" width={640} height={640} decoding="async" className="h-full w-full object-cover" />
+                    <img src={img} alt={heroScrollAlt[img] ?? "Athena Web Studio editor"} width={640} height={640} decoding="async" className="h-full w-full object-cover" />
                   </div>
                 ))}
               </div>

@@ -181,7 +181,7 @@ const Resources = () => {
         <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
           <img
             src="/assets/res.webp"
-            alt=""
+            alt="Abstract glass shapes in teal and purple"
             width={1024}
             height={1024}
             fetchPriority="high"
@@ -502,7 +502,11 @@ const Resources = () => {
                             ? specializedTools[hoveredTool].image
                             : specializedTools[activeIndex].image
                         }
-                        alt="Tool Preview"
+                        alt={
+                          hoveredTool !== null
+                            ? `${specializedTools[hoveredTool].title} preview`
+                            : `${specializedTools[activeIndex].title} preview`
+                        }
                         width={
                           hoveredTool !== null
                             ? specializedTools[hoveredTool].width
