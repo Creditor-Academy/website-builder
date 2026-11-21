@@ -90,6 +90,8 @@ export default function HeroCTASection() {
               alt="Creator workspace atmosphere"
               className="h-full w-full scale-105 object-cover object-center opacity-40 brightness-90 contrast-125 mix-blend-luminosity blur-sm filter"
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuASrYyywOi6Yb_6jwvberyJ6UNuR-txWpjNZMLdG2JeRctdxrPBxO5JPylzt1orOOu2oKgpjq1fpr8Rj6WU264_6gnhj25PJypNc41PQRh1pSEGVI1r8B8kLWW_e8Z6EImKYVc-task4BYBRthmbqmA0CwrUceiK3oLnqCv-Jv6TTm5fGE2dgCU9-oNqXLjki_4GNI-1YKqYQx8GA3QPHIez-oxL6XLFg21Y7_LZZ9E_6vL3JGAFPaLSifnMJsH_TKhNf4"
+              loading="lazy"
+              decoding="async"
             />
             {/* Multi-tier modern dark atmospheric gradient vignettes */}
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/75 to-slate-900/60 mix-blend-multiply" />
@@ -148,12 +150,12 @@ export default function HeroCTASection() {
 
               {/* BEGIN: Headline & Typographic Treatment */}
               <div className="mb-5 space-y-1 sm:mb-6" data-purpose="hero-title-block">
-                <h1 className="text-slate-950 dark:text-white font-extrabold tracking-tight text-[1.65rem] leading-[1.15] sm:text-4xl md:text-5xl lg:text-6xl px-1">
+                <h2 className="text-slate-950 dark:text-white font-extrabold tracking-tight text-[1.65rem] leading-[1.15] sm:text-4xl md:text-5xl lg:text-6xl px-1">
                   Publish to a{' '}
                   <span className="inline italic font-black bg-gradient-to-r from-blue-600 via-indigo-500 to-fuchsia-500 animated-gradient-text animate-text-shimmer drop-shadow-sm">
                     live address.
                   </span>
-                </h1>
+                </h2>
               </div>
 
               {/* BEGIN: High-Converting Feature Checklist */}

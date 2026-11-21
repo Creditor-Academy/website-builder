@@ -16,7 +16,6 @@ import {
   Clock,
   Globe
 } from "lucide-react";
-import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/Common/BrandLogo";
 import Footer from "./Footer";
@@ -155,16 +154,6 @@ export default function Contact() {
       "w-full min-h-screen transition-colors duration-1000 selection:bg-blue-500/30 relative overflow-hidden",
       isDark ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-800"
     )}>
-      <Helmet>
-        <title>Contact Us - Web Studio</title>
-        <meta
-          name="description"
-          content="Contact Athena Web Studio for assistance, website-building support, inquiries, and information about creating and managing your professional website."
-        />
-        <meta name="keywords" content="contact Web Studio" />
-        <link rel="canonical" href="https://webstudio.lmsathena.com/contact/" />
-      </Helmet>
-
       {/* BACKGROUND IMAGE OVERLAY */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className={cn("absolute inset-0 bg-gradient-to-b opacity-40", isDark ? "from-slate-950 via-slate-950/20 to-slate-950" : "from-slate-50 via-slate-50/20 to-slate-50")} />
