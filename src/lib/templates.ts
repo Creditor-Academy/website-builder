@@ -6,10 +6,10 @@ import ecommerce from "../assets/Ecomm.jpg";
 import portfolio from "../assets/Portfolio.jpg";
 import school from "../assets/School.jpg";
 import learning from "../assets/Learning.jpg";
-import cta from "../assets/CTA.png";
-import placeholder from "../assets/ui_showcase_1.png";
+import cta from "../assets/CTA.webp";
+import placeholder from "../assets/ui_showcase_1.webp";
 import restaurant from "../assets/Hospital.jpg"; // Reusing an existing asset as placeholder
-import blog from "../assets/templates_showcase.png"; // Reusing an existing asset as placeholder
+import blog from "../assets/templates_showcase.webp"; // Reusing an existing asset as placeholder
 
 export const templatesList = [
     { 

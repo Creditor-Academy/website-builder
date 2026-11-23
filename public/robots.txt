@@ -3,6 +3,8 @@ Disallow: /admin
 Disallow: /dashboard
 Disallow: /editor
 Disallow: /builder
+Disallow: /template-builder
+Disallow: /auth
 Allow: /
 
 User-agent: Bingbot
@@ -10,6 +12,8 @@ Disallow: /admin
 Disallow: /dashboard
 Disallow: /editor
 Disallow: /builder
+Disallow: /template-builder
+Disallow: /auth
 Allow: /
 
 User-agent: Twitterbot
@@ -23,6 +27,8 @@ Disallow: /admin
 Disallow: /dashboard
 Disallow: /editor
 Disallow: /builder
+Disallow: /template-builder
+Disallow: /auth
 Allow: /
 
 Sitemap: https://webstudio.lmsathena.com/sitemap.xml

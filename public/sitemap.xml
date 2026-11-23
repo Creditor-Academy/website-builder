@@ -1,54 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
-
   <url>
     <loc>https://webstudio.lmsathena.com/</loc>
     <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
   </url>
-
-
   <url>
-    <loc>https://webstudio.lmsathena.com/features</loc>
+    <loc>https://webstudio.lmsathena.com/features/</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
   </url>
-
-
   <url>
-    <loc>https://webstudio.lmsathena.com/templates</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://webstudio.lmsathena.com/templates/</loc>
+    <changefreq>monthly</changefreq>
   </url>
-
-
   <url>
-    <loc>https://webstudio.lmsathena.com/resources</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://webstudio.lmsathena.com/resources/</loc>
+    <changefreq>monthly</changefreq>
   </url>
-
-
   <url>
-    <loc>https://webstudio.lmsathena.com/privacy-policy</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
+    <loc>https://webstudio.lmsathena.com/privacy-policy/</loc>
+    <changefreq>monthly</changefreq>
   </url>
-
-
   <url>
-    <loc>https://webstudio.lmsathena.com/terms-of-service</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
+    <loc>https://webstudio.lmsathena.com/terms-of-service/</loc>
+    <changefreq>monthly</changefreq>
   </url>
-
-
   <url>
-    <loc>https://webstudio.lmsathena.com/contact</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
+    <loc>https://webstudio.lmsathena.com/contact/</loc>
+    <changefreq>monthly</changefreq>
   </url>
-
-
+  <url>
+    <loc>https://webstudio.lmsathena.com/pricing</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://webstudio.lmsathena.com/services</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://webstudio.lmsathena.com/about</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://webstudio.lmsathena.com/blog</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://webstudio.lmsathena.com/careers</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://webstudio.lmsathena.com/help</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://webstudio.lmsathena.com/status</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://webstudio.lmsathena.com/start</loc>
+    <changefreq>monthly</changefreq>
+  </url>
 </urlset>

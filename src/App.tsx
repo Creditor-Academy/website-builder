@@ -43,6 +43,7 @@ const DashboardAuditLogs = React.lazy(() => import("./pages/DashboardAuditLogs")
 const DashboardProfile = React.lazy(() => import("./pages/DashboardProfile"));
 
 import { ScrollToTop } from "./components/utils/ScrollToTop";
+import DocumentHead from "./seo/DocumentHead";
 import { JumpToTop } from "./components/ui/JumpToTop";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -60,6 +61,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthSessionProvider>
+          <DocumentHead />
           <ScrollToTop />
           <JumpToTop />
           <Suspense fallback={<Loading fullScreen />}>

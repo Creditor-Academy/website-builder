@@ -60,7 +60,7 @@ export default function ResetPassword() {
         {success ? (
           <div className="text-center py-4">
             <CheckCircle2 className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Password Reset!</h2>
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">Password Reset!</h1>
             <p className="text-slate-500 text-sm mb-6">Your password has been updated successfully.</p>
             <button
               onClick={() => navigate("/login")}
@@ -71,7 +71,7 @@ export default function ResetPassword() {
           </div>
         ) : (
           <>
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Set new password</h2>
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">Set new password</h1>
             <p className="text-slate-500 text-sm mb-6">Enter your new password below.</p>
 
             <div className="space-y-4">

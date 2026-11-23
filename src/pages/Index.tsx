@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { ArrowRight, Menu, X, LayoutTemplate, Layers, Palette, Sun, Moon, Play, Check, Image as ImageIcon, Settings, Plus, MousePointer2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -22,7 +21,12 @@ import Portfolio from "../assets/Portfolio.jpg";
 import school from "../assets/School.jpg";
 
 function HeroProductMockup({ isDark }: { isDark: boolean }) {
-  const thumbs = [business, Portfolio, school, Ecommerce];
+  const thumbs = [
+    { src: business, width: 736, height: 981, alt: "Sample business website page" },
+    { src: Portfolio, width: 736, height: 1251, alt: "Sample portfolio website page" },
+    { src: school, width: 736, height: 1104, alt: "Sample school website page" },
+    { src: Ecommerce, width: 735, height: 1103, alt: "Sample online store website page" },
+  ];
   const rail = [
     { icon: Plus, label: "Add" },
     { icon: Layers, label: "Layers" },
@@ -84,7 +88,15 @@ function HeroProductMockup({ isDark }: { isDark: boolean }) {
               </span>
             </div>
             <div className="relative min-h-0 flex-1">
-              <img src={business} alt="" className="absolute inset-0 h-full w-full object-cover" />
+              <img
+                src="/images/hero-canvas.webp"
+                alt="Sample website page on the Athena Web Studio canvas"
+                width={736}
+                height={981}
+                fetchPriority="high"
+                decoding="async"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/75 via-[#0F172A]/10 to-transparent" />
               <div className="absolute bottom-4 left-3 right-3 text-white sm:bottom-6 sm:left-6 sm:right-6">
                 <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-white/75 sm:text-[11px] sm:tracking-[0.22em]">Explore the World</p>
@@ -144,8 +156,16 @@ function HeroProductMockup({ isDark }: { isDark: boolean }) {
           isDark ? "border-white/40 bg-slate-900" : "bg-white",
         )}
       >
-        {thumbs.map((src, i) => (
-          <img key={i} src={src} alt="" className="h-9 w-9 shrink-0 rounded-lg object-cover sm:h-12 sm:w-12 sm:rounded-xl" />
+        {thumbs.map((thumb) => (
+          <img
+            key={thumb.src}
+            src={thumb.src}
+            alt={thumb.alt}
+            width={thumb.width}
+            height={thumb.height}
+            decoding="async"
+            className="h-9 w-9 shrink-0 rounded-lg object-cover sm:h-12 sm:w-12 sm:rounded-xl"
+          />
         ))}
       </motion.div>
 
@@ -212,14 +232,6 @@ export default function LandingPage() {
           : "bg-slate-50 text-slate-900 selection:bg-[#131924]/15 selection:text-black",
       )}
     >
-      <Helmet>
-        <title>Athena Web Studio – AI-Powered Website Creation Platform</title>
-        <meta name="description" content="Create a professional website with Athena Web Studio. Explore easy website building, customizable designs, and templates to grow your online presence." />
-        <meta name="keywords" content="website builder" />
-        <meta property="og:title" content="Athena Web Studio – AI-Powered Website Creation Platform" />
-        <meta property="og:description" content="Create a professional website with Athena Web Studio. Explore easy website building, customizable designs, and templates to grow your online presence." />
-        <link rel="canonical" href="https://webstudio.lmsathena.com/" />
-      </Helmet>
       {/* ================= NAVBAR ================= */}
       <nav className="pointer-events-none fixed inset-x-0 top-0 z-[100] pt-3 sm:pt-6">
         <div className={cn(pageFrameClass, "relative")}>

@@ -11,17 +11,23 @@ import MarketingReveal from "@/components/landing/MarketingReveal";
 import LandingCta from "@/components/landing/LandingCta";
 import MarketingNav from "@/components/landing/MarketingNav";
 
-import dragDropImg from "../assets/drag_drop.png";
-import templatesImg from "../assets/templates_showcase.png";
-import componentsImg from "../assets/components_palette.png";
-import uiShowcase1 from "../assets/ui_showcase_1.png";
-import featureImg1 from "../assets/1.png";
-import featureImg2 from "../assets/2.png";
-import featureImg3 from "../assets/3.png";
-import featureImg4 from "../assets/4.png";
-import featureImg5 from "../assets/5.png";
+import dragDropImg from "../assets/drag_drop.webp";
+import templatesImg from "../assets/templates_showcase.webp";
+import componentsImg from "../assets/components_palette.webp";
+import uiShowcase1 from "../assets/ui_showcase_1.webp";
+import featureImg1 from "../assets/1.webp";
+import featureImg2 from "../assets/2.webp";
+import featureImg3 from "../assets/3.webp";
+import featureImg4 from "../assets/4.webp";
+import featureImg5 from "../assets/5.webp";
 
 const heroScrollImages = [dragDropImg, templatesImg, uiShowcase1, componentsImg] as const;
+const heroScrollAlt: Record<string, string> = {
+  [dragDropImg]: "Hand arranging a button on the editor canvas",
+  [templatesImg]: "Website template previews in the editor",
+  [uiShowcase1]: "Page layout open in the editor",
+  [componentsImg]: "Component list in the editor",
+};
 const featureCardImages = [featureImg1, featureImg2, featureImg3, featureImg4, featureImg5] as const;
 
 export default function FeaturesPage() {
@@ -59,13 +65,6 @@ export default function FeaturesPage() {
       )}
     >
       <Helmet>
-        <title>Features — Web Studio</title>
-        <meta
-          name="description"
-          content="Explore Web Studio features to build, customize, and manage professional websites with powerful tools, flexible design options, and easy website creation."
-        />
-        <meta name="keywords" content="website builder features" />
-        <link rel="canonical" href="https://webstudio.lmsathena.com/features/" />
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
           rel="stylesheet"
@@ -91,7 +90,7 @@ export default function FeaturesPage() {
                     key={`col-a-${i}`}
                     className="aspect-video w-[160px] overflow-hidden rounded-2xl bg-slate-900 shadow-2xl xs:w-[200px] sm:w-[320px] sm:rounded-3xl md:w-[420px]"
                   >
-                    <img src={img} alt="" className="h-full w-full object-cover" />
+                    <img src={img} alt={heroScrollAlt[img] ?? "Athena Web Studio editor"} width={640} height={640} decoding="async" className="h-full w-full object-cover" />
                   </div>
                 ))}
               </div>
@@ -101,7 +100,7 @@ export default function FeaturesPage() {
                     key={`col-b-${i}`}
                     className="aspect-video w-[200px] overflow-hidden rounded-2xl bg-slate-900 shadow-2xl sm:w-[320px] sm:rounded-3xl md:w-[420px]"
                   >
-                    <img src={img} alt="" className="h-full w-full object-cover" />
+                    <img src={img} alt={heroScrollAlt[img] ?? "Athena Web Studio editor"} width={640} height={640} decoding="async" className="h-full w-full object-cover" />
                   </div>
                 ))}
               </div>
@@ -111,7 +110,7 @@ export default function FeaturesPage() {
                     key={`col-c-${i}`}
                     className="aspect-video w-[420px] overflow-hidden rounded-3xl bg-slate-900 shadow-2xl"
                   >
-                    <img src={img} alt="" className="h-full w-full object-cover" />
+                    <img src={img} alt={heroScrollAlt[img] ?? "Athena Web Studio editor"} width={640} height={640} decoding="async" className="h-full w-full object-cover" />
                   </div>
                 ))}
               </div>
@@ -182,6 +181,10 @@ export default function FeaturesPage() {
                   <img
                     src={dragDropImg}
                     alt="Drag and drop canvas preview"
+                    width={640}
+                    height={640}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full max-w-md rotate-2 rounded-2xl shadow-2xl transition-transform duration-700 hover:rotate-0"
                   />
                 </div>
@@ -244,6 +247,10 @@ export default function FeaturesPage() {
                     <div className="group/img relative min-h-[240px] w-full overflow-hidden rounded-2xl border border-white/25 bg-slate-900/50 shadow-[0_0_0_1px_rgba(255,255,255,0.14),0_12px_40px_rgba(255,255,255,0.08)] lg:min-h-0 lg:h-full">
                       <img
                         alt="Visual canvas workspace interface"
+                        width={1376}
+                        height={768}
+                        loading="lazy"
+                        decoding="async"
                         className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover/img:scale-105"
                         src={featureCardImages[0]}
                       />
@@ -267,6 +274,10 @@ export default function FeaturesPage() {
                     <div className="group/img relative min-h-[240px] w-full overflow-hidden rounded-2xl border border-white/25 bg-slate-900/50 shadow-[0_0_0_1px_rgba(255,255,255,0.14),0_12px_40px_rgba(255,255,255,0.08)] lg:min-h-0 lg:h-full">
                       <img
                         alt="Modular block system UI showcase"
+                        width={1376}
+                        height={768}
+                        loading="lazy"
+                        decoding="async"
                         className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover/img:scale-105"
                         src={featureCardImages[1]}
                       />
@@ -380,6 +391,10 @@ export default function FeaturesPage() {
                     <div className="group/img relative min-h-[240px] w-full overflow-hidden rounded-2xl border border-white/25 bg-slate-900/50 shadow-[0_0_0_1px_rgba(255,255,255,0.14),0_12px_40px_rgba(255,255,255,0.08)] lg:min-h-0 lg:h-full">
                       <img
                         alt="Live typography and inline content editor"
+                        width={1376}
+                        height={768}
+                        loading="lazy"
+                        decoding="async"
                         className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover/img:scale-105"
                         src={featureCardImages[2]}
                       />
@@ -403,6 +418,10 @@ export default function FeaturesPage() {
                     <div className="group/img relative min-h-[240px] w-full overflow-hidden rounded-2xl border border-white/25 bg-slate-900/50 shadow-[0_0_0_1px_rgba(255,255,255,0.14),0_12px_40px_rgba(255,255,255,0.08)] lg:min-h-0 lg:h-full">
                       <img
                         alt="Design token engine and responsive preview"
+                        width={1376}
+                        height={768}
+                        loading="lazy"
+                        decoding="async"
                         className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover/img:scale-105"
                         src={featureCardImages[3]}
                       />
@@ -516,6 +535,10 @@ export default function FeaturesPage() {
                     <div className="group/img relative min-h-[240px] w-full overflow-hidden rounded-2xl border border-white/25 bg-slate-900/50 shadow-[0_0_0_1px_rgba(255,255,255,0.14),0_12px_40px_rgba(255,255,255,0.08)] lg:min-h-0 lg:h-full">
                       <img
                         alt="Cloud deployment dashboard"
+                        width={1376}
+                        height={768}
+                        loading="lazy"
+                        decoding="async"
                         className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover/img:scale-105"
                         src={featureCardImages[4]}
                       />

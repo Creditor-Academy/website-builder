@@ -1,15 +1,11 @@
-import { Helmet } from "react-helmet-async";
 import { WebsiteEditor } from "@/components/editor/WebsiteEditor";
 import { createBlogPage } from "@/lib/defaultPageData";
+import { RouteHeading } from "@/seo/RouteHeading";
 
 const Blog = () => {
   return (
     <>
-      <Helmet>
-        <title>Blog - Web Studio</title>
-        <link rel="canonical" href="https://webstudio.lmsathena.com/blog" />
-        <meta name="description" content="Blog" />
-      </Helmet>
+      <RouteHeading path="/blog" />
       <WebsiteEditor initialPage={createBlogPage()} />
     </>
   );

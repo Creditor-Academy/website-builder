@@ -1,15 +1,11 @@
-import { Helmet } from "react-helmet-async";
 import { WebsiteEditor } from "@/components/editor/WebsiteEditor";
 import { createStartPage } from "@/lib/defaultPageData";
+import { RouteHeading } from "@/seo/RouteHeading";
 
 const Start = () => {
   return (
     <>
-      <Helmet>
-        <title>Get Started - Web Studio</title>
-        <link rel="canonical" href="https://webstudio.lmsathena.com/start" />
-        <meta name="description" content="Get started" />
-      </Helmet>
+      <RouteHeading path="/start" />
       <WebsiteEditor initialPage={createStartPage()} />
     </>
   );
