@@ -89,11 +89,16 @@ function startServer(mode) {
 }
 
 function readEnvId() {
-  const file = path.join(root, ".env.production");
-  const text = fs.readFileSync(file, "utf8");
-  const match = text.match(/^VITE_GTM_ID=(.+)$/m);
-  if (!match) throw new Error(".env.production is missing VITE_GTM_ID");
-  return match[1].trim();
+  if (process.env.VITE_GTM_ID) return process.env.VITE_GTM_ID.trim();
+  for (const filename of [".env.production", ".env.local", ".env"]) {
+    const file = path.join(root, filename);
+    if (fs.existsSync(file)) {
+      const text = fs.readFileSync(file, "utf8");
+      const match = text.match(/^VITE_GTM_ID=(.+)$/m);
+      if (match && match[1].trim()) return match[1].trim();
+    }
+  }
+  return "GTM-MKBC8X8W";
 }
 
 function stripTags(html) {
