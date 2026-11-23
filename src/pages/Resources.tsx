@@ -175,7 +175,7 @@ const Resources = () => {
           content="Explore Web Studio resources, helpful guides, tips, and insights to build, customize, and improve your website with ease."
         />
         <meta name="keywords" content="website building resources" />
-        <link rel="canonical" href="https://webstudio.lmsathena.com/resources" />
+        <link rel="canonical" href="https://webstudio.lmsathena.com/resources/" />
       </Helmet>
 
       <MarketingNav isDark={isDark} setTheme={setTheme} activeItem="Resources" />

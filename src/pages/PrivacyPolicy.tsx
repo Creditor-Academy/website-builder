@@ -82,7 +82,7 @@ export default function PrivacyPolicy() {
           content="Read the Web Studio Privacy Policy to learn how your personal information is collected, used, protected, and managed when using our website and services."
         />
         <meta name="keywords" content="Web Studio privacy policy" />
-        <link rel="canonical" href="https://webstudio.lmsathena.com/privacy-policy" />
+        <link rel="canonical" href="https://webstudio.lmsathena.com/privacy-policy/" />
       </Helmet>
 
       <MarketingNav isDark={isDark} setTheme={setTheme} />
