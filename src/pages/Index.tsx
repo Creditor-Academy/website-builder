@@ -22,10 +22,10 @@ import school from "../assets/School.jpg";
 
 function HeroProductMockup({ isDark }: { isDark: boolean }) {
   const thumbs = [
-    { src: business, width: 736, height: 981 },
-    { src: Portfolio, width: 736, height: 1251 },
-    { src: school, width: 736, height: 1104 },
-    { src: Ecommerce, width: 735, height: 1103 },
+    { src: business, width: 736, height: 981, alt: "Sample business website page" },
+    { src: Portfolio, width: 736, height: 1251, alt: "Sample portfolio website page" },
+    { src: school, width: 736, height: 1104, alt: "Sample school website page" },
+    { src: Ecommerce, width: 735, height: 1103, alt: "Sample online store website page" },
   ];
   const rail = [
     { icon: Plus, label: "Add" },
@@ -90,7 +90,7 @@ function HeroProductMockup({ isDark }: { isDark: boolean }) {
             <div className="relative min-h-0 flex-1">
               <img
                 src="/images/hero-canvas.webp"
-                alt=""
+                alt="Sample website page on the Athena Web Studio canvas"
                 width={736}
                 height={981}
                 fetchPriority="high"
@@ -160,7 +160,7 @@ function HeroProductMockup({ isDark }: { isDark: boolean }) {
           <img
             key={thumb.src}
             src={thumb.src}
-            alt=""
+            alt={thumb.alt}
             width={thumb.width}
             height={thumb.height}
             decoding="async"

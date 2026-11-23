@@ -25,7 +25,7 @@ export function BrandLogo({
       {showIcon && (
         <img
           src="/assets/logo.png"
-          alt={showWordmark ? '' : alt}
+          alt={showWordmark ? "Athena Web Studio logo" : alt}
           className={cn('h-10 w-10 shrink-0 object-contain', imgClassName)}
         />
       )}
