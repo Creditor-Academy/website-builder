@@ -1,12 +1,7 @@
 export const SITE_ORIGIN = "https://webstudio.lmsathena.com";
+export const ORGANIZATION_URL = "https://lmsathena.com";
+export const ORGANIZATION_ID = `${ORGANIZATION_URL}/#organization`;
 export const SOFTWARE_ID = `${SITE_ORIGIN}/#software`;
-
-/** Copy already shown on the home page. */
-export const HOME_DESCRIPTION =
-  "Create a project, design pages on a visual canvas, and publish to a live address without writing code.";
-
-/** Contact address already shown on the contact page. */
-export const CONTACT_EMAIL = "hello@webstudio.lmsathena.com";
 
 /** Authenticated app routes stay on the SPA shell and are not indexable. */
 export const APP_PREFIXES = [
@@ -22,8 +17,7 @@ export type RobotsDirective = "index, follow" | "noindex, nofollow";
 
 /**
  * content: Puppeteer writes the rendered page into dist.
- * shell: the route mounts the website editor, so the build only writes head tags
- * and one heading. The editor itself is not snapshotted.
+ * shell: the route mounts the website editor; the build writes head tags and one heading.
  */
 export type CaptureMode = "content" | "shell";
 
@@ -55,6 +49,11 @@ function page(input: PageInput): SeoPage {
   const capture = input.capture ?? "content";
   const file = input.path === "/" ? "index.html" : `${input.path.replace(/^\//, "")}/index.html`;
   return { ...input, robots, capture, file };
+}
+
+/** Editor demo routes: indexable on main; Puppeteer keeps a shell snapshot only. */
+function shellPage(input: Omit<PageInput, "capture" | "robots">): SeoPage {
+  return page({ ...input, capture: "shell" });
 }
 
 export const SEO_PAGES: SeoPage[] = [
@@ -114,84 +113,68 @@ export const SEO_PAGES: SeoPage[] = [
     heading: "Get in touch",
     breadcrumb: "Contact",
   }),
-  page({
+  shellPage({
     path: "/pricing",
     title: "Pricing - Web Studio",
     description:
       "See a pricing-page layout in Athena Web Studio, the no-code builder for designing and publishing a website.",
     heading: "Pricing",
     breadcrumb: "Pricing",
-    robots: "noindex, nofollow",
-    capture: "shell",
   }),
-  page({
+  shellPage({
     path: "/services",
     title: "Services - Web Studio",
     description:
       "See a services-page layout in Athena Web Studio, the no-code builder for designing and publishing a website.",
     heading: "Services",
     breadcrumb: "Services",
-    robots: "noindex, nofollow",
-    capture: "shell",
   }),
-  page({
+  shellPage({
     path: "/about",
     title: "About - Web Studio",
     description:
       "See an about-page layout in Athena Web Studio, the no-code builder for designing and publishing a website.",
     heading: "About",
     breadcrumb: "About",
-    robots: "noindex, nofollow",
-    capture: "shell",
   }),
-  page({
+  shellPage({
     path: "/blog",
     title: "Blog - Web Studio",
     description:
       "See a blog-page layout in Athena Web Studio, the no-code builder for designing and publishing a website.",
     heading: "Blog",
     breadcrumb: "Blog",
-    robots: "noindex, nofollow",
-    capture: "shell",
   }),
-  page({
+  shellPage({
     path: "/careers",
     title: "Careers - Web Studio",
     description:
       "See a careers-page layout in Athena Web Studio, the no-code builder for designing and publishing a website.",
     heading: "Careers",
     breadcrumb: "Careers",
-    robots: "noindex, nofollow",
-    capture: "shell",
   }),
-  page({
+  shellPage({
     path: "/help",
     title: "Help - Web Studio",
     description:
       "See a help-page layout in Athena Web Studio, the no-code builder for designing and publishing a website.",
     heading: "Help",
     breadcrumb: "Help",
-    robots: "noindex, nofollow",
-    capture: "shell",
   }),
-  page({
+  shellPage({
     path: "/status",
     title: "Status - Web Studio",
     description:
       "See a status-page layout in Athena Web Studio, the no-code builder for designing and publishing a website.",
     heading: "Status",
     breadcrumb: "Status",
-    robots: "noindex, nofollow",
-    capture: "shell",
   }),
-  page({
+  shellPage({
     path: "/start",
     title: "Get Started - Web Studio",
     description: "Open the Athena Web Studio builder to start a site from a template or a blank canvas.",
     heading: "Get started",
     breadcrumb: "Get Started",
-    robots: "noindex, nofollow",
-    capture: "shell",
   }),
   page({
     path: "/login",
@@ -200,6 +183,7 @@ export const SEO_PAGES: SeoPage[] = [
     heading: "Sign in",
     breadcrumb: "Sign in",
     robots: "noindex, nofollow",
+    capture: "shell",
   }),
   page({
     path: "/reset-password",
@@ -208,6 +192,7 @@ export const SEO_PAGES: SeoPage[] = [
     heading: "Set new password",
     breadcrumb: "Reset password",
     robots: "noindex, nofollow",
+    capture: "shell",
   }),
   page({
     path: "/verify-email",
@@ -216,6 +201,7 @@ export const SEO_PAGES: SeoPage[] = [
     heading: "Verify email",
     breadcrumb: "Verify email",
     robots: "noindex, nofollow",
+    capture: "shell",
   }),
 ];
 
@@ -270,8 +256,19 @@ export function headingFor(pathname: string): string {
   return resolveSeo(pathname).page.heading;
 }
 
+/** Matches canonical trailing slashes already used on main for these marketing routes. */
+const TRAILING_SLASH_CANONICAL = new Set([
+  "/contact",
+  "/features",
+  "/privacy-policy",
+  "/resources",
+  "/templates",
+  "/terms-of-service",
+]);
+
 export function absoluteUrl(pathname: string): string {
   if (pathname === "/") return `${SITE_ORIGIN}/`;
+  if (TRAILING_SLASH_CANONICAL.has(pathname)) return `${SITE_ORIGIN}${pathname}/`;
   return `${SITE_ORIGIN}${pathname}`;
 }
 
@@ -281,24 +278,60 @@ export function indexablePages(): SeoPage[] {
 
 type JsonLdNode = Record<string, unknown>;
 
-/**
- * SoftwareApplication on the home page only.
- * Fields are limited to the product name, the public URL, the home-page
- * description, and the email address printed on the contact page.
- */
-export function buildJsonLd(page: SeoPage): JsonLdNode | null {
-  if (page.path !== "/") return null;
+export function buildJsonLd(page: SeoPage, canonicalPath: string | null): JsonLdNode {
+  const home = absoluteUrl("/");
+  const crumbs: JsonLdNode[] = [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: home,
+    },
+  ];
+
+  if (page.path !== "/") {
+    const crumb: JsonLdNode = {
+      "@type": "ListItem",
+      position: 2,
+      name: page.breadcrumb,
+    };
+    if (canonicalPath) crumb.item = absoluteUrl(canonicalPath);
+    crumbs.push(crumb);
+  }
+
   return {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "@id": SOFTWARE_ID,
-    name: "Athena Web Studio",
-    applicationCategory: "DesignApplication",
-    operatingSystem: "Web",
-    url: absoluteUrl("/"),
-    image: `${SITE_ORIGIN}/assets/logo.png`,
-    description: HOME_DESCRIPTION,
-    email: CONTACT_EMAIL,
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": ORGANIZATION_ID,
+        name: "Athena LMS",
+        url: ORGANIZATION_URL,
+        telephone: "+1 (425) 400-9246",
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "12315 NE 97th Street",
+          addressLocality: "Kirkland",
+          addressRegion: "WA",
+          addressCountry: "US",
+        },
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": SOFTWARE_ID,
+        name: "Athena Web Studio",
+        applicationCategory: "DesignApplication",
+        operatingSystem: "Web",
+        url: home,
+        image: `${SITE_ORIGIN}/assets/logo.png`,
+        description: "No-code website builder for designing pages and publishing them to a live address.",
+        publisher: { "@id": ORGANIZATION_ID },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: crumbs,
+      },
+    ],
   };
 }
 
@@ -318,6 +351,7 @@ export function renderFallbackBody(page: SeoPage): string {
 /** Head fragment injected into each built HTML file. Tags use data-rh so Helmet replaces them. */
 export function renderHead(page: SeoPage, canonicalPath: string | null, preloadHero = false): string {
   const canonical = canonicalPath ? absoluteUrl(canonicalPath) : null;
+  const json = JSON.stringify(buildJsonLd(page, canonicalPath)).replace(/</g, "\\u003c");
   const image = `${SITE_ORIGIN}/assets/logo.png`;
   const lines = [
     `<title data-rh="true">${escapeHtml(page.title)}</title>`,
@@ -347,11 +381,7 @@ export function renderHead(page: SeoPage, canonicalPath: string | null, preloadH
       `<link rel="preload" as="image" href="/images/hero-canvas.webp" fetchpriority="high" data-rh="true" />`,
     );
   }
-  const jsonLd = buildJsonLd(page);
-  if (jsonLd) {
-    const json = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
-    lines.push(`<script type="application/ld+json" data-rh="true">${json}</script>`);
-  }
+  lines.push(`<script type="application/ld+json" data-rh="true">${json}</script>`);
   return lines.join("\n    ");
 }
 

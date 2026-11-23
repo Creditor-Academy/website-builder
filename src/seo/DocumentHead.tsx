@@ -2,13 +2,13 @@ import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 import { absoluteUrl, buildJsonLd, resolveSeo, SITE_ORIGIN } from "./metadata";
 
-/** One title, description, canonical, Open Graph set, Twitter set, and home-page JSON-LD. */
+/** One title, description, canonical, Open Graph set, Twitter set, and JSON-LD per route. */
 export default function DocumentHead() {
   const { pathname } = useLocation();
   const { page, canonicalPath } = resolveSeo(pathname);
   const canonical = canonicalPath ? absoluteUrl(canonicalPath) : undefined;
   const image = `${SITE_ORIGIN}/assets/logo.png`;
-  const jsonLd = buildJsonLd(page);
+  const jsonLd = buildJsonLd(page, canonicalPath);
 
   return (
     <Helmet>
@@ -28,7 +28,7 @@ export default function DocumentHead() {
       {page.path === "/" ? (
         <link rel="preload" as="image" href="/images/hero-canvas.webp" fetchPriority="high" />
       ) : null}
-      {jsonLd ? <script type="application/ld+json">{JSON.stringify(jsonLd)}</script> : null}
+      <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
     </Helmet>
   );
 }

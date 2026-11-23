@@ -32,10 +32,10 @@ pipeline {
                     fi
 
                     # Sync new build to live site (only changes files, removes old ones)
-                    sudo rsync -a --delete dist/ /var/www/html/
+                    sudo rsync -a --delete dist/ /var/www/frontend/website-builder/dist/
 
                     # Set ownership
-                    sudo chown -R www-data:www-data /var/www/html
+                    sudo chown -R www-data:www-data /var/www/frontend/website-builder/dist
 
                     # Test Nginx config, then reload
                     sudo nginx -t
