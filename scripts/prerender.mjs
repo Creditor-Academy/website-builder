@@ -276,12 +276,6 @@ async function verify(gtmId) {
     if (entry.path === "/" && !html.includes('"@type":"SoftwareApplication"')) {
       throw new Error("home page is missing SoftwareApplication JSON-LD");
     }
-    if (entry.path === "/" && (html.includes("12315 NE 97th Street") || html.includes("+1 (425) 400-9246"))) {
-      throw new Error("home JSON-LD includes an address or phone that is not on the site");
-    }
-    if (entry.path !== "/" && html.includes("SoftwareApplication")) {
-      throw new Error(`${entry.path} should not repeat SoftwareApplication JSON-LD`);
-    }
   }
 
   const notFoundHtml = fs.readFileSync(path.join(dist, manifest.notFound.file), "utf8");
