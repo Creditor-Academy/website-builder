@@ -109,7 +109,7 @@ const Templates = () => {
           content="Discover customizable website templates with Athena Web Studio. Choose professional designs to create attractive, responsive websites for your business."
         />
         <meta name="keywords" content="website templates" />
-        <link rel="canonical" href="https://webstudio.lmsathena.com/templates" />
+        <link rel="canonical" href="https://webstudio.lmsathena.com/templates/" />
       </Helmet>
 
       <MarketingNav isDark={isDark} setTheme={setTheme} activeItem="Templates" />
