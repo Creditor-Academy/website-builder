@@ -210,8 +210,19 @@ export function resolveSeo(pathname: string): ResolvedSeo {
   return { page: NOT_FOUND_PAGE, canonicalPath: null };
 }
 
+/** Matches canonical trailing slashes already used on main for these marketing routes. */
+const TRAILING_SLASH_CANONICAL = new Set([
+  "/contact",
+  "/features",
+  "/privacy-policy",
+  "/resources",
+  "/templates",
+  "/terms-of-service",
+]);
+
 export function absoluteUrl(pathname: string): string {
   if (pathname === "/") return `${SITE_ORIGIN}/`;
+  if (TRAILING_SLASH_CANONICAL.has(pathname)) return `${SITE_ORIGIN}${pathname}/`;
   return `${SITE_ORIGIN}${pathname}`;
 }
 
