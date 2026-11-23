@@ -14,7 +14,6 @@ import {
   Grid,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
 import Footer from "./Footer";
 import { useTheme } from "@/hooks/useTheme";
@@ -135,19 +134,25 @@ const Resources = () => {
       icon: <Layout />,
       title: "Component Catalog",
       desc: "Elements, Header presets (Simple, Classic, Centered, Split), Sections, and Footer layouts from the left rail.",
-      image: "/assets/predefine.jpg",
+      image: "/assets/predefine.webp",
+      width: 1400,
+      height: 910,
     },
     {
       icon: <Smartphone />,
       title: "Responsive Viewports",
       desc: "Switch Desktop, Tablet, and Mobile in the top bar; viewport-specific spacing saves per device size.",
-      image: "/assets/monitor.jpg",
+      image: "/assets/monitor.webp",
+      width: 1400,
+      height: 934,
     },
     {
       icon: <Zap />,
       title: "Publish & Domains",
       desc: "Publish to a subdomain or connect and verify a custom domain with DNS records and automated SSL.",
       image: "/assets/SEO.jpg",
+      width: 268,
+      height: 188,
     },
   ];
 
@@ -168,16 +173,6 @@ const Resources = () => {
         isDark ? "bg-slate-950 text-slate-100" : "bg-[#f8fafc] text-[#1b1b1d]",
       )}
     >
-      <Helmet>
-        <title>Resources - Web Studio</title>
-        <meta
-          name="description"
-          content="Explore Web Studio resources, helpful guides, tips, and insights to build, customize, and improve your website with ease."
-        />
-        <meta name="keywords" content="website building resources" />
-        <link rel="canonical" href="https://webstudio.lmsathena.com/resources/" />
-      </Helmet>
-
       <MarketingNav isDark={isDark} setTheme={setTheme} activeItem="Resources" />
 
       <main className="w-full">
@@ -185,8 +180,12 @@ const Resources = () => {
       <section className="relative flex min-h-[70svh] items-center justify-center overflow-hidden bg-slate-950 pb-16 pt-28 sm:min-h-[75svh] sm:pb-20 sm:pt-32">
         <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
           <img
-            src="/assets/res.png"
+            src="/assets/res.webp"
             alt=""
+            width={1024}
+            height={1024}
+            fetchPriority="high"
+            decoding="async"
             className="h-full w-full object-cover opacity-40 brightness-[0.55]"
           />
           <motion.div
@@ -504,6 +503,18 @@ const Resources = () => {
                             : specializedTools[activeIndex].image
                         }
                         alt="Tool Preview"
+                        width={
+                          hoveredTool !== null
+                            ? specializedTools[hoveredTool].width
+                            : specializedTools[activeIndex].width
+                        }
+                        height={
+                          hoveredTool !== null
+                            ? specializedTools[hoveredTool].height
+                            : specializedTools[activeIndex].height
+                        }
+                        loading="lazy"
+                        decoding="async"
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                       <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0F172A]/80 to-transparent" />

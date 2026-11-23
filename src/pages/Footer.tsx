@@ -113,7 +113,7 @@ export default function Footer({ isDark = true }: { isDark?: boolean }) {
           <p className="flex flex-wrap items-center gap-1.5">
             Powered by{" "}
             <a
-              href="https://lmsathena.com/"
+              href="https://lmsathena.com"
               target="_blank"
               rel="noopener noreferrer"
               className={cn(

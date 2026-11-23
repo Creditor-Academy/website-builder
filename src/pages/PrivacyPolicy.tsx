@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { ChevronRight, ShieldCheck, Lock, Eye, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -75,16 +74,6 @@ export default function PrivacyPolicy() {
         isDark ? "bg-slate-950 text-slate-100" : "bg-[#f8fafc] text-[#1b1b1d]",
       )}
     >
-      <Helmet>
-        <title>Privacy Policy — Web Studio</title>
-        <meta
-          name="description"
-          content="Read the Web Studio Privacy Policy to learn how your personal information is collected, used, protected, and managed when using our website and services."
-        />
-        <meta name="keywords" content="Web Studio privacy policy" />
-        <link rel="canonical" href="https://webstudio.lmsathena.com/privacy-policy/" />
-      </Helmet>
-
       <MarketingNav isDark={isDark} setTheme={setTheme} />
 
       <main className="w-full">

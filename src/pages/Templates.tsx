@@ -9,7 +9,6 @@ import {
   MousePointer2,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
 import Footer from "./Footer";
 import { useTheme } from "@/hooks/useTheme";
@@ -23,8 +22,8 @@ import Ecommerce from "../assets/Ecomm.jpg";
 import Portfolio from "../assets/Portfolio.jpg";
 import business from "../assets/Bussiness.jpg";
 import school from "../assets/School.jpg";
-import saasImg from "../assets/template_saas_1.png";
-import templatesImg from "../assets/templates_showcase.png";
+import saasImg from "../assets/template_saas_1.webp";
+import templatesImg from "../assets/templates_showcase.webp";
 
 const Templates = () => {
   const navigate = useNavigate();
@@ -44,6 +43,8 @@ const Templates = () => {
       title: "Blank Canvas",
       category: "Blank",
       image: templatesImg,
+      width: 640,
+      height: 640,
       description:
         "Start from scratch on an empty canvas. Add headers, sections, and footers from the Elements rail as you build.",
       popular: true,
@@ -53,6 +54,8 @@ const Templates = () => {
       title: "SaaS Starter",
       category: "Business",
       image: saasImg,
+      width: 640,
+      height: 640,
       description:
         "A pre-built project layout ready for product sites. Swap copy inline, swap sections, and publish to a subdomain.",
     },
@@ -61,6 +64,8 @@ const Templates = () => {
       title: "Storefront",
       category: "E-commerce",
       image: Ecommerce,
+      width: 735,
+      height: 1103,
       description:
         "Commerce-oriented starting template. Customize images from Assets, edit text inline, and connect pages from the Pages rail.",
     },
@@ -69,6 +74,8 @@ const Templates = () => {
       title: "Portfolio & Studio",
       category: "Portfolio",
       image: Portfolio,
+      width: 736,
+      height: 1251,
       description:
         "Showcase work with a visual canvas layout. Reorder blocks, resize frames, and preview desktop, tablet, and mobile.",
     },
@@ -77,6 +84,8 @@ const Templates = () => {
       title: "Business Site",
       category: "Business",
       image: business,
+      width: 736,
+      height: 981,
       description:
         "Professional starting point with header, hero, services, and footer blocks you can replace or extend from Elements.",
     },
@@ -85,6 +94,8 @@ const Templates = () => {
       title: "Creative Agency",
       category: "Creative",
       image: school,
+      width: 736,
+      height: 1104,
       description:
         "Image-forward template for studios and agencies. Apply a global color palette and style preset from Design.",
     },
@@ -102,16 +113,6 @@ const Templates = () => {
         isDark ? "bg-slate-950 text-slate-100" : "bg-[#f8fafc] text-[#1b1b1d]",
       )}
     >
-      <Helmet>
-        <title>Templates - Web Studio</title>
-        <meta
-          name="description"
-          content="Discover customizable website templates with Athena Web Studio. Choose professional designs to create attractive, responsive websites for your business."
-        />
-        <meta name="keywords" content="website templates" />
-        <link rel="canonical" href="https://webstudio.lmsathena.com/templates/" />
-      </Helmet>
-
       <MarketingNav isDark={isDark} setTheme={setTheme} activeItem="Templates" />
 
       <main className="w-full">
@@ -121,6 +122,10 @@ const Templates = () => {
           <img
             src={templatesImg}
             alt=""
+            width={640}
+            height={640}
+            decoding="async"
+            fetchPriority="high"
             className="h-full w-full object-cover opacity-35"
           />
           <motion.div
@@ -221,6 +226,10 @@ const Templates = () => {
                     <img
                       src={template.image}
                       alt={template.title}
+                      width={template.width}
+                      height={template.height}
+                      loading="lazy"
+                      decoding="async"
                       className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover/card:scale-105"
                     />
                     <div className="absolute inset-0 flex items-center justify-center bg-[#0F172A]/0 opacity-0 backdrop-blur-0 transition-all duration-500 group-hover/card:bg-[#0F172A]/40 group-hover/card:opacity-100 group-hover/card:backdrop-blur-sm">
@@ -347,6 +356,10 @@ const Templates = () => {
               <img
                 src={templatesImg}
                 alt="Editor"
+                width={640}
+                height={640}
+                loading="lazy"
+                decoding="async"
                 className="relative w-full max-w-full rounded-[22px] border border-white/10 shadow-2xl sm:rounded-[30px]"
               />
             </div>
