@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { isProtectedAppPath } from '@/lib/authPaths';
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.webstudio.lmsathena.com/api/v1';
 /** Platform host for published subdomains (no protocol). */
 export const SITE_HOST = String(import.meta.env.VITE_SITE_HOST || 'webstudio.lmsathena.com')
   .replace(/^https?:\/\//, '')
