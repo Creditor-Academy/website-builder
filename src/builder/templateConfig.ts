@@ -37,8 +37,8 @@ export function templateResizePatch(kind: NodeKind, width: number, height: numbe
   };
 }
 
-export function stylesToPrebuiltHostCss(styles: CanvasStyles | null | undefined): CSSProperties {
-  const bag = styles || {};
+export function stylesToPrebuiltHostCss(styles: CanvasStyles | Record<string, unknown> | null | undefined): CSSProperties {
+  const bag = (styles || {}) as Record<string, any>;
   const css: CSSProperties = {};
   if (bag.minHeight) css.minHeight = bag.minHeight;
   if (bag.height) css.minHeight = bag.height;
