@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Check,
+  ChevronLeft,
+  ChevronRight,
   Copy,
   Film,
   ExternalLink,
@@ -113,6 +115,42 @@ function cardAspect(photo: { width?: number; height?: number }, compact?: boolea
   return `${clamped} / 1`;
 }
 
+function getPageNumbers(current: number, total: number): (number | string)[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  const windowSize = 5;
+  let start = Math.max(1, current - 2);
+  let end = start + windowSize - 1;
+
+  if (end > total) {
+    end = total;
+    start = Math.max(1, end - windowSize + 1);
+  }
+
+  const pages: (number | string)[] = [];
+
+  if (start > 1) {
+    pages.push(1);
+    if (start > 2) {
+      pages.push('...');
+    }
+  }
+
+  for (let i = start; i <= end; i++) {
+    if (!pages.includes(i)) {
+      pages.push(i);
+    }
+  }
+
+  if (end < total) {
+    pages.push('...');
+  }
+
+  return pages;
+}
+
 type StockPreview =
   | { kind: 'image'; photo: PexelsPhoto }
   | { kind: 'video'; video: PexelsVideo };
@@ -218,15 +256,17 @@ export function PexelsStockSection({
   const [orientation, setOrientation] = useState<'' | PexelsOrientation>('');
   const [size, setSize] = useState<'' | PexelsSize>('');
   const [color, setColor] = useState('');
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectedMap, setSelectedMap] = useState<Map<string, PexelsPhoto | PexelsVideo>>(new Map());
+  const selectedIds = useMemo(() => new Set(selectedMap.keys()), [selectedMap]);
   const [copiedUrlId, setCopiedUrlId] = useState<string | null>(null);
   const [preview, setPreview] = useState<StockPreview | null>(null);
-  const sentinelRef = useRef<HTMLDivElement>(null);
+  const gridTopRef = useRef<HTMLDivElement>(null);
   const loadLockRef = useRef(false);
   const isPanel = layout === 'panel';
   const searchQuery = [term, category].filter(Boolean).join(' ');
   const hasFilters = Boolean(orientation || size || (!isPanel && !isVideo && color));
   const filterKey = `${mediaType}|${searchQuery}|${orientation}|${size}|${isPanel || isVideo ? '' : color}`;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const fetchPage = async (nextPage: number) => {
     if (isVideo) {
@@ -250,7 +290,7 @@ export function PexelsStockSection({
       setPhotos([]);
       setVideos([]);
       setHasMore(true);
-      setSelectedIds(new Set());
+      setSelectedMap(new Map());
       setLoading(true);
       if (page !== 1) {
         setPage(1);
@@ -271,23 +311,33 @@ export function PexelsStockSection({
         const result = await fetchPage(page);
         if (cancelled) return;
         const incoming = result.items;
+
+        if (incoming.length === 0 && page > 1) {
+          // Safeguard: deep page has no results — adjust total to known items and step back to last valid page
+          setHasMore(false);
+          setTotal((page - 1) * PAGE_SIZE);
+          setPage((prev) => Math.max(1, prev - 1));
+          return;
+        }
+
         if (isVideo) {
-          setVideos((current) => {
-            if (page === 1) return incoming as PexelsVideo[];
-            const seen = new Set(current.map((video) => video.id));
-            return [...current, ...(incoming as PexelsVideo[]).filter((video) => !seen.has(video.id))];
-          });
+          setVideos(incoming as PexelsVideo[]);
           setPhotos([]);
         } else {
-          setPhotos((current) => {
-            if (page === 1) return incoming as PexelsPhoto[];
-            const seen = new Set(current.map((photo) => photo.id));
-            return [...current, ...(incoming as PexelsPhoto[]).filter((photo) => !seen.has(photo.id))];
-          });
+          setPhotos(incoming as PexelsPhoto[]);
           setVideos([]);
         }
-        setTotal(result.total || incoming.length || 0);
-        setHasMore(Boolean(result.next) && incoming.length > 0);
+
+        if (incoming.length < PAGE_SIZE) {
+          // Reached true last page (fewer than 20 items returned)
+          setHasMore(false);
+          setTotal((page - 1) * PAGE_SIZE + incoming.length);
+        } else {
+          // Full page returned: has next if next_page is present OR if page * PAGE_SIZE < total
+          const hasNext = Boolean(result.next) || (result.total > 0 ? page * PAGE_SIZE < result.total : true);
+          setHasMore(hasNext);
+          setTotal(result.total || incoming.length || 0);
+        }
       } catch (err) {
         if (cancelled) return;
         if (page === 1) {
@@ -313,38 +363,27 @@ export function PexelsStockSection({
     };
   }, [filterKey, page, term, isVideo]);
 
-  useEffect(() => {
-    const node = sentinelRef.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries[0]?.isIntersecting || !hasMore || loading || loadingMore || loadLockRef.current) return;
-        loadLockRef.current = true;
-        setPage((current) => current + 1);
-      },
-      { rootMargin: '480px' }
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [hasMore, loading, loadingMore, photos.length, videos.length]);
-
   const itemsCount = isVideo ? videos.length : photos.length;
-  const selectedPhotos = useMemo(
-    () => photos.filter((photo) => selectedIds.has(String(photo.id))),
-    [photos, selectedIds]
-  );
-  const selectedVideos = useMemo(
-    () => videos.filter((video) => selectedIds.has(String(video.id))),
-    [videos, selectedIds]
-  );
+  const startItem = total === 0 || itemsCount === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const endItem = total === 0 || itemsCount === 0 ? 0 : Math.min(startItem + itemsCount - 1, total);
 
-  const toggleSelected = (id: string) => {
-    setSelectedIds((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+  const toggleSelected = (item: PexelsPhoto | PexelsVideo) => {
+    const id = String(item.id);
+    setSelectedMap((current) => {
+      const next = new Map(current);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.set(id, item);
+      }
       return next;
     });
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage === page || (total > 0 && newPage > totalPages) || loading || loadingMore) return;
+    setPage(newPage);
+    gridTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const clearFilters = () => {
@@ -356,24 +395,23 @@ export function PexelsStockSection({
   };
 
   const applySelected = async () => {
-    if (isVideo) {
-      for (const video of selectedVideos) {
-        const url = videoFileUrl(video);
+    const items = Array.from(selectedMap.values());
+    for (const item of items) {
+      if ('video_files' in item) {
+        const url = videoFileUrl(item);
         if (url) {
-          await onAddToLibrary({ name: videoName(video), url, media: 'video', provider: 'pexels', providerId: video.id });
-          setSelectedIds((current) => {
-            const next = new Set(current);
-            next.delete(String(video.id));
+          await onAddToLibrary({ name: videoName(item), url, media: 'video', provider: 'pexels', providerId: item.id });
+          setSelectedMap((current) => {
+            const next = new Map(current);
+            next.delete(String(item.id));
             return next;
           });
         }
-      }
-    } else {
-      for (const photo of selectedPhotos) {
-        await onAddToLibrary({ name: photoName(photo), url: photoUrl(photo), media: 'image', provider: 'pexels', providerId: photo.id });
-        setSelectedIds((current) => {
-          const next = new Set(current);
-          next.delete(String(photo.id));
+      } else {
+        await onAddToLibrary({ name: photoName(item), url: photoUrl(item), media: 'image', provider: 'pexels', providerId: item.id });
+        setSelectedMap((current) => {
+          const next = new Map(current);
+          next.delete(String(item.id));
           return next;
         });
       }
@@ -519,7 +557,11 @@ export function PexelsStockSection({
           </div>
         ) : (
           <>
-            <div className={cn(isPanel ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5')}>
+            <div ref={gridTopRef} />
+            <div className={cn(
+              isPanel ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5',
+              loadingMore && 'opacity-60 pointer-events-none transition-opacity duration-150'
+            )}>
               {isVideo
                 ? videos.map((video) => {
                   const id = String(video.id);
@@ -556,7 +598,7 @@ export function PexelsStockSection({
                       <span className="absolute left-2.5 bottom-2.5 rounded-md bg-black/45 px-1.5 py-0.5 text-[10px] font-medium text-white">
                         {formatDuration(video.duration)} · {video.width} × {video.height}
                       </span>
-                      <SelectBadge selected={selected} onToggle={() => toggleSelected(id)} />
+                      <SelectBadge selected={selected} onToggle={() => toggleSelected(video)} />
                     </div>
                   );
                 })
@@ -593,12 +635,11 @@ export function PexelsStockSection({
                       <span className="absolute left-2.5 bottom-2.5 rounded-md bg-black/45 px-1.5 py-0.5 text-[10px] font-medium text-white">
                         {photo.width} × {photo.height}
                       </span>
-                      <SelectBadge selected={selected} onToggle={() => toggleSelected(id)} />
+                      <SelectBadge selected={selected} onToggle={() => toggleSelected(photo)} />
                     </div>
                   );
                 })}
             </div>
-            <div ref={sentinelRef} className="h-8 w-full" aria-hidden />
             {loadingMore && (
               <div className="flex items-center justify-center gap-2 py-3 text-slate-400">
                 <Loader2 className="h-4 w-4 animate-spin text-[#111827]" />
@@ -608,10 +649,64 @@ export function PexelsStockSection({
           </>
         )}
 
-        <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-          <p className="text-center text-xs text-slate-400 sm:text-left">
-            Showing {itemsCount.toLocaleString()} of {total.toLocaleString()} {isVideo ? 'videos' : 'photos'}
+        <div className="flex flex-col gap-3.5 border-t border-slate-100 pt-6 pb-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <p className="text-center text-xs font-medium text-slate-500 sm:text-left">
+            Showing {startItem.toLocaleString()}–{endItem.toLocaleString()} of {total.toLocaleString()} {isVideo ? 'videos' : 'photos'}
           </p>
+
+          {totalPages > 1 && (
+            <div className="flex flex-wrap items-center justify-center gap-1 sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={page <= 1 || loading || loadingMore}
+                onClick={() => handlePageChange(page - 1)}
+                className="h-8 gap-1 rounded-lg border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+                <span className="hidden min-[480px]:inline">Previous</span>
+              </Button>
+
+              <div className="flex items-center gap-1">
+                {getPageNumbers(page, totalPages).map((p, idx) =>
+                  typeof p === 'number' ? (
+                    <button
+                      key={`page-${p}`}
+                      type="button"
+                      disabled={loading || loadingMore}
+                      onClick={() => handlePageChange(p)}
+                      aria-current={page === p ? 'page' : undefined}
+                      className={cn(
+                        'flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-semibold transition-colors',
+                        page === p
+                          ? 'bg-[#111827] text-white shadow-sm'
+                          : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                      )}
+                    >
+                      {p}
+                    </button>
+                  ) : (
+                    <span key={`ellipsis-${idx}`} className="flex h-8 w-5 items-center justify-center text-xs text-slate-400">
+                      …
+                    </span>
+                  )
+                )}
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={!hasMore || page >= totalPages || loading || loadingMore}
+                onClick={() => handlePageChange(page + 1)}
+                className="h-8 gap-1 rounded-lg border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+              >
+                <span className="hidden min-[480px]:inline">Next</span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -834,4 +929,4 @@ export function PexelsStockBrowser({
   );
 }
 
-export { cardAspect, formatDuration, photoName, photoUrl, videoFileUrl, videoName };
+export { cardAspect, formatDuration, getPageNumbers, photoName, photoUrl, videoFileUrl, videoName };
