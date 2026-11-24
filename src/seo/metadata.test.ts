@@ -55,6 +55,9 @@ describe("route SEO metadata", () => {
     expect(head).toContain('"name":"Athena Web Studio"');
     expect(head).toContain('"@type":"BreadcrumbList"');
     expect(head).toContain("/images/hero-canvas.webp");
+
+    const featuresHead = renderHead(SEO_PAGES.find((p) => p.path === "/features")!, "/features");
+    expect(featuresHead).not.toContain("SoftwareApplication");
   });
 
   it("sends unknown paths to the noindex 404 head and keeps the builder on the app shell", () => {
