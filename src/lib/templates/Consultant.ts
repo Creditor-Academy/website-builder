@@ -449,52 +449,20 @@ export const createMarketExpansionPage = () => ({
   footer: createConsultantFooter(),
 });
 
-export const getConsultantPage = () => ({
-  pages: [
-    {
-      id: uuidv4(),
-      name: 'Home',
-      slug: '/',
-      meta: {
-        title: 'Executive Consulting - Strategic Excellence',
-        description: 'Bespoke strategic intelligence for high-performance leaders and organizational transformation.'
-      },
-      sections: [
-        createConsultantHeroSection(),
-        createConsultantAboutSection(),
-        createConsultantServicesSection(),
-        createConsultantCaseStudiesSection(),
-        createConsultantTestimonialsSection(),
-        createConsultantCTASection(),
-        createConsultantContactSection(),
-      ],
-    },
-    {
-      ...createExecutiveStrategyPage(),
-      navbar: undefined,
-      footer: undefined
-    },
-    {
-      ...createRevenueGrowthPage(),
-      navbar: undefined,
-      footer: undefined
-    },
-    {
-      ...createMarketExpansionPage(),
-      navbar: undefined,
-      footer: undefined
-    },
-    {
-      id: uuidv4(),
-      name: 'Contact',
-      slug: '/contact',
-      meta: { title: 'Contact Us', description: 'Get in touch with Thompson Consulting' },
-      sections: [createConsultantContactSection()],
-    }
-  ],
-  navbar: createConsultantNavbar(),
-  footer: createConsultantFooter(),
-  globalStyles: {
+export const getConsultantPage = () => {
+  const homeId = uuidv4();
+  const homeSections = [
+    createConsultantHeroSection(),
+    createConsultantAboutSection(),
+    createConsultantServicesSection(),
+    createConsultantCaseStudiesSection(),
+    createConsultantTestimonialsSection(),
+    createConsultantCTASection(),
+    createConsultantContactSection(),
+  ];
+  const navbar = createConsultantNavbar();
+  const footer = createConsultantFooter();
+  const globalStyles = {
     fontFamily: 'Inter',
     headingFont: 'Playfair Display',
     primaryColor: '#d4af37',
@@ -506,5 +474,53 @@ export const getConsultantPage = () => ({
     glassmorphism: false,
     animations: true,
     shadows: 'subtle',
-  },
-}); 
+  };
+
+  return {
+    id: homeId,
+    name: 'Home',
+    slug: '/',
+    meta: {
+      title: 'Executive Consulting - Strategic Excellence',
+      description: 'Bespoke strategic intelligence for high-performance leaders and organizational transformation.'
+    },
+    navbar,
+    sections: homeSections,
+    footer,
+    globalStyles,
+    pages: [
+      {
+        id: homeId,
+        name: 'Home',
+        slug: '/',
+        meta: {
+          title: 'Executive Consulting - Strategic Excellence',
+          description: 'Bespoke strategic intelligence for high-performance leaders and organizational transformation.'
+        },
+        sections: homeSections,
+      },
+      {
+        ...createExecutiveStrategyPage(),
+        navbar: undefined,
+        footer: undefined
+      },
+      {
+        ...createRevenueGrowthPage(),
+        navbar: undefined,
+        footer: undefined
+      },
+      {
+        ...createMarketExpansionPage(),
+        navbar: undefined,
+        footer: undefined
+      },
+      {
+        id: uuidv4(),
+        name: 'Contact',
+        slug: '/contact',
+        meta: { title: 'Contact Us', description: 'Get in touch with Thompson Consulting' },
+        sections: [createConsultantContactSection()],
+      }
+    ],
+  };
+}; 

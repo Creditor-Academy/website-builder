@@ -5,6 +5,8 @@ import { FooterPreview } from '@/components/preview/FooterPreview';
 import { SectionRenderer } from '@/components/sections/SectionRenderer';
 import { JumpToTop } from '@/components/ui/JumpToTop';
 import { sanitizeHTML } from '@/utils/sanitize';
+import { DEVICE_WIDTHS } from '@/builder/types';
+import { cn } from '@/lib/utils';
 
 export function CanvasPreview() {
   const { state, selectSection, updateSectionContent, updateNavbar, updateFooter } = useBuilder();
@@ -66,6 +68,7 @@ export function CanvasPreview() {
     >
       <style dangerouslySetInnerHTML={{ __html: sanitizeHTML(`
         #canvas-root {
+          container-type: inline-size;
           --theme-primary: ${globalStyles.primaryColor || '#3b82f6'};
           --theme-secondary: ${globalStyles.secondaryColor || '#8b5cf6'};
           --theme-accent: ${globalStyles.accentColor || '#06b6d4'};
@@ -112,10 +115,19 @@ export function CanvasPreview() {
         ` : ''}
       `) }} />
       <JumpToTop containerRef={canvasRef} className="absolute bottom-6 right-6" threshold={200} />
-      {/* FIXED FULL-WIDTH CANVAS */}
+      {/* FIXED FULL-WIDTH CANVAS WITH DEVICE EMULATION */}
       <div
         id="canvas-root"
-        className="mx-auto shadow-elevated rounded-xl bg-[hsl(var(--canvas))] transition-colors duration-200 w-full max-w-full overflow-x-hidden"
+        data-device={editor.device}
+        style={{
+          width: editor.device === 'desktop' ? '100%' : `${DEVICE_WIDTHS[editor.device] || 1200}px`,
+          maxWidth: '100%',
+          transition: 'width 0.25s ease',
+        }}
+        className={cn(
+          "mx-auto shadow-elevated rounded-xl bg-[hsl(var(--canvas))] duration-200 overflow-x-hidden",
+          editor.device !== 'desktop' && "my-4 border border-slate-200 shadow-2xl"
+        )}
       >
         <div className="light-canvas w-full max-w-full overflow-x-hidden">
           <NavbarPreview

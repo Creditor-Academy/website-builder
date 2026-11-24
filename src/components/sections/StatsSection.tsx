@@ -58,27 +58,27 @@ export function StatsSection({ section, isEditing, onContentChange }) {
   if (variant === 'counter') {
     return (
       <section className="relative" style={{ background, padding }}>
-        <div className="container mx-auto px-6 max-w-7xl">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-12">
             {stats.map((stat, index) => (
               <div key={stat.id || index} className="flex flex-col items-center">
                 <div className="relative">
                   <Editable
-                    className="text-7xl md:text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 leading-none"
+                    className="text-5xl sm:text-6xl md:text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 leading-none text-center"
                     isEditing={isEditing}
                     value={stat.value || ''}
                     onSave={(val) => updateField(stat.id, 'value', val)}
                   />
                   <Editable 
                     as="span"
-                    className="text-3xl font-bold text-blue-500 absolute -top-2 -right-6"
+                    className="text-2xl sm:text-3xl font-bold text-blue-500 absolute -top-1 sm:-top-2 -right-4 sm:-right-6"
                     isEditing={isEditing}
                     value={stat.suffix || ''}
                     onSave={(val) => updateField(stat.id, 'suffix', val)}
                   />
                 </div>
                 <Editable 
-                  className="mt-4 text-slate-400 text-sm font-medium uppercase tracking-[0.3em] text-center"
+                  className="mt-4 text-slate-400 text-xs sm:text-sm font-medium uppercase tracking-[0.2em] sm:tracking-[0.3em] text-center"
                   isEditing={isEditing}
                   value={stat.label || ''}
                   onSave={(val) => updateField(stat.id, 'label', val)}
@@ -94,29 +94,29 @@ export function StatsSection({ section, isEditing, onContentChange }) {
   // --- DEFAULT: HORIZONTAL (Minimalist Split) ---
   return (
     <section className="relative border-y border-white/5" style={{ background, padding }}>
-      <div className="container mx-auto px-6 max-w-7xl">
-        <div className="flex flex-wrap justify-center lg:justify-between items-center gap-12 lg:gap-4">
+      <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
+        <div className="flex flex-wrap justify-center lg:justify-between items-center gap-8 sm:gap-12 lg:gap-4">
           {stats.map((stat, index) => (
             <React.Fragment key={stat.id || index}>
-              <div className="text-center px-8">
+              <div className="text-center px-4 sm:px-8">
                 <div className="flex items-center justify-center gap-1">
                   <Editable
                     as="span"
-                    className="text-6xl font-bold text-white tracking-tighter"
+                    className="text-4xl sm:text-5xl md:text-6xl font-bold text-white tracking-tighter"
                     isEditing={isEditing}
                     value={stat.value || ''}
                     onSave={(val) => updateField(stat.id, 'value', val)}
                   />
                   <Editable 
                     as="span"
-                    className="text-4xl font-light text-blue-400/80"
+                    className="text-3xl sm:text-4xl font-light text-blue-400/80"
                     isEditing={isEditing}
                     value={stat.suffix || ''}
                     onSave={(val) => updateField(stat.id, 'suffix', val)}
                   />
                 </div>
                 <Editable 
-                  className="mt-2 text-slate-500 text-xs font-black uppercase tracking-widest"
+                  className="mt-2 text-slate-500 text-[11px] sm:text-xs font-black uppercase tracking-widest"
                   isEditing={isEditing}
                   value={stat.label || ''}
                   onSave={(val) => updateField(stat.id, 'label', val)}

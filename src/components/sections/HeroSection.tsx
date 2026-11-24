@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, Play, ChevronRight } from 'lucide-react';
 import { Editable } from '@/components/ui/Editable';
+import { responsivePadding } from '@/builder/styles';
 
 export function HeroSection({ section, isSelected, isEditing, onContentChange, isAlternate }) {
   const { content, styles, variant = 'split' } = section;
@@ -51,7 +52,7 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange, i
 
   const sectionStyle = {
     background,
-    padding: styles.padding,
+    padding: responsivePadding(styles.padding),
     minHeight: styles.minHeight,
     fontFamily: "'DM Sans', 'Helvetica Neue', sans-serif",
   };
@@ -431,7 +432,7 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange, i
             </div>
 
             {/* Social proof row */}
-            <div className="flex items-center justify-center gap-6 pt-8 border-t border-slate-100">
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 pt-8 border-t border-slate-100">
               {(content.socialProof || ['Trusted by 10K+ teams', '4.9★ rating', 'SOC 2 certified']).map((item, i) => (
                 <div key={i} className="flex items-center gap-2 text-sm" style={{ color: '#64748b' }}>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" />
@@ -541,7 +542,7 @@ export function HeroSection({ section, isSelected, isEditing, onContentChange, i
             </div>
 
             {/* Stats row */}
-            <div className="flex flex-wrap gap-8 pt-6 border-t border-slate-100">
+            <div className="flex flex-wrap gap-4 sm:gap-8 pt-6 border-t border-slate-100">
               {(content.stats || [
                 { value: '10K+', label: 'Users' },
                 { value: '50K+', label: 'Websites' },

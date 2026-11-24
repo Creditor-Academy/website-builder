@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronDown, Plus, Minus } from 'lucide-react';
 import { Editable } from '@/components/ui/Editable';
 import { useBuilder } from '@/contexts/BuilderContext';
+import { responsivePadding } from '@/builder/styles';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -406,7 +407,7 @@ export function FAQSection({ section, isSelected, isEditing, onContentChange, is
     ? (styles.backgroundGradient || styles.backgroundColor)
     : (styles.backgroundColor || (isAlternate ? 'var(--theme-bg-alt, #f8fafc)' : 'var(--theme-bg, #f8fafc)'));
 
-          const padding = styles.padding || '60px 0';
+  const padding = responsivePadding(styles.padding, '60px 0');
   const headingColor = styles.headingColor || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
   const paragraphColor = styles.paragraphColor || (isAlternate ? 'var(--theme-text-alt, #64748b)' : 'var(--theme-text, #64748b)');
 

@@ -624,13 +624,35 @@ export function NavbarPreview({
           </div>
         </div>
 
-        {/* Responsive CSS via style tag — shows mobile button & menu below md */}
+        {/* Responsive CSS via style tag — shows mobile button & menu below md & on simulated devices */}
         <style>{`
         @media (max-width: 768px) {
           #nb-hamburger { display: flex !important; }
           #nb-mobile-menu { display: block !important; }
           .nb-desktop-links { display: none !important; }
           .nb-logo-center { position: static !important; transform: none !important; }
+        }
+        @container (max-width: 768px) {
+          #nb-hamburger { display: flex !important; }
+          #nb-mobile-menu { display: block !important; }
+          .nb-desktop-links { display: none !important; }
+          .nb-logo-center { position: static !important; transform: none !important; }
+        }
+        [data-device="mobile"] #nb-hamburger,
+        [data-device="tablet"] #nb-hamburger {
+          display: flex !important;
+        }
+        [data-device="mobile"] #nb-mobile-menu,
+        [data-device="tablet"] #nb-mobile-menu {
+          display: block !important;
+        }
+        [data-device="mobile"] .nb-desktop-links,
+        [data-device="tablet"] .nb-desktop-links {
+          display: none !important;
+        }
+        [data-device="mobile"] .nb-logo-center,
+        [data-device="tablet"] .nb-logo-center {
+          position: static !important; transform: none !important;
         }
       `}</style>
       </nav>

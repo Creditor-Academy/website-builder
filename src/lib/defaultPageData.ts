@@ -7,6 +7,8 @@ export * from './templates/Ecommerce';
 export * from './templates/Consultant';
 export * from './templates/Agencies';
 export * from './templates/Coach';
+export * from './templates/Restaurant';
+export * from './templates/Blog';
 
 // --- Default Sections (Shared/Fallback) ---
 

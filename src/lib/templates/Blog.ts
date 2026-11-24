@@ -261,3 +261,14 @@ export const getBlogTemplate = () => ({
     backgroundColor: '#ffffff',
   },
 });
+
+export const getBlogPage = () => {
+  const t = getBlogTemplate();
+  const home = t.pages[0];
+  return {
+    ...home,
+    navbar: t.navbar,
+    footer: t.footer,
+    globalStyles: t.globalStyles,
+  };
+};

@@ -171,3 +171,14 @@ export const getRestaurantTemplate = () => ({
     backgroundColor: '#fafaf9',
   },
 });
+
+export const getRestaurantPage = () => {
+  const t = getRestaurantTemplate();
+  const home = t.pages[0];
+  return {
+    ...home,
+    navbar: t.navbar,
+    footer: t.footer,
+    globalStyles: t.globalStyles,
+  };
+};

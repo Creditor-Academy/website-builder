@@ -103,3 +103,16 @@ export function patchResponsiveStyles(
 export function spacingShorthand(value: string | undefined, fallback = '0px'): string {
   return value && value.trim() ? value : fallback;
 }
+
+export function responsivePadding(padding?: string, fallback = 'clamp(48px, 6vw, 100px) 0'): string {
+  if (!padding || !padding.trim()) return fallback;
+  if (padding.includes('clamp') || padding.includes('calc') || padding.includes('rem') || padding.includes('vh')) {
+    return padding;
+  }
+  const parts = padding.trim().split(/\s+/);
+  const top = parseFloat(parts[0]);
+  if (!Number.isFinite(top) || top <= 48) return padding;
+  const min = Math.max(36, Math.round(top * 0.45));
+  const horiz = parts[1] || '0';
+  return `clamp(${min}px, 6vw, ${top}px) ${horiz}`;
+}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { ExternalLink } from 'lucide-react';
 import { Editable } from '@/components/ui/Editable';
+import { responsivePadding } from '@/builder/styles';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -345,7 +346,7 @@ export function GallerySection({ section, isSelected, isEditing, onContentChange
     <section
       style={{
         background,
-        padding: styles.padding || '60px 0',
+        padding: responsivePadding(styles.padding),
         fontFamily: "'DM Sans', sans-serif",
         position: 'relative',
         outline: isSelected ? '2px solid #E11D48' : 'none',
