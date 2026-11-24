@@ -307,14 +307,7 @@ export function buildJsonLd(page: SeoPage, canonicalPath: string | null): JsonLd
         "@id": ORGANIZATION_ID,
         name: "Athena LMS",
         url: ORGANIZATION_URL,
-        telephone: "+1 (425) 400-9246",
-        address: {
-          "@type": "PostalAddress",
-          streetAddress: "12315 NE 97th Street",
-          addressLocality: "Kirkland",
-          addressRegion: "WA",
-          addressCountry: "US",
-        },
+        
       },
       {
         "@type": "SoftwareApplication",

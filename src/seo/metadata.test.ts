@@ -50,8 +50,6 @@ describe("route SEO metadata", () => {
     expect(head.match(/<meta name="description"/g)).toHaveLength(1);
     expect(head).toContain('"@type":"Organization"');
     expect(head).toContain('"name":"Athena LMS"');
-    expect(head).toContain("12315 NE 97th Street");
-    expect(head).toContain("+1 (425) 400-9246");
     expect(head).toContain("https://lmsathena.com");
     expect(head).toContain('"@type":"SoftwareApplication"');
     expect(head).toContain('"name":"Athena Web Studio"');
