@@ -1,5 +1,10 @@
+```groovy
 pipeline {
     agent any
+
+    environment {
+        PUPPETEER_EXECUTABLE_PATH = '/usr/bin/google-chrome'
+    }
 
     options {
         timeout(time: 15, unit: 'MINUTES')
@@ -8,9 +13,17 @@ pipeline {
     }
 
     stages {
+
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/Creditor-Academy/website-builder.git'
+            }
+        }
+
         stage('Install') {
             steps {
-                sh 'npm install'
+                sh 'npm ci'
             }
         }
 
@@ -25,20 +38,22 @@ pipeline {
                 sh '''
                     set -e
 
-                    # Make sure build output exists before touching the live site
+                    # Verify build output
                     if [ ! -d dist ] || [ -z "$(ls -A dist)" ]; then
-                        echo "dist/ is missing or empty. Aborting deploy."
+                        echo "dist/ is missing or empty. Aborting deployment."
                         exit 1
                     fi
 
-                    # Sync new build to live site (only changes files, removes old ones)
+                    # Deploy build to live directory
                     sudo rsync -a --delete dist/ /var/www/frontend/website-builder/dist/
 
-                    # Set ownership
+                    # Set correct ownership
                     sudo chown -R www-data:www-data /var/www/frontend/website-builder/dist
 
-                    # Test Nginx config, then reload
+                    # Validate Nginx configuration
                     sudo nginx -t
+
+                    # Reload Nginx
                     sudo systemctl reload nginx
                 '''
             }
@@ -47,11 +62,11 @@ pipeline {
 
     post {
         success {
-            echo 'Deployment Successful'
+            echo 'Web Studio deployment completed successfully.'
         }
 
         failure {
-            echo 'Deployment Failed. Check the stage logs above.'
+            echo 'Web Studio deployment failed. Check the stage logs.'
         }
 
         always {
@@ -59,3 +74,4 @@ pipeline {
         }
     }
 }
+```
