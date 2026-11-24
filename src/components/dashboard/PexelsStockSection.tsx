@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Check,
+  Copy,
   Film,
   ExternalLink,
   Image as ImageIcon,
@@ -54,17 +55,17 @@ const SIZES: { id: '' | PexelsSize; label: string }[] = [
 ];
 
 const COLORS = [
-  { id: 'white', swatch: '#ffffff' },
-  { id: 'black', swatch: '#111827' },
-  { id: 'gray', swatch: '#9ca3af' },
-  { id: 'red', swatch: '#ef4444' },
-  { id: 'orange', swatch: '#f97316' },
-  { id: 'yellow', swatch: '#eab308' },
-  { id: 'green', swatch: '#22c55e' },
-  { id: 'turquoise', swatch: '#14b8a6' },
-  { id: 'blue', swatch: '#3b82f6' },
-  { id: 'violet', swatch: '#8b5cf6' },
-  { id: 'pink', swatch: '#ec4899' },
+  { id: 'white', swatch: '#FFFFFF' },
+  { id: 'black', swatch: '#000000' },
+  { id: 'gray', swatch: '#9E9E9E' },
+  { id: 'red', swatch: '#F44336' },
+  { id: 'orange', swatch: '#FF9800' },
+  { id: 'yellow', swatch: '#FFEB3B' },
+  { id: 'green', swatch: '#4CAF50' },
+  { id: 'turquoise', swatch: '#00BCD4' },
+  { id: 'blue', swatch: '#2196F3' },
+  { id: 'violet', swatch: '#9C27B0' },
+  { id: 'pink', swatch: '#E91E63' },
 ] as const;
 
 const MEDIA_TYPES: { id: PexelsMediaType; label: string }[] = [
@@ -88,7 +89,7 @@ function photoName(photo: PexelsPhoto) {
 }
 
 function photoUrl(photo: PexelsPhoto) {
-  return photo.src.large || photo.src.medium || photo.src.original;
+  return photo.src.original || photo.src.large2x || photo.src.large || photo.src.medium;
 }
 
 function photoSrc(photo: PexelsPhoto) {
@@ -96,13 +97,16 @@ function photoSrc(photo: PexelsPhoto) {
 }
 
 function formatDuration(seconds: number) {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.max(0, Math.round(seconds % 60));
+  const total = Math.max(0, Math.round(seconds || 0));
+  const mins = Math.floor(total / 60);
+  const secs = total % 60;
   return `${mins}:${String(secs).padStart(2, '0')}`;
 }
 
-function cardAspect(photo: { width: number; height: number }, compact?: boolean) {
-  const ratio = photo.width / Math.max(photo.height, 1);
+function cardAspect(photo: { width?: number; height?: number }, compact?: boolean) {
+  const w = Number(photo?.width) || 1200;
+  const h = Number(photo?.height) || 800;
+  const ratio = w / Math.max(h, 1);
   const min = compact ? 0.82 : 0.62;
   const max = compact ? 1.35 : 1.7;
   const clamped = Math.min(max, Math.max(min, ratio));
@@ -142,6 +146,11 @@ function SelectBadge({ selected, onToggle }: { selected: boolean; onToggle: () =
         event.stopPropagation();
         onToggle();
       }}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.stopPropagation();
+        }
+      }}
       className={cn(
         'absolute right-2.5 top-2.5 z-10 flex h-7 w-7 items-center justify-center rounded-full shadow-sm',
         selected ? 'bg-emerald-500 text-white' : 'bg-white/90 text-slate-500'
@@ -167,6 +176,7 @@ export function PexelsStockSection({
   query,
   importingId,
   onClearQuery,
+  onCopy,
   onAddToLibrary,
   onSaveToLibrary,
   layout = 'page',
@@ -181,7 +191,21 @@ export function PexelsStockSection({
   layout?: 'page' | 'panel';
   filtersOpen?: boolean;
 }) {
-  const [mediaType, setMediaType] = useState<PexelsMediaType>('images');
+  const { requestsVideos, term } = parseStockSearchQuery(query);
+  const [mediaType, setMediaType] = useState<PexelsMediaType>(() => requestsVideos ? 'videos' : 'images');
+  const prevQueryRef = useRef(query);
+  const prevTermRef = useRef(term);
+
+  useEffect(() => {
+    if (query !== prevQueryRef.current) {
+      prevQueryRef.current = query;
+      if (requestsVideos) {
+        setMediaType('videos');
+      }
+    }
+  }, [query, requestsVideos]);
+
+  const isVideo = mediaType === 'videos';
   const [photos, setPhotos] = useState<PexelsPhoto[]>([]);
   const [videos, setVideos] = useState<PexelsVideo[]>([]);
   const [total, setTotal] = useState(0);
@@ -195,15 +219,14 @@ export function PexelsStockSection({
   const [size, setSize] = useState<'' | PexelsSize>('');
   const [color, setColor] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [copiedUrlId, setCopiedUrlId] = useState<string | null>(null);
   const [preview, setPreview] = useState<StockPreview | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadLockRef = useRef(false);
   const isPanel = layout === 'panel';
-  const { requestsVideos, term } = parseStockSearchQuery(query);
   const searchQuery = [term, category].filter(Boolean).join(' ');
-  const isVideo = requestsVideos || mediaType === 'videos';
   const hasFilters = Boolean(orientation || size || (!isPanel && !isVideo && color));
-  const filterKey = `${isVideo ? 'videos' : mediaType}|${searchQuery}|${orientation}|${size}|${isPanel || isVideo ? '' : color}`;
+  const filterKey = `${mediaType}|${searchQuery}|${orientation}|${size}|${isPanel || isVideo ? '' : color}`;
 
   const fetchPage = async (nextPage: number) => {
     if (isVideo) {
@@ -228,6 +251,7 @@ export function PexelsStockSection({
       setVideos([]);
       setHasMore(true);
       setSelectedIds(new Set());
+      setLoading(true);
       if (page !== 1) {
         setPage(1);
         return;
@@ -236,6 +260,8 @@ export function PexelsStockSection({
     let cancelled = false;
     let started = false;
     loadLockRef.current = true;
+    const isTyping = term !== prevTermRef.current;
+    prevTermRef.current = term;
     const timer = window.setTimeout(async () => {
       started = true;
       if (page === 1) setLoading(true);
@@ -270,7 +296,7 @@ export function PexelsStockSection({
           setTotal(0);
         }
         setHasMore(false);
-        setError(err instanceof Error ? err.message : 'Could not load stock photos.');
+        setError(err instanceof Error ? err.message : (isVideo ? 'Could not load stock videos' : 'Could not load stock photos'));
       } finally {
         loadLockRef.current = false;
         if (!cancelled) {
@@ -278,7 +304,7 @@ export function PexelsStockSection({
           setLoadingMore(false);
         }
       }
-    }, term && page === 1 ? 400 : 0);
+    }, isTyping && page === 1 ? 400 : 0);
 
     return () => {
       cancelled = true;
@@ -333,141 +359,169 @@ export function PexelsStockSection({
     if (isVideo) {
       for (const video of selectedVideos) {
         const url = videoFileUrl(video);
-        if (url) await onAddToLibrary({ name: videoName(video), url, media: 'video', provider: 'pexels', providerId: video.id });
+        if (url) {
+          await onAddToLibrary({ name: videoName(video), url, media: 'video', provider: 'pexels', providerId: video.id });
+          setSelectedIds((current) => {
+            const next = new Set(current);
+            next.delete(String(video.id));
+            return next;
+          });
+        }
       }
     } else {
       for (const photo of selectedPhotos) {
         await onAddToLibrary({ name: photoName(photo), url: photoUrl(photo), media: 'image', provider: 'pexels', providerId: photo.id });
+        setSelectedIds((current) => {
+          const next = new Set(current);
+          next.delete(String(photo.id));
+          return next;
+        });
       }
     }
-    setSelectedIds(new Set());
   };
 
   return (
     <div className={cn(!isPanel && 'min-w-0 space-y-3 pb-24', isPanel && 'flex h-full min-h-0 flex-col')}>
       <div className={cn(isPanel ? 'min-h-0 flex-1 space-y-3 overflow-y-auto p-3' : 'min-w-0 space-y-3')}>
-      {(!isPanel || filtersOpen) && (
-      <div className={cn('rounded-2xl bg-white px-3 py-3 sm:px-4 sm:py-3.5', isPanel && 'animate-in fade-in slide-in-from-top-2 duration-200')}>
-        <div className="flex min-w-0 flex-col gap-3">
-        <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-3">
-          <div className="min-w-0">
-            <p className="mb-1.5 text-[11px] font-medium text-slate-400">Type</p>
-            <div className={filterScrollClass}>
-              {MEDIA_TYPES.map((option) => (
-                <button key={option.id} type="button" onClick={() => setMediaType(option.id)} className={pillClass((isVideo ? 'videos' : mediaType) === option.id)}>
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          {!isPanel && !isVideo && (
-          <div className="min-w-0">
-            <p className="mb-1.5 text-[11px] font-medium text-slate-400">Color</p>
-            <div className="inline-flex items-center gap-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {COLORS.map((option) => (
+        {(!isPanel || filtersOpen) && (
+          <div className={cn('rounded-2xl bg-white px-3 py-3 sm:px-4 sm:py-3.5', isPanel && 'animate-in fade-in slide-in-from-top-2 duration-200')}>
+            <div className="flex min-w-0 flex-col gap-3">
+              <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-3">
+                <div className="min-w-0">
+                  <p className="mb-1.5 text-[11px] font-medium text-slate-400">Type</p>
+                  <div className={filterScrollClass}>
+                    {MEDIA_TYPES.map((option) => (
+                      <button key={option.id} type="button" onClick={() => setMediaType(option.id)} className={pillClass(mediaType === option.id)}>
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {!isPanel && !isVideo && (
+                  <div className="min-w-0">
+                    <p className="mb-1.5 text-[11px] font-medium text-slate-400">Color</p>
+                    <div className="inline-flex items-center gap-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                      {COLORS.map((option) => (
+                        <button
+                          key={option.id}
+                          type="button"
+                          title={option.id}
+                          aria-label={`Filter by ${option.id} color`}
+                          onClick={() => setColor(color === option.id ? '' : option.id)}
+                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-transform hover:scale-110 touch-manipulation"
+                        >
+                          <span
+                            className={cn(
+                              'h-4 w-4 rounded-full border border-slate-200 shadow-sm transition-all',
+                              color === option.id && 'ring-2 ring-[#111827] ring-offset-1'
+                            )}
+                            style={{ backgroundColor: option.swatch }}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="mb-1.5 text-[11px] font-medium text-slate-400">Orientation</p>
+                  <div className={filterScrollClass}>
+                    {ORIENTATIONS.map((option) => (
+                      <button key={option.id || 'any-shape'} type="button" onClick={() => setOrientation(orientation === option.id ? '' : option.id)} className={pillClass(orientation === option.id)}>
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="min-w-0">
+                  <p className="mb-1.5 text-[11px] font-medium text-slate-400">Size</p>
+                  <div className={filterScrollClass}>
+                    {SIZES.map((option) => (
+                      <button key={option.id || 'any-size'} type="button" onClick={() => setSize(size === option.id ? '' : option.id)} className={pillClass(size === option.id)}>
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <button
-                  key={option.id}
                   type="button"
-                  title={option.id}
-                  onClick={() => setColor(color === option.id ? '' : option.id)}
-                  className="flex h-4 w-4 shrink-0 items-center justify-center touch-manipulation"
+                  onClick={clearFilters}
+                  className="ml-auto shrink-0 text-xs font-medium text-slate-400 hover:text-slate-700"
                 >
-                  <span
-                    className={cn(
-                      'h-4 w-4 rounded-full border border-slate-200 shadow-sm',
-                      color === option.id && 'ring-2 ring-[#111827] ring-offset-1'
-                    )}
-                    style={{ backgroundColor: option.swatch }}
-                  />
+                  Clear all filters
                 </button>
-              ))}
+              </div>
+              <div className="min-w-0">
+                <p className="mb-1.5 text-[11px] font-medium text-slate-400">Category</p>
+                <div className={cn(filterScrollClass, 'gap-1.5')}>
+                  {CATEGORIES.map((item) => (
+                    <button
+                      key={item.id || 'all'}
+                      type="button"
+                      onClick={() => setCategory(category === item.id ? '' : item.id)}
+                      className={pillClass(category === item.id)}
+                    >
+                      {item.id === '' ? (isVideo ? 'All Videos' : 'All Images') : item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-          )}
-          <div className="min-w-0">
-            <p className="mb-1.5 text-[11px] font-medium text-slate-400">Orientation</p>
-            <div className={filterScrollClass}>
-              {ORIENTATIONS.map((option) => (
-                <button key={option.id || 'any-shape'} type="button" onClick={() => setOrientation(option.id)} className={pillClass(orientation === option.id)}>
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="min-w-0">
-            <p className="mb-1.5 text-[11px] font-medium text-slate-400">Size</p>
-            <div className={filterScrollClass}>
-              {SIZES.map((option) => (
-                <button key={option.id || 'any-size'} type="button" onClick={() => setSize(option.id)} className={pillClass(size === option.id)}>
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="ml-auto shrink-0 text-xs font-medium text-slate-400 hover:text-slate-700"
-          >
-            Clear all filters
-          </button>
-        </div>
-        <div className="min-w-0">
-          <p className="mb-1.5 text-[11px] font-medium text-slate-400">Category</p>
-          <div className={cn(filterScrollClass, 'gap-1.5')}>
-            {CATEGORIES.map((item) => (
-              <button
-                key={item.id || 'all'}
-                type="button"
-                onClick={() => setCategory(item.id)}
-                className={pillClass(category === item.id)}
-              >
-                {item.id === '' ? (isVideo ? 'All Videos' : 'All Images') : item.label}
+        )}
+
+        {(term || category || orientation || size || (!isVideo && color)) && (
+          <div className="flex min-w-0 flex-wrap items-center gap-2 text-xs text-slate-500 sm:text-sm">
+            <span className="shrink-0">Filtered for</span>
+            {term && (
+              <button type="button" onClick={onClearQuery} className="inline-flex min-h-8 max-w-full items-center gap-1 truncate rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                <span className="truncate">“{term}”</span> <X className="h-3 w-3 shrink-0" />
               </button>
-            ))}
+            )}
+            {category && (
+              <button type="button" onClick={() => setCategory('')} className="inline-flex min-h-8 max-w-full items-center gap-1 truncate rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                <span className="truncate">“{category}”</span> <X className="h-3 w-3 shrink-0" />
+              </button>
+            )}
+            {orientation && (
+              <button type="button" aria-label={`Remove ${orientation} filter`} onClick={() => setOrientation('')} className="inline-flex min-h-8 max-w-full items-center gap-1 truncate rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium capitalize text-slate-700">
+                <span className="truncate">{orientation}</span> <X className="h-3 w-3 shrink-0" />
+              </button>
+            )}
+            {size && (
+              <button type="button" aria-label={`Remove ${size} filter`} onClick={() => setSize('')} className="inline-flex min-h-8 max-w-full items-center gap-1 truncate rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium capitalize text-slate-700">
+                <span className="truncate">{size}</span> <X className="h-3 w-3 shrink-0" />
+              </button>
+            )}
+            {!isVideo && color && (
+              <button type="button" aria-label={`Remove ${color} color filter`} onClick={() => setColor('')} className="inline-flex min-h-8 max-w-full items-center gap-1.5 truncate rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium capitalize text-slate-700">
+                <span className="h-2.5 w-2.5 rounded-full border border-slate-300" style={{ backgroundColor: COLORS.find((c) => c.id === color)?.swatch || color }} />
+                <span className="truncate">{color}</span> <X className="h-3 w-3 shrink-0" />
+              </button>
+            )}
           </div>
-        </div>
-        </div>
-      </div>
-      )}
+        )}
 
-      {(term || category) && (
-        <div className="flex min-w-0 flex-wrap items-center gap-2 text-xs text-slate-500 sm:text-sm">
-          <span className="shrink-0">Filtered for</span>
-          {term && (
-            <button type="button" onClick={onClearQuery} className="inline-flex min-h-8 max-w-full items-center gap-1 truncate rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-              <span className="truncate">“{term}”</span> <X className="h-3 w-3 shrink-0" />
-            </button>
-          )}
-          {category && (
-            <button type="button" onClick={() => setCategory('')} className="inline-flex min-h-8 max-w-full items-center gap-1 truncate rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-              <span className="truncate">“{category}”</span> <X className="h-3 w-3 shrink-0" />
-            </button>
-          )}
-        </div>
-      )}
-
-      {loading && itemsCount === 0 ? (
-        <div className="flex h-[280px] flex-col items-center justify-center gap-3 text-slate-400">
-          <Loader2 className="h-6 w-6 animate-spin text-[#111827]" />
-          <p className="text-sm font-medium">{isVideo ? 'Loading stock videos…' : 'Loading stock photos…'}</p>
-        </div>
-      ) : error && itemsCount === 0 ? (
-        <div className="flex h-[280px] flex-col items-center justify-center gap-2 rounded-2xl bg-slate-50 px-6 text-center">
-          {isVideo ? <Film className="h-8 w-8 opacity-40" /> : <ImageIcon className="h-8 w-8 opacity-40" />}
-          <p className="text-sm font-bold text-[#111827]">{isVideo ? 'Stock videos unavailable' : 'Stock photos unavailable'}</p>
-          <p className="max-w-md text-xs text-slate-500">{error}. Ensure the API is reachable and PEXELS_API_KEY is set on the backend server.</p>
-        </div>
-      ) : itemsCount === 0 ? (
-        <div className="flex h-[280px] flex-col items-center justify-center gap-2 rounded-2xl bg-slate-50 text-center">
-          <p className="text-sm font-bold text-[#111827]">No {isVideo ? 'videos' : 'photos'} match these filters</p>
-          <p className="text-xs text-slate-500">Clear a filter or try another search term.</p>
-        </div>
-      ) : (
-        <>
-          <div className={cn(isPanel ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5')}>
-            {isVideo
-              ? videos.map((video) => {
+        {loading && itemsCount === 0 ? (
+          <div className="flex h-[280px] flex-col items-center justify-center gap-3 text-slate-400">
+            <Loader2 className="h-6 w-6 animate-spin text-[#111827]" />
+            <p className="text-sm font-medium">{isVideo ? 'Loading stock videos…' : 'Loading stock photos…'}</p>
+          </div>
+        ) : error && itemsCount === 0 ? (
+          <div className="flex h-[280px] flex-col items-center justify-center gap-2 rounded-2xl bg-slate-50 px-6 text-center">
+            {isVideo ? <Film className="h-8 w-8 opacity-40" /> : <ImageIcon className="h-8 w-8 opacity-40" />}
+            <p className="text-sm font-bold text-[#111827]">{isVideo ? 'Stock videos unavailable' : 'Stock photos unavailable'}</p>
+            <p className="max-w-md text-xs text-slate-500">{error.replace(/\.+$/, '')}. Ensure the API is reachable and PEXELS_API_KEY is set on the backend server.</p>
+          </div>
+        ) : itemsCount === 0 ? (
+          <div className="flex h-[280px] flex-col items-center justify-center gap-2 rounded-2xl bg-slate-50 text-center">
+            <p className="text-sm font-bold text-[#111827]">No {isVideo ? 'videos' : 'photos'} match these filters</p>
+            <p className="text-xs text-slate-500">Clear a filter or try another search term.</p>
+          </div>
+        ) : (
+          <>
+            <div className={cn(isPanel ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5')}>
+              {isVideo
+                ? videos.map((video) => {
                   const id = String(video.id);
                   const selected = selectedIds.has(id);
                   const portrait = video.height > video.width;
@@ -478,6 +532,7 @@ export function PexelsStockSection({
                       tabIndex={0}
                       onClick={() => setPreview({ kind: 'video', video })}
                       onKeyDown={(event) => {
+                        if (event.target !== event.currentTarget) return;
                         if (event.key === 'Enter' || event.key === ' ') {
                           event.preventDefault();
                           setPreview({ kind: 'video', video });
@@ -505,58 +560,59 @@ export function PexelsStockSection({
                     </div>
                   );
                 })
-              : photos.map((photo) => {
-              const id = String(photo.id);
-              const selected = selectedIds.has(id);
-              const portrait = photo.height > photo.width;
-              return (
-                <div
-                  key={photo.id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setPreview({ kind: 'image', photo })}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      setPreview({ kind: 'image', photo });
-                    }
-                  }}
-                  className={cn(
-                    'group relative w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-100',
-                    selected && 'ring-2 ring-emerald-500 ring-offset-2'
-                  )}
-                  style={{ aspectRatio: cardAspect(photo, isPanel) }}
-                >
-                  <img
-                    src={photoSrc(photo)}
-                    alt={photo.alt || photoName(photo)}
-                    loading="lazy"
-                    decoding="async"
-                    className={cn('h-full w-full', portrait ? 'object-cover object-center' : 'object-cover')}
-                  />
-                  <span className="absolute left-2.5 bottom-2.5 rounded-md bg-black/45 px-1.5 py-0.5 text-[10px] font-medium text-white">
-                    {photo.width} × {photo.height}
-                  </span>
-                  <SelectBadge selected={selected} onToggle={() => toggleSelected(id)} />
-                </div>
-              );
-            })}
-          </div>
-          <div ref={sentinelRef} className="h-8 w-full" aria-hidden />
-          {loadingMore && (
-            <div className="flex items-center justify-center gap-2 py-3 text-slate-400">
-              <Loader2 className="h-4 w-4 animate-spin text-[#111827]" />
-              <p className="text-xs font-medium">{isVideo ? 'Loading more videos…' : 'Loading more photos…'}</p>
+                : photos.map((photo) => {
+                  const id = String(photo.id);
+                  const selected = selectedIds.has(id);
+                  const portrait = photo.height > photo.width;
+                  return (
+                    <div
+                      key={photo.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setPreview({ kind: 'image', photo })}
+                      onKeyDown={(event) => {
+                        if (event.target !== event.currentTarget) return;
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          setPreview({ kind: 'image', photo });
+                        }
+                      }}
+                      className={cn(
+                        'group relative w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-100',
+                        selected && 'ring-2 ring-emerald-500 ring-offset-2'
+                      )}
+                      style={{ aspectRatio: cardAspect(photo, isPanel) }}
+                    >
+                      <img
+                        src={photoSrc(photo)}
+                        alt={photo.alt || photoName(photo)}
+                        loading="lazy"
+                        decoding="async"
+                        className={cn('h-full w-full', portrait ? 'object-cover object-center' : 'object-cover')}
+                      />
+                      <span className="absolute left-2.5 bottom-2.5 rounded-md bg-black/45 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                        {photo.width} × {photo.height}
+                      </span>
+                      <SelectBadge selected={selected} onToggle={() => toggleSelected(id)} />
+                    </div>
+                  );
+                })}
             </div>
-          )}
-        </>
-      )}
+            <div ref={sentinelRef} className="h-8 w-full" aria-hidden />
+            {loadingMore && (
+              <div className="flex items-center justify-center gap-2 py-3 text-slate-400">
+                <Loader2 className="h-4 w-4 animate-spin text-[#111827]" />
+                <p className="text-xs font-medium">{isVideo ? 'Loading more videos…' : 'Loading more photos…'}</p>
+              </div>
+            )}
+          </>
+        )}
 
-      <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <p className="text-center text-xs text-slate-400 sm:text-left">
-          Showing {itemsCount.toLocaleString()} of {total.toLocaleString()} {isVideo ? 'videos' : 'photos'}
-        </p>
-      </div>
+        <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <p className="text-center text-xs text-slate-400 sm:text-left">
+            Showing {itemsCount.toLocaleString()} of {total.toLocaleString()} {isVideo ? 'videos' : 'photos'}
+          </p>
+        </div>
       </div>
 
       {selectedIds.size > 0 && !preview && (
@@ -564,7 +620,7 @@ export function PexelsStockSection({
           <div className="shrink-0 bg-white p-2">
             <div className="flex items-center gap-2 rounded-full bg-[#111827] px-2 py-1.5 text-white">
               <span className="min-w-0 flex-1 truncate px-2 text-[11px] font-medium">
-                Add to assets {selectedIds.size}
+                {selectedIds.size} {selectedIds.size === 1 ? (isVideo ? 'video' : 'photo') : (isVideo ? 'videos' : 'photos')} selected
               </span>
               <Button
                 type="button"
@@ -577,21 +633,21 @@ export function PexelsStockSection({
             </div>
           </div>
         ) : (
-        <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-3 sm:bottom-6">
-          <div className="pointer-events-auto flex w-full max-w-lg items-center gap-2 rounded-full bg-[#111827] px-2 py-1.5 text-white shadow-lg animate-in fade-in slide-in-from-bottom-3 duration-200">
-            <span className="min-w-0 flex-1 truncate px-2 text-[11px] font-medium sm:text-xs">
-              Add to assets {selectedIds.size}
-            </span>
-            <Button
-              type="button"
-              disabled={Boolean(importingId)}
-              onClick={() => void applySelected()}
-              className="h-8 shrink-0 rounded-full bg-white px-3 text-[11px] font-semibold text-[#111827] hover:bg-slate-100"
-            >
-              {importingId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Add to assets'}
-            </Button>
+          <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[250] flex justify-center px-3 sm:bottom-6">
+            <div className="pointer-events-auto flex w-full max-w-lg items-center gap-2 rounded-full bg-[#111827] px-2 py-1.5 text-white shadow-lg animate-in fade-in slide-in-from-bottom-3 duration-200">
+              <span className="min-w-0 flex-1 truncate px-2 text-[11px] font-medium sm:text-xs">
+                {selectedIds.size} {selectedIds.size === 1 ? (isVideo ? 'video' : 'photo') : (isVideo ? 'videos' : 'photos')} selected
+              </span>
+              <Button
+                type="button"
+                disabled={Boolean(importingId)}
+                onClick={() => void applySelected()}
+                className="h-8 shrink-0 rounded-full bg-white px-3 text-[11px] font-semibold text-[#111827] hover:bg-slate-100"
+              >
+                {importingId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Add to assets'}
+              </Button>
+            </div>
           </div>
-        </div>
         )
       )}
 
@@ -624,12 +680,11 @@ export function PexelsStockSection({
                 controls
                 autoPlay
                 playsInline
-                referrerPolicy="no-referrer"
                 className="max-h-[min(58dvh,32rem)] w-full max-w-full rounded-lg bg-black sm:max-h-[min(68dvh,38rem)]"
               />
             ) : preview?.kind === 'image' ? (
               <img
-                src={preview.photo.src.original || photoUrl(preview.photo)}
+                src={photoUrl(preview.photo)}
                 alt={photoName(preview.photo)}
                 className="max-h-[min(58dvh,32rem)] max-w-full rounded-lg object-contain sm:max-h-[min(68dvh,38rem)]"
               />
@@ -660,13 +715,41 @@ export function PexelsStockSection({
                   onClick={() => {
                     const url = preview.kind === 'video'
                       ? videoFileUrl(preview.video)
-                      : preview.photo.src.original || photoUrl(preview.photo);
+                      : photoUrl(preview.photo);
                     if (url) window.open(url, '_blank', 'noopener,noreferrer');
                   }}
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
                   Preview
                 </button>
+                {onCopy && (
+                  <button
+                    type="button"
+                    className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-[#c6c6cd] bg-white px-3 text-xs font-medium text-[#0F172A] hover:bg-[#eae7e9]"
+                    onClick={() => {
+                      const url = preview.kind === 'video'
+                        ? videoFileUrl(preview.video)
+                        : photoUrl(preview.photo);
+                      const id = String(preview.kind === 'video' ? preview.video.id : preview.photo.id);
+                      if (!url) return;
+                      onCopy(id, url);
+                      setCopiedUrlId(id);
+                      setTimeout(() => setCopiedUrlId((curr) => (curr === id ? null : curr)), 2000);
+                    }}
+                  >
+                    {copiedUrlId === String(preview.kind === 'video' ? preview.video.id : preview.photo.id) ? (
+                      <>
+                        <Check className="h-3.5 w-3.5 text-emerald-600" />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-3.5 w-3.5" />
+                        Copy link
+                      </>
+                    )}
+                  </button>
+                )}
                 <button
                   type="button"
                   disabled={Boolean(importingId)}
@@ -674,7 +757,7 @@ export function PexelsStockSection({
                   onClick={() => {
                     const item = preview.kind === 'video'
                       ? { name: videoName(preview.video), url: videoFileUrl(preview.video), media: 'video' as const, provider: 'pexels', providerId: preview.video.id }
-                      : { name: photoName(preview.photo), url: preview.photo.src.original || photoUrl(preview.photo), media: 'image' as const, provider: 'pexels', providerId: preview.photo.id };
+                      : { name: photoName(preview.photo), url: photoUrl(preview.photo), media: 'image' as const, provider: 'pexels', providerId: preview.photo.id };
                     if (!item.url) return;
                     void (onSaveToLibrary || onAddToLibrary)(item);
                     setPreview(null);
@@ -700,6 +783,7 @@ export function PexelsStockBrowser({
   onSaveToLibrary,
   onCopy,
   onClose,
+  layout,
 }: {
   query: string;
   onQueryChange: (value: string) => void;
@@ -708,6 +792,7 @@ export function PexelsStockBrowser({
   onSaveToLibrary?: (item: { name: string; url: string; media: 'image' | 'video'; provider?: string; providerId?: string | number }) => void | Promise<void>;
   onCopy?: (id: string, url: string) => void;
   onClose?: () => void;
+  layout?: 'page' | 'panel';
 }) {
   return (
     <div className="flex h-full min-h-0 min-w-0 flex-col">
@@ -742,10 +827,11 @@ export function PexelsStockBrowser({
           onCopy={onCopy}
           onAddToLibrary={onAddToLibrary}
           onSaveToLibrary={onSaveToLibrary}
+          layout={layout}
         />
       </div>
     </div>
   );
 }
 
-export { photoName, photoUrl, videoFileUrl, videoName };
+export { cardAspect, formatDuration, photoName, photoUrl, videoFileUrl, videoName };

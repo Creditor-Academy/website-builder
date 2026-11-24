@@ -31,6 +31,7 @@ type StockSearchParams = {
   orientation?: string;
   size?: string;
   color?: string;
+  colors?: string;
 };
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -204,6 +205,7 @@ export async function searchStockPhotos(
       orientation: options.orientation || undefined,
       size: options.size || undefined,
       color: options.color || undefined,
+      colors: options.color || undefined,
     });
     const mapped = normalizeStockSearchResponse(data, 'images');
     return {
