@@ -299,15 +299,20 @@ export function buildJsonLd(page: SeoPage, canonicalPath: string | null): JsonLd
     crumbs.push(crumb);
   }
 
-  return {
-    "@context": "https://schema.org",
-    "@graph": [
+  const graph: JsonLdNode[] = [
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: crumbs,
+    },
+  ];
+
+  if (page.path === "/") {
+    graph.unshift(
       {
         "@type": "Organization",
         "@id": ORGANIZATION_ID,
         name: "Athena LMS",
         url: ORGANIZATION_URL,
-        
       },
       {
         "@type": "SoftwareApplication",
@@ -320,11 +325,12 @@ export function buildJsonLd(page: SeoPage, canonicalPath: string | null): JsonLd
         description: "No-code website builder for designing pages and publishing them to a live address.",
         publisher: { "@id": ORGANIZATION_ID },
       },
-      {
-        "@type": "BreadcrumbList",
-        itemListElement: crumbs,
-      },
-    ],
+    );
+  }
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": graph,
   };
 }
 
