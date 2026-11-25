@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Check,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
   Film,
   ExternalLink,
   Image as ImageIcon,
@@ -54,17 +57,17 @@ const SIZES: { id: '' | PexelsSize; label: string }[] = [
 ];
 
 const COLORS = [
-  { id: 'white', swatch: '#ffffff' },
-  { id: 'black', swatch: '#111827' },
-  { id: 'gray', swatch: '#9ca3af' },
-  { id: 'red', swatch: '#ef4444' },
-  { id: 'orange', swatch: '#f97316' },
-  { id: 'yellow', swatch: '#eab308' },
-  { id: 'green', swatch: '#22c55e' },
-  { id: 'turquoise', swatch: '#14b8a6' },
-  { id: 'blue', swatch: '#3b82f6' },
-  { id: 'violet', swatch: '#8b5cf6' },
-  { id: 'pink', swatch: '#ec4899' },
+  { id: 'white', swatch: '#FFFFFF' },
+  { id: 'black', swatch: '#000000' },
+  { id: 'gray', swatch: '#9E9E9E' },
+  { id: 'red', swatch: '#F44336' },
+  { id: 'orange', swatch: '#FF9800' },
+  { id: 'yellow', swatch: '#FFEB3B' },
+  { id: 'green', swatch: '#4CAF50' },
+  { id: 'turquoise', swatch: '#00BCD4' },
+  { id: 'blue', swatch: '#2196F3' },
+  { id: 'violet', swatch: '#9C27B0' },
+  { id: 'pink', swatch: '#E91E63' },
 ] as const;
 
 const MEDIA_TYPES: { id: PexelsMediaType; label: string }[] = [
@@ -88,7 +91,7 @@ function photoName(photo: PexelsPhoto) {
 }
 
 function photoUrl(photo: PexelsPhoto) {
-  return photo.src.large || photo.src.medium || photo.src.original;
+  return photo.src.original || photo.src.large2x || photo.src.large || photo.src.medium;
 }
 
 function photoSrc(photo: PexelsPhoto) {
@@ -96,17 +99,56 @@ function photoSrc(photo: PexelsPhoto) {
 }
 
 function formatDuration(seconds: number) {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.max(0, Math.round(seconds % 60));
+  const total = Math.max(0, Math.round(seconds || 0));
+  const mins = Math.floor(total / 60);
+  const secs = total % 60;
   return `${mins}:${String(secs).padStart(2, '0')}`;
 }
 
-function cardAspect(photo: { width: number; height: number }, compact?: boolean) {
-  const ratio = photo.width / Math.max(photo.height, 1);
+function cardAspect(photo: { width?: number; height?: number }, compact?: boolean) {
+  const w = Number(photo?.width) || 1200;
+  const h = Number(photo?.height) || 800;
+  const ratio = w / Math.max(h, 1);
   const min = compact ? 0.82 : 0.62;
   const max = compact ? 1.35 : 1.7;
   const clamped = Math.min(max, Math.max(min, ratio));
   return `${clamped} / 1`;
+}
+
+function getPageNumbers(current: number, total: number): (number | string)[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  const windowSize = 5;
+  let start = Math.max(1, current - 2);
+  let end = start + windowSize - 1;
+
+  if (end > total) {
+    end = total;
+    start = Math.max(1, end - windowSize + 1);
+  }
+
+  const pages: (number | string)[] = [];
+
+  if (start > 1) {
+    pages.push(1);
+    if (start > 2) {
+      pages.push('...');
+    }
+  }
+
+  for (let i = start; i <= end; i++) {
+    if (!pages.includes(i)) {
+      pages.push(i);
+    }
+  }
+
+  if (end < total) {
+    pages.push('...');
+  }
+
+  return pages;
 }
 
 type StockPreview =
@@ -142,6 +184,11 @@ function SelectBadge({ selected, onToggle }: { selected: boolean; onToggle: () =
         event.stopPropagation();
         onToggle();
       }}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.stopPropagation();
+        }
+      }}
       className={cn(
         'absolute right-2.5 top-2.5 z-10 flex h-7 w-7 items-center justify-center rounded-full shadow-sm',
         selected ? 'bg-emerald-500 text-white' : 'bg-white/90 text-slate-500'
@@ -167,6 +214,7 @@ export function PexelsStockSection({
   query,
   importingId,
   onClearQuery,
+  onCopy,
   onAddToLibrary,
   onSaveToLibrary,
   layout = 'page',
@@ -181,7 +229,21 @@ export function PexelsStockSection({
   layout?: 'page' | 'panel';
   filtersOpen?: boolean;
 }) {
-  const [mediaType, setMediaType] = useState<PexelsMediaType>('images');
+  const { requestsVideos, term } = parseStockSearchQuery(query);
+  const [mediaType, setMediaType] = useState<PexelsMediaType>(() => requestsVideos ? 'videos' : 'images');
+  const prevQueryRef = useRef(query);
+  const prevTermRef = useRef(term);
+
+  useEffect(() => {
+    if (query !== prevQueryRef.current) {
+      prevQueryRef.current = query;
+      if (requestsVideos) {
+        setMediaType('videos');
+      }
+    }
+  }, [query, requestsVideos]);
+
+  const isVideo = mediaType === 'videos';
   const [photos, setPhotos] = useState<PexelsPhoto[]>([]);
   const [videos, setVideos] = useState<PexelsVideo[]>([]);
   const [total, setTotal] = useState(0);
@@ -194,16 +256,17 @@ export function PexelsStockSection({
   const [orientation, setOrientation] = useState<'' | PexelsOrientation>('');
   const [size, setSize] = useState<'' | PexelsSize>('');
   const [color, setColor] = useState('');
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectedMap, setSelectedMap] = useState<Map<string, PexelsPhoto | PexelsVideo>>(new Map());
+  const selectedIds = useMemo(() => new Set(selectedMap.keys()), [selectedMap]);
+  const [copiedUrlId, setCopiedUrlId] = useState<string | null>(null);
   const [preview, setPreview] = useState<StockPreview | null>(null);
-  const sentinelRef = useRef<HTMLDivElement>(null);
+  const gridTopRef = useRef<HTMLDivElement>(null);
   const loadLockRef = useRef(false);
   const isPanel = layout === 'panel';
-  const { requestsVideos, term } = parseStockSearchQuery(query);
   const searchQuery = [term, category].filter(Boolean).join(' ');
-  const isVideo = requestsVideos || mediaType === 'videos';
   const hasFilters = Boolean(orientation || size || (!isPanel && !isVideo && color));
-  const filterKey = `${isVideo ? 'videos' : mediaType}|${searchQuery}|${orientation}|${size}|${isPanel || isVideo ? '' : color}`;
+  const filterKey = `${mediaType}|${searchQuery}|${orientation}|${size}|${isPanel || isVideo ? '' : color}`;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const fetchPage = async (nextPage: number) => {
     if (isVideo) {
@@ -227,7 +290,8 @@ export function PexelsStockSection({
       setPhotos([]);
       setVideos([]);
       setHasMore(true);
-      setSelectedIds(new Set());
+      setSelectedMap(new Map());
+      setLoading(true);
       if (page !== 1) {
         setPage(1);
         return;
@@ -236,6 +300,8 @@ export function PexelsStockSection({
     let cancelled = false;
     let started = false;
     loadLockRef.current = true;
+    const isTyping = term !== prevTermRef.current;
+    prevTermRef.current = term;
     const timer = window.setTimeout(async () => {
       started = true;
       if (page === 1) setLoading(true);
@@ -245,23 +311,33 @@ export function PexelsStockSection({
         const result = await fetchPage(page);
         if (cancelled) return;
         const incoming = result.items;
+
+        if (incoming.length === 0 && page > 1) {
+          // Safeguard: deep page has no results — adjust total to known items and step back to last valid page
+          setHasMore(false);
+          setTotal((page - 1) * PAGE_SIZE);
+          setPage((prev) => Math.max(1, prev - 1));
+          return;
+        }
+
         if (isVideo) {
-          setVideos((current) => {
-            if (page === 1) return incoming as PexelsVideo[];
-            const seen = new Set(current.map((video) => video.id));
-            return [...current, ...(incoming as PexelsVideo[]).filter((video) => !seen.has(video.id))];
-          });
+          setVideos(incoming as PexelsVideo[]);
           setPhotos([]);
         } else {
-          setPhotos((current) => {
-            if (page === 1) return incoming as PexelsPhoto[];
-            const seen = new Set(current.map((photo) => photo.id));
-            return [...current, ...(incoming as PexelsPhoto[]).filter((photo) => !seen.has(photo.id))];
-          });
+          setPhotos(incoming as PexelsPhoto[]);
           setVideos([]);
         }
-        setTotal(result.total || incoming.length || 0);
-        setHasMore(Boolean(result.next) && incoming.length > 0);
+
+        if (incoming.length < PAGE_SIZE) {
+          // Reached true last page (fewer than 20 items returned)
+          setHasMore(false);
+          setTotal((page - 1) * PAGE_SIZE + incoming.length);
+        } else {
+          // Full page returned: has next if next_page is present OR if page * PAGE_SIZE < total
+          const hasNext = Boolean(result.next) || (result.total > 0 ? page * PAGE_SIZE < result.total : true);
+          setHasMore(hasNext);
+          setTotal(result.total || incoming.length || 0);
+        }
       } catch (err) {
         if (cancelled) return;
         if (page === 1) {
@@ -270,7 +346,7 @@ export function PexelsStockSection({
           setTotal(0);
         }
         setHasMore(false);
-        setError(err instanceof Error ? err.message : 'Could not load stock photos.');
+        setError(err instanceof Error ? err.message : (isVideo ? 'Could not load stock videos' : 'Could not load stock photos'));
       } finally {
         loadLockRef.current = false;
         if (!cancelled) {
@@ -278,7 +354,7 @@ export function PexelsStockSection({
           setLoadingMore(false);
         }
       }
-    }, term && page === 1 ? 400 : 0);
+    }, isTyping && page === 1 ? 400 : 0);
 
     return () => {
       cancelled = true;
@@ -287,38 +363,27 @@ export function PexelsStockSection({
     };
   }, [filterKey, page, term, isVideo]);
 
-  useEffect(() => {
-    const node = sentinelRef.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries[0]?.isIntersecting || !hasMore || loading || loadingMore || loadLockRef.current) return;
-        loadLockRef.current = true;
-        setPage((current) => current + 1);
-      },
-      { rootMargin: '480px' }
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [hasMore, loading, loadingMore, photos.length, videos.length]);
-
   const itemsCount = isVideo ? videos.length : photos.length;
-  const selectedPhotos = useMemo(
-    () => photos.filter((photo) => selectedIds.has(String(photo.id))),
-    [photos, selectedIds]
-  );
-  const selectedVideos = useMemo(
-    () => videos.filter((video) => selectedIds.has(String(video.id))),
-    [videos, selectedIds]
-  );
+  const startItem = total === 0 || itemsCount === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const endItem = total === 0 || itemsCount === 0 ? 0 : Math.min(startItem + itemsCount - 1, total);
 
-  const toggleSelected = (id: string) => {
-    setSelectedIds((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+  const toggleSelected = (item: PexelsPhoto | PexelsVideo) => {
+    const id = String(item.id);
+    setSelectedMap((current) => {
+      const next = new Map(current);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.set(id, item);
+      }
       return next;
     });
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage === page || (total > 0 && newPage > totalPages) || loading || loadingMore) return;
+    setPage(newPage);
+    gridTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const clearFilters = () => {
@@ -330,144 +395,175 @@ export function PexelsStockSection({
   };
 
   const applySelected = async () => {
-    if (isVideo) {
-      for (const video of selectedVideos) {
-        const url = videoFileUrl(video);
-        if (url) await onAddToLibrary({ name: videoName(video), url, media: 'video', provider: 'pexels', providerId: video.id });
-      }
-    } else {
-      for (const photo of selectedPhotos) {
-        await onAddToLibrary({ name: photoName(photo), url: photoUrl(photo), media: 'image', provider: 'pexels', providerId: photo.id });
+    const items = Array.from(selectedMap.values());
+    for (const item of items) {
+      if ('video_files' in item) {
+        const url = videoFileUrl(item);
+        if (url) {
+          await onAddToLibrary({ name: videoName(item), url, media: 'video', provider: 'pexels', providerId: item.id });
+          setSelectedMap((current) => {
+            const next = new Map(current);
+            next.delete(String(item.id));
+            return next;
+          });
+        }
+      } else {
+        await onAddToLibrary({ name: photoName(item), url: photoUrl(item), media: 'image', provider: 'pexels', providerId: item.id });
+        setSelectedMap((current) => {
+          const next = new Map(current);
+          next.delete(String(item.id));
+          return next;
+        });
       }
     }
-    setSelectedIds(new Set());
   };
 
   return (
     <div className={cn(!isPanel && 'min-w-0 space-y-3 pb-24', isPanel && 'flex h-full min-h-0 flex-col')}>
       <div className={cn(isPanel ? 'min-h-0 flex-1 space-y-3 overflow-y-auto p-3' : 'min-w-0 space-y-3')}>
-      {(!isPanel || filtersOpen) && (
-      <div className={cn('rounded-2xl bg-white px-3 py-3 sm:px-4 sm:py-3.5', isPanel && 'animate-in fade-in slide-in-from-top-2 duration-200')}>
-        <div className="flex min-w-0 flex-col gap-3">
-        <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-3">
-          <div className="min-w-0">
-            <p className="mb-1.5 text-[11px] font-medium text-slate-400">Type</p>
-            <div className={filterScrollClass}>
-              {MEDIA_TYPES.map((option) => (
-                <button key={option.id} type="button" onClick={() => setMediaType(option.id)} className={pillClass((isVideo ? 'videos' : mediaType) === option.id)}>
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          {!isPanel && !isVideo && (
-          <div className="min-w-0">
-            <p className="mb-1.5 text-[11px] font-medium text-slate-400">Color</p>
-            <div className="inline-flex items-center gap-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {COLORS.map((option) => (
+        {(!isPanel || filtersOpen) && (
+          <div className={cn('rounded-2xl bg-white px-3 py-3 sm:px-4 sm:py-3.5', isPanel && 'animate-in fade-in slide-in-from-top-2 duration-200')}>
+            <div className="flex min-w-0 flex-col gap-3">
+              <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-3">
+                <div className="min-w-0">
+                  <p className="mb-1.5 text-[11px] font-medium text-slate-400">Type</p>
+                  <div className={filterScrollClass}>
+                    {MEDIA_TYPES.map((option) => (
+                      <button key={option.id} type="button" onClick={() => setMediaType(option.id)} className={pillClass(mediaType === option.id)}>
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {!isPanel && !isVideo && (
+                  <div className="min-w-0">
+                    <p className="mb-1.5 text-[11px] font-medium text-slate-400">Color</p>
+                    <div className="inline-flex items-center gap-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                      {COLORS.map((option) => (
+                        <button
+                          key={option.id}
+                          type="button"
+                          title={option.id}
+                          aria-label={`Filter by ${option.id} color`}
+                          onClick={() => setColor(color === option.id ? '' : option.id)}
+                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-transform hover:scale-110 touch-manipulation"
+                        >
+                          <span
+                            className={cn(
+                              'h-4 w-4 rounded-full border border-slate-200 shadow-sm transition-all',
+                              color === option.id && 'ring-2 ring-[#111827] ring-offset-1'
+                            )}
+                            style={{ backgroundColor: option.swatch }}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="mb-1.5 text-[11px] font-medium text-slate-400">Orientation</p>
+                  <div className={filterScrollClass}>
+                    {ORIENTATIONS.map((option) => (
+                      <button key={option.id || 'any-shape'} type="button" onClick={() => setOrientation(orientation === option.id ? '' : option.id)} className={pillClass(orientation === option.id)}>
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="min-w-0">
+                  <p className="mb-1.5 text-[11px] font-medium text-slate-400">Size</p>
+                  <div className={filterScrollClass}>
+                    {SIZES.map((option) => (
+                      <button key={option.id || 'any-size'} type="button" onClick={() => setSize(size === option.id ? '' : option.id)} className={pillClass(size === option.id)}>
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <button
-                  key={option.id}
                   type="button"
-                  title={option.id}
-                  onClick={() => setColor(color === option.id ? '' : option.id)}
-                  className="flex h-4 w-4 shrink-0 items-center justify-center touch-manipulation"
+                  onClick={clearFilters}
+                  className="ml-auto shrink-0 text-xs font-medium text-slate-400 hover:text-slate-700"
                 >
-                  <span
-                    className={cn(
-                      'h-4 w-4 rounded-full border border-slate-200 shadow-sm',
-                      color === option.id && 'ring-2 ring-[#111827] ring-offset-1'
-                    )}
-                    style={{ backgroundColor: option.swatch }}
-                  />
+                  Clear all filters
                 </button>
-              ))}
+              </div>
+              <div className="min-w-0">
+                <p className="mb-1.5 text-[11px] font-medium text-slate-400">Category</p>
+                <div className={cn(filterScrollClass, 'gap-1.5')}>
+                  {CATEGORIES.map((item) => (
+                    <button
+                      key={item.id || 'all'}
+                      type="button"
+                      onClick={() => setCategory(category === item.id ? '' : item.id)}
+                      className={pillClass(category === item.id)}
+                    >
+                      {item.id === '' ? (isVideo ? 'All Videos' : 'All Images') : item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-          )}
-          <div className="min-w-0">
-            <p className="mb-1.5 text-[11px] font-medium text-slate-400">Orientation</p>
-            <div className={filterScrollClass}>
-              {ORIENTATIONS.map((option) => (
-                <button key={option.id || 'any-shape'} type="button" onClick={() => setOrientation(option.id)} className={pillClass(orientation === option.id)}>
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="min-w-0">
-            <p className="mb-1.5 text-[11px] font-medium text-slate-400">Size</p>
-            <div className={filterScrollClass}>
-              {SIZES.map((option) => (
-                <button key={option.id || 'any-size'} type="button" onClick={() => setSize(option.id)} className={pillClass(size === option.id)}>
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="ml-auto shrink-0 text-xs font-medium text-slate-400 hover:text-slate-700"
-          >
-            Clear all filters
-          </button>
-        </div>
-        <div className="min-w-0">
-          <p className="mb-1.5 text-[11px] font-medium text-slate-400">Category</p>
-          <div className={cn(filterScrollClass, 'gap-1.5')}>
-            {CATEGORIES.map((item) => (
-              <button
-                key={item.id || 'all'}
-                type="button"
-                onClick={() => setCategory(item.id)}
-                className={pillClass(category === item.id)}
-              >
-                {item.id === '' ? (isVideo ? 'All Videos' : 'All Images') : item.label}
+        )}
+
+        {(term || category || orientation || size || (!isVideo && color)) && (
+          <div className="flex min-w-0 flex-wrap items-center gap-2 text-xs text-slate-500 sm:text-sm">
+            <span className="shrink-0">Filtered for</span>
+            {term && (
+              <button type="button" onClick={onClearQuery} className="inline-flex min-h-8 max-w-full items-center gap-1 truncate rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                <span className="truncate">“{term}”</span> <X className="h-3 w-3 shrink-0" />
               </button>
-            ))}
+            )}
+            {category && (
+              <button type="button" onClick={() => setCategory('')} className="inline-flex min-h-8 max-w-full items-center gap-1 truncate rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                <span className="truncate">“{category}”</span> <X className="h-3 w-3 shrink-0" />
+              </button>
+            )}
+            {orientation && (
+              <button type="button" aria-label={`Remove ${orientation} filter`} onClick={() => setOrientation('')} className="inline-flex min-h-8 max-w-full items-center gap-1 truncate rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium capitalize text-slate-700">
+                <span className="truncate">{orientation}</span> <X className="h-3 w-3 shrink-0" />
+              </button>
+            )}
+            {size && (
+              <button type="button" aria-label={`Remove ${size} filter`} onClick={() => setSize('')} className="inline-flex min-h-8 max-w-full items-center gap-1 truncate rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium capitalize text-slate-700">
+                <span className="truncate">{size}</span> <X className="h-3 w-3 shrink-0" />
+              </button>
+            )}
+            {!isVideo && color && (
+              <button type="button" aria-label={`Remove ${color} color filter`} onClick={() => setColor('')} className="inline-flex min-h-8 max-w-full items-center gap-1.5 truncate rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium capitalize text-slate-700">
+                <span className="h-2.5 w-2.5 rounded-full border border-slate-300" style={{ backgroundColor: COLORS.find((c) => c.id === color)?.swatch || color }} />
+                <span className="truncate">{color}</span> <X className="h-3 w-3 shrink-0" />
+              </button>
+            )}
           </div>
-        </div>
-        </div>
-      </div>
-      )}
+        )}
 
-      {(term || category) && (
-        <div className="flex min-w-0 flex-wrap items-center gap-2 text-xs text-slate-500 sm:text-sm">
-          <span className="shrink-0">Filtered for</span>
-          {term && (
-            <button type="button" onClick={onClearQuery} className="inline-flex min-h-8 max-w-full items-center gap-1 truncate rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-              <span className="truncate">“{term}”</span> <X className="h-3 w-3 shrink-0" />
-            </button>
-          )}
-          {category && (
-            <button type="button" onClick={() => setCategory('')} className="inline-flex min-h-8 max-w-full items-center gap-1 truncate rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-              <span className="truncate">“{category}”</span> <X className="h-3 w-3 shrink-0" />
-            </button>
-          )}
-        </div>
-      )}
-
-      {loading && itemsCount === 0 ? (
-        <div className="flex h-[280px] flex-col items-center justify-center gap-3 text-slate-400">
-          <Loader2 className="h-6 w-6 animate-spin text-[#111827]" />
-          <p className="text-sm font-medium">{isVideo ? 'Loading stock videos…' : 'Loading stock photos…'}</p>
-        </div>
-      ) : error && itemsCount === 0 ? (
-        <div className="flex h-[280px] flex-col items-center justify-center gap-2 rounded-2xl bg-slate-50 px-6 text-center">
-          {isVideo ? <Film className="h-8 w-8 opacity-40" /> : <ImageIcon className="h-8 w-8 opacity-40" />}
-          <p className="text-sm font-bold text-[#111827]">{isVideo ? 'Stock videos unavailable' : 'Stock photos unavailable'}</p>
-          <p className="max-w-md text-xs text-slate-500">{error}. Ensure the API is reachable and PEXELS_API_KEY is set on the backend server.</p>
-        </div>
-      ) : itemsCount === 0 ? (
-        <div className="flex h-[280px] flex-col items-center justify-center gap-2 rounded-2xl bg-slate-50 text-center">
-          <p className="text-sm font-bold text-[#111827]">No {isVideo ? 'videos' : 'photos'} match these filters</p>
-          <p className="text-xs text-slate-500">Clear a filter or try another search term.</p>
-        </div>
-      ) : (
-        <>
-          <div className={cn(isPanel ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5')}>
-            {isVideo
-              ? videos.map((video) => {
+        {loading && itemsCount === 0 ? (
+          <div className="flex h-[280px] flex-col items-center justify-center gap-3 text-slate-400">
+            <Loader2 className="h-6 w-6 animate-spin text-[#111827]" />
+            <p className="text-sm font-medium">{isVideo ? 'Loading stock videos…' : 'Loading stock photos…'}</p>
+          </div>
+        ) : error && itemsCount === 0 ? (
+          <div className="flex h-[280px] flex-col items-center justify-center gap-2 rounded-2xl bg-slate-50 px-6 text-center">
+            {isVideo ? <Film className="h-8 w-8 opacity-40" /> : <ImageIcon className="h-8 w-8 opacity-40" />}
+            <p className="text-sm font-bold text-[#111827]">{isVideo ? 'Stock videos unavailable' : 'Stock photos unavailable'}</p>
+            <p className="max-w-md text-xs text-slate-500">{error.replace(/\.+$/, '')}. Ensure the API is reachable and PEXELS_API_KEY is set on the backend server.</p>
+          </div>
+        ) : itemsCount === 0 ? (
+          <div className="flex h-[280px] flex-col items-center justify-center gap-2 rounded-2xl bg-slate-50 text-center">
+            <p className="text-sm font-bold text-[#111827]">No {isVideo ? 'videos' : 'photos'} match these filters</p>
+            <p className="text-xs text-slate-500">Clear a filter or try another search term.</p>
+          </div>
+        ) : (
+          <>
+            <div ref={gridTopRef} />
+            <div className={cn(
+              isPanel ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5',
+              loadingMore && 'opacity-60 pointer-events-none transition-opacity duration-150'
+            )}>
+              {isVideo
+                ? videos.map((video) => {
                   const id = String(video.id);
                   const selected = selectedIds.has(id);
                   const portrait = video.height > video.width;
@@ -478,6 +574,7 @@ export function PexelsStockSection({
                       tabIndex={0}
                       onClick={() => setPreview({ kind: 'video', video })}
                       onKeyDown={(event) => {
+                        if (event.target !== event.currentTarget) return;
                         if (event.key === 'Enter' || event.key === ' ') {
                           event.preventDefault();
                           setPreview({ kind: 'video', video });
@@ -501,62 +598,116 @@ export function PexelsStockSection({
                       <span className="absolute left-2.5 bottom-2.5 rounded-md bg-black/45 px-1.5 py-0.5 text-[10px] font-medium text-white">
                         {formatDuration(video.duration)} · {video.width} × {video.height}
                       </span>
-                      <SelectBadge selected={selected} onToggle={() => toggleSelected(id)} />
+                      <SelectBadge selected={selected} onToggle={() => toggleSelected(video)} />
                     </div>
                   );
                 })
-              : photos.map((photo) => {
-              const id = String(photo.id);
-              const selected = selectedIds.has(id);
-              const portrait = photo.height > photo.width;
-              return (
-                <div
-                  key={photo.id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setPreview({ kind: 'image', photo })}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      setPreview({ kind: 'image', photo });
-                    }
-                  }}
-                  className={cn(
-                    'group relative w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-100',
-                    selected && 'ring-2 ring-emerald-500 ring-offset-2'
-                  )}
-                  style={{ aspectRatio: cardAspect(photo, isPanel) }}
-                >
-                  <img
-                    src={photoSrc(photo)}
-                    alt={photo.alt || photoName(photo)}
-                    loading="lazy"
-                    decoding="async"
-                    className={cn('h-full w-full', portrait ? 'object-cover object-center' : 'object-cover')}
-                  />
-                  <span className="absolute left-2.5 bottom-2.5 rounded-md bg-black/45 px-1.5 py-0.5 text-[10px] font-medium text-white">
-                    {photo.width} × {photo.height}
-                  </span>
-                  <SelectBadge selected={selected} onToggle={() => toggleSelected(id)} />
-                </div>
-              );
-            })}
-          </div>
-          <div ref={sentinelRef} className="h-8 w-full" aria-hidden />
-          {loadingMore && (
-            <div className="flex items-center justify-center gap-2 py-3 text-slate-400">
-              <Loader2 className="h-4 w-4 animate-spin text-[#111827]" />
-              <p className="text-xs font-medium">{isVideo ? 'Loading more videos…' : 'Loading more photos…'}</p>
+                : photos.map((photo) => {
+                  const id = String(photo.id);
+                  const selected = selectedIds.has(id);
+                  const portrait = photo.height > photo.width;
+                  return (
+                    <div
+                      key={photo.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setPreview({ kind: 'image', photo })}
+                      onKeyDown={(event) => {
+                        if (event.target !== event.currentTarget) return;
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          setPreview({ kind: 'image', photo });
+                        }
+                      }}
+                      className={cn(
+                        'group relative w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-100',
+                        selected && 'ring-2 ring-emerald-500 ring-offset-2'
+                      )}
+                      style={{ aspectRatio: cardAspect(photo, isPanel) }}
+                    >
+                      <img
+                        src={photoSrc(photo)}
+                        alt={photo.alt || photoName(photo)}
+                        loading="lazy"
+                        decoding="async"
+                        className={cn('h-full w-full', portrait ? 'object-cover object-center' : 'object-cover')}
+                      />
+                      <span className="absolute left-2.5 bottom-2.5 rounded-md bg-black/45 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                        {photo.width} × {photo.height}
+                      </span>
+                      <SelectBadge selected={selected} onToggle={() => toggleSelected(photo)} />
+                    </div>
+                  );
+                })}
+            </div>
+            {loadingMore && (
+              <div className="flex items-center justify-center gap-2 py-3 text-slate-400">
+                <Loader2 className="h-4 w-4 animate-spin text-[#111827]" />
+                <p className="text-xs font-medium">{isVideo ? 'Loading more videos…' : 'Loading more photos…'}</p>
+              </div>
+            )}
+          </>
+        )}
+
+        <div className="flex flex-col gap-3.5 border-t border-slate-100 pt-6 pb-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <p className="text-center text-xs font-medium text-slate-500 sm:text-left">
+            Showing {startItem.toLocaleString()}–{endItem.toLocaleString()} of {total.toLocaleString()} {isVideo ? 'videos' : 'photos'}
+          </p>
+
+          {totalPages > 1 && (
+            <div className="flex flex-wrap items-center justify-center gap-1 sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={page <= 1 || loading || loadingMore}
+                onClick={() => handlePageChange(page - 1)}
+                className="h-8 gap-1 rounded-lg border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+                <span className="hidden min-[480px]:inline">Previous</span>
+              </Button>
+
+              <div className="flex items-center gap-1">
+                {getPageNumbers(page, totalPages).map((p, idx) =>
+                  typeof p === 'number' ? (
+                    <button
+                      key={`page-${p}`}
+                      type="button"
+                      disabled={loading || loadingMore}
+                      onClick={() => handlePageChange(p)}
+                      aria-current={page === p ? 'page' : undefined}
+                      className={cn(
+                        'flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-semibold transition-colors',
+                        page === p
+                          ? 'bg-[#111827] text-white shadow-sm'
+                          : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                      )}
+                    >
+                      {p}
+                    </button>
+                  ) : (
+                    <span key={`ellipsis-${idx}`} className="flex h-8 w-5 items-center justify-center text-xs text-slate-400">
+                      …
+                    </span>
+                  )
+                )}
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={!hasMore || page >= totalPages || loading || loadingMore}
+                onClick={() => handlePageChange(page + 1)}
+                className="h-8 gap-1 rounded-lg border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+              >
+                <span className="hidden min-[480px]:inline">Next</span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
             </div>
           )}
-        </>
-      )}
-
-      <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <p className="text-center text-xs text-slate-400 sm:text-left">
-          Showing {itemsCount.toLocaleString()} of {total.toLocaleString()} {isVideo ? 'videos' : 'photos'}
-        </p>
-      </div>
+        </div>
       </div>
 
       {selectedIds.size > 0 && !preview && (
@@ -564,7 +715,7 @@ export function PexelsStockSection({
           <div className="shrink-0 bg-white p-2">
             <div className="flex items-center gap-2 rounded-full bg-[#111827] px-2 py-1.5 text-white">
               <span className="min-w-0 flex-1 truncate px-2 text-[11px] font-medium">
-                Add to assets {selectedIds.size}
+                {selectedIds.size} {selectedIds.size === 1 ? (isVideo ? 'video' : 'photo') : (isVideo ? 'videos' : 'photos')} selected
               </span>
               <Button
                 type="button"
@@ -577,21 +728,21 @@ export function PexelsStockSection({
             </div>
           </div>
         ) : (
-        <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-3 sm:bottom-6">
-          <div className="pointer-events-auto flex w-full max-w-lg items-center gap-2 rounded-full bg-[#111827] px-2 py-1.5 text-white shadow-lg animate-in fade-in slide-in-from-bottom-3 duration-200">
-            <span className="min-w-0 flex-1 truncate px-2 text-[11px] font-medium sm:text-xs">
-              Add to assets {selectedIds.size}
-            </span>
-            <Button
-              type="button"
-              disabled={Boolean(importingId)}
-              onClick={() => void applySelected()}
-              className="h-8 shrink-0 rounded-full bg-white px-3 text-[11px] font-semibold text-[#111827] hover:bg-slate-100"
-            >
-              {importingId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Add to assets'}
-            </Button>
+          <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[250] flex justify-center px-3 sm:bottom-6">
+            <div className="pointer-events-auto flex w-full max-w-lg items-center gap-2 rounded-full bg-[#111827] px-2 py-1.5 text-white shadow-lg animate-in fade-in slide-in-from-bottom-3 duration-200">
+              <span className="min-w-0 flex-1 truncate px-2 text-[11px] font-medium sm:text-xs">
+                {selectedIds.size} {selectedIds.size === 1 ? (isVideo ? 'video' : 'photo') : (isVideo ? 'videos' : 'photos')} selected
+              </span>
+              <Button
+                type="button"
+                disabled={Boolean(importingId)}
+                onClick={() => void applySelected()}
+                className="h-8 shrink-0 rounded-full bg-white px-3 text-[11px] font-semibold text-[#111827] hover:bg-slate-100"
+              >
+                {importingId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Add to assets'}
+              </Button>
+            </div>
           </div>
-        </div>
         )
       )}
 
@@ -624,12 +775,11 @@ export function PexelsStockSection({
                 controls
                 autoPlay
                 playsInline
-                referrerPolicy="no-referrer"
                 className="max-h-[min(58dvh,32rem)] w-full max-w-full rounded-lg bg-black sm:max-h-[min(68dvh,38rem)]"
               />
             ) : preview?.kind === 'image' ? (
               <img
-                src={preview.photo.src.original || photoUrl(preview.photo)}
+                src={photoUrl(preview.photo)}
                 alt={photoName(preview.photo)}
                 className="max-h-[min(58dvh,32rem)] max-w-full rounded-lg object-contain sm:max-h-[min(68dvh,38rem)]"
               />
@@ -660,13 +810,41 @@ export function PexelsStockSection({
                   onClick={() => {
                     const url = preview.kind === 'video'
                       ? videoFileUrl(preview.video)
-                      : preview.photo.src.original || photoUrl(preview.photo);
+                      : photoUrl(preview.photo);
                     if (url) window.open(url, '_blank', 'noopener,noreferrer');
                   }}
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
                   Preview
                 </button>
+                {onCopy && (
+                  <button
+                    type="button"
+                    className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-[#c6c6cd] bg-white px-3 text-xs font-medium text-[#0F172A] hover:bg-[#eae7e9]"
+                    onClick={() => {
+                      const url = preview.kind === 'video'
+                        ? videoFileUrl(preview.video)
+                        : photoUrl(preview.photo);
+                      const id = String(preview.kind === 'video' ? preview.video.id : preview.photo.id);
+                      if (!url) return;
+                      onCopy(id, url);
+                      setCopiedUrlId(id);
+                      setTimeout(() => setCopiedUrlId((curr) => (curr === id ? null : curr)), 2000);
+                    }}
+                  >
+                    {copiedUrlId === String(preview.kind === 'video' ? preview.video.id : preview.photo.id) ? (
+                      <>
+                        <Check className="h-3.5 w-3.5 text-emerald-600" />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-3.5 w-3.5" />
+                        Copy link
+                      </>
+                    )}
+                  </button>
+                )}
                 <button
                   type="button"
                   disabled={Boolean(importingId)}
@@ -674,7 +852,7 @@ export function PexelsStockSection({
                   onClick={() => {
                     const item = preview.kind === 'video'
                       ? { name: videoName(preview.video), url: videoFileUrl(preview.video), media: 'video' as const, provider: 'pexels', providerId: preview.video.id }
-                      : { name: photoName(preview.photo), url: preview.photo.src.original || photoUrl(preview.photo), media: 'image' as const, provider: 'pexels', providerId: preview.photo.id };
+                      : { name: photoName(preview.photo), url: photoUrl(preview.photo), media: 'image' as const, provider: 'pexels', providerId: preview.photo.id };
                     if (!item.url) return;
                     void (onSaveToLibrary || onAddToLibrary)(item);
                     setPreview(null);
@@ -700,6 +878,7 @@ export function PexelsStockBrowser({
   onSaveToLibrary,
   onCopy,
   onClose,
+  layout,
 }: {
   query: string;
   onQueryChange: (value: string) => void;
@@ -708,6 +887,7 @@ export function PexelsStockBrowser({
   onSaveToLibrary?: (item: { name: string; url: string; media: 'image' | 'video'; provider?: string; providerId?: string | number }) => void | Promise<void>;
   onCopy?: (id: string, url: string) => void;
   onClose?: () => void;
+  layout?: 'page' | 'panel';
 }) {
   return (
     <div className="flex h-full min-h-0 min-w-0 flex-col">
@@ -742,10 +922,11 @@ export function PexelsStockBrowser({
           onCopy={onCopy}
           onAddToLibrary={onAddToLibrary}
           onSaveToLibrary={onSaveToLibrary}
+          layout={layout}
         />
       </div>
     </div>
   );
 }
 
-export { photoName, photoUrl, videoFileUrl, videoName };
+export { cardAspect, formatDuration, getPageNumbers, photoName, photoUrl, videoFileUrl, videoName };

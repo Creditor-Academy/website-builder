@@ -8,7 +8,9 @@ import {
     getEcommercePage,
     getConsultantPage,
     getAgenciesPage,
-    getCoachPage
+    getCoachPage,
+    getRestaurantPage,
+    getBlogPage,
 } from '@/lib/defaultPageData';
 import { builderWebsiteToTemplatePayload, templateToBuilderWebsite } from '@/lib/templateBuilder';
 import type { DeviceId, DropTarget, ElementType, FreePosition, NodeKind, SaveStatus } from '@/builder/types';
@@ -73,6 +75,8 @@ const TEMPLATE_MAP: Record<string, () => any> = {
     consultant: getConsultantPage,
     agencies: getAgenciesPage,
     coaching: getCoachPage,
+    restaurant: getRestaurantPage,
+    blog: getBlogPage,
 };
 
 function createLocalWebsite(id: string, name = 'Untitled website', template = 'blank'): Website {

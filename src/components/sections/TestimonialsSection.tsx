@@ -2,6 +2,7 @@ import { Quote, Star } from 'lucide-react';
 import { useBuilder } from '@/contexts/BuilderContext';
 import { Editable } from '@/components/ui/Editable';
 import { sanitizeHTML } from '@/utils/sanitize';
+import { responsivePadding } from '@/builder/styles';
 
 // ─── Global styles injected once ──────────────────────────────────────────
 const STYLES = `
@@ -610,7 +611,7 @@ export function TestimonialsSection({ section, isSelected, isEditing, onContentC
     ? (styles.backgroundGradient || styles.backgroundColor)
     : (styles.backgroundColor || (isAlternate ? 'var(--theme-bg-alt, #f8fafc)' : 'var(--theme-bg, #ffffff)'));
   
-  const padding = styles.padding || '60px 0';
+  const padding = responsivePadding(styles.padding);
   
   const headingColor = styles.headingColor || (isAlternate ? 'var(--theme-text-alt, #0f172a)' : 'var(--theme-text, #0f172a)');
   const paragraphColor = styles.paragraphColor || (isAlternate ? 'var(--theme-text-alt, #64748b)' : 'var(--theme-text, #64748b)');

@@ -17,7 +17,7 @@ export function CanvasContextMenu() {
   const location = page && selectedId ? findNode(normalizePageSections(page.sections, page.id), selectedId) : null;
   const locked = Boolean(location?.node.locked);
   const hidden = location?.kind === 'section'
-    ? location.node.visible === false
+    ? ('visible' in location.node && location.node.visible === false)
     : Boolean(location && 'visibility' in location.node && location.node.visibility?.desktop === false);
 
   useEffect(() => {

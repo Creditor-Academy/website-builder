@@ -1,6 +1,7 @@
 import React from 'react';
 import { Linkedin, Twitter, Github } from 'lucide-react';
 import { Editable } from '@/components/ui/Editable';
+import { responsivePadding } from '@/builder/styles';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -453,7 +454,7 @@ export function TeamSection({ section, isEditing, onContentChange }) {
   const background = styles.useGradient
     ? (styles.backgroundGradient || styles.backgroundColor)
     : (styles.backgroundColor || '#ffffff');
-  const padding = styles.padding || '60px 0';
+  const padding = responsivePadding(styles.padding, '60px 0');
   const headingColor = styles.headingColor || '#0f172a';
   const paragraphColor = styles.paragraphColor || '#64748b';
 

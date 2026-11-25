@@ -3,6 +3,7 @@ import { Check, Sparkles, Zap, ArrowRight } from 'lucide-react';
 import { useBuilder } from '@/contexts/BuilderContext';
 import { Editable } from '@/components/ui/Editable';
 import { sanitizeHTML } from '@/utils/sanitize';
+import { responsivePadding } from '@/builder/styles';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -476,7 +477,7 @@ export function PricingSection({ section, isSelected, isEditing, onContentChange
         className={`pr-sect relative transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${globalClasses}`}
         style={{
           background,
-          padding: styles.padding || '60px 0',
+          padding: responsivePadding(styles.padding),
           position: 'relative', overflow: 'hidden',
           borderRadius: variant === 'table' ? '0' : 'var(--radius, 0)',
         }}

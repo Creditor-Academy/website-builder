@@ -3,6 +3,7 @@ import * as Icons from 'lucide-react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { Editable } from '@/components/ui/Editable';
 import { sanitizeHTML } from '@/utils/sanitize';
+import { responsivePadding } from '@/builder/styles';
 
 // ─── Shared Helpers ────────────────────────────────────────────────────────────
 
@@ -450,7 +451,7 @@ export function FeaturesSection({ section, isSelected, isEditing, onContentChang
         className={`fs-root relative transition-all duration-300 ${isSelected ? 'ring-2 ring-slate-900 ring-offset-2 ring-offset-white' : ''}`}
         style={{
           background,
-          padding: styles.padding || '4rem 0 md:5rem 0',
+          padding: responsivePadding(styles.padding),
           position: 'relative',
           overflow: 'hidden',
         }}

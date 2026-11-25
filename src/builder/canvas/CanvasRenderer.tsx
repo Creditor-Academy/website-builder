@@ -185,6 +185,7 @@ export const CanvasRenderer = memo(function CanvasRenderer({
         dangerouslySetInnerHTML={{
           __html: sanitizeHTML(`
         #canvas-root {
+          container-type: inline-size;
           --theme-primary: ${globalStyles.primaryColor || '#3b82f6'};
           --theme-secondary: ${globalStyles.secondaryColor || '#8b5cf6'};
           --theme-accent: ${globalStyles.accentColor || '#06b6d4'};

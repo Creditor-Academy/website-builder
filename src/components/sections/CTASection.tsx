@@ -1,6 +1,7 @@
 import { ArrowRight, Sparkles, ChevronRight, Zap, Shield, Star } from 'lucide-react';
 import { useBuilder } from '@/contexts/BuilderContext';
 import { Editable } from '@/components/ui/Editable';
+import { responsivePadding } from '@/builder/styles';
 
 // ─── Shared Tokens ─────────────────────────────────────────────────────────────
 const accentGrad = 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)';
@@ -464,7 +465,7 @@ export function CTASection({ section, isSelected, isEditing, onContentChange, is
         className={`cta-section relative transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${globalClasses}`}
         style={{
           background: background,
-          padding: styles.padding || (isBanner ? '1.25rem 0' : isFloating ? '3rem 0' : '4rem 0'),
+          padding: responsivePadding(styles.padding, isBanner ? '1.25rem 0' : isFloating ? '3rem 0' : '4rem 0'),
           position: 'relative',
           overflow: 'hidden',
           borderRadius: isFloating ? '0' : 'var(--radius, 0)',

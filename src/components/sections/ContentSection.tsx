@@ -1,5 +1,6 @@
 import React from 'react';
 import { Editable } from '@/components/ui/Editable';
+import { responsivePadding } from '@/builder/styles';
 
 export function ContentSection({ section, isSelected, isEditing, onContentChange }) {
     const { content, styles } = section;
@@ -11,7 +12,7 @@ export function ContentSection({ section, isSelected, isEditing, onContentChange
 
     const sectionStyle = {
         background,
-        padding: styles.padding || '80px 0',
+        padding: responsivePadding(styles.padding, '80px 0'),
     };
 
     const handleTextEdit = (field, e) => {

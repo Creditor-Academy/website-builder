@@ -113,7 +113,7 @@ export function applyResizeDelta(
 
 export function boxToStylePatch(
   box: Box,
-  kind: NodeKind,
+  kind: NodeKind | string,
   freePosition: boolean
 ): Record<string, string | number> {
   if (freePosition) {

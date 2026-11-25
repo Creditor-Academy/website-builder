@@ -2,6 +2,7 @@ import React from 'react';
 import { Target, Eye, Heart, Award, Users } from 'lucide-react';
 import { Editable } from '@/components/ui/Editable';
 import { useBuilder } from '@/contexts/BuilderContext';
+import { responsivePadding } from '@/builder/styles';
 
 const iconMap = { Target, Eye, Heart, Award, Users };
 
@@ -111,10 +112,11 @@ function Badge({ text, isEditing, onSave }) {
 }
 
 function ImageBlock({ src, alt, isEditing, onContentChange, height = 480, borderRadius = '4px' }: { src: any; alt: any; isEditing: any; onContentChange: any; height?: string | number; borderRadius?: any }) {
+  const responsiveHeight = typeof height === 'number' ? `clamp(260px, 42vw, ${height}px)` : height;
   return (
     <div
       className="ab-img-wrap"
-      style={{ borderRadius, overflow: 'hidden', height, position: 'relative' }}
+      style={{ borderRadius, overflow: 'hidden', height: responsiveHeight, position: 'relative' }}
     >
       <img src={src} alt={alt || 'About us'} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(160deg, transparent 50%, rgba(0,0,0,0.38) 100%)', pointerEvents: 'none' }} />
@@ -421,7 +423,7 @@ export function AboutSection({ section, isSelected, isEditing, onContentChange, 
     <section
       style={{
         background,
-        padding: styles.padding || '60px 0 lg:100px 0',
+        padding: responsivePadding(styles.padding),
         fontFamily: "'Epilogue', sans-serif",
         position: 'relative',
         outline: isSelected ? '2px solid #D97706' : 'none',
