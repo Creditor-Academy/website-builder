@@ -1,10 +1,5 @@
-```groovy
 pipeline {
     agent any
-
-    environment {
-        PUPPETEER_EXECUTABLE_PATH = '/usr/bin/google-chrome'
-    }
 
     options {
         timeout(time: 15, unit: 'MINUTES')
@@ -14,16 +9,33 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
+        stage('Prepare Environment') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/Creditor-Academy/website-builder.git'
+                sh '''
+                    set -e
+
+                    # Prepare only required public frontend variables
+                    # from the server-side .env file.
+                    # PEXELS_API_KEY is intentionally excluded because
+                    # Pexels is handled by the backend in production.
+
+                    awk -F= '
+                        /^VITE_API_BASE_URL=/ { print }
+                        /^VITE_SITE_HOST=/ { print }
+                        /^VITE_GOOGLE_CLIENT_ID=/ { print }
+                        /^VITE_GTM_ID=/ { print }
+                    ' /var/www/frontend/website-builder/.env > .env
+
+                    chmod 600 .env
+
+                    echo "Frontend build environment prepared."
+                '''
             }
         }
 
         stage('Install') {
             steps {
-                sh 'npm ci'
+                sh 'npm install'
             }
         }
 
@@ -38,19 +50,19 @@ pipeline {
                 sh '''
                     set -e
 
-                    # Verify build output
+                    # Make sure build output exists before touching the live site
                     if [ ! -d dist ] || [ -z "$(ls -A dist)" ]; then
-                        echo "dist/ is missing or empty. Aborting deployment."
+                        echo "dist/ is missing or empty. Aborting deploy."
                         exit 1
                     fi
 
-                    # Deploy build to live directory
+                    # Sync new build to live site
                     sudo rsync -a --delete dist/ /var/www/frontend/website-builder/dist/
 
-                    # Set correct ownership
+                    # Set ownership
                     sudo chown -R www-data:www-data /var/www/frontend/website-builder/dist
 
-                    # Validate Nginx configuration
+                    # Test Nginx configuration
                     sudo nginx -t
 
                     # Reload Nginx
@@ -62,11 +74,11 @@ pipeline {
 
     post {
         success {
-            echo 'Web Studio deployment completed successfully.'
+            echo 'Deployment Successful'
         }
 
         failure {
-            echo 'Web Studio deployment failed. Check the stage logs.'
+            echo 'Deployment Failed. Check the stage logs above.'
         }
 
         always {
@@ -74,4 +86,3 @@ pipeline {
         }
     }
 }
-```
