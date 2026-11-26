@@ -49,7 +49,7 @@ export function FeatureFlipShell({
           )}
         >
           <div className="relative z-10 flex min-h-0 flex-1 flex-col">
-            <p className="mb-2 text-[10px] font-bold tracking-[0.18em] text-sky-300/90 uppercase sm:text-xs">
+            <p className="mb-2 text-xs font-bold tracking-[0.18em] text-sky-300/90 uppercase">
               {brief.eyebrow}
             </p>
             <h3 className="mb-3 text-xl font-bold tracking-tight text-white sm:text-2xl lg:text-3xl">

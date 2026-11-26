@@ -53,13 +53,13 @@ export default function Footer({ isDark = true }: { isDark?: boolean }) {
             >
               Explore
             </h4>
-            <ul className="space-y-2.5 sm:space-y-3">
+            <ul className="space-y-0.5">
               {exploreLinks.map((link) => (
                 <li key={link.to}>
                   <Link
                     to={link.to}
                     className={cn(
-                      "text-sm font-medium transition-colors",
+                      "inline-flex min-h-11 items-center py-2 text-sm font-medium transition-colors",
                       isDark
                         ? "text-slate-400 hover:text-white"
                         : "text-[#747781] hover:text-[#0F172A]",
@@ -82,13 +82,13 @@ export default function Footer({ isDark = true }: { isDark?: boolean }) {
             >
               Legal
             </h4>
-            <ul className="space-y-2.5 sm:space-y-3">
+            <ul className="space-y-0.5">
               {legalLinks.map((link) => (
                 <li key={link.to}>
                   <Link
                     to={link.to}
                     className={cn(
-                      "text-sm font-medium transition-colors",
+                      "inline-flex min-h-11 items-center py-2 text-sm font-medium transition-colors",
                       isDark
                         ? "text-slate-400 hover:text-white"
                         : "text-[#747781] hover:text-[#0F172A]",
@@ -117,7 +117,7 @@ export default function Footer({ isDark = true }: { isDark?: boolean }) {
               target="_blank"
               rel="noopener noreferrer"
               className={cn(
-                "font-semibold transition-colors",
+                "inline-flex min-h-11 items-center py-2 font-semibold transition-colors",
                 isDark ? "text-white hover:text-slate-200" : "text-[#0F172A] hover:text-[#1E293B]",
               )}
             >

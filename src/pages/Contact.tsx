@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Phone, 
   Mail, 
-  MapPin, 
   Send, 
   CheckCircle2, 
   Sun, 
@@ -127,24 +125,24 @@ export default function Contact() {
 
   const contactMethods = [
     { 
-      icon: <Phone className="w-6 h-6" />, 
-      title: "Call Us", 
-      value: "+1 (123) 456 7890",
-      description: "Mon-Fri from 8am to 5pm.",
-      color: "blue"
-    },
-    { 
       icon: <Mail className="w-6 h-6" />, 
       title: "Email Us", 
       value: "hello@webstudio.lmsathena.com",
-      description: "Our friendly team is here to help.",
+      description: "Send your questions or project inquiries directly to our team.",
       color: "indigo"
     },
     { 
-      icon: <MapPin className="w-6 h-6" />, 
-      title: "Visit Us", 
-      value: "San Francisco, CA",
-      description: "Come say hello at our HQ.",
+      icon: <Globe className="w-6 h-6" />, 
+      title: "Platform", 
+      value: "webstudio.lmsathena.com",
+      description: "Explore templates, canvas features, and publishing workflows.",
+      color: "blue"
+    },
+    { 
+      icon: <Clock className="w-6 h-6" />, 
+      title: "Support Hours", 
+      value: "Monday – Friday",
+      description: "Our team reviews incoming inquiries during business hours.",
       color: "purple"
     }
   ];
@@ -172,7 +170,7 @@ export default function Contact() {
               : "bg-white/60 border-slate-200/50 shadow-[0_8px_32px_rgba(0,0,0,0.05)]"
           )}
         >
-          <Link to="/" className="flex items-center cursor-pointer group">
+          <Link to="/" className="flex min-h-11 min-w-11 items-center cursor-pointer group">
             <BrandLogo
               imgClassName="h-8 w-8 transition-transform duration-300 group-hover:scale-110"
             />
@@ -181,23 +179,34 @@ export default function Contact() {
           <div className="hidden md:flex items-center gap-8 text-sm font-medium">
             {["Features", "Templates", "Resources"].map((item) => (
               <Link key={item} to={`/${item.toLowerCase()}`} className={cn(
-                "relative group transition-colors",
+                "relative group inline-flex min-h-11 items-center transition-colors",
                 isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
               )}>
                 {item}
-                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-blue-500 transition-all group-hover:w-full rounded-full"></span>
+                <span className="absolute bottom-2 left-0 w-0 h-[2px] bg-blue-500 transition-all group-hover:w-full rounded-full"></span>
               </Link>
             ))}
             <div className={cn("h-4 w-px", isDark ? "bg-slate-600/50" : "bg-slate-300")} />
 
-            <button onClick={() => setTheme(isDark ? 'light' : 'dark')} className={cn("p-2 rounded-full transition-colors", isDark ? "hover:bg-slate-800 text-slate-300" : "hover:bg-slate-200 text-slate-600")}>
+            <button
+              type="button"
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              onClick={() => setTheme(isDark ? 'light' : 'dark')}
+              className={cn("inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors", isDark ? "hover:bg-slate-800 text-slate-300" : "hover:bg-slate-200 text-slate-600")}
+            >
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
-            <Link to="/login" className={isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"}>Log in</Link>
+            <Link to="/login" className={cn("inline-flex min-h-11 items-center", isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900")}>Log in</Link>
           </div>
 
-          <button className="md:hidden p-2 pointer-events-auto" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <button
+            type="button"
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isMenuOpen}
+            className="md:hidden inline-flex h-11 w-11 items-center justify-center rounded-full pointer-events-auto"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </motion.div>
@@ -338,10 +347,10 @@ export default function Contact() {
                 <div className="flex items-center gap-4 text-sm font-bold">
                   <div className="flex items-center gap-1.5 text-green-500">
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    Fast Response
+                    Support Form
                   </div>
                   <div className={cn("h-4 w-px", isDark ? "bg-slate-700" : "bg-slate-200")} />
-                  <div className={isDark ? "text-slate-400" : "text-slate-500"}>Typically responds in 2 hours</div>
+                  <div className={isDark ? "text-slate-400" : "text-slate-500"}>We'll get back to you as soon as possible</div>
                 </div>
               </div>
 

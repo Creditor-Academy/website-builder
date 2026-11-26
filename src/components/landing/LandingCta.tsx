@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { pageFrameClass } from "@/components/landing/pageFrame";
+import ctaBg from "@/assets/CTA.webp";
 
 export default function HeroCTASection() {
   const [isPressed, setIsPressed] = useState(false);
@@ -89,7 +90,9 @@ export default function HeroCTASection() {
             <img
               alt="Creator workspace atmosphere"
               className="h-full w-full scale-105 object-cover object-center opacity-40 brightness-90 contrast-125 mix-blend-luminosity blur-sm filter"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuASrYyywOi6Yb_6jwvberyJ6UNuR-txWpjNZMLdG2JeRctdxrPBxO5JPylzt1orOOu2oKgpjq1fpr8Rj6WU264_6gnhj25PJypNc41PQRh1pSEGVI1r8B8kLWW_e8Z6EImKYVc-task4BYBRthmbqmA0CwrUceiK3oLnqCv-Jv6TTm5fGE2dgCU9-oNqXLjki_4GNI-1YKqYQx8GA3QPHIez-oxL6XLFg21Y7_LZZ9E_6vL3JGAFPaLSifnMJsH_TKhNf4"
+              src={ctaBg}
+              width={1408}
+              height={768}
               loading="lazy"
               decoding="async"
             />
@@ -126,7 +129,7 @@ export default function HeroCTASection() {
               <div className="absolute top-3 right-3 hidden items-center gap-2 sm:top-7 sm:right-7 sm:flex" data-purpose="window-controls">
                 <button
                   aria-label="Dismiss view"
-                  className="p-2 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors"
                   type="button"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,12 +140,12 @@ export default function HeroCTASection() {
 
               {/* BEGIN: Action Pill Badge */}
               <div className="inline-flex items-center justify-center mb-4 sm:mb-6" data-purpose="status-badge">
-                <div className="relative group cursor-pointer inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full border border-sky-400/30 transition-all duration-300 shadow-sm shadow-indigo-500/10">
+                <div className="relative group inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full border border-sky-400/30 transition-all duration-300 shadow-sm shadow-indigo-500/10">
                   <svg className="w-4 h-4 text-sky-500 dark:text-sky-400 animate-sparkle shrink-0" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2L13.8 8.2L20 10L13.8 11.8L12 18L10.2 11.8L4 10L10.2 8.2L12 2Z" />
                     <path d="M19 16L19.9 19.1L23 20L19.9 20.9L19 24L18.1 20.9L15 20L18.1 19.1L19 16Z" opacity="0.6" />
                   </svg>
-                  <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase bg-gradient-to-r from-sky-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                  <span className="text-xs font-bold tracking-widest uppercase bg-gradient-to-r from-sky-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
                     Zero to Live
                   </span>
                 </div>
@@ -168,7 +171,7 @@ export default function HeroCTASection() {
                       </svg>
                     </span>
                     <span className="min-w-0">
-                      Publish instantly to a blazing-fast <strong className="text-slate-900 dark:text-white font-semibold">Web Studio subdomain</strong>
+                      Publish directly to a <strong className="text-slate-900 dark:text-white font-semibold">Web Studio subdomain</strong>
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
@@ -188,7 +191,7 @@ export default function HeroCTASection() {
                       </svg>
                     </span>
                     <span className="min-w-0">
-                      Zero setup: Automatic <strong className="text-slate-900 dark:text-white font-semibold">SSL certificates &amp; edge cache</strong> included
+                      Automatic <strong className="text-slate-900 dark:text-white font-semibold">SSL certificates &amp; static site hosting</strong> included
                     </span>
                   </li>
                 </ul>
@@ -214,37 +217,13 @@ export default function HeroCTASection() {
                 </a>
               </div>
 
-              {/* BEGIN: Social Proof & Trust Elements */}
-              <div className="pt-4 sm:pt-5 border-t border-slate-200/60 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 text-center sm:text-left" data-purpose="social-proof-section">
-                <div className="flex -space-x-2.5 overflow-hidden">
-                  <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-[10px] font-bold text-white">
-                    MK
-                  </span>
-                  <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center text-[10px] font-bold text-white">
-                    TL
-                  </span>
-                  <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-gradient-to-tr from-fuchsia-500 to-pink-500 flex items-center justify-center text-[10px] font-bold text-white">
-                    AS
-                  </span>
-                  <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-200">
-                    +10k
-                  </span>
-                </div>
-                <div className="flex flex-col items-center sm:items-start min-w-0">
-                  <div className="flex items-center gap-1">
-                    <div className="flex text-amber-400">
-                      {[...Array(5)].map((_, i) => (
-                        <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-                    <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">5.0 / 5.0</span>
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 px-1">
-                    Join <span className="font-semibold text-slate-800 dark:text-slate-200">10,000+ creators &amp; designers</span> publishing live
-                  </p>
-                </div>
+              {/* Platform highlights */}
+              <div className="pt-4 sm:pt-5 border-t border-slate-200/60 dark:border-slate-800/80 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+                <span>Visual Canvas</span>
+                <span aria-hidden className="text-slate-300 dark:text-slate-700">·</span>
+                <span>Responsive Breakpoints</span>
+                <span aria-hidden className="text-slate-300 dark:text-slate-700">·</span>
+                <span>Static Site Export</span>
               </div>
             </div>
             </div>

@@ -436,7 +436,7 @@ export default function TemplateShowcaseSection({ isDark = false }: { isDark?: b
                           <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
                           <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
                         </div>
-                        <span className="font-mono text-[10px] text-slate-500">Canvas · Artboard</span>
+                        <span className="font-mono text-xs text-slate-500">Canvas · Artboard</span>
                       </div>
                       <div className="my-auto space-y-3 py-4">
                         <div className="h-7 w-3/4 animate-pulse rounded-lg border border-indigo-500/30 bg-indigo-500/20" />
@@ -445,14 +445,14 @@ export default function TemplateShowcaseSection({ isDark = false }: { isDark?: b
                           {['Section', 'Grid', 'Embed'].map((label) => (
                             <div
                               key={label}
-                              className="flex h-[4.5rem] items-center justify-center rounded-xl border border-dashed border-slate-700 bg-slate-800/40 text-[10px] text-slate-500"
+                              className="flex h-[4.5rem] items-center justify-center rounded-xl border border-dashed border-slate-700 bg-slate-800/40 text-xs text-slate-500"
                             >
                               + {label}
                             </div>
                           ))}
                         </div>
                       </div>
-                      <span className="mx-auto inline-flex items-center gap-1.5 rounded-full border border-indigo-800/60 bg-indigo-950/60 px-3 py-1.5 text-[11px] font-medium text-indigo-300">
+                      <span className="mx-auto inline-flex items-center gap-1.5 rounded-full border border-indigo-800/60 bg-indigo-950/60 px-3 py-1.5 text-xs font-medium text-indigo-300">
                         Freeform Spatial Layout
                       </span>
                     </div>
@@ -482,14 +482,14 @@ export default function TemplateShowcaseSection({ isDark = false }: { isDark?: b
                       <div className="w-full pb-28 text-white">
                         <div className="flex items-center justify-between border-b border-slate-800/80 px-5 py-3.5 sm:px-6">
                           <span className="text-xs font-bold tracking-wider text-indigo-400">ALEXA.STUDIO</span>
-                          <span className="rounded-full bg-indigo-600/90 px-2.5 py-1 text-[10px] text-white">Contact</span>
+                          <span className="rounded-full bg-indigo-600/90 px-2.5 py-1 text-xs text-white">Contact</span>
                         </div>
                         <div className="px-5 py-5 text-center sm:px-6">
-                          <span className="mb-3 inline-block rounded-full border border-indigo-800/60 bg-indigo-950/80 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-indigo-400">
+                          <span className="mb-3 inline-block rounded-full border border-indigo-800/60 bg-indigo-950/80 px-2.5 py-0.5 font-mono text-xs uppercase tracking-wider text-indigo-400">
                             Available For Commission
                           </span>
                           <h4 className="mb-2 text-2xl font-black leading-none tracking-tight">CREATIVE PORTFOLIO</h4>
-                          <p className="mx-auto max-w-[260px] text-[11px] leading-relaxed text-slate-400">
+                          <p className="mx-auto max-w-[260px] text-xs leading-relaxed text-slate-400">
                             Curated visual galleries, editorial case studies &amp; experimental interactive design.
                           </p>
                           <div className="relative mx-auto my-5 h-28 w-28">
@@ -503,15 +503,15 @@ export default function TemplateShowcaseSection({ isDark = false }: { isDark?: b
                           <div className="mx-auto grid max-w-[280px] grid-cols-3 gap-2 rounded-xl border border-slate-800 bg-slate-900/90 p-2.5">
                             <div>
                               <div className="text-xs font-extrabold text-white">140+</div>
-                              <div className="text-[9px] text-slate-400">Projects Done</div>
+                              <div className="text-xs text-slate-400">Projects Done</div>
                             </div>
                             <div className="border-x border-slate-800">
                               <div className="text-xs font-extrabold text-white">12+</div>
-                              <div className="text-[9px] text-slate-400">Years Active</div>
+                              <div className="text-xs text-slate-400">Years Active</div>
                             </div>
                             <div>
                               <div className="text-xs font-extrabold text-white">38+</div>
-                              <div className="text-[9px] text-slate-400">Design Honors</div>
+                              <div className="text-xs text-slate-400">Design Honors</div>
                             </div>
                           </div>
                         </div>
@@ -546,26 +546,26 @@ export default function TemplateShowcaseSection({ isDark = false }: { isDark?: b
                         {/* Hero */}
                         <div className="relative bg-gradient-to-br from-[#0c1b4d] via-[#1e1b6b] to-[#312e81] px-5 pb-5 pt-4 text-white sm:px-6 sm:pb-6 sm:pt-5">
                           <div className="mb-4 flex items-center justify-between gap-2">
-                            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/80">
+                            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-white/80">
                               Soundcraft Pro
                             </span>
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#1d4ed8]/90 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#1d4ed8]/90 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
                               <span className="h-1.5 w-1.5 rounded-full bg-sky-300" />
                               eCommerce Suite
                             </span>
                           </div>
-                          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-cyan-300">Live Storefront</p>
+                          <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-300">Live Storefront</p>
                           <h4 className="mt-1.5 max-w-[15rem] text-[1.35rem] font-extrabold leading-tight tracking-tight sm:text-xl">
                             Elevate Your Audio Journey
                           </h4>
-                          <p className="mt-2 max-w-[16rem] text-[11px] leading-relaxed text-slate-300">
+                          <p className="mt-2 max-w-[16rem] text-xs leading-relaxed text-slate-300">
                             Experience Sound in Its Purest Form with Spatial Earbuds.
                           </p>
                           <div className="mt-4 flex gap-2">
-                            <span className="rounded-lg bg-white px-3.5 py-1.5 text-[11px] font-semibold text-slate-900 shadow-sm">
+                            <span className="rounded-lg bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm">
                               Shop Now
                             </span>
-                            <span className="rounded-lg border border-white/25 bg-white/10 px-3.5 py-1.5 text-[11px] font-medium text-white backdrop-blur-sm">
+                            <span className="rounded-lg border border-white/25 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
                               Checkout
                             </span>
                           </div>
@@ -575,7 +575,7 @@ export default function TemplateShowcaseSection({ isDark = false }: { isDark?: b
                         <div className="bg-white px-5 py-4 sm:px-6">
                           <div className="mb-3 flex items-center justify-between">
                             <span className="text-xs font-bold text-slate-800">Curated Collection</span>
-                            <span className="text-[10px] font-semibold text-blue-600">Filter By Tags</span>
+                            <span className="text-xs font-semibold text-blue-600">Filter By Tags</span>
                           </div>
                           <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
                             {[
@@ -590,18 +590,18 @@ export default function TemplateShowcaseSection({ isDark = false }: { isDark?: b
                                 <div className="mb-1.5 flex h-11 w-11 items-center justify-center rounded-lg bg-white text-base shadow-sm sm:h-12 sm:w-12 sm:text-lg">
                                   {item.icon}
                                 </div>
-                                <span className="line-clamp-2 text-[10px] font-bold leading-tight text-slate-900 sm:text-[11px]">
+                                <span className="line-clamp-2 text-xs font-bold leading-tight text-slate-900 sm:text-xs">
                                   {item.name}
                                 </span>
-                                <span className="mt-1 text-[10px] font-semibold text-blue-600">{item.price}</span>
+                                <span className="mt-1 text-xs font-semibold text-blue-600">{item.price}</span>
                               </div>
                             ))}
                           </div>
 
                           <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
                             <div className="min-w-0">
-                              <p className="text-[11px] font-bold text-slate-800">Integrated Stripe Checkout</p>
-                              <p className="text-[9px] text-slate-500">Digital &amp; physical delivery workflows</p>
+                              <p className="text-xs font-bold text-slate-800">Integrated Stripe Checkout</p>
+                              <p className="text-xs text-slate-500">Digital &amp; physical delivery workflows</p>
                             </div>
                             <span className="shrink-0 text-xs font-bold text-blue-600">Active →</span>
                           </div>
@@ -636,12 +636,12 @@ export default function TemplateShowcaseSection({ isDark = false }: { isDark?: b
                   <div className="pointer-events-none relative flex h-full w-full flex-col overflow-hidden bg-[#051332]">
                     <div className="template-mockup-scroll absolute inset-0 h-[140%] overflow-hidden">
                       <div className="w-full pb-28 text-white">
-                        <div className="flex items-center justify-between border-b border-blue-900/50 px-5 py-3.5 text-[10px] sm:px-6">
+                        <div className="flex items-center justify-between border-b border-blue-900/50 px-5 py-3.5 text-xs sm:px-6">
                           <span className="font-bold tracking-wider text-cyan-400">APEX ENTERPRISE</span>
                           <span className="rounded-full bg-cyan-500/20 px-2.5 py-1 text-cyan-200">SaaS Tier</span>
                         </div>
                         <div className="px-5 py-5 sm:px-6">
-                          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-cyan-400">
+                          <span className="font-mono text-xs font-bold uppercase tracking-widest text-cyan-400">
                             Cloud Infrastructure
                           </span>
                           <h4 className="mt-1 mb-2 text-2xl font-black leading-tight tracking-tight">
@@ -651,15 +651,15 @@ export default function TemplateShowcaseSection({ isDark = false }: { isDark?: b
                             <br />
                             Thrive.
                           </h4>
-                          <p className="mb-4 text-[11px] leading-relaxed text-slate-300">
+                          <p className="mb-4 text-xs leading-relaxed text-slate-300">
                             Enterprise telemetry, autonomous scaling infrastructure and client onboarding.
                           </p>
-                          <span className="mb-6 inline-block rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-3.5 py-1.5 text-[11px] font-bold text-white shadow-md">
+                          <span className="mb-6 inline-block rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-md">
                             Explore Platform →
                           </span>
                           <div className="relative flex h-36 items-end justify-center gap-2 overflow-hidden rounded-2xl border border-blue-900/60 bg-gradient-to-t from-slate-900 via-blue-950 to-transparent p-4">
                             <div className="h-20 w-6 rounded-t-md bg-blue-600/80 shadow-lg" />
-                            <div className="flex h-28 w-8 items-center justify-center rounded-t-md bg-cyan-500/90 font-mono text-[9px] shadow-xl">
+                            <div className="flex h-28 w-8 items-center justify-center rounded-t-md bg-cyan-500/90 font-mono text-xs shadow-xl">
                               B2B
                             </div>
                             <div className="h-16 w-6 rounded-t-md bg-blue-700/80 shadow-lg" />
@@ -694,21 +694,21 @@ export default function TemplateShowcaseSection({ isDark = false }: { isDark?: b
                   <div className="pointer-events-none relative flex h-full w-full flex-col overflow-hidden bg-[#f5efe6]">
                     <div className="template-mockup-scroll absolute inset-0 h-[140%] overflow-hidden">
                       <div className="w-full pb-28 text-[#2c2118]">
-                        <div className="flex items-center justify-between border-b border-amber-900/10 bg-[#efe6d8] px-5 py-3.5 text-[10px] sm:px-6">
+                        <div className="flex items-center justify-between border-b border-amber-900/10 bg-[#efe6d8] px-5 py-3.5 text-xs sm:px-6">
                           <span className="font-bold tracking-wider text-amber-800">AURELIA BISTRO</span>
                           <span className="rounded-full bg-amber-900/10 px-2.5 py-1 text-amber-900/70">Reserve Table</span>
                         </div>
                         <div className="px-5 py-5 sm:px-6">
-                          <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-amber-700">
+                          <span className="font-mono text-xs font-semibold uppercase tracking-widest text-amber-700">
                             Artisanal Dining
                           </span>
                           <h4 className="mt-1 mb-2 text-2xl font-black tracking-tight">Farm-to-Table Gastronomy</h4>
-                          <p className="mb-4 text-[11px] leading-relaxed text-amber-950/60">
+                          <p className="mb-4 text-xs leading-relaxed text-amber-950/60">
                             Handcrafted seasonal menus, curated natural wine pairings and private salon bookings.
                           </p>
                           <div className="relative mb-4 flex h-36 flex-col justify-end rounded-2xl border border-amber-900/10 bg-gradient-to-t from-[#c4a574] via-[#d4b896] to-[#e8d9c0] p-4">
                             <div className="text-xs font-bold text-[#2c2118]">Tasting Experience</div>
-                            <div className="text-[10px] text-[#2c2118]/70">Chef de Cuisine Tasting Menu · 7 Courses</div>
+                            <div className="text-xs text-[#2c2118]/70">Chef de Cuisine Tasting Menu · 7 Courses</div>
                           </div>
                           <div className="space-y-2">
                             <div className="flex items-center justify-between rounded-xl border border-amber-900/10 bg-white/70 p-2.5 text-xs">
@@ -750,7 +750,7 @@ export default function TemplateShowcaseSection({ isDark = false }: { isDark?: b
                     <div className="template-mockup-scroll absolute inset-0 h-[140%] overflow-hidden">
                       <div className="w-full pb-28 text-white">
                         <div className="p-5 sm:p-6">
-                          <div className="mb-2 flex justify-between font-mono text-[10px] text-emerald-400">
+                          <div className="mb-2 flex justify-between font-mono text-xs text-emerald-400">
                             <span>THE CHRONICLE</span>
                             <span>ISSUE Nº 42</span>
                           </div>
@@ -758,13 +758,13 @@ export default function TemplateShowcaseSection({ isDark = false }: { isDark?: b
                           <div className="relative mb-4 flex h-40 items-end overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-t from-slate-950 via-slate-900 to-emerald-950/40 p-4">
                             <div>
                               <span className="block text-xs font-bold text-white">By Elena Vance</span>
-                              <span className="text-[10px] text-slate-400">6 min read · Design Systems</span>
+                              <span className="text-xs text-slate-400">6 min read · Design Systems</span>
                             </div>
                           </div>
                           <div className="space-y-2">
                             <div className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900 p-2.5 text-xs">
                               <span className="text-slate-300">Curated Weekly Newsletter</span>
-                              <span className="font-bold text-emerald-400">Join 24k</span>
+                              <span className="font-bold text-emerald-400">Subscribe</span>
                             </div>
                             <div className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900 p-2.5 text-xs">
                               <span className="text-slate-300">Deep Dives &amp; Essays</span>
@@ -797,7 +797,7 @@ export default function TemplateShowcaseSection({ isDark = false }: { isDark?: b
             <div className={cn("mt-8 flex flex-col items-center gap-6 border-t pt-8", isDark ? "border-slate-800" : "border-slate-200/70")}>
               <div
                 aria-label="Template slides"
-                className="flex items-center justify-center gap-2.5 mx-auto"
+                className="mx-auto flex flex-wrap items-center justify-center gap-0.5 sm:gap-1"
                 id="pagination-pills"
                 role="tablist"
               >
@@ -805,31 +805,36 @@ export default function TemplateShowcaseSection({ isDark = false }: { isDark?: b
                   <button
                     key={idx}
                     aria-label={`Go to slide ${idx + 1}${idx === activeIndex ? ' (active)' : ''}`}
-                    className={`rounded-full transition-all duration-300 ${
-                      idx === activeIndex
-                        ? 'h-2.5 bg-indigo-600 w-8 shadow-sm shadow-indigo-500/50'
-                        : isDark
-                          ? 'h-2 w-2 bg-slate-600 hover:bg-slate-500'
-                          : 'h-2 bg-slate-300 w-2 hover:bg-slate-400'
-                    }`}
+                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full"
                     onClick={() => {
                       setActiveIndex(idx);
                       startAutoPlay();
                     }}
                     type="button"
-                  />
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`block rounded-full transition-all duration-300 ${
+                        idx === activeIndex
+                          ? 'h-2.5 w-8 bg-indigo-600 shadow-sm shadow-indigo-500/50'
+                          : isDark
+                            ? 'h-2 w-2 bg-slate-600 hover:bg-slate-500'
+                            : 'h-2 w-2 bg-slate-300 hover:bg-slate-400'
+                      }`}
+                    />
+                  </button>
                 ))}
               </div>
               <div className="flex w-full flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4">
                 <a
-                  className={cn("group flex items-center justify-center gap-1.5 text-center text-xs font-semibold transition-colors sm:justify-start sm:text-left sm:text-sm", isDark ? "text-slate-300 hover:text-indigo-400" : "text-slate-700 hover:text-indigo-600")}
+                  className={cn("group inline-flex min-h-11 items-center justify-center gap-1.5 px-3 py-2 text-center text-xs font-semibold transition-colors sm:justify-start sm:text-left sm:text-sm", isDark ? "text-slate-300 hover:text-indigo-400" : "text-slate-700 hover:text-indigo-600")}
                   href="#templates-library"
                 >
                   Browse All 120+ Templates{' '}
                   <span className="transition-transform group-hover:translate-x-1">→</span>
                 </a>
                 <button
-                  className="rounded-xl bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:scale-[1.02] hover:bg-indigo-600 active:scale-[0.98] sm:text-sm"
+                  className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:scale-[1.02] hover:bg-indigo-600 active:scale-[0.98] sm:text-sm"
                   type="button"
                 >
                   Use Active Blueprint
