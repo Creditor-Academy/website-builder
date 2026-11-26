@@ -513,9 +513,9 @@ export default function FeaturesPage() {
                           <span className="material-symbols-outlined text-[18px]">lock</span>
                         </div>
                         <div>
-                          <div className="text-sm font-semibold text-white">Automated SSL &amp; Global CDN</div>
+                          <div className="text-sm font-semibold text-white">Automated SSL &amp; Cloud Hosting</div>
                           <div className="text-xs text-slate-400">
-                            Sub-38ms TTFB edge distribution and automated Let's Encrypt certificates
+                            Cloud CDN distribution and automated SSL certificates
                           </div>
                         </div>
                       </div>
@@ -523,10 +523,10 @@ export default function FeaturesPage() {
 
                     <div className="flex flex-wrap items-center gap-2 pt-2 sm:gap-3">
                       <span className="inline-flex items-center rounded-md border border-purple-400/40 bg-purple-500/25 px-3 py-1 font-mono text-xs text-purple-200">
-                        99.9% Cloud SLA
+                        Automated SSL
                       </span>
                       <span className="inline-flex items-center rounded-md border border-white/20 bg-white/10 px-3 py-1 font-mono text-xs text-slate-200">
-                        Brotli Edge Compression
+                        Static CDN Delivery
                       </span>
                     </div>
                   </div>
@@ -769,7 +769,7 @@ export default function FeaturesPage() {
                       </div>
                       <div className="flex items-center justify-between pt-1 border-t border-white/10 text-xs text-slate-400">
                         <span>Parity Score</span>
-                        <span className="text-emerald-300 font-mono font-bold">100% Validated</span>
+                        <span className="text-emerald-300 font-mono font-bold">Breakpoints Ready</span>
                       </div>
                     </div>
                     <p className="text-[14px] text-[#45464d] leading-relaxed">
@@ -835,12 +835,12 @@ export default function FeaturesPage() {
                         <span className="material-symbols-outlined text-[13px] text-emerald-400">lock</span>
                       </div>
                       <div className="flex items-center justify-between pt-1 border-t border-white/10 text-xs text-slate-300">
-                        <span className="text-emerald-400 font-bold">14ms Global TTFB</span>
-                        <span className="text-slate-400">99.9% Cloud SLA</span>
+                        <span className="text-emerald-400 font-bold">HTTPS Enabled</span>
+                        <span className="text-slate-400">Static Cloud Hosting</span>
                       </div>
                     </div>
                     <p className="text-[14px] text-slate-300 leading-relaxed">
-                      Instant worldwide discovery with automated SSL encryption, edge caching, and 99.9% uptime SLA.
+                      Publish worldwide with automated SSL encryption, edge caching, and static site hosting.
                     </p>
                   </div>
                   <div className="pt-3 mt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">

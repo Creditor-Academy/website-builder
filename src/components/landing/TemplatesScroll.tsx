@@ -764,7 +764,7 @@ export default function TemplateShowcaseSection({ isDark = false }: { isDark?: b
                           <div className="space-y-2">
                             <div className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900 p-2.5 text-xs">
                               <span className="text-slate-300">Curated Weekly Newsletter</span>
-                              <span className="font-bold text-emerald-400">Join 24k</span>
+                              <span className="font-bold text-emerald-400">Subscribe</span>
                             </div>
                             <div className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900 p-2.5 text-xs">
                               <span className="text-slate-300">Deep Dives &amp; Essays</span>

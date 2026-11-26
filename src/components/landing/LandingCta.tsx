@@ -171,7 +171,7 @@ export default function HeroCTASection() {
                       </svg>
                     </span>
                     <span className="min-w-0">
-                      Publish instantly to a blazing-fast <strong className="text-slate-900 dark:text-white font-semibold">Web Studio subdomain</strong>
+                      Publish directly to a <strong className="text-slate-900 dark:text-white font-semibold">Web Studio subdomain</strong>
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
@@ -191,7 +191,7 @@ export default function HeroCTASection() {
                       </svg>
                     </span>
                     <span className="min-w-0">
-                      Zero setup: Automatic <strong className="text-slate-900 dark:text-white font-semibold">SSL certificates &amp; edge cache</strong> included
+                      Automatic <strong className="text-slate-900 dark:text-white font-semibold">SSL certificates &amp; static site hosting</strong> included
                     </span>
                   </li>
                 </ul>
@@ -217,37 +217,13 @@ export default function HeroCTASection() {
                 </a>
               </div>
 
-              {/* BEGIN: Social Proof & Trust Elements */}
-              <div className="pt-4 sm:pt-5 border-t border-slate-200/60 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 text-center sm:text-left" data-purpose="social-proof-section">
-                <div className="flex -space-x-2.5 overflow-hidden">
-                  <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-xs font-bold text-white">
-                    MK
-                  </span>
-                  <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center text-xs font-bold text-white">
-                    TL
-                  </span>
-                  <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-gradient-to-tr from-fuchsia-500 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
-                    AS
-                  </span>
-                  <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-200">
-                    +10k
-                  </span>
-                </div>
-                <div className="flex flex-col items-center sm:items-start min-w-0">
-                  <div className="flex items-center gap-1">
-                    <div className="flex text-amber-400">
-                      {[...Array(5)].map((_, i) => (
-                        <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-                    <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">5.0 / 5.0</span>
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 px-1">
-                    Join <span className="font-semibold text-slate-800 dark:text-slate-200">10,000+ creators &amp; designers</span> publishing live
-                  </p>
-                </div>
+              {/* Platform highlights */}
+              <div className="pt-4 sm:pt-5 border-t border-slate-200/60 dark:border-slate-800/80 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+                <span>Visual Canvas</span>
+                <span aria-hidden className="text-slate-300 dark:text-slate-700">·</span>
+                <span>Responsive Breakpoints</span>
+                <span aria-hidden className="text-slate-300 dark:text-slate-700">·</span>
+                <span>Static Site Export</span>
               </div>
             </div>
             </div>
