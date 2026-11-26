@@ -172,7 +172,7 @@ export default function Contact() {
               : "bg-white/60 border-slate-200/50 shadow-[0_8px_32px_rgba(0,0,0,0.05)]"
           )}
         >
-          <Link to="/" className="flex items-center cursor-pointer group">
+          <Link to="/" className="flex min-h-11 min-w-11 items-center cursor-pointer group">
             <BrandLogo
               imgClassName="h-8 w-8 transition-transform duration-300 group-hover:scale-110"
             />
@@ -181,23 +181,34 @@ export default function Contact() {
           <div className="hidden md:flex items-center gap-8 text-sm font-medium">
             {["Features", "Templates", "Resources"].map((item) => (
               <Link key={item} to={`/${item.toLowerCase()}`} className={cn(
-                "relative group transition-colors",
+                "relative group inline-flex min-h-11 items-center transition-colors",
                 isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
               )}>
                 {item}
-                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-blue-500 transition-all group-hover:w-full rounded-full"></span>
+                <span className="absolute bottom-2 left-0 w-0 h-[2px] bg-blue-500 transition-all group-hover:w-full rounded-full"></span>
               </Link>
             ))}
             <div className={cn("h-4 w-px", isDark ? "bg-slate-600/50" : "bg-slate-300")} />
 
-            <button onClick={() => setTheme(isDark ? 'light' : 'dark')} className={cn("p-2 rounded-full transition-colors", isDark ? "hover:bg-slate-800 text-slate-300" : "hover:bg-slate-200 text-slate-600")}>
+            <button
+              type="button"
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              onClick={() => setTheme(isDark ? 'light' : 'dark')}
+              className={cn("inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors", isDark ? "hover:bg-slate-800 text-slate-300" : "hover:bg-slate-200 text-slate-600")}
+            >
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
-            <Link to="/login" className={isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"}>Log in</Link>
+            <Link to="/login" className={cn("inline-flex min-h-11 items-center", isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900")}>Log in</Link>
           </div>
 
-          <button className="md:hidden p-2 pointer-events-auto" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <button
+            type="button"
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isMenuOpen}
+            className="md:hidden inline-flex h-11 w-11 items-center justify-center rounded-full pointer-events-auto"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </motion.div>

@@ -166,11 +166,11 @@ export default function CanvasBentoFeatures() {
               <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-rose-500/80" />
               <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-amber-500/80" />
               <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500/80" />
-              <span className="ml-1 truncate font-mono text-[10px] text-white/55 sm:ml-2 sm:text-[11px]">
+              <span className="ml-1 truncate font-mono text-xs text-white/55 sm:ml-2 sm:text-xs">
                 Desktop • 1440px
               </span>
             </div>
-            <div className="hidden items-center gap-1.5 rounded-md border border-teal-400/30 bg-teal-500/20 px-2.5 py-0.5 font-mono text-[11px] text-teal-200 sm:flex">
+            <div className="hidden items-center gap-1.5 rounded-md border border-teal-400/30 bg-teal-500/20 px-2.5 py-0.5 font-mono text-xs text-teal-200 sm:flex">
               <span>flex-col</span>
               <span>gap-3</span>
             </div>
@@ -181,7 +181,7 @@ export default function CanvasBentoFeatures() {
             <span className="absolute -top-1.5 -right-1.5 h-3 w-3 rounded-sm border-2 border-teal-500 bg-white shadow-md" />
             <span className="absolute -bottom-1.5 -left-1.5 h-3 w-3 rounded-sm border-2 border-teal-500 bg-white shadow-md" />
             <span className="absolute -right-1.5 -bottom-1.5 h-3 w-3 rounded-sm border-2 border-teal-500 bg-white shadow-md" />
-            <span className="absolute -top-3 left-3 max-w-[calc(100%-1.5rem)] truncate rounded bg-teal-600 px-2 py-0.5 font-mono text-[9px] font-semibold text-white shadow-md sm:left-6 sm:text-[10px]">
+            <span className="absolute -top-3 left-3 max-w-[calc(100%-1.5rem)] truncate rounded bg-teal-600 px-2 py-0.5 font-mono text-xs font-semibold text-white shadow-md sm:left-6 sm:text-xs">
               Frame (w: 100%, padding: 24px)
             </span>
 
@@ -247,7 +247,7 @@ export default function CanvasBentoFeatures() {
             style={{ animationDuration: "40s" }}
           />
 
-          <div className="animate-float-slow absolute top-2 left-1 flex max-w-[calc(100%-0.5rem)] items-center gap-1.5 rounded-xl border border-white/20 bg-gradient-to-r from-fuchsia-600 to-pink-700 px-2.5 py-1.5 text-[10px] font-semibold text-white shadow-lg shadow-fuchsia-500/30 sm:left-2 sm:gap-2 sm:px-3.5 sm:py-2 sm:text-xs">
+          <div className="animate-float-slow absolute top-2 left-1 flex max-w-[calc(100%-0.5rem)] items-center gap-1.5 rounded-xl border border-white/20 bg-gradient-to-r from-fuchsia-600 to-pink-700 px-2.5 py-1.5 text-xs font-semibold text-white shadow-lg shadow-fuchsia-500/30 sm:left-2 sm:gap-2 sm:px-3.5 sm:py-2 sm:text-xs">
             <Zap className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
             <span className="truncate">{"<InteractiveButton />"}</span>
           </div>
@@ -258,19 +258,19 @@ export default function CanvasBentoFeatures() {
             </div>
             <div className="min-w-0">
               <div className="text-xs font-semibold text-white">Hero Showcase</div>
-              <div className="text-[10px] text-fuchsia-200/80">Composite Module</div>
+              <div className="text-xs text-fuchsia-200/80">Composite Module</div>
             </div>
-            <span className="inline-flex items-center rounded border border-fuchsia-400/30 bg-fuchsia-400/20 px-1.5 py-0.5 text-[10px] font-medium text-fuchsia-100">
+            <span className="inline-flex items-center rounded border border-fuchsia-400/30 bg-fuchsia-400/20 px-1.5 py-0.5 text-xs font-medium text-fuchsia-100">
               Drag + Drop
             </span>
           </div>
 
-          <div className="animate-float-delayed absolute right-1 bottom-2 flex items-center gap-2 rounded-xl border border-white/20 bg-gradient-to-r from-fuchsia-700 to-slate-800 px-2.5 py-1.5 text-[10px] font-semibold text-white shadow-lg shadow-fuchsia-500/25 sm:right-2 sm:px-3 sm:text-xs">
+          <div className="animate-float-delayed absolute right-1 bottom-2 flex items-center gap-2 rounded-xl border border-white/20 bg-gradient-to-r from-fuchsia-700 to-slate-800 px-2.5 py-1.5 text-xs font-semibold text-white shadow-lg shadow-fuchsia-500/25 sm:right-2 sm:px-3 sm:text-xs">
             <ImageIcon className="h-3.5 w-3.5" strokeWidth={2} />
             Media Grid
           </div>
 
-          <div className="animate-float-fast absolute bottom-1 left-2 rounded-lg border border-white/15 bg-black/45 px-2 py-1 font-mono text-[10px] text-slate-200 shadow-md sm:left-4 sm:px-2.5 sm:py-1.5 sm:text-[11px]">
+          <div className="animate-float-fast absolute bottom-1 left-2 rounded-lg border border-white/15 bg-black/45 px-2 py-1 font-mono text-xs text-slate-200 shadow-md sm:left-4 sm:px-2.5 sm:py-1.5 sm:text-xs">
             Input::Newsletter
           </div>
         </div>
@@ -301,10 +301,10 @@ export default function CanvasBentoFeatures() {
 
         <div className="relative z-10 mt-6 space-y-3 sm:mt-8">
           {/* Drag chip */}
-          <div className="animate-float-slow flex w-fit max-w-full items-center gap-2 rounded-xl border border-emerald-400/35 bg-emerald-500/15 px-2.5 py-1.5 text-[10px] font-semibold text-emerald-100 shadow-lg shadow-emerald-900/30 sm:px-3 sm:text-xs">
+          <div className="animate-float-slow flex w-fit max-w-full items-center gap-2 rounded-xl border border-emerald-400/35 bg-emerald-500/15 px-2.5 py-1.5 text-xs font-semibold text-emerald-100 shadow-lg shadow-emerald-900/30 sm:px-3 sm:text-xs">
             <GripVertical className="h-3.5 w-3.5 shrink-0 text-emerald-300" strokeWidth={2} />
             <span className="truncate">Drag · Hero Section</span>
-            <span className="rounded border border-emerald-400/30 bg-emerald-400/20 px-1.5 py-0.5 text-[9px] font-medium text-emerald-100 sm:text-[10px]">
+            <span className="rounded border border-emerald-400/30 bg-emerald-400/20 px-1.5 py-0.5 text-xs font-medium text-emerald-100 sm:text-xs">
               Drop here
             </span>
           </div>
@@ -328,7 +328,7 @@ export default function CanvasBentoFeatures() {
                 <div className="font-mono text-xs font-semibold tracking-wider text-emerald-300/90 uppercase">
                   Selected Heading
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-md border border-white/15 bg-white/10 px-1.5 py-0.5 text-[9px] font-medium text-white/70 sm:text-[10px]">
+                <span className="inline-flex items-center gap-1 rounded-md border border-white/15 bg-white/10 px-1.5 py-0.5 text-xs font-medium text-white/70 sm:text-xs">
                   <GripVertical className="h-3 w-3" />
                   Move
                 </span>
@@ -370,44 +370,44 @@ export default function CanvasBentoFeatures() {
         </div>
 
         <div className="relative z-10 mt-6 rounded-2xl border border-white/10 bg-black/30 p-3 backdrop-blur-md sm:mt-8 sm:p-5">
-          <div className="mb-3 flex items-center justify-between font-mono text-[10px] tracking-wider text-white/50 uppercase sm:text-xs">
+          <div className="mb-3 flex items-center justify-between font-mono text-xs tracking-wider text-white/50 uppercase sm:text-xs">
             <span>Global Color Tokens</span>
           </div>
 
           <div className="mb-4 grid grid-cols-2 gap-2 sm:mb-5 sm:grid-cols-4 sm:gap-3">
             <div className="flex min-w-0 items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-2 shadow-sm sm:gap-2.5 sm:p-2.5">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#0ea5e9] text-[10px] text-white shadow-inner ring-2 ring-sky-400/40">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#0ea5e9] text-xs text-white shadow-inner ring-2 ring-sky-400/40">
                 ✓
               </div>
               <div className="min-w-0">
                 <div className="truncate text-xs font-semibold text-white">Sky</div>
-                <div className="font-mono text-[10px] text-white/50">#0ea5e9</div>
+                <div className="font-mono text-xs text-white/50">#0ea5e9</div>
               </div>
             </div>
             <div className="flex min-w-0 items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-2 shadow-sm sm:gap-2.5 sm:p-2.5">
               <div className="h-7 w-7 shrink-0 rounded-lg bg-[#10b981] shadow-inner ring-2 ring-emerald-400/40" />
               <div className="min-w-0">
                 <div className="truncate text-xs font-semibold text-white">Emerald</div>
-                <div className="font-mono text-[10px] text-white/50">#10b981</div>
+                <div className="font-mono text-xs text-white/50">#10b981</div>
               </div>
             </div>
             <div className="flex min-w-0 items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-2 shadow-sm sm:gap-2.5 sm:p-2.5">
               <div className="h-7 w-7 shrink-0 rounded-lg bg-[#f59e0b] shadow-inner ring-2 ring-amber-400/40" />
               <div className="min-w-0">
                 <div className="truncate text-xs font-semibold text-white">Amber</div>
-                <div className="font-mono text-[10px] text-white/50">#f59e0b</div>
+                <div className="font-mono text-xs text-white/50">#f59e0b</div>
               </div>
             </div>
             <div className="flex min-w-0 items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-2 shadow-sm sm:gap-2.5 sm:p-2.5">
               <div className="h-7 w-7 shrink-0 rounded-lg bg-[#f43f5e] shadow-inner ring-2 ring-rose-400/40" />
               <div className="min-w-0">
                 <div className="truncate text-xs font-semibold text-white">Rose</div>
-                <div className="font-mono text-[10px] text-white/50">#f43f5e</div>
+                <div className="font-mono text-xs text-white/50">#f43f5e</div>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 border-t border-white/10 pt-3 text-[11px] sm:pt-1 sm:text-xs">
+          <div className="flex flex-wrap items-center gap-2 border-t border-white/10 pt-3 text-xs sm:pt-1 sm:text-xs">
             <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/10 px-2.5 py-1.5 text-slate-200 sm:px-3">
               <span className="font-serif font-bold text-white">Aa</span>{" "}
               <span className="hidden sm:inline">Inter Display (32px / 1.2)</span>
@@ -419,7 +419,7 @@ export default function CanvasBentoFeatures() {
             <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/10 px-2.5 py-1.5 text-slate-200 sm:px-3">
               Shadow: Elev-3D
             </span>
-            <span className="inline-flex items-center gap-1 rounded-lg border border-sky-400/30 bg-sky-500/20 px-2.5 py-1.5 font-mono text-[11px] text-sky-200 sm:ml-auto">
+            <span className="inline-flex items-center gap-1 rounded-lg border border-sky-400/30 bg-sky-500/20 px-2.5 py-1.5 font-mono text-xs text-sky-200 sm:ml-auto">
               Auto-Synced
             </span>
           </div>

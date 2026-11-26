@@ -571,24 +571,24 @@ export default function FeaturesPage() {
                 <div className="group flex flex-col justify-between rounded-2xl border border-[#c6c6cd]/50 bg-white p-5 transition-all duration-300 hover:-translate-y-1.5 hover:border-cyan-500/50 hover:shadow-lg">
                   <div>
                     <div className="mb-3 flex items-center justify-end">
-                      <span className="text-[11px] font-semibold text-cyan-700">Zero Friction</span>
+                      <span className="text-xs font-semibold text-cyan-700">Zero Friction</span>
                     </div>
                     <h4 className="text-[18px] text-[#1b1b1d] font-semibold mb-2">Auth &amp; Identity</h4>
                     <div className="my-3 p-2.5 rounded-xl bg-slate-900 text-white shadow-inner border border-white/10 space-y-2">
-                      <div className="flex flex-wrap items-center justify-between gap-1 text-[10px] sm:text-[11px]">
+                      <div className="flex flex-wrap items-center justify-between gap-1 text-xs sm:text-xs">
                         <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-white/10 border border-white/10 font-mono">
-                          <span className="w-3.5 h-3.5 rounded-full bg-red-500/90 text-[9px] font-bold flex items-center justify-center text-white">G</span>
+                          <span className="w-3.5 h-3.5 rounded-full bg-red-500/90 text-xs font-bold flex items-center justify-center text-white">G</span>
                           <span>Google Auth</span>
                         </div>
-                        <div className="px-2 py-1 rounded bg-white/5 border border-white/5 text-slate-300 text-[10px]">
+                        <div className="px-2 py-1 rounded bg-white/5 border border-white/5 text-slate-300 text-xs">
                           Magic Link
                         </div>
                       </div>
-                      <div className="flex items-center justify-between pt-1 border-t border-white/10 text-[10px] text-emerald-400">
+                      <div className="flex items-center justify-between pt-1 border-t border-white/10 text-xs text-emerald-400">
                         <span className="inline-flex items-center gap-1">
                           <span className="material-symbols-outlined text-[13px]">verified_user</span> Encrypted 256-bit
                         </span>
-                        <span className="text-slate-400 font-mono text-[9px]">Zero-Trust</span>
+                        <span className="text-slate-400 font-mono text-xs">Zero-Trust</span>
                       </div>
                     </div>
                     <p className="text-[14px] text-[#45464d] leading-relaxed">
@@ -596,7 +596,7 @@ export default function FeaturesPage() {
                     </p>
                   </div>
                   <div className="pt-3 mt-3 border-t border-[#c6c6cd]/30 flex items-center justify-between text-xs text-[#45464d]">
-                    <span className="font-mono text-[10px] text-cyan-700">P0 IDENTITY</span>
+                    <span className="font-mono text-xs text-cyan-700">P0 IDENTITY</span>
                     <span className="material-symbols-outlined text-[16px] text-cyan-600 group-hover:translate-x-1 transition-transform">
                       arrow_forward
                     </span>
@@ -607,21 +607,21 @@ export default function FeaturesPage() {
                 <div className="group flex flex-col justify-between rounded-2xl border border-[#c6c6cd]/50 bg-white p-5 transition-all duration-300 hover:-translate-y-1.5 hover:border-indigo-500/50 hover:shadow-lg">
                   <div>
                     <div className="mb-3 flex items-center justify-end">
-                      <span className="text-[11px] font-semibold text-indigo-700">Spatial DOM</span>
+                      <span className="text-xs font-semibold text-indigo-700">Spatial DOM</span>
                     </div>
                     <h4 className="text-[18px] text-[#1b1b1d] font-semibold mb-2">Canvas Init</h4>
                     <div className="my-3 p-2.5 rounded-xl bg-slate-900 text-white shadow-inner border border-white/10 space-y-2">
-                      <div className="grid grid-cols-2 gap-1.5 text-[11px] font-mono text-center">
+                      <div className="grid grid-cols-2 gap-1.5 text-xs font-mono text-center">
                         <div className="py-1 rounded bg-indigo-500/30 border border-indigo-400/40 text-indigo-200 font-semibold flex items-center justify-center gap-1">
                           <span>+</span> Blank Canvas
                         </div>
-                        <div className="py-1 rounded bg-white/5 border border-white/10 text-slate-300 flex items-center justify-center gap-1 text-[10px]">
+                        <div className="py-1 rounded bg-white/5 border border-white/10 text-slate-300 flex items-center justify-center gap-1 text-xs">
                           <span>★</span> Starter Kits
                         </div>
                       </div>
-                      <div className="flex items-center justify-between pt-1 border-t border-white/10 text-[10px]">
+                      <div className="flex items-center justify-between pt-1 border-t border-white/10 text-xs">
                         <span className="text-slate-400 font-mono">Viewport Base</span>
-                        <span className="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono text-[9px] border border-indigo-400/30">
+                        <span className="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono text-xs border border-indigo-400/30">
                           1440px Fluid
                         </span>
                       </div>
@@ -631,7 +631,7 @@ export default function FeaturesPage() {
                     </p>
                   </div>
                   <div className="pt-3 mt-3 border-t border-[#c6c6cd]/30 flex items-center justify-between text-xs text-[#45464d]">
-                    <span className="font-mono text-[10px] text-indigo-700">PROJECT MOUNT</span>
+                    <span className="font-mono text-xs text-indigo-700">PROJECT MOUNT</span>
                     <span className="material-symbols-outlined text-[16px] text-indigo-600 group-hover:translate-x-1 transition-transform">
                       arrow_forward
                     </span>
@@ -642,10 +642,10 @@ export default function FeaturesPage() {
                 <div className="group flex flex-col justify-between rounded-2xl border border-[#c6c6cd]/50 bg-white p-5 transition-all duration-300 hover:-translate-y-1.5 hover:border-violet-500/50 hover:shadow-lg">
                   <div>
                     <div className="mb-3 flex items-center justify-end">
-                      <span className="text-[11px] font-semibold text-violet-700">Smart Snapping</span>
+                      <span className="text-xs font-semibold text-violet-700">Smart Snapping</span>
                     </div>
                     <h4 className="text-[18px] text-[#1b1b1d] font-semibold mb-2">Section Assembly</h4>
-                    <div className="my-3 p-2.5 rounded-xl bg-slate-900 text-white shadow-inner border border-white/10 space-y-1.5 font-mono text-[10px]">
+                    <div className="my-3 p-2.5 rounded-xl bg-slate-900 text-white shadow-inner border border-white/10 space-y-1.5 font-mono text-xs">
                       <div className="flex items-center justify-between px-2 py-1 rounded bg-white/10 border border-white/10">
                         <span className="flex items-center gap-1.5">
                           <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
@@ -673,7 +673,7 @@ export default function FeaturesPage() {
                     </p>
                   </div>
                   <div className="pt-3 mt-3 border-t border-[#c6c6cd]/30 flex items-center justify-between text-xs text-[#45464d]">
-                    <span className="font-mono text-[10px] text-violet-700">DOM REFLOW</span>
+                    <span className="font-mono text-xs text-violet-700">DOM REFLOW</span>
                     <span className="material-symbols-outlined text-[16px] text-violet-600 group-hover:translate-x-1 transition-transform">
                       arrow_forward
                     </span>
@@ -684,18 +684,18 @@ export default function FeaturesPage() {
                 <div className="group flex flex-col justify-between rounded-2xl border border-[#c6c6cd]/50 bg-white p-5 transition-all duration-300 hover:-translate-y-1.5 hover:border-rose-500/50 hover:shadow-lg">
                   <div>
                     <div className="mb-3 flex items-center justify-end">
-                      <span className="text-[11px] font-semibold text-rose-700">Zero Lag</span>
+                      <span className="text-xs font-semibold text-rose-700">Zero Lag</span>
                     </div>
                     <h4 className="text-[18px] text-[#1b1b1d] font-semibold mb-2">WYSIWYG Engine</h4>
                     <div className="my-3 p-2.5 rounded-xl bg-slate-900 text-white shadow-inner border border-white/10 space-y-2">
-                      <div className="flex items-center justify-between px-2 py-1 rounded bg-white/10 text-[10px] font-mono text-slate-300">
+                      <div className="flex items-center justify-between px-2 py-1 rounded bg-white/10 text-xs font-mono text-slate-300">
                         <span className="font-bold text-white">B</span>
                         <span className="italic text-white">I</span>
                         <span className="underline">U</span>
                         <span className="text-rose-400">Link</span>
                         <span className="px-1 rounded bg-rose-500/30 text-rose-200 font-bold">H1</span>
                       </div>
-                      <div className="flex items-center gap-1 px-2 py-1.5 rounded bg-slate-950/70 border border-white/5 font-mono text-[11px]">
+                      <div className="flex items-center gap-1 px-2 py-1.5 rounded bg-slate-950/70 border border-white/5 font-mono text-xs">
                         <span className="text-slate-200 font-semibold">Live Typography</span>
                         <span className="w-1.5 h-3.5 bg-rose-400 animate-pulse inline-block" />
                       </div>
@@ -705,7 +705,7 @@ export default function FeaturesPage() {
                     </p>
                   </div>
                   <div className="pt-3 mt-3 border-t border-[#c6c6cd]/30 flex items-center justify-between text-xs text-[#45464d]">
-                    <span className="font-mono text-[10px] text-rose-700">INLINE DIRECT</span>
+                    <span className="font-mono text-xs text-rose-700">INLINE DIRECT</span>
                     <span className="material-symbols-outlined text-[16px] text-rose-600 group-hover:translate-x-1 transition-transform">
                       arrow_forward
                     </span>
@@ -716,10 +716,10 @@ export default function FeaturesPage() {
                 <div className="group flex flex-col justify-between rounded-2xl border border-[#c6c6cd]/50 bg-white p-5 transition-all duration-300 hover:-translate-y-1.5 hover:border-amber-500/50 hover:shadow-lg">
                   <div>
                     <div className="mb-3 flex items-center justify-end">
-                      <span className="text-[11px] font-semibold text-amber-700">Auto-Resolvers</span>
+                      <span className="text-xs font-semibold text-amber-700">Auto-Resolvers</span>
                     </div>
                     <h4 className="text-[18px] text-[#1b1b1d] font-semibold mb-2">Router &amp; Linking</h4>
-                    <div className="my-3 p-2.5 rounded-xl bg-slate-900 text-white shadow-inner border border-white/10 space-y-1.5 font-mono text-[10px]">
+                    <div className="my-3 p-2.5 rounded-xl bg-slate-900 text-white shadow-inner border border-white/10 space-y-1.5 font-mono text-xs">
                       <div className="flex items-center justify-between text-slate-300">
                         <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30">
                           Home (/)
@@ -729,7 +729,7 @@ export default function FeaturesPage() {
                           /templates
                         </span>
                       </div>
-                      <div className="flex items-center justify-between pt-1 border-t border-white/10 text-[9px] text-slate-400">
+                      <div className="flex items-center justify-between pt-1 border-t border-white/10 text-xs text-slate-400">
                         <span className="flex items-center gap-1">
                           <span className="material-symbols-outlined text-[12px] text-amber-400">link</span> Anchor Binding
                         </span>
@@ -741,7 +741,7 @@ export default function FeaturesPage() {
                     </p>
                   </div>
                   <div className="pt-3 mt-3 border-t border-[#c6c6cd]/30 flex items-center justify-between text-xs text-[#45464d]">
-                    <span className="font-mono text-[10px] text-amber-700">STATIC DISPATCH</span>
+                    <span className="font-mono text-xs text-amber-700">STATIC DISPATCH</span>
                     <span className="material-symbols-outlined text-[16px] text-amber-600 group-hover:translate-x-1 transition-transform">
                       arrow_forward
                     </span>
@@ -752,22 +752,22 @@ export default function FeaturesPage() {
                 <div className="group flex flex-col justify-between rounded-2xl border border-[#c6c6cd]/50 bg-white p-5 transition-all duration-300 hover:-translate-y-1.5 hover:border-emerald-500/50 hover:shadow-lg">
                   <div>
                     <div className="mb-3 flex items-center justify-end">
-                      <span className="text-[11px] font-semibold text-emerald-700">Auto-Breakpoints</span>
+                      <span className="text-xs font-semibold text-emerald-700">Auto-Breakpoints</span>
                     </div>
                     <h4 className="text-[18px] text-[#1b1b1d] font-semibold mb-2">Responsive Audit</h4>
                     <div className="my-3 p-2.5 rounded-xl bg-slate-900 text-white shadow-inner border border-white/10 space-y-1.5">
-                      <div className="grid grid-cols-3 gap-1 text-[10px] font-mono text-center">
+                      <div className="grid grid-cols-3 gap-1 text-xs font-mono text-center">
                         <div className="py-1 px-1 rounded bg-white/10 border border-white/10 text-slate-300 flex items-center justify-center gap-0.5">
-                          <span>🖥</span> 1440 <span className="text-emerald-400 text-[9px]">✓</span>
+                          <span>🖥</span> 1440 <span className="text-emerald-400 text-xs">✓</span>
                         </div>
                         <div className="py-1 px-1 rounded bg-emerald-500/25 border border-emerald-400/40 text-emerald-200 flex items-center justify-center gap-0.5 font-semibold">
-                          <span>📱</span> 768 <span className="text-emerald-400 text-[9px]">✓</span>
+                          <span>📱</span> 768 <span className="text-emerald-400 text-xs">✓</span>
                         </div>
                         <div className="py-1 px-1 rounded bg-white/10 border border-white/10 text-slate-300 flex items-center justify-center gap-0.5">
-                          <span>📲</span> 390 <span className="text-emerald-400 text-[9px]">✓</span>
+                          <span>📲</span> 390 <span className="text-emerald-400 text-xs">✓</span>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between pt-1 border-t border-white/10 text-[9px] text-slate-400">
+                      <div className="flex items-center justify-between pt-1 border-t border-white/10 text-xs text-slate-400">
                         <span>Parity Score</span>
                         <span className="text-emerald-300 font-mono font-bold">100% Validated</span>
                       </div>
@@ -777,7 +777,7 @@ export default function FeaturesPage() {
                     </p>
                   </div>
                   <div className="pt-3 mt-3 border-t border-[#c6c6cd]/30 flex items-center justify-between text-xs text-[#45464d]">
-                    <span className="font-mono text-[10px] text-emerald-700">FLUID TEST</span>
+                    <span className="font-mono text-xs text-emerald-700">FLUID TEST</span>
                     <span className="material-symbols-outlined text-[16px] text-emerald-600 group-hover:translate-x-1 transition-transform">
                       arrow_forward
                     </span>
@@ -788,18 +788,18 @@ export default function FeaturesPage() {
                 <div className="group flex flex-col justify-between rounded-2xl border border-[#c6c6cd]/50 bg-white p-5 transition-all duration-300 hover:-translate-y-1.5 hover:border-sky-500/50 hover:shadow-lg">
                   <div>
                     <div className="mb-3 flex items-center justify-end">
-                      <span className="text-[11px] font-semibold text-sky-700">One-Click Edge</span>
+                      <span className="text-xs font-semibold text-sky-700">One-Click Edge</span>
                     </div>
                     <h4 className="text-[18px] text-[#1b1b1d] font-semibold mb-2">Immutable Deploy</h4>
-                    <div className="my-3 p-2.5 rounded-xl bg-slate-900 text-white shadow-inner border border-white/10 space-y-1.5 font-mono text-[10px]">
+                    <div className="my-3 p-2.5 rounded-xl bg-slate-900 text-white shadow-inner border border-white/10 space-y-1.5 font-mono text-xs">
                       <div className="flex items-center justify-between text-slate-300">
                         <span className="flex items-center gap-1.5">
                           <span className="material-symbols-outlined text-[13px] text-sky-400">commit</span>
                           <span>v2.4 Prod</span>
                         </span>
-                        <span className="text-[9px] text-slate-400">#8f4c2</span>
+                        <span className="text-xs text-slate-400">#8f4c2</span>
                       </div>
-                      <div className="flex items-center justify-between px-2 py-1 rounded bg-sky-500/20 border border-sky-400/30 text-sky-200 text-[10px]">
+                      <div className="flex items-center justify-between px-2 py-1 rounded bg-sky-500/20 border border-sky-400/30 text-sky-200 text-xs">
                         <span className="flex items-center gap-1">
                           <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
                           <span>Deploy to Edge</span>
@@ -812,7 +812,7 @@ export default function FeaturesPage() {
                     </p>
                   </div>
                   <div className="pt-3 mt-3 border-t border-[#c6c6cd]/30 flex items-center justify-between text-xs text-[#45464d]">
-                    <span className="font-mono text-[10px] text-sky-700">STATIC BUNDLER</span>
+                    <span className="font-mono text-xs text-sky-700">STATIC BUNDLER</span>
                     <span className="material-symbols-outlined text-[16px] text-sky-600 group-hover:translate-x-1 transition-transform">
                       arrow_forward
                     </span>
@@ -823,10 +823,10 @@ export default function FeaturesPage() {
                 <div className="group flex flex-col justify-between rounded-2xl border border-emerald-500/40 bg-slate-950 p-5 text-white transition-all duration-300 hover:-translate-y-1.5 hover:border-emerald-400 hover:shadow-lg">
                   <div>
                     <div className="mb-3 flex items-center justify-end">
-                      <span className="text-[11px] font-semibold text-emerald-300">Active Anycast</span>
+                      <span className="text-xs font-semibold text-emerald-300">Active Anycast</span>
                     </div>
                     <h4 className="text-[18px] text-white font-semibold mb-2">Worldwide Live</h4>
-                    <div className="my-3 p-2.5 rounded-xl bg-black/40 text-white shadow-inner border border-emerald-500/30 space-y-1.5 font-mono text-[10px]">
+                    <div className="my-3 p-2.5 rounded-xl bg-black/40 text-white shadow-inner border border-emerald-500/30 space-y-1.5 font-mono text-xs">
                       <div className="flex items-center justify-between text-emerald-300">
                         <span className="flex items-center gap-1.5">
                           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -834,7 +834,7 @@ export default function FeaturesPage() {
                         </span>
                         <span className="material-symbols-outlined text-[13px] text-emerald-400">lock</span>
                       </div>
-                      <div className="flex items-center justify-between pt-1 border-t border-white/10 text-[9px] text-slate-300">
+                      <div className="flex items-center justify-between pt-1 border-t border-white/10 text-xs text-slate-300">
                         <span className="text-emerald-400 font-bold">14ms Global TTFB</span>
                         <span className="text-slate-400">99.9% Cloud SLA</span>
                       </div>
@@ -844,7 +844,7 @@ export default function FeaturesPage() {
                     </p>
                   </div>
                   <div className="pt-3 mt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
-                    <span className="font-mono text-[10px] text-emerald-300 font-semibold">PRODUCTION ACTIVE</span>
+                    <span className="font-mono text-xs text-emerald-300 font-semibold">PRODUCTION ACTIVE</span>
                     <span className="material-symbols-outlined text-[16px] text-emerald-400 group-hover:translate-x-1 transition-transform">
                       check_circle
                     </span>

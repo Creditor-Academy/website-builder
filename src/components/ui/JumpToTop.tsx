@@ -64,7 +64,7 @@ export function JumpToTop({ className, threshold = 400, containerRef }: JumpToTo
           <ChevronUp className="w-6 h-6 relative z-10 group-hover:text-primary transition-colors" />
           
           {/* Tooltip on hover */}
-          <div className="absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-slate-900 text-white text-[10px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 whitespace-nowrap shadow-xl pointer-events-none">
+          <div className="absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 whitespace-nowrap shadow-xl pointer-events-none">
             Back to top
             <div className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45" />
           </div>

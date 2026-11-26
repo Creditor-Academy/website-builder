@@ -1,10 +1,10 @@
 import { FileText, Building2, Layout, ShoppingBag, Users, Globe, Sparkles } from 'lucide-react';
 
 // Import template assets
-import business from "../assets/Bussiness.jpg";
-import ecommerce from "../assets/Ecomm.jpg";
-import portfolio from "../assets/Portfolio.jpg";
-import school from "../assets/School.jpg";
+import business from "../assets/Bussiness.webp";
+import ecommerce from "../assets/Ecomm.webp";
+import portfolio from "../assets/Portfolio.webp";
+import school from "../assets/School.webp";
 import learning from "../assets/Learning.jpg";
 import cta from "../assets/CTA.webp";
 import placeholder from "../assets/ui_showcase_1.webp";

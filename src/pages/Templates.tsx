@@ -18,10 +18,10 @@ import MarketingNav from "@/components/landing/MarketingNav";
 import LandingCta from "@/components/landing/LandingCta";
 
 // Assets
-import Ecommerce from "../assets/Ecomm.jpg";
-import Portfolio from "../assets/Portfolio.jpg";
-import business from "../assets/Bussiness.jpg";
-import school from "../assets/School.jpg";
+import Ecommerce from "../assets/Ecomm.webp";
+import Portfolio from "../assets/Portfolio.webp";
+import business from "../assets/Bussiness.webp";
+import school from "../assets/School.webp";
 import saasImg from "../assets/template_saas_1.webp";
 import templatesImg from "../assets/templates_showcase.webp";
 
@@ -64,8 +64,8 @@ const Templates = () => {
       title: "Storefront",
       category: "E-commerce",
       image: Ecommerce,
-      width: 735,
-      height: 1103,
+      width: 640,
+      height: 960,
       description:
         "Commerce-oriented starting template. Customize images from Assets, edit text inline, and connect pages from the Pages rail.",
     },
@@ -74,8 +74,8 @@ const Templates = () => {
       title: "Portfolio & Studio",
       category: "Portfolio",
       image: Portfolio,
-      width: 736,
-      height: 1251,
+      width: 640,
+      height: 1088,
       description:
         "Showcase work with a visual canvas layout. Reorder blocks, resize frames, and preview desktop, tablet, and mobile.",
     },
@@ -84,8 +84,8 @@ const Templates = () => {
       title: "Business Site",
       category: "Business",
       image: business,
-      width: 736,
-      height: 981,
+      width: 640,
+      height: 853,
       description:
         "Professional starting point with header, hero, services, and footer blocks you can replace or extend from Elements.",
     },
@@ -94,8 +94,8 @@ const Templates = () => {
       title: "Creative Agency",
       category: "Creative",
       image: school,
-      width: 736,
-      height: 1104,
+      width: 640,
+      height: 960,
       description:
         "Image-forward template for studios and agencies. Apply a global color palette and style preset from Design.",
     },
@@ -184,7 +184,7 @@ const Templates = () => {
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
                 className={cn(
-                  "rounded-full px-5 py-2.5 text-sm font-semibold transition-all active:scale-95 sm:px-6",
+                  "min-h-11 rounded-full px-5 py-2.5 text-sm font-semibold transition-all active:scale-95 sm:px-6",
                   selectedCategory === cat
                     ? isDark
                       ? "bg-white text-slate-950"
@@ -217,7 +217,7 @@ const Templates = () => {
                   )}
                 >
                   {template.popular && (
-                    <div className="absolute left-4 top-4 z-10 flex items-center gap-1.5 rounded-full bg-[#0F172A] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white sm:left-5 sm:top-5">
+                    <div className="absolute left-4 top-4 z-10 flex items-center gap-1.5 rounded-full bg-[#0F172A] px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white sm:left-5 sm:top-5">
                       <Sparkles className="h-3 w-3" /> Recommended
                     </div>
                   )}

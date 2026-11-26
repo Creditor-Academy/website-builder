@@ -94,7 +94,7 @@ const SpotlightCard: React.FC<FeatureCardProps> = ({
               {icon}
             </div>
             <span
-              className={`inline-flex max-w-[55%] shrink-0 items-center gap-1.5 truncate rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wide backdrop-blur-md sm:max-w-none sm:px-3 sm:text-xs ${theme.badgeBgTextBorder}`}
+              className={`inline-flex max-w-[55%] shrink-0 items-center gap-1.5 truncate rounded-full border px-2.5 py-1 text-xs font-semibold tracking-wide backdrop-blur-md sm:max-w-none sm:px-3 ${theme.badgeBgTextBorder}`}
             >
               {heroBadge && (
                 <svg className="h-3.5 w-3.5 text-purple-300" fill="currentColor" viewBox="0 0 24 24">

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { pageFrameClass } from "@/components/landing/pageFrame";
+import ctaBg from "@/assets/CTA.webp";
 
 export default function HeroCTASection() {
   const [isPressed, setIsPressed] = useState(false);
@@ -89,7 +90,9 @@ export default function HeroCTASection() {
             <img
               alt="Creator workspace atmosphere"
               className="h-full w-full scale-105 object-cover object-center opacity-40 brightness-90 contrast-125 mix-blend-luminosity blur-sm filter"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuASrYyywOi6Yb_6jwvberyJ6UNuR-txWpjNZMLdG2JeRctdxrPBxO5JPylzt1orOOu2oKgpjq1fpr8Rj6WU264_6gnhj25PJypNc41PQRh1pSEGVI1r8B8kLWW_e8Z6EImKYVc-task4BYBRthmbqmA0CwrUceiK3oLnqCv-Jv6TTm5fGE2dgCU9-oNqXLjki_4GNI-1YKqYQx8GA3QPHIez-oxL6XLFg21Y7_LZZ9E_6vL3JGAFPaLSifnMJsH_TKhNf4"
+              src={ctaBg}
+              width={1408}
+              height={768}
               loading="lazy"
               decoding="async"
             />
@@ -126,7 +129,7 @@ export default function HeroCTASection() {
               <div className="absolute top-3 right-3 hidden items-center gap-2 sm:top-7 sm:right-7 sm:flex" data-purpose="window-controls">
                 <button
                   aria-label="Dismiss view"
-                  className="p-2 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors"
                   type="button"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,12 +140,12 @@ export default function HeroCTASection() {
 
               {/* BEGIN: Action Pill Badge */}
               <div className="inline-flex items-center justify-center mb-4 sm:mb-6" data-purpose="status-badge">
-                <div className="relative group cursor-pointer inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full border border-sky-400/30 transition-all duration-300 shadow-sm shadow-indigo-500/10">
+                <div className="relative group inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full border border-sky-400/30 transition-all duration-300 shadow-sm shadow-indigo-500/10">
                   <svg className="w-4 h-4 text-sky-500 dark:text-sky-400 animate-sparkle shrink-0" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2L13.8 8.2L20 10L13.8 11.8L12 18L10.2 11.8L4 10L10.2 8.2L12 2Z" />
                     <path d="M19 16L19.9 19.1L23 20L19.9 20.9L19 24L18.1 20.9L15 20L18.1 19.1L19 16Z" opacity="0.6" />
                   </svg>
-                  <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase bg-gradient-to-r from-sky-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                  <span className="text-xs font-bold tracking-widest uppercase bg-gradient-to-r from-sky-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
                     Zero to Live
                   </span>
                 </div>
@@ -217,16 +220,16 @@ export default function HeroCTASection() {
               {/* BEGIN: Social Proof & Trust Elements */}
               <div className="pt-4 sm:pt-5 border-t border-slate-200/60 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 text-center sm:text-left" data-purpose="social-proof-section">
                 <div className="flex -space-x-2.5 overflow-hidden">
-                  <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-[10px] font-bold text-white">
+                  <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-xs font-bold text-white">
                     MK
                   </span>
-                  <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center text-[10px] font-bold text-white">
+                  <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center text-xs font-bold text-white">
                     TL
                   </span>
-                  <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-gradient-to-tr from-fuchsia-500 to-pink-500 flex items-center justify-center text-[10px] font-bold text-white">
+                  <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-gradient-to-tr from-fuchsia-500 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
                     AS
                   </span>
-                  <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-200">
+                  <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-200">
                     +10k
                   </span>
                 </div>
