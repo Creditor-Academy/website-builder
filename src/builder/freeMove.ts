@@ -1,5 +1,5 @@
 import { getFreePosition, isFreePositioned } from './tree';
-import type { CanvasContainer, CanvasElement, CanvasSection, FreePosition } from './types';
+import type { CanvasContainer, CanvasElement, CanvasSection, CanvasStyles, FreePosition } from './types';
 
 const DEFAULT_ORIGIN = { x: 64, y: 64 };
 export const SURFACE_GROW_PADDING = 80;
@@ -17,25 +17,25 @@ function px(value?: string | number): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-export function freeBottom(node: { styles?: { height?: string; minHeight?: string }; properties?: Record<string, unknown> }): number {
+export function freeBottom(node: { styles?: { height?: string; minHeight?: string; position?: string }; properties?: Record<string, unknown> }): number {
   if (!isFreePositioned(node)) return 0;
   const pos = getFreePosition(node);
   const height = Math.max(pos.height || 0, px(node.styles?.height), px(node.styles?.minHeight)) || 64;
   return pos.y + height;
 }
 
-export function childrenBottom(nodes: Array<{ styles?: { height?: string; minHeight?: string }; properties?: Record<string, unknown> }> = []): number {
+export function childrenBottom(nodes: Array<{ styles?: { height?: string; minHeight?: string; position?: string }; properties?: Record<string, unknown> }> = []): number {
   return nodes.reduce((max, node) => Math.max(max, freeBottom(node)), 0);
 }
 
-function withGrownHeight<T extends { styles?: Record<string, unknown> }>(
+function withGrownHeight<T extends { styles?: CanvasStyles | Record<string, any> }>(
   node: T,
   needed: number,
   options: { pad?: number; min?: number } = {}
 ): T {
   const pad = options.pad ?? SURFACE_GROW_PADDING;
   const min = options.min ?? 0;
-  const current = Math.max(px(node.styles?.minHeight as string), px(node.styles?.height as string), min);
+  const current = Math.max(px(node.styles?.minHeight as string | number | undefined), px(node.styles?.height as string | number | undefined), min);
   const next = Math.max(current, min, Math.round(needed + pad));
   if (next <= current) return node;
   return {

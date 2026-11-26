@@ -1,5 +1,6 @@
 import React from 'react';
 import { Editable } from '@/components/ui/Editable';
+import { responsivePadding } from '@/builder/styles';
 
 
 export function GalleryMasonrySection({ section, isSelected, isEditing, onContentChange }) {
@@ -29,7 +30,7 @@ export function GalleryMasonrySection({ section, isSelected, isEditing, onConten
   };
 
   return (
-    <section className={`${isSelected ? 'ring-2 ring-primary' : ''} py-12`} style={{ background: styles.backgroundColor, padding: styles.padding }}>
+    <section className={`${isSelected ? 'ring-2 ring-primary' : ''} py-12`} style={{ background: styles.backgroundColor, padding: responsivePadding(styles.padding, '48px 0') }}>
       <div className="container mx-auto px-6">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Briefcase, TrendingUp, Users, Target, ArrowRight } from 'lucide-react';
 import { Editable } from '@/components/ui/Editable';
+import { responsivePadding } from '@/builder/styles';
 
 export function CaseStudiesSection({ section, isSelected, isEditing, onContentChange }) {
   const { content, styles } = section;
@@ -21,7 +22,7 @@ export function CaseStudiesSection({ section, isSelected, isEditing, onContentCh
 
   const sectionStyle = {
     backgroundColor: styles.backgroundColor || '#0f172a',
-    padding: styles.padding || '110px 0',
+    padding: responsivePadding(styles.padding, '110px 0'),
     color: styles.color || '#e2e8f0',
   };
 

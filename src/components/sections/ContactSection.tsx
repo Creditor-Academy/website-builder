@@ -3,6 +3,7 @@ import { Mail, Phone, MapPin, Send, ArrowUpRight, Users, MessageSquare, Clock } 
 import { Editable } from '@/components/ui/Editable';
 import formsApi from '@/api/forms';
 import useBuilderStore from '@/store/useBuilderStore';
+import { responsivePadding } from '@/builder/styles';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -541,7 +542,7 @@ export function ContactSection({ section, isSelected, isEditing, onContentChange
   return (
     <section style={{
       background,
-      padding: styles.padding || '60px 0 lg:100px 0',
+      padding: responsivePadding(styles.padding),
       fontFamily: "'Geist', sans-serif",
       position: 'relative',
       outline: isSelected ? '2px solid #E11D48' : 'none',

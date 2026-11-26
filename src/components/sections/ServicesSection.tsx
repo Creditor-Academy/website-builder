@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowUpRight, ChevronRight, ArrowRight } from 'lucide-react';
 import { Editable } from '@/components/ui/Editable';
 import { useBuilder } from '@/contexts/BuilderContext';
+import { responsivePadding } from '@/builder/styles';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -415,7 +416,7 @@ export function ServicesSection({ section, isSelected, isEditing, onContentChang
       className={`relative transition-all duration-300 ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${globalClasses}`}
       style={{
         background,
-        padding: styles.padding || '60px 0',
+        padding: responsivePadding(styles.padding),
         fontFamily: "'Cabinet Grotesk', sans-serif",
         position: 'relative',
       }}

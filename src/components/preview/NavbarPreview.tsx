@@ -264,7 +264,21 @@ function findPageForHref(pages: Array<{ id: string; slug?: string }>, href: stri
   return pages.find((page) => normalizePageSlug(page.slug).toLowerCase() === slug) || null;
 }
 
-export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selectedItemId, onSelectItem }) {
+export interface NavbarPreviewProps {
+  config: any;
+  isEditing?: boolean;
+  onUpdate?: (updates: any) => void;
+  selectedItemId?: string | null;
+  onSelectItem?: (id: string) => void;
+}
+
+export function NavbarPreview({
+  config: rawConfig,
+  isEditing = false,
+  onUpdate = () => { },
+  selectedItemId = null,
+  onSelectItem = () => { },
+}: NavbarPreviewProps) {
   const config = {
     ...rawConfig,
     logo: rawConfig.logo && typeof rawConfig.logo === 'object' ? rawConfig.logo : { text: rawConfig.logo || 'Logo', imageUrl: '' },
@@ -398,244 +412,266 @@ export function NavbarPreview({ config: rawConfig, isEditing, onUpdate, selected
     wrapNavItem(
       link,
       link.isButton ? (
-      <a
-        href={link.href}
-        data-canvas-node={`navbar-link-${link.id}`}
-        data-canvas-kind="navbar"
-        data-navbar-item={link.id}
-        className={`nb-cta ${isGhostCta ? 'nb-cta-ghost' : ''}`}
-        onClick={(e) => handleNavClick(e, link)}
-        style={ctaStyle}
-      >
-        <NavLabel
-          value={link.label}
-          editing={Boolean(isEditing)}
-          className="nb-cta-label nb-ce"
-          onSave={(newLabel) => {
-            onUpdate({ links: config.links.map((l) => l.id === link.id ? { ...l, label: newLabel.trim() } : l) });
-          }}
-        />
-      </a>
-    ) : (
-      <a
-        href={link.href}
-        data-canvas-node={`navbar-link-${link.id}`}
-        data-canvas-kind="navbar"
-        data-navbar-item={link.id}
-        className={`nb-link ${isLight ? '' : 'nb-ce-inv'}`}
-        onClick={(e) => handleNavClick(e, link)}
-        style={{ color: tc, borderRadius: 4 }}
-      >
-        <NavLabel
-          value={link.label}
-          editing={Boolean(isEditing)}
-          className={`nb-ce ${isLight ? '' : 'nb-ce-inv'}`}
-          onSave={(newLabel) => {
-            onUpdate({ links: config.links.map((l) => l.id === link.id ? { ...l, label: newLabel } : l) });
-            if (link.href && link.href.startsWith('/')) updatePageName(link.href, newLabel);
-          }}
-        />
-      </a>
-    )
+        <a
+          href={link.href}
+          data-canvas-node={`navbar-link-${link.id}`}
+          data-canvas-kind="navbar"
+          data-navbar-item={link.id}
+          className={`nb-cta ${isGhostCta ? 'nb-cta-ghost' : ''}`}
+          onClick={(e) => handleNavClick(e, link)}
+          style={ctaStyle}
+        >
+          <NavLabel
+            value={link.label}
+            editing={Boolean(isEditing)}
+            className="nb-cta-label nb-ce"
+            onSave={(newLabel) => {
+              onUpdate({ links: config.links.map((l) => l.id === link.id ? { ...l, label: newLabel.trim() } : l) });
+            }}
+          />
+        </a>
+      ) : (
+        <a
+          href={link.href}
+          data-canvas-node={`navbar-link-${link.id}`}
+          data-canvas-kind="navbar"
+          data-navbar-item={link.id}
+          className={`nb-link ${isLight ? '' : 'nb-ce-inv'}`}
+          onClick={(e) => handleNavClick(e, link)}
+          style={{ color: tc, borderRadius: 4 }}
+        >
+          <NavLabel
+            value={link.label}
+            editing={Boolean(isEditing)}
+            className={`nb-ce ${isLight ? '' : 'nb-ce-inv'}`}
+            onSave={(newLabel) => {
+              onUpdate({ links: config.links.map((l) => l.id === link.id ? { ...l, label: newLabel } : l) });
+              if (link.href && link.href.startsWith('/')) updatePageName(link.href, newLabel);
+            }}
+          />
+        </a>
+      )
     );
 
   const logoMark = (
-        <div
-          data-canvas-node="navbar-logo"
-          data-canvas-kind="navbar"
-          data-navbar-item="logo"
-          className={isCentered ? 'nb-logo-center' : undefined}
+    <div
+      data-canvas-node="navbar-logo"
+      data-canvas-kind="navbar"
+      data-navbar-item="logo"
+      className={isCentered ? 'nb-logo-center' : undefined}
+      style={{
+        flexShrink: 0,
+        display: 'flex',
+        alignItems: 'center',
+        borderRadius: 4,
+        cursor: isEditing ? 'pointer' : 'default',
+        ...(isCentered ? { position: 'absolute', left: '50%', transform: 'translateX(-50%)' } : {}),
+      }}
+      onClick={(e) => {
+        if (!isEditing) return;
+        e.preventDefault();
+        e.stopPropagation();
+        onSelectItem?.('navbar-logo');
+      }}
+    >
+      {config.logo.imageUrl ? (
+        <img src={config.logo.imageUrl} alt="Logo" style={{ height: 34 }} />
+      ) : (
+        <NavLabel
+          value={config.logo.text || ''}
+          editing={Boolean(isEditing)}
+          className={`nb-ce ${isLight ? '' : 'nb-ce-inv'}`}
           style={{
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            borderRadius: 4,
-            cursor: isEditing ? 'pointer' : 'default',
-            ...(isCentered ? { position: 'absolute', left: '50%', transform: 'translateX(-50%)' } : {}),
+            fontFamily: "'Fraunces', serif",
+            fontSize: 22, fontWeight: 900, fontStyle: 'italic',
+            color: tc, letterSpacing: '-0.02em',
           }}
-          onClick={(e) => {
-            if (!isEditing) return;
-            e.preventDefault();
-            e.stopPropagation();
-            onSelectItem?.('navbar-logo');
-          }}
-        >
-          {config.logo.imageUrl ? (
-            <img src={config.logo.imageUrl} alt="Logo" style={{ height: 34 }} />
-          ) : (
-            <NavLabel
-              value={config.logo.text || ''}
-              editing={Boolean(isEditing)}
-              className={`nb-ce ${isLight ? '' : 'nb-ce-inv'}`}
-              style={{
-                fontFamily: "'Fraunces', serif",
-                fontSize: 22, fontWeight: 900, fontStyle: 'italic',
-                color: tc, letterSpacing: '-0.02em',
-              }}
-              onSave={(text) => onUpdate({ logo: { ...config.logo, text } })}
-            />
-          )}
-        </div>
+          onSave={(text) => onUpdate({ logo: { ...config.logo, text } })}
+        />
+      )}
+    </div>
   );
 
   return (
     <>
-    <nav
-      style={{
-        backgroundColor: navBg,
-        color: tc,
-        position: styles.sticky ? 'sticky' : 'relative',
-        top: styles.sticky ? 0 : undefined,
-        zIndex: 10,
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        cursor: isEditing ? 'pointer' : 'default',
-        borderBottom: variant === 'simple' ? 'none' : `1px solid ${isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.08)'}`,
-        boxShadow: variant === 'simple' ? 'none' : variant === 'split' ? '0 8px 24px rgba(15,23,42,0.18)' : '0 1px 2px rgba(15,23,42,0.04)',
-        animation: 'nb-down 0.4s ease both',
-      }}
-      onClick={handleNavbarClick}
-    >
-      <InjectStyles />
+      <nav
+        style={{
+          backgroundColor: navBg,
+          color: tc,
+          position: styles.sticky ? 'sticky' : 'relative',
+          top: styles.sticky ? 0 : undefined,
+          zIndex: 10,
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          cursor: isEditing ? 'pointer' : 'default',
+          borderBottom: variant === 'simple' ? 'none' : `1px solid ${isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.08)'}`,
+          boxShadow: variant === 'simple' ? 'none' : variant === 'split' ? '0 8px 24px rgba(15,23,42,0.18)' : '0 1px 2px rgba(15,23,42,0.04)',
+          animation: 'nb-down 0.4s ease both',
+        }}
+        onClick={handleNavbarClick}
+      >
+        <InjectStyles />
 
-      <div className="nb-inner" style={{ position: 'relative' }}>
-        {isCentered ? (
-          <>
-            <div className="nb-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-              {navLinks.map(renderLink)}
-            </div>
-            {logoMark}
-            <div className="nb-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: 16, marginLeft: 'auto' }}>
-              {ctaLinks.map(renderLink)}
-            </div>
-          </>
-        ) : isSplit ? (
-          <>
-            {logoMark}
-            <div className="nb-desktop-links" style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', gap: 32 }}>
-              {navLinks.map(renderLink)}
-            </div>
-            <div className="nb-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              {ctaLinks.map(renderLink)}
-            </div>
-          </>
-        ) : variant === 'simple' ? (
-          <>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 28, minWidth: 0 }}>
-              {logoMark}
-              <div className="nb-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+        <div className="nb-inner" style={{ position: 'relative' }}>
+          {isCentered ? (
+            <>
+              <div className="nb-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
                 {navLinks.map(renderLink)}
               </div>
-            </div>
-            <div className="nb-desktop-links" style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}>
-              {ctaLinks.map(renderLink)}
-            </div>
-          </>
-        ) : (
-          <>
-            {logoMark}
-            <div className="nb-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: 36, marginLeft: 'auto' }}>
-              {config.links.map(renderLink)}
-            </div>
-          </>
-        )}
+              {logoMark}
+              <div className="nb-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: 16, marginLeft: 'auto' }}>
+                {ctaLinks.map(renderLink)}
+              </div>
+            </>
+          ) : isSplit ? (
+            <>
+              {logoMark}
+              <div className="nb-desktop-links" style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', gap: 32 }}>
+                {navLinks.map(renderLink)}
+              </div>
+              <div className="nb-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                {ctaLinks.map(renderLink)}
+              </div>
+            </>
+          ) : variant === 'simple' ? (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 28, minWidth: 0 }}>
+                {logoMark}
+                <div className="nb-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+                  {navLinks.map(renderLink)}
+                </div>
+              </div>
+              <div className="nb-desktop-links" style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}>
+                {ctaLinks.map(renderLink)}
+              </div>
+            </>
+          ) : (
+            <>
+              {logoMark}
+              <div className="nb-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: 36, marginLeft: 'auto' }}>
+                {config.links.map(renderLink)}
+              </div>
+            </>
+          )}
 
-        {/* ── Mobile hamburger ──────────────────────────────────── */}
-        <button
-          className="nb-ham"
-          style={{ color: tc }}
-          id="nb-hamburger"
-          onClick={(e) => { e.stopPropagation(); setMobileMenuOpen((o) => !o); }}
-          aria-label="Toggle menu"
-        >
-          {mobileMenuOpen
-            ? <X size={20} />
-            : <>
+          {/* ── Mobile hamburger ──────────────────────────────────── */}
+          <button
+            className="nb-ham"
+            style={{ color: tc }}
+            id="nb-hamburger"
+            onClick={(e) => { e.stopPropagation(); setMobileMenuOpen((o) => !o); }}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen
+              ? <X size={20} />
+              : <>
                 <div className="nb-ham-line" style={{ width: 22 }} />
                 <div className="nb-ham-line" style={{ width: 16 }} />
               </>
-          }
-        </button>
-      </div>
-
-      {/* ── Mobile menu ──────────────────────────────────────────── */}
-      <div
-        style={{
-          backgroundColor: navBg,
-          borderTop: `1px solid ${isLight ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.07)'}`,
-          overflow: 'hidden',
-          maxHeight: mobileMenuOpen ? 600 : 0,
-          opacity: mobileMenuOpen ? 1 : 0,
-          transition: 'max-height 0.32s ease, opacity 0.25s ease',
-        }}
-        id="nb-mobile-menu"
-      >
-        <div style={{ padding: '8px 40px 28px' }}>
-          {config.links.map((link, i) =>
-            link.isButton ? (
-              <a
-                key={link.id}
-                href={link.href}
-                onClick={(e) => handleNavClick(e, link)}
-                className={`nb-cta ${isGhostCta ? 'nb-cta-ghost' : ''}`}
-                style={{
-                  ...ctaStyle,
-                  display: 'flex',
-                  width: '100%',
-                  marginTop: 16,
-                  height: 44,
-                }}
-              >
-                <span className="nb-cta-label">{link.label}</span>
-              </a>
-            ) : (
-              <a
-                key={link.id}
-                href={link.href}
-                className="nb-mob-link"
-                onClick={(e) => handleNavClick(e, link)}
-                style={{ color: tc, animationDelay: `${i * 0.04}s` }}
-              >
-                <NavLabel
-                  value={link.label}
-                  editing={Boolean(isEditing)}
-                  className="nb-ce"
-                  onSave={(newLabel) =>
-                    onUpdate({ links: config.links.map((l) => l.id === link.id ? { ...l, label: newLabel } : l) })
-                  }
-                />
-              </a>
-            )
-          )}
+            }
+          </button>
         </div>
-      </div>
 
-      {/* Responsive CSS via style tag — shows mobile button & menu below md */}
-      <style>{`
+        {/* ── Mobile menu ──────────────────────────────────────────── */}
+        <div
+          style={{
+            backgroundColor: navBg,
+            borderTop: `1px solid ${isLight ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.07)'}`,
+            overflow: 'hidden',
+            maxHeight: mobileMenuOpen ? 600 : 0,
+            opacity: mobileMenuOpen ? 1 : 0,
+            transition: 'max-height 0.32s ease, opacity 0.25s ease',
+          }}
+          id="nb-mobile-menu"
+        >
+          <div style={{ padding: '8px 40px 28px' }}>
+            {config.links.map((link, i) =>
+              link.isButton ? (
+                <a
+                  key={link.id}
+                  href={link.href}
+                  onClick={(e) => handleNavClick(e, link)}
+                  className={`nb-cta ${isGhostCta ? 'nb-cta-ghost' : ''}`}
+                  style={{
+                    ...ctaStyle,
+                    display: 'flex',
+                    width: '100%',
+                    marginTop: 16,
+                    height: 44,
+                  }}
+                >
+                  <span className="nb-cta-label">{link.label}</span>
+                </a>
+              ) : (
+                <a
+                  key={link.id}
+                  href={link.href}
+                  className="nb-mob-link"
+                  onClick={(e) => handleNavClick(e, link)}
+                  style={{ color: tc, animationDelay: `${i * 0.04}s` }}
+                >
+                  <NavLabel
+                    value={link.label}
+                    editing={Boolean(isEditing)}
+                    className="nb-ce"
+                    onSave={(newLabel) =>
+                      onUpdate({ links: config.links.map((l) => l.id === link.id ? { ...l, label: newLabel } : l) })
+                    }
+                  />
+                </a>
+              )
+            )}
+          </div>
+        </div>
+
+        {/* Responsive CSS via style tag — shows mobile button & menu below md & on simulated devices */}
+        <style>{`
         @media (max-width: 768px) {
           #nb-hamburger { display: flex !important; }
           #nb-mobile-menu { display: block !important; }
           .nb-desktop-links { display: none !important; }
           .nb-logo-center { position: static !important; transform: none !important; }
         }
+        @container (max-width: 768px) {
+          #nb-hamburger { display: flex !important; }
+          #nb-mobile-menu { display: block !important; }
+          .nb-desktop-links { display: none !important; }
+          .nb-logo-center { position: static !important; transform: none !important; }
+        }
+        [data-device="mobile"] #nb-hamburger,
+        [data-device="tablet"] #nb-hamburger {
+          display: flex !important;
+        }
+        [data-device="mobile"] #nb-mobile-menu,
+        [data-device="tablet"] #nb-mobile-menu {
+          display: block !important;
+        }
+        [data-device="mobile"] .nb-desktop-links,
+        [data-device="tablet"] .nb-desktop-links {
+          display: none !important;
+        }
+        [data-device="mobile"] .nb-logo-center,
+        [data-device="tablet"] .nb-logo-center {
+          position: static !important; transform: none !important;
+        }
       `}</style>
-    </nav>
-    <AlertDialog open={Boolean(pendingLink)} onOpenChange={(open) => { if (!open) setPendingLink(null); }}>
-      <AlertDialogContent className="max-w-md rounded-2xl">
-        <AlertDialogHeader>
-          <AlertDialogTitle>Create this page?</AlertDialogTitle>
-          <AlertDialogDescription>
-            {pendingLink
-              ? `"${pendingLink.label || normalizePageSlug(pendingLink.href, pendingLink.label)}" is not in this site yet. Create an empty page and open it?`
-              : 'This page is not in this site yet. Create an empty page and open it?'}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={confirmCreatePage}>Create page</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      </nav>
+      <AlertDialog open={Boolean(pendingLink)} onOpenChange={(open) => { if (!open) setPendingLink(null); }}>
+        <AlertDialogContent className="max-w-md rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Create this page?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingLink
+                ? `"${pendingLink.label || normalizePageSlug(pendingLink.href, pendingLink.label)}" is not in this site yet. Create an empty page and open it?`
+                : 'This page is not in this site yet. Create an empty page and open it?'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmCreatePage}>Create page</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

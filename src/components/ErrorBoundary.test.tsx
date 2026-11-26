@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
@@ -7,6 +7,11 @@ function Bomb(): JSX.Element {
 }
 
 describe('ErrorBoundary', () => {
+  beforeEach(() => {
+    if (typeof navigator !== 'undefined') {
+      vi.spyOn(navigator, 'sendBeacon').mockImplementation(() => true);
+    }
+  });
   it('renders children when no error', () => {
     render(
       <ErrorBoundary>
@@ -18,7 +23,7 @@ describe('ErrorBoundary', () => {
 
   it('renders fallback on error', () => {
     // Suppress console.error noise from React
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => { });
     render(
       <ErrorBoundary>
         <Bomb />
@@ -30,7 +35,7 @@ describe('ErrorBoundary', () => {
   });
 
   it('renders custom fallback', () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => { });
     render(
       <ErrorBoundary fallback={<p>Custom error</p>}>
         <Bomb />

@@ -3,6 +3,7 @@ import { useBuilder } from '@/contexts/BuilderContext';
 import { Edit, ArrowRight, Image as ImageIcon } from 'lucide-react';
 import { Editable } from '@/components/ui/Editable';
 import { sanitizeHTML } from '@/utils/sanitize';
+import { responsivePadding } from '@/builder/styles';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -423,7 +424,7 @@ export function LayoutSection({ section, isSelected, isEditing, onContentChange 
       className="ly-sect"
       style={{
         background: bg,
-        padding: styles.padding || '80px 0',
+        padding: responsivePadding(styles.padding, '80px 0'),
         position: 'relative',
         fontFamily: "'Geist', sans-serif",
         outline: isSelected ? '2px solid #E11D48' : 'none',

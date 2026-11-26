@@ -1,6 +1,7 @@
 import React from "react";
 import { Plus, Trash, Image, ArrowUpRight, Calendar } from "lucide-react";
 import { Editable } from '@/components/ui/Editable';
+import { responsivePadding } from '@/builder/styles';
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 const STYLES = `
@@ -124,7 +125,7 @@ export function BlogListSection({ section, isSelected, isEditing, onContentChang
     <section
       style={{
         background: bg,
-        padding: styles.padding || '60px 0 lg:100px 0',
+        padding: responsivePadding(styles.padding),
         fontFamily: "'Outfit', sans-serif",
         position: 'relative',
         outline: isSelected ? '2px solid #E11D48' : 'none',

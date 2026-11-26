@@ -1,13 +1,14 @@
 import React from 'react';
 import { Editable } from '@/components/ui/Editable';
 import { sanitizeHTML } from '@/utils/sanitize';
+import { responsivePadding } from '@/builder/styles';
 
 export function LogoCloudSection({ section, isEditing, onContentChange }) {
   const { content, styles } = section;
   const logos = content.logos || [];
   const variant = section.variant || 'simple';
   const background = styles.useGradient ? (styles.backgroundGradient || styles.backgroundColor) : (styles.backgroundColor || '#ffffff');
-  const padding = styles.padding || '60px 0';
+  const padding = responsivePadding(styles.padding, '60px 0');
   
   // Get text colors with fallbacks
   const headingColor = styles.headingColor || '#0f172a';
