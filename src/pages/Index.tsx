@@ -252,7 +252,7 @@ export default function LandingPage() {
           </Link>
 
           <div className="hidden lg:flex items-center gap-5 text-sm font-medium xl:gap-8">
-            {["Features", "Templates", "Resources"].map((item) => (
+            {["Features", "Templates", "Pricing", "Resources"].map((item) => (
               <Link key={item} to={`/${item.toLowerCase()}`} className={cn(
                 "relative group transition-colors",
                 isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
@@ -321,7 +321,7 @@ export default function LandingPage() {
               )}
             >
               <div className="flex flex-col gap-2">
-                {["Features", "Templates", "Resources"].map((item) => (
+                {["Features", "Templates", "Pricing", "Resources"].map((item) => (
                   <Link
                     key={item}
                     to={`/${item.toLowerCase()}`}

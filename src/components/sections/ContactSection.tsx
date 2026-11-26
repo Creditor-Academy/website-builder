@@ -110,6 +110,7 @@ function ContactForm({ content, isEditing, onContentChange, buttonPrimaryBg, but
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submissionRef, setSubmissionRef] = useState<string | null>(null);
 
   const handleChange = (field: 'firstName' | 'lastName' | 'email' | 'message', value: string) => {
     setFormValues((prev) => ({ ...prev, [field]: value }));
@@ -137,14 +138,15 @@ function ContactForm({ content, isEditing, onContentChange, buttonPrimaryBg, but
           message: formValues.message.trim(),
         }
       });
+      const ref = `INQ-${Date.now().toString().slice(-6)}`;
       setIsSubmitted(true);
+      setSubmissionRef(ref);
       setFormValues({
         firstName: '',
         lastName: '',
         email: '',
         message: '',
       });
-      setTimeout(() => setIsSubmitted(false), 4000);
     } catch (error) {
       console.error('Failed to submit contact form:', error);
     } finally {
@@ -224,6 +226,14 @@ function ContactForm({ content, isEditing, onContentChange, buttonPrimaryBg, but
           required
         />
       </div>
+
+      {/* Feedback banner */}
+      {isSubmitted && (
+        <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/25 px-4 py-3 text-xs text-emerald-700 font-medium flex items-center justify-between">
+          <span>✓ Your message has been sent successfully!</span>
+          {submissionRef && <span className="font-mono text-[10px] opacity-75">Ref: {submissionRef}</span>}
+        </div>
+      )}
 
       {/* Submit */}
       <button
