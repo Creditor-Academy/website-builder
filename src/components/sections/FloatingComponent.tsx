@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Trash2, GripVertical, Maximize2, Type, Play } from 'lucide-react';
 import { sanitizeHTML } from '@/utils/sanitize';
 import { pointInSection } from '@/builder/templatePieces';
+import { DEVICE_WIDTHS } from '@/builder/types';
 import useBuilderStore from '@/store/useBuilderStore';
 
 const HANDLE_CURSORS: Record<string, string> = {
@@ -202,17 +203,38 @@ export function FloatingComponent({
     window.addEventListener('pointerup', handleUp);
   };
 
+  const currentDevice = useBuilderStore((state) => state.editor.device) || 'desktop';
+  const targetDeviceWidth = DEVICE_WIDTHS[currentDevice] || DEVICE_WIDTHS.desktop;
+  const isSmallDevice = currentDevice !== 'desktop';
+  const scaleRatio = isSmallDevice ? targetDeviceWidth / 1280 : 1;
+
+  const rawX = livePos?.x ?? component.position?.x ?? 0;
+  const rawY = livePos?.y ?? component.position?.y ?? 0;
+  const rawW = parseSize(component.style?.width, rootRef.current?.offsetWidth || 160);
+
+  const scaledW = isSmallDevice
+    ? Math.min(targetDeviceWidth - 24, Math.max(32, Math.round(rawW * scaleRatio)))
+    : rawW;
+  const scaledX = isSmallDevice
+    ? Math.max(8, Math.min(Math.round(rawX * scaleRatio), targetDeviceWidth - scaledW - 8))
+    : rawX;
+  const scaledY = isSmallDevice ? Math.round(rawY * (currentDevice === 'mobile' ? 0.85 : 0.95)) : rawY;
+
   return (
     <div
       ref={rootRef}
       className={`floating-component absolute group/comp transition-shadow duration-200 ${!editor.previewMode ? 'cursor-grab' : ''} ${isSelected && !editor.previewMode ? 'ring-2 ring-sky-500 ring-offset-2 rounded-sm shadow-xl' : ''}`}
       style={{
-        left: livePos?.x ?? component.position?.x ?? 0,
-        top: livePos?.y ?? component.position?.y ?? 0,
+        left: scaledX,
+        top: scaledY,
         zIndex: isSelected ? 50 : 10,
-        width: component.style?.width,
+        width: isSmallDevice ? `${scaledW}px` : component.style?.width,
+        maxWidth: '100%',
+        boxSizing: 'border-box',
         height: component.style?.height,
-        fontSize: component.style?.fontSize,
+        fontSize: isSmallDevice && currentDevice === 'mobile' && component.style?.fontSize && parseSize(component.style.fontSize, 0) > 26
+          ? `${Math.max(16, Math.round(parseSize(component.style.fontSize, 20) * 0.72))}px`
+          : component.style?.fontSize,
         fontWeight: component.style?.fontWeight,
         color: component.style?.color,
         fontFamily: component.style?.fontFamily,

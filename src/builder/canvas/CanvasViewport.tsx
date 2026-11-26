@@ -173,6 +173,7 @@ export function CanvasViewport({ children }: { children: ReactNode }) {
     <div
       ref={viewportRef}
       id="tour-canvas"
+      data-device={device}
       className={cn('relative z-0 isolate h-full w-full overflow-auto bg-[hsl(var(--builder-panel))]', previewMode && 'is-preview')}
       onClick={() => {
         if (previewMode) return;
@@ -193,14 +194,21 @@ export function CanvasViewport({ children }: { children: ReactNode }) {
       >
         <div
           ref={scalerRef}
-          className="relative shrink-0 overflow-visible"
+          className="relative shrink-0 overflow-visible transition-all duration-200"
           style={{
             width: scaledWidth,
             height: scaledHeight,
             marginLeft: CANVAS_GUTTER,
             marginRight: CANVAS_GUTTER,
+            transition: 'width 0.25s ease',
           }}
         >
+          {device !== 'desktop' && (
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/85 text-white text-[10px] font-medium tracking-wide shadow-sm backdrop-blur-sm pointer-events-none select-none z-30">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+              <span>{device === 'tablet' ? 'Tablet (768px)' : 'Mobile (390px)'}</span>
+            </div>
+          )}
           {children}
         </div>
       </div>

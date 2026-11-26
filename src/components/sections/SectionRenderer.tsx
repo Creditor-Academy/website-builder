@@ -93,6 +93,8 @@ export function SectionRenderer({ section, idx, isAlternate, isSelected, isEditi
                 position: 'absolute',
                 left: `${(comp.position.x / 1200) * 100}%`,
                 top: `${(comp.position.y / 600) * 100}%`,
+                maxWidth: '100%',
+                boxSizing: 'border-box',
                 zIndex: comp.style?.zIndex || 10,
                 ...(comp.style || {}),
               }}
