@@ -315,7 +315,14 @@ function PlanCard({ plan, index, isEditing, onContentChange, content, price, per
         </ul>
 
         {/* CTA */}
-        <button className={`pr-cta ${isPopular ? 'pr-cta-popular' : 'pr-cta-default'}`}>
+        <button
+          className={`pr-cta ${isPopular ? 'pr-cta-popular' : 'pr-cta-default'}`}
+          onClick={() => {
+            if (isEditing) return;
+            const planSlug = (plan.name || 'starter').toLowerCase().replace(/\s+/g, '-');
+            window.location.href = `/start?plan=${encodeURIComponent(planSlug)}`;
+          }}
+        >
           <Editable
             className={isPopular ? 'pr-ce-inv' : 'pr-ce'}
             isEditing={isEditing}

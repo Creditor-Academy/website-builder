@@ -235,116 +235,116 @@ export default function LandingPage() {
       {/* ================= NAVBAR ================= */}
       <nav className="pointer-events-none fixed inset-x-0 top-0 z-[100] pt-3 sm:pt-6">
         <div className={cn(pageFrameClass, "relative")}>
-        <motion.div
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className={cn(
-            "pointer-events-auto flex w-full min-w-0 items-center justify-between rounded-full px-3.5 py-2.5 backdrop-blur-2xl transition-all duration-500 sm:px-6 sm:py-3",
-            isDark
-              ? "bg-slate-900/80 border border-slate-700/50 shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
-              : "bg-white/90 border border-slate-200/50 shadow-[0_8px_32px_rgba(0,0,0,0.05)]"
-          )}
-        >
-          <Link to="/" className="flex min-w-0 shrink items-center cursor-pointer group pointer-events-auto">
-            <BrandLogo
-              imgClassName="h-12 w-12 sm:h-14 sm:w-14 transition-transform duration-300 group-hover:scale-110"
-            />
-          </Link>
-
-          <div className="hidden lg:flex items-center gap-5 text-sm font-medium xl:gap-8">
-            {["Features", "Templates", "Resources"].map((item) => (
-              <Link key={item} to={`/${item.toLowerCase()}`} className={cn(
-                "relative group transition-colors",
-                isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
-              )}>
-                {item}
-                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-blue-500 transition-all group-hover:w-full rounded-full"></span>
-              </Link>
-            ))}
-            <div className={cn("h-4 w-px", isDark ? "bg-slate-600/50" : "bg-slate-300")} />
-
-            {/* Theme Toggle */}
-            <button onClick={() => setTheme(isDark ? 'light' : 'dark')} className={cn("p-2 rounded-full transition-colors", isDark ? "hover:bg-slate-800 text-slate-300" : "hover:bg-slate-200 text-slate-600")}>
-              <AnimatePresence mode="wait">
-                {isDark ? (
-                  <motion.div key="sun" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}><Sun className="w-4 h-4" /></motion.div>
-                ) : (
-                  <motion.div key="moon" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}><Moon className="w-4 h-4" /></motion.div>
-                )}
-              </AnimatePresence>
-            </button>
-
-            <Link to="/login" className={cn(
-              "inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold transition-all active:scale-95",
-              isDark ? "bg-white text-slate-950 hover:bg-slate-100" : "bg-[#0F172A] text-white hover:bg-[#1e293b]",
-            )}>
-              Login <ArrowRight className="h-3.5 w-3.5" />
+          <motion.div
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className={cn(
+              "pointer-events-auto flex w-full min-w-0 items-center justify-between rounded-full px-3.5 py-2.5 backdrop-blur-2xl transition-all duration-500 sm:px-6 sm:py-3",
+              isDark
+                ? "bg-slate-900/80 border border-slate-700/50 shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+                : "bg-white/90 border border-slate-200/50 shadow-[0_8px_32px_rgba(0,0,0,0.05)]"
+            )}
+          >
+            <Link to="/" className="flex min-w-0 shrink items-center cursor-pointer group pointer-events-auto">
+              <BrandLogo
+                imgClassName="h-12 w-12 sm:h-14 sm:w-14 transition-transform duration-300 group-hover:scale-110"
+              />
             </Link>
-          </div>
 
-          <div className="flex items-center gap-0.5 lg:hidden">
-            <button
-              type="button"
-              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-              onClick={() => setTheme(isDark ? "light" : "dark")}
-              className={cn("pointer-events-auto rounded-full p-2", isDark ? "text-slate-300" : "text-slate-600")}
-            >
-              {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </button>
-            <button
-              type="button"
-              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={isMenuOpen}
-              className={cn("pointer-events-auto p-2", isDark ? "text-white" : "text-slate-900")}
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </motion.div>
+            <div className="hidden lg:flex items-center gap-5 text-sm font-medium xl:gap-8">
+              {["Features", "Templates", "Pricing", "Resources"].map((item) => (
+                <Link key={item} to={`/${item.toLowerCase()}`} className={cn(
+                  "relative group transition-colors",
+                  isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                )}>
+                  {item}
+                  <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-blue-500 transition-all group-hover:w-full rounded-full"></span>
+                </Link>
+              ))}
+              <div className={cn("h-4 w-px", isDark ? "bg-slate-600/50" : "bg-slate-300")} />
 
-        {/* Mobile Menu Overlay */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className={cn(
-                "pointer-events-auto absolute left-0 right-0 top-[calc(100%+0.75rem)] max-h-[min(70vh,28rem)] overflow-y-auto rounded-2xl border p-4 backdrop-blur-3xl sm:rounded-3xl sm:p-6 lg:hidden",
-                isDark ? "bg-slate-900/95 border-slate-700 shadow-2xl" : "bg-white/95 border-slate-200 shadow-xl"
-              )}
-            >
-              <div className="flex flex-col gap-2">
-                {["Features", "Templates", "Resources"].map((item) => (
+              {/* Theme Toggle */}
+              <button onClick={() => setTheme(isDark ? 'light' : 'dark')} className={cn("p-2 rounded-full transition-colors", isDark ? "hover:bg-slate-800 text-slate-300" : "hover:bg-slate-200 text-slate-600")}>
+                <AnimatePresence mode="wait">
+                  {isDark ? (
+                    <motion.div key="sun" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}><Sun className="w-4 h-4" /></motion.div>
+                  ) : (
+                    <motion.div key="moon" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}><Moon className="w-4 h-4" /></motion.div>
+                  )}
+                </AnimatePresence>
+              </button>
+
+              <Link to="/login" className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold transition-all active:scale-95",
+                isDark ? "bg-white text-slate-950 hover:bg-slate-100" : "bg-[#0F172A] text-white hover:bg-[#1e293b]",
+              )}>
+                Login <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+
+            <div className="flex items-center gap-0.5 lg:hidden">
+              <button
+                type="button"
+                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+                onClick={() => setTheme(isDark ? "light" : "dark")}
+                className={cn("pointer-events-auto rounded-full p-2", isDark ? "text-slate-300" : "text-slate-600")}
+              >
+                {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </button>
+              <button
+                type="button"
+                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={isMenuOpen}
+                className={cn("pointer-events-auto p-2", isDark ? "text-white" : "text-slate-900")}
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Mobile Menu Overlay */}
+          <AnimatePresence>
+            {isMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className={cn(
+                  "pointer-events-auto absolute left-0 right-0 top-[calc(100%+0.75rem)] max-h-[min(70vh,28rem)] overflow-y-auto rounded-2xl border p-4 backdrop-blur-3xl sm:rounded-3xl sm:p-6 lg:hidden",
+                  isDark ? "bg-slate-900/95 border-slate-700 shadow-2xl" : "bg-white/95 border-slate-200 shadow-xl"
+                )}
+              >
+                <div className="flex flex-col gap-2">
+                  {["Features", "Templates", "Pricing", "Resources"].map((item) => (
+                    <Link
+                      key={item}
+                      to={`/${item.toLowerCase()}`}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={cn(
+                        "rounded-xl p-3 text-base font-semibold transition-colors sm:text-lg",
+                        isDark ? "text-slate-300 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                      )}
+                    >
+                      {item}
+                    </Link>
+                  ))}
+                  <div className={cn("my-2 h-px w-full", isDark ? "bg-slate-800" : "bg-slate-100")} />
                   <Link
-                    key={item}
-                    to={`/${item.toLowerCase()}`}
+                    to="/login"
                     onClick={() => setIsMenuOpen(false)}
                     className={cn(
-                      "rounded-xl p-3 text-base font-semibold transition-colors sm:text-lg",
-                      isDark ? "text-slate-300 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                      "mt-1 w-full rounded-2xl py-3.5 text-center text-base font-bold sm:py-4 sm:text-lg",
+                      isDark ? "bg-white text-slate-950" : "bg-slate-900 text-white",
                     )}
                   >
-                    {item}
+                    Login
                   </Link>
-                ))}
-                <div className={cn("my-2 h-px w-full", isDark ? "bg-slate-800" : "bg-slate-100")} />
-                <Link
-                  to="/login"
-                  onClick={() => setIsMenuOpen(false)}
-                  className={cn(
-                    "mt-1 w-full rounded-2xl py-3.5 text-center text-base font-bold sm:py-4 sm:text-lg",
-                    isDark ? "bg-white text-slate-950" : "bg-slate-900 text-white",
-                  )}
-                >
-                  Login
-                </Link>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </nav>
 
@@ -425,7 +425,7 @@ export default function LandingPage() {
               </Link>
             </div>
           </motion.div>
-          
+
 
           <div className="relative min-h-[18rem] min-w-0 w-full max-w-full sm:min-h-[22rem] lg:col-start-2 lg:row-start-1 lg:h-auto lg:min-h-0 lg:self-stretch">
             <motion.div

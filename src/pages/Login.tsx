@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Eye } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import Loading from "@/components/Common/LoadingUI";
 import loginbg from "../assets/login.webp";
 import { useGoogleLogin } from "@react-oauth/google";
@@ -102,10 +102,17 @@ const LoginForm = ({
                   : "border-slate-200 focus:border-slate-400 focus:ring-slate-400"
               }`}
             />
-            <Eye
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 cursor-pointer hover:text-slate-600"
-            />
+            <button
+              type="button"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              onClick={(e) => {
+                e.preventDefault();
+                setShowPassword(!showPassword);
+              }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
           </div>
 
           {loginError && (
@@ -265,10 +272,17 @@ const SignupForm = ({
                   : "border-slate-200 focus:border-slate-400 focus:ring-slate-400"
               }`}
             />
-            <Eye
-              onClick={() => setShowSignupPassword(!showSignupPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 cursor-pointer"
-            />
+            <button
+              type="button"
+              aria-label={showSignupPassword ? "Hide password" : "Show password"}
+              onClick={(e) => {
+                e.preventDefault();
+                setShowSignupPassword(!showSignupPassword);
+              }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+            >
+              {showSignupPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
           </div>
 
           {/* Password strength indicator */}

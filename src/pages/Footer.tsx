@@ -6,6 +6,7 @@ import { pageFrameClass } from "@/components/landing/pageFrame";
 const exploreLinks = [
   { label: "Features", to: "/features" },
   { label: "Templates", to: "/templates" },
+  { label: "Pricing", to: "/pricing" },
   { label: "Resources", to: "/resources" },
 ];
 

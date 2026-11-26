@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/Common/BrandLogo";
 import { pageFrameClass } from "@/components/landing/pageFrame";
 
-const NAV_ITEMS = ["Features", "Templates", "Resources"] as const;
+const NAV_ITEMS = ["Features", "Templates", "Pricing", "Resources"] as const;
 
 export type MarketingNavItem = (typeof NAV_ITEMS)[number];
 
