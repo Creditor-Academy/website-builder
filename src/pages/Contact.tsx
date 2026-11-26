@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Phone, 
   Mail, 
-  MapPin, 
   Send, 
   CheckCircle2, 
   Sun, 
@@ -127,24 +125,24 @@ export default function Contact() {
 
   const contactMethods = [
     { 
-      icon: <Phone className="w-6 h-6" />, 
-      title: "Call Us", 
-      value: "+1 (123) 456 7890",
-      description: "Mon-Fri from 8am to 5pm.",
-      color: "blue"
-    },
-    { 
       icon: <Mail className="w-6 h-6" />, 
       title: "Email Us", 
       value: "hello@webstudio.lmsathena.com",
-      description: "Our friendly team is here to help.",
+      description: "Send your questions or project inquiries directly to our team.",
       color: "indigo"
     },
     { 
-      icon: <MapPin className="w-6 h-6" />, 
-      title: "Visit Us", 
-      value: "San Francisco, CA",
-      description: "Come say hello at our HQ.",
+      icon: <Globe className="w-6 h-6" />, 
+      title: "Platform", 
+      value: "webstudio.lmsathena.com",
+      description: "Explore templates, canvas features, and publishing workflows.",
+      color: "blue"
+    },
+    { 
+      icon: <Clock className="w-6 h-6" />, 
+      title: "Support Hours", 
+      value: "Monday – Friday",
+      description: "Our team reviews incoming inquiries during business hours.",
       color: "purple"
     }
   ];
@@ -338,10 +336,10 @@ export default function Contact() {
                 <div className="flex items-center gap-4 text-sm font-bold">
                   <div className="flex items-center gap-1.5 text-green-500">
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    Fast Response
+                    Support Form
                   </div>
                   <div className={cn("h-4 w-px", isDark ? "bg-slate-700" : "bg-slate-200")} />
-                  <div className={isDark ? "text-slate-400" : "text-slate-500"}>Typically responds in 2 hours</div>
+                  <div className={isDark ? "text-slate-400" : "text-slate-500"}>We'll get back to you as soon as possible</div>
                 </div>
               </div>
 
