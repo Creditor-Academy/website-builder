@@ -15,17 +15,17 @@ import { pageFrameClass } from "@/components/landing/pageFrame";
 import { useTheme } from "@/hooks/useTheme";
 
 // Assets
-import business from "../assets/Bussiness.jpg";
-import Ecommerce from "../assets/Ecomm.jpg";
-import Portfolio from "../assets/Portfolio.jpg";
-import school from "../assets/School.jpg";
+import thumbBusiness from "../assets/thumb-business.webp";
+import thumbEcommerce from "../assets/thumb-ecomm.webp";
+import thumbPortfolio from "../assets/thumb-portfolio.webp";
+import thumbSchool from "../assets/thumb-school.webp";
 
 function HeroProductMockup({ isDark }: { isDark: boolean }) {
   const thumbs = [
-    { src: business, width: 736, height: 981, alt: "Sample business website page" },
-    { src: Portfolio, width: 736, height: 1251, alt: "Sample portfolio website page" },
-    { src: school, width: 736, height: 1104, alt: "Sample school website page" },
-    { src: Ecommerce, width: 735, height: 1103, alt: "Sample online store website page" },
+    { src: thumbBusiness, width: 160, height: 213, alt: "Sample business website page" },
+    { src: thumbPortfolio, width: 160, height: 272, alt: "Sample portfolio website page" },
+    { src: thumbSchool, width: 160, height: 240, alt: "Sample school website page" },
+    { src: thumbEcommerce, width: 160, height: 240, alt: "Sample online store website page" },
   ];
   const rail = [
     { icon: Plus, label: "Add" },
@@ -55,7 +55,7 @@ function HeroProductMockup({ isDark }: { isDark: boolean }) {
         </div>
 
         <div className="flex min-h-0 flex-1">
-          <div className="flex w-12 shrink-0 flex-col items-center gap-0.5 bg-[#0F172A] px-1 py-3 sm:w-[4.75rem] sm:gap-1 sm:px-1.5 sm:py-4">
+          <div className="flex w-12 shrink-0 flex-col items-center gap-0.5 bg-[#0F172A] px-1 py-3 sm:w-20 sm:gap-1 sm:px-1.5 sm:py-4">
             {rail.map((item, i) => (
               <span
                 key={item.label}
@@ -65,15 +65,15 @@ function HeroProductMockup({ isDark }: { isDark: boolean }) {
                 )}
               >
                 <item.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" strokeWidth={1.75} />
-                <span className="hidden text-[8px] font-medium leading-none tracking-wide sm:block">{item.label}</span>
+                <span className="hidden text-xs font-medium leading-none tracking-tight sm:block">{item.label}</span>
               </span>
             ))}
           </div>
 
           <div className={cn("relative flex min-h-0 min-w-0 flex-1 flex-col", isDark ? "bg-slate-950" : "bg-white")}>
-            <div className="flex shrink-0 items-center justify-between gap-2 bg-[#0B1220] px-2.5 py-2.5 text-[10px] text-white sm:gap-3 sm:px-5 sm:py-3 sm:text-[11px]">
+            <div className="flex shrink-0 items-center justify-between gap-2 bg-[#0B1220] px-2.5 py-2.5 text-xs text-white sm:gap-3 sm:px-5 sm:py-3">
               <span className="flex min-w-0 items-center gap-1.5 font-semibold tracking-tight sm:gap-2">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white/10 text-[9px] font-bold sm:h-6 sm:w-6 sm:text-[10px]">A</span>
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white/10 text-xs font-bold">A</span>
                 <span className="truncate">Apex</span>
               </span>
               <span className="hidden items-center gap-4 text-white/75 sm:flex">
@@ -83,7 +83,7 @@ function HeroProductMockup({ isDark }: { isDark: boolean }) {
                 <span className="hidden md:inline">Portfolio</span>
                 <span className="hidden lg:inline">Contact</span>
               </span>
-              <span className="shrink-0 rounded-full bg-white px-2 py-1 text-[9px] font-semibold text-[#0F172A] sm:px-3 sm:py-1.5 sm:text-[10px]">
+              <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[#0F172A] sm:px-3 sm:py-1.5">
                 Get started
               </span>
             </div>
@@ -99,7 +99,7 @@ function HeroProductMockup({ isDark }: { isDark: boolean }) {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/75 via-[#0F172A]/10 to-transparent" />
               <div className="absolute bottom-4 left-3 right-3 text-white sm:bottom-6 sm:left-6 sm:right-6">
-                <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-white/75 sm:text-[11px] sm:tracking-[0.22em]">Explore the World</p>
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-white/75 sm:tracking-[0.22em]">Explore the World</p>
               </div>
               <div className="absolute left-[32%] top-[36%] h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-lg border-2 border-dashed border-sky-400 bg-sky-400/10 sm:h-10 sm:w-10" />
             </div>
@@ -163,8 +163,7 @@ function HeroProductMockup({ isDark }: { isDark: boolean }) {
             alt={thumb.alt}
             width={thumb.width}
             height={thumb.height}
-            decoding="async"
-            className="h-9 w-9 shrink-0 rounded-lg object-cover sm:h-12 sm:w-12 sm:rounded-xl"
+            className="block h-9 w-9 shrink-0 rounded-lg object-cover sm:h-12 sm:w-12 sm:rounded-xl"
           />
         ))}
       </motion.div>
@@ -181,7 +180,7 @@ function HeroProductMockup({ isDark }: { isDark: boolean }) {
         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white">
           <Check className="h-3 w-3" strokeWidth={3} />
         </span>
-        <span className="text-[10px] font-semibold sm:text-[11px]">Published</span>
+        <span className="text-xs font-semibold">Published</span>
       </motion.div>
     </div>
   );
@@ -235,116 +234,121 @@ export default function LandingPage() {
       {/* ================= NAVBAR ================= */}
       <nav className="pointer-events-none fixed inset-x-0 top-0 z-[100] pt-3 sm:pt-6">
         <div className={cn(pageFrameClass, "relative")}>
-          <motion.div
-            initial={{ y: -50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className={cn(
-              "pointer-events-auto flex w-full min-w-0 items-center justify-between rounded-full px-3.5 py-2.5 backdrop-blur-2xl transition-all duration-500 sm:px-6 sm:py-3",
-              isDark
-                ? "bg-slate-900/80 border border-slate-700/50 shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
-                : "bg-white/90 border border-slate-200/50 shadow-[0_8px_32px_rgba(0,0,0,0.05)]"
-            )}
-          >
-            <Link to="/" className="flex min-w-0 shrink items-center cursor-pointer group pointer-events-auto">
-              <BrandLogo
-                imgClassName="h-12 w-12 sm:h-14 sm:w-14 transition-transform duration-300 group-hover:scale-110"
-              />
-            </Link>
+        <motion.div
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className={cn(
+            "pointer-events-auto flex w-full min-w-0 items-center justify-between rounded-full px-3.5 py-2.5 backdrop-blur-2xl transition-all duration-500 sm:px-6 sm:py-3",
+            isDark
+              ? "bg-slate-900/80 border border-slate-700/50 shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+              : "bg-white/90 border border-slate-200/50 shadow-[0_8px_32px_rgba(0,0,0,0.05)]"
+          )}
+        >
+          <Link to="/" className="flex min-w-0 shrink items-center cursor-pointer group pointer-events-auto">
+            <BrandLogo
+              imgClassName="h-12 w-12 sm:h-14 sm:w-14 transition-transform duration-300 group-hover:scale-110"
+            />
+          </Link>
 
-            <div className="hidden lg:flex items-center gap-5 text-sm font-medium xl:gap-8">
-              {["Features", "Templates", "Pricing", "Resources"].map((item) => (
-                <Link key={item} to={`/${item.toLowerCase()}`} className={cn(
-                  "relative group transition-colors",
-                  isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
-                )}>
-                  {item}
-                  <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-blue-500 transition-all group-hover:w-full rounded-full"></span>
-                </Link>
-              ))}
-              <div className={cn("h-4 w-px", isDark ? "bg-slate-600/50" : "bg-slate-300")} />
-
-              {/* Theme Toggle */}
-              <button onClick={() => setTheme(isDark ? 'light' : 'dark')} className={cn("p-2 rounded-full transition-colors", isDark ? "hover:bg-slate-800 text-slate-300" : "hover:bg-slate-200 text-slate-600")}>
-                <AnimatePresence mode="wait">
-                  {isDark ? (
-                    <motion.div key="sun" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}><Sun className="w-4 h-4" /></motion.div>
-                  ) : (
-                    <motion.div key="moon" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}><Moon className="w-4 h-4" /></motion.div>
-                  )}
-                </AnimatePresence>
-              </button>
-
-              <Link to="/login" className={cn(
-                "inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold transition-all active:scale-95",
-                isDark ? "bg-white text-slate-950 hover:bg-slate-100" : "bg-[#0F172A] text-white hover:bg-[#1e293b]",
+          <div className="hidden lg:flex items-center gap-5 text-sm font-medium xl:gap-8">
+            {["Features", "Templates", "Pricing", "Resources"].map((item) => (
+              <Link key={item} to={`/${item.toLowerCase()}`} className={cn(
+                "relative group transition-colors",
+                isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
               )}>
-                Login <ArrowRight className="h-3.5 w-3.5" />
+                {item}
+                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-blue-500 transition-all group-hover:w-full rounded-full"></span>
               </Link>
-            </div>
+            ))}
+            <div className={cn("h-4 w-px", isDark ? "bg-slate-600/50" : "bg-slate-300")} />
 
-            <div className="flex items-center gap-0.5 lg:hidden">
-              <button
-                type="button"
-                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-                onClick={() => setTheme(isDark ? "light" : "dark")}
-                className={cn("pointer-events-auto rounded-full p-2", isDark ? "text-slate-300" : "text-slate-600")}
-              >
-                {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              </button>
-              <button
-                type="button"
-                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-                aria-expanded={isMenuOpen}
-                className={cn("pointer-events-auto p-2", isDark ? "text-white" : "text-slate-900")}
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
-            </div>
-          </motion.div>
-
-          {/* Mobile Menu Overlay */}
-          <AnimatePresence>
-            {isMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className={cn(
-                  "pointer-events-auto absolute left-0 right-0 top-[calc(100%+0.75rem)] max-h-[min(70vh,28rem)] overflow-y-auto rounded-2xl border p-4 backdrop-blur-3xl sm:rounded-3xl sm:p-6 lg:hidden",
-                  isDark ? "bg-slate-900/95 border-slate-700 shadow-2xl" : "bg-white/95 border-slate-200 shadow-xl"
+            {/* Theme Toggle */}
+            <button
+              type="button"
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              onClick={() => setTheme(isDark ? 'light' : 'dark')}
+              className={cn("inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors", isDark ? "hover:bg-slate-800 text-slate-300" : "hover:bg-slate-200 text-slate-600")}
+            >
+              <AnimatePresence mode="wait">
+                {isDark ? (
+                  <motion.div key="sun" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}><Sun className="w-4 h-4" /></motion.div>
+                ) : (
+                  <motion.div key="moon" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}><Moon className="w-4 h-4" /></motion.div>
                 )}
-              >
-                <div className="flex flex-col gap-2">
-                  {["Features", "Templates", "Pricing", "Resources"].map((item) => (
-                    <Link
-                      key={item}
-                      to={`/${item.toLowerCase()}`}
-                      onClick={() => setIsMenuOpen(false)}
-                      className={cn(
-                        "rounded-xl p-3 text-base font-semibold transition-colors sm:text-lg",
-                        isDark ? "text-slate-300 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                      )}
-                    >
-                      {item}
-                    </Link>
-                  ))}
-                  <div className={cn("my-2 h-px w-full", isDark ? "bg-slate-800" : "bg-slate-100")} />
+              </AnimatePresence>
+            </button>
+
+            <Link to="/login" className={cn(
+              "inline-flex min-h-11 items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold transition-all active:scale-95",
+              isDark ? "bg-white text-slate-950 hover:bg-slate-100" : "bg-[#0F172A] text-white hover:bg-[#1e293b]",
+            )}>
+              Login <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          <div className="flex items-center gap-1 lg:hidden">
+            <button
+              type="button"
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              onClick={() => setTheme(isDark ? "light" : "dark")}
+              className={cn("pointer-events-auto inline-flex h-11 w-11 items-center justify-center rounded-full", isDark ? "text-slate-300" : "text-slate-600")}
+            >
+              {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
+            <button
+              type="button"
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMenuOpen}
+              className={cn("pointer-events-auto inline-flex h-11 w-11 items-center justify-center rounded-full", isDark ? "text-white" : "text-slate-900")}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Mobile Menu Overlay */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className={cn(
+                "pointer-events-auto absolute left-0 right-0 top-[calc(100%+0.75rem)] max-h-[min(70vh,28rem)] overflow-y-auto rounded-2xl border p-4 backdrop-blur-3xl sm:rounded-3xl sm:p-6 lg:hidden",
+                isDark ? "bg-slate-900/95 border-slate-700 shadow-2xl" : "bg-white/95 border-slate-200 shadow-xl"
+              )}
+            >
+              <div className="flex flex-col gap-2">
+                {["Features", "Templates", "Pricing", "Resources"].map((item) => (
                   <Link
-                    to="/login"
+                    key={item}
+                    to={`/${item.toLowerCase()}`}
                     onClick={() => setIsMenuOpen(false)}
                     className={cn(
-                      "mt-1 w-full rounded-2xl py-3.5 text-center text-base font-bold sm:py-4 sm:text-lg",
-                      isDark ? "bg-white text-slate-950" : "bg-slate-900 text-white",
+                      "rounded-xl p-3 text-base font-semibold transition-colors sm:text-lg",
+                      isDark ? "text-slate-300 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                     )}
                   >
-                    Login
+                    {item}
                   </Link>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                ))}
+                <div className={cn("my-2 h-px w-full", isDark ? "bg-slate-800" : "bg-slate-100")} />
+                <Link
+                  to="/login"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={cn(
+                    "mt-1 w-full rounded-2xl py-3.5 text-center text-base font-bold sm:py-4 sm:text-lg",
+                    isDark ? "bg-white text-slate-950" : "bg-slate-900 text-white",
+                  )}
+                >
+                  Login
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         </div>
       </nav>
 
@@ -425,12 +429,12 @@ export default function LandingPage() {
               </Link>
             </div>
           </motion.div>
-
+          
 
           <div className="relative min-h-[18rem] min-w-0 w-full max-w-full sm:min-h-[22rem] lg:col-start-2 lg:row-start-1 lg:h-auto lg:min-h-0 lg:self-stretch">
             <motion.div
               style={{ rotateX, rotateY, transformPerspective: 1000 }}
-              className="h-full max-w-full [transform-style:preserve-3d] lg:absolute lg:inset-0"
+              className="h-full max-w-full lg:absolute lg:inset-0"
             >
               <HeroProductMockup isDark={isDark} />
             </motion.div>

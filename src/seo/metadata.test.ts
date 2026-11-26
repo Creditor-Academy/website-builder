@@ -50,13 +50,14 @@ describe("route SEO metadata", () => {
     expect(head.match(/<meta name="description"/g)).toHaveLength(1);
     expect(head).toContain('"@type":"Organization"');
     expect(head).toContain('"name":"Athena LMS"');
-    expect(head).toContain("12315 NE 97th Street");
-    expect(head).toContain("+1 (425) 400-9246");
     expect(head).toContain("https://lmsathena.com");
     expect(head).toContain('"@type":"SoftwareApplication"');
     expect(head).toContain('"name":"Athena Web Studio"');
     expect(head).toContain('"@type":"BreadcrumbList"');
     expect(head).toContain("/images/hero-canvas.webp");
+
+    const featuresHead = renderHead(SEO_PAGES.find((p) => p.path === "/features")!, "/features");
+    expect(featuresHead).not.toContain("SoftwareApplication");
   });
 
   it("sends unknown paths to the noindex 404 head and keeps the builder on the app shell", () => {

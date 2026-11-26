@@ -94,7 +94,7 @@ const SpotlightCard: React.FC<FeatureCardProps> = ({
               {icon}
             </div>
             <span
-              className={`inline-flex max-w-[55%] shrink-0 items-center gap-1.5 truncate rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wide backdrop-blur-md sm:max-w-none sm:px-3 sm:text-xs ${theme.badgeBgTextBorder}`}
+              className={`inline-flex max-w-[55%] shrink-0 items-center gap-1.5 truncate rounded-full border px-2.5 py-1 text-xs font-semibold tracking-wide backdrop-blur-md sm:max-w-none sm:px-3 ${theme.badgeBgTextBorder}`}
             >
               {heroBadge && (
                 <svg className="h-3.5 w-3.5 text-purple-300" fill="currentColor" viewBox="0 0 24 24">
@@ -172,7 +172,7 @@ function ReadyToLiveCard() {
                 Ready to see your site live?
               </h2>
               <p className="text-sm leading-relaxed text-white/70 sm:text-base">
-                No credit card required. Build with standard features completely free.
+                Start building in your browser and publish to a live address.
               </p>
             </div>
             <div
@@ -189,7 +189,7 @@ function ReadyToLiveCard() {
             </div>
           </div>
           <div className="relative z-10 mt-5 flex flex-wrap items-center gap-2 border-t border-white/10 pt-4 text-xs text-white/70 sm:mt-6 sm:pt-5">
-            <span>Start instantly in browser</span>
+            <span>Start building in browser</span>
           </div>
         </article>
       }
@@ -416,7 +416,7 @@ export default function FeaturesShowcase({ isDark = false }: { isDark?: boolean 
               colSpan="col-span-1"
               badgeText="Royalty-Free"
               title="Assets and stock"
-              description="Upload PNG, JPG, SVG, and MP4 files, or search millions of curated royalty-free stock assets and apply them directly to your project canvas."
+              description="Upload PNG, JPG, SVG, and MP4 files, or search curated royalty-free stock assets and apply them directly to your project canvas."
               subText="Global CDN asset optimization"
               icon={
                 <svg
@@ -449,9 +449,9 @@ export default function FeaturesShowcase({ isDark = false }: { isDark?: boolean 
             <SpotlightCard
               brief={featureFlipBriefs.publish}
               colSpan="col-span-1 md:col-span-1 lg:col-span-2"
-              badgeText="Instant Deploy"
+              badgeText="Live Publish"
               title="Publish to a live address"
-              description="Deploy to a free Web Studio subdomain or connect your own domain instantly with automatic SSL certificates and edge routing included."
+              description="Deploy to a Web Studio subdomain or connect your own domain with automatic SSL certificates and edge routing included."
               subText="Edge SSL & zero-config hosting"
               icon={
                 <svg

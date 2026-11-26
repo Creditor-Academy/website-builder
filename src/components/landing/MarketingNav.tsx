@@ -37,7 +37,7 @@ export default function MarketingNav({
               : "border border-slate-200/50 bg-white/90 shadow-[0_8px_32px_rgba(0,0,0,0.05)]",
           )}
         >
-          <Link to="/" className="group pointer-events-auto flex min-w-0 shrink cursor-pointer items-center">
+          <Link to="/" className="group pointer-events-auto flex min-h-11 min-w-11 shrink cursor-pointer items-center">
             <BrandLogo imgClassName="h-10 w-10 transition-transform duration-300 group-hover:scale-110" />
           </Link>
 
@@ -47,14 +47,14 @@ export default function MarketingNav({
                 key={item}
                 to={`/${item.toLowerCase()}`}
                 className={cn(
-                  "relative group transition-colors",
+                  "relative group inline-flex min-h-11 items-center transition-colors",
                   isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900",
                 )}
               >
                 {item}
                 <span
                   className={cn(
-                    "absolute -bottom-1 left-0 h-[2px] rounded-full bg-blue-500 transition-all",
+                    "absolute bottom-2 left-0 h-[2px] rounded-full bg-blue-500 transition-all",
                     item === activeItem ? "w-full" : "w-0 group-hover:w-full",
                   )}
                 />
@@ -64,9 +64,10 @@ export default function MarketingNav({
 
             <button
               type="button"
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
               onClick={() => setTheme(isDark ? "light" : "dark")}
               className={cn(
-                "rounded-full p-2 transition-colors",
+                "inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors",
                 isDark ? "text-slate-300 hover:bg-slate-800" : "text-slate-600 hover:bg-slate-200",
               )}
             >
@@ -98,7 +99,7 @@ export default function MarketingNav({
             <Link
               to="/login"
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold transition-all active:scale-95",
+                "inline-flex min-h-11 items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold transition-all active:scale-95",
                 isDark
                   ? "bg-white text-slate-950 hover:bg-slate-100"
                   : "bg-[#0F172A] text-white hover:bg-[#1e293b]",
@@ -108,12 +109,12 @@ export default function MarketingNav({
             </Link>
           </div>
 
-          <div className="flex items-center gap-0.5 lg:hidden">
+          <div className="flex items-center gap-1 lg:hidden">
             <button
               type="button"
               aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
               onClick={() => setTheme(isDark ? "light" : "dark")}
-              className={cn("pointer-events-auto rounded-full p-2", isDark ? "text-slate-300" : "text-slate-600")}
+              className={cn("pointer-events-auto inline-flex h-11 w-11 items-center justify-center rounded-full", isDark ? "text-slate-300" : "text-slate-600")}
             >
               {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </button>
@@ -121,7 +122,7 @@ export default function MarketingNav({
               type="button"
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMenuOpen}
-              className={cn("pointer-events-auto p-2", isDark ? "text-white" : "text-slate-900")}
+              className={cn("pointer-events-auto inline-flex h-11 w-11 items-center justify-center rounded-full", isDark ? "text-white" : "text-slate-900")}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}

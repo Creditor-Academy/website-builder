@@ -302,7 +302,7 @@ const Resources = () => {
                     <div
                       key={tag}
                       className={cn(
-                        "rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider",
+                        "rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wider",
                         isDark
                           ? "bg-sky-500/10 text-sky-400"
                           : "bg-sky-500/10 text-sky-600",
@@ -348,7 +348,7 @@ const Resources = () => {
                     <div
                       key={tag}
                       className={cn(
-                        "rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider",
+                        "rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wider",
                         isDark
                           ? "bg-slate-800 text-slate-300"
                           : "bg-slate-100 text-slate-600",
@@ -390,7 +390,7 @@ const Resources = () => {
               viewport={{ once: true }}
               className="min-w-0"
             >
-              <div className="mb-5 inline-block rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-sky-500 sm:mb-6">
+              <div className="mb-5 inline-block rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-sky-500 sm:mb-6">
                 Editor guide
               </div>
               <h2
@@ -446,7 +446,7 @@ const Resources = () => {
                           </h3>
                           <div
                             className={cn(
-                              "shrink-0 rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider transition-colors",
+                              "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider transition-colors",
                               isActive
                                 ? "bg-sky-500 text-white"
                                 : isDark
@@ -525,7 +525,7 @@ const Resources = () => {
                     </div>
                     <div className="flex items-center justify-between gap-3 px-1 pt-5 sm:px-2 sm:pt-6">
                       <div className="min-w-0">
-                        <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-sky-500">
+                        <div className="mb-1 text-xs font-bold uppercase tracking-[0.2em] text-sky-500">
                           Product manual
                         </div>
                         <div className="truncate text-xl font-bold leading-none sm:text-2xl">
