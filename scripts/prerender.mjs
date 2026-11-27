@@ -263,6 +263,10 @@ async function verify(gtmId) {
   if (!sitemap.includes("https://webstudio.lmsathena.com/")) {
     throw new Error("sitemap is missing the home page");
   }
+  for (const [, loc] of sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)) {
+    if (!loc.startsWith("https://webstudio.lmsathena.com/")) throw new Error(`sitemap URL is not https on the main host: ${loc}`);
+    if (!loc.endsWith("/")) throw new Error(`sitemap URL has no trailing slash (canonical form): ${loc}`);
+  }
 
   const marketing = new Set(["/", "/features", "/templates", "/resources", "/contact", "/privacy-policy", "/terms-of-service"]);
   for (const entry of manifest.content) {

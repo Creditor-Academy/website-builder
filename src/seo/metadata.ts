@@ -256,7 +256,11 @@ export function headingFor(pathname: string): string {
   return resolveSeo(pathname).page.heading;
 }
 
-/** Matches canonical trailing slashes already used on main for these marketing routes. */
+/**
+ * Every indexable marketing page uses a trailing slash in its canonical URL and
+ * the sitemap (the form Google already indexed for the first six). nginx.conf
+ * 301s the no-slash form to it. Auth pages (/login etc.) keep no slash.
+ */
 const TRAILING_SLASH_CANONICAL = new Set([
   "/contact",
   "/features",
@@ -264,6 +268,14 @@ const TRAILING_SLASH_CANONICAL = new Set([
   "/resources",
   "/templates",
   "/terms-of-service",
+  "/pricing",
+  "/services",
+  "/about",
+  "/blog",
+  "/careers",
+  "/help",
+  "/status",
+  "/start",
 ]);
 
 export function absoluteUrl(pathname: string): string {
