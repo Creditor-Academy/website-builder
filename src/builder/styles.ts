@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import type { CanvasStyles, DeviceId, ResponsiveStyles } from './types';
+import { DEVICE_WIDTHS, type CanvasStyles, type DeviceId, type ResponsiveStyles } from './types';
 
 const STYLE_TO_CSS: Record<keyof CanvasStyles, string> = {
   width: 'width',
@@ -52,6 +52,53 @@ export function resolveStyles(
   if (device === 'desktop') return { ...base };
   const override = responsive[device] || {};
   const merged: CanvasStyles = { ...base };
+
+  const targetWidth = DEVICE_WIDTHS[device] || DEVICE_WIDTHS.desktop;
+  const desktopWidth = DEVICE_WIDTHS.desktop;
+  const scaleRatio = targetWidth / desktopWidth;
+
+  const isAbsolute = (override.position || base.position) === 'absolute';
+  if (isAbsolute) {
+    if (override.width === undefined && base.width) {
+      const parsedWidth = parseFloat(String(base.width));
+      if (Number.isFinite(parsedWidth) && String(base.width).endsWith('px')) {
+        const scaledWidth = Math.min(targetWidth - 24, Math.max(32, Math.round(parsedWidth * scaleRatio)));
+        merged.width = `${scaledWidth}px`;
+      }
+    }
+
+    if (override.left === undefined && base.left !== undefined) {
+      const parsedLeft = parseFloat(String(base.left));
+      if (Number.isFinite(parsedLeft) && String(base.left).endsWith('px')) {
+        const currentWidth = parseFloat(String(merged.width || base.width || 0)) || 0;
+        let scaledLeft = Math.round(parsedLeft * scaleRatio);
+        if (currentWidth > 0 && currentWidth < targetWidth) {
+          scaledLeft = Math.max(8, Math.min(scaledLeft, targetWidth - currentWidth - 8));
+        } else if (scaledLeft > targetWidth - 24) {
+          scaledLeft = Math.max(8, targetWidth - 40);
+        }
+        merged.left = `${scaledLeft}px`;
+      }
+    }
+
+    if (override.top === undefined && base.top !== undefined) {
+      const parsedTop = parseFloat(String(base.top));
+      if (Number.isFinite(parsedTop) && String(base.top).endsWith('px')) {
+        merged.top = `${Math.round(parsedTop * (device === 'mobile' ? 0.85 : 0.95))}px`;
+      }
+    }
+
+    merged.maxWidth = '100%';
+  }
+
+  // Scale down huge font sizes on mobile
+  if (device === 'mobile' && override.fontSize === undefined && base.fontSize) {
+    const parsedFontSize = parseFloat(String(base.fontSize));
+    if (Number.isFinite(parsedFontSize) && parsedFontSize > 26 && String(base.fontSize).endsWith('px')) {
+      merged.fontSize = `${Math.max(16, Math.round(parsedFontSize * 0.72))}px`;
+    }
+  }
+
   for (const [key, value] of Object.entries(override)) {
     if (value !== undefined && value !== null && value !== '') {
       merged[key as keyof CanvasStyles] = value as never;

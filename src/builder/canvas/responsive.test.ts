@@ -21,6 +21,22 @@ describe('responsive styles', () => {
     expect(resolveStyles(patched.styles, patched.responsiveStyles, 'desktop').fontSize).toBe('20px');
     expect(resolveStyles(patched.styles, patched.responsiveStyles, 'mobile').fontSize).toBe('16px');
   });
+
+  it('proportionally scales and bounds absolute desktop positions to mobile and tablet', () => {
+    const base = { position: 'absolute', left: '700px', width: '400px', top: '150px' };
+    const mobileStyles = resolveStyles(base, {}, 'mobile');
+    const tabletStyles = resolveStyles(base, {}, 'tablet');
+
+    // On mobile (390px), 700px desktop position must be inside the 390px frame
+    expect(parseFloat(mobileStyles.left as string)).toBeLessThan(390);
+    expect(parseFloat(mobileStyles.width as string)).toBeLessThan(390);
+    expect(parseFloat(mobileStyles.left as string) + parseFloat(mobileStyles.width as string)).toBeLessThanOrEqual(390);
+
+    // On tablet (768px), 700px desktop position must be inside the 768px frame
+    expect(parseFloat(tabletStyles.left as string)).toBeLessThan(768);
+    expect(parseFloat(tabletStyles.width as string)).toBeLessThan(768);
+    expect(parseFloat(tabletStyles.left as string) + parseFloat(tabletStyles.width as string)).toBeLessThanOrEqual(768);
+  });
 });
 
 describe('responsivePadding', () => {

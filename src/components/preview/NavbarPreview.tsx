@@ -150,6 +150,8 @@ const STYLES = `
   /* Responsive nav container */
   .nb-inner {
     max-width: 1240px;
+    width: 100%;
+    box-sizing: border-box;
     margin: 0 auto;
     padding: 0 40px;
     height: 72px;
@@ -492,10 +494,16 @@ export function NavbarPreview({
     </div>
   );
 
+  const navBorderRadius = styles.borderRadius || '0px';
+  const hasBorderRadius = Boolean(navBorderRadius && navBorderRadius !== '0px' && navBorderRadius !== '0');
+
   return (
     <>
       <nav
         style={{
+          width: '100%',
+          maxWidth: '100%',
+          boxSizing: 'border-box',
           backgroundColor: navBg,
           color: tc,
           position: styles.sticky ? 'sticky' : 'relative',
@@ -504,7 +512,14 @@ export function NavbarPreview({
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
           cursor: isEditing ? 'pointer' : 'default',
-          borderBottom: variant === 'simple' ? 'none' : `1px solid ${isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.08)'}`,
+          borderRadius: navBorderRadius,
+          overflow: hasBorderRadius ? 'hidden' : undefined,
+          border: hasBorderRadius
+            ? `1px solid ${isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.08)'}`
+            : undefined,
+          borderBottom: !hasBorderRadius
+            ? (variant === 'simple' ? 'none' : `1px solid ${isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.08)'}`)
+            : undefined,
           boxShadow: variant === 'simple' ? 'none' : variant === 'split' ? '0 8px 24px rgba(15,23,42,0.18)' : '0 1px 2px rgba(15,23,42,0.04)',
           animation: 'nb-down 0.4s ease both',
         }}
@@ -653,6 +668,19 @@ export function NavbarPreview({
         [data-device="mobile"] .nb-logo-center,
         [data-device="tablet"] .nb-logo-center {
           position: static !important; transform: none !important;
+        }
+        [data-device="mobile"] .nb-inner {
+          padding: 0 16px !important;
+          height: 60px !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box !important;
+        }
+        [data-device="tablet"] .nb-inner {
+          padding: 0 24px !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box !important;
         }
       `}</style>
       </nav>

@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import useBuilderStore from '@/store/useBuilderStore';
 import { NavbarPreview } from '@/components/preview/NavbarPreview';
 import { DRAG_THRESHOLD } from '@/builder/selection';
+import { DEVICE_WIDTHS } from '@/builder/types';
 import { useCanvasEngine } from './CanvasEngineContext';
 import { useFreePositionDrag } from './CanvasDrag';
 
@@ -26,8 +27,10 @@ export function CanvasNavbar({
   const selectNode = useBuilderStore((state) => state.selectNode);
   const updateNavbar = useBuilderStore((state) => state.updateNavbar);
   const selectedId = useBuilderStore((state) => state.editor.selectedNodeId);
-  const { setHoveredNodeId, liveGeometryRef, clickSuppressRef } = useCanvasEngine();
+  const { setHoveredNodeId, liveGeometryRef, clickSuppressRef, device } = useCanvasEngine();
   const selected = isNavbarNodeId(selectedId);
+  const targetWidth = DEVICE_WIDTHS[device] || DEVICE_WIDTHS.desktop;
+  const isSmallDevice = device !== 'desktop';
   const styles = (navbar?.styles || {}) as { position?: string; left?: string; top?: string; width?: string; flowHeight?: string | number };
   const live = liveGeometryRef.current.navbar;
   const free = styles.position === 'absolute' || Boolean(live);
@@ -100,12 +103,22 @@ export function CanvasNavbar({
           free
             ? {
                 position: 'absolute',
-                left: live ? Math.round(live.left) : styles.left || 0,
+                left: live
+                  ? Math.round(live.left)
+                  : isSmallDevice
+                  ? Math.max(0, Math.min(parseFloat(String(styles.left)) || 0, targetWidth - 60))
+                  : styles.left || 0,
                 top: live ? Math.round(live.top) : styles.top || 0,
-                width: live?.width != null ? Math.round(live.width) : styles.width || '100%',
+                width: live?.width != null
+                  ? Math.round(live.width)
+                  : isSmallDevice
+                  ? '100%'
+                  : styles.width || '100%',
+                maxWidth: '100%',
+                boxSizing: 'border-box',
                 zIndex: 20,
               }
-            : { position: 'relative', width: '100%', zIndex: 20 }
+            : { position: 'relative', width: '100%', maxWidth: '100%', boxSizing: 'border-box', zIndex: 20 }
         }
         onPointerDown={onPointerDown}
         onPointerOver={(event) => {

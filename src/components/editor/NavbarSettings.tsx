@@ -65,7 +65,7 @@ export function NavbarSettings({ navbar, pages = [], onUpdate, isExpanded = true
           <span className="text-sm font-semibold text-[#0F172A]">Navbar Settings</span>
         </div>
       </CollapsibleTrigger>
-      
+
       <CollapsibleContent className="p-4 pt-0 space-y-6 px-6 pb-6">
         {/* Navbar Colors */}
         <div className="space-y-3">
@@ -111,18 +111,61 @@ export function NavbarSettings({ navbar, pages = [], onUpdate, isExpanded = true
               <Label className="text-[10px] font-semibold text-slate-500">Sticky Header</Label>
               <div className="flex items-center h-8">
                 <button
+                  type="button"
                   onClick={() => handleUpdateStyles({ sticky: !styles.sticky })}
-                  className={`relative w-12 h-6 rounded-full transition-colors ${
-                    styles.sticky ? 'bg-blue-500' : 'bg-slate-300'
-                  }`}
+                  className={`relative w-12 h-6 rounded-full transition-colors ${styles.sticky ? 'bg-blue-500' : 'bg-slate-300'
+                    }`}
                 >
                   <div
-                    className={`absolute w-5 h-5 bg-white rounded-full top-0.5 transition-all ${
-                      styles.sticky ? 'right-0.5' : 'left-0.5'
-                    }`}
+                    className={`absolute w-5 h-5 bg-white rounded-full top-0.5 transition-all ${styles.sticky ? 'right-0.5' : 'left-0.5'
+                      }`}
                   />
                 </button>
               </div>
+            </div>
+          </div>
+
+          {/* Whole Navigation Radius (Corner Curvature) */}
+          <div className="space-y-2 pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-between">
+              <Label className="text-[10px] font-semibold text-slate-600">Navbar Radius (Curved Edges)</Label>
+              <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                {styles.borderRadius || '0px'}
+              </span>
+            </div>
+            <div className="grid grid-cols-5 gap-1.5">
+              {[
+                { label: '0px', value: '0px', name: 'Sharp' },
+                { label: '8px', value: '8px', name: 'Subtle' },
+                { label: '16px', value: '16px', name: 'Curved' },
+                { label: '24px', value: '24px', name: 'Round' },
+                { label: '9999px', value: '9999px', name: 'Pill' },
+              ].map((preset) => {
+                const active = (styles.borderRadius || '0px') === preset.value;
+                return (
+                  <button
+                    key={preset.value}
+                    type="button"
+                    onClick={() => handleUpdateStyles({ borderRadius: preset.value })}
+                    className={`h-9 rounded-md border text-[10px] font-medium flex flex-col items-center justify-center transition-all ${
+                      active
+                        ? 'bg-[#0F172A] border-[#0F172A] text-white shadow-sm'
+                        : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span className="font-semibold leading-tight">{preset.name}</span>
+                    <span className="text-[8px] opacity-70 leading-tight">{preset.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <Input
+                value={styles.borderRadius || ''}
+                onChange={(e) => handleUpdateStyles({ borderRadius: e.target.value })}
+                className="bg-slate-50 border-slate-200 font-mono text-[9px] h-8 flex-1"
+                placeholder="Custom radius (e.g. 12px, 20px, 9999px)"
+              />
             </div>
           </div>
         </div>
@@ -168,12 +211,39 @@ export function NavbarSettings({ navbar, pages = [], onUpdate, isExpanded = true
             </div>
 
             <div className="space-y-2">
-              <Label className="text-[10px] font-semibold text-slate-500">Radius</Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-[10px] font-semibold text-slate-500">Button Radius</Label>
+                <span className="text-[9px] font-mono text-slate-400">{styles.buttonRadius || '999px'}</span>
+              </div>
+              <div className="flex gap-1">
+                {[
+                  { label: '0px', value: '0px' },
+                  { label: '6px', value: '6px' },
+                  { label: '12px', value: '12px' },
+                  { label: 'Pill', value: '999px' },
+                ].map((preset) => {
+                  const active = (styles.buttonRadius || '999px') === preset.value;
+                  return (
+                    <button
+                      key={preset.value}
+                      type="button"
+                      onClick={() => handleUpdateStyles({ buttonRadius: preset.value })}
+                      className={`flex-1 h-8 rounded border text-[9px] font-medium transition-colors ${
+                        active
+                          ? 'bg-[#0F172A] border-[#0F172A] text-white shadow-sm'
+                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  );
+                })}
+              </div>
               <Input
-                value={styles.buttonRadius || '999px'}
+                value={styles.buttonRadius || ''}
                 onChange={(e) => handleUpdateStyles({ buttonRadius: e.target.value })}
-                className="bg-slate-50 border-slate-200 font-mono text-[9px] h-8"
-                placeholder="999px"
+                className="bg-slate-50 border-slate-200 font-mono text-[9px] h-7"
+                placeholder="Custom (e.g. 999px)"
               />
             </div>
           </div>
@@ -261,11 +331,10 @@ export function NavbarSettings({ navbar, pages = [], onUpdate, isExpanded = true
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleUpdateLink(link.id, { isButton: !link.isButton })}
-                          className={`px-2 py-1 rounded text-[9px] font-semibold transition-colors ${
-                            link.isButton
+                          className={`px-2 py-1 rounded text-[9px] font-semibold transition-colors ${link.isButton
                               ? 'bg-blue-100 text-blue-700 border border-blue-300'
                               : 'bg-slate-200 text-slate-700 border border-slate-300'
-                          }`}
+                            }`}
                         >
                           {link.isButton ? 'Button' : 'Link'}
                         </button>

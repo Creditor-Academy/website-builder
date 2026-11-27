@@ -152,10 +152,16 @@ export const CanvasRenderer = memo(function CanvasRenderer({
     <div
       id="canvas-root"
       ref={setFrameRef}
-      className={cn('canvas-edit light-canvas absolute left-0 top-0 overflow-visible rounded-xl bg-white shadow-elevated', !previewMode && 'select-none', previewMode && 'is-preview')}
+      className={cn(
+        'canvas-edit light-canvas absolute left-0 top-0 overflow-visible rounded-xl bg-white shadow-elevated transition-all duration-200',
+        !previewMode && 'select-none',
+        previewMode && 'is-preview',
+        device !== 'desktop' && 'border border-slate-300/80 shadow-2xl ring-1 ring-slate-900/10'
+      )}
       data-fit-canvas="true"
       data-canvas-node={pageId}
       data-canvas-kind="page"
+      data-device={device}
       onPointerLeave={() => setHoveredNodeId(null)}
       onDragStart={(event) => {
         if (!previewMode) event.preventDefault();
@@ -163,6 +169,7 @@ export const CanvasRenderer = memo(function CanvasRenderer({
       onClick={(event) => {
         if (previewMode) return;
         const target = event.target as HTMLElement;
+        if (target.closest('#nb-hamburger, .nb-ham')) return;
         if (target.closest('video, iframe')) return;
         if (target.closest('a, button, [href]')) event.preventDefault();
       }}
@@ -179,6 +186,7 @@ export const CanvasRenderer = memo(function CanvasRenderer({
         transform: `scale(${(zoom || 100) / 100})`,
         transformOrigin: 'top left',
         backgroundColor: String(globalStyles.backgroundColor || '#ffffff'),
+        transition: 'width 0.25s ease',
       }}
     >
       <style
@@ -212,6 +220,11 @@ export const CanvasRenderer = memo(function CanvasRenderer({
           cursor: pointer;
           user-select: none;
         }
+        .canvas-edit [data-canvas-kind="navbar"] #nb-hamburger,
+        .canvas-edit [data-canvas-kind="navbar"] .nb-ham {
+          pointer-events: auto !important;
+          cursor: pointer !important;
+        }
         .canvas-edit:not(.is-preview) [data-canvas-kind="footer"] [contenteditable],
         .canvas-edit:not(.is-preview) [data-canvas-kind="footer"] [data-footer-go] {
           pointer-events: auto;
@@ -237,6 +250,74 @@ export const CanvasRenderer = memo(function CanvasRenderer({
           user-select: text;
           -webkit-user-select: text;
           cursor: text;
+        }
+
+        /* ─── Cross-Device Preview Adaptations ─── */
+        #canvas-root[data-device="mobile"] .container,
+        #canvas-root[data-device="tablet"] .container {
+          width: 100% !important;
+          max-width: 100% !important;
+          padding-left: 1.25rem !important;
+          padding-right: 1.25rem !important;
+        }
+
+        #canvas-root[data-device="mobile"] {
+          overflow-x: clip;
+        }
+
+        /* Grid single-column reflow on mobile */
+        #canvas-root[data-device="mobile"] [class*="md:grid-cols-"],
+        #canvas-root[data-device="mobile"] [class*="lg:grid-cols-"],
+        #canvas-root[data-device="mobile"] [class*="sm:grid-cols-"] {
+          grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+        }
+
+        /* Grid two-column reflow on tablet for 3- and 4-column grids */
+        #canvas-root[data-device="tablet"] [class*="lg:grid-cols-3"],
+        #canvas-root[data-device="tablet"] [class*="lg:grid-cols-4"] {
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+
+        /* Flex row to column stacking on mobile */
+        #canvas-root[data-device="mobile"] .md\:flex-row,
+        #canvas-root[data-device="mobile"] .lg\:flex-row,
+        #canvas-root[data-device="mobile"] .sm\:flex-row {
+          flex-direction: column !important;
+        }
+
+        /* Fluid typography for simulated mobile view to prevent overflowing large headers */
+        #canvas-root[data-device="mobile"] h1,
+        #canvas-root[data-device="mobile"] [class*="text-5xl"],
+        #canvas-root[data-device="mobile"] [class*="text-6xl"],
+        #canvas-root[data-device="mobile"] [class*="text-7xl"] {
+          font-size: clamp(1.85rem, 6.5vw, 2.35rem) !important;
+          line-height: 1.15 !important;
+          letter-spacing: -0.02em !important;
+        }
+
+        #canvas-root[data-device="mobile"] h2,
+        #canvas-root[data-device="mobile"] [class*="text-4xl"] {
+          font-size: clamp(1.45rem, 5vw, 1.85rem) !important;
+          line-height: 1.2 !important;
+        }
+
+        #canvas-root[data-device="mobile"] p,
+        #canvas-root[data-device="mobile"] [class*="text-xl"],
+        #canvas-root[data-device="mobile"] [class*="text-2xl"] {
+          font-size: clamp(0.925rem, 3.5vw, 1.05rem) !important;
+          line-height: 1.5 !important;
+        }
+
+        /* Mobile button wrap and full-width adaptions */
+        #canvas-root[data-device="mobile"] .hero-btn-group,
+        #canvas-root[data-device="mobile"] .cta-buttons {
+          flex-direction: column !important;
+          width: 100% !important;
+        }
+
+        #canvas-root[data-device="mobile"] img {
+          max-width: 100% !important;
+          height: auto !important;
         }
       `),
         }}
