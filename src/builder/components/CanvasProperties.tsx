@@ -15,6 +15,7 @@ import { findNode } from '@/builder/tree';
 import { normalizePageSections } from '@/builder/adapter';
 import { resolveStyles } from '@/builder/styles';
 import type { CanvasElement, CanvasStyles, DeviceId, FormField } from '@/builder/types';
+import { isIconUrl } from '@/builder/components/CanvasPrimitives';
 
 const EMPTY_PAGES: { id: string; name?: string; slug?: string }[] = [];
 
@@ -282,12 +283,105 @@ export function CanvasProperties() {
           </Group>
         )}
         {element?.type === 'icon' && (
-          <Group title="Content">
-            <Field label="Icon name">
-              <Input value={String(element.content.icon || 'Sparkles')} disabled={node.locked} onChange={(event) => patchContent({ icon: event.target.value })} />
+          <Group title="Icon Content">
+            <Field label="Icon Source">
+              <div className="grid grid-cols-2 gap-1 rounded-lg bg-slate-100 p-0.5 text-xs">
+                <button
+                  type="button"
+                  className={`rounded-md py-1 font-medium transition-colors ${
+                    isIconUrl(element.content.url || element.content.icon)
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                  onClick={() => {
+                    const currentUrl = typeof element.content.url === 'string' ? element.content.url : '';
+                    if (!currentUrl) {
+                      patchContent({ url: 'https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/sparkles.svg' });
+                    }
+                  }}
+                >
+                  Custom URL
+                </button>
+                <button
+                  type="button"
+                  className={`rounded-md py-1 font-medium transition-colors ${
+                    !isIconUrl(element.content.url || element.content.icon)
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                  onClick={() => {
+                    patchContent({ url: '', icon: isIconUrl(element.content.icon) ? 'Sparkles' : element.content.icon || 'Sparkles' });
+                  }}
+                >
+                  Lucide Preset
+                </button>
+              </div>
             </Field>
+
+            <Field label="Icon URL (SVG / Image)">
+              <Input
+                data-testid="icon-url-input"
+                value={String(element.content.url || (isIconUrl(element.content.icon) ? element.content.icon : ''))}
+                placeholder="https://... (SVG, PNG, WebP or data:)"
+                disabled={node.locked}
+                onChange={(event) => patchContent({ url: event.target.value })}
+              />
+              <p className="text-[10px] text-slate-400">Supports public SVG, PNG, WebP or data URLs</p>
+            </Field>
+
+            <Field label="Lucide Icon Name">
+              <Input
+                data-testid="icon-name-input"
+                value={String(isIconUrl(element.content.icon) ? '' : (element.content.icon || 'Sparkles'))}
+                placeholder="Sparkles, Star, Heart, Check, Search..."
+                disabled={node.locked}
+                onChange={(event) => patchContent({ icon: event.target.value })}
+              />
+            </Field>
+
+            <Field label="Common Presets">
+              <div className="flex flex-wrap gap-1">
+                {['Sparkles', 'Star', 'Heart', 'Check', 'Search', 'ArrowRight', 'Mail', 'Phone', 'Shield', 'Globe'].map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    className="rounded border border-slate-200 bg-white px-2 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                    onClick={() => patchContent({ icon: preset, url: '' })}
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
+            </Field>
+
             <Field label="Size">
-              <Input type="number" value={Number(element.content.size || 28)} disabled={node.locked} onChange={(event) => patchContent({ size: Number(event.target.value) })} className="h-8 text-xs" />
+              <div className="flex items-center gap-2">
+                <Input
+                  data-testid="icon-size-input"
+                  type="number"
+                  min={12}
+                  max={256}
+                  value={Number(element.content.size || 28)}
+                  disabled={node.locked}
+                  onChange={(event) => {
+                    const size = Number(event.target.value) || 28;
+                    patchContent({ size });
+                    patchStyle({ width: `${size}px`, height: `${size}px` });
+                  }}
+                  className="h-8 text-xs"
+                />
+                <span className="text-xs text-slate-400">px</span>
+              </div>
+            </Field>
+
+            <Field label="Alt text">
+              <Input
+                value={String(element.content.alt || '')}
+                placeholder="Icon description"
+                disabled={node.locked}
+                onChange={(event) => patchContent({ alt: event.target.value })}
+                className="h-8 text-xs"
+              />
             </Field>
           </Group>
         )}

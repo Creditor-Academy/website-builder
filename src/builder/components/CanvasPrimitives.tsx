@@ -74,9 +74,83 @@ function VideoView({ element, css, editingCanvas }: { element: CanvasElement; cs
   );
 }
 
-function IconView({ name, size, color }: { name: string; size: number; color?: string }) {
-  const Icon = (Lucide as unknown as Record<string, Lucide.LucideIcon>)[name] || Lucide.Sparkles;
-  return <Icon size={size} color={color} />;
+export function isIconUrl(value?: unknown): boolean {
+  if (typeof value !== 'string') return false;
+  const trimmed = value.trim();
+  return (
+    trimmed.startsWith('http://') ||
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('/') ||
+    trimmed.startsWith('data:image/') ||
+    trimmed.startsWith('blob:') ||
+    /\.(svg|png|jpg|jpeg|webp|gif|ico)(\?.*)?$/i.test(trimmed)
+  );
+}
+
+export function IconView({
+  name,
+  url,
+  size,
+  color,
+  alt = 'Icon',
+}: {
+  name?: string;
+  url?: string;
+  size: number;
+  color?: string;
+  alt?: string;
+}) {
+  const iconSrc = (url && url.trim()) || (isIconUrl(name) ? name?.trim() : undefined);
+
+  if (iconSrc) {
+    const isSvg = /\.svg(\?.*)?$/i.test(iconSrc) || iconSrc.startsWith('data:image/svg+xml');
+
+    if (isSvg && color) {
+      return (
+        <span
+          role="img"
+          aria-label={alt}
+          className="inline-block shrink-0"
+          style={{
+            width: `${size}px`,
+            height: `${size}px`,
+            maskImage: `url("${iconSrc}")`,
+            WebkitMaskImage: `url("${iconSrc}")`,
+            maskRepeat: 'no-repeat',
+            WebkitMaskRepeat: 'no-repeat',
+            maskPosition: 'center',
+            WebkitMaskPosition: 'center',
+            maskSize: 'contain',
+            WebkitMaskSize: 'contain',
+            backgroundColor: color,
+            verticalAlign: 'middle',
+          }}
+        />
+      );
+    }
+
+    return (
+      <img
+        src={iconSrc}
+        alt={alt}
+        width={size}
+        height={size}
+        className="inline-block shrink-0 object-contain"
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          verticalAlign: 'middle',
+        }}
+        onError={(event) => {
+          (event.currentTarget as HTMLElement).style.display = 'none';
+        }}
+      />
+    );
+  }
+
+  const iconName = name || 'Sparkles';
+  const Icon = (Lucide as unknown as Record<string, Lucide.LucideIcon>)[iconName] || Lucide.Sparkles;
+  return <Icon size={size} color={color} className="shrink-0" />;
 }
 
 const FIELD_CLASS = 'select-text cursor-text rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900';
@@ -201,7 +275,9 @@ function InlineTextEditor({
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
-    node.innerHTML = sanitizeHTML(html);
+    const sanitized = sanitizeHTML(html);
+    if (node.innerHTML === sanitized) return;
+    node.innerHTML = sanitized;
     node.focus();
     const selection = window.getSelection();
     const range = document.createRange();
@@ -223,6 +299,7 @@ function InlineTextEditor({
     if (event.key === 'Enter' && !event.shiftKey && tag !== 'p') {
       event.preventDefault();
       commit(ref.current?.innerHTML || '');
+      onCancel();
     }
   };
 
@@ -234,7 +311,24 @@ function InlineTextEditor({
       suppressContentEditableWarning
       style={css}
       className="outline-none ring-1 ring-sky-400/70"
-      onBlur={() => commit(ref.current?.innerHTML || initialRef.current)}
+      onInput={() => {
+        if (ref.current) {
+          commit(ref.current.innerHTML);
+        }
+      }}
+      onBlur={(event) => {
+        const next = ref.current?.innerHTML || initialRef.current;
+        commit(next);
+        const related = (event.relatedTarget || document.activeElement) as HTMLElement | null;
+        const isToolbar = Boolean(
+          related?.closest(
+            '[data-text-toolbar], [data-radix-popper-content-wrapper], [data-radix-select-content], [role="listbox"], [role="dialog"], [data-radix-portal]'
+          )
+        );
+        if (!isToolbar) {
+          onCancel();
+        }
+      }}
       onKeyDown={onKeyDown}
       onClick={(event) => event.stopPropagation()}
     />
@@ -289,16 +383,29 @@ export const CanvasElementView = memo(function CanvasElementView({
           {String(element.content.label || 'Button')}
         </a>
       );
-    case 'icon':
+    case 'icon': {
+      const iconUrl = typeof element.content.url === 'string' && element.content.url.trim()
+        ? element.content.url.trim()
+        : typeof element.content.src === 'string' && element.content.src.trim()
+        ? element.content.src.trim()
+        : undefined;
+      const iconName = typeof element.content.icon === 'string' ? element.content.icon : 'Sparkles';
+      const size = Number(element.content.size || 28);
+      const color = typeof css.color === 'string' ? css.color : undefined;
+      const alt = typeof element.content.alt === 'string' ? element.content.alt : 'Icon';
+
       return (
-        <span style={css} className="inline-flex">
+        <span style={css} className="inline-flex items-center justify-center">
           <IconView
-            name={String(element.content.icon || 'Sparkles')}
-            size={Number(element.content.size || 28)}
-            color={typeof css.color === 'string' ? css.color : undefined}
+            name={iconName}
+            url={iconUrl}
+            size={size}
+            color={color}
+            alt={alt}
           />
         </span>
       );
+    }
     case 'video':
       return <VideoView element={element} css={css} editingCanvas={editingCanvas} />;
     case 'divider':

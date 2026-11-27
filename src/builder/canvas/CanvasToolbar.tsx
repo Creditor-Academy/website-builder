@@ -1,4 +1,5 @@
-import { AlignHorizontalSpaceAround, ArrowDown, ArrowUp, Copy, Plus, Trash2 } from 'lucide-react';
+import { AlignHorizontalSpaceAround, ArrowDown, ArrowUp, Copy, Plus, Sparkles, Trash2 } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import useBuilderStore from '@/store/useBuilderStore';
 import { findNode, getFreePosition, isFreePositioned } from '@/builder/tree';
 import { isLayoutSurface } from '@/builder/freeMove';
@@ -117,6 +118,94 @@ export function CanvasToolbar() {
             <ArrowDown className="h-3.5 w-3.5" />
           </button>
         </>
+      )}
+      {location?.node.type === 'icon' && !multi && (
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="flex items-center gap-1 rounded px-2 py-1 text-slate-700 hover:bg-slate-100 text-xs font-medium"
+              title="Edit Icon (URL or preset)"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-sky-500" />
+              <span>Edit Icon</span>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-72 p-3 shadow-xl border-slate-200 z-50 bg-white" sideOffset={8}>
+            <div className="space-y-2.5">
+              <div>
+                <label className="text-[11px] font-semibold text-slate-700 block mb-1">Icon URL (SVG / Image)</label>
+                <input
+                  type="text"
+                  placeholder="https://... or data:image/..."
+                  value={String(location.node.content?.url || '')}
+                  onChange={(e) => {
+                    useBuilderStore.getState().updateCanvasNode(selectedId, {
+                      content: { ...location.node.content, url: e.target.value }
+                    });
+                  }}
+                  className="w-full h-8 px-2 text-xs rounded border border-slate-200 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-slate-50"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] font-semibold text-slate-700 block mb-1">Lucide Name</label>
+                <input
+                  type="text"
+                  placeholder="Sparkles, Heart, Star, Check..."
+                  value={String(location.node.content?.icon || 'Sparkles')}
+                  onChange={(e) => {
+                    useBuilderStore.getState().updateCanvasNode(selectedId, {
+                      content: { ...location.node.content, icon: e.target.value }
+                    });
+                  }}
+                  className="w-full h-8 px-2 text-xs rounded border border-slate-200 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-slate-50"
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-semibold text-slate-700">Size</label>
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="number"
+                    min={12}
+                    max={256}
+                    value={Number(location.node.content?.size || 28)}
+                    onChange={(e) => {
+                      const sz = Number(e.target.value) || 28;
+                      useBuilderStore.getState().updateCanvasNode(selectedId, {
+                        content: { ...location.node.content, size: sz }
+                      });
+                      useBuilderStore.getState().updateCanvasStyles(selectedId, {
+                        width: `${sz}px`,
+                        height: `${sz}px`
+                      });
+                    }}
+                    className="w-16 h-7 px-2 text-xs rounded border border-slate-200 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                  />
+                  <span className="text-xs text-slate-400">px</span>
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1">Presets</label>
+                <div className="flex flex-wrap gap-1">
+                  {['Sparkles', 'Star', 'Heart', 'Check', 'Search', 'ArrowRight'].map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      className="px-2 py-0.5 text-[10px] rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium"
+                      onClick={() => {
+                        useBuilderStore.getState().updateCanvasNode(selectedId, {
+                          content: { ...location.node.content, icon: p, url: '' }
+                        });
+                      }}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       )}
       {selectedKind === 'section' && !multi && (
         <button type="button" className="rounded p-1.5 text-slate-600 hover:bg-slate-100" title="Add container" disabled={locked} onClick={() => addCanvasContainer()}>

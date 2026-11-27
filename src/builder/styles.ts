@@ -25,6 +25,8 @@ const STYLE_TO_CSS: Record<keyof CanvasStyles, string> = {
   fontFamily: 'fontFamily',
   fontSize: 'fontSize',
   fontWeight: 'fontWeight',
+  fontStyle: 'fontStyle',
+  textDecoration: 'textDecoration',
   lineHeight: 'lineHeight',
   letterSpacing: 'letterSpacing',
   textAlign: 'textAlign',
