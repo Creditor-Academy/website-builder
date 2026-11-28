@@ -63,6 +63,8 @@ export interface CanvasStyles {
   fontFamily?: string;
   fontSize?: string;
   fontWeight?: string | number;
+  fontStyle?: string;
+  textDecoration?: string;
   lineHeight?: string;
   letterSpacing?: string;
   textAlign?: string;

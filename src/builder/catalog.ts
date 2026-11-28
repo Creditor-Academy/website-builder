@@ -71,7 +71,7 @@ export const ELEMENT_CATALOG: CatalogItem[] = [
   { id: 'paragraph', name: 'Paragraph', description: 'Body copy', icon: Type, category: 'Elements', kind: 'element', elementType: 'text' },
   { id: 'image', name: 'Image', description: 'Responsive image', icon: ImageIcon, category: 'Elements', kind: 'element', elementType: 'image' },
   { id: 'button', name: 'Button', description: 'Call to action', icon: MousePointer2, category: 'Elements', kind: 'element', elementType: 'button' },
-  { id: 'icon', name: 'Icon', description: 'Lucide icon', icon: Sparkles, category: 'Elements', kind: 'element', elementType: 'icon' },
+  { id: 'icon', name: 'Icon', description: 'Lucide icon or custom URL', icon: Sparkles, category: 'Elements', kind: 'element', elementType: 'icon' },
   { id: 'video', name: 'Video', description: 'YouTube or file', icon: Play, category: 'Elements', kind: 'element', elementType: 'video' },
   { id: 'divider', name: 'Divider', description: 'Horizontal rule', icon: Minus, category: 'Elements', kind: 'element', elementType: 'divider' },
   { id: 'form', name: 'Form', description: 'Reusable contact form', icon: Mail, category: 'Elements', kind: 'element', elementType: 'form' },

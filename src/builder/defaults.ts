@@ -110,7 +110,7 @@ export function createIconElement(parentId: string, order = 0): CanvasElement {
   return {
     ...baseNode('Icon', parentId, order),
     type: 'icon',
-    content: { icon: 'Sparkles', size: 28 },
+    content: { icon: 'Sparkles', size: 28, url: '' },
     styles: { color: '#0f172a', width: '28px', height: '28px' },
   };
 }

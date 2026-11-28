@@ -325,7 +325,6 @@ export const CanvasElementNode = memo(function CanvasElementNode({
           editingCanvas={!previewMode}
           onSaveText={(html) => {
             updateCanvasNode(element.id, { content: { ...element.content, text: html } });
-            setEditingNodeId(null);
           }}
           onCancelEdit={() => setEditingNodeId(null)}
         />
