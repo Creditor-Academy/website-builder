@@ -1,18 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { pageFrameClass } from "@/components/landing/pageFrame";
 import ctaBg from "@/assets/CTA.webp";
+import { Link } from 'react-router-dom';
+import { ArrowRight } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 
-export default function HeroCTASection() {
-  const [isPressed, setIsPressed] = useState(false);
-
-  const handleCtaClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    setIsPressed(true);
-    setTimeout(() => {
-      setIsPressed(false);
-      console.log('Publish flow initialized.');
-    }, 150);
-  };
+export default function HeroCTASection({ isDark: propIsDark }: { isDark?: boolean } = {}) {
+  const { isDark: themeIsDark } = useTheme();
+  const isDark = propIsDark ?? themeIsDark;
 
   return (
     <>
@@ -117,115 +112,106 @@ export default function HeroCTASection() {
           {/* BEGIN: GlassmorphicCTACard — same content width as hero */}
           <div className={`${pageFrameClass} relative z-10 min-w-0`} data-purpose="interactive-cta-card">
             <div className="relative w-full min-w-0 max-w-full">
-            {/* Floating 3D Glass Accent Badge (Top-Right Dimension Breaker) */}
-  
+              {/* Floating 3D Glass Accent Badge (Top-Right Dimension Breaker) */}
 
-            {/* Main Frosted Glass Card Container */}
-            <div className="glass-specular-border relative overflow-hidden rounded-[1.5rem] sm:rounded-[2.5rem] bg-white/85 dark:bg-slate-900/85 backdrop-blur-2xl p-5 sm:p-10 md:p-12 shadow-2xl shadow-indigo-950/50 text-center transition-all duration-300 hover:shadow-indigo-500/20">
-              {/* Subtle Top Glass Refraction Highlight */}
-              <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-gradient-to-b from-white/40 to-transparent blur-xl pointer-events-none" />
 
-              {/* Optional Top Navigation Corner Utility */}
-              <div className="absolute top-3 right-3 hidden items-center gap-2 sm:top-7 sm:right-7 sm:flex" data-purpose="window-controls">
-                <button
-                  aria-label="Dismiss view"
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors"
-                  type="button"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                  </svg>
-                </button>
-              </div>
+              {/* Main Frosted Glass Card Container */}
+              <div className="glass-specular-border relative overflow-hidden rounded-[1.5rem] sm:rounded-[2.5rem] bg-white/85 dark:bg-slate-900/85 backdrop-blur-2xl p-5 sm:p-10 md:p-12 shadow-2xl shadow-indigo-950/50 text-center transition-all duration-300 hover:shadow-indigo-500/20">
+                {/* Subtle Top Glass Refraction Highlight */}
+                <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-gradient-to-b from-white/40 to-transparent blur-xl pointer-events-none" />
 
-              {/* BEGIN: Action Pill Badge */}
-              <div className="inline-flex items-center justify-center mb-4 sm:mb-6" data-purpose="status-badge">
-                <div className="relative group inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full border border-sky-400/30 transition-all duration-300 shadow-sm shadow-indigo-500/10">
-                  <svg className="w-4 h-4 text-sky-500 dark:text-sky-400 animate-sparkle shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2L13.8 8.2L20 10L13.8 11.8L12 18L10.2 11.8L4 10L10.2 8.2L12 2Z" />
-                    <path d="M19 16L19.9 19.1L23 20L19.9 20.9L19 24L18.1 20.9L15 20L18.1 19.1L19 16Z" opacity="0.6" />
-                  </svg>
-                  <span className="text-xs font-bold tracking-widest uppercase bg-gradient-to-r from-sky-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
-                    Zero to Live
-                  </span>
+                {/* Optional Top Navigation Corner Utility */}
+                <div className="absolute top-3 right-3 hidden items-center gap-2 sm:top-7 sm:right-7 sm:flex" data-purpose="window-controls">
+                  <button
+                    aria-label="Dismiss view"
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors"
+                    type="button"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* BEGIN: Action Pill Badge */}
+                <div className="inline-flex items-center justify-center mb-4 sm:mb-6" data-purpose="status-badge">
+                  <div className="relative group inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full border border-sky-400/30 transition-all duration-300 shadow-sm shadow-indigo-500/10">
+                    <svg className="w-4 h-4 text-sky-500 dark:text-sky-400 animate-sparkle shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2L13.8 8.2L20 10L13.8 11.8L12 18L10.2 11.8L4 10L10.2 8.2L12 2Z" />
+                      <path d="M19 16L19.9 19.1L23 20L19.9 20.9L19 24L18.1 20.9L15 20L18.1 19.1L19 16Z" opacity="0.6" />
+                    </svg>
+                    <span className="text-xs font-bold tracking-widest uppercase bg-gradient-to-r from-sky-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                      Zero to Live
+                    </span>
+                  </div>
+                </div>
+
+                {/* BEGIN: Headline & Typographic Treatment */}
+                <div className="mb-5 space-y-1 sm:mb-6" data-purpose="hero-title-block">
+                  <h2 className="text-slate-950 dark:text-white font-extrabold tracking-tight text-[1.65rem] leading-[1.15] sm:text-4xl md:text-5xl lg:text-6xl px-1">
+                    Publish to a{' '}
+                    <span className="inline italic font-black bg-gradient-to-r from-blue-600 via-indigo-500 to-fuchsia-500 animated-gradient-text animate-text-shimmer drop-shadow-sm">
+                      live address.
+                    </span>
+                  </h2>
+                </div>
+
+                {/* BEGIN: High-Converting Feature Checklist */}
+                <div className="max-w-2xl mx-auto mb-6 text-left sm:mb-7 sm:px-4" data-purpose="value-proposition-checklist">
+                  <ul className="space-y-2.5 sm:space-y-3 text-sm sm:text-base text-slate-600 dark:text-slate-300 font-medium">
+                    <li className="flex items-start gap-3">
+                      <span className="flex-shrink-0 mt-0.5 flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path clipRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fillRule="evenodd" />
+                        </svg>
+                      </span>
+                      <span className="min-w-0">
+                        Publish directly to a <strong className="text-slate-900 dark:text-white font-semibold">Web Studio subdomain</strong>
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="flex-shrink-0 mt-0.5 flex items-center justify-center w-5 h-5 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400">
+                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path clipRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fillRule="evenodd" />
+                        </svg>
+                      </span>
+                      <span className="min-w-0">
+                        Connect your own <strong className="text-slate-900 dark:text-white font-semibold">custom apex domain or subdomain</strong>
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="flex-shrink-0 mt-0.5 flex items-center justify-center w-5 h-5 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-400">
+                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path clipRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fillRule="evenodd" />
+                        </svg>
+                      </span>
+                      <span className="min-w-0">
+                        Automatic <strong className="text-slate-900 dark:text-white font-semibold">SSL certificates &amp; static site hosting</strong> included
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* BEGIN: High-Converting Radiant Action Button */}
+                <div className="mt-6 mb-6 flex w-full items-center justify-center sm:mt-7 sm:mb-7">
+                  <Link
+                    to="/login"
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 px-8 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all duration-200 hover:scale-[1.02] hover:shadow-indigo-500/40 active:scale-[0.98] sm:h-13 sm:px-9 sm:text-base cursor-pointer"
+                  >
+                    <span>Start building</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+
+                {/* Platform highlights */}
+                <div className="pt-4 sm:pt-5 border-t border-slate-200/60 dark:border-slate-800/80 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+                  <span>Visual Canvas</span>
+                  <span aria-hidden className="text-slate-300 dark:text-slate-700">·</span>
+                  <span>Responsive Breakpoints</span>
+                  <span aria-hidden className="text-slate-300 dark:text-slate-700">·</span>
+                  <span>Static Site Export</span>
                 </div>
               </div>
-
-              {/* BEGIN: Headline & Typographic Treatment */}
-              <div className="mb-5 space-y-1 sm:mb-6" data-purpose="hero-title-block">
-                <h2 className="text-slate-950 dark:text-white font-extrabold tracking-tight text-[1.65rem] leading-[1.15] sm:text-4xl md:text-5xl lg:text-6xl px-1">
-                  Publish to a{' '}
-                  <span className="inline italic font-black bg-gradient-to-r from-blue-600 via-indigo-500 to-fuchsia-500 animated-gradient-text animate-text-shimmer drop-shadow-sm">
-                    live address.
-                  </span>
-                </h2>
-              </div>
-
-              {/* BEGIN: High-Converting Feature Checklist */}
-              <div className="max-w-2xl mx-auto mb-6 text-left sm:mb-7 sm:px-4" data-purpose="value-proposition-checklist">
-                <ul className="space-y-2.5 sm:space-y-3 text-sm sm:text-base text-slate-600 dark:text-slate-300 font-medium">
-                  <li className="flex items-start gap-3">
-                    <span className="flex-shrink-0 mt-0.5 flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path clipRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fillRule="evenodd" />
-                      </svg>
-                    </span>
-                    <span className="min-w-0">
-                      Publish directly to a <strong className="text-slate-900 dark:text-white font-semibold">Web Studio subdomain</strong>
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="flex-shrink-0 mt-0.5 flex items-center justify-center w-5 h-5 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400">
-                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path clipRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fillRule="evenodd" />
-                      </svg>
-                    </span>
-                    <span className="min-w-0">
-                      Connect your own <strong className="text-slate-900 dark:text-white font-semibold">custom apex domain or subdomain</strong>
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="flex-shrink-0 mt-0.5 flex items-center justify-center w-5 h-5 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-400">
-                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path clipRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fillRule="evenodd" />
-                      </svg>
-                    </span>
-                    <span className="min-w-0">
-                      Automatic <strong className="text-slate-900 dark:text-white font-semibold">SSL certificates &amp; static site hosting</strong> included
-                    </span>
-                  </li>
-                </ul>
-              </div>
-
-              {/* BEGIN: High-Converting Radiant Action Button */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 mb-6 sm:mb-7" data-purpose="cta-button-group">
-                <a
-                  className={`group relative inline-flex items-center justify-center w-full sm:w-auto px-6 sm:px-10 py-3.5 sm:py-4 text-sm sm:text-base font-bold text-white tracking-wide rounded-full overflow-hidden transition-all duration-300 transform hover:-translate-y-1 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-indigo-500/40 shadow-xl shadow-indigo-600/30 hover:shadow-indigo-500/50 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-500 hover:via-indigo-500 hover:to-violet-500 ${
-                    isPressed ? 'scale-95' : ''
-                  }`}
-                  data-purpose="primary-action-button"
-                  href="#start-building"
-                  onClick={handleCtaClick}
-                >
-                  <span className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full animate-shimmer-sweep pointer-events-none" />
-                  <span className="relative z-10 flex items-center gap-3">
-                    <span>Start building</span>
-                    <svg className="w-5 h-5 text-white transition-transform duration-300 group-hover:translate-x-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" />
-                    </svg>
-                  </span>
-                </a>
-              </div>
-
-              {/* Platform highlights */}
-              <div className="pt-4 sm:pt-5 border-t border-slate-200/60 dark:border-slate-800/80 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-                <span>Visual Canvas</span>
-                <span aria-hidden className="text-slate-300 dark:text-slate-700">·</span>
-                <span>Responsive Breakpoints</span>
-                <span aria-hidden className="text-slate-300 dark:text-slate-700">·</span>
-                <span>Static Site Export</span>
-              </div>
-            </div>
             </div>
           </div>
         </main>

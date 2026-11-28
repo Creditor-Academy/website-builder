@@ -427,30 +427,53 @@ export function PropertiesPanel() {
 
       case 'stats': return (
         <div className="space-y-4">
-          <div className="space-y-2"><Label className="text-xs font-medium">Headline</Label><Input value={content.headline || ''} onChange={(e) => handleContentChange('headline', e.target.value)} className="bg-white border-slate-200 text-xs" /></div>
+          <div className="space-y-2">
+            <Label className="text-xs font-medium">Headline</Label>
+            <Input value={content.headline || ''} onChange={(e) => handleContentChange('headline', e.target.value)} className="bg-white border-slate-200 text-xs" />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs font-medium">Subheadline</Label>
+            <Textarea value={content.subheadline || ''} onChange={(e) => handleContentChange('subheadline', e.target.value)} className="bg-white border-slate-200 resize-none text-xs" rows={2} />
+          </div>
           <div className="space-y-3">
-            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Stats Grid</Label>
-            <div className="grid grid-cols-2 gap-2">
+            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Stats Items</Label>
+            <div className="space-y-2">
               {(content.stats || []).map((s, idx) => (
-                <div key={idx} className="p-2 bg-slate-50 rounded-lg border border-slate-200 space-y-1 relative group">
-                  <Input value={s.value || ''} className="text-sm font-bold h-7" onChange={(e) => {
-                    const updated = [...content.stats];
-                    updated[idx] = { ...s, value: e.target.value };
-                    handleContentChange('stats', updated);
-                  }} />
-                  <Input value={s.label || ''} className="text-[9px] h-6" onChange={(e) => {
-                    const updated = [...content.stats];
-                    updated[idx] = { ...s, label: e.target.value };
-                    handleContentChange('stats', updated);
-                  }} />
+                <div key={s.id || idx} className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 space-y-2 relative group">
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2 space-y-1">
+                      <Label className="text-[9px] text-slate-400 font-bold uppercase">Value</Label>
+                      <Input value={s.value || ''} placeholder="e.g. 100" className="text-xs font-bold h-7 bg-white" onChange={(e) => {
+                        const updated = [...content.stats];
+                        updated[idx] = { ...s, value: e.target.value };
+                        handleContentChange('stats', updated);
+                      }} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[9px] text-slate-400 font-bold uppercase">Suffix</Label>
+                      <Input value={s.suffix || ''} placeholder="e.g. +" className="text-xs h-7 bg-white" onChange={(e) => {
+                        const updated = [...content.stats];
+                        updated[idx] = { ...s, suffix: e.target.value };
+                        handleContentChange('stats', updated);
+                      }} />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[9px] text-slate-400 font-bold uppercase">Label</Label>
+                    <Input value={s.label || ''} placeholder="e.g. Active Users" className="text-xs h-7 bg-white" onChange={(e) => {
+                      const updated = [...content.stats];
+                      updated[idx] = { ...s, label: e.target.value };
+                      handleContentChange('stats', updated);
+                    }} />
+                  </div>
                   <button className="absolute -top-1 -right-1 bg-white border border-slate-200 text-destructive rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => {
                     const updated = content.stats.filter((_, i) => i !== idx);
                     handleContentChange('stats', updated);
                   }}><X className="w-2.5 h-2.5" /></button>
                 </div>
               ))}
-              <Button variant="outline" size="sm" className="col-span-2 text-[9px] h-7 border-dashed" onClick={() => {
-                handleContentChange('stats', [...(content.stats || []), { value: '0', label: 'New Stat' }]);
+              <Button variant="outline" size="sm" className="w-full text-[10px] font-bold h-8 border-dashed" onClick={() => {
+                handleContentChange('stats', [...(content.stats || []), { id: uuidv4(), value: '0', suffix: '+', label: 'New Stat' }]);
               }}>+ Add Stat</Button>
             </div>
           </div>
@@ -1527,31 +1550,88 @@ export function PropertiesPanel() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Headings</Label>
+                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  {selectedSection.type === 'stats' ? 'Stat Value' : 'Headings'}
+                </Label>
                 <div className="flex gap-2">
                   <input type="color" value={selectedSection.styles.headingColor || '#0f172a'} onChange={(e) => handleStyleChange('headingColor', e.target.value)} className="w-8 h-8 rounded border p-0.5 cursor-pointer" />
                   <Input value={selectedSection.styles.headingColor || ''} onChange={(e) => handleStyleChange('headingColor', e.target.value)} className="bg-slate-50 border-slate-200 text-[10px] h-8 font-mono flex-1 px-1.5" />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Body Text</Label>
+                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  {selectedSection.type === 'stats' ? 'Stat Label' : 'Body Text'}
+                </Label>
                 <div className="flex gap-2">
                   <input type="color" value={selectedSection.styles.paragraphColor || '#475569'} onChange={(e) => handleStyleChange('paragraphColor', e.target.value)} className="w-8 h-8 rounded border p-0.5 cursor-pointer" />
                   <Input value={selectedSection.styles.paragraphColor || ''} onChange={(e) => handleStyleChange('paragraphColor', e.target.value)} className="bg-slate-50 border-slate-200 text-[10px] h-8 font-mono flex-1 px-1.5" />
                 </div>
               </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Accent / Suffix</Label>
+                <div className="flex gap-2">
+                  <input type="color" value={selectedSection.styles.accentColor || '#38bdf8'} onChange={(e) => handleStyleChange('accentColor', e.target.value)} className="w-8 h-8 rounded border p-0.5 cursor-pointer" />
+                  <Input value={selectedSection.styles.accentColor || ''} onChange={(e) => handleStyleChange('accentColor', e.target.value)} className="bg-slate-50 border-slate-200 text-[10px] h-8 font-mono flex-1 px-1.5" />
+                </div>
+              </div>
             </div>
 
-            {/* Card Background for features, testimonials, and services sections */}
-            {(selectedSection.type === 'features' || selectedSection.type === 'testimonials' || selectedSection.type === 'services') && (
+            {/* Typography */}
+            <div className="space-y-3 pt-2 border-t border-slate-100">
+              <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Typography</Label>
+              <div className="space-y-2">
+                <Label className="text-[9px] text-slate-500 font-bold">Font Family</Label>
+                <Select
+                  value={selectedSection.styles?.fontFamily || 'Inter'}
+                  onValueChange={(val) => handleStyleChange('fontFamily', val)}
+                >
+                  <SelectTrigger className="bg-white border-slate-200 h-8 text-xs">
+                    <SelectValue placeholder="Select font" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[
+                      'Inter',
+                      'Roboto',
+                      'Playfair Display',
+                      'Outfit',
+                      'Plus Jakarta Sans',
+                      'Montserrat',
+                      'Geist',
+                      'Epilogue',
+                      'Lora',
+                      'Sora',
+                      'Fraunces',
+                      'Space Grotesk',
+                      'Cinzel',
+                      'Newsreader',
+                      'Instrument Serif',
+                    ].map((font) => (
+                      <SelectItem key={font} value={font} style={{ fontFamily: font }} className="text-xs">
+                        {font}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Card Background for features, testimonials, services, and stats sections */}
+            {(selectedSection.type === 'features' || selectedSection.type === 'testimonials' || selectedSection.type === 'services' || selectedSection.type === 'stats') && (
               <div className="space-y-4 pt-2 border-t border-slate-100">
-                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Card Styling</Label>
+                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Card & Item Styling</Label>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-[9px] text-slate-500 font-bold">Card Background</Label>
                     <div className="flex gap-2">
-                      <input type="color" value={selectedSection.styles.cardBackgroundColor || (selectedSection.type === 'services' ? '#f8fafc' : '#ffffff')} onChange={(e) => handleStyleChange('cardBackgroundColor', e.target.value)} className="w-8 h-8 rounded border p-0.5 cursor-pointer" />
+                      <input type="color" value={selectedSection.styles.cardBackgroundColor || (selectedSection.type === 'services' ? '#f8fafc' : selectedSection.type === 'stats' ? '#ffffff' : '#ffffff')} onChange={(e) => handleStyleChange('cardBackgroundColor', e.target.value)} className="w-8 h-8 rounded border p-0.5 cursor-pointer" />
                       <Input value={selectedSection.styles.cardBackgroundColor || ''} onChange={(e) => handleStyleChange('cardBackgroundColor', e.target.value)} className="bg-slate-50 border-slate-200 text-[10px] h-8 font-mono flex-1 px-1.5" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[9px] text-slate-500 font-bold">Card Border Color</Label>
+                    <div className="flex gap-2">
+                      <input type="color" value={selectedSection.styles.borderColor || 'rgba(255, 255, 255, 0.1)'} onChange={(e) => handleStyleChange('borderColor', e.target.value)} className="w-8 h-8 rounded border p-0.5 cursor-pointer" />
+                      <Input value={selectedSection.styles.borderColor || ''} onChange={(e) => handleStyleChange('borderColor', e.target.value)} className="bg-slate-50 border-slate-200 text-[10px] h-8 font-mono flex-1 px-1.5" />
                     </div>
                   </div>
                 </div>
@@ -1608,9 +1688,84 @@ export function PropertiesPanel() {
               )}
             </div>
 
-            <div className="space-y-3">
-              <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Border Radius</Label>
-              <div className="grid grid-cols-4 gap-2">
+            <div className="space-y-3 pt-2 border-t border-slate-100">
+              <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Borders & Radius</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-[9px] text-slate-500 font-bold">Border Color</Label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="color" 
+                      value={
+                        (selectedComponent 
+                          ? selectedComponent.style?.borderColor 
+                          : selectedSection.styles?.borderColor) || '#e2e8f0'
+                      } 
+                      onChange={(e) => selectedComponent 
+                        ? handleCompStyleUpdate({ borderColor: e.target.value })
+                        : handleStyleChange('borderColor', e.target.value)
+                      } 
+                      className="w-8 h-8 rounded border p-0.5 cursor-pointer" 
+                    />
+                    <Input 
+                      value={
+                        (selectedComponent 
+                          ? selectedComponent.style?.borderColor 
+                          : selectedSection.styles?.borderColor) || ''
+                      } 
+                      onChange={(e) => selectedComponent 
+                        ? handleCompStyleUpdate({ borderColor: e.target.value })
+                        : handleStyleChange('borderColor', e.target.value)
+                      } 
+                      className="bg-slate-50 border-slate-200 text-[10px] h-8 font-mono flex-1 px-1.5" 
+                      placeholder="#e2e8f0"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[9px] text-slate-500 font-bold">Border Width</Label>
+                  <Input 
+                    value={
+                      (selectedComponent 
+                        ? selectedComponent.style?.borderWidth 
+                        : selectedSection.styles?.borderWidth) || ''
+                    } 
+                    onChange={(e) => selectedComponent 
+                      ? handleCompStyleUpdate({ borderWidth: e.target.value })
+                      : handleStyleChange('borderWidth', e.target.value)
+                    } 
+                    className="bg-slate-50 border-slate-200 text-[10px] h-8 font-mono" 
+                    placeholder="1px"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[9px] text-slate-500 font-bold">Border Style</Label>
+                <Select
+                  value={
+                    (selectedComponent 
+                      ? selectedComponent.style?.borderStyle 
+                      : selectedSection.styles?.borderStyle) || 'solid'
+                  }
+                  onValueChange={(val) => selectedComponent 
+                    ? handleCompStyleUpdate({ borderStyle: val })
+                    : handleStyleChange('borderStyle', val)
+                  }
+                >
+                  <SelectTrigger className="bg-white border-slate-200 h-8 text-xs">
+                    <SelectValue placeholder="Border style" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="solid" className="text-xs">Solid</SelectItem>
+                    <SelectItem value="dashed" className="text-xs">Dashed</SelectItem>
+                    <SelectItem value="dotted" className="text-xs">Dotted</SelectItem>
+                    <SelectItem value="none" className="text-xs">None</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[9px] text-slate-500 font-bold">Border Radius</Label>
+                <div className="grid grid-cols-4 gap-2">
                 {[
                   { value: '0px', label: '0°', desc: 'Sharp' },
                   { value: '4px', label: '1°', desc: 'Slight' },
@@ -1635,20 +1790,21 @@ export function PropertiesPanel() {
                     <div className="text-[8px] opacity-70">{option.desc}</div>
                   </button>
                 ))}
-              </div>
-              <div className="flex gap-2 mt-2">
-                <Input
-                  value={selectedComponent 
-                    ? selectedComponent.style?.borderRadius || ''
-                    : selectedSection.styles?.borderRadius || ''
-                  }
-                  onChange={(e) => selectedComponent 
-                    ? handleCompStyleUpdate({ borderRadius: e.target.value })
-                    : handleStyleChange('borderRadius', e.target.value)
-                  }
-                  className="bg-slate-50 border-slate-200 text-[10px] h-8 font-mono"
-                  placeholder="Custom value (e.g., 16px)"
-                />
+                </div>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    value={selectedComponent 
+                      ? selectedComponent.style?.borderRadius || ''
+                      : selectedSection.styles?.borderRadius || ''
+                    }
+                    onChange={(e) => selectedComponent 
+                      ? handleCompStyleUpdate({ borderRadius: e.target.value })
+                      : handleStyleChange('borderRadius', e.target.value)
+                    }
+                    className="bg-slate-50 border-slate-200 text-[10px] h-8 font-mono"
+                    placeholder="Custom value (e.g., 16px)"
+                  />
+                </div>
               </div>
             </div>
 

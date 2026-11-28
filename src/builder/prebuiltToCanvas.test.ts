@@ -62,4 +62,35 @@ describe('prebuilt to canvas', () => {
     expect(mission && missionBody && overlaps(mission, missionBody)).toBe(false);
     expect(mission && mission.y).toBeGreaterThan(imageBox.bottom - 4);
   });
+
+  it('turns stats section into canvas elements preserving color and typography', () => {
+    const statsSection = {
+      id: 'stats-test',
+      type: 'stats',
+      name: 'Stats',
+      styles: {
+        headingColor: '#10b981',
+        paragraphColor: '#64748b',
+        fontFamily: 'Montserrat',
+      },
+      content: {
+        stats: [
+          { value: '100', suffix: 'K+', label: 'Happy Users' },
+          { value: '99.9', suffix: '%', label: 'Uptime' },
+        ],
+      },
+    };
+    const section = explodePrebuiltSection(statsSection, 'page-1', 0);
+    const elements = section.children[0].children;
+    expect(elements.length).toBe(4); // 2 headings + 2 paragraphs
+    const headingEl = elements.find((el) => el.content.text === '100K+');
+    expect(headingEl).toBeDefined();
+    expect(headingEl?.styles.color).toBe('#10b981');
+    expect(headingEl?.styles.fontFamily).toBe('Montserrat');
+
+    const labelEl = elements.find((el) => el.content.text === 'Happy Users');
+    expect(labelEl).toBeDefined();
+    expect(labelEl?.styles.color).toBe('#64748b');
+    expect(labelEl?.styles.fontFamily).toBe('Montserrat');
+  });
 });

@@ -1,5 +1,6 @@
-import { AlignHorizontalSpaceAround, ArrowDown, ArrowUp, Copy, Plus, Sparkles, Trash2 } from 'lucide-react';
+import { AlignHorizontalSpaceAround, ArrowDown, ArrowUp, Copy, Download, FileText, Plus, Sparkles, Trash2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { downloadPdfFromUrl } from '@/builder/components/CanvasPrimitives';
 import useBuilderStore from '@/store/useBuilderStore';
 import { findNode, getFreePosition, isFreePositioned } from '@/builder/tree';
 import { isLayoutSurface } from '@/builder/freeMove';
@@ -206,6 +207,97 @@ export function CanvasToolbar() {
             </div>
           </PopoverContent>
         </Popover>
+      )}
+      {location?.node.type === 'pdf' && !multi && (
+        <>
+          <button
+            type="button"
+            data-testid="canvas-toolbar-download-pdf"
+            className="flex items-center gap-1 rounded px-2 py-1 text-slate-700 hover:bg-slate-100 text-xs font-medium disabled:opacity-40"
+            title={location.node.content?.url ? 'Download PDF' : 'Configure PDF URL in properties'}
+            disabled={!location.node.content?.url}
+            onClick={(e) => {
+              e.stopPropagation();
+              const url = String(location.node.content?.url || '');
+              const filename = String(location.node.content?.filename || location.node.content?.title || 'document.pdf');
+              downloadPdfFromUrl(url, filename);
+            }}
+          >
+            <Download className="h-3.5 w-3.5 text-red-500" />
+            <span>Download</span>
+          </button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center gap-1 rounded px-2 py-1 text-slate-700 hover:bg-slate-100 text-xs font-medium"
+                title="Edit PDF URL & settings"
+              >
+                <FileText className="h-3.5 w-3.5 text-slate-600" />
+                <span>PDF Settings</span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-72 p-3 shadow-xl border-slate-200 z-50 bg-white" sideOffset={8}>
+              <div className="space-y-2.5">
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">PDF URL</label>
+                  <input
+                    type="text"
+                    placeholder="https://.../document.pdf"
+                    value={String(location.node.content?.url || '')}
+                    onChange={(e) => {
+                      useBuilderStore.getState().updateCanvasNode(selectedId, {
+                        content: { ...location.node.content, url: e.target.value }
+                      });
+                    }}
+                    className="w-full h-8 px-2 text-xs rounded border border-slate-200 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-slate-50"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">Title</label>
+                  <input
+                    type="text"
+                    placeholder="Document Title"
+                    value={String(location.node.content?.title || '')}
+                    onChange={(e) => {
+                      useBuilderStore.getState().updateCanvasNode(selectedId, {
+                        content: { ...location.node.content, title: e.target.value }
+                      });
+                    }}
+                    className="w-full h-8 px-2 text-xs rounded border border-slate-200 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-slate-50"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">Description</label>
+                  <input
+                    type="text"
+                    placeholder="Document description"
+                    value={String(location.node.content?.description || '')}
+                    onChange={(e) => {
+                      useBuilderStore.getState().updateCanvasNode(selectedId, {
+                        content: { ...location.node.content, description: e.target.value }
+                      });
+                    }}
+                    className="w-full h-8 px-2 text-xs rounded border border-slate-200 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-slate-50"
+                  />
+                </div>
+                <button
+                  type="button"
+                  disabled={!location.node.content?.url}
+                  onClick={() => {
+                    const url = String(location.node.content?.url || '');
+                    const filename = String(location.node.content?.filename || location.node.content?.title || 'document.pdf');
+                    downloadPdfFromUrl(url, filename);
+                  }}
+                  className="w-full h-8 flex items-center justify-center gap-1.5 rounded-lg bg-slate-900 text-white text-xs font-medium hover:bg-slate-800 disabled:opacity-40 cursor-pointer"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Download / Test PDF</span>
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </>
       )}
       {selectedKind === 'section' && !multi && (
         <button type="button" className="rounded p-1.5 text-slate-600 hover:bg-slate-100" title="Add container" disabled={locked} onClick={() => addCanvasContainer()}>
