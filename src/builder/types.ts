@@ -59,6 +59,11 @@ export interface CanvasStyles {
   backgroundSize?: string;
   backgroundPosition?: string;
   color?: string;
+  headingColor?: string;
+  paragraphColor?: string;
+  labelColor?: string;
+  accentColor?: string;
+  cardBackgroundColor?: string;
   opacity?: number;
   fontFamily?: string;
   fontSize?: string;

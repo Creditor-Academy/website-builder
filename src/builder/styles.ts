@@ -21,6 +21,11 @@ const STYLE_TO_CSS: Record<keyof CanvasStyles, string> = {
   backgroundSize: 'backgroundSize',
   backgroundPosition: 'backgroundPosition',
   color: 'color',
+  headingColor: 'color',
+  paragraphColor: 'color',
+  labelColor: 'color',
+  accentColor: 'color',
+  cardBackgroundColor: 'backgroundColor',
   opacity: 'opacity',
   fontFamily: 'fontFamily',
   fontSize: 'fontSize',
@@ -112,18 +117,28 @@ export function resolveStyles(
 export function stylesToCss(styles: CanvasStyles): CSSProperties {
   const css: Record<string, string | number> = {};
 
-  if (styles.backgroundGradient) {
+  if (styles.backgroundGradient && styles.backgroundGradient !== 'none') {
     css.backgroundImage = styles.backgroundGradient;
   } else if (styles.backgroundImage && !styles.backgroundImage.startsWith('linear')) {
     css.backgroundImage = styles.backgroundImage.includes('url(')
       ? styles.backgroundImage
       : `url(${styles.backgroundImage})`;
+  } else if (styles.backgroundGradient === '' || styles.backgroundGradient === 'none') {
+    css.backgroundImage = 'none';
   }
 
   for (const [key, cssKey] of Object.entries(STYLE_TO_CSS) as [keyof CanvasStyles, string][]) {
     if (key === 'backgroundGradient' || key === 'backgroundImage') continue;
     const value = styles[key];
     if (value === undefined || value === null || value === '') continue;
+    if (key === 'backgroundColor') {
+      if (typeof value === 'string' && (value.startsWith('linear') || value.startsWith('radial'))) {
+        if (!css.backgroundImage || css.backgroundImage === 'none') {
+          css.backgroundImage = value;
+        }
+        continue;
+      }
+    }
     css[cssKey] = value as string | number;
   }
 

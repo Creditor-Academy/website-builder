@@ -234,6 +234,11 @@ export const createDefaultStatsSection = () => ({
   locked: false,
   styles: {
     backgroundGradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+    backgroundColor: '#0f172a',
+    headingColor: '#ffffff',
+    paragraphColor: '#94a3b8',
+    color: '#ffffff',
+    accentColor: '#38bdf8',
     padding: '80px 0',
   },
   content: {

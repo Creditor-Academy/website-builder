@@ -172,7 +172,7 @@ export function createPdfElement(parentId: string, order = 0): CanvasElement {
   return {
     ...baseNode('PDF Resource', parentId, order),
     type: 'pdf',
-    content: { title: 'Resource', url: '', description: 'Download the PDF' },
+    content: { title: 'Resource', url: '', description: 'Download the PDF', filename: 'document.pdf' },
     styles: {
       width: '100%',
       padding: '20px',

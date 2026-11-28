@@ -121,7 +121,7 @@ function columnWidth(columns: number, gap = 24): number {
   return Math.floor((CONTENT - gap * (columns - 1)) / columns);
 }
 
-function explodeContent(type: string, content: Record<string, unknown>, parentId: string): CanvasElement[] {
+function explodeContent(type: string, content: Record<string, unknown>, parentId: string, styles?: Record<string, unknown>): CanvasElement[] {
   const items: CanvasElement[] = [];
   let order = 0;
   const push = (element: CanvasElement) => {
@@ -234,12 +234,31 @@ function explodeContent(type: string, content: Record<string, unknown>, parentId
     const cols = Math.max(1, Math.min(4, stats.length || 1));
     const gap = 24;
     const cellW = columnWidth(cols, gap);
+    const isDarkBg = String(styles?.backgroundColor || styles?.backgroundGradient || '').includes('#0f172a') ||
+                     String(styles?.backgroundColor || styles?.backgroundGradient || '').includes('#000') ||
+                     String(styles?.backgroundColor || styles?.backgroundGradient || '').includes('#1e293b');
+    const defaultHeadingColor = isDarkBg ? '#ffffff' : '#0f172a';
+    const defaultParagraphColor = isDarkBg ? '#94a3b8' : '#475569';
+    const valColor = String(styles?.headingColor || styles?.textColor || styles?.color || defaultHeadingColor);
+    const lblColor = String(styles?.paragraphColor || styles?.labelColor || defaultParagraphColor);
+    const fontFamily = styles?.fontFamily ? String(styles.fontFamily) : undefined;
+
     stats.forEach((stat, index) => {
       const x = MARGIN + (index % cols) * (cellW + gap);
       const y = 56 + Math.floor(index / cols) * 140;
       const value = `${textOf(stat.value)}${textOf(stat.suffix)}`;
-      push(heading(parentId, order, value, x, y, cellW, '40px'));
-      push(paragraph(parentId, order, textOf(stat.label), x, y + blockHeight(value, cellW, 40, 1.2) + 8, cellW, '16px'));
+      const h = heading(parentId, order, value, x, y, cellW, '40px');
+      h.styles.color = valColor;
+      if (fontFamily) {
+        h.styles.fontFamily = fontFamily;
+      }
+      push(h);
+      const p = paragraph(parentId, order, textOf(stat.label), x, y + blockHeight(value, cellW, 40, 1.2) + 8, cellW, '16px');
+      p.styles.color = lblColor;
+      if (fontFamily) {
+        p.styles.fontFamily = fontFamily;
+      }
+      push(p);
     });
     return items;
   }
@@ -336,7 +355,7 @@ export function explodePrebuiltSection(raw: Record<string, unknown>, pageId: str
   const minHeight = String(styles.minHeight || '800px');
   const container = slideContainer(id, minHeight);
   const content = (raw.content as Record<string, unknown>) || {};
-  container.children = explodeContent(type, content, container.id).map((element, index) => ({
+  container.children = explodeContent(type, content, container.id, styles as Record<string, unknown>).map((element, index) => ({
     ...element,
     parentId: container.id,
     order: index,
@@ -357,7 +376,14 @@ export function explodePrebuiltSection(raw: Record<string, unknown>, pageId: str
       position: 'relative',
       width: '100%',
       minHeight,
-      backgroundColor: styles.backgroundColor || styles.backgroundGradient || '#ffffff',
+      backgroundColor: (() => {
+        const rawBg = String(styles.backgroundColor || '');
+        const isGrad = rawBg.startsWith('linear') || rawBg.startsWith('radial');
+        if (!isGrad && rawBg) return rawBg;
+        if (styles.backgroundGradient) return '#0f172a';
+        return '#ffffff';
+      })(),
+      backgroundGradient: String(styles.backgroundGradient || (styles.backgroundColor && String(styles.backgroundColor).startsWith('linear') ? styles.backgroundColor : '')),
     },
     responsiveStyles: (raw.responsiveStyles as CanvasSection['responsiveStyles']) || {},
     properties: { ...((raw.properties as Record<string, unknown>) || {}), explodedFrom: type },

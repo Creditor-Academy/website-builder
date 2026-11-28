@@ -8,7 +8,6 @@ import {
   Minus,
   Mail,
   FileText,
-  Square,
   Grid3X3,
   Layout,
   Quote,
@@ -79,7 +78,6 @@ export const ELEMENT_CATALOG: CatalogItem[] = [
   { id: 'html', name: 'HTML', description: 'Sanitized custom markup', icon: FileText, category: 'Elements', kind: 'element', elementType: 'html' },
   { id: 'gallery', name: 'Gallery', description: 'Image grid', icon: ImageIcon, category: 'Elements', kind: 'element', elementType: 'gallery' },
   { id: 'social', name: 'Social', description: 'Social links', icon: Users, category: 'Elements', kind: 'element', elementType: 'social' },
-  { id: 'container', name: 'Container', description: 'Layout wrapper', icon: Square, category: 'Layout', kind: 'container' },
 ];
 
 export const PREBUILT_CATALOG: CatalogItem[] = [
@@ -123,7 +121,6 @@ export function footerFromCatalog(id: string) {
 
 export const CATALOG_CATEGORIES = [
   'Elements',
-  'Layout',
   'Header',
   'Hero',
   'Features',

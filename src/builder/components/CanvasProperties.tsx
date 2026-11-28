@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { AlignCenter, AlignLeft, AlignRight, Copy, Lock, Settings2, Trash2, Unlock } from 'lucide-react';
+import { AlignCenter, AlignLeft, AlignRight, Copy, Download, Lock, Settings2, Trash2, Unlock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,8 +14,8 @@ import useBuilderStore from '@/store/useBuilderStore';
 import { findNode } from '@/builder/tree';
 import { normalizePageSections } from '@/builder/adapter';
 import { resolveStyles } from '@/builder/styles';
-import type { CanvasElement, CanvasStyles, DeviceId, FormField } from '@/builder/types';
-import { isIconUrl } from '@/builder/components/CanvasPrimitives';
+import type { CanvasElement, CanvasSection, CanvasStyles, DeviceId, FormField } from '@/builder/types';
+import { isIconUrl, downloadPdfFromUrl } from '@/builder/components/CanvasPrimitives';
 
 const EMPTY_PAGES: { id: string; name?: string; slug?: string }[] = [];
 
@@ -182,7 +182,23 @@ export function CanvasProperties() {
   const isPrebuilt = location.kind === 'section' && location.section?.kind === 'prebuilt';
   const element = location.kind === 'element' ? (node as CanvasElement) : null;
 
-  const patchStyle = (patch: Partial<CanvasStyles>) => updateCanvasStyles(node.id, patch);
+  const patchStyle = (patch: Partial<CanvasStyles>) => {
+    const finalPatch = { ...patch };
+    // If setting a solid background and backgroundGradient wasn't explicitly patched, clear gradient so background color takes effect
+    if (finalPatch.backgroundColor && finalPatch.backgroundGradient === undefined && styles.backgroundGradient) {
+      finalPatch.backgroundGradient = '';
+    }
+    updateCanvasStyles(node.id, finalPatch);
+    if (location.kind === 'section' && (patch.fontFamily || patch.color)) {
+      const sectionNode = node as CanvasSection;
+      (sectionNode.children || []).flatMap((c) => c.children || []).forEach((el) => {
+        const childPatch: Partial<CanvasStyles> = {};
+        if (patch.fontFamily) childPatch.fontFamily = patch.fontFamily;
+        if (patch.color) childPatch.color = patch.color;
+        updateCanvasStyles(el.id, childPatch);
+      });
+    }
+  };
   const patchContent = (patch: Record<string, unknown>) => updateCanvasNode(node.id, { content: { ...node.content, ...patch } });
 
   return (
@@ -223,6 +239,195 @@ export function CanvasProperties() {
             </Button>
           )}
         </Group>
+
+        {location.kind === 'section' && (node.type === 'stats' || node.name?.toLowerCase().includes('stats') || (node.properties as any)?.explodedFrom === 'stats') && (
+          <Group title="Stats Styling" defaultOpen={true}>
+            <div className="space-y-3">
+              <Field label="Section Background">
+                <div className="flex gap-2 items-center">
+                  <Input
+                    type="color"
+                    value={
+                      (styles.backgroundColor && !styles.backgroundColor.startsWith('linear') && !styles.backgroundColor.startsWith('radial'))
+                        ? styles.backgroundColor
+                        : '#0f172a'
+                    }
+                    onChange={(event) => patchStyle({ backgroundColor: event.target.value, backgroundGradient: '' })}
+                    className="h-8 w-10 p-1 cursor-pointer shrink-0"
+                  />
+                  <Input
+                    value={String(styles.backgroundColor || '')}
+                    placeholder="#ffffff"
+                    onChange={(event) => patchStyle({ backgroundColor: event.target.value, backgroundGradient: '' })}
+                    className="h-8 flex-1 text-xs font-mono"
+                  />
+                  {Boolean(styles.backgroundGradient) && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-50 shrink-0 font-medium"
+                      onClick={() => patchStyle({ backgroundGradient: '' })}
+                      title="Clear dark gradient"
+                    >
+                      Clear Gradient
+                    </Button>
+                  )}
+                </div>
+              </Field>
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="Number Color">
+                  <div className="flex gap-1.5 items-center">
+                    <Input
+                      type="color"
+                      value={String(styles.color || '#ffffff')}
+                      onChange={(event) => {
+                        const newColor = event.target.value;
+                        patchStyle({ color: newColor });
+                        const sectionNode = node as CanvasSection;
+                        (sectionNode.children || []).flatMap((c) => c.children || []).forEach((el) => {
+                          if (el.content?.tag === 'h2' || el.name?.toLowerCase().includes('heading') || el.type === 'text') {
+                            updateCanvasStyles(el.id, { color: newColor });
+                          }
+                        });
+                      }}
+                      className="h-8 w-8 p-1 cursor-pointer shrink-0"
+                    />
+                    <Input
+                      value={String(styles.color || '')}
+                      placeholder="#ffffff"
+                      onChange={(event) => {
+                        const newColor = event.target.value;
+                        patchStyle({ color: newColor });
+                        const sectionNode = node as CanvasSection;
+                        (sectionNode.children || []).flatMap((c) => c.children || []).forEach((el) => {
+                          if (el.content?.tag === 'h2' || el.name?.toLowerCase().includes('heading') || el.type === 'text') {
+                            updateCanvasStyles(el.id, { color: newColor });
+                          }
+                        });
+                      }}
+                      className="h-8 flex-1 text-xs font-mono px-1.5"
+                    />
+                  </div>
+                </Field>
+                <Field label="Label Color">
+                  <div className="flex gap-1.5 items-center">
+                    <Input
+                      type="color"
+                      value={String(styles.paragraphColor || '#94a3b8')}
+                      onChange={(event) => {
+                        const newColor = event.target.value;
+                        patchStyle({ paragraphColor: newColor });
+                        const sectionNode = node as CanvasSection;
+                        (sectionNode.children || []).flatMap((c) => c.children || []).forEach((el) => {
+                          if (el.content?.tag === 'p' || el.name?.toLowerCase().includes('paragraph')) {
+                            updateCanvasStyles(el.id, { color: newColor });
+                          }
+                        });
+                      }}
+                      className="h-8 w-8 p-1 cursor-pointer shrink-0"
+                    />
+                    <Input
+                      value={String(styles.paragraphColor || '')}
+                      placeholder="#94a3b8"
+                      onChange={(event) => {
+                        const newColor = event.target.value;
+                        patchStyle({ paragraphColor: newColor });
+                        const sectionNode = node as CanvasSection;
+                        (sectionNode.children || []).flatMap((c) => c.children || []).forEach((el) => {
+                          if (el.content?.tag === 'p' || el.name?.toLowerCase().includes('paragraph')) {
+                            updateCanvasStyles(el.id, { color: newColor });
+                          }
+                        });
+                      }}
+                      className="h-8 flex-1 text-xs font-mono px-1.5"
+                    />
+                  </div>
+                </Field>
+              </div>
+              <Field label="Typography (Font)">
+                <Select
+                  value={String(styles.fontFamily || 'Inter')}
+                  onValueChange={(val) => {
+                    patchStyle({ fontFamily: val });
+                    const sectionNode = node as CanvasSection;
+                    (sectionNode.children || []).flatMap((c) => c.children || []).forEach((el) => {
+                      updateCanvasStyles(el.id, { fontFamily: val });
+                    });
+                  }}
+                >
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select font" /></SelectTrigger>
+                  <SelectContent>
+                    {['Inter', 'Poppins', 'Playfair Display', 'Montserrat', 'Outfit', 'Plus Jakarta Sans', 'Geist', 'Roboto', 'Georgia', 'Lora', 'Sora'].map((f) => (
+                      <SelectItem key={f} value={f}>{f}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="Border Width">
+                  <StyleInput
+                    styles={styles}
+                    styleKey="borderWidth"
+                    onChange={(p) => {
+                      if (p.borderWidth && (!styles.borderStyle || styles.borderStyle === 'none')) {
+                        patchStyle({ ...p, borderStyle: 'solid' });
+                      } else {
+                        patchStyle(p);
+                      }
+                    }}
+                    placeholder="1px"
+                  />
+                </Field>
+                <Field label="Border Radius">
+                  <StyleInput styles={styles} styleKey="borderRadius" onChange={patchStyle} placeholder="16px" />
+                </Field>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="Border Color">
+                  <div className="flex gap-1.5 items-center">
+                    <Input
+                      type="color"
+                      value={String(styles.borderColor || '#e2e8f0')}
+                      onChange={(e) => {
+                        const updates: Partial<CanvasStyles> = { borderColor: e.target.value };
+                        if (!styles.borderStyle || styles.borderStyle === 'none') updates.borderStyle = 'solid';
+                        if (!styles.borderWidth) updates.borderWidth = '1px';
+                        patchStyle(updates);
+                      }}
+                      className="h-8 w-8 p-1 cursor-pointer shrink-0"
+                    />
+                    <Input
+                      value={String(styles.borderColor || '')}
+                      placeholder="#e2e8f0"
+                      onChange={(e) => {
+                        const updates: Partial<CanvasStyles> = { borderColor: e.target.value };
+                        if (!styles.borderStyle || styles.borderStyle === 'none') updates.borderStyle = 'solid';
+                        if (!styles.borderWidth) updates.borderWidth = '1px';
+                        patchStyle(updates);
+                      }}
+                      className="h-8 flex-1 text-xs font-mono px-1.5"
+                    />
+                  </div>
+                </Field>
+                <Field label="Border Style">
+                  <Select
+                    value={String(styles.borderStyle || 'none')}
+                    onValueChange={(val) => patchStyle({ borderStyle: val })}
+                  >
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="solid">Solid</SelectItem>
+                      <SelectItem value="dashed">Dashed</SelectItem>
+                      <SelectItem value="dotted">Dotted</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </div>
+            </div>
+          </Group>
+        )}
 
         {element?.type === 'text' && (
           <Group title="Content">
@@ -402,16 +607,66 @@ export function CanvasProperties() {
           </Group>
         )}
         {element?.type === 'pdf' && (
-          <Group title="Content">
+          <Group title="PDF Resource">
             <Field label="Title">
-              <Input value={String(element.content.title || '')} onChange={(event) => patchContent({ title: event.target.value })} />
+              <Input
+                data-testid="pdf-title-input"
+                value={String(element.content.title || '')}
+                placeholder="e.g. Course Syllabus, Product Catalog"
+                disabled={node.locked}
+                onChange={(event) => patchContent({ title: event.target.value })}
+              />
             </Field>
+
             <Field label="PDF URL">
-              <Input value={String(element.content.url || '')} disabled={node.locked} onChange={(event) => patchContent({ url: event.target.value })} />
+              <Input
+                data-testid="pdf-url-input"
+                value={String(element.content.url || '')}
+                placeholder="https://example.com/document.pdf or /files/doc.pdf"
+                disabled={node.locked}
+                onChange={(event) => patchContent({ url: event.target.value })}
+              />
+              <p className="text-[10px] text-slate-400">Direct link to a hosted PDF file or data URL</p>
             </Field>
+
             <Field label="Description">
-              <Input value={String(element.content.description || '')} disabled={node.locked} onChange={(event) => patchContent({ description: event.target.value })} />
+              <Input
+                data-testid="pdf-description-input"
+                value={String(element.content.description || '')}
+                placeholder="e.g. 5 MB • PDF Document"
+                disabled={node.locked}
+                onChange={(event) => patchContent({ description: event.target.value })}
+              />
             </Field>
+
+            <Field label="Download Filename (Optional)">
+              <Input
+                data-testid="pdf-filename-input"
+                value={String(element.content.filename || '')}
+                placeholder="e.g. document.pdf"
+                disabled={node.locked}
+                onChange={(event) => patchContent({ filename: event.target.value })}
+              />
+            </Field>
+
+            <div className="pt-1">
+              <Button
+                type="button"
+                data-testid="pdf-test-download"
+                variant="outline"
+                size="sm"
+                disabled={!element.content.url}
+                onClick={() => {
+                  const url = String(element.content.url || '');
+                  const filename = String(element.content.filename || element.content.title || 'document.pdf');
+                  downloadPdfFromUrl(url, filename);
+                }}
+                className="w-full gap-2 text-xs h-8 border-slate-200 hover:bg-slate-50 text-slate-700"
+              >
+                <Download className="h-3.5 w-3.5 text-slate-600" />
+                <span>Download / Test PDF URL</span>
+              </Button>
+            </div>
           </Group>
         )}
         {element?.type === 'form' && (
@@ -520,53 +775,55 @@ export function CanvasProperties() {
           </Group>
         )}
 
-        <Group title="Layout">
-          <div className="grid grid-cols-2 gap-2">
-            <Field label="Width"><StyleInput styles={styles} styleKey="width" onChange={patchStyle} placeholder="100%" /></Field>
-            <Field label="Height"><StyleInput styles={styles} styleKey="height" onChange={patchStyle} placeholder="auto" /></Field>
-            <Field label="Max width"><StyleInput styles={styles} styleKey="maxWidth" onChange={patchStyle} placeholder="1120px" /></Field>
-            <Field label="Min height"><StyleInput styles={styles} styleKey="minHeight" onChange={patchStyle} /></Field>
-          </div>
-          <Field label="Direction">
-            <Select value={String(styles.flexDirection || 'column')} onValueChange={(value) => patchStyle({ display: 'flex', flexDirection: value })}>
-              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="column">Vertical</SelectItem>
-                <SelectItem value="row">Horizontal</SelectItem>
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field label="Gap"><StyleInput styles={styles} styleKey="gap" onChange={patchStyle} placeholder="16px" /></Field>
-          <Field label="Justify">
-            <Select value={String(styles.justifyContent || 'flex-start')} onValueChange={(value) => patchStyle({ display: 'flex', justifyContent: value })}>
-              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="flex-start">Start</SelectItem>
-                <SelectItem value="center">Center</SelectItem>
-                <SelectItem value="flex-end">End</SelectItem>
-                <SelectItem value="space-between">Space between</SelectItem>
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field label="Alignment">
-            <div className="flex gap-1">
-              {[
-                ['flex-start', AlignLeft],
-                ['center', AlignCenter],
-                ['flex-end', AlignRight],
-              ].map(([value, Icon]) => (
-                <button
-                  key={value as string}
-                  type="button"
-                  onClick={() => patchStyle({ alignItems: value as string })}
-                  className={`rounded-md border p-1.5 text-[#0F172A] ${styles.alignItems === value ? 'border-[#0F172A]' : 'border-[#0F172A]/25'}`}
-                >
-                  <Icon className="h-4 w-4" />
-                </button>
-              ))}
+        {location.kind !== 'element' && (
+          <Group title="Layout">
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="Width"><StyleInput styles={styles} styleKey="width" onChange={patchStyle} placeholder="100%" /></Field>
+              <Field label="Height"><StyleInput styles={styles} styleKey="height" onChange={patchStyle} placeholder="auto" /></Field>
+              <Field label="Max width"><StyleInput styles={styles} styleKey="maxWidth" onChange={patchStyle} placeholder="1120px" /></Field>
+              <Field label="Min height"><StyleInput styles={styles} styleKey="minHeight" onChange={patchStyle} /></Field>
             </div>
-          </Field>
-        </Group>
+            <Field label="Direction">
+              <Select value={String(styles.flexDirection || 'column')} onValueChange={(value) => patchStyle({ display: 'flex', flexDirection: value })}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="column">Vertical</SelectItem>
+                  <SelectItem value="row">Horizontal</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Gap"><StyleInput styles={styles} styleKey="gap" onChange={patchStyle} placeholder="16px" /></Field>
+            <Field label="Justify">
+              <Select value={String(styles.justifyContent || 'flex-start')} onValueChange={(value) => patchStyle({ display: 'flex', justifyContent: value })}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="flex-start">Start</SelectItem>
+                  <SelectItem value="center">Center</SelectItem>
+                  <SelectItem value="flex-end">End</SelectItem>
+                  <SelectItem value="space-between">Space between</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Alignment">
+              <div className="flex gap-1">
+                {[
+                  ['flex-start', AlignLeft],
+                  ['center', AlignCenter],
+                  ['flex-end', AlignRight],
+                ].map(([value, Icon]) => (
+                  <button
+                    key={value as string}
+                    type="button"
+                    onClick={() => patchStyle({ alignItems: value as string })}
+                    className={`rounded-md border p-1.5 text-[#0F172A] ${styles.alignItems === value ? 'border-[#0F172A]' : 'border-[#0F172A]/25'}`}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </button>
+                ))}
+              </div>
+            </Field>
+          </Group>
+        )}
 
         <Group title="Spacing">
           <Field label="Padding"><StyleInput styles={styles} styleKey="padding" onChange={patchStyle} placeholder="24px" /></Field>
@@ -604,16 +861,64 @@ export function CanvasProperties() {
 
         <Group title="Colors">
           <Field label="Text color">
-            <Input type="color" value={String(styles.color || '#0f172a')} onChange={(event) => patchStyle({ color: event.target.value })} className="h-8 w-full p-1" />
+            <div className="flex gap-2 items-center">
+              <Input
+                type="color"
+                value={String(styles.color || '#0f172a')}
+                onChange={(event) => patchStyle({ color: event.target.value })}
+                className="h-8 w-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={String(styles.color || '')}
+                placeholder="#0f172a"
+                onChange={(event) => patchStyle({ color: event.target.value })}
+                className="h-8 flex-1 text-xs font-mono"
+              />
+            </div>
           </Field>
           <Field label="Background">
-            <Input type="color" value={String(styles.backgroundColor || '#ffffff')} onChange={(event) => patchStyle({ backgroundColor: event.target.value })} className="h-8 w-full p-1" />
+            <div className="flex gap-2 items-center">
+              <Input
+                type="color"
+                value={
+                  (styles.backgroundColor && !styles.backgroundColor.startsWith('linear') && !styles.backgroundColor.startsWith('radial'))
+                    ? styles.backgroundColor
+                    : '#ffffff'
+                }
+                onChange={(event) => patchStyle({ backgroundColor: event.target.value, backgroundGradient: '' })}
+                className="h-8 w-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={String(styles.backgroundColor || '')}
+                placeholder="#ffffff"
+                onChange={(event) => patchStyle({ backgroundColor: event.target.value, backgroundGradient: '' })}
+                className="h-8 flex-1 text-xs font-mono"
+              />
+            </div>
           </Field>
           <Field label="Background image">
             <Input value={String(styles.backgroundImage || '')} placeholder="https://..." onChange={(event) => patchStyle({ backgroundImage: event.target.value })} />
           </Field>
           <Field label="Gradient">
-            <Input value={String(styles.backgroundGradient || '')} placeholder="linear-gradient(...)" onChange={(event) => patchStyle({ backgroundGradient: event.target.value })} />
+            <div className="flex gap-1.5 items-center">
+              <Input
+                value={String(styles.backgroundGradient || '')}
+                placeholder="linear-gradient(...)"
+                onChange={(event) => patchStyle({ backgroundGradient: event.target.value })}
+                className="h-8 flex-1 text-xs font-mono"
+              />
+              {Boolean(styles.backgroundGradient) && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-50 shrink-0 font-medium"
+                  onClick={() => patchStyle({ backgroundGradient: '' })}
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
           </Field>
           <Field label="Opacity">
             <Input
@@ -629,7 +934,20 @@ export function CanvasProperties() {
 
         <Group title="Border">
           <div className="grid grid-cols-2 gap-2">
-            <Field label="Width"><StyleInput styles={styles} styleKey="borderWidth" onChange={patchStyle} placeholder="1px" /></Field>
+            <Field label="Width">
+              <StyleInput
+                styles={styles}
+                styleKey="borderWidth"
+                onChange={(p) => {
+                  if (p.borderWidth && (!styles.borderStyle || styles.borderStyle === 'none')) {
+                    patchStyle({ ...p, borderStyle: 'solid' });
+                  } else {
+                    patchStyle(p);
+                  }
+                }}
+                placeholder="1px"
+              />
+            </Field>
             <Field label="Radius"><StyleInput styles={styles} styleKey="borderRadius" onChange={patchStyle} placeholder="8px" /></Field>
           </div>
           <Field label="Style">
@@ -639,11 +957,35 @@ export function CanvasProperties() {
                 <SelectItem value="none">None</SelectItem>
                 <SelectItem value="solid">Solid</SelectItem>
                 <SelectItem value="dashed">Dashed</SelectItem>
+                <SelectItem value="dotted">Dotted</SelectItem>
               </SelectContent>
             </Select>
           </Field>
           <Field label="Color">
-            <Input type="color" value={String(styles.borderColor || '#e2e8f0')} onChange={(event) => patchStyle({ borderColor: event.target.value })} className="h-8 w-full p-1" />
+            <div className="flex gap-2 items-center">
+              <Input
+                type="color"
+                value={String(styles.borderColor || '#e2e8f0')}
+                onChange={(event) => {
+                  const updates: Partial<CanvasStyles> = { borderColor: event.target.value };
+                  if (!styles.borderStyle || styles.borderStyle === 'none') updates.borderStyle = 'solid';
+                  if (!styles.borderWidth) updates.borderWidth = '1px';
+                  patchStyle(updates);
+                }}
+                className="h-8 w-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={String(styles.borderColor || '')}
+                placeholder="#e2e8f0"
+                onChange={(event) => {
+                  const updates: Partial<CanvasStyles> = { borderColor: event.target.value };
+                  if (!styles.borderStyle || styles.borderStyle === 'none') updates.borderStyle = 'solid';
+                  if (!styles.borderWidth) updates.borderWidth = '1px';
+                  patchStyle(updates);
+                }}
+                className="h-8 flex-1 text-xs font-mono"
+              />
+            </div>
           </Field>
         </Group>
 

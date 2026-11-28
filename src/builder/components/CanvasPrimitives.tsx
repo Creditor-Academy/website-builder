@@ -1,7 +1,7 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from 'react';
 import * as Lucide from 'lucide-react';
-import { FileText, Pause, Play } from 'lucide-react';
+import { Download, FileText, Pause, Play } from 'lucide-react';
 import { sanitizeHTML } from '@/utils/sanitize';
 import type { CanvasElement, FormField } from '@/builder/types';
 import { stylesToCss } from '@/builder/styles';
@@ -163,6 +163,111 @@ function keepFormFieldEvent(event: ReactPointerEvent | ReactMouseEvent) {
 function isFormFieldTarget(target: EventTarget | null) {
   const node = target as HTMLElement | null;
   return Boolean(node?.closest?.('input, textarea, select, option, label, [data-canvas-form-field]'));
+}
+
+export function downloadPdfFromUrl(url: string, filename = 'document.pdf') {
+  if (!url || typeof window === 'undefined') return;
+
+  const trimmedUrl = url.trim();
+  if (!trimmedUrl) return;
+
+  const cleanName = filename.endsWith('.pdf') ? filename : `${filename}.pdf`;
+
+  if (trimmedUrl.startsWith('data:') || trimmedUrl.startsWith('blob:')) {
+    const link = document.createElement('a');
+    link.href = trimmedUrl;
+    link.download = cleanName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    return;
+  }
+
+  fetch(trimmedUrl, { method: 'GET', mode: 'cors' })
+    .then((res) => {
+      if (!res.ok) throw new Error('Fetch failed');
+      return res.blob();
+    })
+    .then((blob) => {
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = cleanName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+    })
+    .catch(() => {
+      const link = document.createElement('a');
+      link.href = trimmedUrl;
+      link.download = cleanName;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+}
+
+export function PdfView({
+  element,
+  css,
+  editingCanvas = false,
+}: {
+  element: CanvasElement;
+  css: CSSProperties;
+  editingCanvas?: boolean;
+}) {
+  const title = String(element.content.title || 'PDF Resource');
+  const description = String(element.content.description || '');
+  const url = String(element.content.url || '').trim();
+  const filename = String(element.content.filename || title || 'document.pdf');
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = (e: ReactMouseEvent) => {
+    e.stopPropagation();
+    if (!url) return;
+    setDownloading(true);
+    try {
+      downloadPdfFromUrl(url, filename);
+    } finally {
+      setTimeout(() => setDownloading(false), 1200);
+    }
+  };
+
+  return (
+    <div
+      style={css}
+      data-pdf-element=""
+      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow"
+    >
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-600 border border-red-100">
+          <FileText className="h-6 w-6" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-slate-900">{title}</p>
+          <p className="truncate text-xs text-slate-500">
+            {description || (url ? 'Click download to view or save file' : 'Add a PDF URL in properties')}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <button
+          type="button"
+          data-testid="pdf-download-button"
+          disabled={!url || downloading}
+          onClick={handleDownload}
+          title={url ? `Download ${filename}` : 'Configure PDF URL in properties'}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-slate-800 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+        >
+          <Download className="h-4 w-4" />
+          <span>{downloading ? 'Downloading…' : 'Download PDF'}</span>
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function FormView({ element, css }: { element: CanvasElement; css: CSSProperties }) {
@@ -413,17 +518,7 @@ export const CanvasElementView = memo(function CanvasElementView({
     case 'form':
       return <FormView element={element} css={css} />;
     case 'pdf':
-      return (
-        <div style={css} className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-white">
-            <FileText className="h-5 w-5" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-slate-900">{String(element.content.title || 'PDF Resource')}</p>
-            <p className="text-xs text-slate-500">{String(element.content.description || 'Add a PDF URL in properties')}</p>
-          </div>
-        </div>
-      );
+      return <PdfView element={element} css={css} editingCanvas={editingCanvas} />;
     case 'html':
       return (
         <div
